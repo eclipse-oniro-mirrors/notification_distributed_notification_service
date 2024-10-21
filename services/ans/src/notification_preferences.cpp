@@ -619,7 +619,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbProfile(
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_NO_PROFILE_TEMPLATE;
     }
     return ERR_OK;
 }

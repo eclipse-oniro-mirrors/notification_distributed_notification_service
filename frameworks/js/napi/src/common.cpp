@@ -1412,5 +1412,50 @@ napi_value Common::SetNotificationUnifiedGroupInfo(
 
     return NapiGetBoolean(env, true);
 }
+
+napi_value Common::SetBundleOption(const napi_env &env, const NotificationBundleOption &bundleInfo,
+    napi_value &result)
+{
+    napi_value value = nullptr;
+    // bundle: string
+    napi_create_string_utf8(env, bundleInfo.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "bundle", value);
+
+    // uid: uid_t
+    napi_create_int32(env, bundleInfo.GetUid(), &value);
+    napi_set_named_property(env, result, "uid", value);
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetDoNotDisturbProfile(const napi_env &env, const NotificationDoNotDisturbProfile &data,
+    napi_value &result)
+{
+    ANS_LOGD("enter");
+    napi_value value = nullptr;
+    // id: number
+    napi_create_int32(env, data.GetProfileId(), &value);
+    napi_set_named_property(env, result, "id", value);
+
+    // name: string
+    napi_create_string_utf8(env, data.GetProfileName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "name", value);
+
+    size_t count = 0;
+    napi_create_array(env, &value);
+    // trustList?: std::vector<NotificationBundleOption>
+    for (auto bundleInfo : data.GetProfileTrustList()) {
+        napi_value bundleValue = nullptr;
+        napi_create_object(env, &bundleValue);
+        if (!Common::SetBundleOption(env, bundleInfo, bundleValue)) {
+            continue;
+        }
+        napi_set_element(env, value, count, bundleValue);
+        count++;
+    }
+    if (count > 0) {
+        napi_set_named_property(env, result, "trustlist", value);
+    }
+    return NapiGetBoolean(env, true);
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -148,6 +148,7 @@ namespace Notification {
         ADD_EXCLUDE_DATE_REMINDER,
         DEL_EXCLUDE_DATES_REMINDER,
         GET_EXCLUDE_DATES_REMINDER,
+        GET_DONOTDISTURB_PROFILE,
     };
 }
 }

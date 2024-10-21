@@ -928,6 +928,15 @@ public:
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
 
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
      * @brief Register Swing Callback.

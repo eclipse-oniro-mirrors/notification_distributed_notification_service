@@ -646,6 +646,12 @@ ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, con
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    ANS_LOGE("GetDoNotDisturbProfile called!");
+    return ERR_INVALID_OPERATION;
+}
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 ErrCode AnsManagerStub::RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback)
 {

@@ -1087,6 +1087,14 @@ public:
     ErrCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
 #endif
 
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
 private:
     /**
      * @brief Gets Ans Manager proxy.
