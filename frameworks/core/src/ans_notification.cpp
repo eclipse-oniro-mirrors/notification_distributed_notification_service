@@ -285,7 +285,7 @@ ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationR
     int32_t instanceKey = DEFAULT_INSTANCE_KEY;
     reqPtr->SetCreatorInstanceKey(instanceKey);
 
-    return proxy->PublishNotificationForIndirectProxy(label, reqPtr);
+    return proxy->PublishNotificationForIndirectProxy(reqPtr);
 }
 
 ErrCode AnsNotification::CancelNotification(int32_t notificationId)

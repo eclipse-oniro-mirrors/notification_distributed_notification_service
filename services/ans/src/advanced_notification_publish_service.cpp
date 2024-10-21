@@ -171,7 +171,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     return result;
 }
 
-ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const std::string &label, const sptr<NotificationRequest> &request)
+ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -209,7 +209,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return ERR_ANS_INVALID_UID;
     }
     std::string bundle = request->GetCreatorBundleName();
-    result = PrePublishNotificationForIndirectProxy(request, uid, bundle);
+    result = PrePublishNotificationForIndirectProxy(request, uid);
     if (result != ERR_OK) {
         return result;
     }

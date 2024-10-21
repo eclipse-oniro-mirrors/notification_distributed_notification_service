@@ -500,7 +500,7 @@ ErrCode AnsManagerStub::HandlePublishNotificationForIndirectProxy(MessageParcel 
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = Publish(label, notification);
+    ErrCode result = PublishNotificationForIndirectProxy(notification);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandlePublishNotificationForIndirectProxy] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;

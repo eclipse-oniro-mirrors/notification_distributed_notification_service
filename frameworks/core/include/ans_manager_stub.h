@@ -969,6 +969,7 @@ public:
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandlePublishNotificationForIndirectProxy(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancel(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAll(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAsBundle(MessageParcel &data, MessageParcel &reply);

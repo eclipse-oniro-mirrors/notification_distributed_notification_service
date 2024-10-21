@@ -113,7 +113,7 @@ public:
      *                This parameter must be specified.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode PublishNotificationForIndirectProxy(const std::string &label, const sptr<NotificationRequest> &request) override;
+    ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request) override;
 
     /**
      * @brief Cancels a published notification matching the specified label and notificationId.
