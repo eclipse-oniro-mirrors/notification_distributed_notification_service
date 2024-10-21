@@ -22,6 +22,7 @@
 #include "mock_ans_subscriber.h"
 
 #include "ans_inner_errors.h"
+#include "ans_subscriber_listener.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -73,13 +74,13 @@ private:
 
 std::shared_ptr<NotificationSubscriberManager> NotificationSubscriberManagerTest::notificationSubscriberManager_ =
     nullptr;
-NotificationSubscriberManagerTest::TestAnsSubscriber NotificationSubscriberManagerTest::testAnsSubscriber_;
 sptr<AnsSubscriberInterface> NotificationSubscriberManagerTest::subscriber_ = nullptr;
 
 void NotificationSubscriberManagerTest::SetUpTestCase()
 {
     notificationSubscriberManager_ = NotificationSubscriberManager::GetInstance();
-    subscriber_ = testAnsSubscriber_.GetImpl();
+    std::shared_ptr<NotificationSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    subscriber_ = new (std::nothrow) SubscriberListener(testAnsSubscriber);
 }
 
 void NotificationSubscriberManagerTest::TearDownTestCase()
@@ -304,7 +305,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | 
     sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
     auto record = notificationSubscriberManager_->CreateSubscriberRecord(mockSubscriber);
     notificationSubscriberManager_->BatchNotifyConsumed(notifications, notificationMap, record);
-
+ 
     sptr<NotificationRequest> request = new NotificationRequest();
     sptr<Notification> notification = new Notification(request);
     notifications.emplace_back(notification);
@@ -312,7 +313,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | 
     notificationSubscriberManager_->BatchNotifyConsumed(notifications, notificationMap, record);
     EXPECT_NE(notificationSubscriberManager_, nullptr);
 }
-
+ 
 /**
  * @tc.number    : OnRemoteDied_001
  * @tc.name      : OnRemoteDied and params is nullptr
