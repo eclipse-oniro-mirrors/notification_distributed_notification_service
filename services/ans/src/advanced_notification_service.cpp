@@ -28,7 +28,6 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "ans_watchdog.h"
 #include "ans_permission_def.h"
 #include "errors.h"
 #include "notification_extension_wrapper.h"
