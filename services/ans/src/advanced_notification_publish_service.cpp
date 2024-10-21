@@ -241,11 +241,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     auto ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        if (!bundleOption->GetBundleName().empty()) {
-            ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
-            if (ret != ERR_OK) {
-                ANS_LOGE("Can not assign valid slot!");
-            }
+        if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
+            ANS_LOGE("Can not assign valid slot!");
         }
 
         ChangeNotificationByControlFlags(record, isAgentController);
@@ -277,7 +274,6 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
     return ERR_OK;
-
 }
 
 bool AdvancedNotificationService::InitPublishProcess()
