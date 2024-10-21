@@ -1079,14 +1079,14 @@ public:
      * @param devices Indicates the devices that support operate.
      */
     void SetDevicesSupportOperate(const std::vector<std::string> &devices);
-
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     /**
      * @brief Obtains the distributed Options.
      *
      * @return Returns the distributed Options.
      */
     NotificationDistributedOptions GetNotificationDistributedOptions() const;
-
+#endif
     /**
      * @brief Sets the UserId of the notification creator.
      *
@@ -1536,9 +1536,9 @@ private:
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::vector<std::shared_ptr<MessageUser>> messageUsers_ {};
     std::vector<std::string> userInputHistory_ {};
-
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationDistributedOptions distributedOptions_;
-
+#endif
     std::shared_ptr<NotificationTemplate> notificationTemplate_ {};
     std::shared_ptr<NotificationFlags> notificationFlags_ {};
     std::shared_ptr<NotificationBundleOption> notificationBundleOption_ {};

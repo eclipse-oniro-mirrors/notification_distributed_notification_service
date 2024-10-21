@@ -691,6 +691,7 @@ std::string NotificationRequest::GetLabel() const
     return label_;
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 void NotificationRequest::SetDistributed(bool distribute)
 {
     distributedOptions_.SetDistributed(distribute);
@@ -710,6 +711,7 @@ NotificationDistributedOptions NotificationRequest::GetNotificationDistributedOp
 {
     return distributedOptions_;
 }
+#endif
 
 void NotificationRequest::SetCreatorUserId(int32_t userId)
 {
@@ -788,7 +790,9 @@ std::string NotificationRequest::Dump()
             ", actionButtons = " + (!actionButtons_.empty() ? actionButtons_.at(0)->Dump() : "empty") +
             ", messageUsers = " + (!messageUsers_.empty() ? messageUsers_.at(0)->Dump() : "empty") +
             ", userInputHistory = " + (!userInputHistory_.empty() ? userInputHistory_.at(0) : "empty") +
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             ", distributedOptions = " + distributedOptions_.Dump() +
+#endif
             ", notificationFlags = " + (notificationFlags_ ? "not null" : "null") +
             ", notificationFlagsOfDevices = " + (notificationFlagsOfDevices_ ? "not null" : "null") +
             ", notificationBundleOption = " + (notificationBundleOption_ != nullptr ? "not null" : "null") +
@@ -909,11 +913,13 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
 
     ConvertJsonToPixelMap(pRequest, jsonObject);
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     if (!ConvertJsonToNotificationDistributedOptions(pRequest, jsonObject)) {
         delete pRequest;
         pRequest = nullptr;
         return nullptr;
     }
+#endif
 
     if (!ConvertJsonToNotificationFlags(pRequest, jsonObject)) {
         delete pRequest;
@@ -1353,10 +1359,12 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     if (!parcel.WriteParcelable(&distributedOptions_)) {
         ANS_LOGE("Failed to write distributedOptions");
         return false;
     }
+#endif
 
     valid = notificationTemplate_ ? true : false;
     if (!parcel.WriteBool(valid)) {
@@ -1425,7 +1433,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         ANS_LOGE("Failed to write bundleOption for the notification");
         return false;
     }
- 
+
     if (valid) {
         if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
             ANS_LOGE("Failed to write notification bundleOption");
@@ -1726,6 +1734,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     auto pOpt = parcel.ReadParcelable<NotificationDistributedOptions>();
     if (pOpt == nullptr) {
         ANS_LOGE("Failed to read distributedOptions");
@@ -1734,6 +1743,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     distributedOptions_ = *pOpt;
     delete pOpt;
     pOpt = nullptr;
+#endif
 
     valid = parcel.ReadBool();
     if (valid) {
@@ -1962,9 +1972,9 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->actionButtons_ = other.actionButtons_;
     this->messageUsers_ = other.messageUsers_;
     this->userInputHistory_ = other.userInputHistory_;
-
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     this->distributedOptions_ = other.distributedOptions_;
-
+#endif
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
     this->agentBundle_ = other.agentBundle_;
@@ -2018,12 +2028,14 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
     jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     nlohmann::json optObj;
     if (!NotificationJsonConverter::ConvertToJson(&distributedOptions_, optObj)) {
         ANS_LOGE("Cannot convert distributedOptions to JSON");
         return false;
     }
     jsonObject["distributedOptions"] = optObj;
+#endif
 
     if (notificationFlags_) {
         nlohmann::json flagsObj;
@@ -2333,6 +2345,7 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
     return true;
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
@@ -2359,6 +2372,7 @@ bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
 
     return true;
 }
+#endif
 
 bool NotificationRequest::ConvertJsonToNotificationFlags(
     NotificationRequest *target, const nlohmann::json &jsonObject)

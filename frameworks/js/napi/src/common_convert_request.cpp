@@ -705,10 +705,12 @@ napi_value Common::GetNotificationRequestByCustom(
     if (GetNotificationOverlayIcon(env, value, request) == nullptr) {
         return nullptr;
     }
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     // distributedOption?:DistributedOptions
     if (GetNotificationRequestDistributedOptions(env, value, request) == nullptr) {
         return nullptr;
     }
+#endif
     // template?: NotificationTemplate
     if (GetNotificationTemplate(env, value, request) == nullptr) {
         return nullptr;
@@ -827,6 +829,7 @@ napi_value Common::GetNotificationOverlayIcon(
     return NapiGetNull(env);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 napi_value Common::GetNotificationSupportDisplayDevices(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
@@ -917,6 +920,7 @@ napi_value Common::GetNotificationSupportOperateDevices(
 
     return NapiGetNull(env);
 }
+#endif
 
 napi_value Common::GetNotificationId(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
