@@ -61,6 +61,10 @@ void SystemDialogConnectStb::SendRemoveBundleEvent()
         ANS_LOGW("Invaild json param");
         return;
     }
+    if (commandStr_.empty() || !nlohmann::json::accept(commandStr_)) {
+        ANS_LOGE("Invalid JSON");
+        return;
+    }
     nlohmann::json root = nlohmann::json::parse(commandStr_);
     if (root.is_null() or !root.is_object()) {
         ANS_LOGE("Invalid JSON object");
@@ -68,6 +72,10 @@ void SystemDialogConnectStb::SendRemoveBundleEvent()
     }
     if (!root.contains("bundleName") || !root.contains("bundleUid")) {
         ANS_LOGW("not found jsonKey from");
+        return;
+    }
+    if (!root["bundleName"].is_string() || !root["bundleUid"].is_number_integer()) {
+        ANS_LOGE("value type is not right");
         return;
     }
     if (!root["bundleName"].is_string() || !root["bundleUid"].is_string()) {
