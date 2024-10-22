@@ -62,9 +62,7 @@ namespace OHOS {
         request.SetDistributed(enabled);
         request.SetDevicesSupportDisplay(text);
         request.SetDevicesSupportOperate(text);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         request.GetNotificationDistributedOptions();
-#endif
         request.SetCreatorUserId(notificationId);
         request.GetCreatorUserId();
         request.SetOwnerUserId(notificationId);
