@@ -393,13 +393,6 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("sortingMap is nullptr.");
         return;
     }
-    //问题单验收逻辑，验收后去掉
-    if (request->GetNotificationRequest().GetAgentBundle() != nullptr) {
-        ANS_LOGD("OnConsumed NotificGetAgentBundle = %{public}s",
-            request->GetNotificationRequest().GetAgentBundle()->Dump().c_str());
-    } else {
-        ANS_LOGD("OnConsumed NotificGetAgentBundle = null");
-    }
     auto notificationFlags = request->GetNotificationRequest().GetFlags();
     ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu, notificationFlag = %{public}s",
         request->GetKey().c_str(), sortingMap->GetKey().size(),

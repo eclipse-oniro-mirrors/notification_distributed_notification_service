@@ -732,7 +732,8 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         return;
     }
     std::string bundleName = record->bundleOption->GetBundleName();
-    ANS_LOGD("The bundle name is %{public}s", bundleName.c_str());
+    ANS_LOGI("The disturbMode is on, userId:%{public}d, bundle:%{public}s, profileId:%{public}s",
+        userId, bundleName.c_str(), profileId.c_str());
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {

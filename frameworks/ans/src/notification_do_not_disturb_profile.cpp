@@ -165,6 +165,7 @@ void NotificationDoNotDisturbProfile::FromJson(const std::string &jsonObj)
                 continue;
             }
             trustList_.push_back(*bundleOption);
+            delete bundleOption;
         }
     }
 }
