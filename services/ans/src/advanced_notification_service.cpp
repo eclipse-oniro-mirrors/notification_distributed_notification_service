@@ -330,7 +330,6 @@ AdvancedNotificationService::AdvancedNotificationService()
 AdvancedNotificationService::~AdvancedNotificationService()
 {
     ANS_LOGI("deconstructor");
-    dataManager_.UnRegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     NotificationSubscriberManager::GetInstance()->UnRegisterOnSubscriberAddCallback();
 
     StopFilters();
