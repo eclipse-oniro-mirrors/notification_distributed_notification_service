@@ -303,7 +303,7 @@ public:
      */
     static napi_value SetNotificationRequestByCustom(
         const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+
     /**
      * @brief Sets a js object by the Distributed Options object of specified Notification object
      *
@@ -314,7 +314,7 @@ public:
      */
     static napi_value SetNotificationByDistributedOptions(
         const napi_env &env, const OHOS::Notification::Notification *notification, napi_value &result);
-#endif
+
     /**
      * @brief Sets a js object by specified NotificationSortingMap object
      *
@@ -1147,7 +1147,7 @@ public:
      */
     static napi_value GetNotificationOverlayIcon(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+
     /**
      * @brief Gets the distributed options of NotificationRequest object from specified js object
      *
@@ -1191,7 +1191,7 @@ public:
      */
     static napi_value GetNotificationSupportOperateDevices(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
-#endif
+
     /**
      * @brief Gets a content type of notification from specified js object
      *
