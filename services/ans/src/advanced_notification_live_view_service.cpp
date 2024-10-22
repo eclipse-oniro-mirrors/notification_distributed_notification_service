@@ -15,6 +15,7 @@
 
 #include "advanced_notification_service.h"
 
+#include "cpp/task.h"
 #include "errors.h"
 #include "ans_inner_errors.h"
 #include "notification_constant.h"
@@ -166,6 +167,14 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
     CancelUpdateTimer(record);
     CancelFinishTimer(record);
     CancelArchiveTimer(record);
+}
+
+void AdvancedNotificationService::OnSubscriberAddInffrt(
+    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
+{
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([this, record]() {
+        OnSubscriberAdd(record);
+    }));
 }
 
 void AdvancedNotificationService::OnSubscriberAdd(
