@@ -52,6 +52,15 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+constexpr int32_t ALL_SA_READY_FLAG = 2;  // bundle service and ability service ready.
+}
+
+bool ReminderDataManager::IsSystemReady()
+{
+    return saReadyFlag_ >= ALL_SA_READY_FLAG;
+}
+
 bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderRequest>& reminder,
     const uint32_t callerTokenId)
 {
@@ -95,6 +104,16 @@ void ReminderDataManager::HandleAutoDeleteReminder(const int32_t notificationId,
         CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     }
     StartRecentReminder();
+}
+
+void ReminderDataManager::OnBundleMgrServiceStart()
+{
+    saReadyFlag_.fetch_add(1);
+}
+
+void ReminderDataManager::OnAbilityMgrServiceStart()
+{
+    saReadyFlag_.fetch_add(1);
 }
 
 bool ReminderDataManager::GetCustomRingFileDesc(const sptr<ReminderRequest>& reminder,

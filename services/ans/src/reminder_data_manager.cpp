@@ -100,7 +100,6 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
     }
     UpdateAndSaveReminderLocked(reminder, bundleOption);
     queue_->submit([this, reminder]() {
-        UpdateReminderLanguageLocked(reminder);
         StartRecentReminder();
     });
     return ERR_OK;
@@ -380,12 +379,6 @@ void ReminderDataManager::OnUserRemove(const int32_t& userId)
         return;
     }
     CancelAllReminders(userId);
-}
-
-void ReminderDataManager::OnServiceStart()
-{
-    std::vector<sptr<ReminderRequest>> immediatelyShowReminders;
-    GetImmediatelyShowRemindersLocked(immediatelyShowReminders);
 }
 
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
@@ -821,6 +814,10 @@ void ReminderDataManager::GenDstBundleName(std::string &dstBundleName, const std
 
 void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
 {
+    if (!IsSystemReady()) {
+        ANSR_LOGW("bundle service or ability service not ready.");
+        return;
+    }
     std::string typeInfo = type == TIME_ZONE_CHANGE ? "timeZone" : "dateTime";
     ANSR_LOGI("Refresh all reminders due to %{public}s changed by user", typeInfo.c_str());
     if (activeReminderId_ != -1) {
@@ -1082,6 +1079,15 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
 
 void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times)
 {
+    auto manager = ReminderDataManager::GetInstance();
+    if (manager == nullptr) {
+        ANSR_LOGW("ReminderDataManager is nullptr.");
+        return;
+    }
+    if (!manager->IsSystemReady()) {
+        ANSR_LOGW("bundle service or ability service not ready.");
+        return;
+    }
     if (!reminder->IsSystemApp()) {
         ANSR_LOGI("Start extension ability failed, is not system app");
         return;
@@ -2048,7 +2054,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetResou
     return resourceManager;
 }
 
-void ReminderDataManager::UpdateReminderLanguage(const int32_t uid,
+void ReminderDataManager::UpdateReminderLanguageLocked(const int32_t uid,
     const std::vector<sptr<ReminderRequest>>& reminders)
 {
     // obtains the bundle info by bundle name
@@ -2066,30 +2072,23 @@ void ReminderDataManager::UpdateReminderLanguage(const int32_t uid,
     }
     // update action button title
     for (auto reminder : reminders) {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         reminder->OnLanguageChange(resourceMgr);
     }
 }
 
-void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder)
-{
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    std::vector<sptr<ReminderRequest>> reminders;
-    reminders.push_back(reminder);
-    UpdateReminderLanguage(reminder->GetUid(), reminders);
-}
-
 void ReminderDataManager::OnLanguageChanged()
 {
-    ANSR_LOGI("System language config changed.");
+    ANSR_LOGI("System language config changed start.");
+    std::unordered_map<int32_t, std::vector<sptr<ReminderRequest>>> reminders;
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        std::unordered_map<int32_t, std::vector<sptr<ReminderRequest>>> reminders;
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
             reminders[(*it)->GetUid()].push_back((*it));
         }
-        for (auto& each : reminders) {
-            UpdateReminderLanguage(each.first, each.second);
-        }
+    }
+    for (auto& each : reminders) {
+        UpdateReminderLanguageLocked(each.first, each.second);
     }
     std::vector<sptr<ReminderRequest>> showedReminder;
     {
@@ -2100,6 +2099,7 @@ void ReminderDataManager::OnLanguageChanged()
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder((*it), false, false, false, false);
     }
+    ANSR_LOGI("System language config changed end.");
 }
 
 void ReminderDataManager::OnRemoveAppMgr()

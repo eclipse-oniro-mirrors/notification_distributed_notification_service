@@ -118,7 +118,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_003, Level1)
     manager->alertingReminderId_ = -1;
     manager->OnUserSwitch(0);
     manager->OnUserRemove(0);
-    manager->OnServiceStart();
+    manager->OnBundleMgrServiceStart();
+    manager->OnAbilityMgrServiceStart();
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }

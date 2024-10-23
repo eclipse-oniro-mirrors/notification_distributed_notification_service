@@ -157,7 +157,15 @@ public:
 
     void OnUserRemove(const int32_t& userId);
 
-    void OnServiceStart();
+    /**
+     * @brief Bundle manager service start.
+     */
+    void OnBundleMgrServiceStart();
+
+    /**
+     * @brief Ability manager service start.
+     */
+    void OnAbilityMgrServiceStart();
 
     void OnUserSwitch(const int32_t& userId);
 
@@ -250,9 +258,8 @@ public:
      *
      * Update action button title.
      */
-    void UpdateReminderLanguage(const int32_t uid, const std::vector<sptr<ReminderRequest>>& reminders);
-    void UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder);
-    
+    void UpdateReminderLanguageLocked(const int32_t uid, const std::vector<sptr<ReminderRequest>>& reminders);
+
     /**
      * @brief System language change
      */
@@ -262,6 +269,11 @@ public:
      * @brief When OnRemoveSystemAbility occurs.
      */
     void OnRemoveAppMgr();
+
+    /**
+     * @brief Whether the device is ready or not.
+     */
+    bool IsSystemReady();
 
     static constexpr uint8_t TIME_ZONE_CHANGE = 0;
     static constexpr uint8_t DATE_TIME_CHANGE = 1;
@@ -753,6 +765,11 @@ private:
      * async queue
      */
     std::shared_ptr<ffrt::queue> queue_ = nullptr;
+
+    /**
+     * Sa ready flag
+     */
+    std::atomic<int32_t> saReadyFlag_{ 0 };
 };
 }  // namespace OHOS
 }  // namespace Notification
