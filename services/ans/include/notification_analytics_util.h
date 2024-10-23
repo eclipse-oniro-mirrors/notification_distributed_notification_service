@@ -101,7 +101,7 @@ public:
 
     static void RemoveExpired(std::list<std::chrono::system_clock::time_point> &list,
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
-    
+
     static int64_t GetCurrentTime();
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
@@ -115,13 +115,16 @@ private:
 
     static bool ReportFlowControl(const int32_t reportType);
 
+    static std::list<std::chrono::system_clock::time_point> GetFlowListByType(const int32_t reportType);
+
     static FlowControllerOption GetFlowOptionByType(const int32_t reportType);
 
-    static void BuildMessage(nlohmann::json& reason, EventFwk::Want& want, const HaMetaMessage& message,
-    int32_t eventCode, std::shared_ptr<AAFwk::WantParams>& extraInfo);
+    static std::string BuildExtraInfo(const HaMetaMessage& message, nlohmann::json& reason);
 
-    static void BuildMessage(nlohmann::json& reason, EventFwk::Want& want, const HaMetaMessage& message,
-        const sptr<NotificationRequest>& request, int32_t eventCode);
+    static std::string BuildExtraInfoWithReq(const HaMetaMessage& message,
+        const sptr<NotificationRequest>& request, nlohmann::json& reason);
+
+    static void SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message, std::string& extraInfo);
     
     static void AddListCache(EventFwk::Want& want, int32_t eventCode);
 
