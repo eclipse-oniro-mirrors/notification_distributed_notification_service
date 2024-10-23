@@ -20,6 +20,7 @@
 
 #include "ans_dialog_host_client.h"
 #include "ans_manager_interface.h"
+#include "ans_subscriber_listener.h"
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"
 #include "want_params.h"
@@ -1101,6 +1102,11 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+
+    /**
+     * @brief Ans service died, OnRemoteDied called.
+     */
+    void OnServiceDied();
 private:
     /**
      * @brief Gets Ans Manager proxy.
@@ -1143,10 +1149,12 @@ private:
 
     bool IsValidTemplate(const NotificationRequest &request) const;
     bool IsValidDelayTime(const NotificationRequest &request) const;
+    bool CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
+        sptr<SubscriberListener> &listener);
 
 private:
-    std::mutex mutex_;
-    sptr<AnsManagerInterface> ansManagerProxy_;
+    std::mutex subscriberMutex_;
+    std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     sptr<SwingCallBackStub> swingCallBackStub_;
 #endif

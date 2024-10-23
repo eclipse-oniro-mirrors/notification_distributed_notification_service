@@ -26,6 +26,7 @@
 #include "ans_dialog_host_client.h"
 #include "ans_manager_interface.h"
 #include "ans_inner_errors.h"
+#include "ans_subscriber_listener.h"
 #include "message_parcel.h"
 #include "mock_i_remote_object.h"
 #include "notification.h"
@@ -4649,9 +4650,10 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Subscribe(listener, subInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -4673,9 +4675,10 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0200, Function | MediumTest | Le
         ERR_OK, true, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Subscribe(listener, subInfo);
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -4695,9 +4698,10 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0300, Function | MediumTest | Le
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Subscribe(listener, subInfo);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -4718,9 +4722,10 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0400, Function | MediumTest | Le
         ERR_OK, false, true, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Subscribe(listener, subInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -4759,9 +4764,10 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0100, Function | MediumTest | 
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Unsubscribe(listener, subInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -4783,9 +4789,10 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0200, Function | MediumTest | 
         ERR_OK, true, true, true)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Unsubscribe(listener, subInfo);
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -4805,9 +4812,10 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0300, Function | MediumTest | 
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Unsubscribe(listener, subInfo);
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -4828,9 +4836,10 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0400, Function | MediumTest | 
         ERR_OK, false, true, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    auto subscriber = new (std::nothrow) TestSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t result = proxy->Unsubscribe(listener, subInfo);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
