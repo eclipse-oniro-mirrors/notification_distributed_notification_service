@@ -607,8 +607,7 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     UpdateRecentNotification(record->notification, false, 0);
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        StartAutoDeletedTimer(record);
     }
 
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;

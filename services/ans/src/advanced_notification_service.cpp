@@ -393,6 +393,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, reason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete("", "", notification);
@@ -557,6 +558,19 @@ void AdvancedNotificationService::CancelArchiveTimer(const std::shared_ptr<Notif
     record->notification->SetArchiveTimer(NotificationConstant::INVALID_TIMER_ID);
 }
 
+ErrCode AdvancedNotificationService::StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record)
+{
+    uint64_t timerId = StartAutoDelete(record,
+        record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    if (timerId == NotificationConstant::INVALID_TIMER_ID) {
+        std::string message = "Start autoDeleted auto delete timer failed.";
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_TASK_ERR;
+    }
+    record->notification->SetAutoDeletedTimer(timerId);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::FillNotificationRecord(
     const NotificationRequestDb &requestdbObj, std::shared_ptr<NotificationRecord> record)
 {
@@ -674,8 +688,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        StartAutoDeletedTimer(record);
     }
     return result;
 }
@@ -2030,6 +2043,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
 
         if (record->notification->GetKey() == hashCode) {
             UpdateRecentNotification(record->notification, true, reason);
+            CancelTimer(record->notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
             notificationList_.remove(record);
