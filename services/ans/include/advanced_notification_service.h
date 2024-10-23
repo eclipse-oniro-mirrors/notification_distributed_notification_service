@@ -1310,7 +1310,7 @@ private:
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
-    ErrCode PrePublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request, int32_t uid);
+    ErrCode PrePublishRequest(const sptr<NotificationRequest> &request);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,

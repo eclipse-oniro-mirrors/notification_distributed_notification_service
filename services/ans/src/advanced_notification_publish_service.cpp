@@ -180,44 +180,19 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         ANSR_LOGE("ReminderRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
-
-    if (!InitPublishProcess()) {
-        return ERR_ANS_NO_MEMORY;
-    }
-
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_1);
-    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    ErrCode result = PrePublishRequest(request);
     if (result != ERR_OK) {
-        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
-    }
-    result = CheckUserIdParams(request->GetReceiverUserId());
-    if (result != ERR_OK) {
-        message.BranchId(EventBranchId::BRANCH_1).ErrorCode(result).Message("User is invalid", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
-    message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
-    int32_t uid = request->GetCreatorUid();
-    if (uid <= 0) {
-        message.ErrorCode(ERR_ANS_INVALID_UID).Message("createUid failed" + std::to_string(uid), true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_UID;
-    }
-    std::string bundle = request->GetCreatorBundleName();
-    result = PrePublishNotificationForIndirectProxy(request, uid);
-    if (result != ERR_OK) {
-        return result;
-    }
-
     // SA not support sound
     if (!request->GetSound().empty()) {
         request->SetSound("");
     }
+    std::string bundle = request->GetCreatorBundleName();
+    int32_t uid = request->GetCreatorUid();
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->isThirdparty = false;
