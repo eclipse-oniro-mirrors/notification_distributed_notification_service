@@ -1690,29 +1690,47 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::PrePublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request,
-    int32_t uid)
+ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_5);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
+    if (!InitPublishProcess()) {
+        return ERR_ANS_NO_MEMORY;
+    }
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    result = CheckUserIdParams(request->GetReceiverUserId());
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_1).ErrorCode(result).Message("User is invalid", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+
+    if (request->GetCreatorUid() <= 0) {
+        message.BranchId(EventBranchId::BRANCH_2).ErrorCode(ERR_ANS_INVALID_UID)
+            .Message("createUid failed" + std::to_string(request->GetCreatorUid()), true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return ERR_ANS_INVALID_UID;
+    }
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
         ANS_LOGE("failed to get bundleManager!");
         return ERR_ANS_INVALID_BUNDLE;
     }
-
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
         request->SetCreatorUserId(userId);
-    } else {
-        userId = request->GetCreatorUserId();
     }
 
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    ErrCode result = CheckPictureSize(request);
+    result = CheckPictureSize(request);
     if (result != ERR_OK) {
         message.ErrorCode(result).Message("Failed to check picture size", true);
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
