@@ -1942,5 +1942,52 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
     return true;
 #endif
 }
+
+ErrCode AdvancedNotificationService::OnRecoverLiveView(
+    const std::vector<std::string> &keys)
+{
+    ANS_LOGD("enter");
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::vector<sptr<Notification>> notifications;
+    int32_t removeReason = NotificationConstant::RECOVER_LIVE_VIEW_DELETE;
+    std::vector<uint64_t> timerIds;
+    for (auto key : keys) {
+        ANS_LOGI("BatchRemoveByKeys key = %{public}s", key.c_str());
+        sptr<Notification> notification = nullptr;
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+        std::string deviceId;
+        std::string bundleName;
+        GetDistributedInfo(key, deviceId, bundleName);
+#endif
+        ErrCode result = RemoveFromNotificationList(key, notification, true, removeReason);
+        if (result != ERR_OK) {
+            continue;
+        }
+        if (notification != nullptr) {
+            notifications.emplace_back(notification);
+            timerIds.emplace_back(notification->GetAutoDeletedTimer());
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+        }
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            std::vector<sptr<Notification>> currNotificationList = notifications;
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                currNotificationList, nullptr, removeReason);
+            notifications.clear();
+        }
+    }
+
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, removeReason);
+    }
+    BatchCancelTimer(timerIds);
+    return ERR_OK;
+}
 }  // namespace Notification
 }  // namespace OHOS
