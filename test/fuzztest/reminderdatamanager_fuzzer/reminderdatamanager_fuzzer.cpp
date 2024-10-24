@@ -115,7 +115,6 @@ namespace OHOS {
         manager->PublishReminder(reminder, option);
         manager->FindReminderRequestLocked(reminderId);
         manager->FindReminderRequestLocked(reminderId, bundleName);
-        manager->FindNotificationBundleOption(reminderId);
         manager->GetRecentReminderLocked();
         manager->HandleImmediatelyShow(immediatelyReminders, value);
         manager->HandleExtensionReminder(extensionReminders);
