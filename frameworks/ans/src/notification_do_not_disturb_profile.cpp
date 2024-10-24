@@ -120,6 +120,13 @@ bool NotificationDoNotDisturbProfile::ReadFromParcel(Parcel &parcel)
 
 std::string NotificationDoNotDisturbProfile::ToJson()
 {
+    nlohmann::json jsonObject;
+    GetProfileJson(jsonObject);
+    return jsonObject.dump();
+}
+
+void NotificationDoNotDisturbProfile::GetProfileJson(nlohmann::json &jsonObject) const
+{
     nlohmann::json jsonNodes = nlohmann::json::array();
     for (size_t index = 0; index < trustList_.size(); index++) {
         nlohmann::json jsonNode;
@@ -127,12 +134,10 @@ std::string NotificationDoNotDisturbProfile::ToJson()
             jsonNodes.emplace_back(jsonNode);
         }
     }
-    nlohmann::json jsonObject {
-        {DO_NOT_DISTURB_PROFILE_ID, id_},
-        {DO_NOT_DISTURB_PROFILE_NAME, name_},
-        {DO_NOT_DISTURB_PROFILE_TRUSTLIST, jsonNodes}
-    };
-    return jsonObject.dump();
+
+    jsonObject[DO_NOT_DISTURB_PROFILE_ID] =  id_;
+    jsonObject[DO_NOT_DISTURB_PROFILE_NAME] =  name_;
+    jsonObject[DO_NOT_DISTURB_PROFILE_TRUSTLIST] =  jsonNodes;
 }
 
 void NotificationDoNotDisturbProfile::FromJson(const std::string &jsonObj)
