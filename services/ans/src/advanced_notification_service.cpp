@@ -99,6 +99,7 @@ std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
 std::mutex AdvancedNotificationService::flowControlMutex_;
 std::mutex AdvancedNotificationService::systemFlowControlMutex_;
+std::mutex AdvancedNotificationService::doNotDisturbMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
@@ -722,6 +723,29 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
     }
 }
 
+void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable)
+{
+    std::lock_guard<std::mutex> lock(doNotDisturbMutex_);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_2);
+    std::string info = "Do not disturb mode changed, userId: " + std::to_string(userId) + ", enable: " + enable;
+    auto it = doNotDisturbEnableRecord_.find(userId);
+    if (it != doNotDisturbEnableRecord_.end()) {
+        if (it->second != enable) {
+            ANS_LOGI("%{public}s", info.c_str());
+            message.Message(info);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
+        }
+    } else {
+        if (enable == DO_NOT_DISTURB_MODE) {
+            ANS_LOGI("%{public}s", info.c_str());
+            message.Message(info);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
+        doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
+    }
+}
+
 void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");
@@ -733,12 +757,13 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     std::string enable;
     std::string profileId;
     QueryDoNotDisturbProfile(userId, enable, profileId);
+    ReportDoNotDisturbModeChanged(userId, enable);
     if (enable != DO_NOT_DISTURB_MODE) {
         ANS_LOGD("Currently not is do not disturb mode.");
         return;
     }
     std::string bundleName = record->bundleOption->GetBundleName();
-    ANS_LOGD("The bundle name is %{public}s", bundleName.c_str());
+    ANS_LOGI("The bundle name is %{public}s", bundleName.c_str());
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {

@@ -119,10 +119,10 @@ private:
 
     static FlowControllerOption GetFlowOptionByType(const int32_t reportType);
 
-    static std::string BuildExtraInfo(const HaMetaMessage& message, nlohmann::json& reason);
+    static std::string BuildExtraInfo(const HaMetaMessage& message);
 
     static std::string BuildExtraInfoWithReq(const HaMetaMessage& message,
-        const sptr<NotificationRequest>& request, nlohmann::json& reason);
+        const sptr<NotificationRequest>& request);
 
     static void SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message, std::string& extraInfo);
     
