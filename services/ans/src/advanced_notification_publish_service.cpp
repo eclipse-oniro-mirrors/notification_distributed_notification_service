@@ -171,6 +171,88 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     return result;
 }
 
+ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (!request) {
+        ANSR_LOGE("ReminderRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = PrePublishRequest(request);
+    if (result != ERR_OK) {
+        return result;
+    }
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+    // SA not support sound
+    if (!request->GetSound().empty()) {
+        request->SetSound("");
+    }
+    std::string bundle = request->GetCreatorBundleName();
+    int32_t uid = request->GetCreatorUid();
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->isThirdparty = false;
+    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    record->bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (record->bundleOption == nullptr || bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    SetRequestBySlotType(record->request, bundleOption);
+
+    auto ipcUid = IPCSkeleton::GetCallingUid();
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
+            ANS_LOGE("Can not assign valid slot!");
+        }
+
+        ChangeNotificationByControlFlags(record, isAgentController);
+        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
+        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
+        record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
+            result = SaPublishSystemLiveViewAsBundle(record);
+            if (result == ERR_OK) {
+                SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
+            }
+            return;
+        }
+
+        if (AssignToNotificationList(record) != ERR_OK) {
+            ANS_LOGE("Failed to assign notification list");
+            return;
+        }
+
+        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+    });
+    notificationSvrQueue_->wait(handler);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+        StartAutoDelete(record,
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    }
+    return ERR_OK;
+}
+
 bool AdvancedNotificationService::InitPublishProcess()
 {
     if (publishProcess_.size() > 0) {

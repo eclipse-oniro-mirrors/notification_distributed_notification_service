@@ -53,6 +53,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode Cancel(int notificationId, const std::string &label, int32_t instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;

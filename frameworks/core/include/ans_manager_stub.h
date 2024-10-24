@@ -56,6 +56,17 @@ public:
     virtual ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &notification) override;
 
     /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     *       this method will update the notification.
+     *
+     * @param notification Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification) override;
+
+    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -958,6 +969,7 @@ public:
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandlePublishNotificationForIndirectProxy(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancel(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAll(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAsBundle(MessageParcel &data, MessageParcel &reply);

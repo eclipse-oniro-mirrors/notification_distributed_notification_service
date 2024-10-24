@@ -237,6 +237,58 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     return proxy->Publish(label, reqPtr);
 }
 
+ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationRequest &request)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("enter");
+
+    if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
+        ANS_LOGE("Refuse to publish the notification without valid content");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!IsValidTemplate(request) || !IsValidDelayTime(request)) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!CanPublishMediaContent(request)) {
+        ANS_LOGE("Refuse to publish the notification because the series numbers actions not match those assigned to "
+                 "added action buttons.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!CanPublishLiveViewContent(request)) {
+        ANS_LOGE("Refuse to publish the notification without valid live view content.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode checkErr = CheckImageSize(request);
+    if (checkErr != ERR_OK) {
+        ANS_LOGE("The size of one picture exceeds the limit");
+        return checkErr;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Failed to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationRequest> reqPtr = new (std::nothrow) NotificationRequest(request);
+    if (reqPtr == nullptr) {
+        ANS_LOGE("Create notificationRequest ptr fail.");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
+        reqPtr->SetDistributed(false);
+    }
+    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    reqPtr->SetCreatorInstanceKey(instanceKey);
+
+    return proxy->PublishNotificationForIndirectProxy(reqPtr);
+}
+
 ErrCode AnsNotification::CancelNotification(int32_t notificationId)
 {
     return CancelNotification("", notificationId);

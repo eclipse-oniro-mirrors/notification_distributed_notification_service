@@ -148,6 +148,17 @@ public:
     ErrCode PublishNotification(const std::string &label, const NotificationRequest &request);
 
     /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     * this method will update the notification.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns publish notification result.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const NotificationRequest &request);
+
+    /**
      * @brief Cancels a published notification.
      *
      * @param notificationId Indicates the unique notification ID in the application.
