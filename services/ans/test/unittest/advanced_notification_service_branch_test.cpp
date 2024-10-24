@@ -25,6 +25,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_subscriber_listener.h"
 #include "ans_ut_constant.h"
 #include "iremote_object.h"
 #include "want_agent_info.h"
@@ -82,7 +83,6 @@ void AnsBranchTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_->CancelAll(0);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
@@ -432,9 +432,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_239000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(listener, info), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -448,9 +449,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_240000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(listener, info), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -464,9 +466,10 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Unsubscribe(listener, info), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

@@ -24,10 +24,7 @@ ohos_unittest("ans_notification_branch_test") {
     "../mock/",
   ]
 
-  sources = [
-    "ans_notification_branch_test.cpp",
-    "mock_ans_notification.cpp",
-  ]
+  sources = [ "ans_notification_branch_test.cpp" ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",

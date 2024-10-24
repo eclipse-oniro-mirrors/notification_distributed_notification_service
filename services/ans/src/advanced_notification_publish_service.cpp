@@ -171,6 +171,88 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     return result;
 }
 
+ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (!request) {
+        ANSR_LOGE("ReminderRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = PrePublishRequest(request);
+    if (result != ERR_OK) {
+        return result;
+    }
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+    // SA not support sound
+    if (!request->GetSound().empty()) {
+        request->SetSound("");
+    }
+    std::string bundle = request->GetCreatorBundleName();
+    int32_t uid = request->GetCreatorUid();
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->isThirdparty = false;
+    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    record->bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
+    if (record->bundleOption == nullptr || bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption");
+        return ERR_ANS_NO_MEMORY;
+    }
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    SetRequestBySlotType(record->request, bundleOption);
+
+    auto ipcUid = IPCSkeleton::GetCallingUid();
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
+            ANS_LOGE("Can not assign valid slot!");
+        }
+
+        ChangeNotificationByControlFlags(record, isAgentController);
+        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
+        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
+        record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
+            result = SaPublishSystemLiveViewAsBundle(record);
+            if (result == ERR_OK) {
+                SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
+            }
+            return;
+        }
+
+        if (AssignToNotificationList(record) != ERR_OK) {
+            ANS_LOGE("Failed to assign notification list");
+            return;
+        }
+
+        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+    });
+    notificationSvrQueue_->wait(handler);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+        StartAutoDelete(record,
+            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    }
+    return ERR_OK;
+}
+
 bool AdvancedNotificationService::InitPublishProcess()
 {
     if (publishProcess_.size() > 0) {
@@ -254,6 +336,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
 
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -268,6 +351,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
             if (notification != nullptr) {
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -284,6 +368,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, reason);
         }
+        BatchCancelTimer(timerIds);
         result = ERR_OK;
     }));
     notificationSvrQueue_->wait(handler);
@@ -495,6 +580,7 @@ ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const 
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, removeReason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, removeReason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
@@ -550,6 +636,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
             if (notification != nullptr) {
                 int32_t reason = NotificationConstant::CANCEL_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
+                CancelTimer(notification->GetAutoDeletedTimer());
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
@@ -602,6 +689,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
         }
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -618,6 +706,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
             if (notification->GetUserId() == activeUserId) {
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -631,7 +720,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, reason);
         }
-
+        BatchCancelTimer(timerIds);
         result = ERR_OK;
     }));
     notificationSvrQueue_->wait(handler);
@@ -1232,6 +1321,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
         if (notification != nullptr) {
             int32_t reason = NotificationConstant::APP_CANCEL_REASON_DELETE;
             UpdateRecentNotification(notification, true, reason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
         }
     }));
@@ -1428,6 +1518,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, removeReason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, removeReason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
@@ -1540,12 +1631,14 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
         }
 
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
             notificationList_.remove(record);
             if (record->notification != nullptr) {
                 ANS_LOGD("record->notification is not nullptr.");
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
+                timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
@@ -1560,6 +1653,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
         }
+        BatchCancelTimer(timerIds);
     }));
     notificationSvrQueue_->wait(handler);
 
@@ -1576,17 +1670,16 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
-
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto key : keys) {
             sptr<Notification> notification = nullptr;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1601,6 +1694,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
             if (notification != nullptr) {
                 UpdateRecentNotification(notification, true, removeReason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -1616,6 +1710,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, removeReason);
         }
+        BatchCancelTimer(timerIds);
     }));
     notificationSvrQueue_->wait(handler);
 
@@ -1660,6 +1755,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
 
             if (notification != nullptr) {
                 UpdateRecentNotification(notification, true, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
+                CancelTimer(notification->GetAutoDeletedTimer());
                 NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
                     NotificationConstant::DISABLE_SLOT_REASON_DELETE);
             }
@@ -1794,11 +1890,13 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
         }
 
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
             notificationList_.remove(record);
             if (record->notification != nullptr) {
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
+                timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
@@ -1815,6 +1913,7 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, reason);
         }
+        BatchCancelTimer(timerIds);
     }));
     notificationSvrQueue_->wait(handler);
 }
@@ -1887,6 +1986,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         }
 
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
             notificationList_.remove(record);
             ProcForDeleteLiveView(record);
@@ -1894,6 +1994,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
             if (record->notification != nullptr) {
                 UpdateRecentNotification(record->notification, true, reason);
                 notifications.emplace_back(record->notification);
+                timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
@@ -1906,6 +2007,7 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
         }
+        BatchCancelTimer(timerIds);
     }));
     notificationSvrQueue_->wait(handler);
 
@@ -1917,6 +2019,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
 {
     ErrCode result = ERR_OK;
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto& record : recordList) {
             std::string key = record->notification->GetKey();
             sptr<Notification> notification = nullptr;
@@ -1934,6 +2037,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
                 int32_t reason = NotificationConstant::USER_STOPPED_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -1949,6 +2053,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, NotificationConstant::USER_STOPPED_REASON_DELETE);
         }
+        BatchCancelTimer(timerIds);
         return result;
 }
 
@@ -2145,8 +2250,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
 
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        StartAutoDeletedTimer(record);
     }
     return ERR_OK;
 }

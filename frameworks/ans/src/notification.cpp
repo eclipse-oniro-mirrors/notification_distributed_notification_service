@@ -592,5 +592,15 @@ uint64_t Notification::GetArchiveTimer() const
 {
     return archiveTimerId_;
 }
+
+void Notification::SetAutoDeletedTimer(uint64_t autoDeletedTimerId)
+{
+    autoDeletedTimerId_ = autoDeletedTimerId;
+}
+
+uint64_t Notification::GetAutoDeletedTimer() const
+{
+    return autoDeletedTimerId_;
+}
 }  // namespace Notification
 }  // namespace OHOS

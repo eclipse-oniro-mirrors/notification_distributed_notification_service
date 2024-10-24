@@ -52,6 +52,10 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
     {ERROR_SETTING_WINDOW_EXIST, "The notification settings window is already displayed"},
     {ERROR_NO_PROFILE_TEMPLATE, "Not exit noNotDisturb profile template"},
+    {ERROR_REPEAT_SET, "Repeat create or end"},
+    {ERROR_NO_RIGHT, "No permission"},
+    {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
+    {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
 };
 }
 

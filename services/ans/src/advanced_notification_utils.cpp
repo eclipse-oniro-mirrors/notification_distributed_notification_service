@@ -539,6 +539,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
 #endif
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto key : keys) {
             sptr<Notification> notification = nullptr;
             result = RemoveFromNotificationList(key, notification, true,
@@ -551,6 +552,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
                 int32_t reason = NotificationConstant::PACKAGE_REMOVE_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
                 ExecBatchCancel(notifications, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete("", "", notification);
@@ -561,6 +563,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
         }
+        BatchCancelTimer(timerIds);
         NotificationPreferences::GetInstance()->RemoveAnsBundleDbInfo(bundleOption);
         RemoveDoNotDisturbProfileTrustList(bundleOption);
         DeleteDuplicateMsgs(bundleOption);
@@ -696,11 +699,9 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid,
 {
     for (auto& notification : notificationList_) {
         if (notification->request != nullptr && notification->request->GetSlotType()== slotType &&
-            notification->request->GetNotificationType() == contentType) {
-            if (notification->request->GetCreatorUid() == uid || (notification->request->GetAgentBundle() != nullptr &&
-                notification->request->GetAgentBundle()->GetUid() == uid)) {
-                recordList.emplace_back(notification);
-            }
+            notification->request->GetNotificationType() == contentType &&
+            notification->request->GetCreatorUid() == uid) {
+            recordList.emplace_back(notification);
         }
     }
     if (recordList.empty()) {
@@ -1132,6 +1133,7 @@ void AdvancedNotificationService::OnDistributedDelete(
         if (notification != nullptr) {
             int32_t reason = NotificationConstant::APP_CANCEL_REASON_OTHER;
             UpdateRecentNotification(notification, true, reason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
         }
     }));
@@ -1343,6 +1345,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(bundleOption);
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -1361,6 +1364,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
                 int32_t reason = NotificationConstant::PACKAGE_CHANGED_REASON_DELETE;
                 UpdateRecentNotification(notification, true, reason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -1377,6 +1381,7 @@ void AdvancedNotificationService::OnBundleDataCleared(const sptr<NotificationBun
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, NotificationConstant::PACKAGE_CHANGED_REASON_DELETE);
         }
+        BatchCancelTimer(timerIds);
     }));
 }
 
@@ -1437,6 +1442,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
         ANS_LOGD("ffrt enter!");
         std::vector<std::string> keys = GetNotificationKeys(nullptr);
         std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
         for (auto key : keys) {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             std::string deviceId;
@@ -1453,6 +1459,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
             if (notification->GetUserId() == userId) {
                 UpdateRecentNotification(notification, true, deleteReason);
                 notifications.emplace_back(notification);
+                timerIds.emplace_back(notification->GetAutoDeletedTimer());
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 DoDistributedDelete(deviceId, bundleName, notification);
 #endif
@@ -1466,7 +1473,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, deleteReason);
         }
-
+        BatchCancelTimer(timerIds);
         *result = ERR_OK;
     }));
 
@@ -1729,6 +1736,55 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
+    if (!InitPublishProcess()) {
+        return ERR_ANS_NO_MEMORY;
+    }
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    result = CheckUserIdParams(request->GetReceiverUserId());
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_1).ErrorCode(result).Message("User is invalid", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+
+    if (request->GetCreatorUid() <= 0) {
+        message.BranchId(EventBranchId::BRANCH_2).ErrorCode(ERR_ANS_INVALID_UID)
+            .Message("createUid failed" + std::to_string(request->GetCreatorUid()), true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return ERR_ANS_INVALID_UID;
+    }
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("failed to get bundleManager!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    request->SetCreatorPid(IPCSkeleton::GetCallingPid());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
+        request->SetCreatorUserId(userId);
+    }
+
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
+    result = CheckPictureSize(request);
+    if (result != ERR_OK) {
+        message.ErrorCode(result).Message("Failed to check picture size", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    return ERR_OK;
+}
+
 uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
     int64_t deleteTimePoint, int32_t reason)
 {
@@ -1765,6 +1821,14 @@ void AdvancedNotificationService::CancelTimer(uint64_t timerId)
     }
     MiscServices::TimeServiceClient::GetInstance()->StopTimer(timerId);
     MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(timerId);
+}
+
+void AdvancedNotificationService::BatchCancelTimer(std::vector<uint64_t> timerIds)
+{
+    ANS_LOGD("Enter");
+    for (uint64_t timerId : timerIds) {
+        CancelTimer(timerId);
+    }
 }
 
 void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
@@ -1945,6 +2009,53 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 #else
     return true;
 #endif
+}
+
+ErrCode AdvancedNotificationService::OnRecoverLiveView(
+    const std::vector<std::string> &keys)
+{
+    ANS_LOGD("enter");
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("NotificationSvrQueue is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::vector<sptr<Notification>> notifications;
+    int32_t removeReason = NotificationConstant::RECOVER_LIVE_VIEW_DELETE;
+    std::vector<uint64_t> timerIds;
+    for (auto key : keys) {
+        ANS_LOGI("BatchRemoveByKeys key = %{public}s", key.c_str());
+        sptr<Notification> notification = nullptr;
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+        std::string deviceId;
+        std::string bundleName;
+        GetDistributedInfo(key, deviceId, bundleName);
+#endif
+        ErrCode result = RemoveFromNotificationList(key, notification, true, removeReason);
+        if (result != ERR_OK) {
+            continue;
+        }
+        if (notification != nullptr) {
+            notifications.emplace_back(notification);
+            timerIds.emplace_back(notification->GetAutoDeletedTimer());
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+        }
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            std::vector<sptr<Notification>> currNotificationList = notifications;
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                currNotificationList, nullptr, removeReason);
+            notifications.clear();
+        }
+    }
+
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, removeReason);
+    }
+    BatchCancelTimer(timerIds);
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

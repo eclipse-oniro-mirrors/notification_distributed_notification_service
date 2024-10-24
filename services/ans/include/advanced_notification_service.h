@@ -105,6 +105,17 @@ public:
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &request) override;
 
     /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     *       this method will update the notification.
+     *
+     * @param notification Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request) override;
+
+    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -1299,6 +1310,7 @@ private:
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    ErrCode PrePublishRequest(const sptr<NotificationRequest> &request);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
@@ -1321,6 +1333,7 @@ private:
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
+    void OnSubscriberAddInffrt(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
@@ -1332,6 +1345,7 @@ private:
         const std::string &secureKey, const int32_t userId);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);
     void CancelTimer(uint64_t timerId);
+    void BatchCancelTimer(std::vector<uint64_t> timerIds);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
@@ -1343,9 +1357,11 @@ private:
     void CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
     void QueryDoNotDisturbProfile(const int32_t &userId, std::string &enable, std::string &profileId);
     void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
+    void ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable);
     void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
@@ -1413,6 +1429,8 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
+    ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
+    
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
@@ -1449,6 +1467,8 @@ private:
     std::list<std::pair<std::chrono::steady_clock::time_point, std::string>> uniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
     std::mutex delayNotificationMutext_;
+    static std::mutex doNotDisturbMutex_;
+    std::map<int32_t, std::string> doNotDisturbEnableRecord_;
 };
 
 /**

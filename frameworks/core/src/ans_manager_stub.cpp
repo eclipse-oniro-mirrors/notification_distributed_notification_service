@@ -47,6 +47,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandlePublish(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION_INDIRECTPROXY): {
+            result = HandlePublishNotificationForIndirectProxy(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_NOTIFICATION): {
             result = HandleCancel(data, reply);
             break;
@@ -483,6 +487,22 @@ ErrCode AnsManagerStub::HandlePublish(MessageParcel &data, MessageParcel &reply)
     ErrCode result = Publish(label, notification);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandlePublish] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandlePublishNotificationForIndirectProxy(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationRequest> notification = data.ReadParcelable<NotificationRequest>();
+    if (!notification) {
+        ANS_LOGE("[HandlePublishNotificationForIndirectProxy] fail: notification ReadParcelable failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = PublishNotificationForIndirectProxy(notification);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandlePublishNotificationForIndirectProxy] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
