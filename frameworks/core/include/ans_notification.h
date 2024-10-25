@@ -1160,7 +1160,7 @@ private:
 
     bool IsValidTemplate(const NotificationRequest &request) const;
     bool IsValidDelayTime(const NotificationRequest &request) const;
-    bool CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
+    void CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
         sptr<SubscriberListener> &listener);
 
 private:
