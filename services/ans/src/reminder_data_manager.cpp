@@ -21,7 +21,6 @@
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
-#include "notification_constant.h"
 #include "reminder_request_calendar.h"
 #include "in_process_call_wrapper.h"
 #ifdef DEVICE_STANDBY_ENABLE
@@ -944,7 +943,7 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
     ErrCode errCode = advancedNotificationService_->GetDoNotDisturbDate(date);
     if (errCode != ERR_OK) {
         ANSR_LOGE("The reminder (reminderId=%{public}d) is silent for get disturbDate error", reminderId);
-        return false;
+        return true;
     }
     if (date->GetDoNotDisturbType() == NotificationConstant::DoNotDisturbType::NONE) {
         return true;
@@ -1679,18 +1678,25 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
             return;
         }
     }
-    std::string defaultPath;
-    if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
-        defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+    std::string customRingUri = reminder->GetCustomRingUri();
+    if (customRingUri.empty()) {
+        // use default ring
+        std::string defaultPath;
+        if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
+            defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+        } else {
+            defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
+        }
+        Uri defaultSound(defaultPath);
+        soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
+        ANSR_LOGI("Play default sound.");
     } else {
-        defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
+        Global::Resource::ResourceManager::RawFileDescriptor desc;
+        if (GetCustomRingFileDesc(reminder, desc)) {
+            soundPlayer_->SetSource(desc.fd, desc.offset, desc.length);
+        }
+        ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
     }
-    std::string ringUri = GetCustomRingUri(reminder);
-    Uri reminderSound(ringUri);
-    Uri defaultSound(defaultPath);
-    Uri soundUri = ringUri.empty() ? defaultSound : reminderSound;
-    std::string uri = soundUri.GetSchemeSpecificPart();
-    ANSR_LOGD("uri:%{public}s", uri.c_str());
     soundPlayer_->SetSource(uri);
     soundPlayer_->SetLooping(true);
     soundPlayer_->PrepareAsync();
@@ -1744,6 +1750,12 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
     if (soundPlayer_ == nullptr) {
         ANSR_LOGW("Sound player is null");
     } else {
+        std::string customRingUri = reminder->GetCustomRingUri();
+        if (customRingUri.empty()) {
+            ANSR_LOGI("Stop default sound.");
+        } else {
+            CloseCustomRingFileDesc(reminder->GetReminderId(), customRingUri);
+        }
         soundPlayer_->Stop();
         soundPlayer_->Release();
         soundPlayer_ = nullptr;
@@ -2010,12 +2022,19 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     }
 }
 
-std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundleResMgr(
-    const AppExecFwk::BundleInfo &bundleInfo)
+std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetResourceMgr(const std::string& bundleName,
+    const int32_t uid)
 {
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, uid, bundleInfo)) {
+        ANSR_LOGE("GetBundleInfo[%{public}s][%{public}d] fail.", bundleName.c_str(), uid);
+        return nullptr;
+    }
+    // obtains the resource manager
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (!resourceManager) {
-        ANSR_LOGE("create resourceManager failed.");
+        ANSR_LOGE("CreateResourceManager fail.");
         return nullptr;
     }
     // obtains the resource path.
@@ -2024,9 +2043,8 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundl
         if (moduleResPath.empty()) {
             continue;
         }
-        ANSR_LOGD("GetBundleResMgr, moduleResPath: %{private}s", moduleResPath.c_str());
         if (!resourceManager->AddResource(moduleResPath.c_str())) {
-            ANSR_LOGW("GetBundleResMgr AddResource failed");
+            ANSR_LOGW("AddResource fail.");
         }
     }
     // obtains the current system language.
@@ -2038,44 +2056,47 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetBundl
     return resourceManager;
 }
 
-void ReminderDataManager::UpdateReminderLanguage(const sptr<ReminderRequest> &reminder)
+void ReminderDataManager::UpdateReminderLanguage(const int32_t uid,
+    const std::vector<sptr<ReminderRequest>>& reminders)
 {
     // obtains the bundle info by bundle name
-    const std::string bundleName = reminder->GetBundleName();
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!BundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, reminder->GetUid(), bundleInfo)) {
-        ANSR_LOGE("Get reminder request[%{public}d][%{public}s] bundle info failed.",
-            reminder->GetReminderId(), bundleName.c_str());
+    if (reminders.empty()) {
         return;
     }
+
+    std::string bundleName = reminders[0]->GetBundleName();
     // obtains the resource manager
-    auto resourceMgr = GetBundleResMgr(bundleInfo);
+    auto resourceMgr = GetResourceMgr(bundleName, uid);
     if (resourceMgr == nullptr) {
         ANSR_LOGE("Get reminder request[%{public}d][%{public}s] resource manager failed.",
-            reminder->GetReminderId(), bundleName.c_str());
+            uid, bundleName.c_str());
         return;
     }
     // update action button title
-    reminder->OnLanguageChange(resourceMgr);
+    for (auto reminder : reminders) {
+        reminder->OnLanguageChange(resourceMgr);
+    }
 }
 
 void ReminderDataManager::UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    UpdateReminderLanguage(reminder);
+    std::vector<sptr<ReminderRequest>> reminders;
+    reminders.push_back(reminder);
+    UpdateReminderLanguage(reminder->GetUid(), reminders);
 }
 
 void ReminderDataManager::OnLanguageChanged()
 {
-    ANSR_LOGI("System language config changed.");
+    ANSR_LOGI("System language config changed start.");
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+        std::unordered_map<int32_t, std::vector<sptr<ReminderRequest>>> reminders;
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-            if ((*it)->IsExpired() || (*it)->GetTriggerTimeInMilli() == 0) {
-                continue;
-            }
-            UpdateReminderLanguage(*it);
+            reminders[(*it)->GetUid()].push_back((*it));
+        }
+        for (auto& each : reminders) {
+            UpdateReminderLanguage(each.first, each.second);
         }
     }
     std::vector<sptr<ReminderRequest>> showedReminder;
@@ -2087,6 +2108,7 @@ void ReminderDataManager::OnLanguageChanged()
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder((*it), false, false, false, false);
     }
+    ANSR_LOGI("System language config changed end.");
 }
 
 void ReminderDataManager::OnRemoveAppMgr()
