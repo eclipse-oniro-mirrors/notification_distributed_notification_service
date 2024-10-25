@@ -1393,7 +1393,7 @@ private:
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     void RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void StartFinishTimerForUpdate(const std::shared_ptr<NotificationRecord> &record, uint64_t process);
-    ErrCode CheckSystemLiveView(const sptr<NotificationRequest> &request, const std::string &key);
+    ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
     void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
