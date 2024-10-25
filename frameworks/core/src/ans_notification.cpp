@@ -519,8 +519,8 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
     }
 
     sptr<SubscriberListener>listener = nullptr;
-    bool result = CreateSubscribeListener(subscriberSptr, listener);
-    if (!result || listener == nullptr) {
+    CreateSubscribeListener(subscriberSptr, listener);
+    if (listener == nullptr) {
         ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -544,8 +544,8 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
     }
 
     sptr<SubscriberListener> listener = nullptr;
-    bool result = CreateSubscribeListener(subscriberSptr, listener);
-    if (!result || listener == nullptr) {
+    CreateSubscribeListener(subscriberSptr, listener);
+    if (listener == nullptr) {
         ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -594,8 +594,8 @@ ErrCode AnsNotification::SubscribeNotification(
     }
 
     sptr<SubscriberListener> listener = nullptr;
-    bool result = CreateSubscribeListener(subscriberSptr, listener);
-    if (!result || listener == nullptr) {
+    CreateSubscribeListener(subscriberSptr, listener);
+    if (listener == nullptr) {
         ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1911,7 +1911,7 @@ ErrCode AnsNotification::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoN
     return proxy->GetDoNotDisturbProfile(id, profile);
 }
 
-bool AnsNotification::CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
+void AnsNotification::CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
     sptr<SubscriberListener> &listener)
 {
     std::lock_guard<std::mutex> lock(subscriberMutex_);
@@ -1919,8 +1919,8 @@ bool AnsNotification::CreateSubscribeListener(std::shared_ptr<NotificationSubscr
     while (item != subscribers_.end()) {
         if (item->first.get() == subscriber.get()) {
             listener = item->second;
-            ANS_LOGW("subscriber has listener");
-            return false;
+            ANS_LOGD("subscriber has listener");
+            return;
         }
         item++;
     }
@@ -1928,10 +1928,7 @@ bool AnsNotification::CreateSubscribeListener(std::shared_ptr<NotificationSubscr
     if (listener != nullptr) {
         subscribers_[subscriber] = listener;
         ANS_LOGD("CreateSubscribeListener success");
-        return true;
     }
-    ANS_LOGE("CreateSubscribeListener failed");
-    return false;
 }
 
 void AnsNotification::OnServiceDied()
