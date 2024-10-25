@@ -95,7 +95,8 @@ NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
 
 std::shared_ptr<NotificationSubscriber> NotificationSubscriber::GetSharedPtr() const
 {
-    return std::const_pointer_cast<NotificationSubscriber>(shared_from_this());
+    std::weak_ptr<const NotificationSubscriber> wptr = weak_from_this();
+    return std::const_pointer_cast<NotificationSubscriber>(wptr.lock());
 }
 }  // namespace Notification
 }  // namespace OHOS
