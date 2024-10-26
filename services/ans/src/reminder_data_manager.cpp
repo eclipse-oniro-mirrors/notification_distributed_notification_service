@@ -1634,7 +1634,6 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         }
         ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
     }
-    soundPlayer_->SetSource(uri);
     soundPlayer_->SetLooping(true);
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
