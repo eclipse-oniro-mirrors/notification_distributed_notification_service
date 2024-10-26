@@ -1466,11 +1466,6 @@ bool ReminderDataManager::RegisterConfigurationObserver()
     }
 
     auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
-    if (appMgrClient->ConnectAppMgrService() != ERR_OK) {
-        ANSR_LOGW("Connect to app mgr service failed.");
-        return false;
-    }
-
     configChangeObserver_ = sptr<AppExecFwk::IConfigurationObserver>(
         new (std::nothrow) ReminderConfigChangeObserver());
     if (appMgrClient->RegisterConfigurationObserver(configChangeObserver_) != ERR_OK) {
