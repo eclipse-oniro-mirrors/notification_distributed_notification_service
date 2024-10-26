@@ -100,6 +100,13 @@ void ReminderEventManager::SubscribeSystemAbility(std::shared_ptr<ReminderDataMa
         ANSR_LOGE("Failed to create appMgrStatusChangeListener due to no memory.");
         return;
     }
+    // ability mgr
+    sptr<SystemAbilityStatusChangeListener> abilityMgrStatusListener
+        = new (std::nothrow) SystemAbilityStatusChangeListener(reminderDataManager);
+    if (abilityMgrStatusListener == nullptr) {
+        ANSR_LOGE("Failed to create abilityMgrStatusListener due to no memory.");
+        return;
+    }
 
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
@@ -113,6 +120,10 @@ void ReminderEventManager::SubscribeSystemAbility(std::shared_ptr<ReminderDataMa
     ret = samgrProxy->SubscribeSystemAbility(APP_MGR_SERVICE_ID, appMgrStatusChangeListener);
     if (ret != ERR_OK) {
         ANSR_LOGE("subscribe system ability id: %{public}d failed", APP_MGR_SERVICE_ID);
+    }
+    ret = samgrProxy->SubscribeSystemAbility(ABILITY_MGR_SERVICE_ID, abilityMgrStatusListener);
+    if (ret != ERR_OK) {
+        ANSR_LOGE("subscribe system ability id: %{public}d failed", ABILITY_MGR_SERVICE_ID);
     }
 }
 
@@ -251,10 +262,14 @@ void ReminderEventManager::SystemAbilityStatusChangeListener::OnAddSystemAbility
     switch (systemAbilityId) {
         case BUNDLE_MGR_SERVICE_SYS_ABILITY_ID:
             ANSR_LOGD("OnAddSystemAbilityInner: BUNDLE_MGR_SERVICE_SYS_ABILITY");
-            reminderDataManager_->OnServiceStart();
+            reminderDataManager_->OnBundleMgrServiceStart();
             break;
         case APP_MGR_SERVICE_ID:
             ANSR_LOGD("OnAddSystemAbilityInner: APP_MGR_SERVICE");
+            break;
+        case ABILITY_MGR_SERVICE_ID:
+            ANSR_LOGD("OnAddSystemAbilityInner ABILITY_MGR_SERVICE_ID");
+            reminderDataManager_->OnAbilityMgrServiceStart();
             break;
         default:
             break;
@@ -272,6 +287,9 @@ void ReminderEventManager::SystemAbilityStatusChangeListener::OnRemoveSystemAbil
         case APP_MGR_SERVICE_ID:
             ANSR_LOGD("OnRemoveSystemAbilityInner: APP_MGR_SERVICE");
             reminderDataManager_->OnRemoveAppMgr();
+            break;
+        case ABILITY_MGR_SERVICE_ID:
+            ANSR_LOGD("OnRemoveSystemAbilityInner ABILITY_MGR_SERVICE_ID");
             break;
         default:
             break;

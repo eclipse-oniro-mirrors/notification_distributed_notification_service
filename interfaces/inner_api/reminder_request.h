@@ -871,6 +871,16 @@ public:
     void SetCustomRingUri(const std::string &uri);
 
     /**
+     * @brief Gets notification bundle option.
+     */
+    sptr<NotificationBundleOption> GetNotificationBundleOption() const;
+
+    /**
+     * @brief Sets notification bundle option.
+     */
+    void SetNotificationBundleOption(const sptr<NotificationBundleOption>& option);
+
+    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
@@ -1133,6 +1143,8 @@ private:
 
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
+
+    sptr<NotificationBundleOption> notificationOption_ {nullptr};
 };
 }  // namespace Reminder
 }  // namespace OHOS
