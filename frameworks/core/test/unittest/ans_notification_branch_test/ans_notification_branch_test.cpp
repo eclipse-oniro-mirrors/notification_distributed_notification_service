@@ -142,16 +142,6 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetNotificationAgent(const std::string &agent) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode GetNotificationAgent(std::string &agent) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish) override
     {
         return ERR_ANS_INVALID_PARAM;

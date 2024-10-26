@@ -898,66 +898,6 @@ HWTEST_F(AnsManagerStubTest, HandleTriggerLocalLiveView04, Function | SmallTest 
 }
 
 /**
- * @tc.name: HandleSetNotificationAgent01
- * @tc.desc: Test HandleSetNotificationAgent succeeds.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    std::string agent = "this is a agent";
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteString(agent);
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)NO_ERROR);
-}
-
-/**
- * @tc.name: HandleSetNotificationAgent02
- * @tc.desc: Test if the agent in data is null.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandleSetNotificationAgent02, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
- * @tc.name: HandleGetNotificationAgent01
- * @tc.desc: Test HandleGetNotificationAgent succeeds.
- * @tc.type: FUNC
- * @tc.require: issueI5XQ4E
- */
-HWTEST_F(AnsManagerStubTest, HandleGetNotificationAgent01, Function | SmallTest | Level1)
-{
-    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_AGENT);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-
-    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)NO_ERROR);
-}
-
-/**
  * @tc.name: HandleCanPublishAsBundle01
  * @tc.desc: Test HandleCanPublishAsBundle succeeds.
  * @tc.type: FUNC

@@ -119,14 +119,6 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetActiveNotificationByFilter(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT): {
-            result = HandleSetNotificationAgent(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_AGENT): {
-            result = HandleGetNotificationAgent(data, reply);
-            break;
-        }
         case static_cast<uint32_t>(NotificationInterfaceCode::CAN_PUBLISH_AS_BUNDLE): {
             result = HandleCanPublishAsBundle(data, reply);
             break;
@@ -870,39 +862,6 @@ ErrCode AnsManagerStub::HandleGetActiveNotificationByFilter(MessageParcel &data,
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
-}
-
-ErrCode AnsManagerStub::HandleSetNotificationAgent(MessageParcel &data, MessageParcel &reply)
-{
-    std::string agent;
-    if (!data.ReadString(agent)) {
-        ANS_LOGE("[HandleSetNotificationAgent] fail: read agent failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = SetNotificationAgent(agent);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleSetNotificationAgent] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AnsManagerStub::HandleGetNotificationAgent(MessageParcel &data, MessageParcel &reply)
-{
-    std::string agent;
-    ErrCode result = GetNotificationAgent(agent);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleGetNotificationAgent] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.WriteString(agent)) {
-        ANS_LOGE("[HandleGetNotificationAgent] fail: write agent failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleCanPublishAsBundle(MessageParcel &data, MessageParcel &reply)

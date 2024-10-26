@@ -366,26 +366,6 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
     return proxy->GetActiveNotifications(request, instanceKey);
 }
 
-ErrCode AnsNotification::SetNotificationAgent(const std::string &agent)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->SetNotificationAgent(agent);
-}
-
-ErrCode AnsNotification::GetNotificationAgent(std::string &agent)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->GetNotificationAgent(agent);
-}
-
 ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish)
 {
     if (representativeBundle.empty()) {

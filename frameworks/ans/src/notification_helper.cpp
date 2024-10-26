@@ -126,16 +126,6 @@ ErrCode NotificationHelper::GetActiveNotifications(std::vector<sptr<Notification
     return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(request);
 }
 
-ErrCode NotificationHelper::SetNotificationAgent(const std::string &agent)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationAgent(agent);
-}
-
-ErrCode NotificationHelper::GetNotificationAgent(std::string &agent)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationAgent(agent);
-}
-
 ErrCode NotificationHelper::CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CanPublishNotificationAsBundle(

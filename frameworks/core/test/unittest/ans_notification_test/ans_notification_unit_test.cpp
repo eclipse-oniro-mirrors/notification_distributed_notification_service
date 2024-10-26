@@ -553,11 +553,6 @@ HWTEST_F(AnsNotificationUnitTest, GetActiveNotificationNums_0100, Function | Med
     std::vector<sptr<NotificationRequest>> request;
     ErrCode ret2 = ans_->GetActiveNotifications(request);
     EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
-    std::string agent = "this is agent";
-    ErrCode ret4 = ans_->SetNotificationAgent(agent);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret5 = ans_->GetNotificationAgent(agent);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*

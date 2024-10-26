@@ -221,24 +221,6 @@ public:
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) override;
 
     /**
-     * @brief Allows another application to act as an agent to publish notifications in the name of your application
-     * bundle.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetNotificationAgent(const std::string &agent) override;
-
-    /**
-     * @brief Obtains the name of the application bundle that can publish notifications in the name of your application.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application if
-     * any; returns null otherwise.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetNotificationAgent(std::string &agent) override;
-
-    /**
      * @brief Checks whether your application has permission to publish notifications by calling
      * PublishNotificationAsBundle(string, NotificationRequest) in the name of another application indicated by the
      * given representativeBundle.

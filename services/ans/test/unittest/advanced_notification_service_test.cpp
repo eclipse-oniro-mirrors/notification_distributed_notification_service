@@ -1453,23 +1453,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_17000
- * @tc.name      : ANS_GetSetActiveNotifications_0100
- * @tc.desc      : Test SetNotificationAgent and GetNotificationAgent function with bundle option is null
- * @tc.require   : #I60KYN
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17000, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test start";
-
-    std::string agent = "agent";
-    ASSERT_EQ(advancedNotificationService_->SetNotificationAgent(agent), ERR_INVALID_OPERATION);
-    ASSERT_EQ(advancedNotificationService_->GetNotificationAgent(agent), ERR_INVALID_OPERATION);
-
-    GTEST_LOG_(INFO) << "ANS_GetActiveNotifications_0100 test end";
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_17100
  * @tc.name      : ANS_GetSetActiveNotifications_0100
  * @tc.desc      : Test function with NON_SYSTEM_APP_UID

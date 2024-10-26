@@ -145,18 +145,6 @@ ErrCode AnsManagerStub::GetActiveNotificationByFilter(
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SetNotificationAgent(const std::string &agent)
-{
-    ANS_LOGE("AnsManagerStub::SetNotificationAgent called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::GetNotificationAgent(std::string &agent)
-{
-    ANS_LOGE("AnsManagerStub::GetNotificationAgent called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)
 {
     ANS_LOGE("AnsManagerStub::CanPublishAsBundle called!");
