@@ -31,6 +31,8 @@
 #include "singleton.h"
 #include "notification_subscriber.h"
 
+extern void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::AnsManagerInterface> mockRet);
+
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS;
@@ -601,7 +603,10 @@ public:
     void SetUp();
 };
 
-void AnsNotificationBranchTest::SetUpTestCase() {}
+void AnsNotificationBranchTest::SetUpTestCase()
+{
+    MockGetAnsManagerProxy(nullptr);
+}
 
 void AnsNotificationBranchTest::TearDownTestCase() {}
 
@@ -855,6 +860,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
 HWTEST_F(AnsNotificationBranchTest, PublishNotification_0001, Function | MediumTest | Level1)
 {
     auto notification = std::make_shared<AnsNotification>();
+    MockGetAnsManagerProxy(new (std::nothrow) MockAnsManagerInterface());
     NotificationRequest req;
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     auto content = std::make_shared<NotificationContent>(mediaContent);

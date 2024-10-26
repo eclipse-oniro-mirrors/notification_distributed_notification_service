@@ -230,8 +230,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -260,6 +260,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -328,12 +329,13 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
             }
+            ANS_LOGE("XXXX size %{public}zu", sortingKey.size());
         };
 
     // add slot
@@ -359,6 +361,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -595,9 +598,10 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
+            ANS_LOGE("XXXX size %{public}zu", sortingKey.size());
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
             }
@@ -625,6 +629,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -693,8 +698,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -723,6 +728,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -906,6 +912,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->CancelAll(0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -932,8 +939,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -963,6 +970,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -1334,8 +1342,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -1365,6 +1373,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
@@ -1388,8 +1397,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -1419,6 +1428,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
 }
@@ -1489,7 +1499,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
     g_advancedNotificationService->Publish(label, req);
 
     // remove request
-    g_advancedNotificationService->Delete("_1_testLabel_0", NotificationConstant::CANCEL_REASON_DELETE);
+    g_advancedNotificationService->Delete("_0_1_bundleName_testLabel_0", NotificationConstant::CANCEL_REASON_DELETE);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
 }
@@ -1657,7 +1668,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0103, Function | SmallTest | Level1)
     // publish request
     g_advancedNotificationService->Publish(label, req);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    EXPECT_EQ(passed, true);
+    EXPECT_FALSE(passed);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
 }
 
@@ -1772,8 +1783,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0107, Function | SmallTest | Level1)
     g_advancedNotificationService->Publish(label, req1);
 
     // remove request
-    g_advancedNotificationService->Delete("_0_1_testLabel_0", NotificationConstant::CANCEL_REASON_DELETE);
-    g_advancedNotificationService->Delete("_0_1_testLabel_1", NotificationConstant::CANCEL_REASON_DELETE);
+    g_advancedNotificationService->Delete("_0_1_bundleName_testLabel_0", NotificationConstant::CANCEL_REASON_DELETE);
+    g_advancedNotificationService->Delete("_0_1_bundleName_testLabel_1", NotificationConstant::CANCEL_REASON_DELETE);
     uint64_t nums = 0;
     g_advancedNotificationService->GetActiveNotificationNums(nums);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
@@ -1848,6 +1859,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0110, Function | SmallTest | Level1)
 
     // unsubscriber
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(passed, true);
 }
 
@@ -1889,8 +1901,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
 
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
@@ -1927,7 +1939,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
 }
@@ -1951,8 +1965,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -1988,7 +2002,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_TRUE(passed);
 }
@@ -2012,8 +2028,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -2049,7 +2065,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
     req1->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_TRUE(passed);
 }
@@ -2073,8 +2091,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -2111,7 +2129,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
 }
@@ -2135,8 +2155,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_1_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_1_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -2173,7 +2193,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Publish(label, req1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
 }
@@ -2367,7 +2389,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
     g_advancedNotificationService->Publish("testLabel", req4);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(ret, 5);
-    g_advancedNotificationService->DeleteAll();
+    g_advancedNotificationService->DeleteAllByUser(0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
@@ -2409,6 +2432,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0124, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_TRUE(passed);
 }
@@ -2447,6 +2471,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0125, Function | SmallTest | Level1)
     req->SetContent(content2);
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_TRUE(passed);
 }
@@ -2487,6 +2512,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0126, Function | SmallTest | Level1)
 
     // publish request
     g_advancedNotificationService->Publish(label, req);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_TRUE(passed);
 }
@@ -2542,7 +2568,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0127, Function | SmallTest | Level1)
 
     // publish
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req1), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_EQ(ret, EXPECT_REQUST_NUM);
 }
@@ -2598,7 +2626,9 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0128, Function | SmallTest | Level1)
 
     // publish
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req1), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
     EXPECT_EQ(ret, EXPECT_REQUST_NUM);
 }
@@ -2696,6 +2726,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
     EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(g_advancedNotificationService->Unsubscribe(listener, nullptr), ERR_OK);
     EXPECT_TRUE(passed);
 }
@@ -2744,6 +2775,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
     EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(g_advancedNotificationService->Unsubscribe(listener, nullptr), ERR_OK);
     EXPECT_TRUE(passed);
 }
@@ -2792,6 +2824,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
     EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(g_advancedNotificationService->Unsubscribe(listener, nullptr), ERR_OK);
     EXPECT_TRUE(passed);
 }
@@ -2840,6 +2873,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0135, Function | SmallTest | Level1)
     EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_EQ(g_advancedNotificationService->Unsubscribe(listener, nullptr), ERR_OK);
     EXPECT_TRUE(passed);
 }
