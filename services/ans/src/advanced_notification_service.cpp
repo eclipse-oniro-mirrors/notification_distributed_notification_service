@@ -2264,13 +2264,9 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::CheckSystemLiveView(const sptr<NotificationRequest> &request,
+ErrCode AdvancedNotificationService::CheckLongTermLiveView(const sptr<NotificationRequest> &request,
     const std::string &key)
 {
-    if (!request->IsSystemLiveView()) {
-        return ERR_OK;
-    }
-
     // live view, not update
     std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
     if (additionalData && additionalData->HasParam("SYSTEM_UPDATE_ONLY")) {
@@ -2281,7 +2277,7 @@ ErrCode AdvancedNotificationService::CheckSystemLiveView(const sptr<Notification
         }
 
         if (AAFwk::Boolean::Unbox(bo) && !IsNotificationExists(key)) {
-            ANS_LOGE("CheckSystemLiveView check failed, cant update.");
+            ANS_LOGE("CheckLongTermLiveView check failed, cant update.");
             return ERR_ANS_INVALID_PARAM;
         }
     }
@@ -2316,7 +2312,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     }
 
     // solve long term continuous update(music)
-    if (!remove && CheckSystemLiveView(record->request, record->notification->GetKey()) != ERR_OK) {
+    if (!remove && CheckLongTermLiveView(record->request, record->notification->GetKey()) != ERR_OK) {
         return ERR_ANS_INVALID_PARAM;
     }
 
