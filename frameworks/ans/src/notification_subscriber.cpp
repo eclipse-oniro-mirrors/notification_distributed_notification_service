@@ -56,8 +56,8 @@ bool NotificationSubscriber::ProcessSyncDecision(
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter flags = %{public}d",
-            request->GetKey().c_str(), flagIter->second->GetReminderFlags());
+        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter flags = %{public}d deviceType = %{public}s",
+            request->GetKey().c_str(), flagIter->second->GetReminderFlags(), deviceType.c_str());
         std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
         tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
         tempFlags->SetVibrationEnabled(

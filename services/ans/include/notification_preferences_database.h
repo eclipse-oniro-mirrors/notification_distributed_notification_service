@@ -231,7 +231,9 @@ public:
     int32_t GetBatchKvsFromDb(
         const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId);
     int32_t DeleteKvFromDb(const std::string &key, const int32_t &userId);
+    int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
     int32_t DropUserTable(const int32_t userId);
+    int32_t GetDistributedDataByOldKey(std::unordered_map<std::string, std::string> &values, const int32_t userId);
 private:
     bool CheckRdbStore();
 

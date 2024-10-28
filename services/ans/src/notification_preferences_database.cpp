@@ -101,9 +101,14 @@ const static std::string KEY_BUNDLE_BADGE_TOTAL_NUM = "badgeTotalNum";
 const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
 
 /**
+ * Indicates that old disturbe key which bundle enable notification.
+ */
+const static std::string OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
+
+/**
  * Indicates that disturbe key which bundle enable notification.
  */
-const static std::string KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
+const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION = "enabledDistributedNotification";
 
 /**
  * Indicates that disturbe key which bundle enable notification.
@@ -1654,7 +1659,7 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
     }
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
-    std::string key = std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(
+    std::string key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(
         KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
     ANS_LOGD("key is %{public}s", key.c_str());
     int32_t result = NativeRdb::E_OK;
@@ -1797,6 +1802,23 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key, 
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::DeleteBatchKvFromDb(const std::vector<std::string> &keys,
+    const int32_t &userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete key-value failed, result %{public}d.", result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationPreferencesDatabase::DropUserTable(const int32_t userId)
 {
     if (!CheckRdbStore()) {
@@ -1807,6 +1829,23 @@ int32_t NotificationPreferencesDatabase::DropUserTable(const int32_t userId)
     int32_t result = rdbDataManager_->DropUserTable(userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Delete table failed, result %{public}d.", result);
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationPreferencesDatabase::GetDistributedDataByOldKey(
+    std::unordered_map<std::string, std::string> &values, const int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION,
+        values, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get distributedDataByOldKey failed, result %{public}d.", result);
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;
@@ -1870,7 +1909,7 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
 {
-    return std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+    return std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
         std::string(bundleInfo.GetBundleName()).append(KEY_MIDDLE_LINE).append(std::to_string(
             bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
 }

@@ -300,6 +300,7 @@ AdvancedNotificationService::AdvancedNotificationService()
     NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
     RecoverLiveViewFromDb();
+    ResetDistributedEnabled();
 
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),

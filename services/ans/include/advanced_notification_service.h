@@ -1400,7 +1400,6 @@ private:
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
-
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
