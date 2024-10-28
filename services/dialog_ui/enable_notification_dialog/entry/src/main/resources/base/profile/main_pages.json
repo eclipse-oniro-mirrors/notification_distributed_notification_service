@@ -1,6 +1,7 @@
 {
   "src": [
     "pages/notificationDialog",
-    "pages/watchNotificationDialog"
+    "pages/watchNotificationDialog",
+    "pages/pcNotificationDialog"
   ]
 }
