@@ -1009,6 +1009,31 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog()
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    ErrCode result = ERR_OK;
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption == nullptr");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    return RemoveEnableNotificationDialog(bundleOption);
+}
+
+ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGI("RemoveEnableNotificationDialog  %{public}s, %{public}d",
+        bundleOption->GetBundleName().c_str(),
+        bundleOption->GetUid());
+    if (!CreateDialogManager()) {
+        return ERROR_INTERNAL_ERROR;
+    }
+    std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;
+    dialogManager_->RemoveDialogInfoByBundleOption(bundleOption, dialogInfoRemoved);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption,
     bool &allowed)
 {
