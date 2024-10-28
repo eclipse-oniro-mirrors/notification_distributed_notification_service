@@ -270,7 +270,7 @@ void SmartReminderCenter::HandleReminderMethods(
     GetDeviceStatusByType(deviceType, bitStatus);
     bool enabledAffectedBy = true;
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
-        if (IsNeedSynergy(deviceType, request->GetOwnerBundleName())) {
+        if (IsNeedSynergy(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid())) {
             validDevices.insert(deviceType);
         } else {
             enabledAffectedBy = false;
@@ -295,20 +295,14 @@ void SmartReminderCenter::HandleReminderMethods(
     }
 }
 
-bool SmartReminderCenter::IsNeedSynergy(const string &deviceType, const string &ownerBundleName) const
+bool SmartReminderCenter::IsNeedSynergy(const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const
 {
     bool isEnable = true;
     if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, isEnable) != ERR_OK || !isEnable) {
         return false;
     }
-    int32_t userId = -1;
-    int32_t result =
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
-    if (result != ERR_OK) {
-        ANS_LOGE("HandleReminderMethods GetOsAccountLocalIdFromUid fail, code = %{public}d.", result);
-        return false;
-    }
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(ownerBundleName, userId);
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
         bundleOption, deviceType, isEnable) != ERR_OK || !isEnable) {
         return false;

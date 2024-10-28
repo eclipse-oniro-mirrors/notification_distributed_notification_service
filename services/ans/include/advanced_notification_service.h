@@ -1413,6 +1413,7 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
+    void ResetDistributedEnabled();
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

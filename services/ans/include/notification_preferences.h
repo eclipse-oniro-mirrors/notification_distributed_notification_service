@@ -327,6 +327,15 @@ public:
     ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled);
 
     /**
+     * @brief Get old distributedEnabled used to reset.
+     *
+     * @param values Indicates the data of query result.
+     * @param userId Indicates the user of old data in.
+     * @return Returns get old distributedEnabled result.
+     */
+    ErrCode GetOldDistributedEnabled(std::unordered_map<std::string, std::string> &values, const int32_t userId);
+
+    /**
      * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.
@@ -377,6 +386,7 @@ public:
     int32_t GetBatchKvsFromDb(
         const std::string &key, std::unordered_map<std::string, std::string>  &values, const int32_t &userId);
     int32_t DeleteKvFromDb(const std::string &key, const int &userId);
+    int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
     ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     bool CheckDoNotDisturbProfileID(int32_t profileId);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);

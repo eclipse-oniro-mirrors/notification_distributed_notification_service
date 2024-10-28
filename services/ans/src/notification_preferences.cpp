@@ -1028,6 +1028,15 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
+ErrCode NotificationPreferences::GetOldDistributedEnabled(std::unordered_map<std::string, std::string> &values,
+    const int32_t userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    int32_t  storeDBResult = preferncesDB_->GetDistributedDataByOldKey(values, userId);
+    return storeDBResult == NativeRdb::E_OK ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
     const std::string &deviceType, bool &enabled)
 {
@@ -1207,6 +1216,14 @@ int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key, const in
         return ERR_ANS_SERVICE_NOT_READY;
     }
     return preferncesDB_->DeleteKvFromDb(key, userId);
+}
+
+int32_t NotificationPreferences::DeleteBatchKvFromDb(const std::vector<std::string> &keys,  const int32_t &userId)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->DeleteBatchKvFromDb(keys, userId);
 }
 
 bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundleName,
