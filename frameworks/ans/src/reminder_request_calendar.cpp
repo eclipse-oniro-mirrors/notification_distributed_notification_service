@@ -618,6 +618,9 @@ bool ReminderRequestCalendar::UpdateNextReminder()
         ANSR_LOGI("No need to update next trigger time as it is an one-time reminder.");
         SetSnoozeTimesDynamic(GetSnoozeTimes());
         SetTriggerTimeInMilli(INVALID_LONG_LONG_VALUE);
+        if (startDateTime_ == endDateTime_) {
+            SetExpired(true);
+        }
         return false;
     }
     uint8_t leftSnoozeTimes = GetSnoozeTimesDynamic();
