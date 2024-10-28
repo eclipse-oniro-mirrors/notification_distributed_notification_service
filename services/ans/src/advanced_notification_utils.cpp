@@ -1958,7 +1958,7 @@ void AdvancedNotificationService::ResetDistributedEnabled()
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("notificationSvrQueue is nullptr");
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=](){
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         std::string value;
         NotificationPreferences::GetInstance()->GetKvFromDb(KEY_TABLE_VERSION, value, FIRST_USERID);
         if (!value.empty()) {
@@ -1990,7 +1990,8 @@ void AdvancedNotificationService::ResetDistributedEnabled()
             if (uid <= 0) {
                 continue;
             }
-            sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+            sptr<NotificationBundleOption> bundleOption = 
+                new NotificationBundleOption(bundleName, uid);
             ErrCode result =  NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(
                 bundleOption, deviceType, enabled);
             if (result != ERR_OK) {
