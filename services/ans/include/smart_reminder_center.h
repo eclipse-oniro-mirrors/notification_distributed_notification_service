@@ -78,7 +78,7 @@ private:
         const sptr<NotificationRequest> &request,
         vector<shared_ptr<ReminderAffected>> &reminderAffecteds) const;
     void GetDeviceStatusByType(const string &deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
-    bool IsNeedSynergy(const string &deviceType, const string &ownerBundleName) const;
+    bool IsNeedSynergy(const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
 
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;

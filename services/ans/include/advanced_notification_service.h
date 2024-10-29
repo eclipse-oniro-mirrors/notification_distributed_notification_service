@@ -1429,6 +1429,7 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
+    void ResetDistributedEnabled();
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     
 private:
