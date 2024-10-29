@@ -17,70 +17,6 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ans_service_sources = [
-  "${services_path}/ans/src/access_token_helper.cpp",
-  "${services_path}/ans/src/advanced_aggregation_data_roaming_observer.cpp",
-  "${services_path}/ans/src/advanced_datashare_helper.cpp",
-  "${services_path}/ans/src/advanced_datashare_helper_ext.cpp",
-  "${services_path}/ans/src/advanced_datashare_observer.cpp",
-  "${services_path}/ans/src/advanced_notification_clone_service.cpp",
-  "${services_path}/ans/src/advanced_notification_event_service.cpp",
-  "${services_path}/ans/src/advanced_notification_inline.cpp",
-  "${services_path}/ans/src/advanced_notification_live_view_service.cpp",
-  "${services_path}/ans/src/advanced_notification_publish/base_publish_process.cpp",
-  "${services_path}/ans/src/advanced_notification_publish/common_notification_publish_process.cpp",
-  "${services_path}/ans/src/advanced_notification_publish/live_publish_process.cpp",
-  "${services_path}/ans/src/advanced_notification_publish_service.cpp",
-  "${services_path}/ans/src/advanced_notification_reminder_service.cpp",
-  "${services_path}/ans/src/advanced_notification_service.cpp",
-  "${services_path}/ans/src/advanced_notification_slot_service.cpp",
-  "${services_path}/ans/src/advanced_notification_subscriber_service.cpp",
-  "${services_path}/ans/src/advanced_notification_utils.cpp",
-  "${services_path}/ans/src/bundle_manager_helper.cpp",
-  "${services_path}/ans/src/clone/notification_clone_bundle_info.cpp",
-  "${services_path}/ans/src/clone/notification_clone_bundle_service.cpp",
-  "${services_path}/ans/src/clone/notification_clone_disturb_service.cpp",
-  "${services_path}/ans/src/clone/notification_clone_manager.cpp",
-  "${services_path}/ans/src/clone/notification_clone_util.cpp",
-  "${services_path}/ans/src/common/aes_gcm_helper.cpp",
-  "${services_path}/ans/src/common/file_utils.cpp",
-  "${services_path}/ans/src/common/notification_analytics_util.cpp",
-  "${services_path}/ans/src/common/notification_config_parse.cpp",
-  "${services_path}/ans/src/distributed_device_status.cpp",
-  "${services_path}/ans/src/event_report.cpp",
-  "${services_path}/ans/src/notification_dialog.cpp",
-  "${services_path}/ans/src/notification_dialog_manager.cpp",
-  "${services_path}/ans/src/notification_extension_wrapper.cpp",
-  "${services_path}/ans/src/notification_local_live_view_subscriber_manager.cpp",
-  "${services_path}/ans/src/notification_preferences.cpp",
-  "${services_path}/ans/src/notification_preferences_database.cpp",
-  "${services_path}/ans/src/notification_preferences_info.cpp",
-  "${services_path}/ans/src/notification_rdb_data_mgr.cpp",
-  "${services_path}/ans/src/notification_slot_filter.cpp",
-  "${services_path}/ans/src/notification_smart_reminder/reminder_affected.cpp",
-  "${services_path}/ans/src/notification_smart_reminder/smart_reminder_center.cpp",
-  "${services_path}/ans/src/notification_smart_reminder/string_utils.cpp",
-  "${services_path}/ans/src/notification_subscriber_manager.cpp",
-  "${services_path}/ans/src/notification_timer_info.cpp",
-  "${services_path}/ans/src/notification_trust_list.cpp",
-  "${services_path}/ans/src/os_account_manager_helper.cpp",
-  "${services_path}/ans/src/permission_filter.cpp",
-  "${services_path}/ans/src/reminder_config_change_observer.cpp",
-  "${services_path}/ans/src/reminder_data_manager.cpp",
-  "${services_path}/ans/src/reminder_data_manager_inner.cpp",
-  "${services_path}/ans/src/reminder_event_manager.cpp",
-  "${services_path}/ans/src/reminder_store.cpp",
-  "${services_path}/ans/src/reminder_store_strategy.cpp",
-  "${services_path}/ans/src/reminder_swing_decision_center.cpp",
-  "${services_path}/ans/src/reminder_table.cpp",
-  "${services_path}/ans/src/reminder_table_old.cpp",
-  "${services_path}/ans/src/reminder_timer_info.cpp",
-  "${services_path}/ans/src/report_time_info.cpp",
-  "${services_path}/ans/src/system_dialog_connect_stb.cpp",
-  "${services_path}/ans/src/system_event_observer.cpp",
-  "${services_path}/ans/src/telephony_extension_wrapper.cpp",
-]
-
 ohos_fuzztest("AnsManagerStubAnnexFuzzTest") {
   module_out_path = service_fuzz_test_path
   fuzz_config_file =
@@ -99,11 +35,11 @@ ohos_fuzztest("AnsManagerStubAnnexFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "ansmanagerstubannex_fuzzer.cpp" ]
-  sources += ans_service_sources
   defines = []
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:ans_service_sources",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/libxml2:libxml2",
   ]

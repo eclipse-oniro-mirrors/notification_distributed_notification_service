@@ -969,18 +969,12 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 
     ErrCode result = ERR_OK;
     if (deviceId.empty()) {
-        bool notificationEnable = false;
-        ErrCode saveRef = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
-            bundle, notificationEnable);
         // Local device
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
         bool enableSuccessed = result == ERR_OK;
         if (result == ERR_OK) {
             if (!enabled) {
                 result = RemoveAllNotificationsForDisable(bundle);
-            }
-            if (saveRef != ERR_OK) {
-                SetSlotFlagsTrustlistsAsBundle(bundle);
             }
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
             PublishSlotChangeCommonEvent(bundle);

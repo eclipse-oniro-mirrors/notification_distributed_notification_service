@@ -25,6 +25,8 @@
 #include "config_policy_utils.h"
 #endif
 #include "nlohmann/json.hpp"
+#include "notification_app_privileges.h"
+#include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_flags.h"
 
@@ -39,6 +41,13 @@ public:
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
+    uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
+        const std::string &bundleName) const;
+    std::shared_ptr<NotificationAppPrivileges> GetAppPrivileges(const std::string &bundleName) const;
+    bool IsLiveViewEnabled(const std::string bundleName) const;
+    bool IsBannerEnabled(const std::string bundleName) const;
+    bool IsReminderEnabled(const std::string& bundleName) const;
+    
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;

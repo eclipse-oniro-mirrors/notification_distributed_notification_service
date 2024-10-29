@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "bundle_info.h"
 #include "notification_live_view_content.h"
 #include "notification_record.h"
 #include <cstdint>
@@ -235,8 +234,6 @@ namespace OHOS {
         service->OnBundleDataUpdate(bundleOption);
         service->GetBundlesOfActiveUser();
         service->InitNotificationEnableList();
-        AppExecFwk::BundleInfo bundleInfo;
-        service->GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo);
         std::shared_ptr<Notification::NotificationRecord> record =
             service->MakeNotificationRecord(request, bundleOption);
         record->slot = new Notification::NotificationSlot(Notification::NotificationConstant::SlotType::LIVE_VIEW);

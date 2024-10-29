@@ -673,7 +673,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
         uint32_t slotFlags = bundleInfo.GetSlotFlags();
         auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            GetConfigSlotReminderModeByType(slotInfo->GetType());
+            GetConfigSlotReminderModeByType(slotInfo->GetType(), cloneBundleInfo.GetBundleName());
         slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
         slotInfo->SetEnable(cloneSlot.enable_);
         slotInfo->SetForceControl(cloneSlot.isForceControl_);
