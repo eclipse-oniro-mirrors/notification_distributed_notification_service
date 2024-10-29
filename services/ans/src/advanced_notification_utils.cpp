@@ -1995,7 +1995,7 @@ void AdvancedNotificationService::ResetDistributedEnabled()
             if (uid <= 0) {
                 continue;
             }
-            sptr<NotificationBundleOption> bundleOption = 
+            sptr<NotificationBundleOption> bundleOption =
                 new NotificationBundleOption(bundleName, uid);
             ErrCode result =  NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(
                 bundleOption, deviceType, enabled);
