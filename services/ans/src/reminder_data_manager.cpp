@@ -1869,6 +1869,11 @@ void ReminderDataManager::ResetStates(TimerType type)
             break;
         }
     }
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANSR_LOGE("Failed to destroy timer due to get TimeServiceClient is null.");
+        return;
+    }
     if (timerId != 0) {
         timer->DestroyTimer(timerId);
     }
