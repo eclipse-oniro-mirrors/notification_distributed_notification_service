@@ -1848,15 +1848,18 @@ void ReminderDataManager::StopTimer(TimerType type)
 
 void ReminderDataManager::ResetStates(TimerType type)
 {
+    uint64_t timerId = 0;
     switch (type) {
         case TimerType::TRIGGER_TIMER: {
             ANSR_LOGD("ResetStates(activeReminderId, timerId(next triggerTime))");
+            timerId = timerId_;
             timerId_ = 0;
             activeReminderId_ = -1;
             break;
         }
         case TimerType::ALERTING_TIMER: {
             ANSR_LOGD("ResetStates(alertingReminderId, timeId(alerting time out))");
+            timerId = timerIdAlerting_;
             timerIdAlerting_ = 0;
             alertingReminderId_ = -1;
             break;
@@ -1865,6 +1868,14 @@ void ReminderDataManager::ResetStates(TimerType type)
             ANSR_LOGE("TimerType not support");
             break;
         }
+    }
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANSR_LOGE("Failed to destroy timer due to get TimeServiceClient is null.");
+        return;
+    }
+    if (timerId != 0) {
+        timer->DestroyTimer(timerId);
     }
 }
 
