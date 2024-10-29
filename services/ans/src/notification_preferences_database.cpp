@@ -101,11 +101,6 @@ const static std::string KEY_BUNDLE_BADGE_TOTAL_NUM = "badgeTotalNum";
 const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
 
 /**
- * Indicates that old disturbe key which bundle enable notification.
- */
-const static std::string OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
-
-/**
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION = "enabledDistributedNotification";
@@ -1829,23 +1824,6 @@ int32_t NotificationPreferencesDatabase::DropUserTable(const int32_t userId)
     int32_t result = rdbDataManager_->DropUserTable(userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Delete table failed, result %{public}d.", result);
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationPreferencesDatabase::GetDistributedDataByOldKey(
-    std::unordered_map<std::string, std::string> &values, const int32_t userId)
-{
-    if (!CheckRdbStore()) {
-        ANS_LOGE("RdbStore is nullptr.");
-        return NativeRdb::E_ERROR;
-    }
-
-    int32_t result = rdbDataManager_->QueryDataBeginWithKey(OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION,
-        values, userId);
-    if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get distributedDataByOldKey failed, result %{public}d.", result);
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;

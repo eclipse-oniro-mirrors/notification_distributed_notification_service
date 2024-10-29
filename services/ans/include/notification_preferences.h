@@ -326,15 +326,6 @@ public:
     ErrCode IsSmartReminderEnabled(const std::string &deviceType, bool &enabled);
 
     /**
-     * @brief Get old distributedEnabled used to reset.
-     *
-     * @param values Indicates the data of query result.
-     * @param userId Indicates the user of old data in.
-     * @return Returns get old distributedEnabled result.
-     */
-    ErrCode GetOldDistributedEnabled(std::unordered_map<std::string, std::string> &values, const int32_t userId);
-
-    /**
      * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.

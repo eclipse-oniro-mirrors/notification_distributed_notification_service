@@ -302,7 +302,8 @@ bool SmartReminderCenter::IsNeedSynergy(const string &deviceType, const string &
         return false;
     }
 
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
+    sptr<NotificationBundleOption> bundleOption =
+        new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
         bundleOption, deviceType, isEnable) != ERR_OK || !isEnable) {
         return false;
