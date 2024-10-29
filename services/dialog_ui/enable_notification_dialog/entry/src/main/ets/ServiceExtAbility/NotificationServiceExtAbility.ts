@@ -71,12 +71,14 @@ interface NotificationConfig {
 
 interface DeviceInfo {
   isWatch: boolean;
+  isPc: boolean;
 }
 
 export class EnableNotificationDialog {
   static ENABLE_NOTIFICATION_DIALOG_NAME = 'EnableNotificationDialog';
   static DIALOG_PATH = 'pages/notificationDialog';
   static WATCH_DIALOG_PATH = 'pages/watchNotificationDialog';
+  static PC_DIALOG_PATH = 'pages/pcNotificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
   static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
   static SYSTEMUI_BUNDLE = 'com.ohos.systemui';
@@ -128,6 +130,10 @@ export class EnableNotificationDialog {
                 path = EnableNotificationDialog.WATCH_DIALOG_PATH;
                 console.info(TAG, 'watch request');
               }
+              if (deviceInfo.isPc !== undefined) {
+                path = EnableNotificationDialog.PC_DIALOG_PATH;
+                console.info(TAG, 'pc request');
+              }
             }
           }
         }
@@ -144,7 +150,7 @@ export class EnableNotificationDialog {
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
-        let windowRect  = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+        let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
         await subWindow.moveWindowTo(windowRect?.left, windowRect?.top);
         await subWindow.resize(windowRect?.width, windowRect?.height);
         console.info(TAG, `size : ${windowRect.left} ${windowRect.top} ${windowRect.width}  ${windowRect.height}`);
@@ -290,7 +296,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
     }
   }
 
-  async onDestroy() {
+  async onDestroy(): Promise<void> {
     console.info(TAG, 'UIExtAbility onDestroy.');
     await this.unsubscribe();
     await this.sleep(500);
@@ -301,46 +307,46 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async subscribe() {
-    CommonEventManager.createSubscriber(
-      { events: ['usual.event.BUNDLE_RESOURCES_CHANGED'] }, (err, subscriber) => {
-      if (err?.code) {
-        console.error(TAG, `createSubscriber callBack err = ${JSON.stringify(err)}`);
-      } else {
+  async subscribe(): Promise<void> {
+    await CommonEventManager.createSubscriber(
+      { events: ['usual.event.BUNDLE_RESOURCES_CHANGED'] })
+      .then((subscriber:CommonEventManager.CommonEventSubscriber) => {
         eventSubscriber = subscriber;
-        console.log(TAG, "create subscriber succeed");
-        if (eventSubscriber != null) {
-          console.log(TAG, "subscriber subscribe BUNDLE_RESOURCES_CHANGED event");
-          CommonEventManager.subscribe(eventSubscriber, (err, data) => {
-            if (err?.code) {
-              console.error(TAG, `subscribe callBack err= ${JSON.stringify(err)}`);
-            } else {
-              console.log(TAG, `subscribe callBack data= ${JSON.stringify(data)}`);
-              if(data.parameters?.bundleResourceChangeType == 1){
-                console.log(TAG, `BUNDLE_RESOURCES_CHANGED-language change`);
-                let isUpdate:number = AppStorage.get('isUpdate');
-                if (isUpdate === undefined || isUpdate > UPDATE_BOUNDARY) {
-                  AppStorage.setOrCreate('isUpdate', UPDATE_NUM);
-                } else {
-                  AppStorage.setOrCreate('isUpdate', ++isUpdate);
-                }
-              }
-            }
-          })
+      })
+      .catch((err) => {
+        console.log(TAG, `subscriber createSubscriber error code is ${err.code}, message is ${err.message}`);
+      });
+
+    if (eventSubscriber === null) {
+      console.log(TAG, 'need create subscriber');
+      return;
+    }
+    CommonEventManager.subscribe(eventSubscriber, (err, data) => {
+      if (err?.code) {
+        console.error(TAG, `subscribe callBack err= ${JSON.stringify(err)}`);
+      } else {
+        console.log(TAG, `subscribe callBack data= ${JSON.stringify(data)}`);
+        if (data.parameters?.bundleResourceChangeType !== 1) {
+          return;
+        }
+        console.log(TAG, `BUNDLE_RESOURCES_CHANGED-language change`);
+        let isUpdate:number = AppStorage.get('isUpdate');
+        if (isUpdate === undefined || isUpdate > UPDATE_BOUNDARY) {
+          AppStorage.setOrCreate('isUpdate', UPDATE_NUM);
         } else {
-          console.info(TAG, "need create subscriber");
+          AppStorage.setOrCreate('isUpdate', ++isUpdate);
         }
       }
     });
   }
 
-  async unsubscribe() {
+  async unsubscribe(): Promise<void> {
     try {
       if (eventSubscriber != null) {
         CommonEventManager.unsubscribe(eventSubscriber, (err) => {});
       }      
     } catch (err) {
-      console.info("ubsubscribe fail");
+      console.info('ubsubscribe fail');
     }
   }
 }
