@@ -157,7 +157,15 @@ public:
 
     void OnUserRemove(const int32_t& userId);
 
-    void OnServiceStart();
+    /**
+     * @brief Bundle manager service start.
+     */
+    void OnBundleMgrServiceStart();
+
+    /**
+     * @brief Ability manager service start.
+     */
+    void OnAbilityMgrServiceStart();
 
     void OnUserSwitch(const int32_t& userId);
 
@@ -246,18 +254,11 @@ public:
     void TerminateAlerting(const OHOS::EventFwk::Want &want);
 
     /**
-     * @brief Get resource manager by handle info.
-     */
-    std::shared_ptr<Global::Resource::ResourceManager> GetBundleResMgr(
-        const AppExecFwk::BundleInfo &bundleInfo);
-
-    /**
      * @brief Update reminders based on the system language.
      *
      * Update action button title.
      */
-    void UpdateReminderLanguage(const sptr<ReminderRequest> &reminder);
-    void UpdateReminderLanguageLocked(const sptr<ReminderRequest> &reminder);
+    void UpdateReminderLanguageLocked(const int32_t uid, const std::vector<sptr<ReminderRequest>>& reminders);
     
     /**
      * @brief System language change
@@ -268,6 +269,11 @@ public:
      * @brief When OnRemoveSystemAbility occurs.
      */
     void OnRemoveAppMgr();
+
+    /**
+     * @brief Whether the device is ready or not.
+     */
+    bool IsSystemReady();
 
     static constexpr uint8_t TIME_ZONE_CHANGE = 0;
     static constexpr uint8_t DATE_TIME_CHANGE = 1;
@@ -417,14 +423,6 @@ private:
      * @return pointer of reminder request or nullptr.
      */
     sptr<ReminderRequest> FindReminderRequestLocked(const int32_t &reminderId, const std::string &pkgName);
-
-    /**
-     * Find bundle option from {@link notificationBundleOptionMap_} by reminder id.
-     *
-     * @param reminderId Indicates the reminder id.
-     * @return pointer of NotificationBundleOption or nullptr.
-     */
-    sptr<NotificationBundleOption> FindNotificationBundleOption(const int32_t &reminderId) const;
 
     /**
      * Obtains the recent reminder which is not expired from reminder vector.
@@ -641,6 +639,25 @@ private:
         const uint32_t callerTokenId);
 
     /**
+     * @brief Get resource manager by bundlename and uid.
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> GetResourceMgr(const std::string& bundleName,
+        const int32_t uid);
+
+    /**
+     * @brief Get custom ring file desc.
+     *    lock by resourceMutex_ in function
+     */
+    bool GetCustomRingFileDesc(const sptr<ReminderRequest>& reminder,
+        Global::Resource::ResourceManager::RawFileDescriptor& desc);
+
+    /**
+     * @brief Close custom ring file desc.
+     *    lock by resourceMutex_ in function
+     */
+    void CloseCustomRingFileDesc(const int32_t reminderId, const std::string& customRingUri);
+
+    /**
      * @brief report event to dfx
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
@@ -687,11 +704,6 @@ private:
     std::vector<sptr<ReminderRequest>> showedReminderVector_;
 
     /**
-     * Map used to record all the bundle information of the reminders in system.
-     */
-    std::map<int32_t, sptr<NotificationBundleOption>> notificationBundleOptionMap_;
-
-    /**
      * This timer is used to control the triggerTime of next reminder.
      */
     uint64_t timerId_ {0};
@@ -714,6 +726,8 @@ private:
     sptr<ReminderRequest> alertingReminder_ = nullptr;
 #ifdef PLAYER_FRAMEWORK_ENABLE
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;
+    std::mutex resourceMutex_;  // for soundResource_
+    std::shared_ptr<Global::Resource::ResourceManager> soundResource_ = nullptr;
 #endif
     /**
      * Indicates the total count of reminders in system.
@@ -738,6 +752,11 @@ private:
      * async queue
      */
     std::shared_ptr<ffrt::queue> queue_ = nullptr;
+
+    /**
+     * Sa ready flag
+     */
+    std::atomic<int32_t> saReadyFlag_{ 0 };
 };
 }  // namespace OHOS
 }  // namespace Notification
