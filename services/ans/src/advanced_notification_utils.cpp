@@ -1776,7 +1776,8 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
+    if (!NotificationPreferences::GetInstance()->IsNotificationSlotFlagsExists(bundleOption) &&
+        DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
         uint32_t slotFlags = 0b111111;
         ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
             bundleOption, slotFlags);
@@ -1793,19 +1794,6 @@ void AdvancedNotificationService::InitNotificationEnableList()
         std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
         bool notificationEnable = false;
         for (const auto &bundleInfo : bundleInfos) {
-            if (bundleInfo.applicationInfo.bundleName.compare("com.ohos.mms") == 0) {
-                uint32_t slotFlags = 63;
-                sptr<NotificationBundleOption> mmsBundle = new (std::nothrow) NotificationBundleOption(
-                bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
-                if (mmsBundle == nullptr) {
-                    ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
-                        bundleInfo.applicationInfo.bundleName.c_str());
-                    continue;
-                }
-                NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
-                    mmsBundle, slotFlags);
-                UpdateSlotReminderModeBySlotFlags(mmsBundle, slotFlags);
-            }
             // Currently only the input from the whitelist is written
             if (!bundleInfo.applicationInfo.allowEnableNotification) {
                 continue;

@@ -19,6 +19,7 @@
 
 #include "ans_log_wrapper.h"
 #include "notification_slot.h"
+#include "notification_trust_list.h"
 #include "file_utils.h"
 
 namespace OHOS {
@@ -132,6 +133,16 @@ uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationCo
     }
 
     return 0;
+}
+
+uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
+    const sptr<NotificationBundleOption> &bundleOption) const
+{
+    uint32_t reminderFlags = GetConfigSlotReminderModeByType(slotType);
+    if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
+        return reminderFlags & 0b111111;
+    }
+    return reminderFlags;
 }
 } // namespace Notification
 } // namespace OHOS

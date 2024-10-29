@@ -563,6 +563,15 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     return ERR_OK;
 }
 
+bool NotificationPreferences::IsNotificationSlotFlagsExists(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return false;
+    }
+    return preferncesDB_->IsNotificationSlotFlagsExists(bundleOption);
+}
+
 ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
@@ -673,7 +682,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
         uint32_t slotFlags = bundleInfo.GetSlotFlags();
         auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            GetConfigSlotReminderModeByType(slotInfo->GetType());
+            GetConfigSlotReminderModeByType(slotInfo->GetType(), bundleOption);
         slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
         slotInfo->SetEnable(cloneSlot.enable_);
         slotInfo->SetForceControl(cloneSlot.isForceControl_);
