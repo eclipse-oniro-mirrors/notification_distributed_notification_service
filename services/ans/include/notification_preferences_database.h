@@ -236,7 +236,6 @@ public:
     bool UpdateBundlePropertyToDisturbeDB(int32_t userId, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
         const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots);
-    int32_t GetDistributedDataByOldKey(std::unordered_map<std::string, std::string> &values, const int32_t userId);
 private:
     bool CheckRdbStore();
 

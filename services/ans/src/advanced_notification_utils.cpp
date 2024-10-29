@@ -80,6 +80,7 @@ constexpr char HIDUMPER_ERR_MSG[] =
     "error: unknown option.\nThe arguments are illegal and you can enter '-h' for help.";
 constexpr int32_t MAIN_USER_ID = 100;
 constexpr int32_t FIRST_USERID = 0;
+constexpr char OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION[] = "enabledNotificationDistributed";
 constexpr char KEY_TABLE_VERSION[] = "tableVersion";
 constexpr char SPLIT_FLAG[] = "-";
 constexpr int32_t KEYWORD_SIZE = 4;
@@ -1966,9 +1967,9 @@ void AdvancedNotificationService::ResetDistributedEnabled()
         }
         ANS_LOGI("start ResetDistributedEnabled");
         std::unordered_map<std::string, std::string> oldValues;
-        if (NotificationPreferences::GetInstance()->GetOldDistributedEnabled(oldValues, FIRST_USERID) != ERR_OK
-            || oldValues.empty())
-        {
+        NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+            OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION, oldValues, FIRST_USERID);
+        if (oldValues.empty()) {
             NotificationPreferences::GetInstance()->SetKvToDb(
                 KEY_TABLE_VERSION, std::to_string(MIN_VERSION), FIRST_USERID);
             return;
