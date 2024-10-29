@@ -15,6 +15,7 @@
 
 #include "advanced_notification_service.h"
 
+#include "cpp/task.h"
 #include "errors.h"
 #include "ans_inner_errors.h"
 #include "notification_constant.h"
@@ -53,10 +54,12 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             return;
         }
         ANS_LOGI("The number of live views to recover: %{public}zu.", requestsdb.size());
+        std::vector<std::string> keys;
         for (const auto &requestObj : requestsdb) {
             ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
             if (!IsLiveViewCanRecover(requestObj.request)) {
                 int32_t userId = requestObj.request->GetReceiverUserId();
+                keys.emplace_back(requestObj.request->GetBaseKey(""));
                 if (DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
                     requestObj.request->GetSecureKey(), userId) != ERR_OK) {
                     ANS_LOGE("Delete notification failed.");
@@ -100,6 +103,9 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE);
         }
 
+        if (!keys.empty()) {
+            OnRecoverLiveView(keys);
+        }
         // publish notifications
         for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
             OnSubscriberAdd(subscriber);
@@ -162,6 +168,14 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
     CancelUpdateTimer(record);
     CancelFinishTimer(record);
     CancelArchiveTimer(record);
+}
+
+void AdvancedNotificationService::OnSubscriberAddInffrt(
+    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
+{
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([this, record]() {
+        OnSubscriberAdd(record);
+    }));
 }
 
 void AdvancedNotificationService::OnSubscriberAdd(
@@ -616,8 +630,7 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
     UpdateRecentNotification(record->notification, false, 0);
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        StartAutoDeletedTimer(record);
     }
 
     record->finish_status = UploadStatus::FIRST_UPDATE_TIME_OUT;

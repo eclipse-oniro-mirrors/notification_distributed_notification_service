@@ -240,7 +240,6 @@ namespace OHOS {
         std::shared_ptr<Notification::NotificationRecord> record =
             service->MakeNotificationRecord(request, bundleOption);
         record->slot = new Notification::NotificationSlot(Notification::NotificationConstant::SlotType::LIVE_VIEW);
-        service->StartAutoDelete(record, fuzzData.GetData<int64_t>(), randomInt32);
         service->PrePublishNotificationBySa(request, randomInt32, randomString);
         service->SetRequestBundleInfo(request, randomInt32, randomString);
         std::vector<std::u16string> args;

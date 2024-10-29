@@ -656,11 +656,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08000,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08300, Function | SmallTest | Level1)
 {
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_NE((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    EXPECT_NE((int)advancedNotificationService_->Subscribe(listener, info), (int)ERR_OK);
     ASSERT_EQ((int)advancedNotificationService_->Subscribe(nullptr, info), (int)ERR_ANS_INVALID_PARAM);
-    EXPECT_NE((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
+    EXPECT_NE((int)advancedNotificationService_->Unsubscribe(listener, nullptr), (int)ERR_OK);
 }
 
 /**
@@ -1593,10 +1594,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400,
 {
     GTEST_LOG_(INFO) << "Subscribe_1000 test start";
 
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_NE(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
-    EXPECT_NE(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_NE(advancedNotificationService_->Subscribe(listener, info), ERR_OK);
+    EXPECT_NE(advancedNotificationService_->Unsubscribe(listener, info), ERR_OK);
 
     GTEST_LOG_(INFO) << "Subscribe_1000 test end";
 }
@@ -1610,10 +1612,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17400,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17500, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "Unsubscribe_1000 test start";
-
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    EXPECT_NE(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_OK);
+    EXPECT_NE(advancedNotificationService_->Subscribe(listener, info), ERR_OK);
     ASSERT_EQ(advancedNotificationService_->Unsubscribe(nullptr, info), ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "Unsubscribe_1000 test end";

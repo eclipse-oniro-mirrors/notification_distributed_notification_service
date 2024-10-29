@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_WATCHDOG_H
-#define BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_WATCHDOG_H
+#include "ans_notification.h"
 
-#include "event_handler.h"
-#include "event_runner.h"
+namespace {
+    OHOS::sptr<OHOS::Notification::AnsManagerInterface> g_mockGetAnsManagerProxy = nullptr;
+}
+
+void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::AnsManagerInterface> mockRet)
+{
+    g_mockGetAnsManagerProxy = mockRet;
+}
 
 namespace OHOS {
 namespace Notification {
-class AnsWatchdog {
-public:
-    AnsWatchdog() = delete;
-    ~AnsWatchdog() = delete;
-  
-    static void AddHandlerThread(std::shared_ptr<AppExecFwk::EventHandler> handler,
-    std::shared_ptr<AppExecFwk::EventRunner> runner);
-};
+sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
+{
+    return g_mockGetAnsManagerProxy;
+}
 }  // namespace Notification
 }  // namespace OHOS
-
-#endif  // BASE_NOTIFICATION_ANS_STANDARD_INNERKITS_BASE_INCLUDE_ANS_WATCHDOG_H

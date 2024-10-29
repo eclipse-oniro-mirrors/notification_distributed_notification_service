@@ -19,8 +19,8 @@
 #include <list>
 
 #include "ans_dialog_host_client.h"
-#include "ans_manager_death_recipient.h"
 #include "ans_manager_interface.h"
+#include "ans_subscriber_listener.h"
 #include "notification_subscriber.h"
 #include "notification_local_live_view_subscriber.h"
 #include "want_params.h"
@@ -146,6 +146,17 @@ public:
      * @return Returns publish notification result.
      */
     ErrCode PublishNotification(const std::string &label, const NotificationRequest &request);
+
+    /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     * this method will update the notification.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns publish notification result.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const NotificationRequest &request);
 
     /**
      * @brief Cancels a published notification.
@@ -1102,6 +1113,11 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+
+    /**
+     * @brief Ans service died, OnRemoteDied called.
+     */
+    void OnServiceDied();
 private:
     /**
      * @brief Gets Ans Manager proxy.
@@ -1144,10 +1160,12 @@ private:
 
     bool IsValidTemplate(const NotificationRequest &request) const;
     bool IsValidDelayTime(const NotificationRequest &request) const;
+    void CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
+        sptr<SubscriberListener> &listener);
 
 private:
-    std::mutex mutex_;
-    sptr<AnsManagerInterface> ansManagerProxy_;
+    std::mutex subscriberMutex_;
+    std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     sptr<SwingCallBackStub> swingCallBackStub_;
 #endif

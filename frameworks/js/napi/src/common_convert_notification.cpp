@@ -111,25 +111,14 @@ napi_value Common::SetNotification(
     napi_get_boolean(env, notification->IsFloatingIcon(), &value);
     napi_set_named_property(env, result, "isFloatingIcon", value);
 
-    if (notification->GetNotificationRequest().IsAgentNotification()) {
-        // Agent notification, replace creator with owner
-        // readonly creatorBundleName?: string
-        napi_create_string_utf8(
-            env, notification->GetNotificationRequest().GetOwnerBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
-        napi_set_named_property(env, result, "creatorBundleName", value);
+    // readonly creatorBundleName?: string
+    napi_create_string_utf8(
+        env, notification->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "creatorBundleName", value);
 
-        // readonly creatorUid?: number
-        napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUid(), &value);
-        napi_set_named_property(env, result, "creatorUid", value);
-    } else {
-        // readonly creatorBundleName?: string
-        napi_create_string_utf8(env, notification->GetCreateBundle().c_str(), NAPI_AUTO_LENGTH, &value);
-        napi_set_named_property(env, result, "creatorBundleName", value);
-
-        // readonly creatorUid?: number
-        napi_create_int32(env, notification->GetUid(), &value);
-        napi_set_named_property(env, result, "creatorUid", value);
-    }
+    // readonly creatorUid?: number
+    napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUid(), &value);
+    napi_set_named_property(env, result, "creatorUid", value);
 
     // readonly creatorUserId?: number
     napi_create_int32(env, notification->GetRecvUserId(), &value);

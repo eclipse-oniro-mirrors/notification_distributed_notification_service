@@ -118,7 +118,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_003, Level1)
     manager->alertingReminderId_ = -1;
     manager->OnUserSwitch(0);
     manager->OnUserRemove(0);
-    manager->OnServiceStart();
+    manager->OnBundleMgrServiceStart();
+    manager->OnAbilityMgrServiceStart();
     system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -141,7 +142,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_004, Level1)
     manager->reminderVector_.push_back(reminder);
     manager->FindReminderRequestLocked(10, "");
     option->SetBundleName("test");
-    manager->notificationBundleOptionMap_[10] = option;
     manager->FindReminderRequestLocked(10, "");
     manager->FindReminderRequestLocked(10, "test");
     system("rm -rf /data/service/el1/public/notification/");
@@ -286,8 +286,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
     sptr<ReminderRequest> reminder(new ReminderRequestTimer(10));
     reminder->SetReminderId(0);
     sptr<NotificationBundleOption> option(new NotificationBundleOption());
-    manager->notificationBundleOptionMap_[10] = option;
     manager->ShowReminder(reminder, true, true, true, true);
+    reminder->SetNotificationBundleOption(option);
     reminder->SetReminderId(10);
     manager->ShowReminder(reminder, true, true, true, true);
     manager->ShowReminder(reminder, true, true, true, true);

@@ -28,7 +28,6 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "ans_watchdog.h"
 #include "ans_permission_def.h"
 #include "errors.h"
 #include "notification_extension_wrapper.h"
@@ -100,6 +99,7 @@ std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
 std::mutex AdvancedNotificationService::flowControlMutex_;
 std::mutex AdvancedNotificationService::systemFlowControlMutex_;
+std::mutex AdvancedNotificationService::doNotDisturbMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
@@ -206,9 +206,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_BUNDLE;
             }
             request->SetAgentBundle(agentBundle);
-            bundle = sourceBundleName;
         }
-        request->SetOwnerBundleName(bundle);
+        request->SetOwnerBundleName(sourceBundleName);
     }
 
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -223,6 +222,9 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
+    if (request->GetOwnerBundleName().empty()) {
+        request->SetOwnerBundleName(bundle);
+    }
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
@@ -301,7 +303,7 @@ AdvancedNotificationService::AdvancedNotificationService()
     StartFilters();
 
     std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
-        std::bind(&AdvancedNotificationService::OnSubscriberAdd, this, std::placeholders::_1);
+        std::bind(&AdvancedNotificationService::OnSubscriberAddInffrt, this, std::placeholders::_1);
     NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
     RecoverLiveViewFromDb();
@@ -330,7 +332,6 @@ AdvancedNotificationService::AdvancedNotificationService()
 AdvancedNotificationService::~AdvancedNotificationService()
 {
     ANS_LOGI("deconstructor");
-    dataManager_.UnRegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     NotificationSubscriberManager::GetInstance()->UnRegisterOnSubscriberAddCallback();
 
     StopFilters();
@@ -396,6 +397,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, reason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete("", "", notification);
@@ -428,24 +430,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
-
-    if (request->IsAgentNotification()) {
+    std::string sourceBundleName =
+        request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+    if ((!sourceBundleName.empty() &&
+        NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) ||
+        request->IsAgentNotification()) {
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        std::string sourceBundleName =
-            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-        if (!sourceBundleName.empty() &&
-            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
-            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
-                GetClientBundleName().c_str(), sourceBundleName.c_str());
-            request->SetCreatorBundleName(request->GetOwnerBundleName());
-            request->SetCreatorUid(request->GetOwnerUid());
-            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
-                request->GetOwnerUid());
-        } else {
-            bundleOption = GenerateBundleOption();
-        }
+        bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
+            request->GetCreatorUid());
     }
 
     if (bundleOption == nullptr) {
@@ -561,6 +556,19 @@ void AdvancedNotificationService::CancelArchiveTimer(const std::shared_ptr<Notif
     record->request->SetArchiveDeadLine(0);
     CancelTimer(record->notification->GetArchiveTimer());
     record->notification->SetArchiveTimer(NotificationConstant::INVALID_TIMER_ID);
+}
+
+ErrCode AdvancedNotificationService::StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record)
+{
+    uint64_t timerId = StartAutoDelete(record,
+        record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    if (timerId == NotificationConstant::INVALID_TIMER_ID) {
+        std::string message = "Start autoDeleted auto delete timer failed.";
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_TASK_ERR;
+    }
+    record->notification->SetAutoDeletedTimer(timerId);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::FillNotificationRecord(
@@ -685,8 +693,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        StartAutoDeletedTimer(record);
     }
     return result;
 }
@@ -717,6 +724,29 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
     }
 }
 
+void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable)
+{
+    std::lock_guard<std::mutex> lock(doNotDisturbMutex_);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_2);
+    std::string info = "Do not disturb mode changed, userId: " + std::to_string(userId) + ", enable: " + enable;
+    auto it = doNotDisturbEnableRecord_.find(userId);
+    if (it != doNotDisturbEnableRecord_.end()) {
+        if (it->second != enable) {
+            ANS_LOGI("%{public}s", info.c_str());
+            message.Message(info);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
+        }
+    } else {
+        if (enable == DO_NOT_DISTURB_MODE) {
+            ANS_LOGI("%{public}s", info.c_str());
+            message.Message(info);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
+        doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
+    }
+}
+
 void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");
@@ -728,12 +758,14 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     std::string enable;
     std::string profileId;
     QueryDoNotDisturbProfile(userId, enable, profileId);
+    ReportDoNotDisturbModeChanged(userId, enable);
     if (enable != DO_NOT_DISTURB_MODE) {
         ANS_LOGD("Currently not is do not disturb mode.");
         return;
     }
     std::string bundleName = record->bundleOption->GetBundleName();
-    ANS_LOGD("The bundle name is %{public}s", bundleName.c_str());
+    ANS_LOGI("The disturbMode is on, userId:%{public}d, bundle:%{public}s, profileId:%{public}s",
+        userId, bundleName.c_str(), profileId.c_str());
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
@@ -2124,6 +2156,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
 
         if (record->notification->GetKey() == hashCode) {
             UpdateRecentNotification(record->notification, true, reason);
+            CancelTimer(record->notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
             notificationList_.remove(record);
@@ -2232,13 +2265,9 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::CheckSystemLiveView(const sptr<NotificationRequest> &request,
+ErrCode AdvancedNotificationService::CheckLongTermLiveView(const sptr<NotificationRequest> &request,
     const std::string &key)
 {
-    if (!request->IsSystemLiveView()) {
-        return ERR_OK;
-    }
-
     // live view, not update
     std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
     if (additionalData && additionalData->HasParam("SYSTEM_UPDATE_ONLY")) {
@@ -2249,7 +2278,7 @@ ErrCode AdvancedNotificationService::CheckSystemLiveView(const sptr<Notification
         }
 
         if (AAFwk::Boolean::Unbox(bo) && !IsNotificationExists(key)) {
-            ANS_LOGE("CheckSystemLiveView check failed, cant update.");
+            ANS_LOGE("CheckLongTermLiveView check failed, cant update.");
             return ERR_ANS_INVALID_PARAM;
         }
     }
@@ -2284,7 +2313,7 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     }
 
     // solve long term continuous update(music)
-    if (!remove && CheckSystemLiveView(record->request, record->notification->GetKey()) != ERR_OK) {
+    if (!remove && CheckLongTermLiveView(record->request, record->notification->GetKey()) != ERR_OK) {
         return ERR_ANS_INVALID_PARAM;
     }
 

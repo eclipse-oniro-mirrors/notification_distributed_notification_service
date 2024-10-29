@@ -22,6 +22,7 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_subscriber_listener.h"
 #include "mock_ipc_skeleton.h"
 #include "notification.h"
 #include "notification_subscriber.h"
@@ -29,7 +30,6 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "ans_permission_def.h"
-
 
 using namespace OHOS;
 using namespace OHOS::Notification;
@@ -111,7 +111,7 @@ public:
     }
     void TearDown(const ::benchmark::State &state) override
     {}
- 
+
 protected:
     const int32_t repetitions = 3;
     const int32_t iterations = 100;
@@ -173,10 +173,11 @@ BENCHMARK_F(BenchmarkNotificationService, RemoveSlotByTypeTestCase)(benchmark::S
  */
 BENCHMARK_F(BenchmarkNotificationService, SubscribeTestCase)(benchmark::State &state)
 {
-    auto subscriber = new TestAnsSubscriber();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
+    auto listener = new (std::nothrow) SubscriberListener(subscriber);
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->Subscribe(subscriber->GetImpl(), info);
+        ErrCode errCode = advancedNotificationService_->Subscribe(listener, info);
         if (errCode != ERR_OK) {
             state.SkipWithError("SubscribeTestCase failed.");
         }
