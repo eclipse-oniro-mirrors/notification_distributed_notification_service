@@ -22,7 +22,6 @@
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
-#include "ans_subscriber_listener.h"
 #include "mock_ipc_skeleton.h"
 #include "notification.h"
 #include "notification_subscriber.h"
@@ -173,11 +172,10 @@ BENCHMARK_F(BenchmarkNotificationService, RemoveSlotByTypeTestCase)(benchmark::S
  */
 BENCHMARK_F(BenchmarkNotificationService, SubscribeTestCase)(benchmark::State &state)
 {
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
-    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     while (state.KeepRunning()) {
-        ErrCode errCode = advancedNotificationService_->Subscribe(listener, info);
+        ErrCode errCode = advancedNotificationService_->Subscribe(subscriber->GetImpl(), info);
         if (errCode != ERR_OK) {
             state.SkipWithError("SubscribeTestCase failed.");
         }

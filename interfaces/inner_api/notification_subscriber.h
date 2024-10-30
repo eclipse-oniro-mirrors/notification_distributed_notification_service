@@ -117,20 +117,78 @@ public:
     void SetDeviceType(const std::string &deviceType);
 
     std::string GetDeviceType() const;
-    std::shared_ptr<NotificationSubscriber> GetSharedPtr() const;
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool ProcessSyncDecision(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
 #endif
 
 private:
+    class SubscriberImpl final : public AnsSubscriberStub {
+    public:
+        class DeathRecipient final : public IRemoteObject::DeathRecipient {
+        public:
+            DeathRecipient(SubscriberImpl &subscriberImpl);
+
+            ~DeathRecipient();
+
+            void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+
+        private:
+            SubscriberImpl &subscriberImpl_;
+        };
+
+    public:
+        SubscriberImpl(NotificationSubscriber &subscriber);
+        ~SubscriberImpl() {};
+
+        void OnConnected() override;
+
+        void OnDisconnected() override;
+
+        void OnConsumed(
+            const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
+
+        void OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+            const sptr<NotificationSortingMap> &notificationMap) override;
+
+        void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
+            int32_t deleteReason) override;
+
+        void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+            const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
+
+        void OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
+            const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
+
+        void OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override;
+
+        void OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
+
+        void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
+
+        void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        sptr<AnsManagerInterface> GetAnsManagerProxy();
+
+    public:
+        NotificationSubscriber &subscriber_;
+        sptr<DeathRecipient> recipient_ {nullptr};
+    };
+
+private:
+    const sptr<SubscriberImpl> GetImpl() const;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     NotificationConstant::FlagStatus DowngradeReminder(
         const NotificationConstant::FlagStatus &oldFlags, const NotificationConstant::FlagStatus &judgeFlags) const;
 #endif
 
 private:
+    sptr<SubscriberImpl> impl_ = nullptr;
     std::string deviceType_;
+
+    friend class AnsNotification;
 };
 }  // namespace Notification
 }  // namespace OHOS
