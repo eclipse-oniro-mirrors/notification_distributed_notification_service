@@ -16,8 +16,11 @@
 #include "ans_dialog_callback_stub.h"
 #include "errors.h"
 #include "notification_slot.h"
+#include "refbase.h"
 #include <cstdint>
 #include <gtest/gtest.h>
+#include <memory>
+#include <new>
 
 #define private public
 #define protected public
@@ -1083,6 +1086,48 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0200, Function | MediumT
 }
 
 /*
+ * @tc.name: SubscribeNotification_0300
+ * @tc.desc: test SubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0300, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
+    ErrCode ret1 = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SubscribeNotification_0400
+ * @tc.desc: test SubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0400, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    ErrCode ret1 = ans_->SubscribeNotification(nullptr);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: GetAllActiveNotifications_0100
  * @tc.desc: test GetAllActiveNotifications return false.
  * @tc.type: FUNC
@@ -1164,6 +1209,49 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0200, Function | Mediu
 
     auto subscriber = TestAnsSubscriber();
     NotificationSubscribeInfo info;
+    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_0300
+ * @tc.desc: test UnSubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0300, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_0400
+ * @tc.desc: test UnSubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0400, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
     ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }

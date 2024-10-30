@@ -28,7 +28,9 @@
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
 #include "system_ability_definition.h"
+#include "unique_fd.h"
 
+#include <memory>
 #include <thread>
 
 namespace OHOS {
@@ -541,20 +543,13 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::shared_ptr<NotificationSubscriber> subscriberSptr = subscriber.GetSharedPtr();
-    if (subscriberSptr == nullptr) {
-        ANS_LOGE("Subscriber is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
-    sptr<SubscriberListener>listener = nullptr;
-    CreateSubscribeListener(subscriberSptr, listener);
-    if (listener == nullptr) {
-        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
+    sptr<NotificationSubscriber::SubscriberImpl> subscriberSptr = subscriber.GetImpl();
+    if (subscriberSptr == nullptr) {
+        ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    return proxy->Subscribe(listener, nullptr);
+    return proxy->Subscribe(subscriberSptr, nullptr);
 }
 
 ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
@@ -566,20 +561,12 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    std::shared_ptr<NotificationSubscriber> subscriberSptr = subscriber.GetSharedPtr();
+    sptr<NotificationSubscriber::SubscriberImpl> subscriberSptr = subscriber.GetImpl();
     if (subscriberSptr == nullptr) {
-        ANS_LOGE("Subscriber is nullptr.");
+        ANS_LOGE("Failed to subscribeSelf with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-
-    sptr<SubscriberListener> listener = nullptr;
-    CreateSubscribeListener(subscriberSptr, listener);
-    if (listener == nullptr) {
-        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    return proxy->SubscribeSelf(listener);
+    return proxy->SubscribeSelf(subscriberSptr);
 }
 
 ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
@@ -616,21 +603,13 @@ ErrCode AnsNotification::SubscribeNotification(
         return ERR_ANS_NO_MEMORY;
     }
 
-    std::shared_ptr<NotificationSubscriber> subscriberSptr = subscriber.GetSharedPtr();
+    sptr<NotificationSubscriber::SubscriberImpl> subscriberSptr = subscriber.GetImpl();
     if (subscriberSptr == nullptr) {
-        ANS_LOGE("Subscriber is nullptr.");
+        ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-
-    sptr<SubscriberListener> listener = nullptr;
-    CreateSubscribeListener(subscriberSptr, listener);
-    if (listener == nullptr) {
-        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    subscriberSptr->SetDeviceType(subscribeInfo.GetDeviceType());
-    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    return proxy->Subscribe(listener, sptrInfo);
+    subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
+    return proxy->Subscribe(subscriberSptr, sptrInfo);
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscriber)
@@ -641,27 +620,13 @@ ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscri
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::shared_ptr<NotificationSubscriber> subscriberSptr = subscriber.GetSharedPtr();
+
+    sptr<NotificationSubscriber::SubscriberImpl> subscriberSptr = subscriber.GetImpl();
     if (subscriberSptr == nullptr) {
-        ANS_LOGE("Subscriber is nullptr.");
+        ANS_LOGE("Failed to unsubscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-
-    std::lock_guard<std::mutex> lock(subscriberMutex_);
-    auto item = subscribers_.begin();
-    while (item != subscribers_.end()) {
-        if (item->first.get() == subscriberSptr.get()) {
-            sptr<SubscriberListener> listener = item->second;
-            int32_t ret = proxy->Unsubscribe(listener, nullptr);
-            if (ret == ERR_OK) {
-                subscribers_.erase(item);
-            }
-            return ret;
-        }
-        item++;
-    }
-    ANS_LOGE("Failed to unsubscribe due to subscriber not found.");
-    return ERR_ANS_INVALID_PARAM;
+    return proxy->Unsubscribe(subscriberSptr, nullptr);
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(
@@ -679,23 +644,102 @@ ErrCode AnsNotification::UnSubscribeNotification(
         ANS_LOGE("Failed to create NotificationSubscribeInfo ptr.");
         return ERR_ANS_NO_MEMORY;
     }
-    std::shared_ptr<NotificationSubscriber> subscriberSptr = subscriber.GetSharedPtr();
+
+    sptr<NotificationSubscriber::SubscriberImpl> subscriberSptr = subscriber.GetImpl();
     if (subscriberSptr == nullptr) {
+        ANS_LOGE("Failed to unsubscribe with SubscriberImpl null ptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->Unsubscribe(subscriberSptr, sptrInfo);
+}
+
+ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    return SubscribeNotification(subscriber, nullptr);
+}
+
+ErrCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<SubscriberListener> listener = nullptr;
+    CreateSubscribeListener(subscriber, listener);
+    if (listener == nullptr) {
+        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
+    return proxy->SubscribeSelf(listener);
+}
+
+ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber == nullptr) {
+        ANS_LOGE("Subscriber is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Failed to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<SubscriberListener> listener = nullptr;
+    CreateSubscribeListener(subscriber, listener);
+    if (listener == nullptr) {
+        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    if (subscribeInfo != nullptr) {
+        subscriber->SetDeviceType(subscribeInfo->GetDeviceType());
+    }
+    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
+    return proxy->Subscribe(listener, subscribeInfo);
+}
+
+ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    return UnSubscribeNotification(subscriber, nullptr);
+}
+
+ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber == nullptr) {
+        ANS_LOGE("Subscriber is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
     std::lock_guard<std::mutex> lock(subscriberMutex_);
-    auto item = subscribers_.begin();
-    while (item != subscribers_.end()) {
-        if (item->first.get() == subscriberSptr.get()) {
-            sptr<SubscriberListener> listener = item->second;
-            int32_t ret = proxy->Unsubscribe(listener, sptrInfo);
-            if (ret == ERR_OK) {
-                subscribers_.erase(item);
-            }
-            return ret;
+    auto item = subscribers_.find(subscriber);
+    if (item != subscribers_.end()) {
+        sptr<SubscriberListener> listener = item->second;
+        int32_t ret = proxy->Unsubscribe(listener, subscribeInfo);
+        if (ret == ERR_OK) {
+            subscribers_.erase(item);
         }
-        ++item;
+        return ret;
     }
     ANS_LOGE("Failed to unsubscribe due to subscriber not found.");
     return ERR_ANS_INVALID_PARAM;
@@ -1938,18 +1982,15 @@ ErrCode AnsNotification::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoN
     return proxy->GetDoNotDisturbProfile(id, profile);
 }
 
-void AnsNotification::CreateSubscribeListener(std::shared_ptr<NotificationSubscriber> &subscriber,
+void AnsNotification::CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
     sptr<SubscriberListener> &listener)
 {
     std::lock_guard<std::mutex> lock(subscriberMutex_);
-    auto item = subscribers_.begin();
-    while (item != subscribers_.end()) {
-        if (item->first.get() == subscriber.get()) {
-            listener = item->second;
-            ANS_LOGD("subscriber has listener");
-            return;
-        }
-        item++;
+    auto item = subscribers_.find(subscriber);
+    if (item != subscribers_.end()) {
+        listener = item->second;
+        ANS_LOGD("subscriber has listener");
+        return;
     }
     listener = new (std::nothrow) SubscriberListener(subscriber);
     if (listener != nullptr) {

@@ -27,7 +27,7 @@ namespace OHOS {
 namespace Notification {
 class SubscriberListener final : public AnsSubscriberStub {
 public:
-    SubscriberListener(std::shared_ptr<NotificationSubscriber> &subscriber);
+    SubscriberListener(const std::shared_ptr<NotificationSubscriber> &subscriber);
     ~SubscriberListener();
 
     void OnConnected() override;

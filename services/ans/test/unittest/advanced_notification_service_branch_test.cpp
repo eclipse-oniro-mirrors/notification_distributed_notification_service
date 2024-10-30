@@ -432,10 +432,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_239000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
-    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Subscribe(listener, info), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
@@ -449,10 +448,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_240000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
-    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Subscribe(listener, info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Subscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -466,10 +464,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
-    auto listener = new (std::nothrow) SubscriberListener(subscriber);
+    auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Unsubscribe(listener, info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

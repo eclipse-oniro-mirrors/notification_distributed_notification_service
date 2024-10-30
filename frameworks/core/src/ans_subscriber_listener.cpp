@@ -21,7 +21,8 @@
 
 namespace OHOS {
 namespace Notification {
-SubscriberListener::SubscriberListener(std::shared_ptr<NotificationSubscriber> &subscriber) : subscriber_(subscriber)
+SubscriberListener::SubscriberListener(const std::shared_ptr<NotificationSubscriber> &subscriber)
+    : subscriber_(subscriber)
 {};
 
 SubscriberListener::~SubscriberListener()
