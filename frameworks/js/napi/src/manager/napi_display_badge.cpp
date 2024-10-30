@@ -321,7 +321,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("Napi set badge number by bundle work execute.");
             AsyncCallbackSetBadgeNumber *asyncCallbackInfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asyncCallbackInfo) {
-                ANS_LOGD("Option.bundle = %{public}s, option.uid = %{public}d, badge number = %{public}d.",
+                ANS_LOGI("Option.bundle = %{public}s, option.uid = %{public}d, badge number = %{public}d.",
                     asyncCallbackInfo->params.option.GetBundleName().c_str(),
                     asyncCallbackInfo->params.option.GetUid(),
                     asyncCallbackInfo->params.badgeNumber);

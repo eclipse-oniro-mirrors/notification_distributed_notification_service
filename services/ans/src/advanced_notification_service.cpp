@@ -412,7 +412,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_3);
     if (request == nullptr) {
         ANS_LOGE("request is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -424,9 +423,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
     ErrCode result = PrepareNotificationRequest(request);
     if (result != ERR_OK) {
-        message.Message("PrepareNotificationRequest failed");
-        message.ErrorCode(result);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
     std::string sourceBundleName =
@@ -443,10 +439,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
 
     if (bundleOption == nullptr) {
-        message.Message("bundleOption is null");
-        message.BranchId(EventBranchId::BRANCH_4);
-        message.ErrorCode(ERR_ANS_INVALID_BUNDLE);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_BUNDLE;
     }
     ANS_LOGI(
