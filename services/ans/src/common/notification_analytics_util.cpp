@@ -83,6 +83,11 @@ HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool print)
     return *this;
 }
 
+HaMetaMessage& HaMetaMessage::Append(const std::string& message)
+{
+    message_+=message;
+    return *this;
+}
 HaMetaMessage& HaMetaMessage::Checkfailed(bool checkfailed)
 {
     checkfailed_ = checkfailed;

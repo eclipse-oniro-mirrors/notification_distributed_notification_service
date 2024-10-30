@@ -90,7 +90,6 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
     ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
     ErrCode errCode = ERR_OK;
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2);
     do {
         if (subscriber == nullptr) {
             errCode = ERR_ANS_INVALID_PARAM;
@@ -121,8 +120,6 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
         }
     } while (0);
 
-    message.Message("SubscribeSelf notification: " + std::to_string(errCode));
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
     if (errCode == ERR_OK) {
         int32_t callingUid = IPCSkeleton::GetCallingUid();
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
