@@ -38,8 +38,6 @@ void TelExtensionWrapper::InitTelExtentionWrapper()
         ANS_LOGE("telephony extension wrapper getCallerIndex symbol failed, error: %{public}s", dlerror());
         return;
     }
-    ANS_LOGI("telephony extension wrapper telephonyCustHandle_: %{public}p", telephonyCustHandle_);
-    ANS_LOGI("telephony extension wrapper getCallerIndex_: %{public}p", getCallerIndex_);
     ANS_LOGI("telephony extension wrapper init success");
 }
 
