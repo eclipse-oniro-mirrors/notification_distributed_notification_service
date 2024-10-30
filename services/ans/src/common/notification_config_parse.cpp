@@ -18,6 +18,9 @@
 #include "notification_config_parse.h"
 
 #include "ans_log_wrapper.h"
+#ifdef ENABLE_ANS_EXT_WRAPPER
+#include "notification_extension_wrapper.h"
+#endif
 #include "notification_slot.h"
 #include "file_utils.h"
 
@@ -37,6 +40,33 @@ NotificationConfigParse::NotificationConfigParse()
         {NotificationConstant::SlotType::CUSTOMER_SERVICE, 0b110001},
         {NotificationConstant::SlotType::EMERGENCY_INFORMATION, 0b111111}
     };
+}
+
+std::shared_ptr<NotificationAppPrivileges> NotificationConfigParse::GetAppPrivileges(
+    const std::string &bundleName) const
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(APP_PRIVILEGES);
+    if (!GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file.");
+        return nullptr;
+    }
+    if (!root.contains(APP_PRIVILEGES)) {
+        ANS_LOGW("not found jsonKey appPrivileges");
+        return nullptr;
+    }
+    nlohmann::json affects = root[APP_PRIVILEGES];
+    if (affects.is_null() || affects.empty()) {
+        ANS_LOGE("GetCcmPrivileges failed as invalid ccmPrivileges json.");
+        return nullptr;
+    }
+    for (auto &affect : affects.items()) {
+        if (affect.key() == bundleName) {
+            return std::make_shared<NotificationAppPrivileges>(affect.value());
+        }
+    }
+    return nullptr;
 }
 
 bool NotificationConfigParse::GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const
@@ -132,6 +162,48 @@ uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationCo
     }
 
     return 0;
+}
+
+uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
+    const std::string &bundleName) const
+{
+    uint32_t reminderFlags = GetConfigSlotReminderModeByType(slotType);
+    if (IsBannerEnabled(bundleName)) {
+        return reminderFlags & 0b111111;
+    }
+    return reminderFlags;
+}
+
+bool NotificationConfigParse::IsLiveViewEnabled(const std::string bundleName) const
+{
+    std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
+    if (appPrivileges == nullptr) {
+        return false;
+    }
+    return appPrivileges->IsLiveViewEnabled();
+}
+
+bool NotificationConfigParse::IsReminderEnabled(const std::string& bundleName) const
+{
+    std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
+    if (appPrivileges == nullptr) {
+        return false;
+    }
+    return appPrivileges->IsReminderEnabled();
+}
+
+bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) const
+{
+    std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
+    if (appPrivileges != nullptr) {
+        return appPrivileges->IsBannerEnabled();
+    }
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    int32_t ctrlResult = EXTENTION_WRAPPER->BannerControl(bundleName);
+    return (ctrlResult == ERR_OK) ? true : false;
+#else
+    return false;
+#endif
 }
 } // namespace Notification
 } // namespace OHOS

@@ -27,8 +27,8 @@
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
+#include "notification_config_parse.h"
 #include "notification_constant.h"
-#include "notification_trust_list.h"
 #include "os_account_manager.h"
 #include "notification_preferences.h"
 #include "distributed_database.h"
@@ -622,12 +622,12 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
         }
+        SetSlotFlagsTrustlistsAsBundle(bundleOption);
         NotificationCloneBundle::GetInstance()->OnBundleDataAdd(bundleOption);
     };
 
@@ -1852,14 +1852,13 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsSlotFlagsTrustlistAsBundle(bundleOption)) {
+    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsBannerEnabled(bundleOption->GetBundleName())) {
         uint32_t slotFlags = 0b111111;
         ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
             bundleOption, slotFlags);
         if (saveRef != ERR_OK) {
             ANS_LOGE("Set slotflags error! code: %{public}d", saveRef);
         }
-        UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
     }
 }
 
@@ -1869,19 +1868,6 @@ void AdvancedNotificationService::InitNotificationEnableList()
         std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
         bool notificationEnable = false;
         for (const auto &bundleInfo : bundleInfos) {
-            if (bundleInfo.applicationInfo.bundleName.compare("com.ohos.mms") == 0) {
-                uint32_t slotFlags = 63;
-                sptr<NotificationBundleOption> mmsBundle = new (std::nothrow) NotificationBundleOption(
-                bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
-                if (mmsBundle == nullptr) {
-                    ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
-                        bundleInfo.applicationInfo.bundleName.c_str());
-                    continue;
-                }
-                NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
-                    mmsBundle, slotFlags);
-                UpdateSlotReminderModeBySlotFlags(mmsBundle, slotFlags);
-            }
             // Currently only the input from the whitelist is written
             if (!bundleInfo.applicationInfo.allowEnableNotification) {
                 continue;
@@ -1907,7 +1893,6 @@ void AdvancedNotificationService::InitNotificationEnableList()
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", saveRef);
             }
-            SetSlotFlagsTrustlistsAsBundle(bundleOption);
         }
     };
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();
@@ -2005,7 +1990,7 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
 {
-    if (DelayedSingleton<NotificationTrustList>::GetInstance()->IsReminderTrustList(bundleName)) {
+    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReminderEnabled(bundleName)) {
         return true;
     }
 #ifdef ENABLE_ANS_EXT_WRAPPER

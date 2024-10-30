@@ -36,7 +36,6 @@
 #include "advanced_notification_inline.cpp"
 #include "notification_extension_wrapper.h"
 #include "notification_analytics_util.h"
-#include "notification_trust_list.h"
 
 namespace OHOS {
 namespace Notification {
@@ -473,11 +472,12 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
         result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption, slots);
     }
     if (result == ERR_OK) {
+        std::string bundleName = bundleOption->GetBundleName();
         if (slot != nullptr &&
-            (bundleOption->GetBundleName() == CALL_UI_BUNDLE || slot->GetEnable() ||
+            (bundleName == CALL_UI_BUNDLE || slot->GetEnable() ||
             (record->request->GetAgentBundle() != nullptr && record->request->IsSystemLiveView()) ||
             (slot->GetType() == NotificationConstant::SlotType::LIVE_VIEW &&
-            DelayedSingleton<NotificationTrustList>::GetInstance()->IsLiveViewTrtust(bundleOption->GetBundleName())))) {
+            DelayedSingleton<NotificationConfigParse>::GetInstance()->IsLiveViewEnabled(bundleName)))) {
             record->slot = slot;
         } else {
             message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
@@ -513,8 +513,8 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     }
 
     for (auto slot : slots) {
-        auto configSlotReminderMode =
-            DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
+        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            GetConfigSlotReminderModeByType(slot->GetType(), bundle->GetBundleName());
         slot->SetReminderMode(slotFlags & configSlotReminderMode);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
@@ -537,8 +537,8 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
         ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
     }
 
-    auto configSlotReminderMode =
-        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
+    auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
+        GetConfigSlotReminderModeByType(slot->GetType(), bundle->GetBundleName());
     if (isSpecifiedSlot) {
         slot->SetReminderMode(configSlotReminderMode & slotFlags & slot->GetReminderMode());
     } else {
