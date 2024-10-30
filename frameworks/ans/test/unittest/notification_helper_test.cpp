@@ -311,34 +311,6 @@ HWTEST_F(NotificationHelperTest, GetActiveNotifications_00001, Function | SmallT
 }
 
 /**
- * @tc.name: SetNotificationAgent_00001
- * @tc.desc: Test SetNotificationAgent parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, SetNotificationAgent_00001, Function | SmallTest | Level1)
-{
-    std::string agent = "Agent";
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.SetNotificationAgent(agent);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
-}
-
-/**
- * @tc.name: GetNotificationAgent_00001
- * @tc.desc: Test GetNotificationAgent parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, GetNotificationAgent_00001, Function | SmallTest | Level1)
-{
-    std::string agent = "Agent";
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.GetNotificationAgent(agent);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
-}
-
-/**
  * @tc.name: CanPublishNotificationAsBundle_00001
  * @tc.desc: Test CanPublishNotificationAsBundle parameters.
  * @tc.type: FUNC

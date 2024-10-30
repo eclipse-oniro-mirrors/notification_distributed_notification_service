@@ -25,11 +25,7 @@ namespace OHOS {
         // test GetActiveNotificationNums function
         uint64_t num;
         Notification::NotificationHelper::GetActiveNotificationNums(num);
-        // test SetNotificationAgent function
         std::string stringData(data);
-        Notification::NotificationHelper::SetNotificationAgent(stringData);
-        // test GetNotificationAgent function
-        Notification::NotificationHelper::GetNotificationAgent(stringData);
         // test CanPublishNotificationAsBundle function
         bool enabled = *data % ENABLE;
         return Notification::NotificationHelper::CanPublishNotificationAsBundle(stringData, enabled);

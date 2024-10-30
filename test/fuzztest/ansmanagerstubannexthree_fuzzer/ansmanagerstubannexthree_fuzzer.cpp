@@ -125,9 +125,6 @@ namespace OHOS {
         datas.WriteStringVector(stringVector);
         ansManagerStub.HandleGetActiveNotificationByFilter(datas, reply);
         datas.WriteString(stringData);
-        ansManagerStub.HandleSetNotificationAgent(datas, reply);
-        ansManagerStub.HandleGetNotificationAgent(datas, reply);
-        datas.WriteString(stringData);
         ansManagerStub.HandleCanPublishAsBundle(datas, reply);
         datas.WriteParcelable(notification);
         datas.WriteString(stringData);
@@ -345,8 +342,6 @@ namespace OHOS {
         ansManagerStub.GetAllActiveNotifications(notificationss);
         std::vector<std::string> key;
         ansManagerStub.GetSpecialActiveNotifications(key, notificationss);
-        ansManagerStub.SetNotificationAgent(stringData);
-        ansManagerStub.GetNotificationAgent(stringData);
         bool canPublish = fuzzData.GenerateRandomBool();
         ansManagerStub.CanPublishAsBundle(stringData, canPublish);
         ansManagerStub.PublishAsBundle(notification, stringData);

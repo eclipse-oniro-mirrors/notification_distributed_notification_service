@@ -1146,16 +1146,6 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::SetNotificationAgent(const std::string &agent)
-{
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AdvancedNotificationService::GetNotificationAgent(std::string &agent)
-{
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AdvancedNotificationService::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)
 {
     return ERR_INVALID_OPERATION;

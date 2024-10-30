@@ -77,8 +77,6 @@ namespace OHOS {
         service->GetAllActiveNotifications(notificationss);
         std::vector<std::string> key;
         service->GetSpecialActiveNotifications(key, notificationss);
-        service->SetNotificationAgent(stringData);
-        service->GetNotificationAgent(stringData);
         bool canPublish = fuzzData.GenerateRandomBool();
         service->CanPublishAsBundle(stringData, canPublish);
         service->PublishAsBundle(notification, stringData);

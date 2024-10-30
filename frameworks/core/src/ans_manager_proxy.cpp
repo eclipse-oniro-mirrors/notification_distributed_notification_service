@@ -477,69 +477,6 @@ ErrCode AnsManagerProxy::GetActiveNotificationByFilter(
     return result;
 }
 
-ErrCode AnsManagerProxy::SetNotificationAgent(const std::string &agent)
-{
-    if (agent.empty()) {
-        ANS_LOGE("[SetNotificationAgent] fail: agent is null.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[SetNotificationAgent] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(agent)) {
-        ANS_LOGE("[SetNotificationAgent] fail:: write agent failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_NOTIFICATION_AGENT, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[SetNotificationAgent] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[SetNotificationAgent] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
-ErrCode AnsManagerProxy::GetNotificationAgent(std::string &agent)
-{
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[GetNotificationAgent] fail: write interface token failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    MessageParcel reply;
-    MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_NOTIFICATION_AGENT, option, data, reply);
-    if (result != ERR_OK) {
-        ANS_LOGE("[GetNotificationAgent] fail: transact ErrCode=%{public}d", result);
-        return ERR_ANS_TRANSACT_FAILED;
-    }
-
-    if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[GetNotificationAgent] fail: read result failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.ReadString(agent)) {
-        ANS_LOGE("[GetNotificationAgent] fail: read agent failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    return result;
-}
-
 ErrCode AnsManagerProxy::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)
 {
     if (representativeBundle.empty()) {

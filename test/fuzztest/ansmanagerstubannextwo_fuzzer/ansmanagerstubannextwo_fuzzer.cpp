@@ -68,8 +68,6 @@ namespace OHOS {
         std::vector<std::string> key;
         key.emplace_back(stringData);
         ansManagerStub.GetSpecialActiveNotifications(key, notificationes);
-        ansManagerStub.SetNotificationAgent(stringData);
-        ansManagerStub.GetNotificationAgent(stringData);
         bool canPublish = *data % ENABLE;
         ansManagerStub.CanPublishAsBundle(stringData, canPublish);
         ansManagerStub.PublishAsBundle(notificationer, stringData);

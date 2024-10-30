@@ -225,24 +225,6 @@ public:
     ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request);
 
     /**
-     * @brief Allows another application to act as an agent to publish notifications in the name of your application
-     * bundle. You can revoke this authorization by passing null to this method.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application.
-     * @return Returns set notification agent result.
-     */
-    ErrCode SetNotificationAgent(const std::string &agent);
-
-    /**
-     * @brief Obtains the name of the application bundle that can publish notifications in the name of your application.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application if
-     * any; returns null otherwise.
-     * @return Returns get notification agent result.
-     */
-    ErrCode GetNotificationAgent(std::string &agent);
-
-    /**
      * @brief Checks whether your application has permission to publish notifications by calling
      * PublishNotificationAsBundle(string, NotificationRequest) in the name of another application indicated by the
      * given representativeBundle.
