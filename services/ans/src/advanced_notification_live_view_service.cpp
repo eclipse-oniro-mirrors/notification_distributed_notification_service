@@ -68,6 +68,7 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
             }
 
             auto record = std::make_shared<NotificationRecord>();
+            record->isNeedFlowCtrl = false;
             if (FillNotificationRecord(requestObj, record) != ERR_OK) {
                 ANS_LOGE("Fill notification record failed.");
                 continue;

@@ -17,12 +17,10 @@
 
 #include "ans_log_wrapper.h"
 #include "notification_preferences.h"
-#include "bundle_manager_helper.h"
-#include "os_account_manager.h"
+#include "notification_clone_util.h"
 
 namespace OHOS {
 namespace Notification {
-constexpr int32_t MAIN_USER_ID = 100;
 std::shared_ptr<NotificationCloneDisturb> NotificationCloneDisturb::GetInstance()
 {
     static std::shared_ptr<NotificationCloneDisturb> instance =
@@ -45,7 +43,7 @@ NotificationCloneDisturb::~NotificationCloneDisturb()
 
 ErrCode NotificationCloneDisturb::OnBackup(nlohmann::json &jsonObject)
 {
-    int32_t userId = GetActiveUserId();
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     NotificationPreferences::GetInstance()->GetDoNotDisturbProfileListByUserId(userId, profiles);
 
@@ -63,12 +61,12 @@ ErrCode NotificationCloneDisturb::OnBackup(nlohmann::json &jsonObject)
     return ERR_OK;
 }
 
-ErrCode NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
+void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
 {
     ANS_LOGI("Notification disturb profile list on restore.");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
         ANS_LOGI("Notification disturb profile list is null or not array.");
-        return ERR_OK;
+        return;
     }
 
     profiles_.clear();
@@ -80,10 +78,10 @@ ErrCode NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
 
     if (cloneDisturbQueue_ == nullptr || profiles_.empty()) {
         ANS_LOGE("Clone queue is invalidated or empty %{public}zu.", profiles_.size());
-        return ERR_OK;
+        return;
     }
 
-    int32_t userId = GetActiveUserId();
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
     cloneDisturbQueue_->submit_h(std::bind([&, userId]() {
         ANS_LOGI("Notification disturb profile ffrt start %{public}zu.", profiles_.size());
         int32_t profileId = -1;
@@ -113,8 +111,8 @@ ErrCode NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
             ANS_LOGI("Clone queue left %{public}d %{public}zu.", (*profile)->GetProfileId(),
                 (*profile)->GetProfileTrustList().size());
         }
+        ANS_LOGI("Notification disturb profile list on restore end.");
     }));
-    return ERR_OK;
 }
 
 void NotificationCloneDisturb::GetProfileUid(int32_t userId, std::map<std::string, int32_t>& uidMap,
@@ -127,7 +125,7 @@ void NotificationCloneDisturb::GetProfileUid(int32_t userId, std::map<std::strin
         if (uidMap.find(key) != uidMap.end()) {
             bundle.SetUid(uidMap[key]);
         } else {
-            int32_t uid = GetBundleUid(bundle.GetBundleName(), userId, bundle.GetAppIndex());
+            int32_t uid = NotificationCloneUtil::GetBundleUid(bundle.GetBundleName(), userId, bundle.GetAppIndex());
             ANS_LOGW("Notification get uid %{public}d %{public}d %{public}s.", uid, bundle.GetAppIndex(),
                 bundle.GetBundleName().c_str());
             bundle.SetUid(uid);
@@ -171,7 +169,7 @@ void NotificationCloneDisturb::HandlerBundleEvent(const std::string bundleName, 
         return;
     }
 
-    int32_t userId = GetActiveUserId();
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
     NotificationBundleOption bundle(bundleName, uid);
     bundle.SetAppIndex(appIndex);
     if (cloneDisturbQueue_ == nullptr) {
@@ -216,24 +214,6 @@ void NotificationCloneDisturb::CheckBundleInfo(std::vector<NotificationBundleOpt
             break;
         }
     }
-}
-
-int32_t NotificationCloneDisturb::GetBundleUid(const std::string bundleName, int32_t userId, int32_t appIndex)
-{
-    if (appIndex == -1) {
-        return BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
-    }
-    return BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId, appIndex);
-}
-
-int32_t NotificationCloneDisturb::GetActiveUserId()
-{
-    std::vector<int> activeUserId;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-    if (activeUserId.size() > 0) {
-        return activeUserId[0];
-    }
-    return MAIN_USER_ID;
 }
 }
 }
