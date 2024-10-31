@@ -25,6 +25,7 @@
 #include "notification_slot.h"
 #include "preferences_constant.h"
 #include "advanced_notification_service.h"
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -315,6 +316,8 @@ public:
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool GetDoNotDisturbProfiles(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
     void GetAllDoNotDisturbProfiles(int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    void GetAllCLoneBundlesInfo(const int32_t &userId, const std::unordered_map<std::string, std::string> &bunlesMap,
+        std::vector<NotificationCloneBundleInfo> &cloneBundles);
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
