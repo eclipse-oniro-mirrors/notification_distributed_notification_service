@@ -56,7 +56,7 @@ namespace OHOS {
 namespace Notification {
 
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
-constexpr int32_t HOURS_IN_ONE_DAY = 24;
+constexpr uint32_t SECONDS_IN_ONE_DAY = 24 * 60 * 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t ANS_UID = 5523;
@@ -2462,7 +2462,7 @@ void AdvancedNotificationService::RemoveExpiredUniqueKey()
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     auto iter = uniqueKeyList_.begin();
     while (iter != uniqueKeyList_.end()) {
-        if (abs(now - (*iter).first) > std::chrono::hours(HOURS_IN_ONE_DAY)) {
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - (*iter).first).count() > SECONDS_IN_ONE_DAY) {
             iter = uniqueKeyList_.erase(iter);
         } else {
             break;
