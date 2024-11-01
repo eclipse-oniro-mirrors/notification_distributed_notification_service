@@ -480,8 +480,6 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
             DelayedSingleton<NotificationConfigParse>::GetInstance()->IsLiveViewEnabled(bundleName)))) {
             record->slot = slot;
         } else {
-            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
             ANS_LOGE("Type[%{public}d] slot enable closed", slotType);
         }

@@ -56,6 +56,7 @@ public:
     HaMetaMessage& BranchId(uint32_t branchId);
     HaMetaMessage& ErrorCode(uint32_t errorCode);
     HaMetaMessage& Message(const std::string& message, bool print = false);
+    HaMetaMessage& Append(const std::string& message);
     HaMetaMessage& BundleName(const std::string& bundleName_);
     HaMetaMessage& AgentBundleName(const std::string& agentBundleName);
     HaMetaMessage& TypeCode(int32_t typeCode);
