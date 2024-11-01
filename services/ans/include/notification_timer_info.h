@@ -52,6 +52,7 @@ public:
 
     void SetCallbackInfo(const std::function<void()> &callBack);
 
+    std::function<void()> GetCallBack();
 private:
     std::function<void()> callBack_ = nullptr;
 };

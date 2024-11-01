@@ -1354,6 +1354,7 @@ private:
     ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
     void QueryDoNotDisturbProfile(const int32_t &userId, std::string &enable, std::string &profileId);
     void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
+    void ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable);
     void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
@@ -1452,6 +1453,8 @@ private:
     std::list<std::pair<std::chrono::steady_clock::time_point, std::string>> uniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
     std::mutex delayNotificationMutext_;
+    static std::mutex doNotDisturbMutex_;
+    std::map<int32_t, std::string> doNotDisturbEnableRecord_;
 };
 
 /**

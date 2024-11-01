@@ -109,7 +109,6 @@ std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueu
 
 sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption()
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_1);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     std::string bundle = "";
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
@@ -122,8 +121,6 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
     int32_t uid = IPCSkeleton::GetCallingUid();
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {
-        message.Message("Failed to create instance" + std::to_string(uid), true);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return nullptr;
     }
     return bundleOption;
@@ -1421,9 +1418,6 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalid.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 7)
-            .ErrorCode(ERR_ANS_INVALID_PARAM);
-        ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
