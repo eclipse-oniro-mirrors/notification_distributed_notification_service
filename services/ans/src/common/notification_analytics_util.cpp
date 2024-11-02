@@ -26,6 +26,7 @@
 #include "report_timer_info.h"
 #include "time_service_client.h"
 #include "nlohmann/json.hpp"
+#include "bundle_manager_helper.h"
 namespace OHOS {
 namespace Notification {
 constexpr char MESSAGE_DELIMITER = '#';
@@ -40,6 +41,7 @@ constexpr const int32_t MODIFY_ERROR_EVENT_TIME = 60;
 
 constexpr const int32_t REPORT_CACHE_MAX_SIZE = 50;
 constexpr const int32_t REPORT_CACHE_INTERVAL_TIME = 30;
+constexpr const int32_t REASON_MAX_LENGTH = 127;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 static std::mutex reportFlowControlMutex_;
 static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_ = {
@@ -225,6 +227,13 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
     std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message);
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
 
+    std::string bundle;
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager != nullptr) {
+        bundle = bundleManager->GetBundleNameByUid(callingUid);
+    }
+    want.SetBundle(bundle + "_" + std::to_string(callingUid));
     want.SetParam("slotType", static_cast<int32_t>(message.slotType_));
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, MODIFY_ERROR_EVENT_CODE));
 }
@@ -320,8 +329,24 @@ std::string NotificationAnalyticsUtil::BuildExtraInfo(const HaMetaMessage& messa
     reason["time"] = now;
 
     std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
-    extraInfo->SetParam("reason",
-        AAFwk::String::Box(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)));
+
+    reason["detail"] = "";
+    int32_t reasonFixedSize =
+        static_cast<int32_t>(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).size());
+    int32_t leftSpace = REASON_MAX_LENGTH - reasonFixedSize;
+    if (leftSpace < 0) {
+        std::string basicInfo = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
+            std::to_string(message.branchId_) + MESSAGE_DELIMITER +
+            std::to_string(message.errorCode_) + MESSAGE_DELIMITER +
+            std::to_string(now) + " Reason fixed size exceeds limit";
+        extraInfo->SetParam("reason", AAFwk::String::Box(basicInfo));
+        ANS_LOGI("%{public}s", basicInfo.c_str());
+    } else {
+        reason["detail"] = message.message_.substr(0, leftSpace);
+        extraInfo->SetParam("reason",
+            AAFwk::String::Box(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)));
+    }
+
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
 
     return wWrapper.ToString();
@@ -357,8 +382,23 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
         extraInfo = std::make_shared<AAFwk::WantParams>();
     }
 
-    extraInfo->SetParam("reason",
-        AAFwk::String::Box(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)));
+    reason["detail"] = "";
+    int32_t reasonFixedSize =
+        static_cast<int32_t>(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).size());
+    int32_t leftSpace = REASON_MAX_LENGTH - reasonFixedSize;
+    if (leftSpace < 0) {
+        std::string basicInfo = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
+            std::to_string(message.branchId_) + MESSAGE_DELIMITER +
+            std::to_string(message.errorCode_) + MESSAGE_DELIMITER +
+            std::to_string(now) + " Reason fixed size exceeds limit";
+        extraInfo->SetParam("reason", AAFwk::String::Box(basicInfo));
+        ANS_LOGI("%{public}s", basicInfo.c_str());
+    } else {
+        reason["detail"] = message.message_.substr(0, leftSpace);
+        extraInfo->SetParam("reason",
+            AAFwk::String::Box(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)));
+    }
+    
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
 
     return wWrapper.ToString();

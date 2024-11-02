@@ -88,10 +88,16 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         }
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
+    message.Message("Des_" + GetClientBundleName() + "_" +
+        " user:" + std::to_string(subInfo->GetAppUserId()));
     if (subInfo->GetAppUserId() == SUBSCRIBE_USER_INIT) {
         int32_t userId = SUBSCRIBE_USER_INIT;
         ErrCode ret = OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
         if (ret != ERR_OK) {
+            ANS_LOGE("Get current calling userId failed.");
+            message.ErrorCode(ret).Append(" Get userId Failed");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ret;
         }
         subInfo->AddAppUserId(userId);
@@ -102,13 +108,15 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2);
+
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber, &subInfo, &result]() {
         result = this->AddSubscriberInner(subscriber, subInfo);
     }));
     notificationSubQueue_->wait(handler);
-    message.Message("Subscribe notification: " + GetClientBundleName() + " user " +
-        std::to_string(subInfo->GetAppUserId()) + " " + std::to_string(result));
+
+    ANS_LOGI("Des_%{public}s_, user: %{public}s, Add subscriber result: %{public}d", GetClientBundleName().c_str(),
+        std::to_string(subInfo->GetAppUserId()).c_str(), result);
+    message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
@@ -127,7 +135,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
         ANS_LOGE("queue is nullptr");
         return result;
     }
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_1);
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, &subscriber,
         &subscribeInfo, &result]() {
         ANS_LOGE("ffrt enter!");
@@ -135,8 +143,11 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
     }));
     notificationSubQueue_->wait(handler);
     std::string appUserId = (subscribeInfo == nullptr) ? "all" : std::to_string(subscribeInfo->GetAppUserId());
-    message.Message("Remove subscriber: " + GetClientBundleName() + " user " +
-        appUserId + " " + std::to_string(result));
+
+    ANS_LOGI("Des_%{public}s_, user: %{public}s, Remove subscriber result: %{public}d", GetClientBundleName().c_str(),
+        appUserId.c_str(), result);
+    message.Message("Des_" + GetClientBundleName() + "_" + "  user:" + appUserId);
+    message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
