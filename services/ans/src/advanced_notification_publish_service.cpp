@@ -728,18 +728,33 @@ ErrCode AdvancedNotificationService::DeleteAll()
 ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("BundleOption is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_3);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+        " enabled:" + std::to_string(enabled));
+
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("Check permission is false.");
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission Denied");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        ANS_LOGE("Bundle is nullptr.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -757,6 +772,10 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
             }
         }));
     notificationSvrQueue_->wait(handler);
+    ANS_LOGI("Des_%{public}s_%{public}d, enabled: %{public}s, Set show badge enabled for bundle result: %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), std::to_string(enabled).c_str(), result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
@@ -850,37 +869,48 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     ErrCode result = ERR_OK;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        ANS_LOGD("bundleOption == nullptr");
+        ANS_LOGE("bundleOption is nullptr.");
         return ERR_ANS_INVALID_BUNDLE;
     }
     // To get the permission
     bool allowedNotify = false;
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_1)
-        .BundleName(bundleOption->GetBundleName());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_5);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+            " deviceId:" + deviceId);
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK) {
-        message.Message("Allow notify self failed: " + std::to_string(result));
+        ANS_LOGE("Not allowed notify self");
+        message.ErrorCode(result).Append(" Allow failed");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     ANS_LOGI("allowedNotify = %{public}d, bundle = %{public}s", allowedNotify,
         bundleOption->GetBundleName().c_str());
     if (allowedNotify) {
+        message.ErrorCode(ERR_OK).Append(" Allow success");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_OK;
     }
     // Check to see if it has been popover before
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK) {
-        message.Message("Has popped dialog: " + std::to_string(result));
+        ANS_LOGE("Get has popped dialog failed.");
+        message.ErrorCode(result).Append(" Get dialog failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
+        ANS_LOGE("Has popped is true.");
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
 
     if (!CreateDialogManager()) {
+        ANS_LOGE("Create dialog manager failed.");
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Create dialog failed");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
 
@@ -888,7 +918,10 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }
-    message.Message("Request dialog: " + std::to_string(result));
+
+    ANS_LOGI("Des_%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), deviceId.c_str(), result);
+    message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
@@ -940,25 +973,28 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INVALID_PARAM;
+    if (bundleOption == nullptr) {
+        ANS_LOGE("BundleOption is null.");
+        return ERR_ANS_INVALID_BUNDLE;
     }
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_5);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
-        " enable: " + std::to_string(enabled));
+
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_4);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+            " enabled:" + std::to_string(enabled) +
+            " deviceId:" + deviceId);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not system app.");
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not SystemApp");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        ANS_LOGE("Not system app.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" No acl permission.");
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission Denied");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        ANS_LOGE(" No acl permission.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -998,6 +1034,11 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         // Remote device
     }
 
+    ANS_LOGI("Des_%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
+        "Set notifications enabled for special bundle result: %{public}d", bundleOption->GetBundleName().c_str(),
+        bundleOption->GetUid(), deviceId.c_str(), std::to_string(enabled).c_str(), result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
     return result;
 }
@@ -1052,48 +1093,65 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     ANS_LOGD("%{public}s", __FUNCTION__);
     canPop = false;
     ErrCode result = ERR_OK;
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_2);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        ANS_LOGE("bundleOption == nullptr");
+        ANS_LOGE("bundleOption is nullptr.");
         return ERR_ANS_INVALID_BUNDLE;
     }
     // To get the permission
     bool allowedNotify = false;
-    message.BundleName(bundleOption->GetBundleName());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_2);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+        " canPop:" + std::to_string(canPop));
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK) {
-        message.Message("Allow notify self failed: " + std::to_string(result));
+        ANS_LOGE("Not allowed Notify self.");
+        message.ErrorCode(result).Append(" Not Allow");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     ANS_LOGI("allowedNotify = %{public}d", allowedNotify);
     if (allowedNotify) {
+        message.ErrorCode(ERR_OK).Append(" Allow success");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_OK;
     }
     // Check to see if it has been popover before
     bool hasPopped = false;
     result = GetHasPoppedDialog(bundleOption, hasPopped);
     if (result != ERR_OK) {
-        message.Message("Has popped dialog: " + std::to_string(result));
+        ANS_LOGE("Get has popped dialog failed. result: %{public}d", result);
+        message.ErrorCode(result).Append(" Has popped");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
+        ANS_LOGE("Has popped is true.");
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Haspopped true");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
 
     if (!CreateDialogManager()) {
+        ANS_LOGE("Create dialog manager failed.");
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Create dialog failed");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERROR_INTERNAL_ERROR;
     }
     result = dialogManager_->AddDialogInfo(bundleOption, callback);
     if (result != ERR_OK) {
+        ANS_LOGI("AddDialogInfo result: %{public}d", result);
+        message.ErrorCode(result).Append(" AddDialogInfo");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return result;
     }
 
     canPop = true;
     bundleName = bundleOption->GetBundleName();
-    ANS_LOGI("CanPopEnableNotificationDialog end");
+    ANS_LOGI("Des_%{public}s_%{public}d, canPop: %{public}s, CanPopEnableNotificationDialog result: %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), std::to_string(canPop).c_str(), result);
+    message.ErrorCode(result).Append(" CanPopEnableNotificationDialog end");
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return ERR_OK;
 }
 
@@ -2516,14 +2574,27 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("BundleOption is null.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_3);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+        " enabled:" + std::to_string(enabled) +
+        " deviceType:" + deviceType);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("IsSystemApp is bogus.");
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -2532,8 +2603,16 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         ANS_LOGE("bundle is nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
+    ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle,
+        deviceType, enabled);
 
-    return NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle, deviceType, enabled);
+    ANS_LOGI("Des_%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
+        "SetDistributedEnabledByBundle result: %{public}d", bundleOption->GetBundleName().c_str(),
+        bundleOption->GetUid(), deviceType.c_str(), std::to_string(enabled).c_str(), result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+
+    return result;
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
@@ -2672,16 +2751,28 @@ ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shar
 ErrCode AdvancedNotificationService::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_6);
+    message.Message(" enabled:" + std::to_string(enabled) + " deviceType:" + deviceType);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("IsSystemApp is bogus.");
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission Denied");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
     ErrCode result = NotificationPreferences::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
+
+    ANS_LOGI("enabled: %{public}s, deviceType: %{public}s,Set smart reminder enabled: %{public}d",
+        std::to_string(enabled).c_str(), deviceType.c_str(), result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 
