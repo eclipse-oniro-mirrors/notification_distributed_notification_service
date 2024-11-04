@@ -50,6 +50,7 @@ void AdvancedNotificationServiceAbility::OnStart()
     EXTENTION_WRAPPER->InitExtentionWrapper();
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
 #else
     ANS_LOGD("Not enabled ans_ext");
 #endif
@@ -90,6 +91,15 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
             return;
         }
         EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    } else if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        if (isDatashaReready_) {
+            return;
+        }
+        auto notificationService = AdvancedNotificationService::GetInstance();
+        if (notificationService == nullptr) {
+            return;
+        }
+        notificationService->ResetDistributedEnabled();
     }
 }
 

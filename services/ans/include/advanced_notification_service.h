@@ -1140,6 +1140,8 @@ public:
      */
     bool AllowUseReminder(const std::string& bundleName);
 
+    void ResetDistributedEnabled();
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

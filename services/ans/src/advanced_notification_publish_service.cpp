@@ -193,7 +193,6 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     int32_t uid = request->GetCreatorUid();
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
-    record->isThirdparty = false;
     record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     record->bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
