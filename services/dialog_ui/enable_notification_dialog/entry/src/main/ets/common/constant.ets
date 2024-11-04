@@ -125,12 +125,12 @@ export default class Constants {
   static DIALOG_REQ_LINE_HEIGHT = 24;
 
   // description text of dialog
-  static DIALOG_DESP_FONT_SIZE = 16;
-  static DIALOG_DESP_MARGIN_TOP = 0;
-  static DIALOG_DESP_MARGIN_LEFT = 24;
-  static DIALOG_DESP_MARGIN_RIGHT = 24;
-  static DIALOG_DESP_MARGIN_BOTTOM = 12;
-  static DIALOG_DESP_LINE_HEIGHT = 21;
+  public static DIALOG_DESP_FONT_SIZE = 16;
+  public static DIALOG_DESP_MARGIN_TOP = 0;
+  public static DIALOG_DESP_MARGIN_LEFT = 24;
+  public static DIALOG_DESP_MARGIN_RIGHT = 24;
+  public static DIALOG_DESP_MARGIN_BOTTOM = 8;
+  public static DIALOG_DESP_LINE_HEIGHT = 21;
 
   static BUTTON_MARGIN_TOP = 8;
   static BUTTON_MARGIN_LEFT = 16;

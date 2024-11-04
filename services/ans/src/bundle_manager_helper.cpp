@@ -199,7 +199,7 @@ bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const App
     std::lock_guard<std::mutex> lock(connectionMutex_);
 
     Connect();
-    
+
     if (bundleMgr_ == nullptr) {
         return false;
     }
@@ -240,6 +240,23 @@ int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
     bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
     return appIndex;
+}
+
+int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId,
+    const int32_t appIndex)
+{
+    int32_t uid = -1;
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ != nullptr) {
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        uid = bundleMgr_->GetUidByBundleName(bundle, userId, appIndex);
+        if (uid < 0) {
+            ANS_LOGW("get invalid uid of bundle %{public}s in userId %{public}d", bundle.c_str(), userId);
+        }
+        IPCSkeleton::SetCallingIdentity(identity);
+    }
+    return uid;
 }
 }  // namespace Notification
 }  // namespace OHOS

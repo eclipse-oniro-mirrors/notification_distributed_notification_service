@@ -2021,5 +2021,59 @@ bool NotificationPreferencesDatabase::CheckApiCompatibility(const std::string &b
     }
     return bundleManager->CheckApiCompatibility(bundleName, uid);
 }
+
+bool NotificationPreferencesDatabase::UpdateBundlePropertyToDisturbeDB(int32_t userId,
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string value;
+    std::string bundleLabelKey = KEY_BUNDLE_LABEL + GenerateBundleLablel(bundleInfo);
+    int32_t result = rdbDataManager_->QueryData(bundleLabelKey, value, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        if (rdbDataManager_->InsertData(bundleLabelKey, GenerateBundleLablel(bundleInfo), userId)
+            != NativeRdb::E_OK) {
+            ANS_LOGE("Store bundle name %{public}s to db is failed.", bundleLabelKey.c_str());
+            return false;
+        }
+    }
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET || result == NativeRdb::E_OK) {
+        return PutBundlePropertyValueToDisturbeDB(bundleInfo);
+    }
+    ANS_LOGW("Query bundle name %{public}s failed %{public}d.", bundleLabelKey.c_str(), result);
+    return false;
+}
+
+bool NotificationPreferencesDatabase::UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
+    const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots)
+{
+    if (bundleName.empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+    if (slots.empty()) {
+        ANS_LOGI("Slot is empty.");
+        return true;
+    }
+
+    std::string bundleKey = bundleName + std::to_string(bundleUid);
+    std::unordered_map<std::string, std::string> values;
+    for (auto& slot : slots) {
+        GenerateSlotEntry(bundleKey, slot, values);
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    int32_t result = rdbDataManager_->InsertBatchData(values, userId);
+    return (result == NativeRdb::E_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

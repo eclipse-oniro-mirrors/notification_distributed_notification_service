@@ -550,5 +550,28 @@ napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info)
         return promise;
     }
 }
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbProfileParams &params)
+{
+    ANS_LOGD("ParseParameters");
+
+    size_t argc = DISTURB_PROFILES_PARA;
+    napi_value argv[DISTURB_PROFILES_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+
+    // argv[0]: profileId
+    napi_valuetype valuetype = napi_undefined;
+    if (argc >= DISTURB_PROFILES_PARA) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGW("Wrong argument type Excute promise.");
+            return Common::NapiGetNull(env);
+        }
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.profileId));
+    }
+
+    return Common::NapiGetNull(env);
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

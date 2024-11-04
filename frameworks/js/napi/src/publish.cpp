@@ -84,7 +84,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         if (valuetype == napi_number) {
             int32_t recvUserId = SUBSCRIBE_USER_INIT;
             NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &recvUserId));
-            params.request.SetReceiverUserId(recvUserId);
+            params.request.SetOwnerUserId(recvUserId);
         } else {
             napi_create_reference(env, argv[PARAM1], 1, &params.callback);
         }

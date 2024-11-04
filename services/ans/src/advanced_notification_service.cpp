@@ -98,6 +98,8 @@ sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
 std::mutex AdvancedNotificationService::flowControlMutex_;
+std::mutex AdvancedNotificationService::systemFlowControlMutex_;
+std::mutex AdvancedNotificationService::doNotDisturbMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
@@ -180,8 +182,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             }
             int32_t uid = -1;
             if (request->GetBundleOption()->GetUid() == DEFAULT_UID) {
-                int32_t userId = 0;
-                GetActiveUserId(userId);
+                int32_t userId = SUBSCRIBE_USER_INIT;
+                OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+                if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
+                    userId = request->GetOwnerUserId();
+                }
                 std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
                 if (bundleManager != nullptr) {
                     uid = bundleManager->GetDefaultUidByBundleName(sourceBundleName, userId);
@@ -201,9 +206,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_BUNDLE;
             }
             request->SetAgentBundle(agentBundle);
-            bundle = sourceBundleName;
         }
-        request->SetOwnerBundleName(bundle);
+        request->SetOwnerBundleName(sourceBundleName);
     }
 
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -218,6 +222,9 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
+    if (request->GetOwnerBundleName().empty()) {
+        request->SetOwnerBundleName(bundle);
+    }
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
@@ -296,7 +303,7 @@ AdvancedNotificationService::AdvancedNotificationService()
     StartFilters();
 
     std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
-        std::bind(&AdvancedNotificationService::OnSubscriberAdd, this, std::placeholders::_1);
+        std::bind(&AdvancedNotificationService::OnSubscriberAddInffrt, this, std::placeholders::_1);
     NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
     RecoverLiveViewFromDb();
@@ -376,9 +383,6 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "notificationSvrQueue is null";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 3)
-            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -393,6 +397,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 
         if (notification != nullptr) {
             UpdateRecentNotification(notification, true, reason);
+            CancelTimer(notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, reason);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             DoDistributedDelete("", "", notification);
@@ -424,24 +429,17 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
-
-    if (request->IsAgentNotification()) {
+    std::string sourceBundleName =
+        request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
+    if ((!sourceBundleName.empty() &&
+        NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) ||
+        request->IsAgentNotification()) {
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        std::string sourceBundleName =
-            request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-        if (!sourceBundleName.empty() &&
-            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName)) {
-            ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
-                GetClientBundleName().c_str(), sourceBundleName.c_str());
-            request->SetCreatorBundleName(request->GetOwnerBundleName());
-            request->SetCreatorUid(request->GetOwnerUid());
-            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
-                request->GetOwnerUid());
-        } else {
-            bundleOption = GenerateBundleOption();
-        }
+        bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
+            request->GetCreatorUid());
     }
 
     if (bundleOption == nullptr) {
@@ -557,6 +555,19 @@ void AdvancedNotificationService::CancelArchiveTimer(const std::shared_ptr<Notif
     record->notification->SetArchiveTimer(NotificationConstant::INVALID_TIMER_ID);
 }
 
+ErrCode AdvancedNotificationService::StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record)
+{
+    uint64_t timerId = StartAutoDelete(record,
+        record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    if (timerId == NotificationConstant::INVALID_TIMER_ID) {
+        std::string message = "Start autoDeleted auto delete timer failed.";
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_TASK_ERR;
+    }
+    record->notification->SetAutoDeletedTimer(timerId);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::FillNotificationRecord(
     const NotificationRequestDb &requestdbObj, std::shared_ptr<NotificationRecord> record)
 {
@@ -606,7 +617,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishPreparedNotification");
-    bool isAgentController = AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
@@ -616,8 +629,16 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return ctrlResult;
     }
 #endif
-    auto record = MakeNotificationRecord(request, bundleOption);
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
+    bool isThirdparty;
+    if (isSystemApp || isSubsystem) {
+        isThirdparty = false;
+    } else {
+        isThirdparty = true;
+    }
+    auto record = MakeNotificationRecord(request, bundleOption);
+    record->isThirdparty = isThirdparty;
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
         message.ErrorCode(result);
@@ -674,8 +695,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
     if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        StartAutoDeletedTimer(record);
     }
     return result;
 }
@@ -706,6 +726,29 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
     }
 }
 
+void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable)
+{
+    std::lock_guard<std::mutex> lock(doNotDisturbMutex_);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_2);
+    std::string info = "Do not disturb mode changed, userId: " + std::to_string(userId) + ", enable: " + enable;
+    auto it = doNotDisturbEnableRecord_.find(userId);
+    if (it != doNotDisturbEnableRecord_.end()) {
+        if (it->second != enable) {
+            ANS_LOGI("%{public}s", info.c_str());
+            message.Message(info);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
+        }
+    } else {
+        if (enable == DO_NOT_DISTURB_MODE) {
+            ANS_LOGI("%{public}s", info.c_str());
+            message.Message(info);
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
+        doNotDisturbEnableRecord_.insert_or_assign(userId, enable);
+    }
+}
+
 void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");
@@ -717,12 +760,13 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     std::string enable;
     std::string profileId;
     QueryDoNotDisturbProfile(userId, enable, profileId);
+    ReportDoNotDisturbModeChanged(userId, enable);
     if (enable != DO_NOT_DISTURB_MODE) {
         ANS_LOGD("Currently not is do not disturb mode.");
         return;
     }
     std::string bundleName = record->bundleOption->GetBundleName();
-    ANS_LOGD("The bundle name is %{public}s", bundleName.c_str());
+    ANS_LOGI("The bundle name is %{public}s", bundleName.c_str());
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
@@ -945,20 +989,50 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
+ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record)
+{
+    if (record->isNeedFlowCtrl == false) {
+        return ERR_OK;
+    }
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    ANS_LOGD("UpdateInNotificationList size %{public}zu,%{public}zu",
+        flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
+    if (record->isThirdparty == true) {
+        // 三方流控
+        std::lock_guard<std::mutex> lock(flowControlMutex_);
+        NotificationAnalyticsUtil::RemoveExpired(flowControlUpdateTimestampList_, now);
+        if (flowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
+                .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateInNotificationList failed");
+            if (record != nullptr) {
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            }
+            return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
+        }
+        flowControlUpdateTimestampList_.push_back(now);
+    } else {
+        // 系统流控
+        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
+        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlUpdateTimestampList_, now);
+        if (systemFlowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
+                .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateInNotificationList failed");
+            if (record != nullptr) {
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            }
+            return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
+        }
+        systemFlowControlUpdateTimestampList_.push_back(now);
+    }
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    NotificationAnalyticsUtil::RemoveExpired(flowControlUpdateTimestampList_, now);
-    if (flowControlUpdateTimestampList_.size() >= MAX_UPDATE_NUM_PERSECOND) {
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
-            .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateInNotificationList failed");
-        if (record != nullptr) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        }
-        return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
+    ErrCode result = UpdateFlowCtrl(record);
+    if (result != ERR_OK) {
+        return result;
     }
-
-    flowControlUpdateTimestampList_.push_back(now);
     auto iter = notificationList_.begin();
     while (iter != notificationList_.end()) {
         if ((*iter)->notification->GetKey() == record->notification->GetKey()) {
@@ -1444,35 +1518,85 @@ static bool SortNotificationsByLevelAndTime(
 
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
+    if (record->isNeedFlowCtrl == false) {
+        return ERR_OK;
+    }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2);
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    std::lock_guard<std::mutex> lock(flowControlMutex_);
-    NotificationAnalyticsUtil::RemoveExpired(flowControlTimestampList_, now);
-    if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
-        message.ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+    ANS_LOGD("FlowControl size %{public}zu,%{public}zu",
+        flowControlTimestampList_.size(), systemFlowControlTimestampList_.size());
+    if (record->isThirdparty == true) {
+        std::lock_guard<std::mutex> lock(flowControlMutex_);
+        NotificationAnalyticsUtil::RemoveExpired(flowControlTimestampList_, now);
+        if (flowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
+            message.ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+        }
+        flowControlTimestampList_.push_back(now);
+    } else {
+        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
+        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlTimestampList_, now);
+        if (systemFlowControlTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND + MAX_UPDATE_NUM_PERSECOND) {
+            message.ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+        }
+        systemFlowControlTimestampList_.push_back(now);
     }
-    flowControlTimestampList_.push_back(now);
 
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::IsSystemUser(int32_t userId)
+{
+    return ((userId >= SUBSCRIBE_USER_SYSTEM_BEGIN) && (userId <= SUBSCRIBE_USER_SYSTEM_END));
+}
+
+ErrCode AdvancedNotificationService::PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record)
+{
+    if (record->isNeedFlowCtrl == false) {
+        return ERR_OK;
+    }
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    ANS_LOGD("PublishFlowControl size %{public}zu,%{public}zu",
+        flowControlPublishTimestampList_.size(), systemFlowControlPublishTimestampList_.size());
+    if (record->isThirdparty == true) {
+        // 三方流控
+        std::lock_guard<std::mutex> lock(flowControlMutex_);
+        NotificationAnalyticsUtil::RemoveExpired(flowControlPublishTimestampList_, now);
+        if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
+                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishFlowControl failed");
+            if (record != nullptr) {
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            }
+            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+        }
+        flowControlPublishTimestampList_.push_back(now);
+    } else {
+        // 系统流控
+        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
+        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlPublishTimestampList_, now);
+        if (systemFlowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
+                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishFlowControl failed");
+            if (record != nullptr) {
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            }
+            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+        }
+        systemFlowControlPublishTimestampList_.push_back(now);
+    }
     return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::PublishFlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    NotificationAnalyticsUtil::RemoveExpired(flowControlPublishTimestampList_, now);
-    if (flowControlPublishTimestampList_.size() >= MAX_ACTIVE_NUM_PERSECOND) {
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
-            .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishFlowControl failed");
-        if (record != nullptr) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        }
-        return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
+    ErrCode result = PublishFlowControlInner(record);
+    if (result != ERR_OK) {
+        return result;
     }
-
-    flowControlPublishTimestampList_.push_back(now);
-
     std::list<std::shared_ptr<NotificationRecord>> bundleList;
     for (auto item : notificationList_) {
         if (record->notification->GetBundleName() == item->notification->GetBundleName()) {
@@ -2030,6 +2154,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
 
         if (record->notification->GetKey() == hashCode) {
             UpdateRecentNotification(record->notification, true, reason);
+            CancelTimer(record->notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
             notificationList_.remove(record);

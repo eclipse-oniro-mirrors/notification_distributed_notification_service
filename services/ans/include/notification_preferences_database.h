@@ -87,7 +87,7 @@ public:
      */
     bool PutNotificationsEnabledForBundle(
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
-    
+
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
      *
@@ -233,6 +233,10 @@ public:
     int32_t DeleteKvFromDb(const std::string &key, const int32_t &userId);
     int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
     int32_t DropUserTable(const int32_t userId);
+    bool UpdateBundlePropertyToDisturbeDB(int32_t userId, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
+    bool UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
+        const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots);
+
 private:
     bool CheckRdbStore();
 

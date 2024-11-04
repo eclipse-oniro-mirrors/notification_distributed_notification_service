@@ -312,6 +312,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode RemoveEnableNotificationDialog() override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -573,6 +578,11 @@ public:
     }
 
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -845,7 +855,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
     ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
- 
+
 /*
  * @tc.name: PublishNotification_0001
  * @tc.desc: PublishNotification

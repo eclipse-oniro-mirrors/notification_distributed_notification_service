@@ -310,6 +310,13 @@ public:
      */
     static ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
         bool &canPop, std::string &bundleName);
+    
+    /**
+     * @brief remove enable notification dialog.
+     *
+     * @return Returns remove dialog result.
+     */
+    static ErrCode RemoveEnableNotificationDialog();
 
     /**
      * @brief Allow the current application to publish notifications on a specified device.
@@ -1014,6 +1021,15 @@ public:
      * @return Returns register swing callback result.
      */
     static ErrCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
+
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
 };
 }  // namespace Notification
 }  // namespace OHOS

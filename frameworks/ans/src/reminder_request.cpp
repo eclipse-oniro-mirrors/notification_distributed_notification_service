@@ -947,6 +947,16 @@ std::string ReminderRequest::GetCustomRingUri() const
     return customRingUri_;
 }
 
+sptr<NotificationBundleOption> ReminderRequest::GetNotificationBundleOption() const
+{
+    return notificationOption_;
+}
+
+void ReminderRequest::SetNotificationBundleOption(const sptr<NotificationBundleOption>& option)
+{
+    notificationOption_ = option;
+}
+
 std::shared_ptr<ReminderRequest::WantAgentInfo> ReminderRequest::GetWantAgentInfo() const
 {
     return wantAgentInfo_;
@@ -1865,7 +1875,7 @@ uint64_t ReminderRequest::GetTriggerTime(const time_t now, const time_t nextTrig
     struct tm test;
     (void)localtime_r(&triggerTime, &test);
     ANSR_LOGI("NextTriggerTime: year=%{public}d, mon=%{public}d, day=%{public}d, hour=%{public}d, "
-            "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
+              "min=%{public}d, sec=%{public}d, week=%{public}d, nextTriggerTime=%{public}lld",
         GetActualTime(TimeTransferType::YEAR, test.tm_year),
         GetActualTime(TimeTransferType::MONTH, test.tm_mon),
         test.tm_mday,
@@ -1888,6 +1898,9 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
     }
     // update title
     for (auto &button : actionButtonMap_) {
+        if (button.second.resource.empty()) {
+            continue;
+        }
         std::string title;
         resMgr->GetStringByName(button.second.resource.c_str(), title);
         if (title.empty()) {
@@ -1895,8 +1908,6 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
         }
         button.second.title = title;
     }
-    // update action button
-    UpdateActionButtons(false);
 }
 }
 }

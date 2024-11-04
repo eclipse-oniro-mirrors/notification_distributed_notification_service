@@ -509,6 +509,13 @@ public:
         bool &canPop, std::string &bundleName) override;
 
     /**
+     * @brief remove enable notification dialog.
+     *
+     * @return Returns remove dialog result.
+     */
+    ErrCode RemoveEnableNotificationDialog() override;
+
+    /**
      * @brief Checks whether notifications are allowed for a specific bundle.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
@@ -938,6 +945,15 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**

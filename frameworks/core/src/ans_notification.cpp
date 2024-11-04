@@ -501,6 +501,17 @@ ErrCode AnsNotification::CanPopEnableNotificationDialog(sptr<AnsDialogHostClient
     return proxy->CanPopEnableNotificationDialog(hostClient, canPop, bundleName);
 }
 
+ErrCode AnsNotification::RemoveEnableNotificationDialog()
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->RemoveEnableNotificationDialog();
+}
+
 ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId,
     sptr<AnsDialogHostClient> &hostClient,
     sptr<IRemoteObject> &callerToken)
@@ -1887,6 +1898,16 @@ bool AnsNotification::IsValidTemplate(const NotificationRequest &request) const
 bool AnsNotification::IsValidDelayTime(const NotificationRequest &request)  const
 {
     return request.GetPublishDelayTime() <= MAX_PUBLISH_DELAY_TIME;
+}
+
+ErrCode AnsNotification::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetDoNotDisturbProfile(id, profile);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
