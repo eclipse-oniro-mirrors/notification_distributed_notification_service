@@ -3744,5 +3744,31 @@ HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | Smal
     ASSERT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
     MockIsVerfyPermisson(false);
 }
+
+/**
+ * @tc.number    : PublishFlowControl_00001
+ * @tc.name      : Test PublishFlowControl
+ * @tc.desc      : Test PublishFlowControl function when the record->slot is nullptr
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishFlowControl_00001, Function | SmallTest | Level1)
+{
+    for (int i = 0; i < 100; i++) {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        sptr<Notification> notification = new (std::nothrow) Notification(request);
+        auto record = std::make_shared<NotificationRecord>();
+        record->request = request;
+        record->notification = notification;
+        advancedNotificationService_->notificationList_.push_back(record);
+    }
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 100);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->PublishFlowControl(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 100);
+}
 }  // namespace Notification
 }  // namespace OHOS
