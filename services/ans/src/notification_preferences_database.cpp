@@ -411,6 +411,10 @@ bool NotificationPreferencesDatabase::PutSlotFlags(NotificationPreferencesInfo::
         return false;
     }
 
+    if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
+        return false;
+    }
+
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags,
         bundleInfo.GetBundleUid());
