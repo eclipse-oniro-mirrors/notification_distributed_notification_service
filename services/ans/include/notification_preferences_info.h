@@ -237,6 +237,7 @@ public:
      */
     NotificationPreferencesInfo()
     {}
+
     /**
      * @brief Default destructor.
      */

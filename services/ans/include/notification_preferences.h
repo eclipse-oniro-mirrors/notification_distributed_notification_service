@@ -386,6 +386,8 @@ public:
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
 
 private:
+    bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
+        const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;
     ErrCode CheckSlotForRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -409,7 +411,7 @@ private:
     static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     std::mutex preferenceMutex_;
-    std::unique_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
+    std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
 };
 }  // namespace Notification
 }  // namespace OHOS
