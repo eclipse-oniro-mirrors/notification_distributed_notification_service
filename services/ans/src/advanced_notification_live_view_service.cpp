@@ -42,12 +42,12 @@ const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
 const std::string PROGRESS_VALUE = "progressValue";
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
-    ANS_LOGI("Start recover live view from db. userId:%{public}d", userId);
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        ANS_LOGI("Start recover live view from db. userId:%{public}d", userId);
         std::vector<NotificationRequestDb> requestsdb;
         if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
             ANS_LOGE("Get liveView from db failed.");
@@ -110,8 +110,8 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
             OnSubscriberAdd(subscriber);
         }
+        ANS_LOGI("End recover live view from db.");
     }));
-    ANS_LOGI("End recover live view from db.");
 }
 
 ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record)
