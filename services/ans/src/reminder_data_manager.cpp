@@ -409,6 +409,7 @@ void ReminderDataManager::OnProcessDiedLocked(const sptr<NotificationBundleOptio
 void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &sharedTimerInfo,
     const sptr<ReminderRequest> &reminderRequest, TimerType reminderType) const
 {
+    ANSR_LOGE("gaojiaqi test");
     uint8_t timerTypeWakeup = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_WAKEUP);
     uint8_t timerTypeExact = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_EXACT);
     sharedTimerInfo->SetRepeat(false);
@@ -424,6 +425,7 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
         (reminderRequest->GetReminderType() == ReminderRequest::ReminderType::CALENDAR ||
         reminderRequest->GetReminderType() == ReminderRequest::ReminderType::TIMER)) {
 #ifdef DEVICE_STANDBY_ENABLE
+        ANSR_LOGE("gaojiaqi STANDBY");
         // Get allow list.
         std::string name = reminderRequest->GetBundleName();
         std::vector<DevStandbyMgr::AllowInfo> allowInfoList;
@@ -443,9 +445,11 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
             timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
         }
 #else
+        ANSR_LOGE("gaojiaqi NO STANDBY");
         timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
 #endif
     } else {
+        ANSR_LOGE("gaojiaqi other");
         timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
     }
     sharedTimerInfo->SetType(timerType);
