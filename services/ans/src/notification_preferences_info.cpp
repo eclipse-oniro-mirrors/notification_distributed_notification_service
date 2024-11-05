@@ -23,6 +23,7 @@ namespace Notification {
 namespace {
 const static std::string KEY_UNDER_LINE = "_";
 } // namespace
+
 NotificationPreferencesInfo::BundleInfo::BundleInfo()
 {
 }
