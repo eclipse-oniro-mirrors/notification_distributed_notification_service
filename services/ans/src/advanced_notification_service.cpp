@@ -1494,11 +1494,12 @@ void AdvancedNotificationService::UpdateRecentNotification(sptr<Notification> &n
 static bool SortNotificationsByLevelAndTime(
     const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second)
 {
-    if (first->slot->GetLevel() != second->slot->GetLevel()) {
-        return (first->slot->GetLevel() < second->slot->GetLevel());
+    if (first->slot ==nullptr || second->slot == nullptr) {
+        return (first->request->GetCreateTime() < second->request->GetCreateTime());
     }
-    return (first->request->GetCreateTime() < second->request->GetCreateTime());
+    return (first->slot->GetLevel() < second->slot->GetLevel());
 }
+    
 
 ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record)
 {
