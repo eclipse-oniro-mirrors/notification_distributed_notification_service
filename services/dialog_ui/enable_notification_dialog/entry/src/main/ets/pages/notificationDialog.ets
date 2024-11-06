@@ -16,13 +16,15 @@
 import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
 import display from '@ohos.display';
 import window from '@ohos.window';
-import { titleTrim } from '../common/utils';
+import { titleTrim, calContainerWidth } from '../common/utils';
 import Constants from '../common/constant';
 import fs from '@ohos.file.fs';
 import configPolicy from '@ohos.configPolicy';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
 import { Callback} from '@ohos.base';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
+import { MeasureOptions } from '@ohos.measure';
+import { MeasureUtils } from '@ohos.arkui.UIContext';
 
 const TAG = 'NotificationDialog_Service ';
 const permission: Record<string, Resource> = {
@@ -90,6 +92,7 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
+  @State titleContainerWidth: string|number = 'auto';
 
   build() {
     GridRow({ columns: { xs: Constants.XS_COLUMNS, sm: Constants.SM_COLUMNS, md: Constants.MD_COLUMNS, lg: Constants.LG_COLUMNS }, gutter: Constants.DIALOG_GUTTER }) {
@@ -109,23 +112,35 @@ struct PermissionDialog {
                 }
                 Row() {
                   Flex({ justifyContent: FlexAlign.Center }) {
-                    Text() {
-                      Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
-                    }
+                    Text($r('app.string.group_label_notification', this.appName))
                     .fontSize($r('sys.float.ohos_id_text_size_headline8'))
                     .fontColor($r('app.color.text_primary'))
                     .fontWeight(FontWeight.Bold)
-                    .lineHeight(Constants.DIALOG_REQ_LINE_HEIGHT)
+                    .minFontSize(Constants.TITLE_MIN_FONT_SIZE)
+                    .maxFontSize($r('sys.float.ohos_id_text_size_headline8'))
+                    .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
                     .maxLines(2)
                     .textOverflow({overflow: TextOverflow.Ellipsis})
-                    .margin({
-                      top: Constants.DIALOG_REQ_MARGIN_TOP,
-                      bottom:Constants.DIALOG_REQ_MARGIN_BUTTOM,
-                      left: Constants.DIALOG_REQ_MARGIN_LEFT,
-                      right: Constants.DIALOG_REQ_MARGIN_RIGHT
-                    })
+                    .width(this.titleContainerWidth)
                     .textAlign(TextAlign.Center)
                   }
+                  .margin({
+                    top: Constants.DIALOG_REQ_MARGIN_TOP,
+                    bottom:Constants.DIALOG_REQ_MARGIN_BUTTOM,
+                    left: Constants.DIALOG_REQ_MARGIN_LEFT,
+                    right: Constants.DIALOG_REQ_MARGIN_RIGHT
+                  })
+                  .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                    let containerWidth = newValue.width as number;
+                    let options: MeasureOptions = {
+                      textContent: $r('app.string.group_label_notification', this.appName),
+                      fontSize: $r('sys.float.ohos_id_text_size_headline8'),
+                      fontWeight: FontWeight.Bold,
+                    };
+                    this.titleContainerWidth = calContainerWidth(containerWidth, options,
+                      Constants.CROSS_LINE_RATIO, this.getUIContext().getMeasureUtils());
+                    console.info(TAG, `onSizeChange titleContainerWidth: ${this.titleContainerWidth}`);
+                  })
                 }
                 Row() {
                   Flex({ justifyContent: FlexAlign.Center }) {

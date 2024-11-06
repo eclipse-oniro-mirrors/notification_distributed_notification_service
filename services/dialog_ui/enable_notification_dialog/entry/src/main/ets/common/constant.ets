@@ -142,6 +142,10 @@ export default class Constants {
   static DIALOG_PRIVACY_BORDER_RADIUS = 32;
   static DIALOG_PADDING_BOTTOM = 16;
 
+  public static TITLE_MIN_FONT_SIZE = 16;
+  public static CROSS_LINE_RATIO = 0.2;
+  public static CROSS_LINE_RESIZE_PARAM = 1.25;
+
   // ccm config path
   static CCM_CONFIG_PATH = "etc/notification/notification_config.json";
 }
