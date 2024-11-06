@@ -67,7 +67,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1)
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_6)
         .BundleName(bundleOption == nullptr ? "" : bundleOption->GetBundleName());
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || slots.empty()) {
         message.Message("Invalid param.");
@@ -125,8 +125,8 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_5);
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " slotType: " + std::to_string(static_cast<uint32_t>(slotType)));
     message.SlotType(static_cast<uint32_t>(slotType));
     std::lock_guard<std::mutex> lock(preferenceMutex_);
@@ -137,7 +137,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
         (!preferncesDB_->RemoveSlotFromDisturbeDB(GenerateBundleKey(bundleOption), slotType, bundleOption->GetUid()))) {
         message.ErrorCode(result).Append(" Remove slot failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
-        ANS_LOGE("Des_%{public}s_%{public}d, remove slot failed.",
+        ANS_LOGE("%{public}s_%{public}d, remove slot failed.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
         return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
@@ -145,9 +145,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
     }
-    message.ErrorCode(result).Append(" Remove slot successful.");
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
-    ANS_LOGI("Des_%{public}s_%{public}d, Remove slot successful.",
+    ANS_LOGI("%{public}s_%{public}d, Remove slot successful.",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     return result;
 }
@@ -159,7 +157,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
         return ERR_ANS_INVALID_PARAM;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_3);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()));
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()));
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
@@ -170,20 +168,20 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
         if (!preferncesDB_->RemoveAllSlotsFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             message.ErrorCode(result).Append(" Db operation failed.");
-            ANS_LOGE("Des_%{public}s_%{public}d, Db operation failed.",
+            ANS_LOGE("%{public}s_%{public}d, Db operation failed.",
                 bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
         }
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
         message.ErrorCode(result).Append(" Notification bundle not exist.");
-        ANS_LOGE("Des_%{public}s_%{public}d, Notification bundle not exist.",
+        ANS_LOGE("%{public}s_%{public}d, Notification bundle not exist.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     }
 
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
         message.ErrorCode(result).Append(" Remove all slot successful.");
-        ANS_LOGI("Des_%{public}s_%{public}d, Remove all slot successful.",
+        ANS_LOGI("%{public}s_%{public}d, Remove all slot successful.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     }
     NotificationAnalyticsUtil::ReportModifyEvent(message);
