@@ -417,7 +417,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_2);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " slotFlags:" + std::to_string(slotFlags));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -455,7 +455,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
-    ANS_LOGI("Des_%{public}s_%{public}d, slotFlags: %{public}d, SetSlotFlagsAsBundle result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d, SetSlotFlagsAsBundle result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
