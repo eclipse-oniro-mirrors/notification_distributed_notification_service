@@ -515,7 +515,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     auto BundleNames = notification->GetBundleName();
     auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
     bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
-        (notification->GetNotificationRequest().GetCreatorUid() == record->subscriberUid);
+        (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
         return false;
     }
@@ -524,7 +524,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return true;
     }
 
-    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
+    int32_t recvUserId = notification->GetNotificationRequestPoint()->GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
     if (record->userId == recvUserId) {
         return true;
