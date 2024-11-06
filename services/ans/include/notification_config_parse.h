@@ -41,8 +41,6 @@ public:
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
-    uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
-        const std::string &bundleName) const;
     std::shared_ptr<NotificationAppPrivileges> GetAppPrivileges(const std::string &bundleName) const;
     bool IsLiveViewEnabled(const std::string bundleName) const;
     bool IsBannerEnabled(const std::string bundleName) const;
