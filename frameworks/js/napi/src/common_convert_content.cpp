@@ -1081,7 +1081,8 @@ napi_value Common::GetNotificationConversationalContentTitle(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, conversationalContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    NAPI_CALL(env, napi_get_value_string_utf8(
+        env, conversationalContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
     conversationalContent->SetConversationTitle(shortStr);
     ANS_LOGD("conversationTitle = %{public}s", shortStr);
 
