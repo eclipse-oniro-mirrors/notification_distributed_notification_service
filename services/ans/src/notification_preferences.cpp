@@ -159,7 +159,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    if (preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         bundleInfo.RemoveAllSlots();
         preferencesInfo.SetBundleInfo(bundleInfo);
         if (!preferncesDB_->RemoveAllSlotsFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
@@ -188,7 +188,8 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     ErrCode result = ERR_OK;
-    if (preferencesInfo.IsExsitBundleInfo(bundleOption)) {
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    if (GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         preferencesInfo.RemoveBundleInfo(bundleOption);
         if (!preferncesDB_->RemoveBundleFromDisturbeDB(GenerateBundleKey(bundleOption), bundleOption->GetUid())) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -250,7 +251,7 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         if (!bundleInfo.GetSlot(type, slot)) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
         }
@@ -272,7 +273,7 @@ ErrCode NotificationPreferences::GetNotificationAllSlots(
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.GetAllSlots(slots);
     } else {
         ANS_LOGW("Notification bundle does not exsit.");
@@ -292,7 +293,7 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         num = static_cast<uint64_t>(bundleInfo.GetAllSlotsSize());
     } else {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST;
@@ -563,6 +564,18 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     return ERR_OK;
 }
 
+bool NotificationPreferences::GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
+    const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const
+{
+    if (preferencesInfo.GetBundleInfo(bundleOption, info)) {
+        return true;
+    } else if (preferncesDB_->GetBundleInfo(bundleOption, info)) {
+        preferencesInfo.SetBundleInfo(info);
+        return true;
+    }
+    return false;
+}
+
 ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
@@ -651,7 +664,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     bundleOption->SetUid(cloneBundleInfo.GetUid());
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    if (!preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (!GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(cloneBundleInfo.GetBundleName());
         bundleInfo.SetBundleUid(cloneBundleInfo.GetUid());
     }
@@ -710,26 +723,20 @@ void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
     std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    preferencesInfo.GetAllDoNotDisturbProfiles(userId, profiles);
-    preferencesInfo_ = preferencesInfo;
+    preferencesInfo_.GetAllDoNotDisturbProfiles(userId, profiles);
 }
 
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    ErrCode result = ERR_OK;
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
-    if (preferncesDB_->GetAllNotificationEnabledBundles(bundleOption)) {
-        preferencesInfo_ = preferencesInfo;
-    } else {
-        result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    if (!preferncesDB_->GetAllNotificationEnabledBundles(bundleOption)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
-    return result;
+    return ERR_OK;
 }
 
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
@@ -753,8 +760,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbProfile(
         return ERR_ANS_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    if (!preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
+    if (!preferencesInfo_.GetDoNotDisturbProfiles(profileId, userId, profile)) {
         return ERR_ANS_NO_PROFILE_TEMPLATE;
     }
     return ERR_OK;
@@ -810,7 +816,7 @@ ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationB
     }
 
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    if (!preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (!GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
         bundleInfo.SetBundleUid(bundleOption->GetUid());
         bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
@@ -826,10 +832,9 @@ ErrCode NotificationPreferences::CheckSlotForRemoveSlot(const sptr<NotificationB
 {
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    if (preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         if (bundleInfo.IsExsitSlot(slotType)) {
             bundleInfo.RemoveSlot(slotType);
-            preferencesInfo.SetBundleInfo(bundleInfo);
         } else {
             ANS_LOGE("Notification slot type does not exsited.");
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
@@ -851,7 +856,7 @@ ErrCode NotificationPreferences::CheckSlotForUpdateSlot(const sptr<NotificationB
 
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    if (preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         if (bundleInfo.IsExsitSlot(slot->GetType())) {
             bundleInfo.SetBundleName(bundleOption->GetBundleName());
             bundleInfo.SetBundleUid(bundleOption->GetUid());
@@ -875,7 +880,7 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
 {
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    if (!preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
         bundleInfo.SetBundleUid(bundleOption->GetUid());
         bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
@@ -937,7 +942,7 @@ ErrCode NotificationPreferences::GetBundleProperty(
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     std::lock_guard<std::mutex> lock(preferenceMutex_);
-    if (preferencesInfo_.GetBundleInfo(bundleOption, bundleInfo)) {
+    if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         switch (type) {
             case BundleType::BUNDLE_IMPORTANCE_TYPE:
                 value = bundleInfo.GetImportance();
@@ -1084,13 +1089,9 @@ void NotificationPreferences::InitSettingFromDisturbDB(int32_t userId)
 void NotificationPreferences::RemoveSettings(int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
-    {
-        std::lock_guard<std::mutex> lock(preferenceMutex_);
-        preferencesInfo_.RemoveNotificationEnable(userId);
-        preferencesInfo_.RemoveDoNotDisturbDate(userId);
-    }
-
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    preferencesInfo_.RemoveNotificationEnable(userId);
+    preferencesInfo_.RemoveDoNotDisturbDate(userId);
     if (preferncesDB_ != nullptr) {
         preferncesDB_->RemoveNotificationEnable(userId);
         preferncesDB_->RemoveDoNotDisturbDate(userId);

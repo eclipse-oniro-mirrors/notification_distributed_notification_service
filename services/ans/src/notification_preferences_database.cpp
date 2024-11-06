@@ -666,16 +666,46 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         GetDoNotDisturbEndDate(info, iter);
         GetEnableAllNotification(info, iter);
         GetDoNotDisturbProfile(info, iter);
-
-        std::unordered_map<std::string, std::string> values;
-        int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_BUNDLE_LABEL, values, iter);
-        if (result == NativeRdb::E_ERROR) {
-            ANS_LOGE("Get Bundle Info failed.");
-            continue;
-        }
-        ParseBundleFromDistureDB(info, values, iter);
     }
 
+    return true;
+}
+
+
+bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundleOption> &bundleOption,
+    NotificationPreferencesInfo::BundleInfo &bundleInfo)
+{
+    std::string bundleDBKey = KEY_BUNDLE_LABEL + bundleOption->GetBundleName() +
+        std::to_string(bundleOption->GetUid());
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    std::string bundleKey;
+    int32_t result = rdbDataManager_->QueryData(bundleDBKey, bundleKey, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get Bundle Info failed.");
+        return false;
+    }
+    ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());
+    std::unordered_map<std::string, std::string> bundleEntries;
+    rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
+    ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
+    std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
+    bool badgeEnableExist = false;
+    for (auto bundleEntry : bundleEntries) {
+        if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
+            ParseSlotFromDisturbeDB(bundleInfo, bundleKey, bundleEntry, userId);
+        } else {
+            ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, bundleEntry);
+        }
+
+        if (keyStr.compare(bundleEntry.first) == 0) {
+            badgeEnableExist = true;
+        }
+    }
+
+    if (!badgeEnableExist) {
+        bundleInfo.SetIsShowBadge(static_cast<bool>(true));
+    }
     return true;
 }
 
