@@ -1412,6 +1412,10 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 
 ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
 {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("No acl permission.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
     return DeleteAllByUserInner(userId, NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE);
 }
 
