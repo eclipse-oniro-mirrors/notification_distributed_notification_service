@@ -544,7 +544,8 @@ napi_value Common::GetNotificationBasicContentDetailed(
     ANS_LOGD("enter");
 
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
+    char commonStr[COMMON_TEXT_SIZE] = {0};
+    char shortStr[SHORT_TEXT_SIZE] = {0};
     size_t strLen = 0;
 
     // title: string
@@ -553,13 +554,13 @@ napi_value Common::GetNotificationBasicContentDetailed(
         ANS_LOGE("Failed to get title from js.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, value, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property title is empty");
         return nullptr;
     }
-    basicContent->SetTitle(str);
-    ANS_LOGD("normal::title = %{public}s", str);
+    basicContent->SetTitle(shortStr);
+    ANS_LOGD("normal::title = %{public}s", shortStr);
 
     // text: string
     value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "text", napi_string);
@@ -567,13 +568,13 @@ napi_value Common::GetNotificationBasicContentDetailed(
         ANS_LOGE("Failed to get text from js.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, value, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(commonStr) == 0) {
         ANS_LOGE("Property text is empty");
         return nullptr;
     }
-    basicContent->SetText(str);
-    ANS_LOGD("normal::text = %{public}s", str);
+    basicContent->SetText(commonStr);
+    ANS_LOGD("normal::text = %{public}s", commonStr);
 
     // additionalText?: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "additionalText", &hasProperty));
@@ -583,9 +584,9 @@ napi_value Common::GetNotificationBasicContentDetailed(
             ANS_LOGE("Failed to get additionalText from js.");
             return nullptr;
         }
-        NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
-        basicContent->SetAdditionalText(str);
-        ANS_LOGD("normal::additionalText = %{public}s", str);
+        NAPI_CALL(env, napi_get_value_string_utf8(env, value, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
+        basicContent->SetAdditionalText(commonStr);
+        ANS_LOGD("normal::additionalText = %{public}s", commonStr);
     }
 
     // lockScreenPicture?: pixelMap
@@ -639,8 +640,8 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     napi_valuetype valuetype = napi_undefined;
     napi_value longContentResult = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
-    char long_str[LONG_STR_MAX_SIZE + 1] = {0};
+    char commonStr[COMMON_TEXT_SIZE] = {0};
+    char shortStr[SHORT_TEXT_SIZE] = {0};
     size_t strLen = 0;
 
     if (GetNotificationBasicContentDetailed(env, contentResult, longContent) == nullptr) {
@@ -659,13 +660,13 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, long_str, LONG_STR_MAX_SIZE, &strLen));
-    if (std::strlen(long_str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, commonStr, COMMON_TEXT_SIZE-1, &strLen));
+    if (std::strlen(commonStr) == 0) {
         ANS_LOGE("Property longText is empty");
         return nullptr;
     }
-    longContent->SetLongText(long_str);
-    ANS_LOGD("longText::longText = %{public}s", long_str);
+    longContent->SetLongText(commonStr);
+    ANS_LOGD("longText::longText = %{public}s", commonStr);
 
     // briefText: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "briefText", &hasProperty));
@@ -679,13 +680,13 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property briefText is empty");
         return nullptr;
     }
-    longContent->SetBriefText(str);
-    ANS_LOGD("longText::briefText = %{public}s", str);
+    longContent->SetBriefText(shortStr);
+    ANS_LOGD("longText::briefText = %{public}s", shortStr);
 
     // expandedTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "expandedTitle", &hasProperty));
@@ -699,13 +700,13 @@ napi_value Common::GetNotificationLongTextContentDetailed(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, longContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property expandedTitle is empty");
         return nullptr;
     }
-    longContent->SetExpandedTitle(str);
-    ANS_LOGD("longText::expandedTitle = %{public}s", str);
+    longContent->SetExpandedTitle(shortStr);
+    ANS_LOGD("longText::expandedTitle = %{public}s", shortStr);
 
     return NapiGetNull(env);
 }
@@ -754,7 +755,7 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     napi_valuetype valuetype = napi_undefined;
     napi_value pictureContentResult = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
+    char shortStr[SHORT_TEXT_SIZE] = {0};
     size_t strLen = 0;
 
     if (GetNotificationBasicContentDetailed(env, contentResult, pictureContent) == nullptr) {
@@ -773,12 +774,12 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, pictureContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, pictureContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property briefText is empty");
         return nullptr;
     }
-    pictureContent->SetBriefText(str);
+    pictureContent->SetBriefText(shortStr);
 
     // expandedTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "expandedTitle", &hasProperty));
@@ -792,12 +793,12 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, pictureContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, pictureContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property expandedTitle is empty");
         return nullptr;
     }
-    pictureContent->SetExpandedTitle(str);
+    pictureContent->SetExpandedTitle(shortStr);
 
     // picture: image.PixelMap
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "picture", &hasProperty));
@@ -1065,7 +1066,7 @@ napi_value Common::GetNotificationConversationalContentTitle(
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
+    char shortStr[SHORT_TEXT_SIZE] = {0};
     size_t strLen = 0;
 
     // conversationTitle: string
@@ -1080,9 +1081,10 @@ napi_value Common::GetNotificationConversationalContentTitle(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, conversationalContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    conversationalContent->SetConversationTitle(str);
-    ANS_LOGD("conversationTitle = %{public}s", str);
+    NAPI_CALL(env, napi_get_value_string_utf8(
+        env, conversationalContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    conversationalContent->SetConversationTitle(shortStr);
+    ANS_LOGD("conversationTitle = %{public}s", shortStr);
 
     return NapiGetNull(env);
 }
@@ -1183,7 +1185,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
+    char commonStr[COMMON_TEXT_SIZE] = {0};
     size_t strLen = 0;
     std::string text;
     int64_t timestamp = 0;
@@ -1202,9 +1204,9 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, textResult, str, STR_MAX_SIZE - 1, &strLen));
-    text = str;
-    ANS_LOGI("conversationalMessage::text = %{public}s", str);
+    NAPI_CALL(env, napi_get_value_string_utf8(env, textResult, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
+    text = commonStr;
+    ANS_LOGI("conversationalMessage::text = %{public}s", commonStr);
 
     // timestamp: number
     NAPI_CALL(env, napi_has_named_property(env, conversationalMessage, "timestamp", &hasProperty));
@@ -1306,7 +1308,7 @@ napi_value Common::GetNotificationMultiLineContent(
     napi_value contentResult = nullptr;
     napi_value multiLineContentResult = nullptr;
     bool hasProperty = false;
-    char str[STR_MAX_SIZE] = {0};
+    char shortStr[SHORT_TEXT_SIZE] = {0};
     size_t strLen = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, result, "multiLine", &hasProperty));
@@ -1344,13 +1346,13 @@ napi_value Common::GetNotificationMultiLineContent(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property briefText is empty");
         return nullptr;
     }
-    multiLineContent->SetBriefText(str);
-    ANS_LOGD("multiLine: briefText = %{public}s", str);
+    multiLineContent->SetBriefText(shortStr);
+    ANS_LOGD("multiLine: briefText = %{public}s", shortStr);
 
     // longTitle: string
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "longTitle", &hasProperty));
@@ -1364,13 +1366,13 @@ napi_value Common::GetNotificationMultiLineContent(
         ANS_LOGE("Wrong argument type. String expected.");
         return nullptr;
     }
-    NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, str, STR_MAX_SIZE - 1, &strLen));
-    if (std::strlen(str) == 0) {
+    NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+    if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property longTitle is empty");
         return nullptr;
     }
-    multiLineContent->SetExpandedTitle(str);
-    ANS_LOGD("multiLine: longTitle = %{public}s", str);
+    multiLineContent->SetExpandedTitle(shortStr);
+    ANS_LOGD("multiLine: longTitle = %{public}s", shortStr);
 
     // lines: Array<String>
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "lines", &hasProperty));
@@ -1396,7 +1398,7 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
     bool isArray = false;
     napi_valuetype valuetype = napi_undefined;
     napi_value multilines = nullptr;
-    char str[STR_MAX_SIZE] = {0};
+    char shortStr[SHORT_TEXT_SIZE] = {0};
     size_t strLen = 0;
     uint32_t length = 0;
 
@@ -1420,9 +1422,9 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
             ANS_LOGE("Wrong argument type. String expected.");
             return nullptr;
         }
-        NAPI_CALL(env, napi_get_value_string_utf8(env, line, str, STR_MAX_SIZE - 1, &strLen));
-        multiLineContent->AddSingleLine(str);
-        ANS_LOGI("multiLine: lines : addSingleLine = %{public}s", str);
+        NAPI_CALL(env, napi_get_value_string_utf8(env, line, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
+        multiLineContent->AddSingleLine(shortStr);
+        ANS_LOGI("multiLine: lines : addSingleLine = %{public}s", shortStr);
     }
 
     return NapiGetNull(env);
