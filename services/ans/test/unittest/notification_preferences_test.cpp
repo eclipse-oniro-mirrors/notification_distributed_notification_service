@@ -1501,7 +1501,7 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0200, TestSize.Leve
     int32_t userId = 1;
     sptr<NotificationDoNotDisturbProfile> profile;
     auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, ERR_ANS_NO_PROFILE_TEMPLATE);
 }
 
 /**
