@@ -414,7 +414,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_2);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " slotFlags:" + std::to_string(slotFlags));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -452,7 +452,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
-    ANS_LOGI("Des_%{public}s_%{public}d, slotFlags: %{public}d, SetSlotFlagsAsBundle result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d, SetSlotFlagsAsBundle result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -776,10 +776,9 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
         }
         NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundle, slotType);
         return AddSlotThenPublishEvent(slot, bundle, enabled, isForceControl);
-    } else {
-        ANS_LOGE("Set enable slot: GetNotificationSlot failed");
-        return result;
     }
+    ANS_LOGE("Set enable slot: GetNotificationSlot failed");
+    return result;
 }
 
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -788,7 +787,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_4);
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
+        " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
     ErrCode result = CheckCommonParams();
     if (result != ERR_OK) {
         return result;
@@ -805,6 +807,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     notificationSvrQueue_->wait(handler);
 
     SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGI("%{public}s_%{public}d, SetEnabledForBundleSlot successful.",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     return result;
 }
 
