@@ -1020,11 +1020,11 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     if (deviceId.empty()) {
         // Local device
         result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
-        bool enableSuccessed = result == ERR_OK;
         if (result == ERR_OK) {
             if (!enabled) {
                 result = RemoveAllNotificationsForDisable(bundle);
             }
+            SetSlotFlagsTrustlistsAsBundle(bundle);
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
             PublishSlotChangeCommonEvent(bundle);
         }

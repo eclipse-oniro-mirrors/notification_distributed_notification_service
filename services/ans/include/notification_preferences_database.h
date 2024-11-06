@@ -246,6 +246,7 @@ public:
     bool UpdateBundlePropertyToDisturbeDB(int32_t userId, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
     bool UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
         const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots);
+    bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
 private:
     bool CheckRdbStore();
 

@@ -519,8 +519,8 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     }
 
     for (auto slot : slots) {
-        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            GetConfigSlotReminderModeByType(slot->GetType(), bundle->GetBundleName());
+        auto configSlotReminderMode =
+            DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
         slot->SetReminderMode(slotFlags & configSlotReminderMode);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
@@ -543,8 +543,8 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
         ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
     }
 
-    auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
-        GetConfigSlotReminderModeByType(slot->GetType(), bundle->GetBundleName());
+    auto configSlotReminderMode =
+        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
     if (isSpecifiedSlot) {
         slot->SetReminderMode(configSlotReminderMode & slotFlags & slot->GetReminderMode());
     } else {

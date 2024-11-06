@@ -164,16 +164,6 @@ uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationCo
     return 0;
 }
 
-uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
-    const std::string &bundleName) const
-{
-    uint32_t reminderFlags = GetConfigSlotReminderModeByType(slotType);
-    if (IsBannerEnabled(bundleName)) {
-        return reminderFlags & 0b111111;
-    }
-    return reminderFlags;
-}
-
 bool NotificationConfigParse::IsLiveViewEnabled(const std::string bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);

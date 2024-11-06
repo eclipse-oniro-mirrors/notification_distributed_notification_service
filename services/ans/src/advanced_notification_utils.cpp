@@ -613,12 +613,12 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
             }
+            SetSlotFlagsTrustlistsAsBundle(bundleOption);
             errCode = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", errCode);
             }
         }
-        SetSlotFlagsTrustlistsAsBundle(bundleOption);
         NotificationCloneBundle::GetInstance()->OnBundleDataAdd(bundleOption);
     };
 
@@ -1843,13 +1843,15 @@ void AdvancedNotificationService::SendNotificationsOnCanceled(std::vector<sptr<N
 
 void AdvancedNotificationService::SetSlotFlagsTrustlistsAsBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsBannerEnabled(bundleOption->GetBundleName())) {
+    if (!NotificationPreferences::GetInstance()->IsNotificationSlotFlagsExists(bundleOption) &&
+        DelayedSingleton<NotificationConfigParse>::GetInstance()->IsBannerEnabled(bundleOption->GetBundleName())) {
         uint32_t slotFlags = 0b111111;
         ErrCode saveRef = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
             bundleOption, slotFlags);
         if (saveRef != ERR_OK) {
             ANS_LOGE("Set slotflags error! code: %{public}d", saveRef);
         }
+        UpdateSlotReminderModeBySlotFlags(bundleOption, slotFlags);
     }
 }
 
@@ -1884,6 +1886,7 @@ void AdvancedNotificationService::InitNotificationEnableList()
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set badge enable error! code: %{public}d", saveRef);
             }
+            SetSlotFlagsTrustlistsAsBundle(bundleOption);
         }
     };
     notificationSvrQueue_ != nullptr ? notificationSvrQueue_->submit(task) : task();
