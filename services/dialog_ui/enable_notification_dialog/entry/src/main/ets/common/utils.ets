@@ -14,6 +14,8 @@
  */
 
 import Constants from './constant';
+import { MeasureOptions } from '@ohos.measure';
+import { MeasureUtils } from '@ohos.arkui.UIContext';
 
 /**
  * Omit display when application name is too long
@@ -29,3 +31,22 @@ export function titleTrim(title: string): string {
     return title;
   }
 }
+
+export function calContainerWidth(
+  containerWidth: number,
+  options: MeasureOptions,
+  crossLineRatio: number,
+  measureUtils: MeasureUtils) : string | number {
+    let targetContainerWidth: string | number = 'auto';
+    try {
+      let textWidth = px2vp(measureUtils.measureText(options));
+      let ratio = (textWidth % containerWidth) / containerWidth;
+      let crossLineFlag: boolean = textWidth > containerWidth;
+      if (crossLineFlag && ratio < crossLineRatio) {
+        targetContainerWidth = containerWidth / Constants.CROSS_LINE_RESIZE_PARAM;
+      }
+    } catch (err) {
+      console.error(`refresh width failed, code=${err?.code0}, msg=${err?.message}.`);
+    }
+    return targetContainerWidth;
+  }

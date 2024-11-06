@@ -16,7 +16,7 @@
 import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
 import display from '@ohos.display';
 import window from '@ohos.window';
-import { titleTrim } from '../common/utils';
+import { titleTrim, calContainerWidth } from '../common/utils';
 import Constants from '../common/constant';
 import fs from '@ohos.file.fs';
 import configPolicy from '@ohos.configPolicy';
@@ -24,6 +24,8 @@ import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServi
 import { Callback} from '@ohos.base';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import i18n from '@ohos.i18n';
+import { MeasureOptions } from '@ohos.measure';
+import { MeasureUtils } from '@ohos.arkui.UIContext';
 
 const TAG = 'NotificationDialog_Service ';
 
@@ -92,6 +94,7 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
+  @State titleContainerWidth: string|number = 'auto';
 
   build() {
     Row() {
@@ -110,21 +113,34 @@ struct PermissionDialog {
               }
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
-                  Text() {
-                    Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
-                  }
+                  Text($r('app.string.group_label_notification', this.appName))
                   .fontSize($r('sys.float.Title_S'))
                   .fontColor($r('sys.color.font_primary'))
                   .fontWeight(FontWeight.Bold)
+                  .minFontSize(Constants.TITLE_MIN_FONT_SIZE)
+                  .maxFontSize($r('sys.float.Title_S'))
+                  .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
                   .maxLines(2)
                   .textOverflow({overflow: TextOverflow.Ellipsis})
-                  .margin({
-                    left: Constants.PC_TITLE_MARGIN_SIDE,
-                    right: Constants.PC_TITLE_MARGIN_SIDE,
-                    top: Constants.PC_TITLE_MARGIN_TOP,
-                  })
+                  .width(this.titleContainerWidth)
                   .textAlign(TextAlign.Center)
                 }
+                .margin({
+                  left: Constants.PC_TITLE_MARGIN_SIDE,
+                  right: Constants.PC_TITLE_MARGIN_SIDE,
+                  top: Constants.PC_TITLE_MARGIN_TOP,
+                })
+                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                    let containerWidth = newValue.width as number;
+                    let options: MeasureOptions = {
+                      textContent: $r('app.string.group_label_notification', this.appName),
+                      fontSize: $r('sys.float.Title_S'),
+                      fontWeight: FontWeight.Bold,
+                    };
+                    this.titleContainerWidth = calContainerWidth(containerWidth, options,
+                      Constants.CROSS_LINE_RATIO, this.getUIContext().getMeasureUtils());
+                    console.info(TAG, `onSizeChange titleContainerWidth: ${this.titleContainerWidth}`);
+                  })
               }
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
@@ -229,15 +245,15 @@ struct PermissionDialog {
 
       let systemLanguage: string = i18n.System.getSystemLanguage();
       console.info(TAG, `language: ${systemLanguage}`);
-      if (systemLanguage.indexOf('zh-Hans')!= -1 ) {
+      if (systemLanguage.indexOf('zh-Hans') != -1) {
         this.content = LAN_CN;
-      } else if (systemLanguage.indexOf('zh-Hant')!= -1 ) {
+      } else if (systemLanguage.indexOf('zh-Hant') != -1) {
         this.content = LAN_TW;
-      } else if (systemLanguage.indexOf('en')!= -1 ) {
+      } else if (systemLanguage.indexOf('en') != -1) {
         this.content = LAN_EN;
-      } else if (systemLanguage.indexOf('ug')!= -1 ) {
+      } else if (systemLanguage.indexOf('ug') != -1) {
         this.content = LAN_UG;
-      } else if (systemLanguage.indexOf('bo')!= -1 ) {
+      } else if (systemLanguage.indexOf('bo') != -1) {
         this.content = LAN_BO;
       }
 
@@ -256,7 +272,7 @@ struct PermissionDialog {
         }
       });
       let avoidArea = this.dialog?.extensionWindow.getWindowAvoidArea(type);
-      if (avoidArea != undefined){
+      if (avoidArea != undefined) {
         console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
         this.naviHeight = avoidArea.bottomRect.height;
       }

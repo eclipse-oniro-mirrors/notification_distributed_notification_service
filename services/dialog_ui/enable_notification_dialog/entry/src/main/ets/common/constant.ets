@@ -142,6 +142,10 @@ export default class Constants {
   public static DIALOG_PRIVACY_BORDER_RADIUS = 32;
   public static DIALOG_PADDING_BOTTOM = 16;
 
+  public static TITLE_MIN_FONT_SIZE = 16;
+  public static CROSS_LINE_RATIO = 0.2;
+  public static CROSS_LINE_RESIZE_PARAM = 1.25;
+
   //pc
   public static PC_ICON_MARGIN_TOP = 24;
 
