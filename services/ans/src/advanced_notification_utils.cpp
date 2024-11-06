@@ -1398,11 +1398,28 @@ bool AdvancedNotificationService::CheckApiCompatibility(const sptr<NotificationB
 
 void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 {
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::USER_REMOVED_REASON_DELETE, message);
+        ANS_LOGE("%{public}s", message.c_str());
+    }
     DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE, true);
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
 {
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("No acl permission.");
         return ERR_ANS_PERMISSION_DENIED;
@@ -1414,16 +1431,6 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
     bool isAsync)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        std::string message = "not system app.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 5)
-            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-        ReportDeleteFailedEventPush(haMetaMessage, deleteReason, message);
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
 
     if (userId <= SUBSCRIBE_USER_INIT) {
         std::string message = "userId is error.";
