@@ -56,7 +56,8 @@ namespace OHOS {
 
         manager->RegisterConfigurationObserver();
         manager->OnUserRemove(userId);
-        manager->OnServiceStart();
+        manager->OnBundleMgrServiceStart();
+        manager->OnAbilityMgrServiceStart();
         manager->OnUserSwitch(userId);
         manager->OnProcessDiedLocked(option);
         manager->RefreshRemindersDueToSysTimeChange(type);
@@ -67,10 +68,6 @@ namespace OHOS {
         manager->HandleCustomButtonClick(want);
         manager->ClickReminder(want);
         manager->TerminateAlerting(want);
-        AppExecFwk::BundleInfo bundleInfo;
-        manager->GetBundleResMgr(bundleInfo);
-        manager->UpdateReminderLanguage(reminder);
-        manager->UpdateReminderLanguageLocked(reminder);
         return true;
     }
 
@@ -118,7 +115,6 @@ namespace OHOS {
         manager->PublishReminder(reminder, option);
         manager->FindReminderRequestLocked(reminderId);
         manager->FindReminderRequestLocked(reminderId, bundleName);
-        manager->FindNotificationBundleOption(reminderId);
         manager->GetRecentReminderLocked();
         manager->HandleImmediatelyShow(immediatelyReminders, value);
         manager->HandleExtensionReminder(extensionReminders);

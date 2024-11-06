@@ -92,7 +92,8 @@ enum ErrorCode : uint32_t {
     ERR_ANS_DUPLICATE_MSG,
     ERR_ANS_NO_AGENT_SETTING,
     ERR_ANS_ENCRYPT_FAIL,
-    ERR_ANS_DECRYPT_FAIL
+    ERR_ANS_DECRYPT_FAIL,
+    ERR_ANS_NO_PROFILE_TEMPLATE
 };
 
 enum ReminderErrorCode : uint32_t {
@@ -148,6 +149,7 @@ const int32_t ERROR_REPEAT_SET                   = 1600015;    // Repeat create 
 const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update version.
 const int32_t ERROR_NO_AGENT_SETTING             = 1600017;    // No corresponding agent relationship configuration.
 const int32_t ERROR_SETTING_WINDOW_EXIST         = 1600018;    // The notification settings window is already displayed.
+const int32_t ERROR_NO_PROFILE_TEMPLATE          = 1600019;    // Not exit noNotDisturb profile template.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 }  // namespace Notification

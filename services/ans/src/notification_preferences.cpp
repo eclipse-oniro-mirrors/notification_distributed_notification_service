@@ -29,10 +29,13 @@
 #include "nlohmann/json.hpp"
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
+#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
-
+namespace {
+const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
+}
 std::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 
@@ -537,6 +540,14 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
         if (!CheckDoNotDisturbProfileID(profile->GetProfileId())) {
             return ERR_ANS_INVALID_PARAM;
         }
+        auto trustList = profile->GetProfileTrustList();
+        for (auto& bundleInfo : trustList) {
+            int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(bundleInfo.GetUid());
+            bundleInfo.SetAppIndex(index);
+            ANS_LOGI("Get app index by uid %{public}d %{public}s %{public}d", bundleInfo.GetUid(),
+                bundleInfo.GetBundleName().c_str(), index);
+        }
+        profile->SetProfileTrustList(trustList);
     }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -579,6 +590,131 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     return ERR_OK;
 }
 
+void NotificationPreferences::UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
+    const std::vector<NotificationBundleOption> bundleList)
+{
+    for (auto& item : bundleList) {
+        bool exit = false;
+        for (auto& bundle: trustList) {
+            if (item.GetUid() == bundle.GetUid()) {
+                exit = true;
+                break;
+            }
+        }
+        if (!exit) {
+            trustList.push_back(item);
+        }
+    }
+}
+
+ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int32_t profileId,
+    const std::string& name, const std::vector<NotificationBundleOption>& bundleList)
+{
+    ANS_LOGI("Called update Profile %{public}d %{public}d %{public}zu.", userId, profileId, bundleList.size());
+    if (!CheckDoNotDisturbProfileID(profileId) || bundleList.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    if (preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
+        auto trustList = profile->GetProfileTrustList();
+        UpdateProfilesUtil(trustList, bundleList);
+        profile->SetProfileTrustList(trustList);
+    } else {
+        profile->SetProfileId(profileId);
+        profile->SetProfileName(name);
+        profile->SetProfileTrustList(bundleList);
+    }
+    ANS_LOGI("Update profile %{public}d %{public}d %{public}zu", userId, profile->GetProfileId(),
+        profile->GetProfileTrustList().size());
+    preferencesInfo.AddDoNotDisturbProfiles(userId, {profile});
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("The prefernces db is nullptr.");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->AddDoNotDisturbProfiles(userId, {profile})) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    preferencesInfo_ = preferencesInfo;
+    return ERR_OK;
+}
+
+void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
+    const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    bundleOption->SetBundleName(cloneBundleInfo.GetBundleName());
+    bundleOption->SetUid(cloneBundleInfo.GetUid());
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    if (!preferencesInfo.GetBundleInfo(bundleOption, bundleInfo)) {
+        bundleInfo.SetBundleName(cloneBundleInfo.GetBundleName());
+        bundleInfo.SetBundleUid(cloneBundleInfo.GetUid());
+    }
+
+    /* after clone, override these witch */
+    bundleInfo.SetSlotFlags(cloneBundleInfo.GetSlotFlags());
+    bundleInfo.SetIsShowBadge(cloneBundleInfo.GetIsShowBadge());
+    bundleInfo.SetEnableNotification(cloneBundleInfo.GetEnableNotification());
+    /* update property to db */
+    if (!preferncesDB_->UpdateBundlePropertyToDisturbeDB(userId, bundleInfo)) {
+        ANS_LOGW("Clone bundle info failed %{public}s.", cloneBundleInfo.Dump().c_str());
+        return;
+    }
+    preferencesInfo.SetBundleInfo(bundleInfo);
+
+    /* update slot info */
+    std::vector<sptr<NotificationSlot>> slots;
+    for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
+        sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
+        uint32_t slotFlags = bundleInfo.GetSlotFlags();
+        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            GetConfigSlotReminderModeByType(slotInfo->GetType());
+        slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
+        slotInfo->SetEnable(cloneSlot.enable_);
+        slotInfo->SetForceControl(cloneSlot.isForceControl_);
+        slotInfo->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        slots.push_back(slotInfo);
+        bundleInfo.SetSlot(slotInfo);
+    }
+
+    if (!preferncesDB_->UpdateBundleSlotToDisturbeDB(userId, cloneBundleInfo.GetBundleName(),
+        cloneBundleInfo.GetUid(), slots)) {
+        ANS_LOGW("Clone bundle slot failed %{public}s.", cloneBundleInfo.Dump().c_str());
+        preferencesInfo_ = preferencesInfo;
+        return;
+    }
+    preferencesInfo.SetBundleInfo(bundleInfo);
+    preferencesInfo_ = preferencesInfo;
+}
+
+void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
+    std::vector<NotificationCloneBundleInfo> &cloneBundles)
+{
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    std::unordered_map<std::string, std::string> bundlesMap;
+    if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, userId) != ERR_OK) {
+        ANS_LOGE("Get bundle map info failed.");
+        return;
+    }
+    preferencesInfo.GetAllCLoneBundlesInfo(userId, bundlesMap, cloneBundles);
+    preferencesInfo_ = preferencesInfo;
+}
+
+void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
+    std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    preferencesInfo.GetAllDoNotDisturbProfiles(userId, profiles);
+    preferencesInfo_ = preferencesInfo;
+}
+
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
@@ -619,7 +755,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbProfile(
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
-        return ERR_ANS_INVALID_PARAM;
+        return ERR_ANS_NO_PROFILE_TEMPLATE;
     }
     return ERR_OK;
 }
@@ -631,8 +767,10 @@ void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
         ANS_LOGE("The bundle option is nullptr.");
         return;
     }
+    int32_t uid = bundleOption->GetUid();
+    int32_t appIndex = bundleOption->GetAppIndex();
     auto bundleName = bundleOption->GetBundleName();
-    ANS_LOGD("Called, bundle name is %{public}s.", bundleName.c_str());
+    ANS_LOGI("Remove %{public}s %{public}d %{public}d.", bundleName.c_str(), uid, appIndex);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
@@ -645,7 +783,7 @@ void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
         }
         auto trustList = profile->GetProfileTrustList();
         for (auto it = trustList.begin(); it != trustList.end(); it++) {
-            if (it->GetBundleName() == bundleName) {
+            if (it->GetUid() == uid) {
                 trustList.erase(it);
                 break;
             }

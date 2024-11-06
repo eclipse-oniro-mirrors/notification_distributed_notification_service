@@ -51,6 +51,11 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_NO_AGENT_SETTING, "There is no corresponding agent relationship configuration"},
     {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
     {ERROR_SETTING_WINDOW_EXIST, "The notification settings window is already displayed"},
+    {ERROR_NO_PROFILE_TEMPLATE, "Not exit noNotDisturb profile template"},
+    {ERROR_REPEAT_SET, "Repeat create or end"},
+    {ERROR_NO_RIGHT, "No permission"},
+    {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
+    {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
 };
 }
 
@@ -316,7 +321,8 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
         {ERR_ANS_PUSH_CHECK_UNREGISTERED, ERROR_NO_RIGHT},
         {ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE, ERROR_NETWORK_UNREACHABLE},
         {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING},
-        {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING}
+        {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING},
+        {ERR_ANS_NO_PROFILE_TEMPLATE, ERROR_NO_PROFILE_TEMPLATE}
     };
 
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;

@@ -293,6 +293,11 @@ public:
     static const int32_t SLOT_ENABLED_REASON_DELETE = 29;
 
     /**
+     * Indicates that a notification is deleted because recover live live validated need delete.
+     */
+    static const int32_t RECOVER_LIVE_VIEW_DELETE = 30;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;

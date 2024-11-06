@@ -101,6 +101,13 @@ public:
      * @return ERR_OK when add Dialog successfully
      */
     ErrCode AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
+    
+    /*
+     * RemoveDialogInfoByBundleOption
+     * @return void
+     */
+    void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
+        std::unique_ptr<DialogInfo>& dialogInfoRemoved);
 
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
@@ -112,9 +119,6 @@ private:
     // bundle need to be not null
     bool AddDialogInfoIfNotExist(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
     sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName, const int32_t& uid);
-    // bundle need to be not null
-    void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
-        std::unique_ptr<DialogInfo>& dialogInfoRemoved);
     void RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved);
 
     bool OnDialogButtonClicked(const std::string& bundleName, const int32_t& uid, bool enabled);

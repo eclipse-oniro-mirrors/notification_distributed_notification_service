@@ -104,6 +104,7 @@ public:
     static NotificationDoNotDisturbProfile *Unmarshalling(Parcel &parcel);
     std::string ToJson();
     void FromJson(const std::string &value);
+    void GetProfileJson(nlohmann::json &jsonObject) const;
 
 private:
     int32_t id_;

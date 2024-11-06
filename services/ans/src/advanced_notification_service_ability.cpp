@@ -25,6 +25,9 @@ namespace {
 REGISTER_SYSTEM_ABILITY_BY_ID(AdvancedNotificationServiceAbility, ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, true);
 }
 
+const std::string EXTENSION_BACKUP = "backup";
+const std::string EXTENSION_RESTORE = "restore";
+
 AdvancedNotificationServiceAbility::AdvancedNotificationServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
 {}
@@ -113,6 +116,23 @@ void AdvancedNotificationServiceAbility::OnRemoveSystemAbility(int32_t systemAbi
     if (systemAbilityId != COMMON_EVENT_SERVICE_ID) {
         return;
     }
+}
+
+int32_t AdvancedNotificationServiceAbility::OnExtension(const std::string& extension,
+    MessageParcel& data, MessageParcel& reply)
+{
+    ANS_LOGI("extension is %{public}s.", extension.c_str());
+    auto notificationService = AdvancedNotificationService::GetInstance();
+    if (notificationService == nullptr) {
+        ANS_LOGW("notification service is not initial.");
+        return ERR_OK;
+    }
+    if (extension == EXTENSION_BACKUP) {
+        return notificationService->OnBackup(data, reply);
+    } else if (extension == EXTENSION_RESTORE) {
+        return notificationService->OnRestore(data, reply);
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

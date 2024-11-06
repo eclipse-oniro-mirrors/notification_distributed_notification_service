@@ -50,6 +50,7 @@ private:
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
+    int32_t OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply) override;
 
 private:
     std::atomic<bool> isDatashaReready_ {false};

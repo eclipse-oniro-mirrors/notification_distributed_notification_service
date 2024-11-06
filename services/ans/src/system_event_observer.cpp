@@ -21,6 +21,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "notification_preferences.h"
+#include "notification_clone_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -60,8 +61,10 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want 
 {
     auto element = want.GetElement();
     std::string bundleName = element.GetBundleName();
+    int32_t appIndex = want.GetIntParam("appIndex", -1);
     int32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    bundleOption->SetAppIndex(appIndex);
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption.");
         return nullptr;
@@ -99,6 +102,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
         NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
+        NotificationCloneManager::GetInstance().OnUserSwitch(userId);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
         if (userId <= SUBSCRIBE_USER_INIT) {

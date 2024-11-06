@@ -351,6 +351,12 @@ ErrCode AnsManagerStub::CanPopEnableNotificationDialog(const sptr<AnsDialogCallb
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::RemoveEnableNotificationDialog()
+{
+    ANS_LOGE("AnsManagerStub::RemoveEnableNotificationDialog called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed)
 {
     ANS_LOGE("AnsManagerStub::IsSpecialBundleAllowedNotify called!");
@@ -643,6 +649,12 @@ ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOpt
 ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
 {
     ANS_LOGE("SetTargetDeviceStatus called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    ANS_LOGE("GetDoNotDisturbProfile called!");
     return ERR_INVALID_OPERATION;
 }
 

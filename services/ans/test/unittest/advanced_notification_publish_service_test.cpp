@@ -862,7 +862,7 @@ HWTEST_F(AnsPublishServiceTest, DuplicateMsgControl_00002, Function | SmallTest 
     request->SetAppMessageId("test1");
     auto uniqueKey = request->GenerateUniqueKey();
     advancedNotificationService_->uniqueKeyList_.emplace_back(
-        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+        std::make_pair(std::chrono::steady_clock::now(), uniqueKey));
 
     auto ret = advancedNotificationService_->DuplicateMsgControl(request);
     ASSERT_EQ(ret, (int)ERR_ANS_DUPLICATE_MSG);
@@ -915,7 +915,7 @@ HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00002, Function | SmallTest | Lev
     request->SetAppMessageId("test2");
     auto uniqueKey = request->GenerateUniqueKey();
     advancedNotificationService_->uniqueKeyList_.emplace_back(
-        std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+        std::make_pair(std::chrono::steady_clock::now(), uniqueKey));
 
     auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
     ASSERT_EQ(ret, true);
@@ -934,7 +934,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTe
     request->SetAppMessageId("test2");
     auto uniqueKey = request->GenerateUniqueKey();
     advancedNotificationService_->uniqueKeyList_.emplace_back(
-        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(24), uniqueKey));
+        std::make_pair(std::chrono::steady_clock::now() - std::chrono::hours(24), uniqueKey));
 
     sleep(1);
     ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);

@@ -223,6 +223,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleCanPopEnableNotificationDialog(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_ENABLE_NOTIFICATION_DIALOG): {
+            result = HandleRemoveEnableNotificationDialog(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::IS_SPECIAL_BUNDLE_ALLOWED_NOTIFY): {
             result = HandleIsSpecialBundleAllowedNotify(data, reply);
             break;
@@ -443,6 +447,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER): {
             result = HandleGetExcludeDates(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE): {
+            result = HandleGetDoNotDisturbProfile(data, reply);
             break;
         }
         default: {
@@ -1644,6 +1652,16 @@ ErrCode AnsManagerStub::HandleCanPopEnableNotificationDialog(MessageParcel &data
     return ERR_OK;
 }
 
+ErrCode AnsManagerStub::HandleRemoveEnableNotificationDialog(MessageParcel &data, MessageParcel &reply)
+{
+    ErrCode result = RemoveEnableNotificationDialog();
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleRemoveEnableNotificationDialog] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode AnsManagerStub::HandleIsSpecialBundleAllowedNotify(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
@@ -2609,6 +2627,25 @@ ErrCode AnsManagerStub::HandleSetTargetDeviceStatus(MessageParcel &data, Message
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t profileId = data.ReadInt32();
+    sptr<NotificationDoNotDisturbProfile> profile = nullptr;
+    ErrCode result = GetDoNotDisturbProfile(profileId, profile);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("HandleGetDoNotDisturbProfile write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (result == ERR_OK) {
+        if (!reply.WriteParcelable(profile)) {
+            ANS_LOGE("HandleGetDoNotDisturbProfile write slot failed.");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
     }
     return ERR_OK;
 }

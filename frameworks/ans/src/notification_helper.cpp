@@ -170,6 +170,11 @@ ErrCode NotificationHelper::CanPopEnableNotificationDialog(sptr<AnsDialogHostCli
         hostClient, canPop, bundleName);
 }
 
+ErrCode NotificationHelper::RemoveEnableNotificationDialog()
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+}
+
 ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId,
     sptr<AnsDialogHostClient> &hostClient,
     sptr<IRemoteObject> &callerToken)
@@ -549,6 +554,10 @@ ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool,
 #else
     return ERR_OK;
 #endif
+}
+ErrCode NotificationHelper::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile);
 }
 }  // namespace Notification
 }  // namespace OHOS

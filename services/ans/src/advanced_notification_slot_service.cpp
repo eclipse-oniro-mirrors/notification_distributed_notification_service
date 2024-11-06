@@ -443,7 +443,7 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
             if (result != ERR_OK) {
                 return;
             }
-            ANS_LOGD("Set slotflags %{public}d to %{public}s.", slotFlags, bundle->GetBundleName().c_str());
+            ANS_LOGI("Set slotflags %{public}d to %{public}s.", slotFlags, bundle->GetBundleName().c_str());
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
@@ -466,8 +466,6 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
         slot = new (std::nothrow) NotificationSlot(slotType);
         if (slot == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot instance");
-            message.ErrorCode(ERR_NO_MEMORY).Message("Create failed");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             return ERR_NO_MEMORY;
         }
 
@@ -521,9 +519,6 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
             DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
         slot->SetReminderMode(slotFlags & configSlotReminderMode);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-        message.Message("Update reminderMode " + std::to_string(slot->GetType()) + ' '
-            + std::to_string(slot->GetReminderMode()));
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
             slot->GetType(), bundleName.c_str(), slot->GetReminderMode());
     }
@@ -778,8 +773,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     if (notificationSvrQueue_ == nullptr) {
-        message.Message("Serial queue is invalid.", true);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
 
