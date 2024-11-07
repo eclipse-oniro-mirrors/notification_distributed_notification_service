@@ -38,6 +38,7 @@
 #include "notification_timer_info.h"
 #include "time_service_client.h"
 #include "notification_extension_wrapper.h"
+#include "string_utils.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -77,6 +78,12 @@ constexpr char RECENT_NOTIFICATION_OPTION[] = "recent";
 constexpr char HIDUMPER_ERR_MSG[] =
     "error: unknown option.\nThe arguments are illegal and you can enter '-h' for help.";
 constexpr int32_t MAIN_USER_ID = 100;
+constexpr int32_t FIRST_USERID = 0;
+constexpr char OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION[] = "enabledNotificationDistributed";
+constexpr char KEY_TABLE_VERSION[] = "tableVersion";
+constexpr char SPLIT_FLAG[] = "-";
+constexpr int32_t KEYWORD_SIZE = 4;
+constexpr int32_t MIN_VERSION = 1;
 const std::unordered_map<std::string, std::string> HIDUMPER_CMD_MAP = {
     { "--help", HELP_NOTIFICATION_OPTION },
     { "--active", ACTIVE_NOTIFICATION_OPTION },
@@ -1720,6 +1727,55 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRequest> &request)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
+    if (!InitPublishProcess()) {
+        return ERR_ANS_NO_MEMORY;
+    }
+    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    result = CheckUserIdParams(request->GetReceiverUserId());
+    if (result != ERR_OK) {
+        message.BranchId(EventBranchId::BRANCH_1).ErrorCode(result).Message("User is invalid", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+
+    if (request->GetCreatorUid() <= 0) {
+        message.BranchId(EventBranchId::BRANCH_2).ErrorCode(ERR_ANS_INVALID_UID)
+            .Message("createUid failed" + std::to_string(request->GetCreatorUid()), true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return ERR_ANS_INVALID_UID;
+    }
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        ANS_LOGE("failed to get bundleManager!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    request->SetCreatorPid(IPCSkeleton::GetCallingPid());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
+        request->SetCreatorUserId(userId);
+    }
+
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
+    result = CheckPictureSize(request);
+    if (result != ERR_OK) {
+        message.ErrorCode(result).Message("Failed to check picture size", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        return result;
+    }
+    return ERR_OK;
+}
+
 uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
     int64_t deleteTimePoint, int32_t reason)
 {
@@ -1938,6 +1994,58 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 #else
     return true;
 #endif
+}
+
+void AdvancedNotificationService::ResetDistributedEnabled()
+{
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("notificationSvrQueue is nullptr");
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::string value;
+        NotificationPreferences::GetInstance()->GetKvFromDb(KEY_TABLE_VERSION, value, FIRST_USERID);
+        if (!value.empty()) {
+            return;
+        }
+        ANS_LOGI("start ResetDistributedEnabled");
+        std::unordered_map<std::string, std::string> oldValues;
+        NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+            OLD_KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION, oldValues, FIRST_USERID);
+        if (oldValues.empty()) {
+            NotificationPreferences::GetInstance()->SetKvToDb(
+                KEY_TABLE_VERSION, std::to_string(MIN_VERSION), FIRST_USERID);
+            return;
+        }
+        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+        std::vector<std::string> delKeys;
+        for (auto iter : oldValues) {
+            std::vector<std::string> keywordVector;
+            StringUtils::Split(iter.first, SPLIT_FLAG, keywordVector);
+            delKeys.push_back(iter.first);
+            if (keywordVector.size() != KEYWORD_SIZE) {
+                continue;
+            }
+            std::string bundleName = keywordVector[1];
+            int32_t activeUserId = atoi(keywordVector[2].c_str());
+            std::string deviceType = keywordVector[3];
+            bool enabled = atoi(iter.second.c_str());
+            int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleName, activeUserId);
+            if (uid <= 0) {
+                continue;
+            }
+            sptr<NotificationBundleOption> bundleOption =
+                new NotificationBundleOption(bundleName, uid);
+            ErrCode result =  NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(
+                bundleOption, deviceType, enabled);
+            if (result != ERR_OK) {
+                ANS_LOGE("SetDistributeEnabled failed! key:%{public}s, uid:%{public}d",
+                    iter.first.c_str(), uid);
+            }
+        }
+        NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(delKeys, FIRST_USERID);
+        NotificationPreferences::GetInstance()->SetKvToDb(
+            KEY_TABLE_VERSION, std::to_string(MIN_VERSION), FIRST_USERID);
+    }));
 }
 
 ErrCode AdvancedNotificationService::OnRecoverLiveView(

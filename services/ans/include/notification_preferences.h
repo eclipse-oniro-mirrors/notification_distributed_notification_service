@@ -377,6 +377,7 @@ public:
     int32_t GetBatchKvsFromDb(
         const std::string &key, std::unordered_map<std::string, std::string>  &values, const int32_t &userId);
     int32_t DeleteKvFromDb(const std::string &key, const int &userId);
+    int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
     ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     bool CheckDoNotDisturbProfileID(int32_t profileId);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);

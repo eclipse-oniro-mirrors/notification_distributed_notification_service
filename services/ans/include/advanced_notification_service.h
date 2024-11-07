@@ -104,6 +104,17 @@ public:
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &request) override;
 
     /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     *       this method will update the notification.
+     *
+     * @param notification Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request) override;
+
+    /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
      * @param notificationId Indicates the ID of the notification to cancel.
@@ -1138,6 +1149,8 @@ public:
      */
     bool AllowUseReminder(const std::string& bundleName);
 
+    void ResetDistributedEnabled();
+
     /**
      * @brief Get do not disturb profile by id.
      *
@@ -1297,6 +1310,7 @@ private:
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    ErrCode PrePublishRequest(const sptr<NotificationRequest> &request);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
@@ -1406,7 +1420,7 @@ private:
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     void RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void StartFinishTimerForUpdate(const std::shared_ptr<NotificationRecord> &record, uint64_t process);
-    ErrCode CheckSystemLiveView(const sptr<NotificationRequest> &request, const std::string &key);
+    ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
     void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);

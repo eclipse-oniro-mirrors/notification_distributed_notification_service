@@ -1218,6 +1218,14 @@ int32_t NotificationPreferences::DeleteKvFromDb(const std::string &key, const in
     return preferncesDB_->DeleteKvFromDb(key, userId);
 }
 
+int32_t NotificationPreferences::DeleteBatchKvFromDb(const std::vector<std::string> &keys,  const int32_t &userId)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->DeleteBatchKvFromDb(keys, userId);
+}
+
 bool NotificationPreferences::IsAgentRelationship(const std::string &agentBundleName,
     const std::string &sourceBundleName)
 {

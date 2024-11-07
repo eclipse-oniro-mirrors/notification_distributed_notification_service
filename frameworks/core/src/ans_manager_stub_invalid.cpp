@@ -32,6 +32,12 @@ ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<Notificatio
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification)
+{
+    ANS_LOGE("AnsManagerStub::PublishNotificationForIndirectProxy called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::Cancel(int notificationId, const std::string &label, int32_t instanceKey)
 {
     ANS_LOGE("AnsManagerStub::Cancel called!");
