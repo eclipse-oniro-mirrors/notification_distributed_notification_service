@@ -100,15 +100,6 @@ constexpr char HIDUMPER_HELP_MSG[] =
     "  --recent, -r                 list recent notifications\n";
 }
 
-static bool SortNotificationsByLevelAndTime(
-    const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second)
-{
-    if (first->slot->GetLevel() != second->slot->GetLevel()) {
-        return (first->slot->GetLevel() < second->slot->GetLevel());
-    }
-    return (first->request->GetCreateTime() < second->request->GetCreateTime());
-}
-
 std::shared_ptr<ffrt::queue> AdvancedNotificationService::GetNotificationSvrQueue()
 {
     return notificationSvrQueue_;
