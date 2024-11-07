@@ -313,6 +313,20 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     return result;
 }
 
+bool NotificationPreferencesDatabase::IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return false;
+    }
+    std::string bundleKey = bundleOption->GetBundleName().append(std::to_string(bundleOption->GetUid()));
+    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
+    std::string value;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    int32_t result = rdbDataManager_->QueryData(key, value, userId);
+    return  (result == NativeRdb::E_OK) || (!value.empty());
+}
+
 bool NotificationPreferencesDatabase::PutShowBadge(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enable)
 {

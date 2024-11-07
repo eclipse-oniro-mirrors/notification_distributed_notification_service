@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include "notification_bundle_option.h"
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <new>
 #include <thread>
 
 #include "gtest/gtest.h"
@@ -343,7 +345,7 @@ HWTEST_F(AnsSlotServiceTest, SetRequestBySlotType_00001, Function | SmallTest | 
 {
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::CUSTOMER_SERVICE);
-    sptr<NotificationBundleOption> bundle = nullptr;
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption();
     advancedNotificationService_->SetRequestBySlotType(request, bundle);
     EXPECT_NE(request->GetFlags(), nullptr);
 }
@@ -513,7 +515,7 @@ HWTEST_F(AnsSlotServiceTest, UpdateSlotReminderModeBySlotFlags_00002, Function |
  */
 HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00001, Function | SmallTest | Level1)
 {
-    sptr<NotificationBundleOption> bundle = nullptr;
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption();
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle);
     ASSERT_EQ(slot->GetReminderMode(), (int)0b111011);
@@ -527,7 +529,7 @@ HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00001, Function | SmallTes
  */
 HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_00002, Function | SmallTest | Level1)
 {
-    sptr<NotificationBundleOption> bundle = nullptr;
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption();
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SERVICE_REMINDER);
     advancedNotificationService_->GenerateSlotReminderMode(slot, bundle, true);
     ASSERT_EQ(slot->GetReminderMode(), (int)0b111011);

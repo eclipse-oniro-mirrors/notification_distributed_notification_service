@@ -385,6 +385,7 @@ public:
         std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     void GetAllCLoneBundlesInfo(int32_t userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
+    bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
