@@ -859,20 +859,33 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_5);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " enable: " + std::to_string(enabled));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("IsSystemApp is bogus.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not system app.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Not system app.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" No acl permission.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE(" No acl permission.");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
+        message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append(" Bundle is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE(" Bundle is nullptr.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -2321,23 +2334,30 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, int32_t
 ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_1);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_6);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " badgeNumber: " + std::to_string(badgeNumber));
     if (notificationSvrQueue_ == nullptr) {
         return ERR_ANS_INVALID_PARAM;
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        message.Message("Client is not a system app or subsystem.", true);
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not system app.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Not system app.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     sptr<NotificationBundleOption> bundle = bundleOption;
     ErrCode result = CheckBundleOptionValid(bundle);
     if (result != ERR_OK) {
-        message.Message("Input bundle option is not correct: " + std::to_string(result), true);
+        message.ErrorCode(result).Append(" Bundle is invalid.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Bundle is invalid.");
         return result;
     }
 
@@ -2350,8 +2370,9 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         bool isAgent = false;
         isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());
         if (!isAgent) {
-            message.Message("the caller has no agent relationship with the specified bundle.", true);
+            message.ErrorCode(ERR_ANS_NO_AGENT_SETTING).Append(" No agent setting.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
+            ANS_LOGE("No agent setting.");
             return ERR_ANS_NO_AGENT_SETTING;
         }
     }
