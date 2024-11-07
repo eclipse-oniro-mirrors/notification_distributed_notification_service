@@ -207,6 +207,16 @@ public:
      */
     bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey, const int32_t &bundleUid);
 
+     /**
+     * @brief Get bundleInfo from DB.
+     *
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @param bundleInfo Indicates bundle info.
+     * @return Return true on success, false on failure.
+     */
+    bool GetBundleInfo(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationPreferencesInfo::BundleInfo &bundleInfo);
+
     /**
      * @brief Query whether there is a agent relationship between the two apps.
      *

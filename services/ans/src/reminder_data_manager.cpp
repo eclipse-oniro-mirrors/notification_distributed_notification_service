@@ -417,37 +417,7 @@ void ReminderDataManager::InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &shar
     sharedTimerInfo->SetBundleName(reminderRequest->GetBundleName());
     sharedTimerInfo->SetUid(reminderRequest->GetUid());
 
-    // The systemtimer type will be set TIMER_TYPE_INEXACT_REMINDER&&EXACT if reminder type is CALENDAR or TIMER,
-    // and set WAKEUP&&EXACT if ALARM.
-    int32_t timerType;
-    if (reminderType == TimerType::TRIGGER_TIMER &&
-        (reminderRequest->GetReminderType() == ReminderRequest::ReminderType::CALENDAR ||
-        reminderRequest->GetReminderType() == ReminderRequest::ReminderType::TIMER)) {
-#ifdef DEVICE_STANDBY_ENABLE
-        // Get allow list.
-        std::string name = reminderRequest->GetBundleName();
-        std::vector<DevStandbyMgr::AllowInfo> allowInfoList;
-        DevStandbyMgr::StandbyServiceClient::GetInstance().GetAllowList(DevStandbyMgr::AllowType::TIMER,
-            allowInfoList, REASON_APP_API);
-        auto it = std::find_if(allowInfoList.begin(),
-            allowInfoList.end(),
-            [&name](const DevStandbyMgr::AllowInfo &allowInfo) {
-                return allowInfo.GetName() == name;
-            });
-        if (reminderRequest->IsSystemApp() || it != allowInfoList.end()) {
-            ANS_LOGI("%{public}s is systemapp or in allowlist, set ALARM type.", name.c_str());
-            timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-        } else {
-            ANS_LOGI("%{public}s is CALENDAR or TIMER type.", name.c_str());
-            uint8_t timerTypeAns = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_INEXACT_REMINDER);
-            timerType = static_cast<int32_t>(timerTypeAns | timerTypeExact);
-        }
-#else
-        timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-#endif
-    } else {
-        timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-    }
+    int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
     sharedTimerInfo->SetType(timerType);
 }
 
