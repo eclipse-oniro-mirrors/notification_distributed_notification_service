@@ -412,23 +412,31 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
-        ANS_LOGD("BundleOption is null.");
+        ANS_LOGE("BundleOption is null.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_2);
+    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+            " slotFlags:" + std::to_string(slotFlags));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("IsSystemApp is false.");
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission denied");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        ANS_LOGD("Bundle is null.");
+        ANS_LOGE("Bundle is null.");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
@@ -447,9 +455,9 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
             result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
         }));
     notificationSvrQueue_->wait(handler);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_2)
-        .Message("Set slotflags " + bundleOption->GetBundleName() + " flag " +
-        std::to_string(slotFlags) + " ret " + std::to_string(result));
+    ANS_LOGI("Des_%{public}s_%{public}d, slotFlags: %{public}d, SetSlotFlagsAsBundle result: %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, result);
+    message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
@@ -765,11 +773,15 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
 ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
+    message.Message(" key:" + key + " value" + value);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission denied");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -786,7 +798,9 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
 #ifdef ENABLE_ANS_EXT_WRAPPER
     ErrCode sync_result = EXTENTION_WRAPPER->SyncAdditionConfig(key, value);
     if (sync_result != ERR_OK) {
-        message.Message("Set addition config " + key + " ret " + std::to_string(sync_result));
+        ANS_LOGE("Sync addition config result: %{public}d, key: %{public}s, value: %{public}s",
+            sync_result, key.c_str(), value.c_str());
+        message.ErrorCode(sync_result).Append(" Sync failed");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return sync_result;
     }
@@ -798,7 +812,9 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
         result = NotificationPreferences::GetInstance()->SetKvToDb(key, value, SUBSCRIBE_USER_INIT);
     }));
     notificationSvrQueue_->wait(handler);
-    message.Message("Set addition config " + key + " ret " + std::to_string(result));
+    ANS_LOGI("Set addition config result: %{public}d, key: %{public}s, value: %{public}s",
+        result, key.c_str(), value.c_str());
+    message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
