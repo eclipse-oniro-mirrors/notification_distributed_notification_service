@@ -956,7 +956,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         }
         uint64_t tempTriggerTime = (*it)->GetTriggerTimeInMilli();
         if (tempTriggerTime < triggerTime) {
-            ANSR_LOGE("this reminder triggerTime is less than target triggerTime.");
+            ANSR_LOGD("this reminder triggerTime is less than target triggerTime.");
             continue;
         }
         if (tempTriggerTime - triggerTime > ReminderRequest::SAME_TIME_DISTINGUISH_MILLISECONDS) {
@@ -1242,15 +1242,14 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminderLocked()
     sort(reminderVector_.begin(), reminderVector_.end(), cmp);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end();) {
         if (!(*it)->IsExpired()) {
-            ANSR_LOGI("GetRecentReminderLocked: %{public}s", (*it)->Dump().c_str());
             time_t now;
             (void)time(&now);  // unit is seconds.
             if (now < 0
                 || ReminderRequest::GetDurationSinceEpochInMilli(now) > (*it)->GetTriggerTimeInMilli()) {
-                ANSR_LOGE("Get recent reminder while the trigger time is overdue.");
                 it++;
                 continue;
             }
+            ANSR_LOGI("GetRecentReminderLocked: %{public}s", (*it)->Dump().c_str());
             return *it;
         }
         if (!(*it)->CanRemove()) {

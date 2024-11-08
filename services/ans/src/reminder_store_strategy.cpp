@@ -621,7 +621,7 @@ void ReminderCalendarStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     }
     ReminderStrategy::RecoverFromDb(reminder, baseResult);
     ReminderCalendarStrategy::RecoverTime(reminder, resultSet);
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+    if (reminder != nullptr && reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
 
         uint32_t repeatDay = 0;

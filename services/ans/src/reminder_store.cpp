@@ -776,9 +776,7 @@ sptr<ReminderRequest> ReminderStore::BuildReminder(const std::shared_ptr<NativeR
             break;
         }
     }
-    if (reminder != nullptr) {
-        ANSR_LOGI("BuildReminder success.");
-    } else {
+    if (reminder == nullptr) {
         ANSR_LOGW("BuildReminder fail.");
     }
     return reminder;
