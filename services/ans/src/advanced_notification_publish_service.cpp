@@ -193,6 +193,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     }
     std::string bundle = request->GetCreatorBundleName();
     int32_t uid = request->GetCreatorUid();
+    request->setOwnerUid(uid);
+    request->SetOwnerBundleName(bundle);
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->isThirdparty = false;
@@ -2222,6 +2224,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         std::shared_ptr<NotificationBundleOption> agentBundle =
         std::make_shared<NotificationBundleOption>("", uid);
         request->SetAgentBundle(agentBundle);
+    } else {
+        request->setOwnerUid(uid);
     }
 
     if (request->IsAgentNotification()) {
