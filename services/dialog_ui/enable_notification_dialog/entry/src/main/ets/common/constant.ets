@@ -146,6 +146,27 @@ export default class Constants {
   public static CROSS_LINE_RATIO = 0.2;
   public static CROSS_LINE_RESIZE_PARAM = 1.25;
 
+   //pc
+  public static PC_ICON_MARGIN_TOP = 24;
+
+  public static PC_TITLE_MARGIN_TOP = 16;
+  public static PC_TITLE_MARGIN_SIDE = 24;
+
+  public static PC_CONTENT_MARGIN_TOP = 16;
+  public static PC_CONTENT_MARGIN_SIDE = 24;
+
+  public static PC_OPERATE_MARGIN_SIDE = 16;
+  public static PC_OPERATE_MARGIN_TOP = 16;
+  public static PC_OPERATE_MARGIN_BUTTOM = 16;
+
+  public static PC_DIALOG_WIDTH = 400;
+  public static PC_BUTTON_HEIGHT = 40;
+
+  public static PC_RDIUS_16 = 16;
+  public static PC_RDIUS_8 = 8;
+
+  public static PC_OUTLINE_COLOR = '#20FFFFFF'; 
+
   // ccm config path
   static CCM_CONFIG_PATH = "etc/notification/notification_config.json";
 }
