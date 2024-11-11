@@ -734,7 +734,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_3);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
         " enabled:" + std::to_string(enabled));
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -772,7 +772,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
             }
         }));
     notificationSvrQueue_->wait(handler);
-    ANS_LOGI("Des_%{public}s_%{public}d, enabled: %{public}s, Set show badge enabled for bundle result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, enabled: %{public}s, Set show badge enabled for bundle result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), std::to_string(enabled).c_str(), result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -875,7 +875,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     // To get the permission
     bool allowedNotify = false;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_5);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " deviceId:" + deviceId);
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK) {
@@ -919,7 +919,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }
 
-    ANS_LOGI("Des_%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), deviceId.c_str(), result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -979,7 +979,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_4);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " enabled:" + std::to_string(enabled) +
             " deviceId:" + deviceId);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -1029,7 +1029,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         // Remote device
     }
 
-    ANS_LOGI("Des_%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
+    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
         "Set notifications enabled for special bundle result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), deviceId.c_str(), std::to_string(enabled).c_str(), result);
     message.ErrorCode(result);
@@ -1096,7 +1096,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
     // To get the permission
     bool allowedNotify = false;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_2);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
         " canPop:" + std::to_string(canPop));
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);
     if (result != ERR_OK) {
@@ -1143,7 +1143,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
 
     canPop = true;
     bundleName = bundleOption->GetBundleName();
-    ANS_LOGI("Des_%{public}s_%{public}d, canPop: %{public}s, CanPopEnableNotificationDialog result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, canPop: %{public}s, CanPopEnableNotificationDialog result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), std::to_string(canPop).c_str(), result);
     message.ErrorCode(result).Append(" CanPopEnableNotificationDialog end");
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -2194,6 +2194,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_4);
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
+        " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
     result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         sptr<NotificationSlot> slot;
@@ -2253,6 +2257,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     }));
     notificationSvrQueue_->wait(handler);
 
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGI("%{public}s_%{public}d, SetEnabledForBundleSlot successful.",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
     return result;
 }
@@ -2472,7 +2480,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         return ERR_ANS_INVALID_PARAM;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_6);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " badgeNumber: " + std::to_string(badgeNumber));
     if (notificationSvrQueue_ == nullptr) {
         return ERR_ANS_INVALID_PARAM;
@@ -2575,7 +2583,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_3);
-    message.Message("Des_" + bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
         " enabled:" + std::to_string(enabled) +
         " deviceType:" + deviceType);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -2601,7 +2609,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle,
         deviceType, enabled);
 
-    ANS_LOGI("Des_%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
+    ANS_LOGI("%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledByBundle result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), deviceType.c_str(), std::to_string(enabled).c_str(), result);
     message.ErrorCode(result);
