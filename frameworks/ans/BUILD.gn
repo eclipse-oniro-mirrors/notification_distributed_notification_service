@@ -61,6 +61,7 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/manager/ans_manager_death_recipient.cpp",
     "${core_path}/src/manager/ans_manager_proxy.cpp",
     "${core_path}/src/manager/ans_manager_proxy_bundle.cpp",
+    "${core_path}/src/manager/ans_manager_proxy_distributed.cpp",
     "${core_path}/src/manager/ans_manager_proxy_disturb.cpp",
     "${core_path}/src/manager/ans_manager_proxy_reminder.cpp",
     "${core_path}/src/manager/ans_manager_proxy_slot.cpp",
