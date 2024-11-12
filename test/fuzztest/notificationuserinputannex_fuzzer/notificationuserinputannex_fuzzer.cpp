@@ -19,28 +19,28 @@
 #undef private
 #undef protected
 #include "notificationuserinputannex_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t INPUT_EDIT_TYPE = 3;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationUserInput notificationUserInput(stringData);
         AAFwk::Want want;
         Notification::NotificationUserInput userInput(stringData);
         std::map<std::string, std::shared_ptr<Uri>> results;
         notificationUserInput.AddMimeInputToWant(userInput, want, results);
-        std::string inputKey(data);
-        std::string tag(data);
+        std::string inputKey = fdp->ConsumeRandomLengthString();
+        std::string tag = fdp->ConsumeRandomLengthString();
         std::vector<std::string> options;
         options.emplace_back(stringData);
-        bool permitFreeFormInput = *data % ENABLE;
+        bool permitFreeFormInput = fdp->ConsumeBool();
         std::set<std::string> permitMimeTypes;
         std::shared_ptr<AAFwk::WantParams> additional;
-        uint8_t inputEditTypes = *data % INPUT_EDIT_TYPE;
+        uint8_t inputEditTypes = fdp->ConsumeIntegral<uint8_t>() % INPUT_EDIT_TYPE;
         Notification::NotificationConstant::InputEditType inputEditType =
             Notification::NotificationConstant::InputEditType(inputEditTypes);
         Notification::NotificationUserInput::Create(inputKey, tag, options, permitFreeFormInput,
@@ -53,11 +53,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
