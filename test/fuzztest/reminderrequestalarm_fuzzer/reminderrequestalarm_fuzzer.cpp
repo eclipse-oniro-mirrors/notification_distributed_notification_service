@@ -19,6 +19,7 @@
 #undef private
 #undef protected
 #include "reminderrequestalarm_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
@@ -27,16 +28,16 @@ namespace OHOS {
         constexpr uint8_t WEEK = 7;
         constexpr uint8_t ENABLE = 2;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        uint8_t hour = *data % HOUR;
-        uint8_t minute = *data % MINUTE;
-        uint8_t week = *data % WEEK;
+        uint8_t hour = fdp->ConsumeIntegral<uint8_t>() % HOUR;
+        uint8_t minute = fdp->ConsumeIntegral<uint8_t>() % MINUTE;
+        uint8_t week = fdp->ConsumeIntegral<uint8_t>() % WEEK;
         std::vector<uint8_t> daysOfWeek;
         daysOfWeek.push_back(week);
         auto rrc = std::make_shared<Notification::ReminderRequestAlarm>(hour, minute, daysOfWeek);
         // test SetRepeatDaysOfWeek function
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         rrc->SetRepeatDaysOfWeek(enabled, daysOfWeek);
         // test GetDaysOfWeek function
         rrc->GetDaysOfWeek();
@@ -51,7 +52,7 @@ namespace OHOS {
         // test GetNextDaysOfWeek function
         time_t now;
         (void)time(&now);  // unit is seconds.
-        time_t target = *data % ENABLE;
+        time_t target = static_cast<time_t>(fdp->ConsumeIntegral<uint8_t>() % ENABLE);
         rrc->GetNextDaysOfWeek(now, target);
         // test GetHour function
         rrc->GetHour();
@@ -77,11 +78,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
