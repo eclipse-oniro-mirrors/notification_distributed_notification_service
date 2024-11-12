@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 #define private public
 #define protected public
 #include "ans_manager_stub.h"
@@ -22,10 +24,9 @@
 
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         Notification::AnsManagerStub ansManagerStub;
         MessageParcel datas;
@@ -33,16 +34,16 @@ namespace OHOS {
         ansManagerStub.HandleGetEnabledForBundleSlot(datas, reply);
         ansManagerStub.HandleDistributedSetEnabledWithoutApp(datas, reply);
         ansManagerStub.HandleDistributedGetEnabledWithoutApp(datas, reply);
-        std::string stringData(data);
+        std::string stringData = fuzzData->ConsumeRandomLengthString();
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         ansManagerStub.Publish(stringData, notification);
         int notificationId = 1;
         ansManagerStub.Cancel(notificationId, stringData, 0);
         ansManagerStub.CancelAll(0);
-        int32_t notificationIds = static_cast<int32_t>(GetU32Data(data));
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        int32_t notificationIds = fuzzData->ConsumeIntegral<int32_t>();
+        int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
         ansManagerStub.CancelAsBundle(notificationIds, stringData, userId);
-        uint8_t type = *data % SLOT_TYPE_NUM;
+        uint8_t type = fuzzData->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         ansManagerStub.AddSlotByType(slotType);
         sptr<Notification::NotificationSlot> slot = new Notification::NotificationSlot();
@@ -68,7 +69,7 @@ namespace OHOS {
         std::vector<std::string> key;
         key.emplace_back(stringData);
         ansManagerStub.GetSpecialActiveNotifications(key, notificationes);
-        bool canPublish = *data % ENABLE;
+        bool canPublish = fuzzData->ConsumeBool();
         ansManagerStub.CanPublishAsBundle(stringData, canPublish);
         ansManagerStub.PublishAsBundle(notificationer, stringData);
         ansManagerStub.SetNotificationBadgeNum(notificationId);
@@ -82,11 +83,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
