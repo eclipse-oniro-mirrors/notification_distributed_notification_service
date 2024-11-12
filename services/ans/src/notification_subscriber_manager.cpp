@@ -90,7 +90,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
-    message.Message("Des_" + GetClientBundleName() + "_" +
+    message.Message(GetClientBundleName() + "_" +
         " user:" + std::to_string(subInfo->GetAppUserId()));
     if (subInfo->GetAppUserId() == SUBSCRIBE_USER_INIT) {
         int32_t userId = SUBSCRIBE_USER_INIT;
@@ -115,7 +115,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     }));
     notificationSubQueue_->wait(handler);
 
-    ANS_LOGI("Des_%{public}s_, user: %{public}s, Add subscriber result: %{public}d", GetClientBundleName().c_str(),
+    ANS_LOGI("%{public}s_, user: %{public}s, Add subscriber result: %{public}d", GetClientBundleName().c_str(),
         std::to_string(subInfo->GetAppUserId()).c_str(), result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -145,9 +145,9 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
     notificationSubQueue_->wait(handler);
     std::string appUserId = (subscribeInfo == nullptr) ? "all" : std::to_string(subscribeInfo->GetAppUserId());
 
-    ANS_LOGI("Des_%{public}s_, user: %{public}s, Remove subscriber result: %{public}d", GetClientBundleName().c_str(),
+    ANS_LOGI("%{public}s_, user: %{public}s, Remove subscriber result: %{public}d", GetClientBundleName().c_str(),
         appUserId.c_str(), result);
-    message.Message("Des_" + GetClientBundleName() + "_" + "  user:" + appUserId);
+    message.Message(GetClientBundleName() + "_" + "  user:" + appUserId);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
@@ -530,7 +530,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     auto BundleNames = notification->GetBundleName();
     auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
     bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
-        (notification->GetNotificationRequest().GetCreatorUid() == record->subscriberUid);
+        (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
         return false;
     }
@@ -539,7 +539,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return true;
     }
 
-    int32_t recvUserId = notification->GetNotificationRequest().GetReceiverUserId();
+    int32_t recvUserId = notification->GetNotificationRequestPoint()->GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
     if (record->userId == recvUserId) {
         return true;

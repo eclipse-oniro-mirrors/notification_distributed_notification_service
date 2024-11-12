@@ -1231,7 +1231,7 @@ ErrCode AdvancedNotificationService::DoDistributedDelete(
     const std::string deviceId, const std::string bundleName, const sptr<Notification> notification)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (!notification->GetNotificationRequest().GetNotificationDistributedOptions().IsDistributed()) {
+    if (!notification->GetNotificationRequestPoint()->GetNotificationDistributedOptions().IsDistributed()) {
         return ERR_OK;
     }
     if (deviceId.empty()) {
