@@ -2224,8 +2224,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         std::shared_ptr<NotificationBundleOption> agentBundle =
         std::make_shared<NotificationBundleOption>("", uid);
         request->SetAgentBundle(agentBundle);
-    } else {
-        request->SetOwnerUid(uid);
     }
 
     if (request->IsAgentNotification()) {
