@@ -1287,7 +1287,6 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
 
 bool ReminderRequest::InitNotificationRequest()
 {
-    ANSR_LOGI("Init notification");
     notificationRequest_ = new (std::nothrow) NotificationRequest(notificationId_);
     if (notificationRequest_ == nullptr) {
         ANSR_LOGE("Failed to create notification.");
