@@ -19,13 +19,14 @@
 #undef private
 #undef protected
 #include "notificationrequestannex_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        int32_t notificationId = static_cast<int32_t>(GetU32Data(data));
+        int32_t notificationId = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationRequest request(notificationId);
-        pid_t pid = *data;
+        pid_t pid = fdp->ConsumeIntegral<pid_t>();
         request.SetCreatorPid(pid);
         request.Dump();
         nlohmann::json jsonObject;
@@ -41,11 +42,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
