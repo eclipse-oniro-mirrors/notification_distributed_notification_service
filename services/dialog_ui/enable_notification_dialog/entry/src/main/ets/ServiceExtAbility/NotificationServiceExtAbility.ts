@@ -144,11 +144,11 @@ export class EnableNotificationDialog {
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
-        let windowRect  = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+        await subWindow.loadContent(path, this.storage);
+        let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
         await subWindow.moveWindowTo(windowRect?.left, windowRect?.top);
         await subWindow.resize(windowRect?.width, windowRect?.height);
         console.info(TAG, `size : ${windowRect.left} ${windowRect.top} ${windowRect.width}  ${windowRect.height}`);
-        await subWindow.loadContent(path, this.storage);
         try {
           await subWindow.hideNonSystemFloatingWindows(true);
         } catch (err) {
@@ -240,6 +240,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
     } catch (err) {
       console.error(TAG, `Failed to handle onSessionCreate`);
       await handleDialogQuitException(want);
+      this.context.terminateSelf();
     }
   }
 
