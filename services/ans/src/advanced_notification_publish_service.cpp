@@ -191,6 +191,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     }
     std::string bundle = request->GetCreatorBundleName();
     int32_t uid = request->GetCreatorUid();
+    request->SetOwnerUid(uid);
+    request->SetOwnerBundleName(bundle);
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
