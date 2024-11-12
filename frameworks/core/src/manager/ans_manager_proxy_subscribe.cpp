@@ -27,6 +27,134 @@
 
 namespace OHOS {
 namespace Notification {
+ErrCode AnsManagerProxy::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, const std::string &label, int32_t removeReason)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[RemoveNotification] fail: bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[RemoveNotification] fail:, write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(bundleOption)) {
+        ANS_LOGE("[RemoveNotification] fail:: write bundle failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(notificationId)) {
+        ANS_LOGE("[RemoveNotification] fail: write notificationId failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(label)) {
+        ANS_LOGE("[RemoveNotification] fail: write label failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(removeReason)) {
+        ANS_LOGE("[RemoveNotification] fail: write removeReason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_NOTIFICATION, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[RemoveNotification] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[RemoveNotification] fail: read result error.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::RemoveAllNotifications(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("[RemoveAllNotifications] fail: bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[RemoveAllNotifications] fail:, write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteStrongParcelable(bundleOption)) {
+        ANS_LOGE("[RemoveAllNotifications] fail:: write bundle failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_ALL_NOTIFICATIONS, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[RemoveNotification] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[RemoveNotification] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason)
+{
+    if (keys.empty()) {
+        ANS_LOGE("fail: keys is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("fail:, write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(keys.size())) {
+        ANS_LOGE("write keys size failed");
+        return false;
+    }
+
+    if (!data.WriteStringVector(keys)) {
+        ANS_LOGE("fail: write keys failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(removeReason)) {
+        ANS_LOGE("fail: write removeReason failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REMOVE_NOTIFICATIONS_BY_KEYS, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
     const sptr<NotificationSubscribeInfo> &info)
 {
