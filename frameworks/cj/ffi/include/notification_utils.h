@@ -243,6 +243,8 @@ constexpr int32_t STR_MAX_SIZE = 204;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t ERR_OK = 0;
 constexpr uint32_t MAX_ICON_SIZE = 192 * 1024;
+constexpr int32_t SHORT_STR_SIZE = 1024;
+constexpr int32_t LONG_STR_SIZE = 3072;
 
 char *MallocCString(const std::string &origin);
 bool GetNotificationSupportDisplayDevices(
