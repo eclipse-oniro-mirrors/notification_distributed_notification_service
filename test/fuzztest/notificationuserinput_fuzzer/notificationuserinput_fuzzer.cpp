@@ -19,18 +19,19 @@
 #undef private
 #undef protected
 #include "notificationuserinput_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
         constexpr uint8_t ENABLE = 2;
         constexpr uint8_t INPUT_EDIT_TYPE = 3;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationUserInput notificationUserInput(stringData);
         AAFwk::Want want;
-        uint8_t sources = *data % ENABLE;
+        uint8_t sources = fdp->ConsumeIntegral<uint8_t>() % ENABLE;
         Notification::NotificationConstant::InputsSource source =
             Notification::NotificationConstant::InputsSource(sources);
         notificationUserInput.SetInputsSource(want, source);
@@ -46,7 +47,7 @@ namespace OHOS {
         notificationUserInput.GetInputKey();
         notificationUserInput.AddAdditionalData(additional);
         notificationUserInput.GetAdditionalData();
-        uint8_t inputEditTypes = *data % INPUT_EDIT_TYPE;
+        uint8_t inputEditTypes = fdp->ConsumeIntegral<uint8_t>() % INPUT_EDIT_TYPE;
         Notification::NotificationConstant::InputEditType inputEditType =
             Notification::NotificationConstant::InputEditType(inputEditTypes);
         notificationUserInput.SetEditType(inputEditType);
@@ -55,7 +56,7 @@ namespace OHOS {
         options.emplace_back(stringData);
         notificationUserInput.SetOptions(options);
         notificationUserInput.GetOptions();
-        bool doPermit = *data % ENABLE;
+        bool doPermit = fdp->ConsumeBool();
         notificationUserInput.SetPermitMimeTypes(stringData, doPermit);
         notificationUserInput.GetPermitMimeTypes();
         notificationUserInput.IsMimeTypeOnly();
@@ -74,11 +75,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

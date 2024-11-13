@@ -16,29 +16,29 @@
 #include "publishnotification_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
         constexpr uint8_t FLAG_STATUS = 3;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationRequest request;
-        request.SetAlertOneTime(*data % ENABLE);
+        request.SetAlertOneTime(fdp->ConsumeBool());
 
-        int32_t style = static_cast<int32_t>(GetU32Data(data));
+        int32_t style = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationRequest::BadgeStyle badgeStyle =
             Notification::NotificationRequest::BadgeStyle(style);
         request.SetBadgeIconStyle(badgeStyle);
         request.SetBadgeNumber(style);
         request.SetClassification(stringData);
 
-        uint32_t color = GetU32Data(data);
+        uint32_t color = fdp->ConsumeIntegral<uint32_t>();
         request.SetColor(color);
-        request.SetColorEnabled(*data % ENABLE);
+        request.SetColorEnabled(fdp->ConsumeBool());
 
         std::shared_ptr<Notification::NotificationNormalContent> contentType =
             std::make_shared<Notification::NotificationNormalContent>();
@@ -48,13 +48,13 @@ namespace OHOS {
         std::shared_ptr<Notification::NotificationContent> content =
             std::make_shared<Notification::NotificationContent>(contentType);
         request.SetContent(content);
-        request.SetCountdownTimer(*data % ENABLE);
+        request.SetCountdownTimer(fdp->ConsumeBool());
         request.SetCreatorBundleName(stringData);
         request.SetDeliveryTime(style);
 
         std::shared_ptr<Notification::NotificationFlags> notificationFlages =
             std::make_shared<Notification::NotificationFlags>();
-        int32_t soundEnabled = static_cast<int32_t>(*data % FLAG_STATUS);
+        int32_t soundEnabled = static_cast<int32_t>(fdp->ConsumeIntegral<uint8_t>() % FLAG_STATUS);
         Notification::NotificationConstant::FlagStatus sound =
             Notification::NotificationConstant::FlagStatus(soundEnabled);
         notificationFlages->SetSoundEnabled(sound);
@@ -66,12 +66,12 @@ namespace OHOS {
         request.SetGroupAlertType(groupAlertType);
 
         request.SetGroupName(stringData);
-        request.SetGroupOverview(*data % ENABLE);
+        request.SetGroupOverview(fdp->ConsumeBool());
         request.SetLabel(stringData);
         request.SetNotificationId(style);
         request.SetOwnerBundleName(stringData);
 
-        uint8_t types = *data % SLOT_TYPE_NUM;
+        uint8_t types = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
         request.SetSlotType(slotType);
 
@@ -90,11 +90,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
