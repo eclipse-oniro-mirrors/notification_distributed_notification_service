@@ -17,22 +17,22 @@
 #define private public
 #define protected public
 #include "notification_request.h"
+#include <fuzzer/FuzzedDataProvider.h>
 #undef private
 #undef protected
 
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t VISIBLENESS_TYPE_NUM = 4;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        std::string stringData(data);
-        int32_t notificationId = static_cast<int32_t>(GetU32Data(data));
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        int32_t notificationId = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationRequest request(notificationId);
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         request.SetTapDismissed(enabled);
-        uint8_t type = *data % VISIBLENESS_TYPE_NUM;
+        uint8_t type = fdp->ConsumeIntegral<uint8_t>() % VISIBLENESS_TYPE_NUM;
         Notification::NotificationConstant::VisiblenessType VisiblenessType =
             Notification::NotificationConstant::VisiblenessType(type);
         request.SetVisibleness(VisiblenessType);
@@ -85,11 +85,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
