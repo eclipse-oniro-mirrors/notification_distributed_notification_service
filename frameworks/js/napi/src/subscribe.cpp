@@ -15,8 +15,6 @@
 
 #include "subscribe.h"
 #include "ans_inner_errors.h"
-#include "inner_event.h"
-#include "out/rk3568/obj/third_party/musl/intermidiates/linux/musl_src_ported/include/unistd.h"
 #include <mutex>
 #include <uv.h>
 
@@ -24,8 +22,6 @@ namespace OHOS {
 namespace NotificationNapi {
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
-const int64_t MAX_PERIOD_MILLISECONDS = 3;
-
 const std::string CONSUME = "onConsume";
 const std::string CANCEL = "onCancel";
 const std::string UPDATE = "onUpdate";
@@ -1158,16 +1154,6 @@ void SubscriberInstance::SetCallbackInfo(const std::string &type, const napi_env
     }
 }
 
-int64_t GetNowSysTime()
-{
-    AppExecFwk::InnerEvent::TimePoint nowSys = AppExecFwk::InnerEvent::Clock::now();
-    auto epoch = nowSys.time_since_epoch();
-    auto value = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-    int64_t duration = value.count();
-
-    return duration;
-}
-
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -1527,31 +1513,6 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
         ANS_LOGE("Wrong argument type for arg0. NotificationSubscriber object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be NotificationSubscriber.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-
-    int64_t begin = GetNowSysTime();
-    bool timeout = true;
-    while (GetNowSysTime() - begin < MAX_PERIOD_MILLISECONDS) {
-        SubscriberInstancesInfo info;
-        if (!HasNotificationSubscriber(env, argv[PARAM0], info)) {
-            timeout = false;
-            break;
-        }
-        if (info.subscriber == nullptr) {
-            timeout = false;
-            break;
-        }
-        std::lock_guard<std::mutex> lock(delMutex_);
-        auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), info.subscriber);
-        if (iter == DeletingSubscriber.end()) {
-            timeout = false;
-            break;
-        }
-        usleep(100);
-    }
-    if (timeout) {
-        ANS_LOGE("Wrong subscribe due to subscriber is deleting");
         return nullptr;
     }
 
