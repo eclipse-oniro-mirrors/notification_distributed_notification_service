@@ -16,21 +16,19 @@
 #include "setnotificationsenabledforallbundles_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         // test SetNotificationsEnabledForAllBundles function
-        std::string stringData(data);
-        bool enabled = *data % ENABLE;
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        bool enabled = fdp->ConsumeBool();
         Notification::NotificationHelper::SetNotificationsEnabledForAllBundles(stringData, enabled);
         // test SetNotificationsEnabledForDefaultBundle function
         Notification::NotificationHelper::SetNotificationsEnabledForDefaultBundle(stringData, enabled);
         // test SetNotificationsEnabledForSpecifiedBundle function
-        int32_t usingData = static_cast<int32_t>(GetU32Data(data));
+        int32_t usingData = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationBundleOption bundleOption;
         bundleOption.SetBundleName(stringData);
         bundleOption.SetUid(usingData);
@@ -46,11 +44,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size > GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
