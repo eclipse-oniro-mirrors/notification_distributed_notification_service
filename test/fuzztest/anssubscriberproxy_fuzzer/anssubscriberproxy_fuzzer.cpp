@@ -22,13 +22,14 @@
 #include "anssubscriberproxy_fuzzer.h"
 #include "notification_request.h"
 #include "notification_subscriber.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         sptr<IRemoteObject> impl;
         Notification::AnsSubscriberProxy ansSubscriberProxy(impl);
-        uint32_t code = GetU32Data(data);
+        uint32_t code = fdp->ConsumeIntegral<uint32_t>();
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
@@ -64,17 +65,13 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        std::vector<std::string> requestPermission = {
-            OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
-            OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
-            OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
-        };
-        SystemHapTokenGet(requestPermission);
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    SystemHapTokenGet(requestPermission);
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
