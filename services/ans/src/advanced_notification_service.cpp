@@ -438,17 +438,18 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     if (request->IsAgentNotification()) {
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
-    }
-    if ((!sourceBundleName.empty() &&
-        NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
-        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER))) {
-        request->SetCreatorUid(request->GetOwnerUid());
-        request->SetCreatorBundleName(request->GetOwnerBundleName());
-        bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
-            request->GetOwnerUid());
     } else {
-        bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
-            request->GetCreatorUid());
+        if ((!sourceBundleName.empty() &&
+            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
+            !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER))) {
+            request->SetCreatorUid(request->GetOwnerUid());
+            request->SetCreatorBundleName(request->GetOwnerBundleName());
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
+                request->GetOwnerUid());
+        } else {
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
+                request->GetCreatorUid());
+        }
     }
 
     if (bundleOption == nullptr) {
