@@ -209,7 +209,6 @@ namespace OHOS {
     {
         std::string randomString = fuzzData->ConsumeRandomLengthString();
         int32_t randomInt32 = fuzzData->ConsumeIntegral<int32_t>();
-        int64_t randomInt64 = fuzzData->ConsumeIntegral<int64_t>();
         sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
         bundleOption->SetBundleName(randomString);
         bundleOption->SetUid(randomInt32);
@@ -246,7 +245,6 @@ namespace OHOS {
         service->OnDistributedPublish(randomString, randomString, request);
         service->OnDistributedUpdate(randomString, randomString, request);
         service->OnDistributedDelete(randomString, randomString, randomString, randomInt32);
-        service->AdjustDateForDndTypeOnce(randomInt64, randomInt64);
         return true;
     }
 
@@ -255,7 +253,6 @@ namespace OHOS {
     {
         std::string randomString = fuzzData->ConsumeRandomLengthString();
         int32_t randomInt32 = fuzzData->ConsumeIntegral<int32_t>();
-        int64_t randomInt64 = fuzzData->ConsumeIntegral<int64_t>();
         sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
         bundleOption->SetBundleName(randomString);
         bundleOption->SetUid(randomInt32);
