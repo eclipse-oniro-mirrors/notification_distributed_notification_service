@@ -19,28 +19,28 @@
 #undef private
 #undef protected
 #include "reminderrequest_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t ACTION_BUTTON_TYPE = 3;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminderRequest(reminderId);
         reminderRequest.CanRemove();
         reminderRequest.CanShow();
         reminderRequest.Dump();
-        uint8_t types = *data % ACTION_BUTTON_TYPE;
+        uint8_t types = fdp->ConsumeIntegral<uint8_t>() % ACTION_BUTTON_TYPE;
         Notification::ReminderRequest::ActionButtonType type =
             Notification::ReminderRequest::ActionButtonType(types);
         reminderRequest.SetActionButton(stringData, type, stringData);
         reminderRequest.SetContent(stringData);
         reminderRequest.SetExpiredContent(stringData);
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         reminderRequest.SetExpired(enabled);
         reminderRequest.InitReminderId();
         reminderRequest.InitUserId(reminderId);
@@ -49,12 +49,12 @@ namespace OHOS {
         reminderRequest.IsShowing();
         reminderRequest.OnClose(enabled);
         reminderRequest.OnDateTimeChange();
-        uint64_t oriTriggerTime = static_cast<uint64_t>(GetU32Data(data));
-        uint64_t optTriggerTimes = static_cast<uint64_t>(GetU32Data(data));
+        uint64_t oriTriggerTime = fdp->ConsumeIntegral<uint64_t>();
+        uint64_t optTriggerTimes = fdp->ConsumeIntegral<uint64_t>();
         reminderRequest.HandleSysTimeChange(oriTriggerTime, optTriggerTimes);
-        uint64_t oldZoneTriggerTime = static_cast<uint64_t>(GetU32Data(data));
-        uint64_t newZoneTriggerTime = static_cast<uint64_t>(GetU32Data(data));
-        uint64_t optTriggerTime = static_cast<uint64_t>(GetU32Data(data));
+        uint64_t oldZoneTriggerTime = fdp->ConsumeIntegral<uint64_t>();
+        uint64_t newZoneTriggerTime = fdp->ConsumeIntegral<uint64_t>();
+        uint64_t optTriggerTime = fdp->ConsumeIntegral<uint64_t>();
         reminderRequest.HandleTimeZoneChange(oldZoneTriggerTime, newZoneTriggerTime, optTriggerTime);
         reminderRequest.OnSameNotificationIdCovered();
         reminderRequest.OnShow(enabled, enabled, enabled);
@@ -69,7 +69,7 @@ namespace OHOS {
             std::make_shared< Notification::ReminderRequest::MaxScreenAgentInfo>();
         reminderRequest.SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
         reminderRequest.SetNotificationId(reminderId);
-        uint8_t typed = *data % SLOT_TYPE_NUM;
+        uint8_t typed = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType =
             Notification::NotificationConstant::SlotType(typed);
         reminderRequest.SetSlotType(slotType);
@@ -82,11 +82,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

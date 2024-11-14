@@ -19,17 +19,18 @@
 #undef private
 #undef protected
 #include "reminderrequestannexthree_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminderRequest(reminderId);
         reminderRequest.GetTitle();
         uint64_t showTime = 2;
         reminderRequest.ReminderRequest::GetShowTime(showTime);
         Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType::YEAR;
-        int32_t cTime = static_cast<int32_t>(GetU32Data(data));
+        int32_t cTime = static_cast<int32_t>(fdp->ConsumeIntegral<uint8_t>());
         reminderRequest.GetActualTime(type, cTime);
         reminderRequest.GetCTime(type, cTime);
         return reminderRequest.IsAlerting();
@@ -40,11 +41,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

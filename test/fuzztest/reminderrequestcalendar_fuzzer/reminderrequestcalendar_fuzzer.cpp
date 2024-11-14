@@ -19,6 +19,7 @@
 #undef private
 #undef protected
 #include "reminderrequestcalendar_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
@@ -28,15 +29,14 @@ namespace OHOS {
         constexpr uint16_t HOURS = 24;
         constexpr uint16_t MINUTES = 60;
         constexpr uint16_t SECONDS = 60;
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t WEEK = 7;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         struct tm nowTime;
-        uint8_t months = *data % MONTHS + 1;
-        uint8_t days = *data % DAYS + 1;
-        uint8_t weeks = *data % WEEK + 1;
+        uint8_t months = fdp->ConsumeIntegral<uint8_t>() % MONTHS + 1;
+        uint8_t days = fdp->ConsumeIntegral<uint8_t>() % DAYS + 1;
+        uint8_t weeks = fdp->ConsumeIntegral<uint8_t>() % WEEK + 1;
         std::vector<uint8_t> repeatMonths;
         std::vector<uint8_t> repeatDays;
         std::vector<uint8_t> daysOfWeek;
@@ -51,7 +51,7 @@ namespace OHOS {
         // test InitDateTime function
         reminderRequestCalendar.InitDateTime(nowTime);
         // test SetDay function
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         reminderRequestCalendar.SetDay(days, enabled);
         // test SetMonth function
         reminderRequestCalendar.SetMonth(months, enabled);
@@ -66,7 +66,7 @@ namespace OHOS {
         // test GetRepeatDays function
         reminderRequestCalendar.GetRepeatDays();
         // test GetDaysOfMonth function
-        uint16_t year = *data % YEAR;
+        uint16_t year = fdp->ConsumeIntegral<uint16_t>() % YEAR;
         reminderRequestCalendar.GetDaysOfMonth(year, months);
         // test GetNextDay function
         struct tm target;
@@ -77,9 +77,9 @@ namespace OHOS {
         struct tm tarTime;
         reminderRequestCalendar.GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
         // test GetTimeInstantMilli function
-        uint8_t hour = *data % HOURS;
-        uint8_t minute = *data % MINUTES;
-        uint8_t second = *data % SECONDS;
+        uint8_t hour = fdp->ConsumeIntegral<uint8_t>() % HOURS;
+        uint8_t minute = fdp->ConsumeIntegral<uint8_t>() % MINUTES;
+        uint8_t second = fdp->ConsumeIntegral<uint8_t>() % SECONDS;
         reminderRequestCalendar.GetTimeInstantMilli(year, months, days, hour, minute, second);
         // test IsRepeatReminder function
         reminderRequestCalendar.IsRepeatReminder();
@@ -107,11 +107,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

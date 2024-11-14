@@ -16,17 +16,18 @@
 #include "reminder_data_manager.h"
 #include "reminder_request_timer.h"
 #include "reminderdatamanager_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithManager(const char* data, size_t size)
+    bool DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     {
-        std::string bundleName(data);
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
-        int32_t uid = static_cast<int32_t>(GetU32Data(data));
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
-        uint64_t date = static_cast<uint64_t>(GetU32Data(data));
-        bool value = static_cast<bool>(GetU32Data(data));
-        uint8_t type = static_cast<uint8_t>(GetU32Data(data));
+        std::string bundleName = fdp->ConsumeRandomLengthString();
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
+        int32_t uid = fdp->ConsumeIntegral<int32_t>();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
+        uint64_t date = fdp->ConsumeIntegral<uint64_t>();
+        bool value = fdp->ConsumeBool();
+        uint8_t type = fdp->ConsumeIntegral<uint8_t>();
         EventFwk::Want want;
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
@@ -71,13 +72,13 @@ namespace OHOS {
         return true;
     }
 
-    bool DoSomethingInterestingWithReminder(const char* data, size_t size)
+    bool DoSomethingInterestingWithReminder(FuzzedDataProvider* fdp)
     {
-        std::string bundleName(data);
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
-        int32_t uid = static_cast<int32_t>(GetU32Data(data));
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
-        bool value = static_cast<bool>(GetU32Data(data));
+        std::string bundleName = fdp->ConsumeRandomLengthString();
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
+        int32_t uid = fdp->ConsumeIntegral<int32_t>();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
+        bool value = fdp->ConsumeBool();
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
         auto manager = Notification::ReminderDataManager::GetInstance();
@@ -140,12 +141,8 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithManager(ch, size);
-        OHOS::DoSomethingInterestingWithReminder(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithManager(&fdp);
+    OHOS::DoSomethingInterestingWithReminder(&fdp);
     return 0;
 }

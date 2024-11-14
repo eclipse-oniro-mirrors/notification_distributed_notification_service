@@ -19,18 +19,16 @@
 #undef private
 #undef protected
 #include "reminderrequesttimer_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         uint64_t countDownTimeInSeconds = 0;
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::ReminderRequestTimer reminderRequestTimer(countDownTimeInSeconds);
         reminderRequestTimer.GetInitInfo();
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         reminderRequestTimer.PreGetNextTriggerTimeIgnoreSnooze(enabled, enabled);
         reminderRequestTimer.OnDateTimeChange();
         reminderRequestTimer.OnTimeZoneChange();
@@ -48,11 +46,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
