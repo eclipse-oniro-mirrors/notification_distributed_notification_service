@@ -15,14 +15,15 @@
 
 #include "notification_do_not_disturb_date.h"
 #include "notificationdonotdisturbdate_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         int64_t beginDate = 1;
         int64_t endDate = 3;
-        uint32_t type = GetU32Data(data);
+        uint32_t type = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationConstant::DoNotDisturbType disturbType =
             Notification::NotificationConstant::DoNotDisturbType(type);
         Notification::NotificationDoNotDisturbDate notificationDoNotDisturbDate(disturbType, beginDate, endDate);
@@ -40,11 +41,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

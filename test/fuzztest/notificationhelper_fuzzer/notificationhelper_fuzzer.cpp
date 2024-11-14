@@ -19,28 +19,31 @@
 #undef private
 #undef protected
 #include "notificationhelper_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
 
-    bool DoSomethingInterestingWithMyAPI(FuzzData fuzzData)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         Notification::NotificationHelper notificationHelper;
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        int32_t intData = fdp->ConsumeIntegral<int32_t>();
         // test IsSoundEnabled function
-        std::string representativeBundle = fuzzData.GenerateRandomString();
+        std::string representativeBundle = stringData;
         Notification::NotificationRequest notification;
-        notification.SetOwnerUid(fuzzData.GenerateRandomInt32());
-        notification.SetCreatorUid(fuzzData.GenerateRandomInt32());
+        notification.SetOwnerUid(intData);
+        notification.SetCreatorUid(intData);
         notification.SetSlotType(Notification::NotificationConstant::SlotType::LIVE_VIEW);
         auto content = std::make_shared<Notification::NotificationLiveViewContent>();
         notification.SetContent(std::make_shared<Notification::NotificationContent>(content));
         notificationHelper.PublishNotificationAsBundle(representativeBundle, notification);
         notificationHelper.RemoveNotifications();
-        int32_t intData = fuzzData.GenerateRandomInt32();
-        bool enabled = fuzzData.GenerateRandomBool();
-        notificationHelper.SetNotificationsEnabledForAllBundles(intData, enabled);
+        
+        bool enabled = fdp->ConsumeBool();
+        notificationHelper.SetNotificationsEnabledForAllBundles(stringData, enabled);
         Notification::NotificationBundleOption bundleOption;
-        bundleOption.SetBundleName(fuzzData.GenerateRandomString());
-        bundleOption.SetUid(fuzzData.GenerateRandomInt32());
+        bundleOption.SetBundleName(stringData);
+        bundleOption.SetUid(intData);
         uint32_t flag = 0;
         notificationHelper.GetNotificationSlotFlagsAsBundle(bundleOption, flag);
         notificationHelper.SetNotificationSlotFlagsAsBundle(bundleOption, intData);
@@ -52,9 +55,7 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    if (data != nullptr && size >= GetU32Size()) {
-        OHOS::FuzzData fuzzData(data, size);
-        OHOS::DoSomethingInterestingWithMyAPI(fuzzData);
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
