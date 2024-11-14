@@ -800,6 +800,10 @@ ErrCode AnsManagerStub::HandleGetAllActiveNotifications(MessageParcel &data, Mes
 {
     std::vector<sptr<Notification>> notifications;
     ErrCode result = GetAllActiveNotifications(notifications);
+    
+    if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     if (!WriteParcelableVector(notifications, reply, result)) {
         ANS_LOGE("[HandleGetAllActiveNotifications] fail: write notifications failed");
         return ERR_ANS_PARCELABLE_FAILED;
