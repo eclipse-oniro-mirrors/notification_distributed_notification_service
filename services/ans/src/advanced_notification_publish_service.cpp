@@ -2529,7 +2529,7 @@ ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<Notification
         return ERR_ANS_DUPLICATE_MSG;
     }
 
-    uniqueKeyList_.emplace_back(std::make_pair(std::chrono::steady_clock::now(), uniqueKey));
+    uniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), uniqueKey));
     return ERR_OK;
 }
 
@@ -2555,10 +2555,13 @@ void AdvancedNotificationService::DeleteDuplicateMsgs(const sptr<NotificationBun
 
 void AdvancedNotificationService::RemoveExpiredUniqueKey()
 {
-    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     auto iter = uniqueKeyList_.begin();
     while (iter != uniqueKeyList_.end()) {
-        if (std::chrono::duration_cast<std::chrono::seconds>(now - (*iter).first).count() > SECONDS_IN_ONE_DAY) {
+        uint32_t duration = std::chrono::duration_cast<std::chrono::seconds>(abs(now - (*iter).first)).count();
+        ANS_LOGD("RemoveExpiredUniqueKey duration is %{public}u", duration);
+        if (duration > SECONDS_IN_ONE_DAY) {
+            ANS_LOGD("RemoveExpiredUniqueKey end duration is %{public}u", duration);
             iter = uniqueKeyList_.erase(iter);
         } else {
             break;
