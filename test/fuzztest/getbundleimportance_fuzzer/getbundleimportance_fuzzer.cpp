@@ -19,10 +19,13 @@
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
+    namespace {
+        constexpr uint8_t NOTIFICATION_LEVEL_NUM = 6;
+    }
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         std::string representativeBundle = fdp->ConsumeRandomLengthString();
-        uint8_t levels = fdp->ConsumeIntegral<uint8_t>();
+        uint8_t levels = fdp->ConsumeIntegral<uint8_t>() % NOTIFICATION_LEVEL_NUM;
 
         // test CanPublishNotificationAsBundle function
         bool canPublish = true;

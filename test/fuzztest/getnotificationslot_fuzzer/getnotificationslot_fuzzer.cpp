@@ -19,9 +19,12 @@
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
+    namespace {
+        constexpr uint8_t SLOT_TYPE_NUM = 5;
+    }
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        uint8_t type = fdp->ConsumeIntegral<uint8_t>();
+        uint8_t type = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         sptr<Notification::NotificationSlot> slot = nullptr;
         // test GetNotificationSlots function
