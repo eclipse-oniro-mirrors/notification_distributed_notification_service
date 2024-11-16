@@ -177,6 +177,10 @@ napi_value Common::SetNotificationRequestByBool(
     napi_get_boolean(env, request->IsShowDeliveryTime(), &value);
     napi_set_named_property(env, result, "showDeliveryTime", value);
 
+    // UpdateOnly?: boolean
+    napi_get_boolean(env, request->IsUpdateOnly(), &value);
+    napi_set_named_property(env, result, "updateOnly", value);
+
     return NapiGetBoolean(env, true);
 }
 
@@ -653,6 +657,11 @@ napi_value Common::GetNotificationRequestByBool(
     }
     // showDeliveryTime?: boolean
     if (GetNotificationShowDeliveryTime(env, value, request) == nullptr) {
+        return nullptr;
+    }
+
+    // UpdateOnly?: boolean
+    if (GetNotificationIsUpdateOnly(env, value, request) == nullptr) {
         return nullptr;
     }
 
@@ -1561,6 +1570,29 @@ napi_value Common::GetNotificationShowDeliveryTime(
         }
         napi_get_value_bool(env, result, &showDeliveryTime);
         request.SetShowDeliveryTime(showDeliveryTime);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationIsUpdateOnly(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    bool isUpdateOnly = false;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "updateOnly", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "updateOnly", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Bool expected.");
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &isUpdateOnly);
+        request.SetUpdateOnly(isUpdateOnly);
     }
 
     return NapiGetNull(env);

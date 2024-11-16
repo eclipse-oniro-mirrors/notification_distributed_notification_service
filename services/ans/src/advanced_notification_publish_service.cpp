@@ -2110,7 +2110,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
-    auto ipcUid = IPCSkeleton::GetCallingUid();
+    const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
         if (!bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
@@ -2129,7 +2129,10 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
             return;
         }
-
+        result = FlowControl(record, ipcUid);
+        if (result != ERR_OK) {
+            return;
+        }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;
