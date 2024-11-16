@@ -535,7 +535,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
-    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -654,7 +654,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02900, Function | SmallTest | Level1)
 {
     std::string deviceId = "<deviceId>";
-    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -1142,7 +1142,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05900, Function | SmallTest | Level1)
 {
-    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
     bool isForceControl = false;
