@@ -944,7 +944,8 @@ void AdvancedNotificationService::OnDistributedPublish(
         ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return;
     }
-    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+    const int32_t callingUid = IPCSkeleton::GetCallingUid();
+    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("CheckDistributedNotificationType is false.");
@@ -994,7 +995,11 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
 
-        result = PublishFlowControl(record);
+        result = FlowControl(record, callingUid);
+        if (result != ERR_OK) {
+            return;
+        }
+        result = PublishInNotificationList(record);
         if (result != ERR_OK) {
             return;
         }

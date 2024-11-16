@@ -3346,6 +3346,57 @@ HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00001, Functi
 }
 
 /**
+ * @tc.name: AssignToNotificationList_00002
+ * @tc.desc: Test AssignToNotificationList when NotificationRequest's updateOnly is true but notification ID not exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetUpdateOnly(true);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    advancedNotificationService_->notificationList_.clear();
+}
+
+/**
+ * @tc.name: AssignToNotificationList_00003
+ * @tc.desc: Test AssignToNotificationList when NotificationRequest's updateOnly is true and notification ID exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetUpdateOnly(true);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->notificationList_.push_back(record);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    advancedNotificationService_->notificationList_.clear();
+}
+
+/**
  * @tc.name: StartArchiveTimer_00001
  * @tc.desc: Test StartArchiveTimer
  * @tc.type: FUNC
@@ -3746,12 +3797,12 @@ HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | Smal
 }
 
 /**
- * @tc.number    : PublishFlowControl_00001
- * @tc.name      : Test PublishFlowControl
- * @tc.desc      : Test PublishFlowControl function when the record->slot is nullptr
+ * @tc.number    : PublishInNotificationList_00001
+ * @tc.name      : Test PublishInNotificationList
+ * @tc.desc      : Test PublishInNotificationList function when the record->slot is nullptr
  * @tc.require   : issueI5S4VP
  */
-HWTEST_F(AdvancedNotificationServiceTest, PublishFlowControl_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Function | SmallTest | Level1)
 {
     for (int i = 0; i < 100; i++) {
         sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
@@ -3767,8 +3818,378 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishFlowControl_00001, Function | S
     auto record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->notification = notification;
-    advancedNotificationService_->PublishFlowControl(record);
+    advancedNotificationService_->PublishInNotificationList(record);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 100);
+}
+
+/**
+ * @tc.number    : PublishGlobalFlowCtrl_00001
+ * @tc.name      : Test PublishGlobalFlowCtrl
+ * @tc.desc      : Test PublishGlobalFlowCtrl 
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishGlobalFlowCtrl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isThirdparty = false;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    for (int i = 0; i < advancedNotificationService_->maxCreateNumPerSecond; i++) {
+        result = advancedNotificationService_->PublishGlobalFlowCtrl(record, now);
+        advancedNotificationService_->systemFlowControlPublishTimestampList_.push_back(now);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->PublishGlobalFlowCtrl(record, now);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+
+    record->isThirdparty = true;
+    for (int i = 0; i < advancedNotificationService_->maxCreateNumPerSecond; i++) {
+        result = advancedNotificationService_->PublishGlobalFlowCtrl(record, now);
+        advancedNotificationService_->flowControlPublishTimestampList_.push_back(now);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->PublishGlobalFlowCtrl(record, now);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+
+    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
+}
+
+/**
+ * @tc.number    : PublishSingleAppFlowCtrl_00001
+ * @tc.name      : Test PublishSingleAppFlowCtrl
+ * @tc.desc      : Test PublishSingleAppFlowCtrl 
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishSingleAppFlowCtrl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    const int32_t callingUid = DEFAULT_UID;
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_[callingUid] =
+        std::make_shared<std::list<std::chrono::system_clock::time_point>>();
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    for (int i = 0; i < advancedNotificationService_->maxCreateNumPerSecondPerApp; i++) {
+        result = advancedNotificationService_->PublishSingleAppFlowCtrl(record, now, callingUid);
+        advancedNotificationService_->singleAppFlowControlPublishTimestampMap_[callingUid]->push_back(now);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->PublishSingleAppFlowCtrl(record, now, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+}
+
+/**
+ * @tc.number    : PublishSingleAppFlowCtrlRemoveExpire_00001
+ * @tc.name      : Test PublishSingleAppFlowCtrlRemoveExpire
+ * @tc.desc      : Test PublishSingleAppFlowCtrlRemoveExpire
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishSingleAppFlowCtrlRemoveExpire_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+
+    int32_t callingUid = DEFAULT_UID;
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_[callingUid] =
+        std::make_shared<std::list<std::chrono::system_clock::time_point>>();
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_[callingUid]->push_back(now);
+    callingUid = NON_SYSTEM_APP_UID;
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_[callingUid] =
+        std::make_shared<std::list<std::chrono::system_clock::time_point>>();
+    now = now + SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME;
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_[callingUid]->push_back(now);
+    now = now + SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME;
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 2);
+    advancedNotificationService_->PublishSingleAppFlowCtrlRemoveExpire(now);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 1);
+    now = now + SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME;
+    advancedNotificationService_->PublishSingleAppFlowCtrlRemoveExpire(now);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 0);
+
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+}
+
+/**
+ * @tc.number    : PublishFlowCtrl_00001
+ * @tc.name      : Test PublishFlowCtrl
+ * @tc.desc      : Test PublishFlowCtrl 
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishFlowCtrl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isThirdparty = false;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    int32_t callingUid = DEFAULT_UID;
+
+    // single app flow control test
+    for (int i = 0; i < advancedNotificationService_->maxCreateNumPerSecondPerApp; i++) {
+        result = advancedNotificationService_->PublishFlowCtrl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->PublishFlowCtrl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 1);
+
+    // global flow control test
+    int gap = advancedNotificationService_->maxCreateNumPerSecond -
+        advancedNotificationService_->maxCreateNumPerSecondPerApp;
+    callingUid = NON_SYSTEM_APP_UID;
+    for (int i = 0; i < gap; i++) {
+        result = advancedNotificationService_->PublishFlowCtrl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->PublishFlowCtrl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 2);
+
+    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+}
+
+/**
+ * @tc.number    : UpdateGlobalFlowCtrl_00001
+ * @tc.name      : Test UpdateGlobalFlowCtrl
+ * @tc.desc      : Test UpdateGlobalFlowCtrl 
+ */
+HWTEST_F(AdvancedNotificationServiceTest, UpdateGlobalFlowCtrl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->flowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlUpdateTimestampList_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isThirdparty = false;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    for (int i = 0; i < advancedNotificationService_->maxUpdateNumPerSecond; i++) {
+        result = advancedNotificationService_->UpdateGlobalFlowCtrl(record, now);
+        advancedNotificationService_->systemFlowControlUpdateTimestampList_.push_back(now);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->UpdateGlobalFlowCtrl(record, now);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+
+    record->isThirdparty = true;
+    for (int i = 0; i < advancedNotificationService_->maxUpdateNumPerSecond; i++) {
+        result = advancedNotificationService_->UpdateGlobalFlowCtrl(record, now);
+        advancedNotificationService_->flowControlUpdateTimestampList_.push_back(now);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->UpdateGlobalFlowCtrl(record, now);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+
+    advancedNotificationService_->flowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlUpdateTimestampList_.clear();
+}
+
+/**
+ * @tc.number    : UpdateSingleAppFlowCtrl_00001
+ * @tc.name      : Test UpdateSingleAppFlowCtrl
+ * @tc.desc      : Test UpdateSingleAppFlowCtrl
+ */
+HWTEST_F(AdvancedNotificationServiceTest, UpdateSingleAppFlowCtrl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    const int32_t callingUid = DEFAULT_UID;
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_[callingUid] =
+        std::make_shared<std::list<std::chrono::system_clock::time_point>>();
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    for (int i = 0; i < advancedNotificationService_->maxUpdateNumPerSecondPerApp; i++) {
+        result = advancedNotificationService_->UpdateSingleAppFlowCtrl(record, now, callingUid);
+        advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_[callingUid]->push_back(now);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->UpdateSingleAppFlowCtrl(record, now, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+}
+
+/**
+ * @tc.number    : UpdateSingleAppFlowCtrlRemoveExpire_00001
+ * @tc.name      : Test UpdateSingleAppFlowCtrlRemoveExpire
+ * @tc.desc      : Test UpdateSingleAppFlowCtrlRemoveExpire
+ */
+HWTEST_F(AdvancedNotificationServiceTest, UpdateSingleAppFlowCtrlRemoveExpire_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+
+    int32_t callingUid = DEFAULT_UID;
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_[callingUid] =
+        std::make_shared<std::list<std::chrono::system_clock::time_point>>();
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_[callingUid]->push_back(now);
+    callingUid = NON_SYSTEM_APP_UID;
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_[callingUid] =
+        std::make_shared<std::list<std::chrono::system_clock::time_point>>();
+    now = now + SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME;
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_[callingUid]->push_back(now);
+    now = now + SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME;
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 2);
+    advancedNotificationService_->UpdateSingleAppFlowCtrlRemoveExpire(now);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 1);
+    now = now + SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME;
+    advancedNotificationService_->UpdateSingleAppFlowCtrlRemoveExpire(now);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 0);
+
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+}
+
+/**
+ * @tc.number    : UpdateFlowCtrl_00001
+ * @tc.name      : Test UpdateFlowCtrl
+ * @tc.desc      : Test UpdateFlowCtrl 
+ */
+HWTEST_F(AdvancedNotificationServiceTest, UpdateFlowCtrl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->flowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isThirdparty = false;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    int32_t callingUid = DEFAULT_UID;
+
+    // single app flow control test
+    for (int i = 0; i < advancedNotificationService_->maxUpdateNumPerSecondPerApp; i++) {
+        result = advancedNotificationService_->UpdateFlowCtrl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->UpdateFlowCtrl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 1);
+
+    // global flow control test
+    int gap = advancedNotificationService_->maxUpdateNumPerSecond -
+        advancedNotificationService_->maxUpdateNumPerSecondPerApp;
+    callingUid = NON_SYSTEM_APP_UID;
+    for (int i = 0; i < gap; i++) {
+        result = advancedNotificationService_->UpdateFlowCtrl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->UpdateFlowCtrl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 2);
+
+    advancedNotificationService_->flowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+}
+
+/**
+ * @tc.number    : FlowControl_00001
+ * @tc.name      : Test FlowControl
+ * @tc.desc      : Test FlowControl 
+ */
+HWTEST_F(AdvancedNotificationServiceTest, FlowControl_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+    advancedNotificationService_->flowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+    advancedNotificationService_->notificationList_.clear();
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isThirdparty = false;
+    record->isNeedFlowCtrl = true;
+    ErrCode result = ERR_OK;
+    int32_t callingUid = DEFAULT_UID;
+
+    // create flow control
+    // single app flow control test
+    for (int i = 0; i < advancedNotificationService_->maxCreateNumPerSecondPerApp; i++) {
+        result = advancedNotificationService_->FlowControl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->FlowControl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 1);
+
+    // global flow control test
+    int gap = advancedNotificationService_->maxCreateNumPerSecond -
+        advancedNotificationService_->maxCreateNumPerSecondPerApp;
+    callingUid = NON_SYSTEM_APP_UID;
+    for (int i = 0; i < gap; i++) {
+        result = advancedNotificationService_->FlowControl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->FlowControl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.size(), 2);
+
+    advancedNotificationService_->notificationList_.push_back(record);
+    // update flow control
+    // single app flow control test
+    callingUid = DEFAULT_UID;
+    for (int i = 0; i < advancedNotificationService_->maxUpdateNumPerSecondPerApp; i++) {
+        result = advancedNotificationService_->FlowControl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->FlowControl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 1);
+
+    // global flow control test
+    gap = advancedNotificationService_->maxUpdateNumPerSecond -
+        advancedNotificationService_->maxUpdateNumPerSecondPerApp;
+    callingUid = NON_SYSTEM_APP_UID;
+    for (int i = 0; i < gap; i++) {
+        result = advancedNotificationService_->FlowControl(record, callingUid);
+    }
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = advancedNotificationService_->FlowControl(record, callingUid);
+    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    ASSERT_EQ(advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.size(), 2);
+
+    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlPublishTimestampMap_.clear();
+    advancedNotificationService_->flowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->systemFlowControlUpdateTimestampList_.clear();
+    advancedNotificationService_->singleAppFlowControlUpdateTimestampMap_.clear();
+    advancedNotificationService_->notificationList_.clear();
 }
 }  // namespace Notification
 }  // namespace OHOS
