@@ -1189,6 +1189,14 @@ public:
      * @brief Ans service died, OnRemoteDied called.
      */
     void OnServiceDied();
+
+    /**
+     * @brief Update Notification Timer by uid.
+     *
+     * @param uid uid.
+     * @return Returns Update result.
+     */
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
 private:
     /**
      * @brief Gets Ans Manager proxy.

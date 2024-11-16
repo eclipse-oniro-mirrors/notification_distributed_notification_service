@@ -583,6 +583,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 #endif
+
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

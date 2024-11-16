@@ -306,5 +306,37 @@ HWTEST_F(AnsLiveViewServiceTest, IsSaCreateSystemLiveViewAsBundle_002, Function 
     flag = advancedNotificationService_->IsSaCreateSystemLiveViewAsBundle(record, creatorUid);
     ASSERT_EQ(flag, false);
 }
+
+/**
+ * @tc.name: HandleUpdateLiveViewNotificationTimer_001
+ * @tc.desc: Test HandleUpdateLiveViewNotificationTimer
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, HandleUpdateLiveViewNotificationTimer_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    int32_t TYPE_CODE_DOWNLOAD = 8;
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    localLiveViewContent->SetType(TYPE_CODE_DOWNLOAD);
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+    int creatorUid = 3051;
+    request->SetCreatorUid(creatorUid);
+    int ownerUid = 20099999;
+    request->SetOwnerUid(ownerUid);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", ownerUid);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    auto timer = record->notification->GetFinishTimer();
+    advancedNotificationService_->HandleUpdateLiveViewNotificationTimer(ownerUid, true);
+    ASSERT_EQ(timer, record->notification->GetFinishTimer());
+    advancedNotificationService_->HandleUpdateLiveViewNotificationTimer(ownerUid, false);
+    ASSERT_NE(timer, record->notification->GetFinishTimer());
+}
 }  // namespace Notification
 }  // namespace OHOS

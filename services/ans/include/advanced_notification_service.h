@@ -1144,6 +1144,8 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
 
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1413,7 +1415,8 @@ private:
         bool enabled, bool isForceControl);
     void ResetDistributedEnabled();
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
-    
+    void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
