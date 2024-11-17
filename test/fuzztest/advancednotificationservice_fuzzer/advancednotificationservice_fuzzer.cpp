@@ -277,7 +277,7 @@ namespace OHOS {
         service->ChangeNotificationByControlFlags(record, fuzzData->ConsumeBool());
         service->CheckPublishPreparedNotification(record, fuzzData->ConsumeBool());
         service->UpdateInNotificationList(record);
-        service->PublishFlowControl(record);
+        service->PublishInNotificationList(record);
         service->IsNeedPushCheck(request);
         return true;
     }
