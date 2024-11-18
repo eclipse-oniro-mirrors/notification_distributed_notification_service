@@ -16,7 +16,12 @@
 import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
 import display from '@ohos.display';
 import window from '@ohos.window';
-import { titleTrim, calContainerWidth } from '../common/utils';
+import {
+  titleTrim, 
+  calContainerWidth,
+  getFontSizeScale,
+  sourceToVp,
+  getLimitFontSize } from '../common/utils';
 import Constants from '../common/constant';
 import fs from '@ohos.file.fs';
 import configPolicy from '@ohos.configPolicy';
@@ -26,6 +31,7 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 import i18n from '@ohos.i18n';
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
+import common from '@ohos.app.ability.common';
 
 const TAG = 'NotificationDialog_Service ';
 
@@ -48,7 +54,11 @@ let storage = LocalStorage.getShared();
   .type(ButtonType.Normal)
   .backgroundColor($r('sys.color.comp_background_tertiary'))
   .fontColor($r('sys.color.font_emphasize'))
-  .fontSize($r('sys.float.Body_L'))
+  .fontSize(
+    getLimitFontSize(
+      sourceToVp($r('sys.float.Body_L')),
+      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
+  )
   .fontWeight(FontWeight.Medium)
   .height(Constants.PC_BUTTON_HEIGHT)
   .width('50%')
@@ -94,7 +104,7 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
-  @State titleContainerWidth: string|number = 'auto';
+  @State titleContainerWidth: string | number = 'auto';
 
   build() {
     Row() {
@@ -117,8 +127,14 @@ struct PermissionDialog {
                   .fontSize($r('sys.float.Title_S'))
                   .fontColor($r('sys.color.font_primary'))
                   .fontWeight(FontWeight.Bold)
-                  .minFontSize(Constants.TITLE_MIN_FONT_SIZE)
-                  .maxFontSize($r('sys.float.Title_S'))
+                  .minFontSize(
+                    getLimitFontSize(Constants.TITLE_MIN_FONT_SIZE,
+                      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
+                  )
+                  .maxFontSize(
+                    getLimitFontSize(sourceToVp($r('sys.float.Title_S')),
+                      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
+                  )
                   .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
                   .maxLines(2)
                   .textOverflow({overflow: TextOverflow.Ellipsis})
@@ -147,7 +163,10 @@ struct PermissionDialog {
                   Text() {
                     Span(this.content)
                   }
-                  .fontSize($r('sys.float.Body_L'))
+                  .fontSize(
+                    getLimitFontSize(sourceToVp($r('sys.float.Body_L')),
+                      getFontSizeScale(getContext(this) as common.UIAbilityContext))
+                  )
                   .fontWeight(FontWeight.Medium)
                   .fontColor($r('sys.color.font_primary'))
                   .margin({
