@@ -16,6 +16,7 @@
 import Constants from './constant';
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
+import common from '@ohos.app.ability.common';
 
 /**
  * Omit display when application name is too long
@@ -50,3 +51,20 @@ export function calContainerWidth(
     }
     return targetContainerWidth;
   }
+
+export function getFontSizeScale(context: common.UIAbilityContext, maxScale: number = 3.2): number {
+  let fontSizeScale = context.config?.fontSizeScale;
+  console.log(`NotificationDialog_Service fontSizeScale = ${fontSizeScale}`);
+  if(fontSizeScale === undefined) {
+    return Constants.FONT_SCALE_DEFAULT;
+  }
+  return fontSizeScale > maxScale ? maxScale : fontSizeScale;
+}
+
+export function sourceToVp(source: Resource): number {
+  return px2vp(getContext().resourceManager.getNumber(source.id));
+}
+
+export function getLimitFontSize(fontSizeScale: number, sourceFontSize: number): string {
+  return `${sourceFontSize * fontSizeScale}vp`;
+}
