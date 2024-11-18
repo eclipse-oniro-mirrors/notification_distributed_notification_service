@@ -143,6 +143,9 @@ void AnsSubscriberProxy::OnConsumedList(const std::vector<sptr<Notification>> &n
     }
 
     MessageParcel data;
+    if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        ANS_LOGE("[OnConsumedList] fail: set max capacity failed.");
+    }
     if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
         ANS_LOGE("Write interface token failed.");
         return;
