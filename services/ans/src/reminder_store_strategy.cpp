@@ -486,7 +486,7 @@ void ReminderCalendarStrategy::AppendValuesBucket(const sptr<ReminderRequest>& r
     uint64_t lastStartDateTime = 0;
     std::string rruleWantAgent;
     std::string excludeDates;
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+    if (reminder != nullptr && reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         if (calendar != nullptr) {
             repeatDay = calendar->GetRepeatDay();
