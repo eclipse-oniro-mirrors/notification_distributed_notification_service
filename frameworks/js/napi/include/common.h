@@ -337,7 +337,7 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value SetNotificationSorting(
-        const napi_env &env, const NotificationSorting &sorting, napi_value &result);
+        const napi_env &env, NotificationSorting &sorting, napi_value &result);
 
     /**
      * @brief Sets a js object by specified NotificationSlot object

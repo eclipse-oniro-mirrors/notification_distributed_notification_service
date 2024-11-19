@@ -81,7 +81,6 @@ bool NotificationSortingMap::Marshalling(Parcel &parcel) const
             break;
         }
     }
-
     return ret;
 }
 
