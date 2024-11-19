@@ -787,10 +787,6 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_4);
-    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
-        " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
-        " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
     ErrCode result = CheckCommonParams();
     if (result != ERR_OK) {
         return result;
@@ -801,6 +797,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_4);
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
+        " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         result = SetEnabledForBundleSlotInner(bundleOption, bundle, slotType, enabled, isForceControl);
     }));
