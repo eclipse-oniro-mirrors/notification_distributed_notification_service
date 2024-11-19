@@ -29,7 +29,11 @@ NotificationSubscriber::NotificationSubscriber()
 };
 
 NotificationSubscriber::~NotificationSubscriber()
-{}
+{
+    if (impl_ != nullptr) {
+        impl_->OnSubscriberDestory();
+    }
+}
 
 void NotificationSubscriber::SetDeviceType(const std::string &deviceType)
 {
@@ -105,8 +109,16 @@ NotificationSubscriber::SubscriberImpl::SubscriberImpl(NotificationSubscriber &s
     recipient_ = new (std::nothrow) DeathRecipient(*this);
 };
 
+void NotificationSubscriber::SubscriberImpl::OnSubscriberDestory()
+{
+    isSubscriberDestory_.store(true);
+}
+
 void NotificationSubscriber::SubscriberImpl::OnConnected()
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
@@ -118,6 +130,9 @@ void NotificationSubscriber::SubscriberImpl::OnConnected()
 
 void NotificationSubscriber::SubscriberImpl::OnDisconnected()
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
@@ -130,6 +145,9 @@ void NotificationSubscriber::SubscriberImpl::OnDisconnected()
 void NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -144,6 +162,9 @@ void NotificationSubscriber::SubscriberImpl::OnConsumed(
 void NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     for (auto notification : notifications) {
         OnConsumed(notification, notificationMap);
@@ -153,6 +174,9 @@ void NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sp
 void NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (notificationMap == nullptr) {
         subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
@@ -166,6 +190,9 @@ void NotificationSubscriber::SubscriberImpl::OnCanceled(
 void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     std::vector<std::shared_ptr<Notification>> notificationList;
     for (auto notification : notifications) {
         notificationList.emplace_back(std::make_shared<Notification>(*notification));
@@ -182,6 +209,9 @@ void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<s
 void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber_.HasOnBatchCancelCallback()) {
         OnBatchCanceled(notifications, notificationMap, deleteReason);
@@ -194,23 +224,35 @@ void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sp
 
 void NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     subscriber_.OnUpdate(std::make_shared<NotificationSortingMap>(*notificationMap));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     subscriber_.OnDoNotDisturbDateChange(std::make_shared<NotificationDoNotDisturbDate>(*date));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
 }
 
 void NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
 }
@@ -218,6 +260,9 @@ void NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumb
 void NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    if (isSubscriberDestory_.load()) {
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnBadgeEnabledChanged(callbackData);
 }
