@@ -1292,5 +1292,19 @@ HWTEST_F(NotificationHelperTest, IsNeedSilentInDoNotDisturbMode_00001, Function 
     ErrCode ret = notificationHelper.IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
     EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: UpdateNotificationTimerByUid_00001
+ * @tc.desc: Test UpdateNotificationTimerByUid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, UpdateNotificationTimerByUid_00001, Function | SmallTest | Level1)
+{
+    int32_t uid = 20099999;
+    bool isPaused = true;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.UpdateNotificationTimerByUid(uid, isPaused);
+    EXPECT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+}
 }
 }

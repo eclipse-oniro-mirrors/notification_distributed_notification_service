@@ -951,5 +951,39 @@ ErrCode AnsManagerProxy::CancelAsBundleWithAgent(const sptr<NotificationBundleOp
 
     return result;
 }
+
+ErrCode AnsManagerProxy::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(uid)) {
+        ANS_LOGE("write uid failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(isPaused)) {
+        ANS_LOGE("write isPaused failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::UPDATE_NOTIFICATION_TIMER, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS
