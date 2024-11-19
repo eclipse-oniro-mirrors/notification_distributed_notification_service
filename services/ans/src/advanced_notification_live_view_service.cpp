@@ -76,11 +76,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 continue;
             }
 
-            if (FlowControl(record) != ERR_OK) {
-                ANS_LOGE("Flow control failed.");
-                continue;
-            }
-
             // Turn off ringtone and vibration during recovery process
             auto notificationFlags = record->request->GetFlags();
             notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);

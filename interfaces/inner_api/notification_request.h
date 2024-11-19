@@ -1403,6 +1403,20 @@ public:
      */
     bool IsUpdateByOwnerAllowed() const;
 
+    /**
+     * @brief Set notification updateOnly value.
+     *
+     * @param updateOnly Indicates the updateOnly value of this notification.
+     */
+    void SetUpdateOnly(bool updateOnly);
+
+    /**
+     * @brief Obtains the value of updateOnly.
+     *
+     * @return Returns the updateOnly value of the notification.
+     */
+    bool IsUpdateOnly() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1522,6 +1536,7 @@ private:
     bool isRemoveAllowed_ {true};
     bool isCoverActionButtons_ {false};
     bool isUpdateByOwnerAllowed_ {false};
+    bool updateOnly_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};

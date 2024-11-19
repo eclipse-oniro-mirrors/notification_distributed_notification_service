@@ -777,6 +777,7 @@ std::string NotificationRequest::Dump()
             ", floatingIcon = " + (floatingIcon_ ? "true" : "false") +
             ", onlyLocal = " + (onlyLocal_ ? "true" : "false") + ", permitted = " + (permitted_ ? "true" : "false") +
             ", isAgent = " + (isAgent_ ? "true" : "false") +
+            ", updateOnly = " + (updateOnly_ ? "true" : "false") +
             ", removalWantAgent = " + (removalWantAgent_ ? "not null" : "null") +
             ", maxScreenWantAgent = " + (maxScreenWantAgent_ ? "not null" : "null") +
             ", additionalParams = " + (additionalParams_ ? "not null" : "null") +
@@ -830,6 +831,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["isUnremovable"]    = unremovable_;
     jsonObject["isAgent"]          = isAgent_;
     jsonObject["isFloatingIcon"]   = floatingIcon_;
+    jsonObject["updateOnly"]   = updateOnly_;
 
     jsonObject["creatorBundleName"] = creatorBundleName_;
     jsonObject["creatorUid"]        = creatorUid_;
@@ -1336,6 +1338,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(updateOnly_)) {
+        ANS_LOGE("Failed to write updateOnly_");
+        return false;
+    }
+
     if (!parcel.WriteUint64(messageUsers_.size())) {
         ANS_LOGE("Failed to write the size of messageUsers");
         return false;
@@ -1707,6 +1714,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     isCoverActionButtons_ = parcel.ReadBool();
     isUpdateByOwnerAllowed_ = parcel.ReadBool();
+    updateOnly_ = parcel.ReadBool();
 
     vsize = parcel.ReadUint64();
     vsize = (vsize < NotificationRequest::MAX_MESSAGE_USERS) ? vsize : NotificationRequest::MAX_MESSAGE_USERS;
@@ -1914,6 +1922,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->isUpdateByOwnerAllowed_ = other.isUpdateByOwnerAllowed_;
+    this->updateOnly_ = other.updateOnly_;
 
     this->slotType_ = other.slotType_;
     this->settingsText_ = other.settingsText_;
@@ -2237,6 +2246,10 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
 
     if (jsonObject.find("isFloatingIcon") != jsonEnd && jsonObject.at("isFloatingIcon").is_boolean()) {
         target->floatingIcon_ = jsonObject.at("isFloatingIcon").get<bool>();
+    }
+
+    if (jsonObject.find("updateOnly") != jsonEnd && jsonObject.at("updateOnly").is_boolean()) {
+        target->updateOnly_ = jsonObject.at("updateOnly").get<bool>();
     }
 
     ConvertJsonToBoolExt(target, jsonObject);
@@ -2801,6 +2814,16 @@ void NotificationRequest::SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed)
 bool NotificationRequest::IsUpdateByOwnerAllowed() const
 {
     return isUpdateByOwnerAllowed_;
+}
+
+void NotificationRequest::SetUpdateOnly(bool updateOnly)
+{
+    updateOnly_ = updateOnly;
+}
+
+bool NotificationRequest::IsUpdateOnly() const
+{
+    return updateOnly_;
 }
 
 const std::string NotificationRequest::GetLittleIconType() const
