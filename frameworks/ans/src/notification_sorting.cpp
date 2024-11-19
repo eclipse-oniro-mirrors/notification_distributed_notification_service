@@ -135,6 +135,10 @@ bool NotificationSorting::ReadFromParcel(Parcel &parcel)
 
     // read slot_
     slot_ = parcel.ReadStrongParcelable<NotificationSlot>();
+    if (!slot_) {
+        ANS_LOGE("read slot failed.");
+        return false;
+    }
 
     return true;
 }
@@ -143,6 +147,7 @@ NotificationSorting *NotificationSorting::Unmarshalling(Parcel &parcel)
 {
     NotificationSorting *sorting = new (std::nothrow) NotificationSorting();
     if (sorting && !sorting->ReadFromParcel(parcel)) {
+        ANS_LOGE("NotificationSorting Unmarshalling failed.");
         delete sorting;
         sorting = nullptr;
     }
