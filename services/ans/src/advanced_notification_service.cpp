@@ -206,6 +206,13 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_BUNDLE;
             }
             request->SetAgentBundle(agentBundle);
+        } else if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
+            int32_t uid = BundleManagerHelper::GetInstance()->
+                GetDefaultUidByBundleName(bundle, request->GetOwnerUserId());
+            if (uid < 0) {
+                return ERR_ANS_INVALID_UID;
+            }
+            request->SetOwnerUid(uid);
         }
         request->SetOwnerBundleName(sourceBundleName);
     }
@@ -428,15 +435,21 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     }
     std::string sourceBundleName =
         request->GetBundleOption() == nullptr ? "" : request->GetBundleOption()->GetBundleName();
-    if ((!sourceBundleName.empty() &&
-        NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
-        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) ||
-        request->IsAgentNotification()) {
+    if (request->IsAgentNotification()) {
         bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
             request->GetOwnerUid());
     } else {
-        bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
-            request->GetCreatorUid());
+        if ((!sourceBundleName.empty() &&
+            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
+            !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER))) {
+            request->SetCreatorUid(request->GetOwnerUid());
+            request->SetCreatorBundleName(request->GetOwnerBundleName());
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetOwnerBundleName(),
+                request->GetOwnerUid());
+        } else {
+            bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(),
+                request->GetCreatorUid());
+        }
     }
 
     if (bundleOption == nullptr) {
