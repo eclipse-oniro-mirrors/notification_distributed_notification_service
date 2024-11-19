@@ -85,7 +85,7 @@ napi_value Common::SetNotificationSortingMap(
     return NapiGetBoolean(env, true);
 }
 
-napi_value Common::SetNotificationSorting(const napi_env &env, const NotificationSorting &sorting, napi_value &result)
+napi_value Common::SetNotificationSorting(const napi_env &env, NotificationSorting &sorting, napi_value &result)
 {
     ANS_LOGD("enter");
 
@@ -93,7 +93,7 @@ napi_value Common::SetNotificationSorting(const napi_env &env, const Notificatio
     napi_value slotResult = nullptr;
     napi_value value = nullptr;
     napi_create_object(env, &slotResult);
-    if (!SetNotificationSlot(env, sorting.GetSlot(), slotResult)) {
+    if (!sorting.GetSlot() || !SetNotificationSlot(env, *sorting.GetSlot(), slotResult)) {
         ANS_LOGE("SetNotificationSlot call failed");
         return NapiGetBoolean(env, false);
     }
