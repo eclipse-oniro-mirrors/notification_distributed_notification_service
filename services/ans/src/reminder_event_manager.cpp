@@ -167,7 +167,7 @@ void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const E
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION) {
-        reminderDataManager_->CloseReminder(want, false);
+        reminderDataManager_->CloseReminder(want, false, false);
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_CLICK_ALERT) {

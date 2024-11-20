@@ -106,7 +106,7 @@ public:
      * @param want Want information that transferred when the event trigger by user.
      * @param cancelNotification Indicates whether need to cancel notification or not.
      */
-    void CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification);
+    void CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification, bool isButtonClick = true);
 
     /**
      * Dump all the reminders information.

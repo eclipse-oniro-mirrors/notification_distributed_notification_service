@@ -505,7 +505,7 @@ bool ReminderDataManager::cmp(sptr<ReminderRequest> &reminderRequest, sptr<Remin
     return reminderRequest->GetTriggerTimeInMilli() < other->GetTriggerTimeInMilli();
 }
 
-void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification)
+void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification, bool isButtonClick)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
@@ -520,8 +520,10 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         CloseRemindersByGroupId(reminderId, packageName, groupId);
     }
     CloseReminder(reminder, cancelNotification);
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    if (isButtonClick) {
+        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    }
     StartRecentReminder();
 }
 
@@ -1890,8 +1892,6 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
         return;
     }
     CloseReminder(reminder, true);
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
 
     auto wantInfo = reminder->GetWantAgentInfo();
