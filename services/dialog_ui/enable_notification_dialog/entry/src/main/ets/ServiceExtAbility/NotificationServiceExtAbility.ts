@@ -150,11 +150,12 @@ export class EnableNotificationDialog {
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
-        await subWindow.loadContent(path, this.storage);
+        await this.sleep(200);
         let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+        console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
         await subWindow.moveWindowTo(windowRect?.left, windowRect?.top);
         await subWindow.resize(windowRect?.width, windowRect?.height);
-        console.info(TAG, `size : ${windowRect.left} ${windowRect.top} ${windowRect.width}  ${windowRect.height}`);
+        await subWindow.loadContent(path, this.storage);
         try {
           await subWindow.hideNonSystemFloatingWindows(true);
         } catch (err) {
@@ -175,6 +176,10 @@ export class EnableNotificationDialog {
       console.error(TAG, 'window create failed!');
       throw new Error('Failed to create window');
     }
+  }
+
+  async sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async publishButtonClickedEvent(enabled: boolean): Promise<void> {

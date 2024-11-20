@@ -117,12 +117,12 @@ export default class Constants {
   static DIALOG_LABEL_LINE_HEIGHT = 14;
 
   // request text of dialog
-  static DIALOG_REQ_FONT_SIZE = 20;
-  static DIALOG_REQ_MARGIN_TOP = 16;
-  static DIALOG_REQ_MARGIN_BUTTOM = 16;
-  static DIALOG_REQ_MARGIN_LEFT = 24;
-  static DIALOG_REQ_MARGIN_RIGHT = 24;
-  static DIALOG_REQ_LINE_HEIGHT = 24;
+  public static DIALOG_REQ_FONT_SIZE = 20;
+  public static DIALOG_REQ_MARGIN_TOP = 16;
+  public static DIALOG_REQ_MARGIN_BUTTOM = 8;
+  public static DIALOG_REQ_MARGIN_LEFT = 24;
+  public static DIALOG_REQ_MARGIN_RIGHT = 24;
+  public static DIALOG_REQ_LINE_HEIGHT = 24;
 
   // description text of dialog
   public static DIALOG_DESP_FONT_SIZE = 16;
@@ -145,6 +145,10 @@ export default class Constants {
   public static TITLE_MIN_FONT_SIZE = 16;
   public static CROSS_LINE_RATIO = 0.2;
   public static CROSS_LINE_RESIZE_PARAM = 1.25;
+
+  public static FONT_SCALE_DEFAULT = 1;
+  public static FONT_SCALE_MAX = 2;
+  public static MAX_DIALOG_WIDTH = 400;
 
    //pc
   public static PC_ICON_MARGIN_TOP = 24;
