@@ -815,18 +815,30 @@ HWTEST_F(ReminderRequestTest, StringSplit_00002, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: SetMaxScreenWantAgentInfo_00001
+ * @tc.name: SetMaxScreenWantAgentInfo_001
  * @tc.desc: Test SetMaxScreenWantAgentInfo parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
-HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_00001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_001, Function | SmallTest | Level1)
 {
-    std::shared_ptr<ReminderRequest::MaxScreenAgentInfo> maxScreenWantAgentInfo =
-    std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
+    auto agentInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
     auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
-    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), maxScreenWantAgentInfo);
+    rrc->SetMaxScreenWantAgentInfo(agentInfo);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), agentInfo);
+}
+
+/**
+ * @tc.name: SetMaxScreenWantAgentInfo_002
+ * @tc.desc: Test SetMaxScreenWantAgentInfo parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5UYHP
+ */
+HWTEST_F(ReminderRequestTest, SetMaxScreenWantAgentInfo_002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetMaxScreenWantAgentInfo(nullptr);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo(), nullptr);
 }
 
 /**
@@ -844,16 +856,19 @@ HWTEST_F(ReminderRequestTest, SetSnoozeContent_00001, Function | SmallTest | Lev
 }
 
 /**
- * @tc.name: SetWantAgentInfo_00001
+ * @tc.name: SetWantAgentInfo_001
  * @tc.desc: Test SetWantAgentInfo parameters.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
-HWTEST_F(ReminderRequestTest, SetWantAgentInfo_00001, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestTest, SetWantAgentInfo_001, Function | SmallTest | Level1)
 {
-    std::shared_ptr<ReminderRequest::WantAgentInfo> wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_NE(rrc->GetWantAgentInfo(), nullptr);
+    auto wantAgentInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     rrc->SetWantAgentInfo(wantAgentInfo);
+    EXPECT_EQ(rrc->GetWantAgentInfo(), wantAgentInfo);
+    rrc->SetWantAgentInfo(nullptr);
     EXPECT_EQ(rrc->GetWantAgentInfo(), wantAgentInfo);
 }
 
@@ -2158,6 +2173,128 @@ HWTEST_F(ReminderRequestTest, InitCreatorUid_00001, Function | SmallTest | Level
 
     rrc->InitCreatorUid(-1);
     EXPECT_EQ(rrc->GetCreatorUid(), -1);
+}
+
+/**
+ * @tc.name: SetSnoozeSlotType_001
+ * @tc.desc: Test SetGroupId parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetSnoozeSlotType_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetSnoozeSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    EXPECT_EQ(rrc->GetSnoozeSlotType(), NotificationConstant::SlotType::CONTENT_INFORMATION);
+    rrc->SetSnoozeSlotType(NotificationConstant::SlotType::CUSTOM);
+    EXPECT_EQ(rrc->GetSnoozeSlotType(), NotificationConstant::SlotType::CUSTOM);
+}
+
+/**
+ * @tc.name: SetReminderId_001
+ * @tc.desc: Test SetReminderId parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetReminderId_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetReminderId(), -1);
+    rrc->SetReminderId(100);
+    EXPECT_EQ(rrc->GetReminderId(), 100);
+}
+
+/**
+ * @tc.name: SetReminderType_001
+ * @tc.desc: Test SetReminderType parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetReminderType_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetReminderType(), ReminderRequest::ReminderType::INVALID);
+    rrc->SetReminderType(ReminderRequest::ReminderType::ALARM);
+    EXPECT_EQ(rrc->GetReminderType(), ReminderRequest::ReminderType::ALARM);
+}
+
+/**
+ * @tc.name: SetRepeatDaysOfWeek_001
+ * @tc.desc: Test SetRepeatDaysOfWeek parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetRepeatDaysOfWeek_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetRepeatDaysOfWeek(), 0);
+    rrc->SetRepeatDaysOfWeek(66);
+    EXPECT_EQ(rrc->GetRepeatDaysOfWeek(), 66);
+}
+
+/**
+ * @tc.name: SetCustomRingUri_001
+ * @tc.desc: Test SetCustomRingUri parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetCustomRingUri_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetCustomRingUri(), "");
+    rrc->SetCustomRingUri("test123sevxgasdr5");
+    EXPECT_EQ(rrc->GetCustomRingUri(), "test123sevxgasdr5");
+    rrc->SetCustomRingUri("@#$^%&*)(&&*^(@!#%$#$))");
+    EXPECT_EQ(rrc->GetCustomRingUri(), "@#$^%&*)(&&*^(@!#%$#$))");
+}
+
+/**
+ * @tc.name: SetNotificationBundleOption_001
+ * @tc.desc: Test SetNotificationBundleOption parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetNotificationBundleOption_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetNotificationBundleOption(), nullptr);
+    sptr<NotificationBundleOption> option = new (std::nothrow) NotificationBundleOption();
+    rrc->SetNotificationBundleOption(option);
+    EXPECT_EQ(rrc->GetNotificationBundleOption(), option);
+    rrc->SetNotificationBundleOption(nullptr);
+    EXPECT_EQ(rrc->GetNotificationBundleOption(), nullptr);
+}
+
+/**
+ * @tc.name: SetWantAgentStr_001
+ * @tc.desc: Test SetWantAgentStr parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetWantAgentStr_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetWantAgentStr(), "");
+    rrc->SetWantAgentStr("test123sevxgasdr5");
+    EXPECT_EQ(rrc->GetWantAgentStr(), "test123sevxgasdr5");
+    rrc->SetWantAgentStr("@#$^%&*)(&&*^(@!#%$#$))");
+    EXPECT_EQ(rrc->GetWantAgentStr(), "@#$^%&*)(&&*^(@!#%$#$))");
+}
+
+/**
+ * @tc.name: SetMaxWantAgentStr_001
+ * @tc.desc: Test SetMaxWantAgentStr parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, SetMaxWantAgentStr_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    EXPECT_EQ(rrc->GetMaxWantAgentStr(), "");
+    rrc->SetMaxWantAgentStr("test123sevxgasdr5");
+    EXPECT_EQ(rrc->GetMaxWantAgentStr(), "test123sevxgasdr5");
+    rrc->SetMaxWantAgentStr("@#$^%&*)(&&*^(@!#%$#$))");
+    EXPECT_EQ(rrc->GetMaxWantAgentStr(), "@#$^%&*)(&&*^(@!#%$#$))");
 }
 }
 }

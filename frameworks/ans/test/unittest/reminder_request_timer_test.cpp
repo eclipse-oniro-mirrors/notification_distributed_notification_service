@@ -114,5 +114,87 @@ HWTEST_F(ReminderRequestTimerTest, ReadFromParcel_00100, Function | SmallTest | 
     auto result = rrc->ReadFromParcel(parcel);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: SetHour_001
+ * @tc.desc: Test SetHour parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestTimerTest, SetInitInfo_001, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer(1);
+    EXPECT_EQ(timer.GetInitInfo(), 0);
+
+    timer.SetInitInfo(120);
+    EXPECT_EQ(timer.GetInitInfo(), 120);
+}
+
+/**
+ * @tc.name: UpdateNextReminder_001
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestTimerTest, UpdateNextReminder_001, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer(1);
+    EXPECT_EQ(timer.UpdateNextReminder(), false);
+}
+
+/**
+ * @tc.name: PreGetNextTriggerTimeIgnoreSnooze_001
+ * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestTimerTest, PreGetNextTriggerTimeIgnoreSnooze_001, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer(1);
+    EXPECT_EQ(timer.PreGetNextTriggerTimeIgnoreSnooze(true, true), ReminderRequest::INVALID_LONG_LONG_VALUE);
+}
+
+/**
+ * @tc.name: CheckParamsValid_001
+ * @tc.desc: Test CheckParamsValid parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestTimerTest, CheckParamsValid_001, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer(1);
+    timer.SetInitInfo(0);
+    timer.CheckParamsValid(0);
+    EXPECT_EQ(timer.GetInitInfo(), 0);
+
+    timer.SetInitInfo(UINT64_MAX);
+    timer.CheckParamsValid(UINT64_MAX);
+    EXPECT_EQ(timer.GetInitInfo(), UINT64_MAX);
+
+    timer.SetInitInfo(5555);
+    timer.CheckParamsValid(5555);
+    EXPECT_EQ(timer.GetInitInfo(), 5555);
+}
+
+/**
+ * @tc.name: Construct_001
+ * @tc.desc: Test Construct parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestTimerTest, Construct_001, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer1(35);
+    EXPECT_EQ(timer1.GetReminderId(), 35);
+
+    ReminderRequestTimer timer2((uint64_t)60);
+    EXPECT_EQ(timer2.GetInitInfo(), 60);
+
+    ReminderRequestTimer timer3(timer2);
+    EXPECT_EQ(timer3.GetInitInfo(), 60);
+
+    ReminderRequestTimer timer4;
+    EXPECT_EQ(timer4.GetReminderId(), -1);
+}
 }
 }
