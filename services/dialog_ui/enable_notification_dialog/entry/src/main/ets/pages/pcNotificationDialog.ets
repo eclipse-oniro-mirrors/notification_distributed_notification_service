@@ -28,24 +28,16 @@ import configPolicy from '@ohos.configPolicy';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
 import { Callback} from '@ohos.base';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
-import i18n from '@ohos.i18n';
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
 
 const TAG = 'NotificationDialog_Service ';
 
-const LAN_EN = 'These may include banners, sounds and more. You can change this in Settings.';
-const LAN_CN = '通知提醒方式可能包括横幅、响铃等。可前往“设置” 更改。';
-const LAN_HK = '通知提醒方式可能包括橫幅、響鬧等。可前往「設定」更改。';
-const LAN_TW = '通知提醒方式可能包括橫幅、響鈴等。可前往「設定」變更。';
-const LAN_BO = 'བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་སྒོ་ལྕགས་བརྙན་ཡོལ་དང་། འཕྲེད་བྱང་། དྲིལ་སྒྲ། སྦིར་བརྡ་སོགས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག';
-const LAN_UG = 'قۇلۇپ ئېكرانى، بالداق، ئاۋاز ۋە تىترەش شۇلارنىڭ ئىچىدە. تەڭشەكتىن ئۆزگەرتەلەيسىز.';
-
 const permission: Record<string, Resource> = {
   'label': $r('app.string.group_label_notification'),
   'icon': $r('app.media.ic_public_ring'),
-  'reason': $r('app.string.reason'),
+  'reason': $r('app.string.reason_simple'),
 };
 
 let storage = LocalStorage.getShared();
@@ -96,7 +88,6 @@ struct NotificationDialogPage {
 @CustomDialog
 struct PermissionDialog {
   @State appName: string = '';
-  @State content: string = LAN_CN;
   @State naviHeight: number = 0;
   @State isBottomPopover: boolean = false;
   @StorageLink('clicked') clicked: boolean = false;
@@ -161,7 +152,7 @@ struct PermissionDialog {
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text() {
-                    Span(this.content)
+                    Span(permission.reason)
                   }
                   .fontSize(
                     getLimitFontSize(sourceToVp($r('sys.float.Body_L')),
@@ -261,21 +252,6 @@ struct PermissionDialog {
       let appName = resourceInfo.label;
       this.appName = titleTrim(appName);
       console.info(TAG, `hap label: ${this.appName}`);
-
-      let systemLanguage: string = i18n.System.getSystemLanguage();
-      console.info(TAG, `language: ${systemLanguage}`);
-      if (systemLanguage.indexOf('zh-Hans') != -1) {
-        this.content = LAN_CN;
-      } else if (systemLanguage.indexOf('zh-Hant') != -1) {
-        this.content = LAN_TW;
-      } else if (systemLanguage.indexOf('en') != -1) {
-        this.content = LAN_EN;
-      } else if (systemLanguage.indexOf('ug') != -1) {
-        this.content = LAN_UG;
-      } else if (systemLanguage.indexOf('bo') != -1) {
-        this.content = LAN_BO;
-      }
-
     } catch (err) {
       console.error(TAG, `applicationName error : ${err?.code}`);
     }
