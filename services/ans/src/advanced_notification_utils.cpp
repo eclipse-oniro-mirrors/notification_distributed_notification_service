@@ -1745,6 +1745,12 @@ ErrCode AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Notif
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
+    if (request->GetOwnerUid() == DEFAULT_UID) {
+        request->SetOwnerUid(request->GetCreatorUid());
+    }
+    if (request->GetOwnerBundleName().empty()) {
+        request->SetOwnerBundleName(request->GetCreatorBundleName());
+    }
     ANS_LOGD("creator uid=%{public}d, userId=%{public}d, bundleName=%{public}s ", uid,
         userId, bundle.c_str());
     return ERR_OK;
