@@ -451,6 +451,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of title must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -465,6 +467,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of backgroundColor must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -478,6 +482,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of content must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -491,6 +497,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of icon must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
@@ -545,6 +553,8 @@ napi_value Common::GetResourceObject(napi_env env,
     napi_typeof(env, id, &valueType);
     if (valueType != napi_number) {
         ANS_LOGE("Failed to get resource name string");
+        std::string msg = "Incorrect parameter types. The type of id must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     int32_t resId = 0;
@@ -694,6 +704,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
         napi_get_named_property(env, progressResult, "maxValue", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
+            std::string msg = "Incorrect parameter types. The type of maxValue must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             ANS_LOGE("Wrong argument type. Number expected.");
             return nullptr;
         }
@@ -708,6 +720,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of currentValue must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &intValue);
@@ -721,6 +735,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isPercentage must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -761,6 +777,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of initialTime must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &intValue);
@@ -775,6 +793,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isCountDown must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -788,6 +808,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isPaused must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -801,6 +823,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isInTitle must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -841,6 +865,8 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument typeCode. Number expected.");
+        std::string msg = "Incorrect parameter types. The type of typeCode must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_int32(env, result, &type);
