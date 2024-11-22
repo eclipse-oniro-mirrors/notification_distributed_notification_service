@@ -66,6 +66,7 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_datashare_observer.cpp",
     "src/advanced_notification_clone_service.cpp",
     "src/advanced_notification_event_service.cpp",
+    "src/advanced_notification_flow_control_service.cpp",
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
     "src/advanced_notification_publish/base_publish_process.cpp",

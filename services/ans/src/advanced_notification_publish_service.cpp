@@ -54,6 +54,7 @@
 #include "iservice_registry.h"
 #include "datashare_predicates.h"
 #include "notification_config_parse.h"
+#include "advanced_notification_flow_control_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -354,7 +355,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             return;
         }
 
-        result = FlowControl(record, ipcUid);
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }
@@ -2440,7 +2442,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
             return;
         }
-        result = FlowControl(record, ipcUid);
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }

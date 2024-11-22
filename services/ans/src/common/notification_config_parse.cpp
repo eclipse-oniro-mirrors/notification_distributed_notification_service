@@ -195,5 +195,42 @@ bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) cons
     return false;
 #endif
 }
+
+void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold)
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    if (!GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file");
+        return;
+    }
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
+        ANS_LOGW("GetFlowCtrlConfigFromCCM not found jsonKey");
+        return;
+    }
+    nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
+    if (affects.is_null() || affects.empty()) {
+        ANS_LOGE("GetFlowCtrlConfigFromCCM failed as invalid ccmFlowCtrlConfig json");
+        return;
+    }
+    if (affects.contains(CFG_KEY_MAX_CREATE_NUM_PERSECOND)) {
+        threshold.maxCreateNumPerSecond = affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND];
+    }
+
+    if (affects.contains(CFG_KEY_MAX_UPDATE_NUM_PERSECOND)) {
+        threshold.maxUpdateNumPerSecond = affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND];
+    }
+
+    if (affects.contains(CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP)) {
+        threshold.maxCreateNumPerSecondPerApp = affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP];
+    }
+
+    if (affects.contains(CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP)) {
+        threshold.maxUpdateNumPerSecondPerApp = affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP];
+    }
+
+    ANS_LOGI("GetFlowCtrlConfigFromCCM success");
+}
 } // namespace Notification
 } // namespace OHOS
