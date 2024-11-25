@@ -431,7 +431,7 @@ private:
      *
      * @return pointer of reminder object.
      */
-    sptr<ReminderRequest> GetRecentReminderLocked();
+    sptr<ReminderRequest> GetRecentReminder();
 
     void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged);
     void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders);

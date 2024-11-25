@@ -1156,7 +1156,8 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
 
 void ReminderDataManager::StartRecentReminder()
 {
-    sptr<ReminderRequest> reminder = GetRecentReminderLocked();
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    sptr<ReminderRequest> reminder = GetRecentReminder();
     if (reminder == nullptr) {
         ANSR_LOGI("No reminder need to start");
         SetActiveReminder(reminder);
@@ -1238,9 +1239,8 @@ std::string ReminderDataManager::Dump() const
            allReminders + "}";
 }
 
-sptr<ReminderRequest> ReminderDataManager::GetRecentReminderLocked()
+sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
 {
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     sort(reminderVector_.begin(), reminderVector_.end(), cmp);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end();) {
         if (!(*it)->IsExpired()) {
@@ -1251,7 +1251,7 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminderLocked()
                 it++;
                 continue;
             }
-            ANSR_LOGI("GetRecentReminderLocked: %{public}s", (*it)->Dump().c_str());
+            ANSR_LOGI("GetRecentReminder: %{public}s", (*it)->Dump().c_str());
             return *it;
         }
         if (!(*it)->CanRemove()) {
