@@ -956,21 +956,6 @@ HWTEST_F(ReminderRequestCalendarTest, RecoverFromDb_00001, Function | SmallTest 
 }
 
 /**
- * @tc.name: InitTriggerTime_00001
- * @tc.desc: Test InitTriggerTime parameters.
- * @tc.type: FUNC
- * @tc.require:I9BM6I
- */
-HWTEST_F(ReminderRequestCalendarTest, InitTriggerTime_00001, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-    EXPECT_EQ(calendar->InitTriggerTime(), true);
-}
-
-
-/**
  * @tc.name: CheckCalenderIsExpired_00001
  * @tc.desc: Test CheckCalenderIsExpired parameters.
  * @tc.type: FUNC
@@ -1530,6 +1515,193 @@ HWTEST_F(ReminderRequestCalendarTest, IsNeedNotification_00001, Function | Small
     rrc->startDateTime_ = now + 10 * 60 * 1000;
     rrc->endDateTime_ = now + 20 * 60 * 1000;
     EXPECT_EQ(rrc->IsNeedNotification(), false);
+}
+
+/**
+ * @tc.name: Set_Get_Year_001
+ * @tc.desc: Test Set/GetYear parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, Set_Get_Year_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetYear(), 1);
+
+    calendar.SetYear(2024);
+    EXPECT_EQ(calendar.GetYear(), 2024);
+}
+
+/**
+ * @tc.name: Set_Get_Month_001
+ * @tc.desc: Test Set/GetMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, Set_Get_Month_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetMonth(), 1);
+
+    calendar.SetMonth(11);
+    EXPECT_EQ(calendar.GetMonth(), 11);
+}
+
+/**
+ * @tc.name: Set_Get_Day_001
+ * @tc.desc: Test Set/GetDay parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, Set_Get_Day_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetDay(), 1);
+
+    calendar.SetDay(21);
+    EXPECT_EQ(calendar.GetDay(), 21);
+}
+
+/**
+ * @tc.name: Set_Get_Hour_001
+ * @tc.desc: Test Set/GetHour parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, Set_Get_Hour_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetHour(), 1);
+
+    calendar.SetHour(19);
+    EXPECT_EQ(calendar.GetHour(), 19);
+}
+
+/**
+ * @tc.name: Set_Get_Minute_001
+ * @tc.desc: Test Set/GetMinute parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, Set_Get_Minute_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetMinute(), 1);
+
+    calendar.SetMinute(14);
+    EXPECT_EQ(calendar.GetMinute(), 14);
+}
+
+/**
+ * @tc.name: SetRepeatDay_001
+ * @tc.desc: Test SetRepeatDay parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetRepeatDay_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetRepeatDay(), 0);
+
+    calendar.SetRepeatDay(19);
+    EXPECT_EQ(calendar.GetRepeatDay(), 19);
+}
+
+/**
+ * @tc.name: SetRepeatMonth_001
+ * @tc.desc: Test SetRepeatMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetRepeatMonth_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetRepeatMonth(), 0);
+
+    calendar.SetRepeatMonth(19);
+    EXPECT_EQ(calendar.GetRepeatMonth(), 19);
+}
+
+/**
+ * @tc.name: SetFirstDesignateYear_001
+ * @tc.desc: Test SetFirstDesignateYear parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetFirstDesignateYear_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetFirstDesignateYear(), 1);
+
+    calendar.SetFirstDesignateYear(19);
+    EXPECT_EQ(calendar.GetFirstDesignateYear(), 19);
+}
+
+/**
+ * @tc.name: SetFirstDesignageMonth_001
+ * @tc.desc: Test SetFirstDesignageMonth parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetFirstDesignageMonth_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetFirstDesignageMonth(), 1);
+
+    calendar.SetFirstDesignageMonth(19);
+    EXPECT_EQ(calendar.GetFirstDesignageMonth(), 19);
+}
+
+/**
+ * @tc.name: SetFirstDesignateDay_001
+ * @tc.desc: Test SetFirstDesignateDay parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, SetFirstDesignateDay_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar(1);
+    EXPECT_EQ(calendar.GetFirstDesignateDay(), 1);
+
+    calendar.SetFirstDesignateDay(19);
+    EXPECT_EQ(calendar.GetFirstDesignateDay(), 19);
+}
+
+/**
+ * @tc.name: InitTriggerTime_001
+ * @tc.desc: Test InitTriggerTime parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, InitTriggerTime_001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);
+    uint64_t nowMilli = ReminderRequest::GetDurationSinceEpochInMilli(now);
+
+    // startTime < nowMilli < endTime
+    ReminderRequestCalendar calendar(1);
+    calendar.startDateTime_ = nowMilli - 60 * 1000;
+    calendar.endDateTime_ = nowMilli + 60 * 1000;
+    EXPECT_EQ(calendar.InitTriggerTime(), true);
+    EXPECT_NE(calendar.GetTriggerTimeInMilli(), nowMilli);
+
+    // nowMilli < startTime
+    calendar.startDateTime_ = nowMilli + 2 * 60 * 1000;
+    calendar.endDateTime_ = nowMilli + 4 * 60 * 1000;
+    EXPECT_EQ(calendar.InitTriggerTime(), true);
+    EXPECT_EQ(calendar.GetTriggerTimeInMilli(), calendar.startDateTime_);
+
+    // nowMilli > endTime and not repeat
+    calendar.startDateTime_ = 1673198080000;
+    calendar.endDateTime_ = 1673219680000;
+    EXPECT_EQ(calendar.InitTriggerTime(), false);
+
+    // nowMilli > endTime and repeat
+    calendar.startDateTime_ = nowMilli - 4 * 60 * 60 * 1000;
+    calendar.endDateTime_ = nowMilli - 2 * 60 * 60 * 1000;
+    calendar.repeatDaysOfWeek_ = 1;
+    EXPECT_EQ(calendar.InitTriggerTime(), true);
 }
 }
 }

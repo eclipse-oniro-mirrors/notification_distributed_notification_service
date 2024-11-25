@@ -890,5 +890,61 @@ HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
     ret = manager->IsMatched(reminder, "test_IsMatched", 100, 98765);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: ReminderEventManager_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderEventManager_001, Level1)
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
+    matchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_REMOVED);
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    auto subscriber = std::make_shared<ReminderEventManager::ReminderEventSubscriber>(subscriberInfo, manager);
+    
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 0);
+    AppExecFwk::ElementName element("", "test", "EntryAbility");
+    want.SetElement(element);
+    auto result = subscriber->GetBundleOption(want);
+    EXPECT_TRUE(result != nullptr);
+    subscriber->HandlePackageRemove(want);
+    subscriber->HandleProcessDied(want);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: IsMatched_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderEventManager_002, Level1)
+{
+    auto statusChangeListener
+        = std::make_shared<ReminderEventManager::SystemAbilityStatusChangeListener>(manager);
+    statusChangeListener->OnAddSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, "");
+    statusChangeListener->OnAddSystemAbility(APP_MGR_SERVICE_ID, "");
+    statusChangeListener->OnAddSystemAbility(ABILITY_MGR_SERVICE_ID, "");
+    statusChangeListener->OnAddSystemAbility(-1, "");
+    statusChangeListener->OnRemoveSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, "");
+    statusChangeListener->OnRemoveSystemAbility(APP_MGR_SERVICE_ID, "");
+    statusChangeListener->OnRemoveSystemAbility(ABILITY_MGR_SERVICE_ID, "");
+    statusChangeListener->OnRemoveSystemAbility(-1, "");
+    EXPECT_TRUE(manager != nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

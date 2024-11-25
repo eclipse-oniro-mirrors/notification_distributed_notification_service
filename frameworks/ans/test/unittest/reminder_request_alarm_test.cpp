@@ -540,5 +540,58 @@ HWTEST_F(ReminderRequestAlarmTest, RecoverFromOldVersion_00001, Function | Small
     uint8_t ret = rrc->GetRepeatDaysOfWeek();
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: SetMinute_001
+ * @tc.desc: Test SetMinute parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestAlarmTest, SetMinute_001, Function | SmallTest | Level1)
+{
+    ReminderRequestAlarm alarm(1);
+    EXPECT_EQ(alarm.GetMinute(), 0);
+
+    alarm.SetMinute(19);
+    EXPECT_EQ(alarm.GetMinute(), 19);
+}
+
+/**
+ * @tc.name: SetHour_001
+ * @tc.desc: Test SetHour parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestAlarmTest, SetHour_001, Function | SmallTest | Level1)
+{
+    ReminderRequestAlarm alarm(1);
+    EXPECT_EQ(alarm.GetHour(), 0);
+
+    alarm.SetHour(19);
+    EXPECT_EQ(alarm.GetHour(), 19);
+}
+
+/**
+ * @tc.name: Construct_001
+ * @tc.desc: Test Construct parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestAlarmTest, Construct_001, Function | SmallTest | Level1)
+{
+    ReminderRequestAlarm alarm1(35);
+    EXPECT_EQ(alarm1.GetReminderId(), 35);
+
+    ReminderRequestAlarm alarm2(12, 12, std::vector<uint8_t>());
+    EXPECT_EQ(alarm2.GetHour(), 12);
+    EXPECT_EQ(alarm2.GetMinute(), 12);
+
+    ReminderRequestAlarm alarm3(alarm2);
+    EXPECT_EQ(alarm3.GetHour(), 12);
+    EXPECT_EQ(alarm3.GetMinute(), 12);
+
+    ReminderRequestAlarm alarm4;
+    EXPECT_EQ(alarm4.GetReminderId(), -1);
+}
 }
 }
