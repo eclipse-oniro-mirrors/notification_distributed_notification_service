@@ -552,8 +552,8 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
     }
 
     std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s",
-        slot->GetType(), slot->GetReminderMode(), bundleName.c_str());
+    ANS_LOGI("The reminder mode of %{public}d is %{public}d in %{public}s,specifiedSlot:%{public}d default:%{public}u",
+        slot->GetType(), slot->GetReminderMode(), bundleName.c_str(), isSpecifiedSlot, defaultSlotFlags);
 }
 
 uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<NotificationRequest> &request)
@@ -561,9 +561,14 @@ uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<Notificatio
     auto flags = DEFAULT_SLOT_FLAGS;
     uint32_t notificationControlFlags = request->GetNotificationControlFlags();
     // SA publish own's notification with banner
+    if ((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) {
+        ANS_LOGI("Creator:%{public}s %{public}d,Owner: %{public}s %{public}d, controlFlags:%{public}d",
+            request->GetCreatorBundleName().c_str(), request->GetCreatorUid(), request->GetOwnerBundleName().c_str(),
+            request->GetOwnerUid(), request->GetNotificationControlFlags());
+    }
     if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
         (request->GetCreatorUid() == IPCSkeleton::GetCallingUid() && request->GetCreatorBundleName().empty() &&
-        request->GetOwnerBundleName().empty() && request->GetOwnerUid() == DEFAULT_UID)) {
+        request->GetOwnerBundleName().empty())) {
         return (flags |= NotificationConstant::ReminderFlag::BANNER_FLAG);
     }
 
