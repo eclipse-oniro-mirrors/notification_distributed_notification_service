@@ -823,6 +823,7 @@ void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::sha
     }
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
     record->notification->SetEnableSound(false);
+    flags->SetLockScreenVisblenessEnabled(false);
     record->request->SetVisibleness(NotificationConstant::VisiblenessType::SECRET);
     flags->SetBannerEnabled(false);
     flags->SetLightScreenEnabled(false);
