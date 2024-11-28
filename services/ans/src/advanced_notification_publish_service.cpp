@@ -142,6 +142,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         result = PrepareNotificationInfo(request, bundleOption);
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("PrepareNotificationInfo failed.");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             break;
         }
 
