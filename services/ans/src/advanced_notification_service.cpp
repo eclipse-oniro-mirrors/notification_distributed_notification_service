@@ -1226,7 +1226,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 #endif
         ) {
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
-                ANS_LOGI("BatchRemove-FILTER-RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
+                ANS_LOGI("UnRemoved-%{public}s", record->notification->GetKey().c_str());
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
             notification = record->notification;
@@ -1269,7 +1269,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         }
 
         if (!isCancel && !record->notification->IsRemoveAllowed()) {
-            ANS_LOGI("BatchRemove-FILTER-RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
+            ANS_LOGI("UnRemoved-%{public}s", record->notification->GetKey().c_str());
             return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
         }
         notification = record->notification;
