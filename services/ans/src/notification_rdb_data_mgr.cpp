@@ -258,7 +258,6 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
             buckets.emplace_back(valuesBucket);
         }
         ret = rdbStore_->BatchInsert(rowId, tableName, buckets);
-        ANS_LOGI("BatchInsert ret = %{public}d affect row = %{public}zu", ret, rowId);
         if (ret == NativeRdb::E_SQLITE_CORRUPT) {
             RestoreForMasterSlaver();
         }
