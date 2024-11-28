@@ -662,6 +662,8 @@ private:
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
 
+    sptr<NotificationRequest> MakeNotificationRequest(sptr<NotificationRequest>& request);
+
    /**
     * Single instance.
     */
