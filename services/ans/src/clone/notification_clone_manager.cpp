@@ -26,6 +26,7 @@
 #include "nlohmann/json.hpp"
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
+#include "notification_clone_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -39,6 +40,22 @@ NotificationCloneManager& NotificationCloneManager::GetInstance()
 {
     static NotificationCloneManager notificationCloneManager;
     return notificationCloneManager;
+}
+
+static std::string SetBackUpReply()
+{
+    nlohmann::json reply;
+    nlohmann::json resultInfo = nlohmann::json::array();
+    nlohmann::json errorInfo;
+
+    errorInfo["type"] = "ErrorInfo";
+    errorInfo["errorCode"] = std::to_string(ERR_OK);
+    errorInfo["errorInfo"] = "";
+
+    resultInfo.emplace_back(errorInfo);
+    reply["resultInfo"] = resultInfo;
+
+    return reply.dump();
 }
 
 int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& reply)
@@ -86,6 +103,7 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
 
 int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& reply)
 {
+    reply.WriteString(SetBackUpReply());
     std::string storeMessage;
     UniqueFd fd(data.ReadFileDescriptor());
     if (LoadConfig(fd, storeMessage) != ERR_OK) {
@@ -182,7 +200,27 @@ void NotificationCloneManager::RemoveBackUpFile()
 void NotificationCloneManager::OnUserSwitch(int32_t userId)
 {
     for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
-        iter->second->OnUserSwitch(userId);
+        if (iter->second != nullptr) {
+            iter->second->OnUserSwitch(userId);
+        }
+    }
+}
+
+void NotificationCloneManager::OnRestoreStart(EventFwk::Want want)
+{
+    int32_t appIndex = want.GetIntParam("index", -1);
+    std::string bundleName = want.GetStringParam("bundleName");
+    int32_t userId = NotificationCloneUtil::GetActiveUserId();
+    if (appIndex == -1 || bundleName.empty()) {
+        ANS_LOGW("Invalid restore data %{public}d %{public}d %{public}s",
+            appIndex, userId, bundleName.c_str());
+        return;
+    }
+    int32_t uid = NotificationCloneUtil::GetBundleUid(bundleName, userId, appIndex);
+    for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
+        if (iter->second != nullptr) {
+            iter->second->OnRestoreStart(bundleName, appIndex, userId, uid);
+        }
     }
 }
 }

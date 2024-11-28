@@ -787,7 +787,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
 }
 
 void AdvancedNotificationService::HandleBadgeEnabledChanged(
-    const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, bool enabled)
 {
     sptr<EnabledNotificationCallbackData> enabledData = new (std::nothrow)
         EnabledNotificationCallbackData(bundleOption->GetBundleName(), bundleOption->GetUid(), enabled);

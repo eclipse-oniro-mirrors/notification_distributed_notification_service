@@ -688,12 +688,17 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     }
 
     /* after clone, override these witch */
-    bundleInfo.SetSlotFlags(cloneBundleInfo.GetSlotFlags());
     bundleInfo.SetIsShowBadge(cloneBundleInfo.GetIsShowBadge());
     bundleInfo.SetEnableNotification(cloneBundleInfo.GetEnableNotification());
     /* update property to db */
     if (!preferncesDB_->UpdateBundlePropertyToDisturbeDB(userId, bundleInfo)) {
         ANS_LOGW("Clone bundle info failed %{public}s.", cloneBundleInfo.Dump().c_str());
+        return;
+    }
+
+    if (SaveBundleProperty(bundleInfo, bundleOption,
+        BundleType::BUNDLE_SLOTFLGS_TYPE, cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
+        ANS_LOGW("Clone bundle slot info %{public}s.", cloneBundleInfo.Dump().c_str());
         return;
     }
     preferencesInfo.SetBundleInfo(bundleInfo);
@@ -1255,6 +1260,78 @@ std::string NotificationPreferences::GetAdditionalConfig(const std::string &key)
         return "";
     }
     return preferncesDB_->GetAdditionalConfig(key);
+}
+
+bool NotificationPreferences::DelCloneProfileInfo(const int32_t &userId,
+    const sptr<NotificationDoNotDisturbProfile>& info)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->DelCloneProfileInfo(userId, info);
+}
+
+bool NotificationPreferences::UpdateBatchCloneProfileInfo(const int32_t &userId,
+    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->UpdateBatchCloneProfileInfo(userId, profileInfo);
+}
+
+void NotificationPreferences::GetAllCloneProfileInfo(const int32_t &userId,
+    std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return;
+    }
+    return preferncesDB_->GetAllCloneProfileInfo(userId, profilesInfo);
+}
+
+void NotificationPreferences::GetAllCloneBundleInfo(const int32_t &userId,
+    std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return;
+    }
+    return preferncesDB_->GetAllCloneBundleInfo(userId, cloneBundleInfo);
+}
+
+bool NotificationPreferences::UpdateBatchCloneBundleInfo(const int32_t &userId,
+    const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->UpdateBatchCloneBundleInfo(userId, cloneBundleInfo);
+}
+
+bool NotificationPreferences::DelCloneBundleInfo(const int32_t &userId,
+    const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->DelCloneBundleInfo(userId, cloneBundleInfo);
+}
+
+bool NotificationPreferences::DelBatchCloneProfileInfo(const int32_t &userId,
+    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->DelBatchCloneProfileInfo(userId, profileInfo);
+}
+
+bool NotificationPreferences::DelBatchCloneBundleInfo(const int32_t &userId,
+    const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->DelBatchCloneBundleInfo(userId, cloneBundleInfo);
 }
 }  // namespace Notification
 }  // namespace OHOS
