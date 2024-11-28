@@ -77,7 +77,8 @@ bool NotificationSubscriber::ProcessSyncDecision(
     if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
         return true;
     }
-    ANS_LOGD("No need to consume cause cannot find deviceFlags. deviceType: %{public}s.", deviceType.c_str());
+    ANS_LOGI("Cannot find deviceFlags,notificationKey = %{public}s, deviceType: %{public}s.",
+        request->GetKey().c_str(), deviceType.c_str());
     return false;
 }
 

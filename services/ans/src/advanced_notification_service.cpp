@@ -1318,13 +1318,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
 #endif
         ) {
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
-                ANS_LOGI("BatchRemove-FILTER-RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
-                std::string message = "notification unremove.";
-                OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 4)
-                    .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
-                ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
-                    NotificationConstant::DEFAULT_REASON_DELETE, message);
-                ANS_LOGE("%{public}s", message.c_str());
+                ANS_LOGI("UnRemoved-%{public}s", record->notification->GetKey().c_str());
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
             notification = record->notification;
@@ -1367,12 +1361,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         }
 
         if (!isCancel && !record->notification->IsRemoveAllowed()) {
-            std::string message = "notification unremove.";
-            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 7)
-                .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
-            ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
-                removeReason, message);
-            ANS_LOGE("%{public}s", message.c_str());
+            ANS_LOGI("UnRemoved-%{public}s", record->notification->GetKey().c_str());
             return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
         }
         notification = record->notification;
