@@ -1228,10 +1228,6 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             if (!isCancel && !record->notification->IsRemoveAllowed()) {
                 ANS_LOGI("BatchRemove-FILTER-RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
                 std::string message = "notification unremove.";
-                OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 4)
-                    .ErrorCode(ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED);
-                ReportDeleteFailedEventPushByNotification(record->notification, haMetaMessage,
-                    NotificationConstant::DEFAULT_REASON_DELETE, message);
                 ANS_LOGE("%{public}s", message.c_str());
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
