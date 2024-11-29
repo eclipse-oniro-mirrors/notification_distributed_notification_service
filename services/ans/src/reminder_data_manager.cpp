@@ -815,7 +815,10 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
+    // Since Ans and reminder share a notificationRequest, there is a multi-threaded contention,
+    // so need to make a copy when calling the Ans interface
+    sptr<NotificationRequest> newRequest = MakeNotificationRequest(notificationRequest);
+    advancedNotificationService_->PublishPreparedNotification(newRequest, bundleOption);
     store_->UpdateOrInsert(reminder, bundleOption);
 }
 
@@ -1066,7 +1069,10 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
+    // Since Ans and reminder share a notificationRequest, there is a multi-threaded contention,
+    // so need to make a copy when calling the Ans interface
+    sptr<NotificationRequest> newRequest = MakeNotificationRequest(notificationRequest);
+    ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(newRequest, bundleOption);
     if (errCode != ERR_OK) {
         reminder->OnShowFail();
         RemoveFromShowedReminders(reminder);
@@ -1150,7 +1156,10 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
+    // Since Ans and reminder share a notificationRequest, there is a multi-threaded contention,
+    // so need to make a copy when calling the Ans interface
+    sptr<NotificationRequest> newRequest = MakeNotificationRequest(notificationRequest);
+    advancedNotificationService_->PublishPreparedNotification(newRequest, bundleOption);
     StartRecentReminder();
 }
 
@@ -2068,6 +2077,14 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
         ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
     }
+}
+
+sptr<NotificationRequest> ReminderDataManager::MakeNotificationRequest(sptr<NotificationRequest>& request)
+{
+    MessageParcel data;
+    data.WriteParcelable(request);
+    sptr<NotificationRequest> result = data.ReadParcelable<NotificationRequest>();
+    return result;
 }
 }
 }
