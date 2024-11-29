@@ -144,7 +144,7 @@ SubscriberInstance::SubscriberInstance()
 SubscriberInstance::~SubscriberInstance()
 {
     if (unsubscribeCallbackInfo_.tsfn != nullptr) {
-        napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_abort);
+        napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_release);
     }
     if (canceCallbackInfo_.ref != nullptr) {
         napi_delete_reference(canceCallbackInfo_.env, canceCallbackInfo_.ref);
