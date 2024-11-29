@@ -250,19 +250,20 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
             return NativeRdb::E_ERROR;
         }
         int64_t rowId = -1;
+        std::vector<NativeRdb::ValuesBucket> buckets;
         for (auto &value : values) {
             NativeRdb::ValuesBucket valuesBucket;
             valuesBucket.PutString(NOTIFICATION_KEY, value.first);
             valuesBucket.PutString(NOTIFICATION_VALUE, value.second);
-            ret = rdbStore_->InsertWithConflictResolution(rowId, tableName, valuesBucket,
-                NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
-            if (ret == NativeRdb::E_SQLITE_CORRUPT) {
-                RestoreForMasterSlaver();
-            }
-            if (ret != NativeRdb::E_OK) {
-                ANS_LOGE("Insert batch operation failed, result: %{public}d.", ret);
-                return NativeRdb::E_ERROR;
-            }
+            buckets.emplace_back(valuesBucket);
+        }
+        ret = rdbStore_->BatchInsert(rowId, tableName, buckets);
+        if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+            RestoreForMasterSlaver();
+        }
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("Insert batch operation failed, result: %{public}d.", ret);
+            return NativeRdb::E_ERROR;
         }
     }
     return NativeRdb::E_OK;
