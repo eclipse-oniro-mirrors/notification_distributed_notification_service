@@ -1037,8 +1037,6 @@ napi_value Common::GetBundleOption(const napi_env &env, const napi_value &value,
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
-            std::string msg = "Incorrect parameter types. The type of uid must be number.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &uid);
