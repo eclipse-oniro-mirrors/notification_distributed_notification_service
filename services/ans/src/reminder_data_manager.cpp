@@ -910,7 +910,9 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     if (HandleSysTimeChange(reminder)) {
         return;
     }
-    ShowActiveReminderExtendLocked(reminder);
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    ShowActiveReminderExtendLocked(reminder, extensionReminders);
+    HandleExtensionReminder(extensionReminders);
     StartRecentReminder();
 }
 
@@ -949,7 +951,8 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
     ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
 }
 
-void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder)
+void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& reminder,
+    std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
@@ -970,7 +973,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if (!(*it)->IsNeedNotification()) {
             continue;
         }
-        ReminderDataManager::AsyncStartExtensionAbility((*it), CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        extensionReminders.push_back((*it));
         if ((*it)->CheckExcludeDate()) {
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
             continue;

@@ -536,7 +536,8 @@ private:
 
     void SetActiveReminder(const sptr<ReminderRequest> &reminder);
     void SetAlertingReminder(const sptr<ReminderRequest> &reminder);
-    void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder);
+    void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder,
+        std::vector<sptr<ReminderRequest>>& extensionReminders);
     static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder);
     static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times);
     void InitServiceHandler();
