@@ -48,6 +48,7 @@
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
 #endif
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1146,6 +1147,8 @@ public:
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
 
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+
+    void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1360,7 +1363,7 @@ private:
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
     ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType);
-    void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
+    void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
