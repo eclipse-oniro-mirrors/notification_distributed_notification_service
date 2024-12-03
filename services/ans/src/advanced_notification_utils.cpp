@@ -597,6 +597,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
+    ANS_LOGI("enter OnBundleDataAdd,bundleName:%{public}s", bundleOption->GetBundleName().c_str());
     auto bundleInstall = [bundleOption, this]() {
         CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
         AppExecFwk::BundleInfo bundleInfo;
@@ -607,6 +608,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 
         // In order to adapt to the publish reminder interface, currently only the input from the whitelist is written
         if (bundleInfo.applicationInfo.allowEnableNotification) {
+            ANS_LOGI("need set %{public}s to be enabled", bundleOption->GetBundleName().c_str());
             auto errCode = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption, true);
             if (errCode != ERR_OK) {
                 ANS_LOGE("Set notification enable error! code: %{public}d", errCode);
@@ -625,6 +627,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
+    ANS_LOGI("enter OnBundleDataUpdate,bundleName:%{public}s", bundleOption->GetBundleName().c_str());
     AppExecFwk::BundleInfo bundleInfo;
     if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
         ANS_LOGE("Failed to get BundleInfo using NotificationBundleOption.");
@@ -1895,6 +1898,7 @@ void AdvancedNotificationService::InitNotificationEnableList()
             if (saveRef == ERR_OK) {
                 continue;
             }
+            ANS_LOGI("need set %{public}s to be enabled", bundleOption->GetBundleName().c_str());
             saveRef = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption, true);
             if (saveRef != ERR_OK) {
                 ANS_LOGE("Set enable error! code: %{public}d", saveRef);

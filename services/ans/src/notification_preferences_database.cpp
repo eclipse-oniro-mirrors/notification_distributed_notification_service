@@ -339,6 +339,7 @@ bool NotificationPreferencesDatabase::PutShowBadge(
         return false;
     }
 
+    ANS_LOGI("bundelName:%{public}s, showBadge[%{public}d]",bundleInfo.GetBundleName().c_str() , enable);
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
@@ -387,12 +388,12 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
 {
-    ANS_LOGD("%{public}s, enabled[%{public}d]", __FUNCTION__, enabled);
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is null.");
         return false;
     }
 
+    ANS_LOGI("bundelName:%{public}s, enabled[%{public}d]",bundleInfo.GetBundleName().c_str() , enabled);
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
