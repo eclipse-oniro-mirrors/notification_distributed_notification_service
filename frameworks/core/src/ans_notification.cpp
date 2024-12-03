@@ -170,6 +170,8 @@ ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBund
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
+    ANS_LOGI("SetNotificationSlotFlagsAsBundle,bundleName:%{public}s, %{public}d",
+        bundleOption.GetBundleName().c_str(), (int)slotFlags);
 
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -190,7 +192,7 @@ ErrCode AnsNotification::PublishNotification(const NotificationRequest &request)
 ErrCode AnsNotification::PublishNotification(const std::string &label, const NotificationRequest &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("enter");
+    ANS_LOGI("PublishNotification,notificationId:%{public}u", request.GetNotificationId());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -242,7 +244,7 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
 ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationRequest &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("enter");
+    ANS_LOGI("PublishNotificationForIndirectProxy,notificationId:%{public}u", request.GetNotificationId());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -386,6 +388,8 @@ ErrCode AnsNotification::CanPublishNotificationAsBundle(const std::string &repre
 ErrCode AnsNotification::PublishNotificationAsBundle(
     const std::string &representativeBundle, const NotificationRequest &request)
 {
+    ANS_LOGI("PublishNotificationAsBundle,representativeBundle:%{public}s ,notificationId:%{public}u",
+        representativeBundle.c_str(), request.GetNotificationId());
     if (representativeBundle.empty()) {
         ANS_LOGE("Refuse to publish the notification whit invalid representativeBundle");
         return ERR_ANS_INVALID_PARAM;
@@ -754,6 +758,8 @@ ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bu
         ANS_LOGE("Invalid button name.");
         return ERR_ANS_INVALID_PARAM;
     }
+    ANS_LOGI("TriggerLocalLiveView,notificationId:%{public}u,bundleName:%{public}s,button:%{public}s",
+        notificationId, bundleOption.GetBundleName().c_str(), buttonOption.GetButtonName().c_str());
 
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
