@@ -20,6 +20,7 @@
 #include "notification_clone_util.h"
 #include "notification_clone_bundle_info.h"
 #include "os_account_manager_helper.h"
+#include "advanced_notification_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -98,7 +99,7 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
             continue;
         }
         bundle->SetUid(uid);
-        NotificationPreferences::GetInstance()->UpdateCloneBundleInfo(userId, *bundle);
+        AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
         bundle = bundlesInfo_.erase(bundle);
     }
 
@@ -122,7 +123,7 @@ void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end();) {
         if (bundle->GetBundleName() == bundleName && bundle->GetAppIndex() == appIndex) {
             bundle->SetUid(uid);
-            NotificationPreferences::GetInstance()->UpdateCloneBundleInfo(userId, *bundle);
+            AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
             NotificationPreferences::GetInstance()->DelCloneBundleInfo(userId, *bundle);
             bundle = bundlesInfo_.erase(bundle);
             break;
