@@ -338,8 +338,9 @@ bool NotificationPreferencesDatabase::PutShowBadge(
         ANS_LOGE("Bundle name is nullptr.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, showBadge[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), enable);
 
-    ANS_LOGI("bundelName:%{public}s, showBadge[%{public}d]",bundleInfo.GetBundleName().c_str() , enable);
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
@@ -357,6 +358,8 @@ bool NotificationPreferencesDatabase::PutImportance(
         ANS_LOGE("Bundle name is empty.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, importance[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), importance);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
@@ -375,6 +378,8 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
         ANS_LOGE("Bundle name is blank.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, totalBadgeNum[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), totalBadgeNum);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
@@ -393,7 +398,8 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
         return false;
     }
 
-    ANS_LOGI("bundelName:%{public}s, enabled[%{public}d]",bundleInfo.GetBundleName().c_str() , enabled);
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, enabled[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), enabled);
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
@@ -430,6 +436,8 @@ bool NotificationPreferencesDatabase::PutSlotFlags(NotificationPreferencesInfo::
         return false;
     }
 
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, slotFlags[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), slotFlags);
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags,
         bundleInfo.GetBundleUid());
@@ -443,6 +451,8 @@ bool NotificationPreferencesDatabase::PutHasPoppedDialog(
         ANS_LOGE("Bundle name is null.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, hasPopped[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), hasPopped);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
