@@ -60,7 +60,6 @@ static std::string SetBackUpReply()
 
 int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& reply)
 {
-    reply.WriteString(SetBackUpReply());
     if (cloneTemplates.empty()) {
         ANS_LOGI("Notification no need Backup.");
         return ERR_OK;

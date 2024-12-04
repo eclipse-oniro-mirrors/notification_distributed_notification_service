@@ -2121,20 +2121,24 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGW("Notification SvrQueue is invalid.");
         return;
     }
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&, cloneBundleInfo]() {
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             cloneBundleInfo.GetBundleName(), cloneBundleInfo.GetUid());
+        if (bundle == nullptr) {
+            return;
+        }
         bundle->SetAppIndex(cloneBundleInfo.GetAppIndex());
-        ErrCode result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
-            cloneBundleInfo.GetEnableNotification());
-        if (result == ERR_OK) {
+        if (NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
+            cloneBundleInfo.GetEnableNotification()) == ERR_OK) {
             SetSlotFlagsTrustlistsAsBundle(bundle);
             sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow) EnabledNotificationCallbackData(
                 bundle->GetBundleName(), bundle->GetUid(), cloneBundleInfo.GetEnableNotification());
+            if (bundleData == nullptr) {
+                return;
+            }
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
         } else {
             ANS_LOGW("Set notification enable failed.");
@@ -2158,7 +2162,6 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             HandleBadgeEnabledChanged(bundle, cloneBundleInfo.GetIsShowBadge());
         } else {
             ANS_LOGW("Set notification badge failed.");
-            return;
         }
 
         for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
