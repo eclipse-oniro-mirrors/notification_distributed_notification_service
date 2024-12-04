@@ -1685,6 +1685,7 @@ void ReminderRequest::UpdateNotificationBundleInfo()
     ANSR_LOGD("ownerBundleName=%{public}s, bundleName_=%{public}s",
         ownerBundleName.c_str(), bundleName_.c_str());
     notificationRequest_->SetOwnerBundleName(bundleName_);
+    notificationRequest_->SetOwnerUid(uid_);
     notificationRequest_->SetCreatorBundleName(bundleName_);
     notificationRequest_->SetCreatorUid(uid_);
     notificationRequest_->SetCreatorUserId(userId_);
