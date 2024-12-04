@@ -640,11 +640,15 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_EXT_WRAPPER
+    NotificationConstant::SlotType oldType = request->GetSlotType();
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
     if (ctrlResult != ERR_OK) {
         message.ErrorCode(ctrlResult);
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ctrlResult;
+    }
+    if (request->GetSlotType() != oldType) {
+        SetRequestBySlotType(request, bundleOption);
     }
 #endif
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
