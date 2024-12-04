@@ -63,7 +63,7 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want 
     auto element = want.GetElement();
     std::string bundleName = element.GetBundleName();
     int32_t appIndex = want.GetIntParam("appIndex", -1);
-    int32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
+    int32_t uid = want.GetIntParam("ohos.aafwk.param.targetUid", -1);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     bundleOption->SetAppIndex(appIndex);
     if (bundleOption == nullptr) {
