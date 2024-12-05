@@ -141,7 +141,8 @@ struct PermissionDialog {
                     let containerWidth = newValue.width as number;
                     let options: MeasureOptions = {
                       textContent: $r('app.string.group_label_notification', this.appName),
-                      fontSize: $r('sys.float.Title_S'),
+                      fontSize: getLimitFontSize(sourceToVp($r('sys.float.Title_S')),
+                      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX)),
                       fontWeight: FontWeight.Bold,
                     };
                     this.titleContainerWidth = calContainerWidth(containerWidth, options,
