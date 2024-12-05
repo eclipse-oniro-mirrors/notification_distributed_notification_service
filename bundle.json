@@ -106,11 +106,14 @@
           "//base/notification/distributed_notification_service/frameworks/ans:ans_client",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
-          "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification"
+          "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification",
+          "//base/notification/distributed_notification_service/frameworks/reminder:reminder_client"
         ],
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
           "//base/notification/distributed_notification_service/services:ans_service",
+          "//base/notification/distributed_notification_service/services/reminder/sa_profile:reminder_sa_profile",
+          "//base/notification/distributed_notification_service/services/reminder:reminder_service",
           "//base/notification/distributed_notification_service/tools:tools_shell"
         ]
       },
@@ -167,10 +170,12 @@
         }
       ],
       "test": [
+        "//base/notification/distributed_notification_service/services/reminder/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",
         "//base/notification/distributed_notification_service/services/test/moduletest:moduletest",
         "//base/notification/distributed_notification_service/frameworks/test/moduletest:moduletest",
+        "//base/notification/distributed_notification_service/frameworks/reminder/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/core/test/unittest:unittest",
         "//base/notification/distributed_notification_service/test:systemtest",

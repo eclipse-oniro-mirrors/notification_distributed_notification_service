@@ -109,12 +109,14 @@ public:
      * @return true if read parcel success.
      */
     bool ReadFromParcel(Parcel &parcel) override;
+    bool WriteParcel(Parcel &parcel) const override;
+
+    ReminderRequestAlarm() : ReminderRequest(ReminderType::ALARM) {};
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestAlarm() : ReminderRequest() {};
     void CheckParamValid() const;
 
     /**

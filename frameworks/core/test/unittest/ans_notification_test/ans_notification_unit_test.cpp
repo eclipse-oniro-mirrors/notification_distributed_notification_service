@@ -874,37 +874,6 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabled_0100, Function | MediumTe
 }
 
 /*
- * @tc.name: GetDeviceRemindType_0100
- * @tc.desc: test GetDeviceRemindType ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, GetDeviceRemindType_0100, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::NONE;
-    ErrCode ret1 = ans_->GetDeviceRemindType(remindType);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ReminderRequest reminder;
-    ErrCode ret2 = ans_->PublishReminder(reminder);
-    EXPECT_EQ(ret2, ERR_ANS_INVALID_PARAM);
-    int32_t reminderId = 1;
-    ErrCode ret3 = ans_->CancelReminder(reminderId);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret4 = ans_->CancelAllReminders();
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    std::vector<sptr<ReminderRequest>> validReminders;
-    ErrCode ret5 = ans_->GetValidReminders(validReminders);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
-}
-
-/*
  * @tc.name: IsSupportTemplate_0100
  * @tc.desc: test IsSupportTemplate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC

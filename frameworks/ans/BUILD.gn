@@ -63,7 +63,6 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/manager/ans_manager_proxy_bundle.cpp",
     "${core_path}/src/manager/ans_manager_proxy_distributed.cpp",
     "${core_path}/src/manager/ans_manager_proxy_disturb.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_reminder.cpp",
     "${core_path}/src/manager/ans_manager_proxy_slot.cpp",
     "${core_path}/src/manager/ans_manager_proxy_subscribe.cpp",
     "${core_path}/src/manager/ans_manager_proxy_utils.cpp",
@@ -112,11 +111,6 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_user_input.cpp",
     "${frameworks_module_ans_path}/src/push_callback_stub.cpp",
     "${frameworks_module_ans_path}/src/push_promise_callback.cpp",
-    "${frameworks_module_ans_path}/src/reminder_helper.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request_alarm.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request_calendar.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request_timer.cpp",
   ]
 
   public_configs = [ ":ans_innerkits_public_config" ]

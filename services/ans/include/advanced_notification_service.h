@@ -704,63 +704,6 @@ public:
     bool CheckReminderPermission();
 
     /**
-     * @brief Publishes a reminder notification.
-     *
-     * @param reminder Identifies the reminder notification request that needs to be published.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode PublishReminder(sptr<ReminderRequest> &reminder) override;
-
-    /**
-     * @brief Cancel a reminder notifications.
-     *
-     * @param reminderId Identifies the reminders id that needs to be canceled.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode CancelReminder(const int32_t reminderId) override;
-
-    /**
-     * @brief Get all valid reminder notifications.
-     *
-     * @param reminders Identifies the list of all valid notifications.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders) override;
-
-    /**
-     * @brief Cancel all reminder notifications.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode CancelAllReminders() override;
-
-    /**
-     * @brief Add exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param date exclude date
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override;
-
-    /**
-     * @brief Clear exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode DelExcludeDates(const int32_t reminderId) override;
-
-    /**
-     * @brief Get exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param dates exclude dates
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override;
-
-    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.
@@ -1132,6 +1075,15 @@ public:
      * @brief Whether reminders are allowed.
      */
     bool AllowUseReminder(const std::string& bundleName);
+
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName bundleName
+     * @param isAllowUseReminder isAllowUseReminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
 
     /**
      * @brief Get do not disturb profile by id.

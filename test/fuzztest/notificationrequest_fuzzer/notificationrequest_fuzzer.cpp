@@ -43,7 +43,6 @@ namespace OHOS {
         request.GetWantAgent();
         request.SetRemovalWantAgent(wantAgent);
         request.GetRemovalWantAgent();
-        request.SetMaxScreenWantAgent(wantAgent);
         request.GetMaxScreenWantAgent();
         std::shared_ptr<AAFwk::WantParams> extras = nullptr;
         request.SetAdditionalData(extras);

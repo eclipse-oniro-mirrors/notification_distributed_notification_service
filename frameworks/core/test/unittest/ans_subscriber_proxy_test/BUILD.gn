@@ -26,17 +26,14 @@ ohos_unittest("ans_subscriber_proxy_test") {
 
   sources = [ "ans_subscriber_proxy_unit_test.cpp" ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_single",

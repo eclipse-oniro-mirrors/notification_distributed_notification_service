@@ -70,12 +70,14 @@ public:
     static ReminderRequestTimer *Unmarshalling(Parcel &parcel);
 
     bool ReadFromParcel(Parcel &parcel) override;
+    bool WriteParcel(Parcel &parcel) const override;
+
+    ReminderRequestTimer() : ReminderRequest(ReminderType::TIMER) {};
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestTimer() {};
     void CheckParamsValid(const uint64_t countDownTimeInSeconds) const;
     void UpdateTimeInfo(const std::string &description);
     uint64_t countDownTimeInSeconds_ {0};

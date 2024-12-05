@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_request_calendar.h"
-#undef private
-#undef protected
 #include "reminderrequestcalendar_fuzzer.h"
 #include <fuzzer/FuzzedDataProvider.h>
 

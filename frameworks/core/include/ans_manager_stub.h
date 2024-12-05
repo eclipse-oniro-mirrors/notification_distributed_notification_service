@@ -643,63 +643,6 @@ public:
     virtual ErrCode CancelContinuousTaskNotification(const std::string &label, int32_t notificationId) override;
 
     /**
-     * @brief Publishes a reminder notification.
-     *
-     * @param reminder Identifies the reminder notification request that needs to be published.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode PublishReminder(sptr<ReminderRequest> &reminder) override;
-
-    /**
-     * @brief Cancel a reminder notifications.
-     *
-     * @param reminderId Identifies the reminders id that needs to be canceled.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode CancelReminder(const int32_t reminderId) override;
-
-    /**
-     * @brief Get all valid reminder notifications.
-     *
-     * @param reminders Identifies the list of all valid notifications.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders) override;
-
-    /**
-     * @brief Cancel all reminder notifications.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode CancelAllReminders() override;
-
-    /**
-     * @brief Add exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param date exclude date
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override;
-
-    /**
-     * @brief Clear exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode DelExcludeDates(const int32_t reminderId) override;
-
-    /**
-     * @brief Get exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param dates exclude dates
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override;
-
-    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.
@@ -939,6 +882,15 @@ public:
      */
     virtual ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
 
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName bundleName
+     * @param isAllowUseReminder isAllowUseReminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
      * @brief Register Swing Callback.
@@ -1020,13 +972,6 @@ private:
     ErrCode HandleGetDeviceRemindType(MessageParcel &data, MessageParcel &reply);
     ErrCode HandlePublishContinuousTaskNotification(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelContinuousTaskNotification(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandlePublishReminder(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleCancelReminder(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetValidReminders(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleCancelAllReminders(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleAddExcludeDate(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleDelExcludeDates(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetExcludeDates(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSupportTemplate(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSpecialUserAllowedNotifyByUser(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledByUser(MessageParcel &data, MessageParcel &reply);
@@ -1058,6 +1003,7 @@ private:
     ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleAllowUseReminder(MessageParcel &data, MessageParcel &reply);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif

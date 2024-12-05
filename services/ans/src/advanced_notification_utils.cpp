@@ -2018,6 +2018,12 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 #endif
 }
 
+ErrCode AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    isAllowUseReminder = AllowUseReminder(bundleName);
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::ResetDistributedEnabled()
 {
     if (notificationSvrQueue_ == nullptr) {
