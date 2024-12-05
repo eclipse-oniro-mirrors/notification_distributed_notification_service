@@ -1637,7 +1637,7 @@ void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notification
 
 void ReminderRequest::UpdateNotificationBundleInfo(NotificationRequest& notificationRequest)
 {
-
+    notificationRequest.SetOwnerUid(uid_);
     notificationRequest.SetCreatorUid(uid_);
     notificationRequest.SetCreatorUserId(userId_);
 }
