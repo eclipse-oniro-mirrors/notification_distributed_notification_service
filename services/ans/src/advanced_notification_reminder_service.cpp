@@ -116,7 +116,7 @@ ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification
 
 void AdvancedNotificationService::TryStartReminderService()
 {
-    if (access(REMINDER_DB_PATH, F_OK) ！= 0) {
+    if (access(REMINDER_DB_PATH, F_OK) != 0) {
         ANS_LOGW("Reminder db no exist");
         return;
     }

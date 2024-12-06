@@ -101,7 +101,7 @@ ErrCode ReminderService::PublishReminder(const ReminderRequest &reminder, int32_
         return ERR_REMINDER_NUMBER_OVERLOAD;
     }
     InitReminderRequest(tarReminder, bundle, callingUid);
-    NotificationBundleOption(tarReminder->GetBundleName(), tarReminder->GetUid());
+    NotificationBundleOption bundleOption = NotificationBundleOption(tarReminder->GetBundleName(), tarReminder->GetUid());
     bool allowedNotify = false;
     ErrCode result = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, allowedNotify));
     if (!tarReminder->IsSystemApp() && (result != ERR_OK || !allowedNotify)) {

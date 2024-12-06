@@ -50,8 +50,8 @@ ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     std::vector<sptr<NotificationSlot>> slotsSptr;
-    sptr<NotificationSlot> slotSptr = new (std::nothrow) NotificationSlot(*slot);
-    if (slot == nullptr) {
+    sptr<NotificationSlot> slotSptr = new (std::nothrow) NotificationSlot(slot);
+    if (slotSptr == nullptr) {
         ANS_LOGE("Failed to create NotificationSlot ptr.");
         return ERR_ANS_NO_MEMORY;
     }

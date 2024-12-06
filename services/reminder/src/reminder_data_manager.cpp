@@ -865,7 +865,7 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
     if (date.GetDoNotDisturbType() == NotificationConstant::DoNotDisturbType::NONE) {
         return true;
     }
-    NotificationBundleOption(reminder->GetBundleName(), reminder->GetUid());
+    NotificationBundleOption bundleOption = NotificationBundleOption(reminder->GetBundleName(), reminder->GetUid());
     std::vector<sptr<NotificationSlot>> slots;
     errCode = IN_PROCESS_CALL(NotificationHelper::GetNotificationSlotsForBundle(bundleOption, slots));
     if (errCode != ERR_OK) {
@@ -1417,7 +1417,7 @@ bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder)
         return false;
     }
     bool isAllowed = false;
-    NotificationBundleOption(reminder->GetBundleName(), reminder->GetUid());
+    NotificationBundleOption bundleOption = NotificationBundleOption(reminder->GetBundleName(), reminder->GetUid());
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, isAllowed));
     if (errCode != ERR_OK) {
         ANSR_LOGE("Failed to call IsAllowedNotify, errCode=%{public}d", errCode);
