@@ -1893,7 +1893,7 @@ ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, bool& i
     ANS_LOGD("enter");
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("AllowUseReminder Fail to GetAnsManagerProxy.");
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 

@@ -283,12 +283,12 @@ ErrCode AnsManagerProxy::AllowUseReminder(const std::string& bundleName, bool& i
     ANS_LOGD("enter");
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
-        ANS_LOGE("[AllowUseReminder] fail: write interface token failed.");
+        ANS_LOGE("fail: write interface token failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (!data.WriteString(bundleName)) {
-        ANS_LOGE("[AllowUseReminder] fail: write bundleName failed");
+        ANS_LOGE("fail: write bundleName failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -296,17 +296,17 @@ ErrCode AnsManagerProxy::AllowUseReminder(const std::string& bundleName, bool& i
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::ALLOW_USE_REMINDER, option, data, reply);
     if (result != ERR_OK) {
-        ANS_LOGE("[AllowUseReminder] fail: transact ErrCode=%{public}d", result);
+        ANS_LOGE("fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
     }
 
     if (!reply.ReadInt32(result)) {
-        ANS_LOGE("[AllowUseReminder] fail: read result failed.");
+        ANS_LOGE("fail: read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (!reply.ReadBool(isAllowUseReminder)) {
-        ANS_LOGE("[AllowUseReminder] fail: read enabled failed.");
+        ANS_LOGE("fail: read enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

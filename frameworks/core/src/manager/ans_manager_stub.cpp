@@ -2479,19 +2479,19 @@ ErrCode AnsManagerStub::HandleAllowUseReminder(MessageParcel &data, MessageParce
     ANS_LOGD("enter");
     std::string bundleName;
     if (!data.ReadString(bundleName)) {
-        ANS_LOGE("[HandleAllowUseReminder] fail: read deviceId failed.");
+        ANS_LOGE("fail: read deviceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     bool isAllowUseReminder = false;
     ErrCode result = AllowUseReminder(bundleName, isAllowUseReminder);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleAllowUseReminder] fail: write result failed, ErrCode=%{public}d", result);
+        ANS_LOGE("fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (!reply.WriteBool(isAllowUseReminder)) {
-        ANS_LOGE("[HandleAllowUseReminder] fail: write enabled failed.");
+        ANS_LOGE("fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

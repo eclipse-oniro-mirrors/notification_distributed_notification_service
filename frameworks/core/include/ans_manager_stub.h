@@ -885,8 +885,8 @@ public:
     /**
      * @brief Whether reminders are allowed.
      *
-     * @param bundleName bundleName
-     * @param isAllowUseReminder isAllowUseReminder
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
