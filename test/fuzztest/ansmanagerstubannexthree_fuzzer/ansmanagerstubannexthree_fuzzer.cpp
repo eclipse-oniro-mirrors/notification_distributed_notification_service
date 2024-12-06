@@ -50,7 +50,7 @@ namespace OHOS {
         ansManagerStub.IsAllowedNotify(allow);
         ansManagerStub.IsAllowedNotifySelf(allow);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allow);
-        ansManagerStub.CancelGroup(stringData, 0);
+        ansManagerStub.CancelGroup(stringData, "");
         ansManagerStub.RemoveGroupByBundle(bundleOption, stringData);
         ansManagerStub.DoesSupportDoNotDisturbMode(allow);
         ansManagerStub.IsDistributedEnabled(allow);

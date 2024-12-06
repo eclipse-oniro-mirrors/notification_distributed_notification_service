@@ -73,7 +73,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns cancel notification result.
      */
-    virtual ErrCode Cancel(int notificationId, const std::string &label, int32_t instanceKey) = 0;
+    virtual ErrCode Cancel(int notificationId, const std::string &label, const std::string &instanceKey) = 0;
 
     /**
      * @brief Cancels all the published notifications.
@@ -81,7 +81,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode CancelAll(int32_t instanceKey) = 0;
+    virtual ErrCode CancelAll(const std::string &instanceKey) = 0;
 
     /**
      * @brief Cancels a published agent notification.
@@ -187,7 +187,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode GetActiveNotifications(
-        std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) = 0;
+        std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey) = 0;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -591,7 +591,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) = 0;
+    virtual ErrCode CancelGroup(const std::string &groupName, const std::string &instanceKey) = 0;
 
     /**
      * @brief Delete notifications according to bundle and group.
@@ -826,7 +826,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    virtual ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) = 0;
+    virtual ErrCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey) = 0;
 
     /**
      * @brief Set badge number by bundle.

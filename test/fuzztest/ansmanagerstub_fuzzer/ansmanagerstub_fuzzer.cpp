@@ -329,7 +329,7 @@ namespace OHOS {
         ansManagerStub.Publish(stringData, notification2);
         int notificationId = fuzzData.GetData<int>();
         ansManagerStub.Cancel(notificationId, stringData, 0);
-        ansManagerStub.CancelAll(0);
+        ansManagerStub.CancelAll("");
         int32_t userId = fuzzData.GetData<int32_t>();
         ansManagerStub.CancelAsBundle(notificationId, stringData, userId);
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
@@ -342,7 +342,7 @@ namespace OHOS {
         uint64_t num = fuzzData.GetData<uint64_t>();
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
-        ansManagerStub.GetActiveNotifications(notifications, 0);
+        ansManagerStub.GetActiveNotifications(notifications, "");
         ansManagerStub.GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
         ansManagerStub.GetAllActiveNotifications(notificationss);
@@ -378,7 +378,7 @@ namespace OHOS {
         bool allowed = fuzzData.GenerateRandomBool();
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);
-        ansManagerStub.CancelGroup(stringData, 0);
+        ansManagerStub.CancelGroup(stringData, "");
         ansManagerStub.RemoveGroupByBundle(bundleOption, stringData);
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         ansManagerStub.SetDoNotDisturbDate(date);

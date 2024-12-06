@@ -38,7 +38,7 @@ namespace OHOS {
         ansManagerStub.Publish(stringData, notification);
         int notificationId = 1;
         ansManagerStub.Cancel(notificationId, stringData, 0);
-        ansManagerStub.CancelAll(0);
+        ansManagerStub.CancelAll("");
         int32_t notificationIds = static_cast<int32_t>(GetU32Data(data));
         int32_t userId = static_cast<int32_t>(GetU32Data(data));
         ansManagerStub.CancelAsBundle(notificationIds, stringData, userId);
@@ -59,7 +59,7 @@ namespace OHOS {
         sptr<Notification::NotificationRequest> notificationer = new Notification::NotificationRequest();
         std::vector<sptr<Notification::NotificationRequest>> notifications;
         notifications.emplace_back(notificationer);
-        ansManagerStub.GetActiveNotifications(notifications, 0);
+        ansManagerStub.GetActiveNotifications(notifications, "");
         ansManagerStub.GetActiveNotificationNums(num);
         sptr<Notification::Notification> notificatione = new Notification::Notification();
         std::vector<sptr<Notification::Notification>> notificationes;

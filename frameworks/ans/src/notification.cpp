@@ -241,12 +241,12 @@ int32_t Notification::GetRecvUserId() const
     return request_->GetReceiverUserId();
 }
 
-int32_t Notification::GetInstanceKey() const
+std::string Notification::GetInstanceKey() const
 {
     if (request_ == nullptr) {
-        return 0;
+        return "";
     }
-    return request_->GetCreatorInstanceKey();
+    return request_->GetAppInstanceKey();
 }
 
 bool Notification::MarshallingBool(Parcel &parcel) const

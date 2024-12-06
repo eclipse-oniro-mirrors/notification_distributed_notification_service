@@ -464,7 +464,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0100, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, 0);
+    int32_t result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -485,7 +485,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0200, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "";
-    int32_t result = proxy->Cancel(notificationId, label, 0);
+    int32_t result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -508,7 +508,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0300, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, 0);
+    int32_t result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -529,7 +529,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0400, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, 0);
+    int32_t result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -552,7 +552,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0500, Function | MediumTest | Level
     ASSERT_NE(nullptr, proxy);
     int32_t notificationId = 0;
     std::string label = "label";
-    int32_t result = proxy->Cancel(notificationId, label, 0);
+    int32_t result = proxy->Cancel(notificationId, label, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -571,7 +571,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll(0);
+    int32_t result = proxy->CancelAll("");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -593,7 +593,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0200, Function | MediumTest | Le
         ERR_OK, true, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll(0);
+    int32_t result = proxy->CancelAll("");
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -612,7 +612,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0300, Function | MediumTest | Le
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll(0);
+    int32_t result = proxy->CancelAll("");
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -633,7 +633,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0400, Function | MediumTest | Le
         ERR_OK, false, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelAll(0);
+    int32_t result = proxy->CancelAll("");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -2000,7 +2000,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0100, Function | Me
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, 0);
+    int32_t result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -2023,7 +2023,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0200, Function | Me
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, 0);
+    int32_t result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
     EXPECT_EQ(0, notifications.size());
 }
@@ -2044,7 +2044,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0300, Function | Me
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, 0);
+    int32_t result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -2066,7 +2066,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0400, Function | Me
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, 0);
+    int32_t result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -2088,7 +2088,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0500, Function | Me
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
-    int32_t result = proxy->GetActiveNotifications(notifications, 0);
+    int32_t result = proxy->GetActiveNotifications(notifications, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -5222,7 +5222,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0100, Function | MediumTest | 
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelGroup("GroupName", 0);
+    int32_t result = proxy->CancelGroup("GroupName", "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -5244,7 +5244,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0200, Function | MediumTest | 
         ERR_OK, true, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelGroup("GroupName", 0);
+    int32_t result = proxy->CancelGroup("GroupName", "");
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -5263,7 +5263,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0300, Function | MediumTest | 
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelGroup("GroupName", 0);
+    int32_t result = proxy->CancelGroup("GroupName", "");
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -5284,7 +5284,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0400, Function | MediumTest | 
         ERR_OK, false, false, false)), Return(NO_ERROR)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->CancelGroup("GroupName", 0);
+    int32_t result = proxy->CancelGroup("GroupName", "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -7661,7 +7661,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0100, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t userId = 0;
-    int32_t result = proxy->SetBadgeNumber(userId, 0);
+    int32_t result = proxy->SetBadgeNumber(userId, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -7684,7 +7684,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0200, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t badgeNumber = 0;
-    int32_t result = proxy->SetBadgeNumber(badgeNumber, 0);
+    int32_t result = proxy->SetBadgeNumber(badgeNumber, "");
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -7704,7 +7704,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0300, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t badgeNumber = 0;
-    int32_t result = proxy->SetBadgeNumber(badgeNumber, 0);
+    int32_t result = proxy->SetBadgeNumber(badgeNumber, "");
     EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
 }
 
@@ -7726,7 +7726,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t badgeNumber = 0;
-    int32_t result = proxy->SetBadgeNumber(badgeNumber, 0);
+    int32_t result = proxy->SetBadgeNumber(badgeNumber, "");
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
 }
 

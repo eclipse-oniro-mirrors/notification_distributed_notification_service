@@ -93,7 +93,7 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    advancedNotificationService_->CancelAll(0);
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
@@ -599,7 +599,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04700,
         req->SetCreatorUid(1);
         ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
     }
-    ASSERT_EQ(advancedNotificationService_->Cancel(1, label, 0), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->Cancel(1, label, ""), (int)ERR_OK);
 }
 
 /**
@@ -612,7 +612,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04800,
     int32_t notificationId = 0;
     std::string label = "testLabel";
     ASSERT_EQ((int)advancedNotificationService_->Cancel(
-        notificationId, label, 0), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        notificationId, label, ""), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -625,7 +625,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04900,
     TestAddSlot(NotificationConstant::SlotType::OTHER);
     sptr<NotificationRequest> req = new NotificationRequest(1);
     req->SetSlotType(NotificationConstant::OTHER);
-    ASSERT_EQ(advancedNotificationService_->CancelAll(0), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->CancelAll(""), (int)ERR_OK);
 }
 
 /**
@@ -646,7 +646,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_05000,
     req->SetUnremovable(true);
     req->SetCreatorUid(1);
     ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->Cancel(notificationId, label, 0), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->Cancel(notificationId, label, ""), (int)ERR_OK);
 }
 
 
@@ -775,7 +775,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10300,
     std::string groupName = "group";
     req->SetGroupName(groupName);
     ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, 0), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), (int)ERR_OK);
     SleepForFC();
 }
 

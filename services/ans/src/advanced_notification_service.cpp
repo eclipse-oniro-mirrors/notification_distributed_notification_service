@@ -619,7 +619,7 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
         return nullptr;
     }
     if (bundleOption != nullptr) {
-        bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+        bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     }
     record->bundleOption = bundleOption;
     SetNotificationRemindType(record->notification, true);
@@ -1063,7 +1063,7 @@ void AdvancedNotificationService::StopFilters()
 }
 
 ErrCode AdvancedNotificationService::GetActiveNotifications(
-    std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey)
+    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1071,7 +1071,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-    bundleOption->SetInstanceKey(instanceKey);
+    bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidated.");
@@ -1082,7 +1082,8 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         notifications.clear();
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid())) {
+                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
                 notifications.push_back(record->request);
             }
         }
@@ -1205,6 +1206,37 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     return keys;
 }
 
+std::vector<std::string> AdvancedNotificationService::GetNotificationKeysByBundle(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    std::vector<std::string> keys;
+    if (bundleOption == nullptr) {
+        return keys;
+    }
+
+    for (auto record : notificationList_) {
+        if ((record->bundleOption->GetUid() != bundleOption->GetUid())) {
+            continue;
+        }
+        ANS_LOGD("GetNotificationKeys instanceKey(%{public}s, %{public}s)",
+            record->notification->GetInstanceKey().c_str(), bundleOption->GetAppInstanceKey().c_str());
+        if (record->notification->GetInstanceKey() == "" || bundleOption->GetAppInstanceKey() == "" ||
+            record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) {
+                keys.push_back(record->notification->GetKey());
+        }
+    }
+
+    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    for (auto delayNotification : delayNotificationList_) {
+        auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
+        if (bundleOption != nullptr && delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
+            keys.push_back(delayNotification.first->notification->GetKey());
+        }
+    }
+
+    return keys;
+}
+
 void AdvancedNotificationService::CancelOnceWantAgent(
     const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent)
 {
@@ -1235,6 +1267,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+            (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
             (record->notification->GetLabel() == label) &&
             (record->notification->GetId() == notificationId)
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1321,7 +1354,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     const std::string &key, const int32_t &userId, sptr<Notification> &notification)
 {
     for (auto record : notificationList_) {
-        if ((record->notification->GetKey() == key) && (record->notification->GetUserId() == userId)) {
+        if ((record->notification->GetKey() == key) &&
+            (record->notification->GetUserId() == userId)) {
             if (!record->notification->IsRemoveAllowed()) {
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
