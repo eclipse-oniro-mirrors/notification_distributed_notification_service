@@ -893,8 +893,6 @@ public:
      */
     void OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
 
-    NotificationRequest CreateNotificationRequest();
-
 public:
     /**
      * @brief Serialize want agent info and max want agent info to string.

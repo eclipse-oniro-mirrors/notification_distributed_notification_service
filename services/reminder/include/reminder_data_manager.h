@@ -599,8 +599,6 @@ private:
      */
     void UpdateAndSaveReminderLocked(const sptr<ReminderRequest> &reminder);
 
-    NotificationRequest CreateNotificationRequest(const sptr<ReminderRequest> &reminder, bool isSnooze);
-
     static bool cmp(sptr<ReminderRequest> &reminderRequest, sptr<ReminderRequest> &other);
 
     /**
