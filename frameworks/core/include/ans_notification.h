@@ -1241,6 +1241,7 @@ private:
     bool IsValidDelayTime(const NotificationRequest &request) const;
     void CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
         sptr<SubscriberListener> &listener);
+    std::string GetAppInstanceKey() const;
 
 private:
     std::mutex subscriberMutex_;

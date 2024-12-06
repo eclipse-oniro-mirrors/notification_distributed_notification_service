@@ -39,7 +39,6 @@ namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
 const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
-const int32_t DEFAULT_INSTANCE_KEY = -1;
 const std::string DOWNLOAD_TITLE = "title";
 const std::string DOWNLOAD_FILENAME = "fileName";
 }
@@ -235,8 +234,8 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    reqPtr->SetCreatorInstanceKey(instanceKey);
+    std::string instanceKey = GetAppInstanceKey();
+    reqPtr->SetAppInstanceKey(instanceKey);
 
     return proxy->Publish(label, reqPtr);
 }
@@ -287,8 +286,8 @@ ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationR
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
-    reqPtr->SetCreatorInstanceKey(instanceKey);
+    std::string instanceKey = GetAppInstanceKey();
+    reqPtr->SetAppInstanceKey(instanceKey);
 
     return proxy->PublishNotificationForIndirectProxy(reqPtr);
 }
@@ -307,7 +306,7 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    std::string instanceKey = GetAppInstanceKey();
     return proxy->Cancel(notificationId, label, instanceKey);
 }
 
@@ -320,7 +319,7 @@ ErrCode AnsNotification::CancelAllNotifications()
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    std::string instanceKey = GetAppInstanceKey();
     return proxy->CancelAll(instanceKey);
 }
 
@@ -366,7 +365,7 @@ ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationReq
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    std::string instanceKey = GetAppInstanceKey();
     return proxy->GetActiveNotifications(request, instanceKey);
 }
 
@@ -1087,7 +1086,7 @@ ErrCode AnsNotification::CancelGroup(const std::string &groupName)
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    std::string instanceKey = GetAppInstanceKey();
     return proxy->CancelGroup(groupName, instanceKey);
 }
 
@@ -1793,7 +1792,7 @@ ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
         ANS_LOGE("SetBadgeNumber fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    int32_t instanceKey = DEFAULT_INSTANCE_KEY;
+    std::string instanceKey = GetAppInstanceKey();
     return proxy->SetBadgeNumber(badgeNumber, instanceKey);
 }
 
@@ -2039,6 +2038,18 @@ ErrCode AnsNotification::UpdateNotificationTimerByUid(const int32_t uid, const b
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->UpdateNotificationTimerByUid(uid, isPaused);
+}
+
+std::string AnsNotification::GetAppInstanceKey() const
+{
+    std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext>context =
+        OHOS::AbilityRuntime::Context::GetApplicationContext();
+    if (context != nullptr) {
+        return context->GetCurrentInstanceKey();
+    } else {
+        ANS_LOGE("GetApplicationContext for instacekey fail.");
+        return "";
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

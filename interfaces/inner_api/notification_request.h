@@ -1104,7 +1104,7 @@ public:
     /**
      * @brief Sets the InstanceKey of the notification creator.
      *
-     * @param userId Indicates the InstanceKey of the notification creator.
+     * @param key Indicates the InstanceKey of the notification creator.
      */
     void SetCreatorInstanceKey(int32_t key);
 
@@ -1114,6 +1114,20 @@ public:
      * @return Returns the InstanceKey of the notification creator.
      */
     int32_t GetCreatorInstanceKey() const;
+
+    /**
+     * @brief Sets the InstanceKey of the notification creator.
+     *
+     * @param key Indicates the InstanceKey of the notification creator.
+     */
+    void SetAppInstanceKey(const std::string &key);
+ 
+    /**
+     * @brief Obtains the InstanceKey of the notification creator.
+     *
+     * @return Returns the InstanceKey of the notification creator.
+     */
+    std::string GetAppInstanceKey() const;
 
     /**
      * @brief Sets the UserId of the notification owner.
@@ -1501,6 +1515,7 @@ private:
     int32_t receiverUserId_ {SUBSCRIBE_USER_INIT};
     int32_t creatorInstanceKey_ {DEFAULT_UID};
 
+    std::string appInstanceKey_ {};
     std::string settingsText_ {};
     std::string creatorBundleName_ {};
     std::string ownerBundleName_ {};

@@ -38,8 +38,8 @@ namespace OHOS {
         sptr<Notification::NotificationRequest> notification = new Notification::NotificationRequest();
         ansManagerStub.Publish(stringData, notification);
         int notificationId = 1;
-        ansManagerStub.Cancel(notificationId, stringData, 0);
-        ansManagerStub.CancelAll(0);
+        ansManagerStub.Cancel(notificationId, stringData, "");
+        ansManagerStub.CancelAll("");
         int32_t notificationIds = fuzzData->ConsumeIntegral<int32_t>();
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
         ansManagerStub.CancelAsBundle(notificationIds, stringData, userId);
@@ -60,7 +60,7 @@ namespace OHOS {
         sptr<Notification::NotificationRequest> notificationer = new Notification::NotificationRequest();
         std::vector<sptr<Notification::NotificationRequest>> notifications;
         notifications.emplace_back(notificationer);
-        ansManagerStub.GetActiveNotifications(notifications, 0);
+        ansManagerStub.GetActiveNotifications(notifications, "");
         ansManagerStub.GetActiveNotificationNums(num);
         sptr<Notification::Notification> notificatione = new Notification::Notification();
         std::vector<sptr<Notification::Notification>> notificationes;

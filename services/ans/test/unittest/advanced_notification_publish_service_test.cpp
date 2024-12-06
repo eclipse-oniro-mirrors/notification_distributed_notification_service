@@ -69,7 +69,7 @@ void AnsPublishServiceTest::SetUp()
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
-    advancedNotificationService_->CancelAll(0);
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";
@@ -686,13 +686,13 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
-    auto ret = advancedNotificationService_->CancelAll(0);
+    auto ret = advancedNotificationService_->CancelAll("");
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->Delete("", 1);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->CancelGroup("group", 0);
+    ret = advancedNotificationService_->CancelGroup("group", "");
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->RemoveGroupByBundle(bundle, "group");
@@ -705,7 +705,7 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     ret = advancedNotificationService_->SetNotificationsEnabledByUser(1, false);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
-    ret = advancedNotificationService_->SetBadgeNumber(1, 0);
+    ret = advancedNotificationService_->SetBadgeNumber(1, "");
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     ret = advancedNotificationService_->SubscribeLocalLiveView(nullptr, nullptr, true);

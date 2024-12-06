@@ -331,8 +331,8 @@ namespace OHOS {
         notification2->SetContent(std::make_shared<Notification::NotificationContent>(content2));
         ansManagerStub.Publish(stringData, notification2);
         int notificationId = fuzzData->ConsumeIntegral<int>();
-        ansManagerStub.Cancel(notificationId, stringData, 0);
-        ansManagerStub.CancelAll(0);
+        ansManagerStub.Cancel(notificationId, stringData, "");
+        ansManagerStub.CancelAll("");
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
         ansManagerStub.CancelAsBundle(notificationId, stringData, userId);
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
@@ -345,7 +345,7 @@ namespace OHOS {
         uint64_t num = fuzzData->ConsumeIntegral<uint64_t>();
         ansManagerStub.GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
-        ansManagerStub.GetActiveNotifications(notifications, 0);
+        ansManagerStub.GetActiveNotifications(notifications, "");
         ansManagerStub.GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
         ansManagerStub.GetAllActiveNotifications(notificationss);
@@ -379,7 +379,7 @@ namespace OHOS {
         bool allowed = fuzzData->ConsumeBool();
         ansManagerStub.IsAllowedNotify(allowed);
         ansManagerStub.IsSpecialBundleAllowedNotify(bundleOption, allowed);
-        ansManagerStub.CancelGroup(stringData, 0);
+        ansManagerStub.CancelGroup(stringData, "");
         ansManagerStub.RemoveGroupByBundle(bundleOption, stringData);
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         ansManagerStub.SetDoNotDisturbDate(date);

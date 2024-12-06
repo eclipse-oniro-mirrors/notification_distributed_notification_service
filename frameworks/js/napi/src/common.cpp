@@ -271,6 +271,11 @@ napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCa
     napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
     napi_set_named_property(env, result, "bundle", bundleNapi);
 
+    // appInstanceKey: string
+    napi_value appKeyNapi = nullptr;
+    napi_create_string_utf8(env, data.GetAppInstanceKey().c_str(), NAPI_AUTO_LENGTH, &appKeyNapi);
+    napi_set_named_property(env, result, "appInstanceKey", appKeyNapi);
+
     // uid: int32_t
     napi_value uidNapi = nullptr;
     napi_create_int32(env, data.GetUid(), &uidNapi);
