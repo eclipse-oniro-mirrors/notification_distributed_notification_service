@@ -852,7 +852,10 @@ int32_t ReminderStore::QueryActiveReminderCount()
         .append(ReminderCalendarTable::CALENDAR_DATE_TIME).append(" < ").append(std::to_string(nowTime)).append(" AND ")
         .append(ReminderCalendarTable::CALENDAR_END_DATE_TIME)
         .append(" > ").append(std::to_string(nowTime)).append(" ) OR ")
-        .append(ReminderCalendarTable::CALENDAR_DATE_TIME).append("> ").append(std::to_string(nowTime));
+        .append(ReminderCalendarTable::CALENDAR_DATE_TIME).append("> ").append(std::to_string(nowTime)).append(" OR (")
+        .append(ReminderCalendarTable::CALENDAR_DATE_TIME).append("< ").append(std::to_string(nowTime)).append(" AND ")
+        .append(ReminderCalendarTable::CALENDAR_DATE_TIME).append(" = ")
+        .append(ReminderCalendarTable::CALENDAR_END_DATE_TIME).append(")");
     resultSet = rdbStore_->QuerySql(queryCondition, whereArgs);
     int32_t calenderTableNum = 0;
     resultSet->GetRowCount(calenderTableNum);

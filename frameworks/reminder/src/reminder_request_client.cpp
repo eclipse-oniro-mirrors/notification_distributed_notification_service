@@ -23,11 +23,7 @@
 
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "reminder_request_alarm.h"
-#include "reminder_request_calendar.h"
-#include "reminder_request_timer.h"
 #include "system_ability_definition.h"
-#include "unique_fd.h"
 
 #include <memory>
 #include <thread>
@@ -48,34 +44,18 @@ ErrCode ReminderRequestClient::AddSlotByType(const NotificationConstant::SlotTyp
 
 ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
 {
-    std::vector<NotificationSlot> slots;
-    slots.push_back(slot);
-    return AddNotificationSlots(slots);
-}
-
-ErrCode ReminderRequestClient::AddNotificationSlots(const std::vector<NotificationSlot> &slots)
-{
-    if (slots.size() == 0) {
-        ANS_LOGE("Failed to add notification slots because input slots size is 0.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-
     std::vector<sptr<NotificationSlot>> slotsSptr;
-    for (auto it = slots.begin(); it != slots.end(); ++it) {
-        sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(*it);
-        if (slot == nullptr) {
-            ANS_LOGE("Failed to create NotificationSlot ptr.");
-            return ERR_ANS_NO_MEMORY;
-        }
-        slotsSptr.emplace_back(slot);
+    sptr<NotificationSlot> slotSptr = new (std::nothrow) NotificationSlot(*slot);
+    if (slot == nullptr) {
+        ANS_LOGE("Failed to create NotificationSlot ptr.");
+        return ERR_ANS_NO_MEMORY;
     }
-
+    slotsSptr.emplace_back(slotSptr);
     return proxy->AddSlots(slotsSptr);
 }
 
@@ -131,7 +111,7 @@ ErrCode ReminderRequestClient::GetValidReminders(std::vector<ReminderRequestAdap
     return proxy->GetValidReminders(validReminders);
 }
 
-ErrCode ReminderRequestClient::AddExcludeDate(const int32_t reminderId, const uint64_t date)
+ErrCode ReminderRequestClient::AddExcludeDate(const int32_t reminderId, const int64_t date)
 {
     sptr<IReminderService> proxy = GetReminderServiceProxy();
     if (!proxy) {
@@ -199,7 +179,7 @@ sptr<IReminderService> ReminderRequestClient::GetReminderServiceProxy()
         }
         auto object = samgrProxy->CheckSystemAbility(REMINDER_SERVICE_ID);
         if (object != nullptr) {
-            ANS_LOGE("get service succeeded");
+            ANS_LOGI("get service succeeded");
             proxy_ = iface_cast<IReminderService>(object);
             return proxy_;
         }
@@ -251,7 +231,7 @@ bool ReminderRequestClient::LoadReminderService()
 
 void ReminderRequestClient::LoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject)
 {
-    ANS_LOGE("ReminderRequestClient FinishStartSA");
+    ANS_LOGI("ReminderRequestClient FinishStartSA");
     std::lock_guard<std::mutex> lock(serviceLock_);
     if (remoteObject != nullptr) {
         proxy_ = iface_cast<IReminderService>(remoteObject);
@@ -263,6 +243,16 @@ void ReminderRequestClient::LoadSystemAbilityFail()
 {
     std::lock_guard<std::mutex> lock(serviceLock_);
     proxy_ = nullptr;
+}
+
+void ReminderRequestClient::StartReminderService()
+{
+    auto reminderServiceProxy = GetReminderServiceProxy();
+    if (reminderServiceProxy == nullptr) {
+        ANS_LOGE("StartReminderService failed");
+        return;
+    }
+    ANS_LOGI("StartReminderService success");
 }
 
 }  // namespace Notification

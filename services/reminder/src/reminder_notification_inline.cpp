@@ -65,32 +65,11 @@ inline std::string GetClientBundleName()
     return GetClientBundleNameByUid(IPCSkeleton::GetCallingUid());
 }
 
-inline int64_t ResetSeconds(int64_t date)
-{
-    auto milliseconds = std::chrono::milliseconds(date);
-    auto tp = std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>(milliseconds);
-    auto tp_minutes = std::chrono::time_point_cast<std::chrono::minutes>(tp);
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(tp_minutes.time_since_epoch());
-    return duration.count();
-}
-
 inline int64_t GetCurrentTime()
 {
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
-}
-
-inline tm GetLocalTime(time_t time)
-{
-    struct tm ret = {0};
-    localtime_r(&time, &ret);
-    return ret;
-}
-
-inline NotificationBundleOption CreateBundleOption(const std::string& bundleName, const int32_t uid)
-{
-    return NotificationBundleOption(bundleName, uid);
 }
 
 }  // namespace Notification

@@ -413,7 +413,7 @@ napi_value CancelAllReminders(napi_env env, napi_callback_info info)
     return CancelAllRemindersInner(env, info, false);
 }
 
-void ParseReminderTimer(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseReminderTimer(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     napi_value value = nullptr;
     ReminderRequestTimer& timer = (ReminderRequestTimer&)reminder;
@@ -421,7 +421,7 @@ void ParseReminderTimer(const napi_env &env, ReminderRequest &reminder, napi_val
     napi_set_named_property(env, result, TIMER_COUNT_DOWN_TIME, value);
 }
 
-void ParseReminderAlarm(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseReminderAlarm(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     // hour
     napi_value value = nullptr;
@@ -447,7 +447,7 @@ void ParseReminderAlarm(const napi_env &env, ReminderRequest &reminder, napi_val
     }
 }
 
-void ParseReminderCalendar(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseReminderCalendar(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     // dateTime
     napi_value value = nullptr;
@@ -456,11 +456,11 @@ void ParseReminderCalendar(const napi_env &env, ReminderRequest &reminder, napi_
     napi_create_object(env, &dateTime);
     napi_set_named_property(env, result, CALENDAR_DATE_TIME, dateTime);
 
-    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetYear()), &value);
+    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetFirstDesignateYear()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_YEAR, value);
-    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetMonth()), &value);
+    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetFirstDesignageMonth()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_MONTH, value);
-    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetDay()), &value);
+    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetFirstDesignateDay()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_DAY, value);
     napi_create_uint32(env, static_cast<uint32_t>(calendar.GetHour()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_HOUR, value);
@@ -810,6 +810,10 @@ void GetValidRemindersInner(napi_env env, const std::vector<ReminderRequestAdapt
     int32_t count = 0;
     napi_create_array(env, &arr);
     for (auto& reminderRequestAdaptation : validReminders) {
+        if (reminderRequestAdaptation.reminderRequest_ == nullptr) {
+            ANSR_LOGW("reminder is null");
+            continue;
+        }
         napi_value result = nullptr;
         napi_create_object(env, &result);
         if (!SetValidReminder(env, *reminderRequestAdaptation.reminderRequest_, result)) {

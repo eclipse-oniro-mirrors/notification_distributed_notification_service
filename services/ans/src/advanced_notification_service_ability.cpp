@@ -46,6 +46,7 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
     service_->CreateDialogManager();
     service_->InitPublishProcess();
+    service_->TryStartReminderService();
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();

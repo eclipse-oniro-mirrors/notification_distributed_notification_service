@@ -821,7 +821,8 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     int32_t reminderId = reminder->GetReminderId();
     int32_t uid = reminder->GetUid();
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
-    NotificationRequest notificationRequest = CreateNotificationRequest(reminder, false);
+    NotificationRequest notificationRequest(reminder->GetReminderId());
+    reminder->UpdateNotificationRequest(notificationRequest, false);
     IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     store_->UpdateOrInsert(reminder);
 }
@@ -864,7 +865,7 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
     if (date.GetDoNotDisturbType() == NotificationConstant::DoNotDisturbType::NONE) {
         return true;
     }
-    auto bundleOption = CreateBundleOption(reminder->GetBundleName(), reminder->GetUid());
+    NotificationBundleOption(reminder->GetBundleName(), reminder->GetUid());
     std::vector<sptr<NotificationSlot>> slots;
     errCode = IN_PROCESS_CALL(NotificationHelper::GetNotificationSlotsForBundle(bundleOption, slots));
     if (errCode != ERR_OK) {
@@ -1042,7 +1043,8 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     bool toPlaySound = isNeedToPlaySound && ShouldAlert(reminder) ? true : false;
     reminder->OnShow(toPlaySound, isSysTimeChanged, true);
     AddToShowedReminders(reminder);
-    NotificationRequest notificationRequest = CreateNotificationRequest(reminder, false);
+    NotificationRequest notificationRequest(reminder->GetReminderId());
+    reminder->UpdateNotificationRequest(notificationRequest, false);
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
@@ -1067,13 +1069,6 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     if (isNeedToStartNext) {
         StartRecentReminder();
     }
-}
-
-NotificationRequest ReminderDataManager::CreateNotificationRequest(const sptr<ReminderRequest> &reminder, bool isSnooze)
-{
-    NotificationRequest notificationRequest = reminder->CreateNotificationRequest();
-    reminder->UpdateNotificationRequest(notificationRequest, isSnooze);
-    return notificationRequest;
 }
 
 void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
@@ -1113,7 +1108,8 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     // 2) Show the notification dialog in the systemUI
 
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
-    NotificationRequest notificationRequest = CreateNotificationRequest(reminder, true);
+    NotificationRequest notificationRequest(reminder->GetReminderId());
+    reminder->UpdateNotificationRequest(notificationRequest, true);
     IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     StartRecentReminder();
 }
@@ -1421,7 +1417,7 @@ bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder)
         return false;
     }
     bool isAllowed = false;
-    auto bundleOption = CreateBundleOption(reminder->GetBundleName(), reminder->GetUid());
+    NotificationBundleOption(reminder->GetBundleName(), reminder->GetUid());
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, isAllowed));
     if (errCode != ERR_OK) {
         ANSR_LOGE("Failed to call IsAllowedNotify, errCode=%{public}d", errCode);

@@ -67,7 +67,7 @@ public:
      * @param date exclude date
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
+    ErrCode AddExcludeDate(const int32_t reminderId, const int64_t date);
 
     /**
      * @brief Clear exclude date for reminder
@@ -114,6 +114,8 @@ public:
 
     void LoadSystemAbilityFail();
 
+    void StartReminderService();
+
 private:
 
     /**
@@ -123,8 +125,6 @@ private:
      * @return Returns add notification slot result.
      */
     ErrCode AddSlotByType(const NotificationConstant::SlotType &slotType);
-
-    ErrCode AddNotificationSlots(const std::vector<NotificationSlot> &slots);
 
     sptr<AnsManagerInterface> GetAnsManagerProxy();
 

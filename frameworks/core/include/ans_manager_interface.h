@@ -892,6 +892,13 @@ public:
      */
     virtual ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) = 0;
 
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) = 0;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**

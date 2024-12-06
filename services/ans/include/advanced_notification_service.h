@@ -1101,6 +1101,8 @@ public:
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+
+    void TryStartReminderService();
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

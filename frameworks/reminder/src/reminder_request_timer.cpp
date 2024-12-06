@@ -125,7 +125,7 @@ bool ReminderRequestTimer::Marshalling(Parcel &parcel) const
 
 bool ReminderRequestTimer::WriteParcel(Parcel &parcel) const
 {
-    if (ReminderRequest::Marshalling(parcel)) {
+    if (ReminderRequest::WriteParcel(parcel)) {
         // write int
         WRITE_UINT64_RETURN_FALSE_LOG(parcel, firstRealTimeInMilliSeconds_, "firstRealTimeInMilliSeconds");
         WRITE_UINT64_RETURN_FALSE_LOG(parcel, countDownTimeInSeconds_, "countDownTimeInSeconds");

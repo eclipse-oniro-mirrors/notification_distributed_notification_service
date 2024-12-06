@@ -74,5 +74,11 @@ ErrCode ReminderHelper::GetExcludeDates(const int32_t reminderId, std::vector<in
     ANSR_LOGI("GetExcludeDates start");
     return DelayedSingleton<ReminderRequestClient>::GetInstance()->GetExcludeDates(reminderId, dates);
 }
+
+void ReminderHelper::StartReminderService()
+{
+    ANSR_LOGI("StartReminderService call");
+    DelayedSingleton<ReminderRequestClient>::GetInstance()->StartReminderService();
+}
 }
 }

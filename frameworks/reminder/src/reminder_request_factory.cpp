@@ -15,7 +15,6 @@
 
 #include "reminder_request_factory.h"
 
-#include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"

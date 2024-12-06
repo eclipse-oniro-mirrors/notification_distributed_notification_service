@@ -18,6 +18,7 @@
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <filesystem>
 
 #include "accesstoken_kit.h"
 #include "ans_inner_errors.h"
@@ -28,6 +29,7 @@
 #include "access_token_helper.h"
 #include "notification_constant.h"
 #include "notification_request.h"
+#include "reminder_helper.h"
 #include "os_account_manager.h"
 #include "hitrace_meter_adapter.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -40,7 +42,7 @@
 
 namespace OHOS {
 namespace Notification {
-
+constexpr const char* REMINDER_DB_PATH = "/data/service/el1/public/notification/notification.db";
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 {
@@ -110,6 +112,16 @@ ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification
     notification->SetRemindType(NotificationConstant::RemindType::NONE);
 #endif
     return ERR_OK;
+}
+
+void AdvancedNotificationService::TryStartReminderService()
+{
+    if (access(REMINDER_DB_PATH, F_OK) ！= 0) {
+        ANS_LOGW("Reminder db no exist");
+        return;
+    }
+    ANS_LOGI("Reminder db no exist");
+    ReminderHelper::StartReminderService();
 }
 }  // namespace Notification
 }  // namespace OHOS

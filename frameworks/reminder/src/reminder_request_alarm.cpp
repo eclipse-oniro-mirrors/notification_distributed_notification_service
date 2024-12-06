@@ -173,7 +173,7 @@ bool ReminderRequestAlarm::Marshalling(Parcel &parcel) const
 
 bool ReminderRequestAlarm::WriteParcel(Parcel &parcel) const
 {
-    if (ReminderRequest::Marshalling(parcel)) {
+    if (ReminderRequest::WriteParcel(parcel)) {
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, hour_, "hour");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, minute_, "minute");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, repeatDaysOfWeek_, "repeatDaysOfWeek");

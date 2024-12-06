@@ -668,7 +668,7 @@ bool ReminderRequestCalendar::Marshalling(Parcel &parcel) const
 
 bool ReminderRequestCalendar::WriteParcel(Parcel &parcel) const
 {
-    if (ReminderRequest::Marshalling(parcel)) {
+    if (ReminderRequest::WriteParcel(parcel)) {
         // write int
         WRITE_UINT16_RETURN_FALSE_LOG(parcel, year_, "year");
         WRITE_UINT8_RETURN_FALSE_LOG(parcel, month_, "month");

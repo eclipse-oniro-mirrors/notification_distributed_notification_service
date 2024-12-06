@@ -188,15 +188,14 @@ ohos_unittest("reminder_service_publish_test") {
     external_deps += [ "player_framework:media_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
-
-  if (hisysevent_usage) {
-    external_deps += [ "hisysevent:libhisysevent" ]
-    cflags += [ "-DHAS_HISYSEVENT_PART" ]
-  }
   cflags = [
     "-Dprivate=public",
     "-Dprotected=public",
   ]
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

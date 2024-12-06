@@ -942,31 +942,6 @@ HWTEST_F(ReminderRequestTest, Unmarshalling_00001, Function | SmallTest | Level1
 }
 
 /**
- * @tc.name: CreateNotificationRequest_00001
- * @tc.desc: Test CreateNotificationRequest parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderRequestTest, CreateNotificationRequest_00001, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    EXPECT_EQ(rrc->CreateNotificationRequest().GetNotificationId(), 0);
-}
-
-/**
- * @tc.name: CreateNotificationRequest_00002
- * @tc.desc: Test CreateNotificationRequest parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderRequestTest, CreateNotificationRequest_00002, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    rrc->SetNotificationId(100);
-    EXPECT_EQ(rrc->CreateNotificationRequest().GetNotificationId(), 100);
-}
-
-/**
  * @tc.name: IsAlerting_00001
  * @tc.desc: Test IsAlerting parameters.
  * @tc.type: FUNC
@@ -1123,7 +1098,7 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00005, Function | SmallTest | Leve
 HWTEST_F(ReminderRequestTest, AddActionButtons_00001, Function | SmallTest | Level1)
 {
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = reminderRequestChild->CreateNotificationRequest();
+    NotificationRequest notificationRequest(reminderRequestChild->GetNotificationId());
     ASSERT_NE(nullptr, reminderRequestChild);
     reminderRequestChild->AddActionButtons(notificationRequest, true);
     reminderRequestChild->AddActionButtons(notificationRequest, false);
@@ -1218,7 +1193,8 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallT
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetNotificationId(100);
-    auto notification = rrc->CreateNotificationRequest();
+    NotificationRequest notification(rrc->GetNotificationId());
+
     rrc->UpdateNotificationContent(notification, true);
     rrc->UpdateNotificationContent(notification, false);
 
@@ -1439,7 +1415,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00006, Function | SmallTest | Lev
 HWTEST_F(ReminderRequestTest, UpdateActionButtons_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     bool setSnooze = true;
     rrc->SetSnoozeTimes(1);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
@@ -1457,7 +1433,7 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00001, Function | SmallTest | 
 HWTEST_F(ReminderRequestTest, UpdateActionButtons_00002, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     bool setSnooze = true;
     rrc->SetSnoozeTimes(0);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 0);
@@ -1475,7 +1451,7 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00002, Function | SmallTest | 
 HWTEST_F(ReminderRequestTest, UpdateActionButtons_00003, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     bool setSnooze = false;
     rrc->SetSnoozeTimes(1);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
@@ -1493,7 +1469,7 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00003, Function | SmallTest | 
 HWTEST_F(ReminderRequestTest, UpdateActionButtons_00004, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     bool setSnooze = true;
     rrc->SetSnoozeTimes(1);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
@@ -1511,7 +1487,7 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00004, Function | SmallTest | 
 HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00300, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     uint32_t minTimeIntervalInSecond = 5 * 60;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
@@ -1530,7 +1506,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00300, Function | SmallT
 HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00400, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
 
     bool deSet = true;
     uint8_t newState = 2;
@@ -1553,7 +1529,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00600, Function | SmallT
 {
     // given
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     rrc->snoozeContent_ = "snooze";
     rrc->content_ = "content";
     rrc->expiredContent_ = "expiredContent";
@@ -1577,7 +1553,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00800, Function | SmallT
 {
     // given
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     rrc->snoozeContent_ = "snooze";
     rrc->content_ = "content";
     rrc->expiredContent_ = "expiredContent";
@@ -1600,7 +1576,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00800, Function | SmallT
 HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00500, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
 
     bool deSet = false;
     uint8_t newState = 0;
@@ -1763,7 +1739,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00100, Function | SmallTe
 {
     // given
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     rrc->snoozeSlotType_ = NotificationConstant::SlotType::OTHER;
     bool isSnooze = true;
 
@@ -1784,7 +1760,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00200, Function | SmallTe
 {
     // given
     auto rrc = std::make_shared<ReminderRequestChild>();
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     rrc->snoozeSlotType_ = NotificationConstant::SlotType::SERVICE_REMINDER;
     bool isSnooze = true;
 
@@ -1806,7 +1782,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00300, Function | SmallTe
     // given
     auto rrc = std::make_shared<ReminderRequestChild>();
 
-    NotificationRequest notificationRequest = rrc->CreateNotificationRequest();
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
     rrc->snoozeSlotType_ = NotificationConstant::SlotType::SERVICE_REMINDER;
     rrc->slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     bool isSnooze = false;

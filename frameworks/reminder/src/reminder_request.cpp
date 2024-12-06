@@ -44,7 +44,6 @@ const int32_t BUTTON_PKG_INDEX = 2;
 const int32_t BUTTON_ABILITY_INDEX = 3;
 const int32_t WANT_AGENT_URI_INDEX = 2;
 const int32_t INDENT = -1;
-const int32_t FOUDATION_UID = 5523;
 
 const char* const PARAM_EXTRA_KEY = "NotificationRequest_extraInfo";
 }
@@ -988,12 +987,6 @@ std::string ReminderRequest::GetMaxWantAgentStr()
     return maxWantAgentStr_;
 }
 
-NotificationRequest ReminderRequest::CreateNotificationRequest()
-{
-    NotificationRequest notificationRequest(notificationId_);
-    return notificationRequest;
-}
-
 void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificationRequest, const bool isSnooze)
 {
     if (isSnooze) {
@@ -1001,8 +994,8 @@ void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificatio
         UpdateNotificationCommon(notificationRequest, true);
     } else {
         UpdateNotificationStateForAlert(notificationRequest);
-        UpdateNotificationCommon(notificationRequest, false);
     }
+    UpdateNotificationCommon(notificationRequest, isSnooze);
     UpdateNotificationAddRemovalWantAgent(notificationRequest);
     UpdateNotificationWantAgent(notificationRequest);
     UpdateNotificationMaxScreenWantAgent(notificationRequest);

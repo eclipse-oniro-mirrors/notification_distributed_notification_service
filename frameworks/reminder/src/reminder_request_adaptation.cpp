@@ -24,7 +24,7 @@ bool ReminderRequestAdaptation::Marshalling(Parcel &parcel) const
     return reminderRequest_->Marshalling(parcel);
 }
 
-ReminderRequestAdaptation *ReminderRequestAdaptation::Unmarshalling(Parcel &parcel)
+ReminderRequestAdaptation* ReminderRequestAdaptation::Unmarshalling(Parcel &parcel)
 {
     ReminderRequest::ReminderType tarReminderType = ReminderRequest::ReminderType::INVALID;
     ReminderRequest::ReadReminderTypeFormParcel(parcel, tarReminderType);
@@ -35,10 +35,9 @@ ReminderRequestAdaptation *ReminderRequestAdaptation::Unmarshalling(Parcel &parc
     }
     if (!reminderRequest->ReadFromParcel(parcel)) {
         delete reminderRequest;
-        reminderRequest = nullptr;
         return nullptr;
     }
-    auto* reminderRequestAdaptation = new (std::nothrow) ReminderRequestAdaptation();
+    ReminderRequestAdaptation* reminderRequestAdaptation = new (std::nothrow) ReminderRequestAdaptation();
     reminderRequestAdaptation->reminderRequest_ = reminderRequest;
     return reminderRequestAdaptation;
 }
