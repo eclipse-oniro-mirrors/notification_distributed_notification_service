@@ -48,8 +48,8 @@ namespace OHOS {
         notification->SetContent(std::make_shared<Notification::NotificationContent>(content));
         service->Publish(stringData, notification);
         int notificationId = fuzzData->ConsumeIntegral<int32_t>();
-        service->Cancel(notificationId, stringData, fuzzData->ConsumeIntegral<int32_t>());
-        service->CancelAll(fuzzData->ConsumeIntegral<int32_t>());
+        service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString());
+        service->CancelAll(fuzzData->ConsumeRandomLengthString());
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
         service->CancelAsBundle(notificationId, stringData, userId);
         uint8_t type = fuzzData->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
@@ -71,7 +71,7 @@ namespace OHOS {
         service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
         service->GetSlotNumAsBundle(bundleOption, num);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
-        service->GetActiveNotifications(notifications, fuzzData->ConsumeIntegral<int32_t>());
+        service->GetActiveNotifications(notifications, fuzzData->ConsumeRandomLengthString());
         service->GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
         service->GetAllActiveNotifications(notificationss);
@@ -109,7 +109,7 @@ namespace OHOS {
         service->IsAllowedNotifySelf(bundleOption, allowed);
         service->IsAllowedNotifyForBundle(bundleOption, allowed);
         service->IsSpecialBundleAllowedNotify(bundleOption, allowed);
-        service->CancelGroup(stringData, fuzzData->ConsumeIntegral<int32_t>());
+        service->CancelGroup(stringData, fuzzData->ConsumeRandomLengthString());
         service->RemoveGroupByBundle(bundleOption, stringData);
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
         service->SetDoNotDisturbDate(date);
@@ -153,7 +153,7 @@ namespace OHOS {
         service->SetSyncNotificationEnabledWithoutApp(userId, enabled);
         service->GetSyncNotificationEnabledWithoutApp(userId, enabled);
         int32_t badgeNum = fuzzData->ConsumeIntegral<int32_t>();
-        service->SetBadgeNumber(badgeNum, fuzzData->ConsumeIntegral<int32_t>());
+        service->SetBadgeNumber(badgeNum, fuzzData->ConsumeRandomLengthString());
         sptr<Notification::AnsDialogCallback> dialogCallback = new Notification::AnsDialogCallbackProxy(nullptr);
         sptr<IRemoteObject> callerToken = new Notification::AnsSubscriberStub();
         std::shared_ptr<Notification::NotificationUnifiedGroupInfo> groupInfo;

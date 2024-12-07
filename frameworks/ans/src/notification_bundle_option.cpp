@@ -59,6 +59,16 @@ int32_t NotificationBundleOption::GetInstanceKey() const
     return instanceKey_;
 }
 
+void NotificationBundleOption::SetAppInstanceKey(const std::string &key)
+{
+    appInstanceKey_ = key;
+}
+ 
+std::string NotificationBundleOption::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
+}
+
 void NotificationBundleOption::SetAppIndex(const int32_t appIndex)
 {
     appIndex_ = appIndex;

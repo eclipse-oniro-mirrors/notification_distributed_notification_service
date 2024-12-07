@@ -233,7 +233,7 @@ public:
      *
      * @return Returns the instance key of the notification creator.
      */
-    int32_t GetInstanceKey() const;
+    std::string GetInstanceKey() const;
 
     /**
      * @brief Obtains the UserId of the notification receiver.

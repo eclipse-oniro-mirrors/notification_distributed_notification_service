@@ -623,7 +623,7 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
         return nullptr;
     }
     if (bundleOption != nullptr) {
-        bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+        bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     }
     record->bundleOption = bundleOption;
     SetNotificationRemindType(record->notification, true);
@@ -1176,7 +1176,7 @@ void AdvancedNotificationService::StopFilters()
 }
 
 ErrCode AdvancedNotificationService::GetActiveNotifications(
-    std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey)
+    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1184,7 +1184,7 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-    bundleOption->SetInstanceKey(instanceKey);
+    bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidated.");
@@ -1195,7 +1195,8 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         notifications.clear();
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid())) {
+                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
                 notifications.push_back(record->request);
             }
         }
@@ -1314,6 +1315,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+            (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
             (record->notification->GetLabel() == label) &&
             (record->notification->GetId() == notificationId)
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1389,7 +1391,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     const std::string &key, const int32_t &userId, sptr<Notification> &notification)
 {
     for (auto record : notificationList_) {
-        if ((record->notification->GetKey() == key) && (record->notification->GetUserId() == userId)) {
+        if ((record->notification->GetKey() == key) &&
+            (record->notification->GetUserId() == userId)) {
             if (!record->notification->IsRemoveAllowed()) {
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }

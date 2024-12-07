@@ -124,7 +124,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns cancel notification result.
      */
-    ErrCode Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey) override;
+    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey) override;
 
     /**
      * @brief Cancels all the published notifications.
@@ -132,7 +132,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelAll(int32_t instanceKey) override;
+    ErrCode CancelAll(const std::string &instanceKey) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -237,7 +237,8 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) override;
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
+        const std::string &instanceKey) override;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -619,7 +620,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override;
+    ErrCode CancelGroup(const std::string &groupName, const std::string &instanceKey) override;
 
     /**
      * @brief Delete notifications according to bundle and group.
@@ -952,7 +953,7 @@ public:
      * @param instanceKey The application instance key.
      * @return Returns set badge number result.
      */
-    ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) override;
+    ErrCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey) override;
 
     /**
      * @brief Set badge number by bundle.
