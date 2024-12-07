@@ -44,6 +44,7 @@ private:
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void OnReceiveEventInner(const EventFwk::CommonEventData &data);
     sptr<NotificationBundleOption> GetBundleOption(AAFwk::Want want);
+    sptr<NotificationBundleOption> GetBundleOptionDataCleared(AAFwk::Want want);
 
     void OnBundleUpdateEventInner(const EventFwk::CommonEventData &data);
     void OnBundleAddEventInner(const EventFwk::CommonEventData &data);
