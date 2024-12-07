@@ -120,7 +120,7 @@ void AdvancedNotificationService::TryStartReminderService()
         ANS_LOGW("Reminder db no exist");
         return;
     }
-    ANS_LOGI("Reminder db no exist");
+    ANS_LOGI("Reminder db exist, start reminder service");
     ReminderHelper::StartReminderService();
 }
 }  // namespace Notification

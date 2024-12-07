@@ -58,7 +58,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestCalendar(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestCalendar(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::CALENDAR);
+    };
 
     explicit ReminderRequestCalendar(const ReminderRequestCalendar &other);
     ReminderRequestCalendar& operator = (const ReminderRequestCalendar &other);

@@ -314,7 +314,8 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
         return;
     }
     ANSR_LOGD("Cancel notification");
-    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::CancelNotification(ReminderRequest::NOTIFICATION_LABEL, reminder->GetNotificationId()));
+    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::CancelNotification(
+        ReminderRequest::NOTIFICATION_LABEL, reminder->GetNotificationId()));
 }
 
 bool ReminderDataManager::CheckReminderLimitExceededLocked(const int32_t callingUid,
@@ -780,6 +781,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
         }
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
+    LoadReminderFromDb();
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
@@ -823,7 +825,8 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
     NotificationRequest notificationRequest(reminder->GetNotificationId());
     reminder->UpdateNotificationRequest(notificationRequest, false);
-    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
+    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(
+        ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     store_->UpdateOrInsert(reminder);
 }
 
@@ -1110,7 +1113,8 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
     NotificationRequest notificationRequest(reminder->GetNotificationId());
     reminder->UpdateNotificationRequest(notificationRequest, true);
-    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
+    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(
+        ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     StartRecentReminder();
 }
 
@@ -1457,6 +1461,7 @@ bool ReminderDataManager::IsBelongToSameApp(const int32_t uidSrc,
 void ReminderDataManager::ReceiveLoadReminderEvent()
 {
     LoadReminderFromDb();
+    StartRecentReminder();
 }
 
 void ReminderDataManager::LoadReminderFromDb()

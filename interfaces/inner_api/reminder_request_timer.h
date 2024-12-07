@@ -39,7 +39,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestTimer(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestTimer(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::TIMER);
+    };
 
     /**
      * @brief Copy construct from an exist reminder.

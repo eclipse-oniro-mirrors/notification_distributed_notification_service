@@ -826,7 +826,8 @@ void GetValidRemindersInner(napi_env env, const std::vector<ReminderRequestAdapt
     ANSR_LOGI("GetValid reminders count = %{public}d", count);
 }
 
-void GetAllValidRemindersInner(napi_env env, const std::vector<ReminderRequestAdaptation>& validReminders, napi_value& arr)
+void GetAllValidRemindersInner(napi_env env,
+    const std::vector<ReminderRequestAdaptation>& validReminders, napi_value& arr)
 {
     int32_t count = 0;
     napi_create_array(env, &arr);

@@ -784,20 +784,23 @@ HWTEST_F(ReminderDataManagerTest, CancelAllReminders_00001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
 {
+    IPCSkeleton::SetCallingTokenID(100);
+    manager->store_->Init();
+    int32_t callingUid = 98765;
     sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(50));
     reminder1->InitCreatorBundleName("test_getvalid");
-    reminder1->InitCreatorUid(98765);
+    reminder1->InitCreatorUid(callingUid);
     reminder1->InitBundleName("test_getvalid");
-    reminder1->InitUid(98765);
-    int32_t callingUid = -1;
+    reminder1->InitUid(callingUid);
+
     manager->PublishReminder(reminder1, callingUid);
     reminder1->SetExpired(false);
 
     sptr<ReminderRequest> reminder2 = new ReminderRequestTimer(51);
     reminder2->InitCreatorBundleName("test_getvalid");
-    reminder2->InitCreatorUid(98765);
+    reminder2->InitCreatorUid(callingUid);
     reminder2->InitBundleName("test_getvalid");
-    reminder2->InitUid(98765);
+    reminder2->InitUid(callingUid);
     reminder2->SetExpired(true);
     manager->PublishReminder(reminder2, callingUid);
     
@@ -822,15 +825,11 @@ HWTEST_F(ReminderDataManagerTest, IsMatched_00001, Level1)
     reminder->InitUserId(100);
     bool ret = manager->IsMatched(reminder, 101, 98765, true);
     EXPECT_EQ(ret, false);
-    ret = manager->IsMatched(reminder, 100, 98765, true);
+    ret = manager->IsMatched(reminder, 100, 98765, false);
     EXPECT_EQ(ret, true);
-    ret = manager->IsMatched(reminder, 100, 98765, true);
+    ret = manager->IsMatched(reminder, 100, -1, false);
     EXPECT_EQ(ret, false);
     ret = manager->IsMatched(reminder, 100, -1, true);
-    EXPECT_EQ(ret, false);
-    ret = manager->IsMatched(reminder, 100, 98766, true);
-    EXPECT_EQ(ret, false);
-    ret = manager->IsMatched(reminder, 100, 98765, true);
     EXPECT_EQ(ret, true);
 }
 

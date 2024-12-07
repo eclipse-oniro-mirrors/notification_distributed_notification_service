@@ -30,6 +30,7 @@
 #include "iremote_object.h"
 #include "accesstoken_kit.h"
 #include "mock_ipc_skeleton.h"
+#include "mock_accesstoken_kit.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 
@@ -38,10 +39,6 @@ using namespace OHOS::Media;
 
 namespace OHOS {
 namespace Notification {
-extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
-extern void MockIsSystemApp(bool isSystemApp);
-extern void MockIsNonBundleName(bool isNonBundleName);
-extern void MockIsVerfyPermisson(bool isVerify);
 
 class ReminderServiceTest : public testing::Test {
 public:
@@ -75,7 +72,7 @@ void ReminderServiceTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     ReminderService_->CancelAllReminders();
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockAccesstokenKit::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -88,9 +85,9 @@ void ReminderServiceTest::TearDown()
 
 void ReminderServiceTest::MockSystemApp()
 {
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(true);
+    MockAccesstokenKit::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockAccesstokenKit::MockIsSystemApp(true);
+    MockAccesstokenKit::MockIsVerfyPermisson(true);
 }
 
 inline void SleepForFC()
@@ -121,7 +118,7 @@ HWTEST_F(ReminderServiceTest, ReminderServiceTest_16900, Function | SmallTest | 
 {
     GTEST_LOG_(INFO) << "Reminder_GetActiveNotifications_0100 test start";
 
-    MockIsNonBundleName(true);
+    MockAccesstokenKit::MockIsNonBundleName(true);
     MockSystemApp();
     int32_t reminderId = 1;
     ASSERT_EQ(ReminderService_->CancelReminder(reminderId), ERR_NO_INIT);
@@ -131,7 +128,7 @@ HWTEST_F(ReminderServiceTest, ReminderServiceTest_16900, Function | SmallTest | 
     std::vector<ReminderRequestAdaptation> reminders;
     ASSERT_EQ(ReminderService_->GetValidReminders(reminders), ERR_NO_INIT);
 
-    MockIsNonBundleName(false);
+    MockAccesstokenKit::MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "Reminder_GetActiveNotifications_0100 test end";
 }
 
@@ -145,12 +142,12 @@ HWTEST_F(ReminderServiceTest, AddExcludeDate_00001, Function | SmallTest | Level
 {
     int32_t reminderId = 10;
     uint64_t time = 124325;
-    MockIsVerfyPermisson(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(false);
     ASSERT_EQ(ReminderService_->AddExcludeDate(reminderId, time), (int)ERR_REMINDER_PERMISSION_DENIED);
-    MockIsVerfyPermisson(true);
-    MockIsNonBundleName(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(true);
+    MockAccesstokenKit::MockIsNonBundleName(false);
     ASSERT_EQ(ReminderService_->AddExcludeDate(reminderId, time), (int)ERR_NO_INIT);
-    MockIsVerfyPermisson(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(false);
 }
 
 /**
@@ -162,12 +159,12 @@ HWTEST_F(ReminderServiceTest, AddExcludeDate_00001, Function | SmallTest | Level
 HWTEST_F(ReminderServiceTest, DelExcludeDates_00002, Function | SmallTest | Level1)
 {
     int32_t reminderId = 10;
-    MockIsVerfyPermisson(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(false);
     ASSERT_EQ(ReminderService_->DelExcludeDates(reminderId), (int)ERR_REMINDER_PERMISSION_DENIED);
-    MockIsVerfyPermisson(true);
-    MockIsNonBundleName(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(true);
+    MockAccesstokenKit::MockIsNonBundleName(false);
     ASSERT_EQ(ReminderService_->DelExcludeDates(reminderId), (int)ERR_NO_INIT);
-    MockIsVerfyPermisson(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(false);
 }
 
 /**
@@ -180,12 +177,12 @@ HWTEST_F(ReminderServiceTest, GetExcludeDates_00001, Function | SmallTest | Leve
 {
     int32_t reminderId = 10;
     std::vector<int64_t> times;
-    MockIsVerfyPermisson(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(false);
     ASSERT_EQ(ReminderService_->GetExcludeDates(reminderId, times), (int)ERR_REMINDER_PERMISSION_DENIED);
-    MockIsVerfyPermisson(true);
-    MockIsNonBundleName(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(true);
+    MockAccesstokenKit::MockIsNonBundleName(false);
     ASSERT_EQ(ReminderService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
-    MockIsVerfyPermisson(false);
+    MockAccesstokenKit::MockIsVerfyPermisson(false);
 }
 }  // namespace Notification
 }  // namespace OHOS

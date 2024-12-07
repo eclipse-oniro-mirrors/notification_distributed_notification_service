@@ -19,15 +19,12 @@
 #include "reminder_access_token_helper.h"
 #include "ans_log_wrapper.h"
 #include "ipc_skeleton.h"
+#include "mock_accesstoken_kit.h"
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
-
-extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
-extern void MockDlpType(DlpType mockRet);
-extern void MockApl(ATokenAplEnum mockRet);
 class AccessTokenHelperTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -63,7 +60,7 @@ void AccessTokenHelperTest::TearDown()
 HWTEST_F(AccessTokenHelperTest, VerifyNativeToken_00100, Function | SmallTest | Level1)
 {
     AccessTokenID tokenID = 0;
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockAccesstokenKit::MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_TRUE(stub_->VerifyNativeToken(tokenID));
 }
 
@@ -74,7 +71,7 @@ HWTEST_F(AccessTokenHelperTest, VerifyNativeToken_00100, Function | SmallTest | 
  */
 HWTEST_F(AccessTokenHelperTest, IsSystemApp_00100, Function | SmallTest | Level1)
 {
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockAccesstokenKit::MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_FALSE(stub_->IsSystemApp());
 }
 
@@ -85,7 +82,7 @@ HWTEST_F(AccessTokenHelperTest, IsSystemApp_00100, Function | SmallTest | Level1
  */
 HWTEST_F(AccessTokenHelperTest, IsSystemApp_00200, Function | SmallTest | Level1)
 {
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockAccesstokenKit::MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     EXPECT_TRUE(stub_->IsSystemApp());
 }
 

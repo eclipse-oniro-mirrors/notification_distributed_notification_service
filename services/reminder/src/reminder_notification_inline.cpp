@@ -32,20 +32,20 @@
 
 namespace OHOS {
 namespace Notification {
-#define REMINDER_CHECK_NULL_VOID(ptr, msg)	\
-	do {									\
-		if ((ptr) == nullptr) {				\
+#define REMINDER_CHECK_NULL_VOID(ptr, msg)  \
+	do {                                    \
+		if ((ptr) == nullptr) {             \
 			ANSR_LOGW("%{public}s", msg);   \
-			return;							\
-		}									\
+			return;                         \
+		}                                   \
 	} while (0)
 
-#define REMINDER_CHECK_NULL_RETURN(ptr, msg, ret)	\
-	do {											\
-		if ((ptr) == nullptr) {						\
+#define REMINDER_CHECK_NULL_RETURN(ptr, msg, ret)   \
+	do {                                            \
+		if ((ptr) == nullptr) {                     \
 			ANSR_LOGW("%{public}s", msg);           \
-			return ret;								\
-		}											\
+			return ret;                             \
+		}                                           \
 	} while (0)
 
 inline std::string GetClientBundleNameByUid(int32_t callingUid)

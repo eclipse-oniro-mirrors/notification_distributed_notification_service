@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-#include "accesstoken_kit.h"
-#include "ans_log_wrapper.h"
-#include "reminder_ut_constant.h"
-#include "ipc_skeleton.h"
+#include "mock_accesstoken_kit.h"
 
 using namespace OHOS::Security::AccessToken;
 namespace OHOS {
@@ -28,20 +25,20 @@ ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
 bool g_mockVerfyPermisson = true;
 }
 
-void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
+void MockAccesstokenKit::MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
 {
     g_mockGetTokenTypeFlagRet = mockRet;
 }
-void MockDlpType(DlpType mockRet)
+void MockAccesstokenKit::MockDlpType(DlpType mockRet)
 {
     g_mockDlpType = mockRet;
 }
-void MockApl(ATokenAplEnum mockRet)
+void MockAccesstokenKit::MockApl(ATokenAplEnum mockRet)
 {
     g_mockApl = mockRet;
 }
 
-void MockIsVerfyPermisson(bool isVerify)
+void MockAccesstokenKit::MockIsVerfyPermisson(bool isVerify)
 {
     g_mockVerfyPermisson = isVerify;
 }

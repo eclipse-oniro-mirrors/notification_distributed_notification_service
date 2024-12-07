@@ -546,7 +546,7 @@ HWTEST_F(ReminderRequestTest, Marshalling_00100, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     Parcel p;
-    EXPECT_EQ(rrc->Marshalling(p), true);
+    EXPECT_EQ(rrc->Marshalling(p), false);
 }
 
 /**

@@ -38,9 +38,6 @@ ReminderBundleManagerHelper::~ReminderBundleManagerHelper()
 {
     std::lock_guard<std::mutex> lock(connectionMutex_);
     Disconnect();
-    if (deathRecipient_ != nullptr) {
-        delete deathRecipient_;
-    }
 }
 
 void ReminderBundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
