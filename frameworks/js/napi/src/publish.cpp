@@ -439,7 +439,7 @@ napi_value ParsePublishAsBundleParameters(
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGW("Wrong argument type. Number expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be number.";
+            std::string msg = "Incorrect parameter types.The type of userId must be number.";
             Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
