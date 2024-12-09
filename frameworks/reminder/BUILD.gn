@@ -20,8 +20,8 @@ group("reminder_client") {
 }
 
 idl_interface_sources = [
-  "${target_gen_dir}/reminder_service_proxy.cpp",
-  "${target_gen_dir}/reminder_service_stub.cpp",
+  "${target_gen_dir}/reminder_agent_service_proxy.cpp",
+  "${target_gen_dir}/reminder_agent_service_stub.cpp",
 ]
 
 idl_gen_interface("reminder_service_interface") {

@@ -16,7 +16,7 @@
 #include "reminder_request_client.h"
 #include "reminder_service_load_callback.h"
 #include "ans_manager_proxy.h"
-#include "reminder_service_proxy.h"
+#include "reminder_agent_service_proxy.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"

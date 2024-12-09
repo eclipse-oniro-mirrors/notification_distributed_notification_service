@@ -28,7 +28,7 @@
 #include "refbase.h"
 
 #include "ans_const_define.h"
-#include "reminder_service_stub.h"
+#include "reminder_agent_service_stub.h"
 #include "reminder_request_adaptation.h"
 
 namespace OHOS {
@@ -129,7 +129,7 @@ private:
     static sptr<ReminderAgentService> instance_;
     static std::mutex instanceMutex_;
     static std::mutex unloadMutex_;
-    int32_t reminderAgentState_ = 1;
+    int8_t reminderAgentState_ = 1;
 };
 }  // namespace Notification
 }  // namespace OHOS
