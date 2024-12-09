@@ -50,10 +50,12 @@ void AdvancedNotificationServiceAbility::OnStart()
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
-    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
-    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #else
     ANS_LOGI("Not enabled ans_ext");
+#endif
+#ifdef ENABLE_ANS_AGGREATION
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #endif
 
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER

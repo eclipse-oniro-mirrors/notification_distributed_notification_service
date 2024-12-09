@@ -2284,7 +2284,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
 
     SetRequestBySlotType(record->request, bundleOption);
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
