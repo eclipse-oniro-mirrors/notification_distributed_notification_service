@@ -12,41 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_UTILS_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_UTILS_H
 
-#include <functional>
-#include <iomanip>
-#include <sstream>
-
-#include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "reminder_access_token_helper.h"
-#include "ans_permission_def.h"
 #include "reminder_bundle_manager_helper.h"
-#include "errors.h"
-#include "ipc_skeleton.h"
-#include "notification_constant.h"
-#include "notification_bundle_option.h"
-#include "reminder_request.h"
-#include "notification_request.h"
 #include <memory>
+
 
 namespace OHOS {
 namespace Notification {
 #define REMINDER_CHECK_NULL_VOID(ptr, msg)  \
-	do {                                    \
-		if ((ptr) == nullptr) {             \
-			ANSR_LOGW("%{public}s", msg);   \
-			return;                         \
-		}                                   \
-	} while (0)
+    do {                                    \
+        if ((ptr) == nullptr) {             \
+            ANSR_LOGW("%{public}s", msg);   \
+            return;                         \
+        }                                   \
+    } while (0)
 
 #define REMINDER_CHECK_NULL_RETURN(ptr, msg, ret)   \
-	do {                                            \
-		if ((ptr) == nullptr) {                     \
-			ANSR_LOGW("%{public}s", msg);           \
-			return ret;                             \
-		}                                           \
-	} while (0)
+    do {                                            \
+        if ((ptr) == nullptr) {                     \
+            ANSR_LOGW("%{public}s", msg);           \
+            return ret;                             \
+        }                                           \
+    } while (0)
 
 inline std::string GetClientBundleNameByUid(int32_t callingUid)
 {
@@ -74,3 +64,4 @@ inline int64_t GetCurrentTime()
 
 }  // namespace Notification
 }  // namespace OHOS
+#endif

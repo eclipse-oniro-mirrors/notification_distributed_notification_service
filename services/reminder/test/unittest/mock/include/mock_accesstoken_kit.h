@@ -25,10 +25,11 @@ namespace OHOS {
 namespace Notification {
 class MockAccesstokenKit {
 public:
-    void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
-    void MockDlpType(DlpType mockRet);
-    void MockApl(ATokenAplEnum mockRet);
-    void MockIsVerfyPermisson(bool isVerify);
+    static void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
+    static void MockDlpType(Security::AccessToken::DlpType mockRet);
+    static void MockApl(Security::AccessToken::ATokenAplEnum mockRet);
+    static void MockIsVerfyPermisson(bool isVerify);
+    static void MockIsSystemApp(bool isSystemApp);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

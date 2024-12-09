@@ -28,7 +28,7 @@
 #include "reminder_request_timer.h"
 #include "reminder_request_calendar.h"
 #include "reminder_store_strategy.h"
-#include "reminder_notification_inline.cpp"
+#include "reminder_utils.h"
 
 namespace OHOS {
 namespace Notification {

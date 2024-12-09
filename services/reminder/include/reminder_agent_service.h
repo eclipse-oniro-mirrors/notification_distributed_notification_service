@@ -118,7 +118,7 @@ private:
 
     void PostDelayUnloadTask();
 
-    void TryInit();
+    void ChangeReminderAgentLoadConfig(int8_t reminderAgentState);
 
     sptr<ReminderRequest> CreateTarReminderRequest(const ReminderRequest &reminder);
 

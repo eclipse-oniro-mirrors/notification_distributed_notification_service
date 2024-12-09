@@ -31,8 +31,8 @@
 #include "accesstoken_kit.h"
 #include "mock_ipc_skeleton.h"
 #include "mock_accesstoken_kit.h"
-
-extern void MockIsOsAccountExists(bool mockRet);
+#include "mock_os_account_manager.h"
+#include "mock_bundle_mgr.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -59,7 +59,7 @@ sptr<ReminderAgentService> ReminderAgentServiceTest::ReminderAgentService_ = nul
 
 void ReminderAgentServiceTest::SetUpTestCase()
 {
-    MockIsOsAccountExists(true);
+    MockOsAccountManager::MockIsOsAccountExists(true);
 }
 
 void ReminderAgentServiceTest::TearDownTestCase() {}
@@ -118,7 +118,7 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_16900, Function | Sm
 {
     GTEST_LOG_(INFO) << "Reminder_GetActiveNotifications_0100 test start";
 
-    MockAccesstokenKit::MockIsNonBundleName(true);
+    MockBundleMgr::MockIsNonBundleName(true);
     MockSystemApp();
     int32_t reminderId = 1;
     ASSERT_EQ(ReminderAgentService_->CancelReminder(reminderId), ERR_NO_INIT);
@@ -128,7 +128,7 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_16900, Function | Sm
     std::vector<ReminderRequestAdaptation> reminders;
     ASSERT_EQ(ReminderAgentService_->GetValidReminders(reminders), ERR_NO_INIT);
 
-    MockAccesstokenKit::MockIsNonBundleName(false);
+    MockBundleMgr::MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "Reminder_GetActiveNotifications_0100 test end";
 }
 
@@ -145,7 +145,7 @@ HWTEST_F(ReminderAgentServiceTest, AddExcludeDate_00001, Function | SmallTest | 
     MockAccesstokenKit::MockIsVerfyPermisson(false);
     ASSERT_EQ(ReminderAgentService_->AddExcludeDate(reminderId, time), (int)ERR_REMINDER_PERMISSION_DENIED);
     MockAccesstokenKit::MockIsVerfyPermisson(true);
-    MockAccesstokenKit::MockIsNonBundleName(false);
+    MockBundleMgr::MockIsNonBundleName(false);
     ASSERT_EQ(ReminderAgentService_->AddExcludeDate(reminderId, time), (int)ERR_NO_INIT);
     MockAccesstokenKit::MockIsVerfyPermisson(false);
 }
@@ -162,7 +162,7 @@ HWTEST_F(ReminderAgentServiceTest, DelExcludeDates_00002, Function | SmallTest |
     MockAccesstokenKit::MockIsVerfyPermisson(false);
     ASSERT_EQ(ReminderAgentService_->DelExcludeDates(reminderId), (int)ERR_REMINDER_PERMISSION_DENIED);
     MockAccesstokenKit::MockIsVerfyPermisson(true);
-    MockAccesstokenKit::MockIsNonBundleName(false);
+    MockBundleMgr::MockIsNonBundleName(false);
     ASSERT_EQ(ReminderAgentService_->DelExcludeDates(reminderId), (int)ERR_NO_INIT);
     MockAccesstokenKit::MockIsVerfyPermisson(false);
 }
@@ -180,7 +180,7 @@ HWTEST_F(ReminderAgentServiceTest, GetExcludeDates_00001, Function | SmallTest |
     MockAccesstokenKit::MockIsVerfyPermisson(false);
     ASSERT_EQ(ReminderAgentService_->GetExcludeDates(reminderId, times), (int)ERR_REMINDER_PERMISSION_DENIED);
     MockAccesstokenKit::MockIsVerfyPermisson(true);
-    MockAccesstokenKit::MockIsNonBundleName(false);
+    MockBundleMgr::MockIsNonBundleName(false);
     ASSERT_EQ(ReminderAgentService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
     MockAccesstokenKit::MockIsVerfyPermisson(false);
 }

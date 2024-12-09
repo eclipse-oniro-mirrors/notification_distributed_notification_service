@@ -15,7 +15,7 @@
 
 #include <functional>
 #include <gtest/gtest.h>
-#include "reminder_service_ability.h"
+#include "reminder_agent_service_ability.h"
 
 using namespace testing::ext;
 

@@ -22,7 +22,7 @@
 #include "notification_slot.h"
 #include "notification_constant.h"
 #include "ans_manager_interface.h"
-#include "ireminder_service.h"
+#include "ireminder_agent_service.h"
 #include "ffrt.h"
 
 namespace OHOS {

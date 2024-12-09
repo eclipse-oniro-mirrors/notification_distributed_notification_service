@@ -57,7 +57,6 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     auto customSubscriber = std::make_shared<ReminderEventCustomSubscriber>(customSubscriberInfo, reminderDataManager);
 
     MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
@@ -186,10 +185,6 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
     Want want = data.GetWant();
     std::string action = want.GetAction();
     ANSR_LOGD("Recieved common event:%{public}s", action.c_str());
-    if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
-        reminderDataManager_->Init(true);
-        return;
-    }
     if (action == CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         HandlePackageRemove(want);
         return;

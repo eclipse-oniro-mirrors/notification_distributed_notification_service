@@ -656,6 +656,7 @@ void AdvancedNotificationService::OnBootSystemCompleted()
 {
     ANS_LOGI("Called.");
     InitNotificationEnableList();
+    TryStartReminderAgentService();
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED

@@ -22,6 +22,7 @@ namespace {
 ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_INVALID;
 DlpType g_mockDlpType = DlpType::DLP_COMMON;
 ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
+bool g_isSystemApp = true;
 bool g_mockVerfyPermisson = true;
 }
 
@@ -41,6 +42,10 @@ void MockAccesstokenKit::MockApl(ATokenAplEnum mockRet)
 void MockAccesstokenKit::MockIsVerfyPermisson(bool isVerify)
 {
     g_mockVerfyPermisson = isVerify;
+}
+void MockAccesstokenKit::MockIsSystemApp(bool isVerify)
+{
+    g_isSystemApp = isSystemApp;
 }
 }
 }

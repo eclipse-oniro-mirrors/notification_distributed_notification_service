@@ -18,25 +18,11 @@
 #include <functional>
 #include <gtest/gtest.h>
 #include "reminder_ut_constant.h"
-
-namespace OHOS {
-namespace Notification {
 namespace {
 bool g_isNonBundleName = false;
 bool g_isEnable = true;
 }
 
-void MockIsNonBundleName(bool isNonBundleName)
-{
-    g_isNonBundleName = isNonBundleName;
-}
-
-void MockDistributedNotificationEnabled(bool isEnable)
-{
-    g_isEnable = isEnable;
-}
-}
-}
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -45,6 +31,8 @@ ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
     name = Notification::g_isNonBundleName ? "": "bundleName";
     return ERR_OK;
 }
+
+
 
 bool BundleMgrProxy::GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo,
     int32_t userId)
@@ -66,6 +54,16 @@ bool BundleMgrProxy::GetApplicationInfo(
 {
     appInfo.distributedNotificationEnabled = Notification::g_isEnable;
     return true;
+}
+
+void MockBundleMgr::MockIsNonBundleName(bool isNonBundleName)
+{
+    g_isNonBundleName = isNonBundleName;
+}
+
+void MockBundleMgr::MockDistributedNotificationEnabled(bool isEnable)
+{
+    g_isEnable = isEnable;
 }
 
 } // namespace AppExecFwk

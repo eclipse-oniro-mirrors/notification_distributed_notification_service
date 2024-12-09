@@ -18,7 +18,7 @@
 #include "ans_log_wrapper.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
-#include "reminder_notification_inline.cpp"
+#include "reminder_utils.h"
 
 using namespace OHOS::Security::AccessToken;
 

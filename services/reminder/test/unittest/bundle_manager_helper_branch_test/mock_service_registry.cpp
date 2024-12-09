@@ -17,12 +17,13 @@
 
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
+#include "mock_service_registry.h"
 
 namespace {
     bool g_mockGetSystemAbilityManagerRet = true;
 }
 
-void MockGetSystemAbilityManager(bool mockRet)
+void MockServiceRegistry::MockGetSystemAbilityManager(bool mockRet)
 {
     g_mockGetSystemAbilityManagerRet = mockRet;
 }

@@ -31,20 +31,18 @@
 #include "reminder_ut_constant.h"
 #include "iremote_object.h"
 #include "mock_ipc_skeleton.h"
+#include "mock_os_account_manager.h"
+#include "mock_accesstoken_kit.h"
+#include "mock_bundle_mgr.h"
 
 #include "reminder_bundle_manager_helper.h"
 
-extern void MockIsOsAccountExists(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::Media;
 
 namespace OHOS {
 namespace Notification {
-extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
-extern void MockIsSystemApp(bool isSystemApp);
-extern void MockIsNonBundleName(bool isNonBundleName);
-extern void MockIsVerfyPermisson(bool isVerify);
 
 class ReminderAgentServicePublishTest : public testing::Test {
 public:
@@ -66,7 +64,7 @@ sptr<ReminderAgentService> ReminderAgentServicePublishTest::reminderService_ = n
 
 void ReminderAgentServicePublishTest::SetUpTestCase()
 {
-    MockIsOsAccountExists(true);
+    MockOsAccountManager::MockIsOsAccountExists(true);
 }
 
 void ReminderAgentServicePublishTest::TearDownTestCase() {}
@@ -79,7 +77,7 @@ void ReminderAgentServicePublishTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockAccesstokenKit::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -98,8 +96,8 @@ inline void SleepForFC()
 
 void ReminderAgentServicePublishTest::MockSystemApp()
 {
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
+    MockAccesstokenKit::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockAccesstokenKit::MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
 }
 
@@ -166,11 +164,11 @@ HWTEST_F(ReminderAgentServicePublishTest, ReminderAgentServicePublishTest_18000,
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
 
-    MockIsNonBundleName(true);
+    MockBundleMgr::MockIsNonBundleName(true);
     int32_t reminderId = 1;
     ReminderRequest reminder;
     ASSERT_NE(reminderService_->PublishReminder(reminder, reminderId), ERR_OK);
-    MockIsNonBundleName(false);
+    MockBundleMgr::MockIsNonBundleName(false);
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test end";
 }
 }  // namespace Notification

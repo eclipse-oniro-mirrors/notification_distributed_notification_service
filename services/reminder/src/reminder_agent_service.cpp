@@ -20,7 +20,7 @@
 #include "reminder_request_alarm.h"
 #include "reminder_bundle_manager_helper.h"
 #include "reminder_access_token_helper.h"
-#include "reminder_notification_inline.cpp"
+#include "reminder_utils.h"
 #include "in_process_call_wrapper.h"
 #include "ffrt_inner.h"
 
@@ -28,6 +28,7 @@
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <file_ex.h>
 
 #include "accesstoken_kit.h"
 #include "ans_inner_errors.h"
@@ -349,7 +350,7 @@ void ReminderAgentService::PostDelayUnloadTask()
 void ReminderAgentService::ChangeReminderAgentLoadConfig(int8_t reminderAgentState)
 {
     if (reminderAgentState_ != reminderAgentState) {
-        OHOS::SaveStringToFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, std::toString(reminderAgentState), true);
+        OHOS::SaveStringToFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, std::to_string(reminderAgentState), true);
         reminderAgentState_ = reminderAgentState;
     }
 }

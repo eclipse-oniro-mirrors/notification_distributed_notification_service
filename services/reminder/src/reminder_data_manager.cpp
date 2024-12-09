@@ -49,7 +49,7 @@
 #ifdef HAS_HISYSEVENT_PART
 #include "hisysevent.h"
 #endif
-#include "reminder_notification_inline.cpp"
+#include "reminder_utils.h"
 #include "notification_helper.h"
 
 namespace OHOS {
@@ -1307,18 +1307,17 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
     }
 }
 
-void ReminderDataManager::Init(bool isFromBootComplete)
+void ReminderDataManager::Init()
 {
-    ANSR_LOGD("ReminderDataManager Init, isFromBootComplete:%{public}d", isFromBootComplete);
-    if (isFromBootComplete) {
-        std::vector<sptr<ReminderRequest>> immediatelyReminders;
-        std::vector<sptr<ReminderRequest>> extensionReminders;
-        CheckReminderTime(immediatelyReminders, extensionReminders);
-        HandleImmediatelyShow(immediatelyReminders, false);
-        HandleExtensionReminder(extensionReminders);
-        StartRecentReminder();
-        StartReminderLoadTimer();
-    }
+    ANSR_LOGD("ReminderDataManager Init");
+    std::vector<sptr<ReminderRequest>> immediatelyReminders;
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    CheckReminderTime(immediatelyReminders, extensionReminders);
+    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleExtensionReminder(extensionReminders);
+    StartRecentReminder();
+    StartReminderLoadTimer();
+
     if (IsReminderAgentReady()) {
         return;
     }

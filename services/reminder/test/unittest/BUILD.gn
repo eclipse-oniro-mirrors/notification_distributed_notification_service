@@ -265,6 +265,7 @@ ohos_unittest("reminder_bundle_manager_helper_branch_test") {
     "include",
     "/${services_path}/reminder/include",
     "${services_path}/reminder/test/unittest/mock/include",
+    "bundle_manager_helper_branch_test/include",
   ]
 
   sources = [
@@ -396,6 +397,91 @@ ohos_unittest("reminder_service_test") {
     "mock/mock_os_account_manager_annex.cpp",
     "reminder_service_test.cpp",
     "reminder_store_test.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/reminder:libreminder",
+  ]
+
+  if (distributed_notification_supported) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "device_manager:devicemanagersdk",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "time_service:time_client",
+  ]
+
+  if (device_usage) {
+    external_deps += [ "device_usage_statistics:usagestatsinner" ]
+    defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+  if (hisysevent_usage) {
+    external_deps += [ "hisysevent:libhisysevent" ]
+    cflags += [ "-DHAS_HISYSEVENT_PART" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("reminder_agent_service_ability_test") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/reminder/include",
+    "${services_path}/reminder/test/unittest/mock/include",
+  ]
+
+  defines = []
+
+  sources = [
+    "reminder_agent_service_ability_test.cpp",
   ]
 
   deps = [

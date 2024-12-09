@@ -18,8 +18,7 @@
 
 #include "reminder_ut_constant.h"
 #include "reminder_bundle_manager_helper.h"
-
-extern void MockGetSystemAbilityManager(bool mockRet);
+#include "mock_service_registry.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -40,7 +39,7 @@ public:
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelperTest_00100, Function | SmallTest | Level1)
 {
     ReminderBundleManagerHelper bundleManagerHelper;
-    MockGetSystemAbilityManager(false);
+    MockServiceRegistry::MockGetSystemAbilityManager(false);
     int32_t uid = 1;
     ASSERT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
 }
@@ -53,7 +52,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelperTest_00100, Function 
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00200, Function | SmallTest | Level1)
 {
     ReminderBundleManagerHelper bundleManagerHelper;
-    MockGetSystemAbilityManager(true);
+    MockServiceRegistry::MockGetSystemAbilityManager(true);
     int32_t uid = 1;
     ASSERT_EQ("", bundleManagerHelper.GetBundleNameByUid(uid));
 }
@@ -67,7 +66,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00800, Function | Sm
 {
     std::shared_ptr<ReminderBundleManagerHelper> bundleManagerHelper = std::make_shared<ReminderBundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    MockGetSystemAbilityManager(true);
+    MockServiceRegistry::MockGetSystemAbilityManager(true);
     bundleManagerHelper->Connect();
 }
 
@@ -80,7 +79,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00900, Function | Sm
 {
     std::shared_ptr<ReminderBundleManagerHelper> bundleManagerHelper = std::make_shared<ReminderBundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    MockGetSystemAbilityManager(false);
+    MockServiceRegistry::MockGetSystemAbilityManager(false);
     // test Connect and bundleMgr_ == nullptr
     bundleManagerHelper->Connect();
 }
@@ -94,7 +93,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01000, Function | Sm
 {
     std::shared_ptr<ReminderBundleManagerHelper> bundleManagerHelper = std::make_shared<ReminderBundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    MockGetSystemAbilityManager(false);
+    MockServiceRegistry::MockGetSystemAbilityManager(false);
     bundleManagerHelper->Connect();
     // test Connect and bundleMgr_ != nullptr
     bundleManagerHelper->Connect();
@@ -109,7 +108,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01100, Function | Sm
 {
     std::shared_ptr<ReminderBundleManagerHelper> bundleManagerHelper = std::make_shared<ReminderBundleManagerHelper>();
     ASSERT_NE(nullptr, bundleManagerHelper);
-    MockGetSystemAbilityManager(false);
+    MockServiceRegistry::MockGetSystemAbilityManager(false);
     bundleManagerHelper->Connect();
     bundleManagerHelper->Disconnect();
 }
@@ -134,7 +133,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01200, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01300, Function | SmallTest | Level1)
 {
     ReminderBundleManagerHelper bundleManagerHelper;
-    MockGetSystemAbilityManager(true);
+    MockServiceRegistry::MockGetSystemAbilityManager(true);
     std::string bundle = "aa";
     int32_t userId = 1;
     ASSERT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));
@@ -148,7 +147,7 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01300, Function | Sm
 HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01400, Function | SmallTest | Level1)
 {
     ReminderBundleManagerHelper bundleManagerHelper;
-    MockGetSystemAbilityManager(false);
+    MockServiceRegistry::MockGetSystemAbilityManager(false);
     std::string bundle = "aa";
     int32_t userId = 1;
     ASSERT_EQ(-1, bundleManagerHelper.GetDefaultUidByBundleName(bundle, userId));

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "reminder_service_ability.h"
+#include "reminder_agent_service_ability.h"
 
 namespace OHOS {
 namespace Notification {
@@ -41,17 +41,17 @@ void ReminderAgentServiceAbility::OnStart()
 
     service_ = ReminderAgentService::GetInstance();
     reminderDataManager_ = ReminderDataManager::InitInstance();
+    reminderDataManager_->Init();
     if (!Publish(service_)) {
         return;
     }
-    reminderDataManager_->Init(false);
     ReminderAgentService::GetInstance()->TryPostDelayUnloadTask(INIT_DELAY_TIME);
 }
 
 void ReminderAgentServiceAbility::OnStop()
 {
     service_ = nullptr;
-    reminderAgent_ = nullptr;
+    reminderDataManager_ = nullptr;
 }
 
 }  // namespace Notification
