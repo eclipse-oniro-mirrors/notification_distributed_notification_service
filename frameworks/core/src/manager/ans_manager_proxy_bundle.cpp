@@ -784,6 +784,10 @@ ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<Notificati
 
     for (auto i = 0; i < vectorSize; i++) {
         sptr<NotificationBundleOption> obj = reply.ReadParcelable<NotificationBundleOption>();
+        if (obj == nullptr) {
+            ANS_LOGE("The obj of Bundle status vector is nullptr.");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
         bundleOption.emplace_back(*obj);
     }
 
