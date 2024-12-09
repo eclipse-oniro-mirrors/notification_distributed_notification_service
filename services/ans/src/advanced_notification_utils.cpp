@@ -2022,6 +2022,7 @@ void AdvancedNotificationService::ResetDistributedEnabled()
 {
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("notificationSvrQueue is nullptr");
+        return;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         std::string value;
