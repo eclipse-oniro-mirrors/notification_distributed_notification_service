@@ -409,6 +409,12 @@ void ReminderRequest::OnShowFail()
     SetState(false, REMINDER_STATUS_SHOWING, "OnShowFailed()");
 }
 
+void ReminderRequest::OnFailByLimit()
+{
+    ANSR_LOGE("Show failed by number limit");
+    OnShow(false, false, false);
+}
+
 bool ReminderRequest::OnSnooze()
 {
     if ((state_ & REMINDER_STATUS_SNOOZE) != 0) {

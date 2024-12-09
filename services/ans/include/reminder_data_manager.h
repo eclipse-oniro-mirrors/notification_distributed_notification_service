@@ -665,6 +665,8 @@ private:
 
     sptr<NotificationRequest> MakeNotificationRequest(sptr<NotificationRequest>& request);
 
+    bool CheckShowLimit(std::unordered_map<int32_t, int32_t>& limits, sptr<ReminderRequest>& reminder);
+
    /**
     * Single instance.
     */

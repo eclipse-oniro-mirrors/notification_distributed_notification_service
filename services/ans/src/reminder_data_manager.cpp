@@ -78,6 +78,8 @@ std::mutex ReminderDataManager::TIMER_MUTEX;
 std::mutex ReminderDataManager::ACTIVE_MUTEX;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
+// The maximum number of applications that can be displayed at a time
+constexpr int32_t ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE = 10;
 std::shared_ptr<ffrt::queue> ReminderDataManager::serviceQueue_ = nullptr;
 ReminderDataManager::~ReminderDataManager() = default;
 
@@ -958,6 +960,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
     bool isAlerting = false;
     sptr<ReminderRequest> playSoundReminder = nullptr;
+    std::unordered_map<int32_t, int32_t> limits;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
             continue;
@@ -976,6 +979,9 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
         extensionReminders.push_back((*it));
         if ((*it)->CheckExcludeDate()) {
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
+            continue;
+        }
+        if (!CheckShowLimit(limits, (*it))) {
             continue;
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
@@ -1284,8 +1290,12 @@ void ReminderDataManager::HandleImmediatelyShow(
     std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged)
 {
     bool isAlerting = false;
+    std::unordered_map<int32_t, int32_t> limits;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
         if ((*it)->IsShowing()) {
+            continue;
+        }
+        if (!CheckShowLimit(limits, (*it))) {
             continue;
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
@@ -2089,5 +2099,25 @@ sptr<NotificationRequest> ReminderDataManager::MakeNotificationRequest(sptr<Noti
     sptr<NotificationRequest> result = data.ReadParcelable<NotificationRequest>();
     return result;
 }
+
+bool ReminderDataManager::CheckShowLimit(std::unordered_map<int32_t, int32_t>& limits,
+    sptr<ReminderRequest>& reminder)
+{
+    int32_t uid = reminder->GetUid();
+    auto iter = limits.find(uid);
+    if (iter == limits.end()) {
+        limits[uid] = 1;
+        return true;
+    }
+
+    if (iter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE) {
+        reminder->OnFailByLimit();
+        store_->UpdateOrInsert(reminder, reminder->GetNotificationBundleOption());
+        return false;
+    }
+    iter->second++;
+    return true;
+}
+
 }
 }
