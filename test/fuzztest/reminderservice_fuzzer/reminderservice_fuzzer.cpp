@@ -17,7 +17,7 @@
 #include <fuzzer/FuzzedDataProvider.h>
 #include <memory>
 #include <string>
-#include "reminder_service.h"
+#include "reminder_agent_service.h"
 #include "reminderservice_fuzzer.h"
 #include "ans_permission_def.h"
 

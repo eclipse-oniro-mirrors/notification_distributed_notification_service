@@ -35,20 +35,20 @@ namespace OHOS {
 namespace Notification {
 
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
-class ReminderService final : public ReminderServiceStub,
-    public std::enable_shared_from_this<ReminderService> {
+class ReminderAgentService final : public ReminderAgentServiceStub,
+    public std::enable_shared_from_this<ReminderAgentService> {
 public:
 
-    ~ReminderService() override = default;
+    ~ReminderAgentService() override = default;
 
-    DISALLOW_COPY_AND_MOVE(ReminderService);
+    DISALLOW_COPY_AND_MOVE(ReminderAgentService);
 
     /**
      * @brief Get the instance of service.
      *
      * @return Returns the instance.
      */
-    static sptr<ReminderService> GetInstance();
+    static sptr<ReminderAgentService> GetInstance();
 
     /**
      * @brief Check reminder permission
@@ -114,7 +114,7 @@ public:
 
     void TryPostDelayUnloadTask(int64_t delayTime);
 private:
-    ReminderService() = default;
+    ReminderAgentService() = default;
 
     void PostDelayUnloadTask();
 
@@ -126,10 +126,10 @@ private:
         const int32_t callingUid);
 private:
     ffrt::task_handle tryUnloadTask_ = nullptr;
-    static sptr<ReminderService> instance_;
+    static sptr<ReminderAgentService> instance_;
     static std::mutex instanceMutex_;
-
     static std::mutex unloadMutex_;
+    int32_t reminderAgentState_ = 1;
 };
 }  // namespace Notification
 }  // namespace OHOS

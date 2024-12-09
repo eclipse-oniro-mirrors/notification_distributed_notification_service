@@ -15,7 +15,7 @@
 
 sequenceable OHOS.Notification.ReminderRequest;
 sequenceable OHOS.Notification.ReminderRequestAdaptation;
-interface OHOS.Notification.IReminderService {
+interface OHOS.Notification.IReminderAgentService {
     void PublishReminder([in] ReminderRequest reminder, [out] int reminderId);
     void CancelReminder([in] int reminderId);
     void CancelAllReminders();

@@ -114,7 +114,7 @@ public:
 
     void LoadSystemAbilityFail();
 
-    void StartReminderService();
+    void StartReminderAgentService();
 
 private:
 
@@ -128,7 +128,7 @@ private:
 
     sptr<AnsManagerInterface> GetAnsManagerProxy();
 
-    sptr<IReminderService> GetReminderServiceProxy();
+    sptr<IReminderAgentService> GetReminderServiceProxy();
 
     bool LoadReminderService();
 
@@ -136,7 +136,7 @@ private:
 
     std::condition_variable proxyConVar_;
 
-    sptr<IReminderService> proxy_;
+    sptr<IReminderAgentService> proxy_;
 };
 }  // namespace Notification
 }  // namespace OHOS

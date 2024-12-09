@@ -18,13 +18,13 @@
 
 #include "system_ability.h"
 
-#include "reminder_service.h"
+#include "reminder_agent_service.h"
 #include "reminder_data_manager.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
 namespace Notification {
-class ReminderServiceAbility final : public SystemAbility {
+class ReminderAgentServiceAbility final : public SystemAbility {
 public:
     /**
      * @brief The constructor of service ability.
@@ -32,23 +32,23 @@ public:
      * @param systemAbilityId Indicates the system ability id.
      * @param runOnCreate Run the system ability on created.
      */
-    ReminderServiceAbility(const int32_t systemAbilityId, bool runOnCreate);
+    ReminderAgentServiceAbility(const int32_t systemAbilityId, bool runOnCreate);
 
     /**
      * @brief The destructor.
      */
-    ~ReminderServiceAbility() final;
+    ~ReminderAgentServiceAbility() final;
 
-    DISALLOW_COPY_AND_MOVE(ReminderServiceAbility);
-    DECLARE_SYSTEM_ABILITY(ReminderServiceAbility);
+    DISALLOW_COPY_AND_MOVE(ReminderAgentServiceAbility);
+    DECLARE_SYSTEM_ABILITY(ReminderAgentServiceAbility);
 
 private:
     void OnStart() final;
     void OnStop() final;
 
 private:
-    sptr<ReminderService> service_;
-    std::shared_ptr<ReminderDataManager> reminderAgent_;
+    sptr<ReminderAgentService> service_;
+    std::shared_ptr<ReminderDataManager> reminderDataManager_;
 };
 }  // namespace Notification
 }  // namespace OHOS

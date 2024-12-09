@@ -272,9 +272,6 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
 {
     ANSR_LOGD("Reminder store init.");
     std::lock_guard<std::mutex> lock(initMutex_);
-    if (isInit_) {
-        return STATE_OK;
-    }
     if (access(REMINDER_DB_DIR.c_str(), F_OK) != 0) {
         int createDir = mkdir(REMINDER_DB_DIR.c_str(), S_IRWXU);
         if (createDir != 0) {
@@ -282,14 +279,12 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
             return STATE_FAIL;
         }
     }
-    if (isFirstInit_) {
-        ReminderTable::InitDbColumns();
-        ReminderBaseTable::InitDbColumns();
-        ReminderTimerTable::InitDbColumns();
-        ReminderAlarmTable::InitDbColumns();
-        ReminderCalendarTable::InitDbColumns();
-        isFirstInit_ = false;
-    }
+    ReminderTable::InitDbColumns();
+    ReminderBaseTable::InitDbColumns();
+    ReminderTimerTable::InitDbColumns();
+    ReminderAlarmTable::InitDbColumns();
+    ReminderCalendarTable::InitDbColumns();
+
     
     std::string dbConfig = REMINDER_DB_DIR + REMINDER_DB_NAME;
     NativeRdb::RdbStoreConfig config(dbConfig);
@@ -303,7 +298,7 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
         return STATE_FAIL;
     }
     int32_t result = InitData();
-    isInit_ = true;
+
     return result;
 }
 
@@ -864,16 +859,5 @@ int32_t ReminderStore::QueryActiveReminderCount()
     return baseTableNum + calenderTableNum;
 }
 
-bool ReminderStore::RemoveDb()
-{
-    std::lock_guard<std::mutex> lock(initMutex_);
-    int result = NativeRdb::RdbHelper::DeleteRdbStore(REMINDER_DB_DIR + REMINDER_DB_NAME);
-    if (result != NativeRdb::E_OK) {
-        ANSR_LOGE("RemoveDb failed");
-    }
-    ANSR_LOGI("RemoveDb success");
-    isInit_ = false;
-    return true;
-}
 }  // namespace Notification
 }  // namespace OHOS

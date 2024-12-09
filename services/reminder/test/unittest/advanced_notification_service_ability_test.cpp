@@ -21,7 +21,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Notification {
-class ReminderServiceAbilityTest : public testing::Test {
+class ReminderAgentServiceAbilityTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
@@ -30,43 +30,43 @@ public:
 };
 
 /**
- * @tc.number    : ReminderServiceAbilityTest_00100
- * @tc.name      : ReminderServiceAbility_0100
- * @tc.desc      : Structure ReminderServiceAbility with systemAbilityId and runOnCreate
+ * @tc.number    : ReminderAgentServiceAbilityTest_00100
+ * @tc.name      : ReminderAgentServiceAbility_0100
+ * @tc.desc      : Structure ReminderAgentServiceAbility with systemAbilityId and runOnCreate
  */
 HWTEST_F(
-    ReminderServiceAbilityTest, ReminderServiceAbilityTest_00100, Function | SmallTest | Level1)
+    ReminderAgentServiceAbilityTest, ReminderAgentServiceAbilityTest_00100, Function | SmallTest | Level1)
 {
     int32_t systemAbilityId = 1;
     bool runOnCreate = true;
-    ReminderServiceAbility(systemAbilityId, runOnCreate);
+    ReminderAgentServiceAbility(systemAbilityId, runOnCreate);
 }
 
 /**
- * @tc.number    : ReminderServiceAbilityTest_00200
- * @tc.name      : ReminderServiceAbility_0200
- * @tc.desc      : Structure ReminderServiceAbility with systemAbilityId and runOnCreate
+ * @tc.number    : ReminderAgentServiceAbilityTest_00200
+ * @tc.name      : ReminderAgentServiceAbility_0200
+ * @tc.desc      : Structure ReminderAgentServiceAbility with systemAbilityId and runOnCreate
  */
 HWTEST_F(
-    ReminderServiceAbilityTest, ReminderServiceAbilityTest_00200, Function | SmallTest | Level1)
+    ReminderAgentServiceAbilityTest, ReminderAgentServiceAbilityTest_00200, Function | SmallTest | Level1)
 {
     int32_t systemAbilityId = 1;
     bool runOnCreate = true;
-    ReminderServiceAbility test(systemAbilityId, runOnCreate);
+    ReminderAgentServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStart();
 }
 
 /**
- * @tc.number    : ReminderServiceAbilityTest_00300
- * @tc.name      : ReminderServiceAbility_0300
- * @tc.desc      : Structure ReminderServiceAbility with systemAbilityId and runOnCreate
+ * @tc.number    : ReminderAgentServiceAbilityTest_00300
+ * @tc.name      : ReminderAgentServiceAbility_0300
+ * @tc.desc      : Structure ReminderAgentServiceAbility with systemAbilityId and runOnCreate
  */
 HWTEST_F(
-    ReminderServiceAbilityTest, ReminderServiceAbilityTest_00300, Function | SmallTest | Level1)
+    ReminderAgentServiceAbilityTest, ReminderAgentServiceAbilityTest_00300, Function | SmallTest | Level1)
 {
     int32_t systemAbilityId = 1;
     bool runOnCreate = true;
-    ReminderServiceAbility test(systemAbilityId, runOnCreate);
+    ReminderAgentServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStop();
     test.OnStart();
 }

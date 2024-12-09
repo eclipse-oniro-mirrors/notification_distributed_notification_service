@@ -19,7 +19,6 @@
 #include <map>
 #include <vector>
 
-#include "reminder_service.h"
 #include "ans_inner_errors.h"
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "player.h"
@@ -272,10 +271,6 @@ public:
     void ReceiveLoadReminderEvent();
 
     void StartReminderLoadTimer();
-
-    void PostUnloadTask();
-
-    void TryInit();
 
     static constexpr uint8_t TIME_ZONE_CHANGE = 0;
     static constexpr uint8_t DATE_TIME_CHANGE = 1;

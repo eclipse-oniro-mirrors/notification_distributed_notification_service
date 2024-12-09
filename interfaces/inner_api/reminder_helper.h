@@ -124,7 +124,7 @@ public:
      */
     static ErrCode GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates);
 
-    static void StartReminderService();
+    static void StartReminderAgentService();
 
 private:
     static bool CheckPermission();

@@ -18,37 +18,37 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-constexpr int32_t REMINDER_SERVICE_ID = 3204;
-REGISTER_SYSTEM_ABILITY_BY_ID(ReminderServiceAbility, REMINDER_SERVICE_ID, false);
+constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
+REGISTER_SYSTEM_ABILITY_BY_ID(ReminderAgentServiceAbility, REMINDER_AGENT_SERVICE_ID, false);
 }
 
 const std::string EXTENSION_BACKUP = "backup";
 const std::string EXTENSION_RESTORE = "restore";
 constexpr int64_t INIT_DELAY_TIME = 60 * 1000 * 1000;
 
-ReminderServiceAbility::ReminderServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
+ReminderAgentServiceAbility::ReminderAgentServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
 {}
 
-ReminderServiceAbility::~ReminderServiceAbility()
+ReminderAgentServiceAbility::~ReminderAgentServiceAbility()
 {}
 
-void ReminderServiceAbility::OnStart()
+void ReminderAgentServiceAbility::OnStart()
 {
     if (service_ != nullptr) {
         return;
     }
 
-    service_ = ReminderService::GetInstance();
-    reminderAgent_ = ReminderDataManager::InitInstance();
+    service_ = ReminderAgentService::GetInstance();
+    reminderDataManager_ = ReminderDataManager::InitInstance();
     if (!Publish(service_)) {
         return;
     }
-    reminderAgent_->Init(true);
-    ReminderService::GetInstance()->TryPostDelayUnloadTask(INIT_DELAY_TIME);
+    reminderDataManager_->Init(false);
+    ReminderAgentService::GetInstance()->TryPostDelayUnloadTask(INIT_DELAY_TIME);
 }
 
-void ReminderServiceAbility::OnStop()
+void ReminderAgentServiceAbility::OnStop()
 {
     service_ = nullptr;
     reminderAgent_ = nullptr;

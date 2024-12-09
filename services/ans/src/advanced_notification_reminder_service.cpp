@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <sstream>
 #include <filesystem>
+#include <file_ex.h>
 
 #include "accesstoken_kit.h"
 #include "ans_inner_errors.h"
@@ -43,6 +44,8 @@
 namespace OHOS {
 namespace Notification {
 constexpr const char* REMINDER_DB_PATH = "/data/service/el1/public/notification/notification.db";
+constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH = "/data/service/el1/public/notification/reminder_agent_service_config";
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 {
@@ -114,14 +117,19 @@ ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification
     return ERR_OK;
 }
 
-void AdvancedNotificationService::TryStartReminderService()
+void AdvancedNotificationService::TryStartReminderAgentService()
 {
     if (access(REMINDER_DB_PATH, F_OK) != 0) {
         ANS_LOGW("Reminder db no exist");
         return;
     }
+    std::string reminderAgentServiceConfig;
+    OHOS::LoadStringFromFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, reminderAgentServiceConfig);
+    if (reminderAgentServiceConfig != "1") {
+        return;
+    }
     ANS_LOGI("Reminder db exist, start reminder service");
-    ReminderHelper::StartReminderService();
+    ReminderHelper::StartReminderAgentService();
 }
 }  // namespace Notification
 }  // namespace OHOS

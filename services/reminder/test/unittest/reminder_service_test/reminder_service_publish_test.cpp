@@ -24,7 +24,7 @@
 #include "gtest/gtest.h"
 #include <vector>
 
-#include "reminder_service.h"
+#include "reminder_agent_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -46,7 +46,7 @@ extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsNonBundleName(bool isNonBundleName);
 extern void MockIsVerfyPermisson(bool isVerify);
 
-class ReminderServicePublishTest : public testing::Test {
+class ReminderAgentServicePublishTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -59,23 +59,23 @@ private:
     void MockSystemApp();
 
 private:
-    static sptr<ReminderService> reminderService_;
+    static sptr<ReminderAgentService> reminderService_;
 };
 
-sptr<ReminderService> ReminderServicePublishTest::reminderService_ = nullptr;
+sptr<ReminderAgentService> ReminderAgentServicePublishTest::reminderService_ = nullptr;
 
-void ReminderServicePublishTest::SetUpTestCase()
+void ReminderAgentServicePublishTest::SetUpTestCase()
 {
     MockIsOsAccountExists(true);
 }
 
-void ReminderServicePublishTest::TearDownTestCase() {}
+void ReminderAgentServicePublishTest::TearDownTestCase() {}
 
-void ReminderServicePublishTest::SetUp()
+void ReminderAgentServicePublishTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
 
-    reminderService_ = new (std::nothrow) ReminderService();
+    reminderService_ = new (std::nothrow) ReminderAgentService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
@@ -83,7 +83,7 @@ void ReminderServicePublishTest::SetUp()
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
-void ReminderServicePublishTest::TearDown()
+void ReminderAgentServicePublishTest::TearDown()
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     reminderService_ = nullptr;
@@ -96,7 +96,7 @@ inline void SleepForFC()
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
-void ReminderServicePublishTest::MockSystemApp()
+void ReminderAgentServicePublishTest::MockSystemApp()
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
@@ -104,12 +104,12 @@ void ReminderServicePublishTest::MockSystemApp()
 }
 
 /**
- * @tc.number    : ReminderServicePublishTest_13200
+ * @tc.number    : ReminderAgentServicePublishTest_13200
  * @tc.name      : ANS_PublishReminder_0100
  * @tc.desc      : Test PublishReminder function
  * @tc.require   : issueI5S4VP
  */
-HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_13200, Function | SmallTest | Level1)
+HWTEST_F(ReminderAgentServicePublishTest, ReminderAgentServicePublishTest_13200, Function | SmallTest | Level1)
 {
     int32_t reminderId = 0;
     ReminderRequest reminder;
@@ -117,35 +117,35 @@ HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_13200, Function 
 }
 
 /**
- * @tc.number    : ReminderServicePublishTest_13300
+ * @tc.number    : ReminderAgentServicePublishTest_13300
  * @tc.name      : ANS_CancelReminder_0100
  * @tc.desc      : Test CancelReminder function when the result is ERR_NO_INIT
  * @tc.require   : issueI5S4VP
  */
-HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_13300, Function | SmallTest | Level1)
+HWTEST_F(ReminderAgentServicePublishTest, ReminderAgentServicePublishTest_13300, Function | SmallTest | Level1)
 {
     int32_t reminderId = 1;
     ASSERT_EQ(reminderService_->CancelReminder(reminderId), (int)ERR_NO_INIT);
 }
 
 /**
- * @tc.number    : ReminderServicePublishTest_13400
+ * @tc.number    : ReminderAgentServicePublishTest_13400
  * @tc.name      : ANS_CancelAllReminders_0100
  * @tc.desc      : Test CancelAllReminders function when the result is ERR_NO_INIT
  * @tc.require   : issueI5S4VP
  */
-HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_13400, Function | SmallTest | Level1)
+HWTEST_F(ReminderAgentServicePublishTest, ReminderAgentServicePublishTest_13400, Function | SmallTest | Level1)
 {
     ASSERT_EQ(reminderService_->CancelAllReminders(), (int)ERR_NO_INIT);
 }
 
 /**
- * @tc.number    : ReminderServicePublishTest_17900
+ * @tc.number    : ReminderAgentServicePublishTest_17900
  * @tc.name      : PublishReminder_1000
  * @tc.desc      : Test PublishReminder function.
  * @tc.require   : #I61RF2
  */
-HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_17900, Function | SmallTest | Level1)
+HWTEST_F(ReminderAgentServicePublishTest, ReminderAgentServicePublishTest_17900, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test start";
 
@@ -157,12 +157,12 @@ HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_17900, Function 
 }
 
 /**
- * @tc.number    : ReminderServicePublishTest_18000
+ * @tc.number    : ReminderAgentServicePublishTest_18000
  * @tc.name      : PublishReminder_2000
  * @tc.desc      : Test PublishReminder function.
  * @tc.require   : #I61RF2
  */
-HWTEST_F(ReminderServicePublishTest, ReminderServicePublishTest_18000, Function | SmallTest | Level1)
+HWTEST_F(ReminderAgentServicePublishTest, ReminderAgentServicePublishTest_18000, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
 

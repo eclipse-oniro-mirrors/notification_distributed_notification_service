@@ -1993,15 +1993,5 @@ int32_t ReminderDataManager::QueryActiveReminderCount()
 {
     return store_->QueryActiveReminderCount();
 }
-
-void ReminderDataManager::PostUnloadTask()
-{
-    store_->RemoveDb();
-}
-
-void ReminderDataManager::TryInit()
-{
-    store_->Init();
-}
 }
 }

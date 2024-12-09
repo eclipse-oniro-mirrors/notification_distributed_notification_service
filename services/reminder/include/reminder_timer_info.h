@@ -16,7 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_TIMER_INFO_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_TIMER_INFO_H
 
-#include "reminder_service.h"
+#include "reminder_agent_service.h"
 #include "itimer_info.h"
 #include "notification_request.h"
 #include "reminder_request.h"

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "reminder_service.h"
+#include "reminder_agent_service.h"
 
 #include "reminder_request_timer.h"
 #include "reminder_request_calendar.h"
@@ -50,17 +50,19 @@
 
 namespace OHOS {
 namespace Notification {
+constexpr int8_t REMINDER_AGENT_SERVICE_LOAD_STATE = 1;
+constexpr int8_t REMINDER_AGENT_SERVICE_UNLOAD_STATE = 0;
+constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH = "/data/service/el1/public/notification/reminder_agent_service_config";
 constexpr int64_t DELAY_TIME = 60 * 1000 * 1000;
-constexpr int32_t REMINDER_SERVICE_ID = 3204;
-sptr<ReminderService> ReminderService::instance_;
-std::mutex ReminderService::instanceMutex_;
-std::mutex ReminderService::unloadMutex_;
-sptr<ReminderService> ReminderService::GetInstance()
+constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
+sptr<ReminderAgentService> ReminderAgentService::instance_;
+std::mutex ReminderAgentService::instanceMutex_;
+std::mutex ReminderAgentService::unloadMutex_;
+sptr<ReminderAgentService> ReminderAgentService::GetInstance()
 {
     std::lock_guard<std::mutex> lock(instanceMutex_);
-
     if (instance_ == nullptr) {
-        instance_ = new (std::nothrow) ReminderService();
+        instance_ = new (std::nothrow) ReminderAgentService();
         if (instance_ == nullptr) {
             ANS_LOGE("Failed to create AdvancedNotificationService instance");
             return nullptr;
@@ -70,7 +72,7 @@ sptr<ReminderService> ReminderService::GetInstance()
     return instance_;
 }
 
-inline bool ReminderService::CheckReminderPermission()
+inline bool ReminderAgentService::CheckReminderPermission()
 {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     ErrCode result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
@@ -78,9 +80,8 @@ inline bool ReminderService::CheckReminderPermission()
     return result == Security::AccessToken::PermissionState::PERMISSION_GRANTED;
 }
 
-ErrCode ReminderService::PublishReminder(const ReminderRequest &reminder, int32_t& reminderId)
+ErrCode ReminderAgentService::PublishReminder(const ReminderRequest &reminder, int32_t& reminderId)
 {
-    TryInit();
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Publish reminder");
     sptr<ReminderRequest> tarReminder = CreateTarReminderRequest(reminder);
@@ -115,12 +116,13 @@ ErrCode ReminderService::PublishReminder(const ReminderRequest &reminder, int32_
     int32_t ret = rdm->PublishReminder(tarReminder, callingUid);
     if (ret == ERR_OK) {
         reminderId = tarReminder->GetReminderId();
+        ChangeReminderAgentLoadConfig(REMINDER_AGENT_SERVICE_LOAD_STATE);
     }
     TryPostDelayUnloadTask(DELAY_TIME);
     return ret;
 }
 
-sptr<ReminderRequest> ReminderService::CreateTarReminderRequest(const ReminderRequest &reminder)
+sptr<ReminderRequest> ReminderAgentService::CreateTarReminderRequest(const ReminderRequest &reminder)
 {
     sptr<ReminderRequest> tarReminder = nullptr;
     switch (reminder.GetReminderType()) {
@@ -149,7 +151,7 @@ sptr<ReminderRequest> ReminderService::CreateTarReminderRequest(const ReminderRe
     return tarReminder;
 }
 
-ErrCode ReminderService::InitReminderRequest(sptr<ReminderRequest>& tarReminder,
+ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& tarReminder,
     const std::string& bundle, const int32_t callingUid)
 {
     ANSR_LOGD("is system app: %{public}d", ReminderAccessTokenHelper::IsSystemApp());
@@ -189,7 +191,7 @@ ErrCode ReminderService::InitReminderRequest(sptr<ReminderRequest>& tarReminder,
     return ERR_OK;
 }
 
-ErrCode ReminderService::CancelReminder(const int32_t reminderId)
+ErrCode ReminderAgentService::CancelReminder(const int32_t reminderId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Cancel Reminder");
@@ -207,7 +209,7 @@ ErrCode ReminderService::CancelReminder(const int32_t reminderId)
     return result;
 }
 
-ErrCode ReminderService::CancelAllReminders()
+ErrCode ReminderAgentService::CancelAllReminders()
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Cancel all reminders");
@@ -229,7 +231,7 @@ ErrCode ReminderService::CancelAllReminders()
 }
 
 
-ErrCode ReminderService::GetValidReminders(std::vector<ReminderRequestAdaptation> &reminders)
+ErrCode ReminderAgentService::GetValidReminders(std::vector<ReminderRequestAdaptation> &reminders)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("GetValidReminders");
@@ -250,7 +252,7 @@ ErrCode ReminderService::GetValidReminders(std::vector<ReminderRequestAdaptation
     return ERR_OK;
 }
 
-ErrCode ReminderService::AddExcludeDate(const int32_t reminderId, const int64_t date)
+ErrCode ReminderAgentService::AddExcludeDate(const int32_t reminderId, const int64_t date)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Add Exclude Date");
@@ -269,7 +271,7 @@ ErrCode ReminderService::AddExcludeDate(const int32_t reminderId, const int64_t 
     return result;
 }
 
-ErrCode ReminderService::DelExcludeDates(const int32_t reminderId)
+ErrCode ReminderAgentService::DelExcludeDates(const int32_t reminderId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Del Exclude Dates");
@@ -289,7 +291,7 @@ ErrCode ReminderService::DelExcludeDates(const int32_t reminderId)
     return result;
 }
 
-ErrCode ReminderService::GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates)
+ErrCode ReminderAgentService::GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("Get Exclude Dates");
@@ -308,7 +310,7 @@ ErrCode ReminderService::GetExcludeDates(const int32_t reminderId, std::vector<i
     return result;
 }
 
-void ReminderService::TryPostDelayUnloadTask(int64_t delayTime)
+void ReminderAgentService::TryPostDelayUnloadTask(int64_t delayTime)
 {
     std::lock_guard<std::mutex> lock(unloadMutex_);
     if (tryUnloadTask_) {
@@ -324,38 +326,33 @@ void ReminderService::TryPostDelayUnloadTask(int64_t delayTime)
         if (reminderCount > 0) {
             return;
         }
-        ReminderService::GetInstance()->PostDelayUnloadTask();
+        ReminderAgentService::GetInstance()->PostDelayUnloadTask();
     }, {}, {}, ffrt::task_attr().delay(delayTime));
 }
 
-void ReminderService::PostDelayUnloadTask()
+void ReminderAgentService::PostDelayUnloadTask()
 {
     ANSR_LOGI("do unload task");
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm != nullptr) {
-        rdm->PostUnloadTask();
-    }
+    ChangeReminderAgentLoadConfig(REMINDER_AGENT_SERVICE_UNLOAD_STATE);
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
         ANSR_LOGE("get samgr failed");
         return;
     }
-    int32_t ret = samgrProxy->UnloadSystemAbility(REMINDER_SERVICE_ID);
+    int32_t ret = samgrProxy->UnloadSystemAbility(REMINDER_AGENT_SERVICE_ID);
     if (ret != ERR_OK) {
         ANSR_LOGE("remove system ability failed");
         return;
     }
 }
 
-void ReminderService::TryInit()
+void ReminderAgentService::ChangeReminderAgentLoadConfig(int8_t reminderAgentState)
 {
-    ANSR_LOGI("try Init");
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        ANSR_LOGW("Reminder data manager not init!");
-        return;
+    if (reminderAgentState_ != reminderAgentState) {
+        OHOS::SaveStringToFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, std::toString(reminderAgentState), true);
+        reminderAgentState_ = reminderAgentState;
     }
-    rdm->TryInit();
 }
+
 }  // namespace Notification
 }  // namespace OHOS

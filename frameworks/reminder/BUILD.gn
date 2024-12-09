@@ -25,11 +25,11 @@ idl_interface_sources = [
 ]
 
 idl_gen_interface("reminder_service_interface") {
-  src_idl = rebase_path("IReminderService.idl")
+  src_idl = rebase_path("IReminderAgentService.idl")
   dst_file = string_join(",", idl_interface_sources)
   hitrace = "HITRACE_TAG_ABILITY_MANAGER"
   log_domainid = "0xD003900"
-  log_tag = "ReminderServiceService"
+  log_tag = "ReminderAgentService"
 }
 
 config("reminder_innerkits_public_config") {

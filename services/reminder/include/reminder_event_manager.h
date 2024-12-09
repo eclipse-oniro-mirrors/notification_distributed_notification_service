@@ -16,7 +16,6 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_EVENT_MANAGER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_EVENT_MANAGER_H
 
-#include "reminder_service.h"
 #include "common_event_subscriber.h"
 #include "reminder_data_manager.h"
 #include "system_ability_status_change_stub.h"

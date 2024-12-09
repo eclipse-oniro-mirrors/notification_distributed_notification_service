@@ -246,7 +246,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_009, Level1)
     int32_t callingUid = -1;
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->UpdateAndSaveReminderLocked(reminder);
-    sptr<ReminderService> service(new ReminderService);
+    sptr<ReminderAgentService> service(new ReminderAgentService);
     manager->ShouldAlert(nullptr);
     manager->currentUserId_ = 0;
     manager->ShouldAlert(reminder);

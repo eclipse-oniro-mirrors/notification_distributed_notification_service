@@ -1102,7 +1102,7 @@ public:
 
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
 
-    void TryStartReminderService();
+    void TryStartReminderAgentService();
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

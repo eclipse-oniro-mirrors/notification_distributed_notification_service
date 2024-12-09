@@ -41,7 +41,6 @@ public:
     int32_t UpdateOrInsert(const sptr<ReminderRequest>& reminder);
     int32_t GetMaxId();
     int32_t QueryActiveReminderCount();
-    bool RemoveDb();
     std::vector<sptr<ReminderRequest>> GetHalfHourReminders();
     std::vector<sptr<ReminderRequest>> GetAllValidReminders();
 
@@ -93,8 +92,6 @@ private:
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_ = nullptr;
 
     std::mutex initMutex_;
-    bool isInit_ = false;
-    bool isFirstInit_ = true;
 
 private:
 class ReminderStoreDataCallBack : public NativeRdb::RdbOpenCallback {
