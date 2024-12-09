@@ -39,7 +39,7 @@ namespace OHOS {
 namespace Notification {
 class ReminderDataManager final {
 public:
-    ReminderDataManager()；
+    ReminderDataManager();
     ~ReminderDataManager();
 
     ReminderDataManager(ReminderDataManager &other) = delete;

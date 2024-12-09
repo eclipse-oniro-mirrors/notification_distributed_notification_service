@@ -22,8 +22,18 @@
 #include "reminder_request.h"
 
 #include "ans_inner_errors.h"
+#include "mock_i_remote_object.h"
 
 using namespace testing::ext;
+
+namespace {
+    bool g_mockWriteInterfaceTokenRet = true;
+}
+
+void MockWriteInterfaceToken(bool mockRet)
+{
+    g_mockWriteInterfaceTokenRet = mockRet;
+}
 namespace OHOS {
 namespace Notification {
 class ReminderAgentServiceProxyTest : public testing::Test {
@@ -73,7 +83,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, PublishReminder_0200, Function | MediumT
     ASSERT_NE(nullptr, proxy);
 
     ReminderRequest reminderRequest;
-    reminderRequest.SetReminderType(ReminderType::TIMER);
+    reminderRequest.SetReminderType(ReminderRequest::ReminderType::TIMER);
     int32_t reminderId = 0;
     ErrCode res = proxy->PublishReminder(reminderRequest, reminderId);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
@@ -191,8 +201,8 @@ HWTEST_F(ReminderAgentServiceProxyTest, GetExcludeDates_0100, Function | MediumT
     std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t reminderId = 0;
-    int64_t date = 0;
-    ErrCode res = proxy->GetExcludeDates(reminderId, date);
+    std::vector<int64_t> dates;
+    ErrCode res = proxy->GetExcludeDates(reminderId, dates);
     EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
 }
 

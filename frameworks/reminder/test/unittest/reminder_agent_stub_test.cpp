@@ -22,6 +22,7 @@
 #include "reminder_request.h"
 
 #include "ans_inner_errors.h"
+#include "mock_i_remote_object.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -32,6 +33,7 @@ public:
     static void TearDownTestCase() {}
     void SetUp() {}
     void TearDown() {}
+    sptr<ReminderAgentServiceStub> reminderAgentServiceStub_;
 };
 
 /*
@@ -44,20 +46,19 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0100, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::ALARM);
     ReminderRequest reminder;
-    ReminderRequestAlarm reminderRequestAlarm = new ReminderRequestAlarm();
+    ReminderRequestAlarm reminderRequestAlarm;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
     data.WriteUint8(typeInfo);
-    data.WriteStrongParcelable(reminder);
-    data.WriteParcelable(reminderRequestAlarm);
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteStrongParcelable(&reminder);
+    data.WriteParcelable(&reminderRequestAlarm);
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -71,18 +72,17 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0200, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0200, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::INVALID);
     ReminderRequest reminder;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
     data.WriteUint8(typeInfo);
-    data.WriteParcelable(reminder);
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteParcelable(&reminder);
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -96,14 +96,13 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0300, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0300, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -117,7 +116,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0400, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0400, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -125,12 +124,11 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0400, Function | MediumTe
     ReminderRequest reminder;
     ReminderRequestAlarm reminderRequestTimer;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
     data.WriteUint8(typeInfo);
-    data.WriteStrongParcelable(reminder);
-    data.WriteParcelable(reminderRequestTimer);
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteStrongParcelable(&reminder);
+    data.WriteParcelable(&reminderRequestTimer);
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -144,7 +142,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0500, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0500, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -152,12 +150,11 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0500, Function | MediumTe
     ReminderRequest reminder;
     ReminderRequestCalendar reminderRequestCalendar;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
     data.WriteUint8(typeInfo);
-    data.WriteStrongParcelable(reminder);
-    data.WriteParcelable(reminderRequestCalendar);
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteStrongParcelable(&reminder);
+    data.WriteParcelable(&reminderRequestCalendar);
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -171,18 +168,17 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0600, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0600, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ReminderRequest reminder;
     ReminderRequestCalendar reminderRequestCalendar;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    data.WriteStrongParcelable(reminder);
-    data.WriteParcelable(reminderRequestCalendar);
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    data.WriteStrongParcelable(&reminder);
+    data.WriteParcelable(&reminderRequestCalendar);
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -196,16 +192,15 @@ HWTEST_F(ReminderAgentServiceStubTest, CancelReminder_0100, Function | MediumTes
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, CancelReminder_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_CANCEL_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_CANCEL_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     int32_t reminderId = 4;
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
     data.WriteInt32(reminderId);
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -219,14 +214,13 @@ HWTEST_F(ReminderAgentServiceStubTest, CancelReminder_0200, Function | MediumTes
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, CancelReminder_0200, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_CANCEL_PEMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_CANCEL_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
@@ -240,14 +234,13 @@ HWTEST_F(ReminderAgentServiceStubTest, CancelAllReminders_0100, Function | Mediu
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, CancelAllReminders_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_CANCEL_ALL_REMINDERS);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_CANCEL_ALL_REMINDERS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -261,14 +254,13 @@ HWTEST_F(ReminderAgentServiceStubTest, GetValidReminders_0100, Function | Medium
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, GetValidReminders_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_GET_VALID_REMINDERS);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_GET_VALID_REMINDERS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
@@ -282,14 +274,13 @@ HWTEST_F(ReminderAgentServiceStubTest, AddExcludeDate_0100, Function | MediumTes
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, AddExcludeDate_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_ADD_EXCLUDE_DATE);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_ADD_EXCLUDE_DATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
@@ -303,14 +294,13 @@ HWTEST_F(ReminderAgentServiceStubTest, DelExcludeDates_0100, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, DelExcludeDates_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_DEL_EXCLUDE_DATES);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_DEL_EXCLUDE_DATES);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
@@ -324,14 +314,13 @@ HWTEST_F(ReminderAgentServiceStubTest, GetExcludeDates_0100, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, GetExcludeDates_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderService::IReminderServiceIpcCode::COMMAND_GET_EXCLUDE_DATES);
+    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_GET_EXCLUDE_DATES);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     
-    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
-    std::shared_ptr<ReminderAgentServiceStub> stub = std::make_shared<ReminderAgentServiceStub>();
-    ErrCode ret = stub->OnRemoteRequest(code, data, reply, option);
+    data.WriteInterfaceToken(ReminderAgentServiceStub::GetDescriptor());
+    ErrCode ret = reminderAgentServiceStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 }

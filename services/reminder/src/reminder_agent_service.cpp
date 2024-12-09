@@ -318,6 +318,7 @@ void ReminderAgentService::TryPostDelayUnloadTask(int64_t delayTime)
         ffrt::skip(tryUnloadTask_);
     }
     tryUnloadTask_ = ffrt::submit_h([]() {
+        std::lock_guard<std::mutex> lock(unloadMutex_);
         auto rdm = ReminderDataManager::GetInstance();
         if (rdm == nullptr) {
             ANSR_LOGW("Reminder data manager not init!");

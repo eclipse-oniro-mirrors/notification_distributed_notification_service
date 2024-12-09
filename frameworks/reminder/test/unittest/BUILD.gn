@@ -163,12 +163,13 @@ ohos_unittest("reminder_agent_idl_test") {
   include_dirs = [
     ".",
     "include",
+    "mock",
     "/${services_path}/reminder/include",
     "${services_path}/reminder/test/unittest/mock/include",
   ]
 
   sources = [
-    "${frameworks_module_reminder_path}/test/unittest/reminder_agent_porxy_test.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_agent_proxy_test.cpp",
     "${frameworks_module_reminder_path}/test/unittest/reminder_agent_stub_test.cpp",
   ]
 
@@ -181,6 +182,8 @@ ohos_unittest("reminder_agent_idl_test") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "googletest:gmock_main",
+    "ipc:ipc_core",
     "relational_store:native_rdb",
   ]
   cflags = [
