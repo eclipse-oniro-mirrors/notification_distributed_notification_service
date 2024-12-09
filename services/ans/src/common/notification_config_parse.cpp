@@ -18,7 +18,7 @@
 #include "notification_config_parse.h"
 
 #include "ans_log_wrapper.h"
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
 #include "notification_extension_wrapper.h"
 #endif
 #include "notification_slot.h"
@@ -188,7 +188,7 @@ bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) cons
     if (appPrivileges != nullptr) {
         return appPrivileges->IsBannerEnabled();
     }
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     int32_t ctrlResult = EXTENTION_WRAPPER->BannerControl(bundleName);
     return (ctrlResult == ERR_OK) ? true : false;
 #else

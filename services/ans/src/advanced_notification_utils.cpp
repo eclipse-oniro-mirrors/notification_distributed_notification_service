@@ -565,7 +565,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         DeleteDuplicateMsgs(bundleOption);
     }));
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
 #endif
@@ -2009,7 +2009,7 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
     if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReminderEnabled(bundleName)) {
         return true;
     }
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     int32_t ctrlResult = EXTENTION_WRAPPER->ReminderControl(bundleName);
     if (ctrlResult != ERR_OK) {
         return ctrlResult;
