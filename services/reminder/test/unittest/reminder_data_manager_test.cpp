@@ -41,7 +41,7 @@ public:
     {
         ReminderDataManager::InitInstance();
         manager = ReminderDataManager::GetInstance();
-        manager->Init(false);
+        manager->Init();
     }
     static void TearDownTestCase()
     {
@@ -364,7 +364,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     manager->HandleImmediatelyShow(vec, true);
     manager->HandleRefreshReminder(0, reminder);
     manager->HandleSameNotificationIdShowing(reminder);
-    manager->Init(true);
+    manager->Init();
     manager->InitUserId();
     manager->GetImmediatelyShowRemindersLocked(vec);
     manager->IsAllowedNotify(reminder);
@@ -757,7 +757,7 @@ HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
     calendar->SetDateTime(now-50000);
     calendar->SetEndDateTime(now+50000);
     manager->reminderVector_.push_back(calendar);
-    manager->Init(true);
+    manager->Init();
     EXPECT_TRUE(!manager->reminderVector_.empty());
 }
 

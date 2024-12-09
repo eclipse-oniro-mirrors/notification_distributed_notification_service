@@ -82,6 +82,7 @@ std::mutex ReminderDataManager::ACTIVE_MUTEX;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 std::shared_ptr<ffrt::queue> ReminderDataManager::serviceQueue_ = nullptr;
+ReminderDataManager::ReminderDataManager() = default;
 ReminderDataManager::~ReminderDataManager() = default;
 
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,

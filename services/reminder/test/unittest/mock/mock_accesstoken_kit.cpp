@@ -43,7 +43,7 @@ void MockAccesstokenKit::MockIsVerfyPermisson(bool isVerify)
 {
     g_mockVerfyPermisson = isVerify;
 }
-void MockAccesstokenKit::MockIsSystemApp(bool isVerify)
+void MockAccesstokenKit::MockIsSystemApp(bool isSystemApp)
 {
     g_isSystemApp = isSystemApp;
 }

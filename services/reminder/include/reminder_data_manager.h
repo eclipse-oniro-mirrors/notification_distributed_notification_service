@@ -39,10 +39,7 @@ namespace OHOS {
 namespace Notification {
 class ReminderDataManager final {
 public:
-    ReminderDataManager()
-    {
-        Init(false);
-    };
+    ReminderDataManager()；
     ~ReminderDataManager();
 
     ReminderDataManager(ReminderDataManager &other) = delete;
@@ -133,10 +130,8 @@ public:
 
     /**
      * @brief Inits and recovery data from database.
-     *
-     * @param isFromBootComplete Indicates the init is called when boot completed.
      */
-    void Init(bool isFromBootComplete);
+    void Init();
 
     void InitUserId();
 

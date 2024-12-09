@@ -35,7 +35,7 @@ namespace OHOS {
 
         Notification::ReminderDataManager::InitInstance();
         auto manager = Notification::ReminderDataManager::GetInstance();
-        manager->Init(false);
+        manager->Init();
         manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);
         manager->CancelReminder(reminderId, callingUid);
@@ -48,7 +48,7 @@ namespace OHOS {
         manager->CloseReminder(want, value);
         std::vector<Notification::ReminderRequestAdaptation> reminders;
         manager->GetValidReminders(callingUid, reminders);
-        manager->Init(value);
+        manager->Init();
         manager->InitUserId();
         std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
         std::vector<sptr<Notification::ReminderRequest>> extensionReminders;

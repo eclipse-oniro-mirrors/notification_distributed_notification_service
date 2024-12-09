@@ -98,7 +98,7 @@ void ReminderAgentServicePublishTest::MockSystemApp()
 {
     MockAccesstokenKit::MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockAccesstokenKit::MockIsSystemApp(true);
-    MockIsVerfyPermisson(true);
+    MockAccesstokenKit::MockIsVerfyPermisson(true);
 }
 
 /**

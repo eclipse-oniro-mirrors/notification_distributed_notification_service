@@ -17,7 +17,7 @@
 
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
-
+namespace OHOS {
 class MockServiceRegistry {
 public:
     static void MockGetSystemAbilityManager(bool mockRet);

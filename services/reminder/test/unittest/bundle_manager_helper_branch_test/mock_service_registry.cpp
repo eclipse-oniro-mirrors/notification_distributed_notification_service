@@ -23,11 +23,6 @@ namespace {
     bool g_mockGetSystemAbilityManagerRet = true;
 }
 
-void MockServiceRegistry::MockGetSystemAbilityManager(bool mockRet)
-{
-    g_mockGetSystemAbilityManagerRet = mockRet;
-}
-
 namespace OHOS {
 sptr<ISystemAbilityManager> SystemAbilityManagerClient::GetSystemAbilityManager()
 {
@@ -40,5 +35,9 @@ sptr<ISystemAbilityManager> SystemAbilityManagerClient::GetSystemAbilityManager(
         return systemAbilityManager_;
     }
     return nullptr;
+}
+void MockServiceRegistry::MockGetSystemAbilityManager(bool mockRet)
+{
+    g_mockGetSystemAbilityManagerRet = mockRet;
 }
 } // namespace OHOS

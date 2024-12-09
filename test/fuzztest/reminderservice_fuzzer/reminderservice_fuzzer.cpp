@@ -27,7 +27,7 @@ namespace OHOS {
 
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
-        auto service = std::make_shared<Notification::ReminderService>();
+        auto service = std::make_shared<Notification::ReminderAgentService>();
         std::string stringData = fuzzData->ConsumeRandomLengthString();
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminder;

@@ -14,6 +14,7 @@
  */
 
 #include "os_account_manager.h"
+#include "mock_os_account_manager.h"
 
 namespace OHOS {
 int32_t g_mockId = 100; // default id when there is no os_account part
@@ -21,7 +22,6 @@ bool g_mockQueryForgroundOsAccountRet = true;
 bool g_mockGetOsAccountLocalIdFromUidRet = true;
 int32_t g_mockIdForGetOsAccountLocalIdFromUid = 100;
 bool g_mockOsAccountExists = true;
-}
 
 void MockOsAccountManager::MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase)
 {
@@ -52,7 +52,7 @@ void MockOsAccountManager::ResetAccountMock()
     g_mockOsAccountExists = true;
 }
 
-void MockOsAccountManager::MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
+void MockOsAccountManager::MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase)
 {
     g_mockGetOsAccountLocalIdFromUidRet = mockRet;
     switch (mockCase) {

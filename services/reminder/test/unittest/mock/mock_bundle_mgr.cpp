@@ -23,12 +23,21 @@ bool g_isNonBundleName = false;
 bool g_isEnable = true;
 }
 
-
 namespace OHOS {
+
+void MockBundleMgr::MockIsNonBundleName(bool isNonBundleName)
+{
+    g_isNonBundleName = isNonBundleName;
+}
+
+void MockBundleMgr::MockDistributedNotificationEnabled(bool isEnable)
+{
+    g_isEnable = isEnable;
+}
 namespace AppExecFwk {
 ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
 {
-    name = Notification::g_isNonBundleName ? "": "bundleName";
+    name = g_isNonBundleName ? "": "bundleName";
     return ERR_OK;
 }
 
@@ -52,19 +61,8 @@ int BundleMgrProxy::GetUidByBundleName(const std::string &bundleName, const int 
 bool BundleMgrProxy::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
 {
-    appInfo.distributedNotificationEnabled = Notification::g_isEnable;
+    appInfo.distributedNotificationEnabled = g_isEnable;
     return true;
 }
-
-void MockBundleMgr::MockIsNonBundleName(bool isNonBundleName)
-{
-    g_isNonBundleName = isNonBundleName;
-}
-
-void MockBundleMgr::MockDistributedNotificationEnabled(bool isEnable)
-{
-    g_isEnable = isEnable;
-}
-
 } // namespace AppExecFwk
 } // namespace OHOS
