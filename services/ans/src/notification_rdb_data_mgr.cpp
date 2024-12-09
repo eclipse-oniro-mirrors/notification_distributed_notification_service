@@ -61,7 +61,7 @@ int32_t RdbStoreDataCallBackNotificationStorage::OnCreate(NativeRdb::RdbStore &r
 int32_t RdbStoreDataCallBackNotificationStorage::OnUpgrade(
     NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion)
 {
-    ANS_LOGD("OnUpgrade currentVersion: %{plubic}d, targetVersion: %{plubic}d",
+    ANS_LOGD("OnUpgrade currentVersion: %{public}d, targetVersion: %{public}d",
         oldVersion, newVersion);
     return NativeRdb::E_OK;
 }
@@ -69,7 +69,7 @@ int32_t RdbStoreDataCallBackNotificationStorage::OnUpgrade(
 int32_t RdbStoreDataCallBackNotificationStorage::OnDowngrade(
     NativeRdb::RdbStore &rdbStore, int currentVersion, int targetVersion)
 {
-    ANS_LOGD("OnDowngrade  currentVersion: %{plubic}d, targetVersion: %{plubic}d",
+    ANS_LOGD("OnDowngrade  currentVersion: %{public}d, targetVersion: %{public}d",
         currentVersion, targetVersion);
     return NativeRdb::E_OK;
 }
@@ -602,7 +602,7 @@ int32_t NotificationDataMgr::GetUserTableName(const int32_t &userId, std::string
                 + " (KEY TEXT NOT NULL PRIMARY KEY, VALUE TEXT NOT NULL);";
             int32_t ret = rdbStore_->ExecuteSql(createTableSql);
             if (ret != NativeRdb::E_OK) {
-                ANS_LOGW("createTable %{public}s failed, code: %{code}d", tableName.c_str(), ret);
+                ANS_LOGW("createTable %{public}s failed, code: %{public}d", tableName.c_str(), ret);
                 return ret;
             }
             createdTables_.insert(tableName);

@@ -1783,7 +1783,7 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
 
     int32_t result = rdbDataManager_->QueryData(key, value, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get key-value failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        ANS_LOGE("Get key-value failed, key %{public}s, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
 
@@ -1802,7 +1802,7 @@ int32_t NotificationPreferencesDatabase::GetByteFromDb(
 
     int32_t result = rdbDataManager_->QueryData(key, value, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get byte failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        ANS_LOGE("Get byte failed, key %{public}s, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
 
@@ -2204,6 +2204,10 @@ void NotificationPreferencesDatabase::GetAllCloneBundleInfo(const int32_t &userI
 
     for (auto item : values) {
         NotificationCloneBundleInfo bundleInfo;
+        if (item.second.empty() || !nlohmann::json::accept(item.second)) {
+            ANS_LOGE("Invalid accept json");
+            continue;
+        }
         nlohmann::json jsonObject = nlohmann::json::parse(item.second, nullptr, false);
         if (jsonObject.is_null() || !jsonObject.is_object()) {
             ANS_LOGE("Invalid JSON object");
