@@ -20,6 +20,9 @@
 
 #include "reminder_agent_service_stub.h"
 #include "reminder_request.h"
+#include "reminder_request_timer.h"
+#include "reminder_request_alarm.h"
+#include "reminder_request_calendar.h"
 
 #include "ans_inner_errors.h"
 #include "mock_i_remote_object.h"
@@ -46,7 +49,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0100, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -72,7 +75,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0200, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0200, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -96,7 +99,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0300, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0300, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -116,7 +119,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0400, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0400, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -142,7 +145,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0500, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0500, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -168,7 +171,7 @@ HWTEST_F(ReminderAgentServiceStubTest, PublishReminder_0600, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, PublishReminder_0600, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_PUBLISH_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_PUBLISH_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -192,7 +195,7 @@ HWTEST_F(ReminderAgentServiceStubTest, CancelReminder_0100, Function | MediumTes
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, CancelReminder_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_CANCEL_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_CANCEL_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -214,7 +217,7 @@ HWTEST_F(ReminderAgentServiceStubTest, CancelReminder_0200, Function | MediumTes
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, CancelReminder_0200, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_CANCEL_REMINDER);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_CANCEL_REMINDER);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -234,7 +237,7 @@ HWTEST_F(ReminderAgentServiceStubTest, CancelAllReminders_0100, Function | Mediu
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, CancelAllReminders_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_CANCEL_ALL_REMINDERS);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_CANCEL_ALL_REMINDERS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -254,7 +257,7 @@ HWTEST_F(ReminderAgentServiceStubTest, GetValidReminders_0100, Function | Medium
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, GetValidReminders_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_GET_VALID_REMINDERS);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_GET_VALID_REMINDERS);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -274,7 +277,7 @@ HWTEST_F(ReminderAgentServiceStubTest, AddExcludeDate_0100, Function | MediumTes
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, AddExcludeDate_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_ADD_EXCLUDE_DATE);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_ADD_EXCLUDE_DATE);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -294,7 +297,7 @@ HWTEST_F(ReminderAgentServiceStubTest, DelExcludeDates_0100, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, DelExcludeDates_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_DEL_EXCLUDE_DATES);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_DEL_EXCLUDE_DATES);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
@@ -314,7 +317,7 @@ HWTEST_F(ReminderAgentServiceStubTest, GetExcludeDates_0100, Function | MediumTe
 {
     GTEST_LOG_(INFO)
         << "ReminderAgentServiceStubTest, GetExcludeDates_0100, TestSize.Level1";
-    uint32_t code = static_cast<uint32_t>(IReminderServiceIpcCode::COMMAND_GET_EXCLUDE_DATES);
+    uint32_t code = static_cast<uint32_t>(IReminderAgentServiceIpcCode::COMMAND_GET_EXCLUDE_DATES);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
