@@ -168,9 +168,7 @@ ohos_unittest("reminder_agent_idl_test") {
     "${services_path}/reminder/test/unittest/mock/include",
   ]
 
-  sources = [
-    "${frameworks_module_reminder_path}/test/unittest/reminder_agent_proxy_test.cpp",
-  ]
+  sources = [ "${frameworks_module_reminder_path}/test/unittest/reminder_agent_proxy_test.cpp" ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",

@@ -480,9 +480,7 @@ ohos_unittest("reminder_agent_service_ability_test") {
 
   defines = []
 
-  sources = [
-    "reminder_agent_service_ability_test.cpp",
-  ]
+  sources = [ "reminder_agent_service_ability_test.cpp" ]
 
   deps = [
     "${frameworks_module_reminder_path}:reminder_innerkits",
