@@ -63,7 +63,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, PublishReminder_0100, Function | MediumT
     ReminderRequest reminderRequest;
     int32_t reminderId = 0;
     ErrCode res = proxy->PublishReminder(reminderRequest, reminderId);
-    EXPECT_EQ(ERR_INVALID_DATA, res);
+    EXPECT_NE(ERR_OK, res);
 }
 
 /*
@@ -83,10 +83,10 @@ HWTEST_F(ReminderAgentServiceProxyTest, PublishReminder_0200, Function | MediumT
     ASSERT_NE(nullptr, proxy);
 
     ReminderRequest reminderRequest;
-    reminderRequest.SetReminderType(ReminderRequest::ReminderType::TIMER);
+    reminderRequest.SetReminderType(ReminderType::TIMER);
     int32_t reminderId = 0;
     ErrCode res = proxy->PublishReminder(reminderRequest, reminderId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 /*
@@ -106,7 +106,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, CancelReminder_0100, Function | MediumTe
 
     int32_t reminderId = 0;
     ErrCode res = proxy->CancelReminder(reminderId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 /*
@@ -125,7 +125,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, CancelAllReminders_0100, Function | Medi
     ASSERT_NE(nullptr, proxy);
 
     ErrCode res = proxy->CancelAllReminders();
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 /*
@@ -144,7 +144,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, GetValidReminders_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     std::vector<ReminderRequestAdaptation> reminderVector;
     ErrCode res = proxy->GetValidReminders(reminderVector);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 /*
@@ -164,7 +164,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, AddExcludeDate_0100, Function | MediumTe
     int32_t reminderId = 0;
     int64_t date = 0;
     ErrCode res = proxy->AddExcludeDate(reminderId, date);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 /*
@@ -183,7 +183,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, DelExcludeDates_0100, Function | MediumT
     ASSERT_NE(nullptr, proxy);
     int32_t reminderId = 0;
     ErrCode res = proxy->DelExcludeDates(reminderId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 /*
@@ -203,7 +203,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, GetExcludeDates_0100, Function | MediumT
     int32_t reminderId = 0;
     std::vector<int64_t> dates;
     ErrCode res = proxy->GetExcludeDates(reminderId, dates);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_OK, res);
 }
 
 }

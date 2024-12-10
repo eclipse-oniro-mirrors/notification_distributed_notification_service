@@ -53,7 +53,8 @@ namespace OHOS {
 namespace Notification {
 constexpr int8_t REMINDER_AGENT_SERVICE_LOAD_STATE = 1;
 constexpr int8_t REMINDER_AGENT_SERVICE_UNLOAD_STATE = 0;
-constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH = "/data/service/el1/public/notification/reminder_agent_service_config";
+constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH =
+    "/data/service/el1/public/notification/reminder_agent_service_config";
 constexpr int64_t DELAY_TIME = 60 * 1000 * 1000;
 constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
 sptr<ReminderAgentService> ReminderAgentService::instance_;
@@ -329,6 +330,7 @@ void ReminderAgentService::TryPostDelayUnloadTask(int64_t delayTime)
             return;
         }
         ReminderAgentService::GetInstance()->PostDelayUnloadTask();
+        tryUnloadTask_ = nullptr;
     }, {}, {}, ffrt::task_attr().delay(delayTime));
 }
 

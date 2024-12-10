@@ -270,6 +270,11 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string& packageNa
         }
         ++vit;
     }
+    if (store_ == nullptr) {
+        MUTEX.unlock();
+        ANSR_LOGE("CancelRemindersImplLocked failed, store_ is null");
+        return;
+    }
     if (isCancelAllPackage) {
         store_->DeleteUser(userId);
     } else {

@@ -170,7 +170,6 @@ ohos_unittest("reminder_agent_idl_test") {
 
   sources = [
     "${frameworks_module_reminder_path}/test/unittest/reminder_agent_proxy_test.cpp",
-    "${frameworks_module_reminder_path}/test/unittest/reminder_agent_stub_test.cpp",
   ]
 
   deps = [

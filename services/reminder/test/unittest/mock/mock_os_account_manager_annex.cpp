@@ -17,6 +17,8 @@
 #include "mock_os_account_manager.h"
 
 namespace OHOS {
+const uint8_t MOCK_CASE_INVALID_ID = 1;
+const uint8_t MOCK_CASE_SYSTEM_ID = 2;
 int32_t g_mockId = 100; // default id when there is no os_account part
 bool g_mockQueryForgroundOsAccountRet = true;
 bool g_mockGetOsAccountLocalIdFromUidRet = true;
@@ -48,7 +50,7 @@ void MockOsAccountManager::ResetAccountMock()
     g_mockId = 100; // 100 mockId
     g_mockQueryForgroundOsAccountRet = true;
     g_mockGetOsAccountLocalIdFromUidRet = true;
-    g_mockIdForGetOsAccountLocalIdFromUid = 100;
+    g_mockIdForGetOsAccountLocalIdFromUid = 100; // 100 mockId
     g_mockOsAccountExists = true;
 }
 
@@ -56,11 +58,11 @@ void MockOsAccountManager::MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t 
 {
     g_mockGetOsAccountLocalIdFromUidRet = mockRet;
     switch (mockCase) {
-        case 1: { // mock for invalid id
+        case MOCK_CASE_INVALID_ID: { // mock for invalid id
             g_mockIdForGetOsAccountLocalIdFromUid = -2; // -2 mock for invalid id
             break;
         }
-        case 2: { // mock for system id
+        case MOCK_CASE_SYSTEM_ID: { // mock for system id
             g_mockIdForGetOsAccountLocalIdFromUid = 88; // 88 mock for system id
             break;
         }

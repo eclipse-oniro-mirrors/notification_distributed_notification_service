@@ -41,8 +41,6 @@ ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
     return ERR_OK;
 }
 
-
-
 bool BundleMgrProxy::GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo,
     int32_t userId)
 {

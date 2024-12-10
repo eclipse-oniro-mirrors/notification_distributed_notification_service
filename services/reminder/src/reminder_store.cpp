@@ -285,7 +285,6 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
     ReminderAlarmTable::InitDbColumns();
     ReminderCalendarTable::InitDbColumns();
 
-    
     std::string dbConfig = REMINDER_DB_DIR + REMINDER_DB_NAME;
     NativeRdb::RdbStoreConfig config(dbConfig);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
@@ -433,21 +432,21 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
 __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetHalfHourReminders()
 {
     int64_t nowTime = GetCurrentTime();
-    std::string sql = "SELECT * FROM "
-        + ReminderBaseTable::TABLE_NAME + " WHERE ("
-        + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::IS_EXPIRED + " = 'false' AND "
-        + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::REMINDER_TYPE + " != 1 AND "
-        + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::TRIGGER_TIME + " < "
-        + std::to_string(nowTime + HALF_HOUR) + ") OR "
-        + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::REMINDER_ID + " IN "
-        + "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderCalendarTable::TABLE_NAME + " WHERE ("
-        + ReminderCalendarTable::TABLE_NAME + "." + ReminderCalendarTable::CALENDAR_DATE_TIME + " <= "
-        + std::to_string(nowTime + HALF_HOUR) + " AND "
-        + ReminderCalendarTable::TABLE_NAME + "." + ReminderCalendarTable::CALENDAR_END_DATE_TIME + " >= "
-        + std::to_string(nowTime) + ") OR (" + (ReminderCalendarTable::CALENDAR_DATE_TIME) + " < "
-        + std::to_string(nowTime + HALF_HOUR) + " AND " + ReminderCalendarTable::CALENDAR_END_DATE_TIME
-        + " = " + ReminderCalendarTable::CALENDAR_DATE_TIME + ") ORDER BY "
-        + ReminderBaseTable::TRIGGER_TIME + " ASC";
+    std::string sql = "SELECT * FROM " +
+        ReminderBaseTable::TABLE_NAME + " WHERE (" +
+        ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::IS_EXPIRED + " = 'false' AND " +
+        ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::REMINDER_TYPE + " != 1 AND "
+        ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::TRIGGER_TIME + " < " +
+        std::to_string(nowTime + HALF_HOUR) + ") OR " +
+        ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::REMINDER_ID + " IN " +
+        "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderCalendarTable::TABLE_NAME + " WHERE (" +
+        ReminderCalendarTable::TABLE_NAME + "." + ReminderCalendarTable::CALENDAR_DATE_TIME + " <= " +
+        std::to_string(nowTime + HALF_HOUR) + " AND " +
+        ReminderCalendarTable::TABLE_NAME + "." + ReminderCalendarTable::CALENDAR_END_DATE_TIME + " >= " +
+        std::to_string(nowTime) + ") OR (" + (ReminderCalendarTable::CALENDAR_DATE_TIME) + " < " +
+        std::to_string(nowTime + HALF_HOUR) + " AND " + ReminderCalendarTable::CALENDAR_END_DATE_TIME +
+        " = " + ReminderCalendarTable::CALENDAR_DATE_TIME + ") ORDER BY " +
+        ReminderBaseTable::TRIGGER_TIME + " ASC"; +
     ANSR_LOGD("GetHalfHourReminders sql =%{public}s", sql.c_str());
     return GetReminders(sql);
 }

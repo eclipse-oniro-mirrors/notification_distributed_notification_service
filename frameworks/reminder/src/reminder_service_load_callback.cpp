@@ -23,8 +23,6 @@ namespace OHOS { class IRemoteObject; }
 namespace OHOS {
 namespace Notification {
 
-const std::string TAG = "ReminderServiceLoadCallback";
-
 void ReminderServiceCallback::OnLoadSystemAbilitySuccess(
     int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject)
 {

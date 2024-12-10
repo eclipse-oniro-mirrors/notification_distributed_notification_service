@@ -44,7 +44,8 @@
 namespace OHOS {
 namespace Notification {
 constexpr const char* REMINDER_DB_PATH = "/data/service/el1/public/notification/notification.db";
-constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH = "/data/service/el1/public/notification/reminder_agent_service_config";
+constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH =
+    "/data/service/el1/public/notification/reminder_agent_service_config";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()

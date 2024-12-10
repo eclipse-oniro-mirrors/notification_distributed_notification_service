@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifndef BASE_NOTIFICATION_MOCK_ISERVICE_REGISTRY_H
+#define BASE_NOTIFICATION_MOCK_ISERVICE_REGISTRY_H
 #include "iservice_registry.h"
 
 #include "ipc_skeleton.h"
@@ -23,5 +24,5 @@ public:
     static void MockGetSystemAbilityManager(bool mockRet);
 };
 
-
 } // namespace OHOS
+#endif
