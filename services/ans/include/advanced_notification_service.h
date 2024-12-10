@@ -48,6 +48,7 @@
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
 #endif
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -561,7 +562,7 @@ public:
      */
     ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
-    
+
     /**
      * @brief remove enable notification dialog.
      *
@@ -1163,6 +1164,8 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
 
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+
+    void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1382,7 +1385,7 @@ private:
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
     ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType);
-    void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
+    void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
@@ -1431,6 +1434,13 @@ private:
     bool IsSystemUser(int32_t userId);
     ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &bundle,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+    ErrCode AddSlotThenPublishEvent(
+        const sptr<NotificationSlot> &slot,
+        const sptr<NotificationBundleOption> &bundle,
+        bool enabled, bool isForceControl);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

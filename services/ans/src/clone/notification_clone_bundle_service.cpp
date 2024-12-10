@@ -20,6 +20,7 @@
 #include "notification_clone_util.h"
 #include "notification_clone_bundle_info.h"
 #include "os_account_manager_helper.h"
+#include "advanced_notification_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -75,7 +76,10 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
     std::unique_lock lock(lock_);
-    bundlesInfo_.clear();
+    if (!bundlesInfo_.empty()) {
+        NotificationPreferences::GetInstance()->DelBatchCloneBundleInfo(userId, bundlesInfo_);
+        bundlesInfo_.clear();
+    }
     for (const auto &profile : jsonObject) {
         NotificationCloneBundleInfo cloneBundleInfo;;
         cloneBundleInfo.FromJson(profile);
@@ -95,41 +99,32 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
             continue;
         }
         bundle->SetUid(uid);
-        NotificationPreferences::GetInstance()->UpdateCloneBundleInfo(userId, *bundle);
+        AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
         bundle = bundlesInfo_.erase(bundle);
     }
 
+    NotificationPreferences::GetInstance()->UpdateBatchCloneBundleInfo(userId, bundlesInfo_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
         ANS_LOGI("Event bundle left %{public}s.", bundle->Dump().c_str());
     }
     ANS_LOGI("Notification bundle list on restore end.");
 }
 
-void NotificationCloneBundle::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
+void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32_t appIndex,
+    int32_t userId, int32_t uid)
 {
-    HandleBundleEvent(bundleOption->GetBundleName(), bundleOption->GetAppIndex(), bundleOption->GetUid());
-}
-
-void NotificationCloneBundle::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
-{
-    HandleBundleEvent(bundleOption->GetBundleName(), bundleOption->GetAppIndex(), bundleOption->GetUid());
-}
-
-void NotificationCloneBundle::HandleBundleEvent(const std::string bundleName, int32_t appIndex, int32_t uid)
-{
-    ANS_LOGI("Handle bundle event %{public}s %{public}d %{public}d %{public}zu.",
-        bundleName.c_str(), appIndex, uid, bundlesInfo_.size());
+    ANS_LOGI("Handle bundle event %{public}s %{public}d %{public}d %{public}d %{public}zu.",
+        bundleName.c_str(), appIndex, userId, uid, bundlesInfo_.size());
     if (bundlesInfo_.empty()) {
         return;
     }
 
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     std::unique_lock lcck(lock_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end();) {
         if (bundle->GetBundleName() == bundleName && bundle->GetAppIndex() == appIndex) {
             bundle->SetUid(uid);
-            NotificationPreferences::GetInstance()->UpdateCloneBundleInfo(userId, *bundle);
+            AdvancedNotificationService::GetInstance()->UpdateCloneBundleInfo(*bundle);
+            NotificationPreferences::GetInstance()->DelCloneBundleInfo(userId, *bundle);
             bundle = bundlesInfo_.erase(bundle);
             break;
         }
@@ -145,9 +140,13 @@ void NotificationCloneBundle::OnUserSwitch(int32_t userId)
         ANS_LOGW("Clone bundle queue is null.");
         return;
     }
-    cloneBundleQueue_->submit_h(std::bind([&]() {
+    cloneBundleQueue_->submit_h(std::bind([&, userId]() {
         std::unique_lock lock(lock_);
         bundlesInfo_.clear();
+        NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(userId, bundlesInfo_);
+        for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
+            ANS_LOGI("Event bundle OnUserSwitch %{public}s.", bundle->Dump().c_str());
+        }
     }));
 }
 
