@@ -96,7 +96,7 @@ void AnsSubscriberProxy::OnConsumed(
     }
 
     MessageParcel data;
-    if (notification->GetNotificationRequest().IsCommonLiveView()) {
+    if (notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
         if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
             ANS_LOGE("[OnConsumed] fail: set max capacity failed.");
             return;
@@ -186,7 +186,7 @@ void AnsSubscriberProxy::OnCanceled(
     }
 
     MessageParcel data;
-    if (notification->GetNotificationRequest().IsCommonLiveView()) {
+    if (notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
         if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
             ANS_LOGE("[OnCanceled] fail: set max capacity failed.");
             return;
