@@ -35,6 +35,7 @@ namespace OHOS {
 
         Notification::ReminderDataManager::InitInstance();
         auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->RegisterConfigurationObserver();
         manager->Init();
         manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);

@@ -83,7 +83,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, PublishReminder_0200, Function | MediumT
     ASSERT_NE(nullptr, proxy);
 
     ReminderRequest reminderRequest;
-    reminderRequest.SetReminderType(ReminderType::TIMER);
+    reminderRequest.SetReminderType(ReminderRequest::ReminderType::TIMER);
     int32_t reminderId = 0;
     ErrCode res = proxy->PublishReminder(reminderRequest, reminderId);
     EXPECT_EQ(ERR_OK, res);

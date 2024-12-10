@@ -41,6 +41,7 @@ public:
     {
         ReminderDataManager::InitInstance();
         manager = ReminderDataManager::GetInstance();
+        manager->RegisterConfigurationObserver();
         manager->Init();
     }
     static void TearDownTestCase()
@@ -56,6 +57,38 @@ public:
 };
 
 std::shared_ptr<ReminderDataManager> ReminderDataManagerTest::manager = nullptr;
+
+/**
+ * @tc.name: GetVaildReminders_00001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
+{
+    IPCSkeleton::SetCallingTokenID(100);
+    manager->store_->Init();
+    int32_t callingUid = 98765;
+    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(50));
+    reminder1->InitCreatorBundleName("test_getvalid");
+    reminder1->InitCreatorUid(callingUid);
+    reminder1->InitBundleName("test_getvalid");
+    reminder1->InitUid(callingUid);
+    reminder1->SetExpired(false);
+    manager->PublishReminder(reminder1, callingUid);
+
+    sptr<ReminderRequest> reminder2 = new ReminderRequestTimer(51);
+    reminder2->InitCreatorBundleName("test_getvalid");
+    reminder2->InitCreatorUid(callingUid);
+    reminder2->InitBundleName("test_getvalid");
+    reminder2->InitUid(callingUid);
+    reminder2->SetExpired(true);
+    manager->PublishReminder(reminder2, callingUid);
+    
+    std::vector<ReminderRequestAdaptation> reminders;
+    manager->GetValidReminders(callingUid, reminders);
+    EXPECT_TRUE(reminders.size() == 1);
+}
 
 /**
  * @tc.name: ReminderDataManagerTest_001
@@ -774,39 +807,6 @@ HWTEST_F(ReminderDataManagerTest, CancelAllReminders_00001, Level1)
 
     ret = manager->CancelAllReminders("", 100, 20020152);
     EXPECT_TRUE(ret == ERR_OK);
-}
-
-/**
- * @tc.name: GetVaildReminders_00001
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issue#I9IIDE
- */
-HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
-{
-    IPCSkeleton::SetCallingTokenID(100);
-    manager->store_->Init();
-    int32_t callingUid = 98765;
-    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(50));
-    reminder1->InitCreatorBundleName("test_getvalid");
-    reminder1->InitCreatorUid(callingUid);
-    reminder1->InitBundleName("test_getvalid");
-    reminder1->InitUid(callingUid);
-
-    manager->PublishReminder(reminder1, callingUid);
-    reminder1->SetExpired(false);
-
-    sptr<ReminderRequest> reminder2 = new ReminderRequestTimer(51);
-    reminder2->InitCreatorBundleName("test_getvalid");
-    reminder2->InitCreatorUid(callingUid);
-    reminder2->InitBundleName("test_getvalid");
-    reminder2->InitUid(callingUid);
-    reminder2->SetExpired(true);
-    manager->PublishReminder(reminder2, callingUid);
-    
-    std::vector<ReminderRequestAdaptation> reminders;
-    manager->GetValidReminders(callingUid, reminders);
-    EXPECT_TRUE(reminders.size() == 1);
 }
 
 /**

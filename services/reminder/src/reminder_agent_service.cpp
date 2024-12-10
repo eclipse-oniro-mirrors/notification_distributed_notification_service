@@ -330,7 +330,7 @@ void ReminderAgentService::TryPostDelayUnloadTask(int64_t delayTime)
             return;
         }
         ReminderAgentService::GetInstance()->PostDelayUnloadTask();
-        tryUnloadTask_ = nullptr;
+        ReminderAgentService::GetInstance()->tryUnloadTask_ = nullptr;
     }, {}, {}, ffrt::task_attr().delay(delayTime));
 }
 
