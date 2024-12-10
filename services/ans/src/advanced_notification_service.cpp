@@ -983,6 +983,17 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
         flags->SetStatusIconEnabled(false);
     }
+
+#ifdef ENABLE_ANS_USERGROWTH_EXT_WRAPPER
+    EXTENTION_WRAPPER->ModifyReminderFlags(record->request);
+    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        record->notification->SetEnableSound(true);
+        record->notification->SetSound(DEFAULT_NOTIFICATION_SOUND);
+    }
+    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        record->notification->SetEnableVibration(true);
+    }
+#endif
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(

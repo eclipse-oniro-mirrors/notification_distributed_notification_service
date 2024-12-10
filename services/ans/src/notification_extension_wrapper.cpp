@@ -61,9 +61,10 @@ void ExtensionWrapper::InitExtentionWrapper()
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
     reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     bannerControl_ = (BANNER_CONTROL)dlsym(extensionWrapperHandle_, "BannerControl");
+    modifyReminderFlags_ = (MODIFY_REMINDER_FLAGS)dlsym(extensionWrapperHandle_, "ModifyReminderFlags");
     if (syncAdditionConfig_ == nullptr || bannerControl_ == nullptr
         || localControl_ == nullptr
-        || reminderControl_ == nullptr) {
+        || reminderControl_ == nullptr || modifyReminderFlags_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
@@ -165,6 +166,15 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
         return -1;
     }
     return bannerControl_(bundleName);
+}
+
+void ExtensionWrapper::ModifyReminderFlags(const sptr<NotificationRequest> &request)
+{
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("ModifyReminderFlags wrapper symbol failed");
+        return;
+    }
+    modifyReminderFlags_(request);
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)

@@ -206,6 +206,11 @@ ohos_source_set("ans_service_sources") {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
   }
 
+  if (distributed_notification_service_feature_summary &&
+      distributed_notification_service_feature_privileged_message) {
+    defines += [ "ENABLE_ANS_USERGROWTH_EXT_WRAPPER" ]
+  }
+
   if (telephony_cust) {
     defines += [ "ENABLE_ANS_TELEPHONY_CUST_WRAPPER" ]
   }
