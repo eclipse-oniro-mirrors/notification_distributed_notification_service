@@ -1316,14 +1316,6 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 void ReminderDataManager::Init()
 {
     ANSR_LOGD("ReminderDataManager Init");
-    std::vector<sptr<ReminderRequest>> immediatelyReminders;
-    std::vector<sptr<ReminderRequest>> extensionReminders;
-    CheckReminderTime(immediatelyReminders, extensionReminders);
-    HandleImmediatelyShow(immediatelyReminders, false);
-    HandleExtensionReminder(extensionReminders);
-    StartRecentReminder();
-    StartReminderLoadTimer();
-
     if (IsReminderAgentReady()) {
         return;
     }
@@ -1349,6 +1341,13 @@ void ReminderDataManager::Init()
     InitServiceHandler();
     LoadReminderFromDb();
     InitUserId();
+    std::vector<sptr<ReminderRequest>> immediatelyReminders;
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    CheckReminderTime(immediatelyReminders, extensionReminders);
+    HandleImmediatelyShow(immediatelyReminders, false);
+    HandleExtensionReminder(extensionReminders);
+    StartRecentReminder();
+    StartReminderLoadTimer();
     isReminderAgentReady_ = true;
     ANSR_LOGD("ReminderAgent is ready.");
 }

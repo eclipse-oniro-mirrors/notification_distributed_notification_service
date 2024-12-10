@@ -445,7 +445,7 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
         ReminderCalendarTable::TABLE_NAME + "." + ReminderCalendarTable::CALENDAR_END_DATE_TIME + " >= " +
         std::to_string(nowTime) + ") OR (" + (ReminderCalendarTable::CALENDAR_DATE_TIME) + " < " +
         std::to_string(nowTime + HALF_HOUR) + " AND " + ReminderCalendarTable::CALENDAR_END_DATE_TIME +
-        " = " + ReminderCalendarTable::CALENDAR_DATE_TIME + ") ORDER BY " +
+        " = " + ReminderCalendarTable::CALENDAR_DATE_TIME + ")) ORDER BY " +
         ReminderBaseTable::TRIGGER_TIME + " ASC";
     ANSR_LOGD("GetHalfHourReminders sql =%{public}s", sql.c_str());
     return GetReminders(sql);

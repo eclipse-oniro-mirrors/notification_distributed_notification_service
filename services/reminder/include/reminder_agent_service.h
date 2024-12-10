@@ -129,7 +129,7 @@ private:
     static sptr<ReminderAgentService> instance_;
     static std::mutex instanceMutex_;
     static std::mutex unloadMutex_;
-    int8_t reminderAgentState_ = 1;
+    int8_t reminderAgentState_ = -1;
 };
 }  // namespace Notification
 }  // namespace OHOS
