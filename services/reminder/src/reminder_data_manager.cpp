@@ -578,7 +578,10 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance()
 void ReminderDataManager::StartReminderLoadTimer()
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
-    REMINDER_CHECK_NULL_VOID(timer, "Get timeServiceClient failed");
+    if (timer == nullptr) {
+        ANSR_LOGE("Get timeServiceClient failed");
+        return;
+    }
     std::lock_guard<std::mutex> locker(timeLoadMutex_);
     if (reminderLoadtimerId_ == 0) {
         reminderLoadtimerId_ = CreateReminderLoadTimer(timer);
@@ -1638,7 +1641,7 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANSR_LOGE("Failed to start timer due to get TimeServiceClient is null.");
         return;
     }
     time_t now;

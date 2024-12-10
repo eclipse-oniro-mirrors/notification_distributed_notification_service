@@ -833,7 +833,10 @@ std::shared_ptr<NativeRdb::ResultSet> ReminderStore::Query(const std::string& qu
 
 int32_t ReminderStore::QueryActiveReminderCount()
 {
-    REMINDER_CHECK_NULL_RETURN(rdbStore_, "Rdb store is not initialized.", 0);
+    if (rdbStore_ == nullptr) {
+        ANSR_LOGE("Rdb store is not initialized.");
+        return 0;
+    }
     std::string queryCondition = "SELECT * FROM ";
     queryCondition.append(ReminderBaseTable::TABLE_NAME).append(" WHERE ").append(ReminderBaseTable::IS_EXPIRED)
         .append(" = 'false' AND ").append(ReminderTable::REMINDER_TYPE).append(" != 1");
