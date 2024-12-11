@@ -225,6 +225,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
         }
+        result = Filter(record);
+        if (result != ERR_OK) {
+            ANS_LOGE("Reject by filters: %{public}d", result);
+            return;
+        }
 
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
@@ -2294,7 +2299,14 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         if (!bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
-                ANS_LOGE("Can not assign valid slot!");
+                ANS_LOGE("PublishNotificationBySA Can not assign valid slot!");
+            }
+            if (!request->IsAgentNotification()) {
+                result = Filter(record);
+                if (result != ERR_OK) {
+                    ANS_LOGE("PublishNotificationBySA Reject by filters: %{public}d", result);
+                    return;
+                }
             }
         }
 
