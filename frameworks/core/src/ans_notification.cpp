@@ -24,9 +24,6 @@
 #include "iservice_registry.h"
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
-#include "reminder_request_alarm.h"
-#include "reminder_request_calendar.h"
-#include "reminder_request_timer.h"
 #include "system_ability_definition.h"
 #include "unique_fd.h"
 
@@ -1345,103 +1342,6 @@ void AnsNotification::Reconnect()
     }
 }
 
-ErrCode AnsNotification::PublishReminder(ReminderRequest &reminder)
-{
-    sptr<ReminderRequest> tarReminder = nullptr;
-    switch (reminder.GetReminderType()) {
-        case (ReminderRequest::ReminderType::TIMER): {
-            ANSR_LOGI("Publish timer");
-            ReminderRequestTimer &timer = (ReminderRequestTimer &)reminder;
-            tarReminder = new (std::nothrow) ReminderRequestTimer(timer);
-            break;
-        }
-        case (ReminderRequest::ReminderType::ALARM): {
-            ANSR_LOGI("Publish alarm");
-            ReminderRequestAlarm &alarm = (ReminderRequestAlarm &)reminder;
-            tarReminder = new (std::nothrow) ReminderRequestAlarm(alarm);
-            break;
-        }
-        case (ReminderRequest::ReminderType::CALENDAR): {
-            ANSR_LOGI("Publish calendar");
-            ReminderRequestCalendar &calendar = (ReminderRequestCalendar &)reminder;
-            tarReminder = new (std::nothrow) ReminderRequestCalendar(calendar);
-            break;
-        }
-        default: {
-            ANSR_LOGW("PublishReminder fail.");
-            return ERR_ANS_INVALID_PARAM;
-        }
-    }
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    ErrCode code = proxy->PublishReminder(tarReminder);
-    reminder.SetReminderId(tarReminder->GetReminderId());
-    return code;
-}
-
-ErrCode AnsNotification::CancelReminder(const int32_t reminderId)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->CancelReminder(reminderId);
-}
-
-ErrCode AnsNotification::CancelAllReminders()
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->CancelAllReminders();
-}
-
-ErrCode AnsNotification::GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->GetValidReminders(validReminders);
-}
-
-ErrCode AnsNotification::AddExcludeDate(const int32_t reminderId, const uint64_t date)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->AddExcludeDate(reminderId, date);
-}
-
-ErrCode AnsNotification::DelExcludeDates(const int32_t reminderId)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->DelExcludeDates(reminderId);
-}
-
-ErrCode AnsNotification::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
-{
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->GetExcludeDates(reminderId, dates);
-}
-
 sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
@@ -1985,6 +1885,18 @@ ErrCode AnsNotification::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoN
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->GetDoNotDisturbProfile(id, profile);
+}
+
+ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->AllowUseReminder(bundleName, isAllowUseReminder);
 }
 
 void AnsNotification::CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,

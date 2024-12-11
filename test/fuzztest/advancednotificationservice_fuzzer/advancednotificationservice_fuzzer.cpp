@@ -126,18 +126,6 @@ namespace OHOS {
         sptr<Notification::NotificationRequest> request = new Notification::NotificationRequest();
         service->PublishContinuousTaskNotification(request);
         service->CancelContinuousTaskNotification(stringData, notificationId);
-        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequest();
-        service->PublishReminder(reminder);
-        int32_t reminderId = fuzzData->ConsumeIntegral<int32_t>();
-        service->CancelReminder(reminderId);
-        std::vector<sptr<Notification::ReminderRequest>> reminders;
-        service->GetValidReminders(reminders);
-        service->CancelAllReminders();
-        uint64_t excludeDate = fuzzData->ConsumeIntegral<uint64_t>();
-        service->AddExcludeDate(reminderId, excludeDate);
-        service->DelExcludeDates(reminderId);
-        std::vector<uint64_t> excludeDates;
-        service->GetExcludeDates(reminderId, excludeDates);
         bool support = fuzzData->ConsumeBool();
         service->IsSupportTemplate(stringData, support);
         service->IsSpecialUserAllowedNotify(userId, allowed);

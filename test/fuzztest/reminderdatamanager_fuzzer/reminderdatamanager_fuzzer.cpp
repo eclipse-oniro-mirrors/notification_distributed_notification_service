@@ -28,28 +28,28 @@ namespace OHOS {
         uint64_t date = fdp->ConsumeIntegral<uint64_t>();
         bool value = fdp->ConsumeBool();
         uint8_t type = fdp->ConsumeIntegral<uint8_t>();
+        int32_t callingUid = fdp->ConsumeIntegral<int32_t>();
         EventFwk::Want want;
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
 
-        Notification::ReminderDataManager::InitInstance(nullptr);
+        Notification::ReminderDataManager::InitInstance();
         auto manager = Notification::ReminderDataManager::GetInstance();
-        manager->Init(false);
+        manager->RegisterConfigurationObserver();
+        manager->Init();
         manager->Dump();
         manager->CancelAllReminders(bundleName, userId, uid);
-        sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
-            bundleName, uid);
-        manager->CancelReminder(reminderId, option);
-        manager->CheckExcludeDateParam(reminderId, option);
-        manager->AddExcludeDate(reminderId, date, option);
-        manager->DelExcludeDates(reminderId, option);
+        manager->CancelReminder(reminderId, callingUid);
+        manager->CheckExcludeDateParam(reminderId, callingUid);
+        manager->AddExcludeDate(reminderId, date, callingUid);
+        manager->DelExcludeDates(reminderId, callingUid);
 
-        std::vector<uint64_t> dates;
-        manager->GetExcludeDates(reminderId, option, dates);
+        std::vector<int64_t> dates;
+        manager->GetExcludeDates(reminderId, callingUid, dates);
         manager->CloseReminder(want, value);
-        std::vector<sptr<Notification::ReminderRequest>> reminders;
-        manager->GetValidReminders(option, reminders);
-        manager->Init(value);
+        std::vector<Notification::ReminderRequestAdaptation> reminders;
+        manager->GetValidReminders(callingUid, reminders);
+        manager->Init();
         manager->InitUserId();
         std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
         std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
@@ -60,7 +60,7 @@ namespace OHOS {
         manager->OnBundleMgrServiceStart();
         manager->OnAbilityMgrServiceStart();
         manager->OnUserSwitch(userId);
-        manager->OnProcessDiedLocked(option);
+        manager->OnProcessDiedLocked(callingUid);
         manager->RefreshRemindersDueToSysTimeChange(type);
         manager->ShouldAlert(reminder);
         manager->ShowActiveReminder(want);
@@ -79,25 +79,23 @@ namespace OHOS {
         int32_t uid = fdp->ConsumeIntegral<int32_t>();
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         bool value = fdp->ConsumeBool();
+        int32_t callingUid = fdp->ConsumeIntegral<int32_t>();
         constexpr uint64_t seconds = 1200;
         sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
         auto manager = Notification::ReminderDataManager::GetInstance();
 
-        sptr<Notification::NotificationBundleOption> option = new Notification::NotificationBundleOption(
-            bundleName, uid);
         manager->OnLanguageChanged();
         manager->OnRemoveAppMgr();
         manager->CancelAllReminders(userId);
         manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
             reminder->GetActionButtons());
         manager->GetCustomRingUri(reminder);
-        manager->CancelRemindersImplLocked(bundleName, userId, uid);
+        manager->CancelRemindersImplLocked(bundleName, userId, uid, value);
         manager->CloseRemindersByGroupId(reminderId, bundleName, bundleName);
         manager->CancelNotification(reminder);
-        manager->CheckReminderLimitExceededLocked(option, reminder);
+        manager->CheckReminderLimitExceededLocked(callingUid, reminder);
         std::vector<sptr<Notification::ReminderRequest>> reminders;
         manager->GetImmediatelyShowRemindersLocked(reminders);
-        manager->GetSoundUri(reminder);
         manager->AddToShowedReminders(reminder);
 
         manager->IsAllowedNotify(reminder);
@@ -113,15 +111,14 @@ namespace OHOS {
 
         std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
         std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
-        manager->PublishReminder(reminder, option);
+        manager->PublishReminder(reminder, callingUid);
         manager->FindReminderRequestLocked(reminderId);
-        manager->FindReminderRequestLocked(reminderId, bundleName);
         manager->StartRecentReminder();
         manager->HandleImmediatelyShow(immediatelyReminders, value);
         manager->HandleExtensionReminder(extensionReminders);
         manager->HandleSameNotificationIdShowing(reminder);
-        manager->IsBelongToSameApp(option, option);
-        manager->CheckIsSameApp(reminder, option);
+        manager->IsBelongToSameApp(uid, uid);
+        manager->CheckIsSameApp(reminder, uid);
         manager->ShowReminder(reminder, value, value, value, value);
         return true;
     }

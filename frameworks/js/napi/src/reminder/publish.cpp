@@ -53,19 +53,19 @@ struct AsyncCallbackInfo {
     napi_ref callback = nullptr;
     napi_value result = nullptr;
     int32_t reminderId = -1;
-    uint64_t excludeDate = 0;
+    int64_t excludeDate = 0;
     bool isThrow = false;
     NotificationNapi::NotificationConstant::SlotType inType
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
     std::shared_ptr<ReminderRequest> reminder = nullptr;
-    std::vector<sptr<ReminderRequest>> validReminders;
-    std::vector<uint64_t> excludeDates;
+    std::vector<ReminderRequestAdaptation> validReminders;
+    std::vector<int64_t> excludeDates;
     CallbackPromiseInfo info;
 };
 
 struct Parameters {
     int32_t reminderId = -1;
-    uint64_t excludeDate = 0;
+    int64_t excludeDate = 0;
     int32_t errCode = ERR_OK;
     NotificationNapi::NotificationConstant::SlotType inType
         = NotificationNapi::NotificationConstant::SlotType::CONTENT_INFORMATION;
@@ -456,11 +456,11 @@ void ParseReminderCalendar(const napi_env &env, const ReminderRequest &reminder,
     napi_create_object(env, &dateTime);
     napi_set_named_property(env, result, CALENDAR_DATE_TIME, dateTime);
 
-    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetYear()), &value);
+    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetFirstDesignateYear()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_YEAR, value);
-    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetMonth()), &value);
+    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetFirstDesignageMonth()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_MONTH, value);
-    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetDay()), &value);
+    napi_create_uint32(env, static_cast<uint32_t>(calendar.GetFirstDesignateDay()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_DAY, value);
     napi_create_uint32(env, static_cast<uint32_t>(calendar.GetHour()), &value);
     napi_set_named_property(env, dateTime, CALENDAR_HOUR, value);
@@ -506,7 +506,7 @@ void ParseReminderCalendar(const napi_env &env, const ReminderRequest &reminder,
 }
 
 void ParseReminder(
-    const napi_env &env, const ReminderRequest::ReminderType &type, const ReminderRequest &reminder, napi_value &result)
+    const napi_env &env, const ReminderRequest::ReminderType &type, ReminderRequest &reminder, napi_value &result)
 {
     switch (type) {
         case ReminderRequest::ReminderType::TIMER: {
@@ -632,7 +632,7 @@ void ParseButtonDataShareUpdate(const napi_env &env,
     ParseValueBucket(env, valuesBucketVector, buttonDataShareUpdate, BUTTON_DATA_SHARE_UPDATE_VALUE);
 }
 
-void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseActionButtons(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     auto actionButtonsMap = reminder.GetActionButtons();
 
@@ -679,7 +679,7 @@ void ParseActionButtons(const napi_env &env, ReminderRequest &reminder, napi_val
     }
 }
 
-void ParseWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseWantAgent(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     // create obj
     napi_value wantAgentInfo = nullptr;
@@ -699,7 +699,7 @@ void ParseWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PARAMETERS, params);
 }
 
-void ParseMaxScreenWantAgent(const napi_env &env, ReminderRequest &reminder, napi_value &result)
+void ParseMaxScreenWantAgent(const napi_env &env, const ReminderRequest &reminder, napi_value &result)
 {
     // create obj
     napi_value maxScreenWantAgentInfo = nullptr;
@@ -805,18 +805,18 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     return NotificationNapi::Common::NapiGetBoolean(env, true);
 }
 
-void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)
+void GetValidRemindersInner(napi_env env, const std::vector<ReminderRequestAdaptation>& validReminders, napi_value& arr)
 {
     int32_t count = 0;
     napi_create_array(env, &arr);
-    for (auto reminder : validReminders) {
-        if (reminder == nullptr) {
+    for (auto& reminderRequestAdaptation : validReminders) {
+        if (reminderRequestAdaptation.reminderRequest_ == nullptr) {
             ANSR_LOGW("reminder is null");
             continue;
         }
         napi_value result = nullptr;
         napi_create_object(env, &result);
-        if (!SetValidReminder(env, *reminder, result)) {
+        if (!SetValidReminder(env, *reminderRequestAdaptation.reminderRequest_, result)) {
             ANSR_LOGW("Set reminder object failed");
             continue;
         }
@@ -826,26 +826,23 @@ void GetValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest
     ANSR_LOGI("GetValid reminders count = %{public}d", count);
 }
 
-void GetAllValidRemindersInner(napi_env env, const std::vector<sptr<ReminderRequest>>& validReminders, napi_value& arr)
+void GetAllValidRemindersInner(napi_env env,
+    const std::vector<ReminderRequestAdaptation>& validReminders, napi_value& arr)
 {
     int32_t count = 0;
     napi_create_array(env, &arr);
-    for (auto reminder : validReminders) {
-        if (reminder == nullptr) {
-            ANSR_LOGW("reminder is null");
-            continue;
-        }
+    for (auto& reminderRequestAdaptation : validReminders) {
         napi_value result = nullptr;
         napi_create_object(env, &result);
         napi_value reminderReq = nullptr;
         napi_create_object(env, &reminderReq);
         napi_set_named_property(env, result, REMINDER_INFO_REMINDER_REQ, reminderReq);
-        if (!SetValidReminder(env, *reminder, reminderReq)) {
+        if (!SetValidReminder(env, *reminderRequestAdaptation.reminderRequest_, reminderReq)) {
             ANSR_LOGW("Set reminder object failed");
             continue;
         }
         napi_value reminderId = nullptr;
-        napi_create_int32(env, reminder->GetReminderId(), &reminderId);
+        napi_create_int32(env, reminderRequestAdaptation.reminderRequest_->GetReminderId(), &reminderId);
         napi_set_named_property(env, result, REMINDER_INFO_REMINDER_ID, reminderId);
         napi_set_element(env, arr, count, result);
         count++;
@@ -1033,8 +1030,9 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
             ANSR_LOGI("Publish napi_create_async_work start");
             AsyncCallbackInfo *asynccallbackinfo = static_cast<AsyncCallbackInfo *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = ReminderHelper::PublishReminder(*(asynccallbackinfo->reminder));
-                ANSR_LOGD("Return reminderId=%{public}d", asynccallbackinfo->reminder->GetReminderId());
+                asynccallbackinfo->info.errorCode =
+                    ReminderHelper::PublishReminder(*(asynccallbackinfo->reminder), asynccallbackinfo->reminderId);
+                ANSR_LOGD("Return reminderId=%{public}d", asynccallbackinfo->reminderId);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -1045,7 +1043,7 @@ napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isTh
             // reminderId
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->info.errorCode == ERR_OK) {
-                    napi_create_int32(env, asynccallbackinfo->reminder->GetReminderId(), &(asynccallbackinfo->result));
+                    napi_create_int32(env, asynccallbackinfo->reminderId, &(asynccallbackinfo->result));
                 } else {
                     napi_create_int32(env, -1, &(asynccallbackinfo->result));
                 }
@@ -1187,7 +1185,7 @@ napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
-    params.excludeDate = static_cast<uint64_t>(date);
+    params.excludeDate = static_cast<int64_t>(date);
     return NotificationNapi::Common::NapiGetNull(env);
 }
 
@@ -1335,7 +1333,7 @@ napi_value DelExcludeDates(napi_env env, napi_callback_info info)
     return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
 }
 
-void GetExcludeDatesInner(napi_env env, const std::vector<uint64_t>& dates, napi_value& arr)
+void GetExcludeDatesInner(napi_env env, const std::vector<int64_t>& dates, napi_value& arr)
 {
     int32_t count = 0;
     napi_create_array(env, &arr);

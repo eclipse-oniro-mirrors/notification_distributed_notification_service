@@ -394,41 +394,6 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode PublishReminder(sptr<ReminderRequest> &reminder) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode CancelReminder(const int32_t reminderId) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode CancelAllReminders() override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode DelExcludeDates(const int32_t reminderId) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode IsSupportTemplate(const std::string &templateName, bool &support) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -586,6 +551,11 @@ public:
 #endif
 
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

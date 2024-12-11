@@ -82,6 +82,7 @@ group("fuzztest") {
     "reminderrequestcalendar_fuzzer:ReminderRequestCalendarFuzzTest",
     "reminderrequestcontinuate_fuzzer:ReminderRequestContinuateFuzzTest",
     "reminderrequesttimer_fuzzer:ReminderRequestTimerFuzzTest",
+    "reminderservice_fuzzer:ReminderServiceFuzzTest",
     "reminderstore_fuzzer:ReminderStoreFuzzTest",
     "reminderstoreannex_fuzzer:ReminderStoreAnnexFuzzTest",
     "removenotification_fuzzer:RemoveNotificationFuzzTest",

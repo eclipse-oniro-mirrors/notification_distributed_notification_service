@@ -653,63 +653,6 @@ public:
     virtual ErrCode CancelContinuousTaskNotification(const std::string &label, int32_t notificationId) = 0;
 
     /**
-     * @brief Publishes a reminder notification.
-     *
-     * @param reminder Identifies the reminder notification request that needs to be published.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode PublishReminder(sptr<ReminderRequest> &reminder) = 0;
-
-    /**
-     * @brief Cancel a reminder notifications.
-     *
-     * @param reminderId Identifies the reminders id that needs to be canceled.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode CancelReminder(const int32_t reminderId) = 0;
-
-    /**
-     * @brief Get all valid reminder notifications.
-     *
-     * @param reminders Identifies the list of all valid notifications.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders) = 0;
-
-    /**
-     * @brief Cancel all reminder notifications.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode CancelAllReminders() = 0;
-
-    /**
-     * @brief Add exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param date exclude date
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) = 0;
-
-    /**
-     * @brief Clear exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode DelExcludeDates(const int32_t reminderId) = 0;
-
-    /**
-     * @brief Get exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param dates exclude dates
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) = 0;
-
-    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.
@@ -948,6 +891,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) = 0;
+
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) = 0;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
      * @brief Register Swing Callback.

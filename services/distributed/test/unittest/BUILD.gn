@@ -35,10 +35,7 @@ group("ans_unit_test") {
 
 ohos_unittest("ans_distributed_unit_test") {
   module_out_path = "${component_name}/unittest"
-  include_dirs = [
-    "/${services_path}/distributed/include",
-    "${ffrt_path}/interfaces/kits",
-  ]
+  include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
     "${services_path}/distributed/src/distributed_database.cpp",
@@ -380,10 +377,7 @@ ohos_unittest("distributed_flow_control_test") {
 
 ohos_unittest("distributed_notification_manager_branch_test") {
   module_out_path = "${component_name}/unittest"
-  include_dirs = [
-    "/${services_path}/distributed/include",
-    "${ffrt_path}/interfaces/kits",
-  ]
+  include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
     "distributed_notification_manager_branch_test/distributed_notification_manager_branch_test.cpp",
