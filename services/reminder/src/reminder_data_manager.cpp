@@ -1057,7 +1057,6 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
-    advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL,
         notificationRequest));
     if (errCode != ERR_OK) {
