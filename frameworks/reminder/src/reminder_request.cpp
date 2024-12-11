@@ -1637,10 +1637,6 @@ void ReminderRequest::UpdateNotificationBundleInfo(NotificationRequest& notifica
 
 void ReminderRequest::UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze)
 {
-    if (notificationRequest_ == nullptr) {
-        ANSR_LOGE("updateNotificationContent failed, the notificationRequest is null");
-        return;
-    }
     std::string extendContent = "";
     if (setSnooze) {
         if (timeIntervalInMilli_ != 0) {
