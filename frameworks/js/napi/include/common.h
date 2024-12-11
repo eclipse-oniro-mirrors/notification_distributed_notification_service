@@ -88,6 +88,7 @@ struct NotificationSubscribeInfo {
     int32_t userId = 0;
     bool hasSubscribeInfo = false;
     std::string deviceType;
+    std::vector<NotificationConstant::SlotType> slotTypes;
 };
 
 struct CallbackPromiseInfo {
