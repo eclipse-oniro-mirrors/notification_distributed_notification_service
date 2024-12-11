@@ -19,7 +19,6 @@
 #include <map>
 #include <string>
 
-#include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_request.h"
 #include "want_params.h"
@@ -287,7 +286,7 @@ public:
      */
     static ReminderRequest *Unmarshalling(Parcel &parcel);
     virtual bool ReadFromParcel(Parcel &parcel);
-
+    virtual bool WriteParcel(Parcel &parcel) const;
     /**
      * @brief If the reminder is showing on the notification panel, it should not be removed automatically.
      *
@@ -354,13 +353,6 @@ public:
      * @return group id.
      */
     std::string GetGroupId() const;
-
-    /**
-     * @brief Obtains notification request.
-     *
-     * @return notification request instance.
-     */
-    sptr<NotificationRequest> GetNotificationRequest() const;
 
     /**
      * @brief Obtains reminder id.
@@ -871,26 +863,16 @@ public:
     void SetCustomRingUri(const std::string &uri);
 
     /**
-     * @brief Gets notification bundle option.
-     */
-    sptr<NotificationBundleOption> GetNotificationBundleOption() const;
-
-    /**
-     * @brief Sets notification bundle option.
-     */
-    void SetNotificationBundleOption(const sptr<NotificationBundleOption>& option);
-
-    /**
      * @brief Update notification attributes.
      *
      * Some attributes need to be updated after the reminder published or before the notification publish.
      * For example, action button should not init until the reminder is published successfully, as the reminder id is
      * assigned after that.
      *
-     * @param type Indicates the update type.
-     * @param extra Indicates the extra content.
+     * @param notificationRequest notification request object
+     * @param isSnooze isSnooze
      */
-    void UpdateNotificationRequest(UpdateNotificationType type, std::string extra);
+    void UpdateNotificationRequest(NotificationRequest& notificationRequest, bool isSnooze);
 
     /**
      * @brief Get repeated days of the week.
@@ -898,12 +880,6 @@ public:
      * @return  Array of the int type.
      */
     std::vector<int32_t> GetDaysOfWeek() const;
-
-    /**
-     * @brief Create notification request struct when recover from rdb or
-     * recv reminder info from ipc.
-     */
-    bool InitNotificationRequest();
 
     /**
      * @brief Gets repeat days of week
@@ -946,6 +922,8 @@ public:
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);
     static uint64_t GetDurationSinceEpochInMilli(const time_t target);
     static std::vector<std::string> StringSplit(std::string source, const std::string &split);
+
+    static bool ReadReminderTypeFormParcel(Parcel &parcel, ReminderType& tarReminderType);
 
     static int32_t GLOBAL_ID;
     static const uint64_t INVALID_LONG_LONG_VALUE;
@@ -991,6 +969,7 @@ public:
      * @brief Update the reminder when remove notification from the systemUI.
      */
     static const std::string REMINDER_EVENT_REMOVE_NOTIFICATION;
+    static const std::string REMINDER_EVENT_LOAD_REMINDER;
     static const std::string PARAM_REMINDER_ID;
     static const uint8_t REMINDER_STATUS_INACTIVE;
     static const uint8_t REMINDER_STATUS_ACTIVE;
@@ -1045,8 +1024,7 @@ protected:
     uint64_t GetNowInstantMilli() const;
 
 private:
-    void AddActionButtons(const bool includeSnooze);
-    void AddRemovalWantAgent();
+
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element) const;
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateMaxWantAgent(AppExecFwk::ElementName &element) const;
     std::string GetShowTime(const uint64_t showTime) const;
@@ -1059,10 +1037,15 @@ private:
     void SetState(bool deSet, const uint8_t newState, std::string function);
     void SetWantAgent(AppExecFwk::ElementName &element);
     void SetExtraInfo(const AAFwk::WantParams& params);
-    void UpdateActionButtons(const bool &setSnooze);
+    void UpdateActionButtons(NotificationRequest& notificationRequest, const bool &setSnooze);
     bool UpdateNextReminder(const bool &force);
-    void UpdateNotificationContent(const bool &setSnooze);
-    void UpdateNotificationCommon(bool isSnooze);
+    void AddActionButtons(NotificationRequest& notificationRequest, const bool includeSnooze);
+    void UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze);
+    void UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze);
+    void UpdateNotificationAddRemovalWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationMaxScreenWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationBundleInfo(NotificationRequest& notificationRequest);
 
     /**
      * @brief Determine whether it is repeated every week.
@@ -1072,25 +1055,18 @@ private:
     bool IsRepeatDaysOfWeek(int32_t day) const;
 
     /**
-     * @brief Used for reminder recovery from database.
-     *
-     * @param bundleName Indicates the third part bundle name.
-     */
-    void UpdateNotificationBundleInfo();
-
-    /**
      * @brief Update the notification, which will be shown for the "Alerting" reminder.
      * 1. Update the notification label/content.
      * 2. Restore the snooze action button.
      */
-    void UpdateNotificationStateForAlert();
+    void UpdateNotificationStateForAlert(NotificationRequest& notificationRequest);
 
     /**
      * @brief Update the notification, which will be shown when user do a snooze.
      * 1. Update the notification label/content.
      * 2. Remove the snooze action button.
      */
-    void UpdateNotificationStateForSnooze();
+    void UpdateNotificationStateForSnooze(NotificationRequest& notificationRequest);
 
     bool MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const;
     bool MarshallingActionButton(Parcel& parcel) const;
@@ -1137,16 +1113,14 @@ private:
     ReminderType reminderType_ {ReminderType::INVALID};
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::SOCIAL_COMMUNICATION};
     NotificationConstant::SlotType snoozeSlotType_ {NotificationConstant::SlotType::OTHER};
-    sptr<NotificationRequest> notificationRequest_ = nullptr;
     std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
     std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;
     std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_ {};
 
+    std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
-
-    sptr<NotificationBundleOption> notificationOption_ {nullptr};
 };
-}  // namespace Reminder
+}  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_REQUEST_H

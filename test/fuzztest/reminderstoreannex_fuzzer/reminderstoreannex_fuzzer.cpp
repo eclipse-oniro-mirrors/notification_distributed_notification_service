@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_store.h"
-#undef private
-#undef protected
 #include "reminderstoreannex_fuzzer.h"
 #include <fuzzer/FuzzedDataProvider.h>
 

@@ -1109,6 +1109,15 @@ public:
      * @return Returns Update result.
      */
     static ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
+
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
 };
 }  // namespace Notification
 }  // namespace OHOS

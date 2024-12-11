@@ -33,16 +33,14 @@ ohos_unittest("ans_image_util_test") {
     "ans_image_util_unit_test.cpp",
   ]
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "image_framework:image_native",
     "relational_store:native_rdb",

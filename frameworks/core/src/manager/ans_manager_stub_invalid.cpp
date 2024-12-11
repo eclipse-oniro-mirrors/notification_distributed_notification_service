@@ -454,48 +454,6 @@ ErrCode AnsManagerStub::CancelContinuousTaskNotification(const std::string &labe
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::PublishReminder(sptr<ReminderRequest> &reminder)
-{
-    ANS_LOGE("AnsManagerStub::PublishReminder called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::CancelReminder(const int32_t reminderId)
-{
-    ANS_LOGE("AnsManagerStub::CancelReminder called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders)
-{
-    ANS_LOGE("AnsManagerStub::getValidReminders called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::CancelAllReminders()
-{
-    ANS_LOGE("AnsManagerStub::cancelAllReminders called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::AddExcludeDate(const int32_t reminderId, const uint64_t date)
-{
-    ANS_LOGE("AnsManagerStub::AddExcludeDate called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::DelExcludeDates(const int32_t reminderId)
-{
-    ANS_LOGE("AnsManagerStub::DelExcludeDates called!");
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AnsManagerStub::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
-{
-    ANS_LOGE("AnsManagerStub::GetExcludeDates called!");
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AnsManagerStub::IsSupportTemplate(const std::string &templateName, bool &support)
 {
     ANS_LOGE("AnsManagerStub::IsSupportTemplate called!");
@@ -649,6 +607,12 @@ ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, con
 ErrCode AnsManagerStub::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     ANS_LOGE("GetDoNotDisturbProfile called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    ANS_LOGE("AllowUseReminder called!");
     return ERR_INVALID_OPERATION;
 }
 

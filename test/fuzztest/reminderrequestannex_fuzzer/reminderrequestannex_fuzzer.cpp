@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_request.h"
-#undef private
-#undef protected
 #include "reminderrequestannex_fuzzer.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -44,7 +40,6 @@ namespace OHOS {
         reminderRequest.GetExpiredContent();
         reminderRequest.GetMaxScreenWantAgentInfo();
         reminderRequest.GetNotificationId();
-        reminderRequest.GetNotificationRequest();
         reminderRequest.GetReminderId();
         reminderRequest.GetReminderTimeInMilli();
         reminderRequest.SetReminderId(reminderId);
@@ -66,7 +61,6 @@ namespace OHOS {
         reminderRequest.UpdateNextReminder();
         reminderRequest.SetNextTriggerTime();
         Parcel parcel;
-        reminderRequest.InitNotificationRequest();
         reminderRequest.InitServerObj();
         return reminderRequest.IsAlerting();
     }

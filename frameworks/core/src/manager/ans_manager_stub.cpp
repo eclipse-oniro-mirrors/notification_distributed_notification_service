@@ -287,22 +287,6 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleCancelContinuousTaskNotification(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_REMINDER): {
-            result = HandlePublishReminder(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_REMINDER): {
-            result = HandleCancelReminder(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::CANCEL_ALL_REMINDERS): {
-            result = HandleCancelAllReminders(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_VALID_REMINDERS): {
-            result = HandleGetValidReminders(data, reply);
-            break;
-        }
         case static_cast<uint32_t>(NotificationInterfaceCode::IS_SUPPORT_TEMPLATE): {
             result = HandleIsSupportTemplate(data, reply);
             break;
@@ -433,24 +417,16 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             break;
         }
 #endif
-        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_EXCLUDE_DATE_REMINDER): {
-            result = HandleAddExcludeDate(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::DEL_EXCLUDE_DATES_REMINDER): {
-            result = HandleDelExcludeDates(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::GET_EXCLUDE_DATES_REMINDER): {
-            result = HandleGetExcludeDates(data, reply);
-            break;
-        }
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE): {
             result = HandleGetDoNotDisturbProfile(data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_NOTIFICATION_TIMER): {
             result = HandleUpdateNotificationTimerByUid(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ALLOW_USE_REMINDER): {
+            result = HandleAllowUseReminder(data, reply);
             break;
         }
         default: {
@@ -1865,175 +1841,6 @@ ErrCode AnsManagerStub::HandleShellDump(MessageParcel &data, MessageParcel &repl
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandlePublishReminder(MessageParcel &data, MessageParcel &reply)
-{
-    ANSR_LOGI("HandlePublishReminder");
-    uint8_t typeInfo = static_cast<uint8_t>(ReminderRequest::ReminderType::INVALID);
-    if (!data.ReadUint8(typeInfo)) {
-        ANSR_LOGE("Failed to read reminder type");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    ReminderRequest::ReminderType reminderType = static_cast<ReminderRequest::ReminderType>(typeInfo);
-    sptr<ReminderRequest> reminder;
-    if (ReminderRequest::ReminderType::ALARM == reminderType) {
-        ANSR_LOGD("Publish alarm");
-        reminder = data.ReadParcelable<ReminderRequestAlarm>();
-    } else if (ReminderRequest::ReminderType::TIMER == reminderType) {
-        ANSR_LOGD("Publish timer");
-        reminder = data.ReadParcelable<ReminderRequestTimer>();
-    } else if (ReminderRequest::ReminderType::CALENDAR == reminderType) {
-        ANSR_LOGD("Publish calendar");
-        reminder = data.ReadParcelable<ReminderRequestCalendar>();
-    } else {
-        ANSR_LOGE("Reminder type invalid");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    if (!reminder) {
-        ANSR_LOGE("Reminder ReadParcelable failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = PublishReminder(reminder);
-
-    if (!reply.WriteInt32(reminder->GetReminderId())) {
-        ANSR_LOGE("Write back reminderId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
-ErrCode AnsManagerStub::HandleCancelReminder(MessageParcel &data, MessageParcel &reply)
-{
-    ANSR_LOGI("HandleCancelReminder");
-    int32_t reminderId = -1;
-    if (!data.ReadInt32(reminderId)) {
-        ANSR_LOGE("Read reminder id failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = CancelReminder(reminderId);
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
-ErrCode AnsManagerStub::HandleCancelAllReminders(MessageParcel &data, MessageParcel &reply)
-{
-    ErrCode result = CancelAllReminders();
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
-ErrCode AnsManagerStub::HandleGetValidReminders(MessageParcel &data, MessageParcel &reply)
-{
-    ANSR_LOGI("HandleGetValidReminders");
-    std::vector<sptr<ReminderRequest>> validReminders;
-    ErrCode result = GetValidReminders(validReminders);
-
-    ANSR_LOGD("Write back size=%{public}zu", validReminders.size());
-    if (!reply.WriteUint8(static_cast<uint8_t>(validReminders.size()))) {
-        ANSR_LOGE("Write back reminder count failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    for (auto it = validReminders.begin(); it != validReminders.end(); ++it) {
-        sptr<ReminderRequest> reminder = (*it);
-        uint8_t reminderType = static_cast<uint8_t>(reminder->GetReminderType());
-        ANSR_LOGD("ReminderType=%{public}d", reminderType);
-        if (!reply.WriteUint8(reminderType)) {
-            ANSR_LOGW("Write reminder type failed");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-        if (!reply.WriteParcelable(reminder)) {
-            ANSR_LOGW("Write reminder parcelable failed");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-    }
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
-ErrCode AnsManagerStub::HandleAddExcludeDate(MessageParcel &data, MessageParcel &reply)
-{
-    ANSR_LOGI("HandleAddExcludeDate");
-    int32_t reminderId = -1;
-    if (!data.ReadInt32(reminderId)) {
-        ANSR_LOGE("Read reminder id failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    uint64_t date = 0;
-    if (!data.ReadUint64(date)) {
-        ANSR_LOGE("Read exclude date failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = AddExcludeDate(reminderId, date);
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
-ErrCode AnsManagerStub::HandleDelExcludeDates(MessageParcel &data, MessageParcel &reply)
-{
-    ANSR_LOGI("HandleDelExcludeDates");
-    int32_t reminderId = -1;
-    if (!data.ReadInt32(reminderId)) {
-        ANSR_LOGE("Read reminder id failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = DelExcludeDates(reminderId);
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
-ErrCode AnsManagerStub::HandleGetExcludeDates(MessageParcel &data, MessageParcel &reply)
-{
-    ANSR_LOGI("HandleGetExcludeDates");
-    int32_t reminderId = -1;
-    if (!data.ReadInt32(reminderId)) {
-        ANSR_LOGE("Read reminder id failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    std::vector<uint64_t> dates;
-    ErrCode result = GetExcludeDates(reminderId, dates);
-    ANSR_LOGD("Write back size=%{public}zu", dates.size());
-    if (!reply.WriteUint8(static_cast<uint8_t>(dates.size()))) {
-        ANSR_LOGE("Write back exclude date count failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    for (const auto date : dates) {
-        if (!reply.WriteUint64(date)) {
-            ANSR_LOGW("Write exclude date failed");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-    }
-    if (!reply.WriteInt32(result)) {
-        ANSR_LOGE("Write back result failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return result;
-}
-
 ErrCode AnsManagerStub::HandleIsSupportTemplate(MessageParcel &data, MessageParcel &reply)
 {
     std::string templateName;
@@ -2662,6 +2469,29 @@ ErrCode AnsManagerStub::HandleUpdateNotificationTimerByUid(MessageParcel &data, 
     ErrCode result = UpdateNotificationTimerByUid(uid, isPaused);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleUpdateNotificationTimerByUid] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleAllowUseReminder(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        ANS_LOGE("fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool isAllowUseReminder = false;
+    ErrCode result = AllowUseReminder(bundleName, isAllowUseReminder);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteBool(isAllowUseReminder)) {
+        ANS_LOGE("fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
