@@ -1145,6 +1145,8 @@ public:
 
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
 
+    void ResetDistributedEnabled();
+
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 protected:
     /**
@@ -1424,7 +1426,6 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
-    void ResetDistributedEnabled();
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
 
