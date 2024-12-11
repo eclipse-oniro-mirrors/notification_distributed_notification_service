@@ -57,6 +57,7 @@ declare_args() {
   ans_hitrace_usage = true
   distributed_notification_service_feature_summary = false
   distributed_notification_service_feature_disable_fa_model = false
+  distributed_notification_service_feature_additional_control = false
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true
   screenlock_mgr_enable = true

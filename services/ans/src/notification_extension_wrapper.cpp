@@ -58,12 +58,15 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
 
     syncAdditionConfig_ = (SYNC_ADDITION_CONFIG)dlsym(extensionWrapperHandle_, "SyncAdditionConfig");
+    if (syncAdditionConfig_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
     reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     bannerControl_ = (BANNER_CONTROL)dlsym(extensionWrapperHandle_, "BannerControl");
-    if (syncAdditionConfig_ == nullptr || bannerControl_ == nullptr
-        || localControl_ == nullptr
-        || reminderControl_ == nullptr) {
+    if (bannerControl_ == nullptr || localControl_ == nullptr || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
@@ -72,7 +75,8 @@ void ExtensionWrapper::InitExtentionWrapper()
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
     }
-
+#endif
+#ifdef ENABLE_ANS_AGGREGATION
     std::string aggregateConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("AGGREGATE_CONFIG");
     if (!aggregateConfig.empty()) {
         syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
@@ -80,6 +84,7 @@ void ExtensionWrapper::InitExtentionWrapper()
     if (initSummary_ != nullptr) {
         initSummary_(UpdateUnifiedGroupInfo);
     }
+#endif
     ANS_LOGD("extension wrapper init success");
 }
 

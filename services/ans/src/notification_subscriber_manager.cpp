@@ -191,7 +191,7 @@ void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     std::vector<sptr<Notification>> notifications;
     notifications.emplace_back(notification);
     EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
@@ -211,7 +211,7 @@ void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<N
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
 #endif
 
