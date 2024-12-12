@@ -1154,6 +1154,7 @@ private:
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
+
     int32_t titleResourceId_ {0};
     int32_t contentResourceId_ {0};
     int32_t expiredContentResourceId_ {0};

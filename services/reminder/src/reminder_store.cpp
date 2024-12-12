@@ -39,7 +39,8 @@ const int32_t REMINDER_RDB_VERSION_V3 = 3;
 const int32_t REMINDER_RDB_VERSION_V4 = 4;
 const int32_t REMINDER_RDB_VERSION_V5 = 5;
 const int32_t REMINDER_RDB_VERSION_V6 = 6;
-const int32_t REMINDER_RDB_VERSION = 7;
+const int32_t REMINDER_RDB_VERSION_V7 = 7;
+const int32_t REMINDER_RDB_VERSION = 8;
 const int64_t ONE_MIN_TIME = 60 * 1000;
 const int64_t HALF_HOUR = 30 * ONE_MIN_TIME;
 }
@@ -82,6 +83,11 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 AddRdbColum(store, ReminderCalendarTable::TABLE_NAME,
                     ReminderCalendarTable::CALENDAR_LAST_DATE_TIME, "BIGINT", "0");
                 [[fallthrough]];
+            case REMINDER_RDB_VERSION_V7:
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::TITLE_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CONTENT_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, "INT", "0");
             default:
                 break;
         }

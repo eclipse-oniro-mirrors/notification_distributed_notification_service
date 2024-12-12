@@ -599,6 +599,7 @@ bool ReminderCommon::GenReminderIntInner(
             reminder->SetAutoDeletedTime(autoDeletedTime);
         }
     }
+
     int32_t resourceId = 0;
     // title
     if (GetInt64(env, value, ReminderAgentNapi::TITLE_RESOURCE_ID, resourceId)) {
