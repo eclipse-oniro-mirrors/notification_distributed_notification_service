@@ -698,7 +698,7 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     auto downloadTemplate = record->notification->GetNotificationRequest().GetTemplate();
     auto content = record->notification->GetNotificationRequest().GetContent();
     auto wantAgent = record->notification->GetNotificationRequest().GetWantAgent();
-    record->request = oldRecord->request;
+    record->request = new (std::nothrow) NotificationRequest(*(oldRecord->request));
     if (wantAgent != nullptr) {
         record->request->SetWantAgent(wantAgent);
     }
