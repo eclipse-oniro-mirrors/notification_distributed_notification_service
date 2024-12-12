@@ -1848,7 +1848,7 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
     if (resMgr == nullptr) {
         return;
     }
-    // update title
+    // update action title
     for (auto &button : actionButtonMap_) {
         if (button.second.resource.empty()) {
             continue;
@@ -1859,6 +1859,38 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
             continue;
         }
         button.second.title = title;
+    }
+    // update title
+    if (titleResourceId_ != 0) {
+        std::string title;
+        resMgr->GetStringById(titleResourceId_, title);
+        if (!title.empty()) {
+            title_ = title;
+        }
+    }
+    // update content
+    if (contentResourceId_ != 0) {
+        std::string content;
+        resMgr->GetStringById(contentResourceId_, content);
+        if (!content.empty()) {
+            content_ = content;
+        }
+    }
+    // update expiredContent
+    if (expiredContentResourceId_ != 0) {
+        std::string expiredContent;
+        resMgr->GetStringById(expiredContentResourceId_, expiredContent);
+        if (!expiredContent.empty()) {
+            expiredContent_ = expiredContent;
+        }
+    }
+    // update snoozeContent
+    if (snoozeContentResourceId_ != 0) {
+        std::string snoozeContent;
+        resMgr->GetStringById(snoozeContentResourceId_, snoozeContent);
+        if (!snoozeContent.empty()) {
+            snoozeContent_ = snoozeContent;
+        }
     }
 }
 }
