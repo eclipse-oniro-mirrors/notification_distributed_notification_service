@@ -46,6 +46,7 @@ namespace Notification {
 constexpr const char* REMINDER_DB_PATH = "/data/service/el1/public/notification/notification.db";
 constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH =
     "/data/service/el1/public/notification/reminder_agent_service_config";
+constexpr const char* CALENDAR_DATA_NAME = "com.ohos.calendardata";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
@@ -120,14 +121,30 @@ ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification
 
 void AdvancedNotificationService::TryStartReminderAgentService()
 {
-    if (access(REMINDER_DB_PATH, F_OK) != 0) {
-        ANS_LOGW("Reminder db no exist");
-        return;
-    }
-    std::string reminderAgentServiceConfig;
-    OHOS::LoadStringFromFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, reminderAgentServiceConfig);
-    if (reminderAgentServiceConfig != "1") {
-        return;
+    auto checkCalendarFunc = []() {
+        int32_t activeUserId = 0;
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
+            ANSR_LOGE("Failed to get active user id");
+            return false;
+        }
+        std::shared_ptr<BundleManagerHelper> bundleMgr = BundleManagerHelper::GetInstance();
+        if (bundleMgr == nullptr) {
+            ANSR_LOGE("Failed to get bundle manager");
+            return false;
+        }
+        int32_t uid = bundleMgr->GetDefaultUidByBundleName(CALENDAR_DATA_NAME, activeUserId);
+        return uid != -1;
+    };
+    if (!checkCalendarFunc()) {
+        if (access(REMINDER_DB_PATH, F_OK) != 0) {
+            ANS_LOGW("Reminder db no exist");
+            return;
+        }
+        std::string reminderAgentServiceConfig;
+        OHOS::LoadStringFromFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, reminderAgentServiceConfig);
+        if (reminderAgentServiceConfig != "1") {
+            return;
+        }
     }
     ANS_LOGI("Reminder db exist, start reminder service");
     ReminderHelper::StartReminderAgentService();
