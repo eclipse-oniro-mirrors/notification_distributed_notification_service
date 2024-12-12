@@ -15,10 +15,7 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 
 config("ans_distributed_config") {
-  include_dirs = [
-    "${services_path}/distributed/include",
-    "${ffrt_path}/interfaces/kits",
-  ]
+  include_dirs = [ "${services_path}/distributed/include" ]
 }
 
 ohos_shared_library("libans_distributed") {

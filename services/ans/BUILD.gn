@@ -22,6 +22,7 @@ config("public_ans_config") {
   include_dirs = [
     "${services_path}/ans/include",
     "${core_path}/include",
+    "${frameworks_module_reminder_path}/include",
   ]
 }
 
@@ -100,16 +101,7 @@ ohos_source_set("ans_service_sources") {
     "src/notification_timer_info.cpp",
     "src/os_account_manager_helper.cpp",
     "src/permission_filter.cpp",
-    "src/reminder_config_change_observer.cpp",
-    "src/reminder_data_manager.cpp",
-    "src/reminder_data_manager_inner.cpp",
-    "src/reminder_event_manager.cpp",
-    "src/reminder_store.cpp",
-    "src/reminder_store_strategy.cpp",
     "src/reminder_swing_decision_center.cpp",
-    "src/reminder_table.cpp",
-    "src/reminder_table_old.cpp",
-    "src/reminder_timer_info.cpp",
     "src/report_time_info.cpp",
     "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
@@ -118,6 +110,7 @@ ohos_source_set("ans_service_sources") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
     "../ans:ans.para",
     "../ans:ans.para.dac",
   ]

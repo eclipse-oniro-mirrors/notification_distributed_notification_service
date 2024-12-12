@@ -28,12 +28,14 @@ ohos_fuzztest("ReminderRequestTimerFuzzTest") {
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+    "-Dprotected=public",
   ]
   sources = [ "reminderrequesttimer_fuzzer.cpp" ]
 
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
-    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
   ]
 
   external_deps = [

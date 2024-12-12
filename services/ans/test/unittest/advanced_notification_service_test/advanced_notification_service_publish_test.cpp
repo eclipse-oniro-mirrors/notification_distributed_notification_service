@@ -1284,48 +1284,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12800,
     ASSERT_EQ(advancedNotificationService_->PublishAsBundle(notification, representativeBundle), result);
 }
 
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_13200
- * @tc.name      : ANS_PublishReminder_0100
- * @tc.desc      : Test PublishReminder function
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13200, Function | SmallTest | Level1)
-{
-    sptr<ReminderRequest> reminder = nullptr;
-    ASSERT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_13300
- * @tc.name      : ANS_CancelReminder_0100
- * @tc.desc      : Test CancelReminder function when the result is ERR_NO_INIT
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13300, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    sptr<NotificationRequest> req = new NotificationRequest();
-    EXPECT_NE(req, nullptr);
-    int32_t reminderId = 1;
-    ASSERT_EQ(advancedNotificationService_->CancelReminder(reminderId), (int)ERR_NO_INIT);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_13400
- * @tc.name      : ANS_CancelAllReminders_0100
- * @tc.desc      : Test CancelAllReminders function when the result is ERR_NO_INIT
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13400, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    sptr<NotificationRequest> req = new NotificationRequest();
-    EXPECT_NE(req, nullptr);
-    ASSERT_EQ(advancedNotificationService_->CancelAllReminders(), (int)ERR_NO_INIT);
-}
-
 /**
  * @tc.number    : AdvancedNotificationServiceTest_21500
  * @tc.name      : PublishPreparedNotification_1000
@@ -1344,43 +1302,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500,
     ASSERT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption), ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test end";
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_17900
- * @tc.name      : PublishReminder_1000
- * @tc.desc      : Test PublishReminder function.
- * @tc.require   : #I61RF2
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17900, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test start";
-
-    int32_t reminderId = 1;
-    sptr<ReminderRequest> reminder = new ReminderRequest(reminderId);
-    reminder->InitNotificationRequest();
-    ASSERT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_REMINDER_NOTIFICATION_NOT_ENABLE);
-
-    GTEST_LOG_(INFO) << "GetAppTargetBundle_1000 test end";
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_18000
- * @tc.name      : PublishReminder_2000
- * @tc.desc      : Test PublishReminder function.
- * @tc.require   : #I61RF2
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18000, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test start";
-
-    MockIsNonBundleName(true);
-    int32_t reminderId = 1;
-    sptr<ReminderRequest> reminder = new ReminderRequest(reminderId);
-    reminder->InitNotificationRequest();
-    ASSERT_EQ(advancedNotificationService_->PublishReminder(reminder), ERR_ANS_INVALID_BUNDLE);
-    MockIsNonBundleName(false);
-    GTEST_LOG_(INFO) << "GetAppTargetBundle_2000 test end";
 }
 
 /**

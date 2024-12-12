@@ -659,6 +659,7 @@ void AdvancedNotificationService::OnBootSystemCompleted()
 {
     ANS_LOGI("Called.");
     InitNotificationEnableList();
+    TryStartReminderAgentService();
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -2018,6 +2019,12 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 #else
     return true;
 #endif
+}
+
+ErrCode AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    isAllowUseReminder = AllowUseReminder(bundleName);
+    return ERR_OK;
 }
 
 void AdvancedNotificationService::ResetDistributedEnabled()

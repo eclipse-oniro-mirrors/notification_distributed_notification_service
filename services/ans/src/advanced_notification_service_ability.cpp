@@ -46,7 +46,6 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
     service_->CreateDialogManager();
     service_->InitPublishProcess();
-    reminderAgent_ = ReminderDataManager::InitInstance(service_);
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
@@ -66,7 +65,6 @@ void AdvancedNotificationServiceAbility::OnStart()
 void AdvancedNotificationServiceAbility::OnStop()
 {
     service_ = nullptr;
-    reminderAgent_ = nullptr;
 }
 
 void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
