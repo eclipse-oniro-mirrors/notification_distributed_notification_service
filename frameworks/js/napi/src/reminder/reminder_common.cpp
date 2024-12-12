@@ -602,22 +602,22 @@ bool ReminderCommon::GenReminderIntInner(
 
     int32_t resourceId = 0;
     // title
-    if (GetInt64(env, value, ReminderAgentNapi::TITLE_RESOURCE_ID, resourceId)) {
+    if (GetInt32(env, value, ReminderAgentNapi::TITLE_RESOURCE_ID, resourceId, false)) {
         reminder->SetTitleResourceId(resourceId);
     }
 
     // content
-    if (GetInt64(env, value, ReminderAgentNapi::CONTENT_RESOURCE_ID, resourceId)) {
+    if (GetInt32(env, value, ReminderAgentNapi::CONTENT_RESOURCE_ID, resourceId, false)) {
         reminder->SetContentResourceId(resourceId);
     }
 
     // expiredContent
-    if (GetInt64(env, value, ReminderAgentNapi::EXPIRED_CONTENT_RESOURCE_ID, resourceId)) {
+    if (GetInt32(env, value, ReminderAgentNapi::EXPIRED_CONTENT_RESOURCE_ID, resourceId, false)) {
         reminder->SetExpiredContentResourceId(resourceId);
     }
 
     // snoozeContent
-    if (GetInt64(env, value, ReminderAgentNapi::SNOOZE_CONTENT_RESOURCE_ID, resourceId)) {
+    if (GetInt32(env, value, ReminderAgentNapi::SNOOZE_CONTENT_RESOURCE_ID, resourceId, false)) {
         reminder->SetSnoozeContentResourceId(resourceId);
     }
     return true;

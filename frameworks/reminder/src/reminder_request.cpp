@@ -146,6 +146,10 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->groupId_ = other.groupId_;
     this->customRingUri_ = other.customRingUri_;
     this->creatorBundleName_ = other.creatorBundleName_;
+    this->titleResourceId_ = other.titleResourceId_;
+    this->contentResourceId_ = other.contentResourceId_;
+    this->expiredContentResourceId_ = other.expiredContentResourceId_;
+    this->snoozeContentResourceId_ = other.snoozeContentResourceId_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -1129,6 +1133,11 @@ bool ReminderRequest::WriteParcel(Parcel &parcel) const
 
     int32_t snoozeSlotType = static_cast<int32_t>(snoozeSlotType_);
     WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
+
 
     if (!MarshallingActionButton(parcel)) {
         return false;
@@ -1263,7 +1272,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     int32_t snoozeSlotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
     READ_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
     snoozeSlotType_ = static_cast<NotificationConstant::SlotType>(snoozeSlotType);
-
+    READ_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
     if (!ReadActionButtonFromParcel(parcel)) {
         return false;
     }

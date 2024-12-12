@@ -48,13 +48,13 @@ void ReminderStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
     values.PutInt(ReminderBaseTable::SNOOZE_SLOT_ID, reminder->GetSnoozeSlotType());
     values.PutInt(ReminderBaseTable::NOTIFICATION_ID, reminder->GetNotificationId());
     values.PutString(ReminderBaseTable::TITLE, reminder->GetTitle());
-    values.PutString(ReminderBaseTable::TITLE_RESOURCE_ID, reminder->GetTitleResourceId());
+    values.PutInt(ReminderBaseTable::TITLE_RESOURCE_ID, reminder->GetTitleResourceId());
     values.PutString(ReminderBaseTable::CONTENT, reminder->GetContent());
-    values.PutString(ReminderBaseTable::CONTENT_RESOURCE_ID, reminder->GetContentResourceId());
+    values.PutInt(ReminderBaseTable::CONTENT_RESOURCE_ID, reminder->GetContentResourceId());
     values.PutString(ReminderBaseTable::SNOOZE_CONTENT, reminder->GetSnoozeContent());
-    values.PutString(ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, reminder->GetSnoozeContentResourceId());
+    values.PutInt(ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, reminder->GetSnoozeContentResourceId());
     values.PutString(ReminderBaseTable::EXPIRED_CONTENT, reminder->GetExpiredContent());
-    values.PutString(ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, reminder->GetExpiredContentResourceId());
+    values.PutInt(ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, reminder->GetExpiredContentResourceId());
 
     if (oldVersion) {
         values.PutString(ReminderBaseTable::WANT_AGENT, reminder->GetWantAgentStr());
