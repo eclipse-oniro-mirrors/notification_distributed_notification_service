@@ -48,7 +48,8 @@ ErrCode BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_NON_SYSTEM_APP;
         }
-        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)
+            && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SEND_NOTIFICATION_CROSS_USER)) {
             message.BranchId(EventBranchId::BRANCH_3);
             message.Message("CheckPermission denied");
             message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
