@@ -187,8 +187,12 @@ void Common::SetCallback(
     napi_value results[ARGS_TWO] = {nullptr};
     results[PARAM0] = CreateErrorValue(env, errorCode, newType);
     results[PARAM1] = result;
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout));
-    ANS_LOGD("end");
+    napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout);
+    if (napi_result != napi_ok) {
+        ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_result);
+    ANS_LOGI("end");
 }
 
 void Common::SetCallback(
@@ -201,8 +205,12 @@ void Common::SetCallback(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout));
-    ANS_LOGD("end");
+    napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout);
+    if (napi_result != napi_ok) {
+        ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_result);
+    ANS_LOGI("end");
 }
 
 void Common::SetCallbackArg2(
@@ -216,8 +224,12 @@ void Common::SetCallbackArg2(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, result, &resultout));
-    ANS_LOGD("end");
+    napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_TWO, result, &resultout);
+    if (napi_result != napi_ok) {
+        ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_result);
+    ANS_LOGI("end");
 }
 
 void Common::SetPromise(const napi_env &env,
