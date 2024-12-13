@@ -26,6 +26,7 @@
 #include "notification_time.h"
 #include "parcel.h"
 #include <vector>
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -37,6 +38,7 @@ public:
         PROGRESS,
         TIME,
         INITIAL_TIME,
+        CARD_BUTTON,
     };
 
     NotificationLocalLiveViewContent() = default;
@@ -82,6 +84,19 @@ public:
     NotificationLocalLiveViewButton GetButton();
 
     /*
+     * @brief Sets the card button to be included in a local live view notification.
+     *
+     * @param button Indicates the type to be included.
+     */
+    void SetCardButton(std::vector<NotificationIconButton> buttons);
+
+    /*
+     * @brief Get the card button of a local live view notification.
+     *
+     */
+    std::vector<NotificationIconButton> GetCardButton();
+
+    /*
      * @brief Sets the progress to be included in a local live view notification.
      *
      * @param progress Indicates the type to be included.
@@ -120,6 +135,19 @@ public:
      * @param flag Indicates the flag to be added.
      */
     bool isFlagExist(int32_t flag);
+
+    /*
+     * @brief Sets the type to be included in a local live view notification.
+     *
+     * @param type Indicates the type to be included.
+     */
+    void SetLiveviewType(int32_t type);
+
+    /*
+     * @brief Get the type of a local live view notification.
+     *
+     */
+    int32_t GetLiveviewType();
 
     /**
      * @brief Returns a string representation of the object.
@@ -177,9 +205,11 @@ private:
     int32_t type_ {0};
     NotificationCapsule capsule_ {};
     NotificationLocalLiveViewButton button_ {};
+    std::vector<NotificationIconButton> card_button_ {};
     NotificationProgress progress_ {};
     NotificationTime time_ {};
     std::vector<int32_t> flags_ {};
+    int32_t liveviewType_ {-1};
 };
 }  // namespace Notification
 }  // namespace OHOS

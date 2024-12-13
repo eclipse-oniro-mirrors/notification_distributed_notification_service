@@ -68,6 +68,26 @@ std::string NotificationCapsule::GetContent() const
     return content_;
 }
 
+std::vector<NotificationIconButton> NotificationCapsule::GetCapsuleButton() const
+{
+    return capsuleButton_;
+}
+
+void NotificationCapsule::SetCapsuleButton(const std::vector<NotificationIconButton> &buttons)
+{
+    capsuleButton_ = buttons;
+}
+
+int32_t NotificationCapsule::GetTime() const
+{
+    return time_;
+}
+
+void NotificationCapsule::SetTime(int32_t time)
+{
+    time_ = time;
+}
+
 std::string NotificationCapsule::Dump()
 {
     return "Capsule{ "
@@ -75,6 +95,7 @@ std::string NotificationCapsule::Dump()
             ", backgroundColor = " + backgroundColor_ +
             ", content = " + content_ +
             ", icon = " + (icon_ ? "not null" : "null") +
+            ", time = " + std::to_string(time_) +
             " }";
 }
 
@@ -84,6 +105,18 @@ bool NotificationCapsule::ToJson(nlohmann::json &jsonObject) const
     jsonObject["backgroundColor"] = backgroundColor_;
     jsonObject["content"] = content_;
     jsonObject["icon"] = AnsImageUtil::PackImage(icon_);
+
+    jsonObject["time"] = time_;
+    nlohmann::json capsuleBtnArr = nlohmann::json::array();
+    for (auto btn : capsuleButton_) {
+        nlohmann::json capsuleBtnObj;
+        if (!NotificationJsonConverter::ConvertToJson(&btn, capsuleBtnObj)) {
+            ANS_LOGE("Cannot convert button to JSON");
+            return false;
+        }
+        capsuleBtnArr.emplace_back(capsuleBtnObj);
+    }
+    jsonObject["capsuleButton"] = capsuleBtnArr;
 
     return true;
 }
@@ -119,6 +152,24 @@ NotificationCapsule *NotificationCapsule::FromJson(const nlohmann::json &jsonObj
         capsule->icon_ = AnsImageUtil::UnPackImage(pmStr);
     }
 
+    if (jsonObject.find("time") != jsonEnd && jsonObject.at("time").is_number_integer()) {
+        capsule->time_ = jsonObject.at("time").get<int32_t>();
+    }
+
+    if (jsonObject.find("capsuleButton") != jsonEnd && jsonObject.at("capsuleButton").is_array()) {
+        std::vector<NotificationIconButton> cardButtons;
+        for (auto &item : jsonObject.at("capsuleButton").items()) {
+            nlohmann::json cardBtnObject = item.value();
+            auto pButton = NotificationJsonConverter::ConvertFromJson<NotificationIconButton>(cardBtnObject);
+            if (pButton != nullptr) {
+                cardButtons.push_back(*pButton);
+                delete pButton;
+                pButton = nullptr;
+            }
+        }
+        capsule->capsuleButton_ = cardButtons;
+    }
+
     return capsule;
 }
 
@@ -152,6 +203,32 @@ bool NotificationCapsule::Marshalling(Parcel &parcel) const
         }
     }
 
+    if (!parcel.WriteInt32(time_)) {
+        ANS_LOGE("Write time_ fail.");
+        return false;
+    }
+
+    parcel.WriteInt32(static_cast<int>(capsuleButton_.size()));
+    for (const auto& button : capsuleButton_) {
+        if (!parcel.WriteParcelable(&button)) {
+            ANS_LOGE("Failed to write card button");
+            return false;
+        }
+    }
+
+    if (!parcel.WriteInt32(time_)) {
+        ANS_LOGE("Write time_ fail.");
+        return false;
+    }
+
+    parcel.WriteInt32(static_cast<int>(capsuleButton_.size()));
+    for (const auto& button : capsuleButton_) {
+        if (!parcel.WriteParcelable(&button)) {
+            ANS_LOGE("Failed to write card button");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -168,6 +245,25 @@ bool NotificationCapsule::ReadFromParcel(Parcel &parcel)
             ANS_LOGE("Failed to read icon pixelMap");
             return false;
         }
+    }
+
+    if (!parcel.ReadInt32(time_)) {
+        ANS_LOGE("Read time_ failed.");
+        return false;
+    }
+
+    auto vsize = parcel.ReadInt32();
+    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
+    capsuleButton_.clear();
+    for (int i = 0; i < vsize; ++i) {
+        auto btn = parcel.ReadParcelable<NotificationIconButton>();
+        if (btn == nullptr) {
+            ANS_LOGE("Failed to read card button");
+            return false;
+        }
+        capsuleButton_.push_back(*btn);
+        delete btn;
+        btn = nullptr;
     }
 
     return true;
