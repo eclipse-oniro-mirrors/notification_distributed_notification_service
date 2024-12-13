@@ -223,6 +223,26 @@ public:
     void ClickReminder(const OHOS::EventFwk::Want &want);
 
     /**
+     * @brief Load reminder event.
+     */
+    void OnLoadReminderEvent(const EventFwk::Want& want);
+
+    /**
+     * @brief datashare notify, share reminder insert.
+     */
+    void OnDataShareInsert();
+
+    /**
+     * @brief datashare notify, share reminder update.
+     */
+    void OnDataShareUpdate(const std::map<int32_t, sptr<ReminderRequest>>& reminders);
+
+    /**
+     * @brief datashare notify, share reminder delete.
+     */
+    void OnDataShareDelete();
+
+    /**
      * Handle auto delete time
      */
     void HandleAutoDeleteReminder(const int32_t notificationId, const int32_t uid, const int64_t autoDeletedTime);
@@ -263,9 +283,7 @@ public:
 
     int32_t QueryActiveReminderCount();
 
-    void ReceiveLoadReminderEvent();
-
-    void StartReminderLoadTimer();
+    void StartLoadTimer();
 
     static constexpr uint8_t TIME_ZONE_CHANGE = 0;
     static constexpr uint8_t DATE_TIME_CHANGE = 1;
@@ -401,9 +419,10 @@ private:
      * Find the reminder from reminderVector_ by reminder id.
      *
      * @param reminderId Indicates the reminder id.
+     * @param isShare Indicates the reminder datashare flag.
      * @return pointer of reminder request or nullptr.
      */
-    sptr<ReminderRequest> FindReminderRequestLocked(const int32_t &reminderId);
+    sptr<ReminderRequest> FindReminderRequestLocked(const int32_t reminderId, const bool isShare);
 
     /**
      * Obtains the recent reminder which is not expired from reminder vector.
@@ -502,8 +521,9 @@ private:
      * 2. cancels the notification.
      *
      * @param reminderId Indicates the reminder id.
+     * @param isShare Indicates the reminder datashare flag.
      */
-    void RemoveReminderLocked(const int32_t &reminderId);
+    void RemoveReminderLocked(const int32_t reminderId, const bool isShare);
 
     /**
      * Resets timer status.
@@ -638,7 +658,20 @@ private:
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
 
-    int64_t CreateReminderLoadTimer(const sptr<MiscServices::TimeServiceClient> timer);
+    /**
+     * @brief Create load reminder timer.
+     */
+    uint64_t CreateTimer(const sptr<MiscServices::TimeServiceClient>& timer);
+
+    /**
+     * @brief Load reminder from datashare.
+     */
+    void LoadShareReminders();
+
+    /**
+     * @brief Load reminder from datashare.
+     */
+    void UpdateShareReminders(const std::map<int32_t, sptr<ReminderRequest>>& reminders);
 
    /**
     * Single instance.
@@ -736,7 +769,10 @@ private:
     std::atomic<int32_t> saReadyFlag_{ 0 };
 
     std::mutex timeLoadMutex_;
-    int32_t reminderLoadtimerId_ {0};
+    uint64_t reminderLoadtimerId_ {0};
+
+    // Last time the calendardata was launched.
+    std::atomic<int64_t> lastStartTime_ {0};
 };
 }  // namespace OHOS
 }  // namespace Notification

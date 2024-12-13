@@ -796,6 +796,31 @@ uint64_t ReminderRequestCalendar::GetLastStartDateTime() const
     return lastStartDateTime_;
 }
 
+void ReminderRequestCalendar::Copy(const sptr<ReminderRequest>& other)
+{
+    if (other == nullptr || other->GetReminderType() != ReminderType::CALENDAR) {
+        return;
+    }
+    if (!IsShare() || !other->IsShare()) {
+        return;
+    }
+    SetNotificationId(other->GetNotificationId());
+    SetTriggerTimeInMilli(other->GetTriggerTimeInMilli());
+    SetSlotType(other->GetSlotType());
+    SetCustomButtonUri(other->GetCustomButtonUri());
+    SetTitle(other->GetTitle());
+    SetContent(other->GetContent());
+    SetActionButtons(other->GetActionButtons());
+    SetWantAgentInfo(other->GetWantAgentInfo());
+    SetAutoDeletedTime(other->GetAutoDeletedTime());
+    ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(other.GetRefPtr());
+    SetDateTime(calendar->GetDateTime());
+    SetEndDateTime(calendar->GetEndDateTime());
+    SetFirstDesignateYear(calendar->GetFirstDesignateYear());
+    SetFirstDesignageMonth(calendar->GetFirstDesignageMonth());
+    SetFirstDesignateDay(calendar->GetFirstDesignateDay());
+}
+
 std::string ReminderRequestCalendar::SerializationRRule()
 {
     constexpr int32_t INDENT = -1;

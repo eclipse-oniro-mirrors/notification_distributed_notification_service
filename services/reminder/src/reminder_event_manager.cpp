@@ -175,7 +175,7 @@ void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const E
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_LOAD_REMINDER) {
-        reminderDataManager_->ReceiveLoadReminderEvent();
+        reminderDataManager_->OnLoadReminderEvent(want);
         return;
     }
 }

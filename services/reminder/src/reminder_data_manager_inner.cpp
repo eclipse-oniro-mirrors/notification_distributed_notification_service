@@ -162,5 +162,26 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
         "RING_TIME", ringTime);
 #endif
 }
+
+void ReminderDataManager::OnDataShareInsert()
+{
+    LoadShareReminders();
+    std::vector<sptr<ReminderRequest>> immediatelyReminders;
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    CheckReminderTime(immediatelyReminders, extensionReminders);
+    HandleImmediatelyShow(immediatelyReminders, false);
+    StartRecentReminder();
+}
+
+void ReminderDataManager::OnDataShareUpdate(const std::map<int32_t, sptr<ReminderRequest>>& reminders)
+{
+    UpdateShareReminders(reminders);
+}
+
+void ReminderDataManager::OnDataShareDelete()
+{
+    LoadShareReminders();
+    StartRecentReminder();
+}
 }
 }
