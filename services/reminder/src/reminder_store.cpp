@@ -85,9 +85,12 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                 [[fallthrough]];
             case REMINDER_RDB_VERSION_V7:
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::TITLE_RESOURCE_ID, "INT", "0");
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::CONTENT_RESOURCE_ID, "INT", "0");
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, "INT", "0");
-                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
+                    ReminderBaseTable::CONTENT_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
+                    ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, "INT", "0");
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
+                    ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, "INT", "0");
             default:
                 break;
         }

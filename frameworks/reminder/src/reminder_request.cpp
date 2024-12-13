@@ -1138,7 +1138,6 @@ bool ReminderRequest::WriteParcel(Parcel &parcel) const
     WRITE_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
 
-
     if (!MarshallingActionButton(parcel)) {
         return false;
     }

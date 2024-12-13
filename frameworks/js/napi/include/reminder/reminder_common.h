@@ -185,6 +185,9 @@ private:
     static bool GenReminderIntInner(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
+    static bool GenReminderIntInnerOther(
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+
     static void GenReminderBoolInner(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 

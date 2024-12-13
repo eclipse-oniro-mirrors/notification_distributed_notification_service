@@ -304,11 +304,13 @@ void ReminderStrategy::RecoverIdFromDb(sptr<ReminderRequest>& reminder,
     reminder->SetContentResourceId(contentResourceId);
 
     int32_t snoozeContentResourceId = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, snoozeContentResourceId);
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID,
+        snoozeContentResourceId);
     reminder->SetSnoozeContentResourceId(snoozeContentResourceId);
 
     int32_t expiredContentResourceId = 0;
-    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, expiredContentResourceId);
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID,
+        expiredContentResourceId);
     reminder->SetExpiredContentResourceId(expiredContentResourceId);
 }
 

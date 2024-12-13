@@ -599,7 +599,12 @@ bool ReminderCommon::GenReminderIntInner(
             reminder->SetAutoDeletedTime(autoDeletedTime);
         }
     }
+    return GenReminderIntInnerOther(env, value, reminder);
+}
 
+bool ReminderCommon::GenReminderIntInnerOther(
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+{
     int32_t resourceId = 0;
     // title
     if (GetInt32(env, value, ReminderAgentNapi::TITLE_RESOURCE_ID, resourceId, false)) {
