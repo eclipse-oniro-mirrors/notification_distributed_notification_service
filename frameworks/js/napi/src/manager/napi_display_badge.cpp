@@ -199,7 +199,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be number.";
+            std::string msg = "Incorrect parameter types.The type of badgeNumber must be number.";
             Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
@@ -209,7 +209,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // case2: setBadgeNumber(badgeNumber)
     if (valuetype != napi_number) {
         ANS_LOGW("Wrong argument type. Number expected.");
-        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        std::string msg = "Incorrect parameter types.The type of badgeNumber must be number.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
