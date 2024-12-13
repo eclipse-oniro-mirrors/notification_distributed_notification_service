@@ -1022,7 +1022,8 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
-ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid)
+ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
+    const int32_t callingUid)
 {
     if (record->isNeedFlowCtrl == false) {
         return ERR_OK;
@@ -1061,7 +1062,7 @@ ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<Notifi
 }
 
 ErrCode AdvancedNotificationService::UpdateGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now)
+    std::chrono::system_clock::time_point now)
 {
     ANS_LOGD("UpdateGlobalFlowCtrl size %{public}zu,%{public}zu",
         flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
@@ -1096,7 +1097,7 @@ ErrCode AdvancedNotificationService::UpdateGlobalFlowCtrl(const std::shared_ptr<
 }
 
 ErrCode AdvancedNotificationService::UpdateSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid)
+    std::chrono::system_clock::time_point now, const int32_t callingUid)
 {
     std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
     auto singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
@@ -1616,7 +1617,7 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
         result = PublishFlowCtrl(record, callingUid);
     } else {
         if (record->request->IsAlertOneTime()) {
-            CloseAlert(record); 
+            CloseAlert(record);
         }
         result = UpdateFlowCtrl(record, callingUid);
     }
@@ -1642,7 +1643,7 @@ ErrCode AdvancedNotificationService::PublishFlowCtrl(const std::shared_ptr<Notif
         return result;
     }
     result = PublishGlobalFlowCtrl(record, now);
-    if (result != ERR_OK) { 
+    if (result != ERR_OK) {
         return result;
     }
     if (record->isThirdparty == true) {

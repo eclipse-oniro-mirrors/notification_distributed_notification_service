@@ -3746,7 +3746,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Funct
 /**
  * @tc.number    : PublishGlobalFlowCtrl_00001
  * @tc.name      : Test PublishGlobalFlowCtrl
- * @tc.desc      : Test PublishGlobalFlowCtrl 
+ * @tc.desc      : Test PublishGlobalFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishGlobalFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3785,7 +3785,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishGlobalFlowCtrl_00001, Function 
 /**
  * @tc.number    : PublishSingleAppFlowCtrl_00001
  * @tc.name      : Test PublishSingleAppFlowCtrl
- * @tc.desc      : Test PublishSingleAppFlowCtrl 
+ * @tc.desc      : Test PublishSingleAppFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishSingleAppFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3845,7 +3845,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishSingleAppFlowCtrlRemoveExpire_0
 /**
  * @tc.number    : PublishFlowCtrl_00001
  * @tc.name      : Test PublishFlowCtrl
- * @tc.desc      : Test PublishFlowCtrl 
+ * @tc.desc      : Test PublishFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3891,7 +3891,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishFlowCtrl_00001, Function | Smal
 /**
  * @tc.number    : UpdateGlobalFlowCtrl_00001
  * @tc.name      : Test UpdateGlobalFlowCtrl
- * @tc.desc      : Test UpdateGlobalFlowCtrl 
+ * @tc.desc      : Test UpdateGlobalFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, UpdateGlobalFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3990,7 +3990,7 @@ HWTEST_F(AdvancedNotificationServiceTest, UpdateSingleAppFlowCtrlRemoveExpire_00
 /**
  * @tc.number    : UpdateFlowCtrl_00001
  * @tc.name      : Test UpdateFlowCtrl
- * @tc.desc      : Test UpdateFlowCtrl 
+ * @tc.desc      : Test UpdateFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, UpdateFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -4036,7 +4036,7 @@ HWTEST_F(AdvancedNotificationServiceTest, UpdateFlowCtrl_00001, Function | Small
 /**
  * @tc.number    : FlowControl_00001
  * @tc.name      : Test FlowControl
- * @tc.desc      : Test FlowControl 
+ * @tc.desc      : Test FlowControl
  */
 HWTEST_F(AdvancedNotificationServiceTest, FlowControl_00001, Function | SmallTest | Level1)
 {
