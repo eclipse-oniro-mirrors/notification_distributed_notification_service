@@ -3750,7 +3750,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Funct
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishGlobalFlowCtrl_00001, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->flowControlPublishTimestampList_.clear();
+    advancedNotificationService_->flowControlPublishTimestampList_.clear(); 
     advancedNotificationService_->systemFlowControlPublishTimestampList_.clear();
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     sptr<Notification> notification = new (std::nothrow) Notification(request);
