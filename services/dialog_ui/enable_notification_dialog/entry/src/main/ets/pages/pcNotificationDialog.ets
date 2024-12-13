@@ -279,9 +279,9 @@ struct PermissionDialog {
   
   updateSubWindowSize(): void {
     try {
-      this.dialog?.extensionWindow.on('windowSizeChange', (data):void => {
+      this.dialog?.extensionWindow.on('windowRectChange', (data):void => {
         let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-        console.info(TAG, `windowSizeChange event, size = ${windowRect?.left}-${windowRect?.top}-${windowRect?.width}-${windowRect?.height}`);
+        console.info(TAG, `windowRectChange event, size = ${windowRect?.left}-${windowRect?.top}-${windowRect?.width}-${windowRect?.height}`);
         this.dialog?.subWindow?.moveWindowTo(windowRect?.left, windowRect?.top);
         this.dialog?.subWindow?.resize(windowRect?.width, windowRect?.height);
       });
