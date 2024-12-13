@@ -31,6 +31,7 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
+import uiextension from '@ohos.arkui.uiExtension';
 
 const TAG = 'NotificationDialog_Service ';
 
