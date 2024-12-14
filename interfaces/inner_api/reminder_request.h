@@ -422,6 +422,40 @@ public:
      */
     uint64_t GetTriggerTimeInMilli() const;
 
+    int32_t GetTitleResourceId() const
+    {
+        return titleResourceId_;
+    }
+    int32_t GetContentResourceId() const
+    {
+        return contentResourceId_;
+    }
+    int32_t GetExpiredContentResourceId() const
+    {
+        return expiredContentResourceId_;
+    }
+    int32_t GetSnoozeContentResourceId() const
+    {
+        return snoozeContentResourceId_;
+    }
+
+    void SetTitleResourceId(const int32_t titleResourceId)
+    {
+        titleResourceId_ = titleResourceId;
+    }
+    void SetContentResourceId(const int32_t contentResourceId)
+    {
+        contentResourceId_ = contentResourceId;
+    }
+    void SetExpiredContentResourceId(const int32_t expiredContentResourceId)
+    {
+        expiredContentResourceId_ = expiredContentResourceId;
+    }
+    void SetSnoozeContentResourceId(const int32_t snoozeContentResourceId)
+    {
+        snoozeContentResourceId_ = snoozeContentResourceId;
+    }
+
     int32_t GetUserId() const;
     int32_t GetUid() const;
 
@@ -1138,6 +1172,11 @@ private:
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
+
+    int32_t titleResourceId_ {0};
+    int32_t contentResourceId_ {0};
+    int32_t expiredContentResourceId_ {0};
+    int32_t snoozeContentResourceId_ {0};
 };
 }  // namespace Notification
 }  // namespace OHOS

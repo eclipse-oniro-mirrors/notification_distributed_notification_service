@@ -599,6 +599,32 @@ bool ReminderCommon::GenReminderIntInner(
             reminder->SetAutoDeletedTime(autoDeletedTime);
         }
     }
+    return GenReminderIntInnerOther(env, value, reminder);
+}
+
+bool ReminderCommon::GenReminderIntInnerOther(
+    const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder)
+{
+    int32_t resourceId = 0;
+    // title
+    if (GetInt32(env, value, ReminderAgentNapi::TITLE_RESOURCE_ID, resourceId, false)) {
+        reminder->SetTitleResourceId(resourceId);
+    }
+
+    // content
+    if (GetInt32(env, value, ReminderAgentNapi::CONTENT_RESOURCE_ID, resourceId, false)) {
+        reminder->SetContentResourceId(resourceId);
+    }
+
+    // expiredContent
+    if (GetInt32(env, value, ReminderAgentNapi::EXPIRED_CONTENT_RESOURCE_ID, resourceId, false)) {
+        reminder->SetExpiredContentResourceId(resourceId);
+    }
+
+    // snoozeContent
+    if (GetInt32(env, value, ReminderAgentNapi::SNOOZE_CONTENT_RESOURCE_ID, resourceId, false)) {
+        reminder->SetSnoozeContentResourceId(resourceId);
+    }
     return true;
 }
 
