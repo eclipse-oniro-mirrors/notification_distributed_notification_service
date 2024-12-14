@@ -47,7 +47,10 @@ ohos_source_set("ans_service_sources") {
     "-fdata-sections",
   ]
 
-  include_dirs = [ "${services_path}/ans/include" ]
+  include_dirs = [
+    "${services_path}/ans/include",
+    "${services_path}/ans/include/slot_manager",
+  ]
 
   defines = []
 
@@ -71,6 +74,8 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_notification_slot_service.cpp",
     "src/advanced_notification_subscriber_service.cpp",
     "src/advanced_notification_utils.cpp",
+    "src/ans_manager_stub.cpp",
+    "src/ans_manager_stub_invalid.cpp",
     "src/bundle_manager_helper.cpp",
     "src/clone/notification_clone_bundle_info.cpp",
     "src/clone/notification_clone_bundle_service.cpp",
@@ -105,6 +110,12 @@ ohos_source_set("ans_service_sources") {
     "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
     "src/telephony_extension_wrapper.cpp",
+  ]
+
+  sources += [
+    "src/slot_manager/AddSlots.cpp",
+    "src/slot_manager/setNotificationEnableSlot.cpp",
+    "src/slot_manager/slot_manager.cpp",
   ]
 
   deps = [
