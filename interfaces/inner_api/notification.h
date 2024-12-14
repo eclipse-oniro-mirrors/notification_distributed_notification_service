@@ -321,6 +321,13 @@ public:
      */
     void SetAutoDeletedTimer(uint64_t autoDeletedTimerId);
 
+    /**
+     * @brief Obtains the privileged.
+     *
+     * @param Returns the privileged of the notification.
+     */
+    bool GetPrivileged() const;
+
 private:
     Notification();
     void SetEnableSound(const bool &enable);
@@ -333,6 +340,7 @@ private:
     void SetVibrationStyle(const std::vector<int64_t> &style);
     void SetRemindType(const NotificationConstant::RemindType &reminType);
     void SetRemoveAllowed(bool removeAllowed);
+    void SetPrivileged(const bool &isPrivileged);
     void SetSourceType(NotificationConstant::SourceType sourceType);
     bool ReadFromParcel(Parcel &parcel);
     void ReadFromParcelBool(Parcel &parcel);
@@ -367,6 +375,7 @@ private:
     std::shared_ptr<Uri> sound_ {nullptr};
     std::vector<int64_t> vibrationStyle_ {};
     uint64_t autoDeletedTimerId_ {0};
+    bool isPrivileged_ {false};
 
     friend class AdvancedNotificationService;
     friend class NotificationSlotFilter;
