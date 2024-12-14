@@ -42,7 +42,10 @@ public:
     typedef void (*UPDATE_BY_BUNDLE)(const std::string bundleName, int deleteType);
     typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
     typedef int32_t (*BANNER_CONTROL)(const std::string &bundleName);
-    typedef void (*MODIFY_REMINDER_FLAGS)(const sptr<NotificationRequest> &request);
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    typedef bool (*MODIFY_REMINDER_FLAGS)(const sptr<NotificationRequest> &request);
+#endif
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
@@ -54,7 +57,10 @@ public:
     void UpdateByBundle(const std::string bundleName, int deleteType);
     int32_t ReminderControl(const std::string &bundleName);
     int32_t BannerControl(const std::string &bundleName);
-    void ModifyReminderFlags(const sptr<NotificationRequest> &request);
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    bool ModifyReminderFlags(const sptr<NotificationRequest> &request);
+#endif
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -70,7 +76,10 @@ private:
     REMINDER_CONTROL reminderControl_ = nullptr;
     BANNER_CONTROL bannerControl_ = nullptr;
     bool isRegisterDataSettingObserver = false;
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     MODIFY_REMINDER_FLAGS modifyReminderFlags_ = nullptr;
+#endif
 };
 
 #define EXTENTION_WRAPPER ::OHOS::DelayedSingleton<ExtensionWrapper>::GetInstance()

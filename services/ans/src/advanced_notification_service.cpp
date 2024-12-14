@@ -983,14 +983,17 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         flags->SetStatusIconEnabled(false);
     }
 
-#ifdef ENABLE_ANS_USERGROWTH_EXT_WRAPPER
-    EXTENTION_WRAPPER->ModifyReminderFlags(record->request);
-    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
-        record->notification->SetEnableSound(true);
-        record->notification->SetSound(DEFAULT_NOTIFICATION_SOUND);
-    }
-    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
-        record->notification->SetEnableVibration(true);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    bool isPrivileged = EXTENTION_WRAPPER->ModifyReminderFlags(record->request);
+    if (isPrivileged) {
+        record->notification->SetPrivileged(true);
+        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+            record->notification->SetEnableSound(true);
+            record->notification->SetSound(DEFAULT_NOTIFICATION_SOUND);
+        }
+        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
+            record->notification->SetEnableVibration(true);
+        }
     }
 #endif
 }
