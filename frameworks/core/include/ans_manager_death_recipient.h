@@ -27,8 +27,6 @@ public:
     ~AnsManagerDeathRecipient() = default;
 
     void SubscribeSAManager();
-
-    bool GetIsSubscribeSAManager();
 private:
     class SystemAbilityStatusChangeListener : public SystemAbilityStatusChangeStub {
     public:
@@ -36,11 +34,8 @@ private:
         ~SystemAbilityStatusChangeListener() = default;
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-
-    private:
-        bool isSAOffline = false;
     };
-
+    std::mutex mutex_;
     sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 };
 }  // namespace Notification

@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace Notification {
-class NotificationSubscriber {
+class NotificationSubscriber : public std::enable_shared_from_this<NotificationSubscriber> {
 public:
     NotificationSubscriber();
 
