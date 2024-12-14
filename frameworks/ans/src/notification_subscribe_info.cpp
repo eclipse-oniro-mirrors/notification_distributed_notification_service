@@ -35,6 +35,7 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
     deviceType_ = subscribeInfo.GetDeviceType();
     userId_ = subscribeInfo.GetAppUserId();
     subscriberUid_ = subscribeInfo.GetSubscriberUid();
+    slotTypes_ = subscribeInfo.GetSlotTypes();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -89,6 +90,17 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write userId_");
         return false;
     }
+     //write slotTypes_
+    if (!parcel.WriteInt32(slotTypes_.size())) {
+        ANS_LOGE("Failed to write slotTypes_ size.");
+        return false;
+    }
+    for (auto slotType : slotTypes_) {
+        if (!parcel.WriteInt32(static_cast<int32_t>(slotType))) {
+            ANS_LOGE("Failed to write slotType");
+            return false;
+        }
+    }
     return true;
 }
 
@@ -120,6 +132,20 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Can't read userId_");
         return false;
     }
+    //read slotTypes_
+    int32_t size = 0;
+    if (!parcel.ReadInt32(size)) {
+        ANS_LOGE("read slotType_ size failed.");
+        return false;
+    }
+    for (int32_t index = 0; index < size; index++) {
+        int32_t slotType = -1;
+        if (!parcel.ReadInt32(slotType)) {
+            ANS_LOGE("read Parcelable slotType failed.");
+            return false;
+        }
+        slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
+    }
     return true;
 }
 
@@ -130,10 +156,16 @@ std::string NotificationSubscribeInfo::Dump()
         appNames += name;
         appNames += ", ";
     }
+    std::string slotTypes = "";
+    for (auto slotType : slotTypes_) {
+        slotTypes += std::to_string(static_cast<int32_t>(slotType));
+        slotTypes += ", ";
+    }
     return "NotificationSubscribeInfo{ "
             "appNames = [" + appNames + "]" +
             "deviceType = " + deviceType_ +
             "userId = " + std::to_string(userId_) +
+            "slotTypes = [" + slotTypes + "]" +
             " }";
 }
 
@@ -145,6 +177,16 @@ void NotificationSubscribeInfo::SetSubscriberUid(const int32_t uid)
 int32_t NotificationSubscribeInfo::GetSubscriberUid() const
 {
     return subscriberUid_;
+}
+
+void NotificationSubscribeInfo::SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes)
+{
+    slotTypes_ = slotTypes;
+}
+
+std::vector<NotificationConstant::SlotType> NotificationSubscribeInfo::GetSlotTypes() const
+{
+    return slotTypes_;
 }
 }  // namespace Notification
 }  // namespace OHOS

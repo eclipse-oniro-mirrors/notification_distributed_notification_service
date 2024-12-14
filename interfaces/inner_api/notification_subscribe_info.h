@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_SUBSCRIBER_INFO_H
 
 #include "parcel.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -122,6 +123,20 @@ public:
      * @return Returns the uid of subscriber.
      **/
     int32_t GetSubscriberUid() const;
+ 
+    /**
+     * @brief Adds subscriber slotTypes.
+     *
+     * @param slotTypes Indicates the slotTypes of subscriber.
+     **/
+    void SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes);
+
+    /**
+     * @brief Obtains the slotTypes of subscriber.
+     *
+     * @return Returns the slotTypes of subscriber.
+     **/
+    std::vector<NotificationConstant::SlotType> GetSlotTypes() const;
 
 private:
     bool ReadFromParcel(Parcel &parcel);
@@ -131,6 +146,7 @@ private:
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};
+    std::vector<NotificationConstant::SlotType> slotTypes_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

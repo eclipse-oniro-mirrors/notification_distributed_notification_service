@@ -44,6 +44,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     int32_t userId {SUBSCRIBE_USER_INIT};
     std::string deviceType {CURRENT_DEVICE_TYPE};
     int32_t subscriberUid {DEFAULT_UID};
+    std::set<NotificationConstant::SlotType> slotTypes {};
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -344,6 +345,10 @@ void NotificationSubscriberManager::AddRecordInfo(
             record->bundleList_.insert(bundle);
             record->subscribedAll = false;
         }
+        record->slotTypes.clear();
+        for (auto slotType : subscribeInfo->GetSlotTypes()) {
+            record->slotTypes.insert(slotType);
+        }
         record->userId = subscribeInfo->GetAppUserId();
         // deviceType is empty, use default
         if (!subscribeInfo->GetDeviceType().empty()) {
@@ -353,6 +358,7 @@ void NotificationSubscriberManager::AddRecordInfo(
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
+        record->slotTypes.clear();
     }
 }
 
@@ -528,6 +534,13 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
         (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
+        return false;
+    }
+    auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
+    ANS_LOGI("slotTypecount:%{public}d", (int)record->slotTypes.size());
+    auto slotIter = std::find(record->slotTypes.begin(), record->slotTypes.end(), soltType);
+    bool isSubscribedSlotType = (record->slotTypes.size() == 0) || (slotIter != record->slotTypes.end());
+    if (!isSubscribedSlotType) {
         return false;
     }
 

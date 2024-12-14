@@ -65,6 +65,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                     subscribeInfo->AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
                     subscribeInfo->AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
                     subscribeInfo->AddDeviceType(asynccallbackinfo->subscriberInfo.deviceType);
+                    subscribeInfo->SetSlotTypes(asynccallbackinfo->subscriberInfo.slotTypes);
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
