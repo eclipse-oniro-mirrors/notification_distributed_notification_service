@@ -70,10 +70,15 @@ void ExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
-
     std::string ctrlConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
+    }
+#endif
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("extension wrapper modifyReminderFlags symbol failed, error: %{public}s", dlerror());
+        return;
     }
 #endif
 #ifdef ENABLE_ANS_AGGREGATION
@@ -171,6 +176,17 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
     }
     return bannerControl_(bundleName);
 }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+bool ExtensionWrapper::ModifyReminderFlags(const sptr<NotificationRequest> &request)
+{
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("ModifyReminderFlags wrapper symbol failed");
+        return false;
+    }
+    return modifyReminderFlags_(request);
+}
+#endif
 
 __attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
 {
