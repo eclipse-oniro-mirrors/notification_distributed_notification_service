@@ -305,8 +305,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     }
     soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
-    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
-        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
@@ -331,7 +329,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
 
-    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     GetFlowCtrlConfigFromCCM();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
