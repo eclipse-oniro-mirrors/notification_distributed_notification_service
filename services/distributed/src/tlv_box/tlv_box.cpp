@@ -190,7 +190,7 @@ bool TlvBox::Serialize()
     bytesLength_ = bytesLength_ + sizeof(uint32_t);
     if (bytesLength_ > MAX_BUFFER_LENGTH) {
         ANS_LOGW("Serialize data length invalid %{public}d", bytesLength_);
-        return;
+        return false;
     }
     byteBuffer_ = new unsigned char[bytesLength_];
     for (auto iter = TlvMap_.begin(); iter != TlvMap_.end(); iter++) {

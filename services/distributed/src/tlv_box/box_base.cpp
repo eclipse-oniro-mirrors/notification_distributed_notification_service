@@ -47,7 +47,9 @@ int32_t BoxBase::GetByteLength()
 
 bool BoxBase::Serialize()
 {
-    CHECK_RETURN_BOOL(box_)
+    if (box_ == nullptr) {
+        return false;
+    }
     box_->PutValue(std::make_shared<TlvItem>(LOCAL_VERSION, CURRENT_VERSION));
     return box_->Serialize();
 }

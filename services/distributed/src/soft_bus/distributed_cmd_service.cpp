@@ -18,7 +18,7 @@
 #include "distributed_client.h"
 #include "state_box.h"
 #include "in_process_call_wrapper.h"
-#include "distribued_screenlock_service.h"
+#include "distributed_screenlock_service.h"
 #include "distributed_device_data.h"
 #include "dm_device_info.h"
 
