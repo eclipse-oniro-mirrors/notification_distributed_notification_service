@@ -71,11 +71,13 @@ HWTEST_F(NotificationSortingTest, Marshalling_00002, Function | SmallTest | Leve
 HWTEST_F(NotificationSortingTest, Unmarshalling_001, Function | SmallTest | Level1)
 {
     NotificationSorting sorting;
+    sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
+    sorting.SetSlot(slot);
     bool unmarshalling = true;
     Parcel parcel;
     std::shared_ptr<NotificationSorting> result =
     std::make_shared<NotificationSorting>(sorting);
-
+    result->Marshalling(parcel);
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {
             unmarshalling = false;
@@ -94,7 +96,10 @@ HWTEST_F(NotificationSortingTest, ReadFromParcel_00001, Function | SmallTest | L
 {
     Parcel parcel;
     NotificationSorting sorting;
+    sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
+    sorting.SetSlot(slot);
     auto rrc = std::make_shared<NotificationSorting>(sorting);
+    rrc->Marshalling(parcel);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
 }
 
