@@ -1417,6 +1417,14 @@ public:
      */
     bool IsUpdateOnly() const;
 
+    bool GetDistributedCollaborate() const;
+
+    void SetDistributedCollaborate(bool distributedCollaborate);
+
+    const std::string GetDistributedHashCode() const;
+
+    void SetDistributedHashCode(const std::string hashCode);
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1512,6 +1520,7 @@ private:
     std::string classification_ {};
     std::string appMessageId_ {};
     std::string sound_ {};
+    std::string distributedHashCode_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
@@ -1536,6 +1545,7 @@ private:
     bool isRemoveAllowed_ {true};
     bool isCoverActionButtons_ {false};
     bool isUpdateByOwnerAllowed_ {false};
+    bool distributedCollaborate_ {false};
     bool updateOnly_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};

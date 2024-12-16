@@ -75,6 +75,7 @@
 #include "advanced_datashare_helper_ext.h"
 #include "notification_analytics_util.h"
 #include "advanced_notification_flow_control_service.h"
+#include "distributed_device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -333,6 +334,8 @@ AdvancedNotificationService::AdvancedNotificationService()
     dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
+#else
+    DistributedDeviceManager::GetInstance().Init();
 #endif
 }
 
@@ -356,7 +359,9 @@ void AdvancedNotificationService::SelfClean()
     }
 
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
+#endif
     NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
 }
 
@@ -1944,7 +1949,7 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         ANS_LOGE("The registration callback has not been processed yet.");
         return ERR_INVALID_OPERATION;
     }
-    
+
     {
         std::lock_guard<std::mutex> lock(pushMutex_);
         pushCallBacks_.clear();
