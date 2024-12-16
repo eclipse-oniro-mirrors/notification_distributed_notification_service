@@ -544,7 +544,7 @@ public:
      */
     ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
-    
+
     /**
      * @brief remove enable notification dialog.
      *
@@ -1367,6 +1367,8 @@ private:
     void ResetDistributedEnabled();
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
+    ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
+    void SetCollaborateReminderFlag(const sptr<NotificationRequest> &request);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

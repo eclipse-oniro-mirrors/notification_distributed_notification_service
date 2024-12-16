@@ -790,7 +790,8 @@ std::string NotificationRequest::Dump()
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
-            ", sound = " + sound_ + ", unifiedGroupInfo_ = " +
+            ", sound = " + sound_ + ", distributed = " + std::to_string(distributedCollaborate_) + ":" +
+            distributedHashCode_ + ", unifiedGroupInfo_ = " +
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
 }
 
@@ -1071,6 +1072,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteString(distributedHashCode_)) {
+        ANS_LOGE("Failed to write sound");
+        return false;
+    }
+
     // write enum
     if (!parcel.WriteInt32(static_cast<int32_t>(slotType_))) {
         ANS_LOGE("Failed to write slot type");
@@ -1304,6 +1310,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(distributedCollaborate_)) {
+        ANS_LOGE("Failed to write distributedCollaborate_");
+        return false;
+    }
+
     if (!parcel.WriteBool(updateOnly_)) {
         ANS_LOGE("Failed to write updateOnly_");
         return false;
@@ -1398,7 +1409,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         ANS_LOGE("Failed to write bundleOption for the notification");
         return false;
     }
- 
+
     if (valid) {
         if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
             ANS_LOGE("Failed to write notification bundleOption");
@@ -1516,6 +1527,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     if (!parcel.ReadString(sound_)) {
         ANS_LOGE("Failed to read sound");
+        return false;
+    }
+
+    if (!parcel.ReadString(distributedHashCode_)) {
+        ANS_LOGE("Failed to read distributedHashCode");
         return false;
     }
 
@@ -1668,6 +1684,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     isCoverActionButtons_ = parcel.ReadBool();
     isUpdateByOwnerAllowed_ = parcel.ReadBool();
+    distributedCollaborate_ = parcel.ReadBool();
     updateOnly_ = parcel.ReadBool();
 
     vsize = parcel.ReadUint64();
@@ -1876,6 +1893,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->isUpdateByOwnerAllowed_ = other.isUpdateByOwnerAllowed_;
+    this->distributedCollaborate_ = other.distributedCollaborate_;
     this->updateOnly_ = other.updateOnly_;
 
     this->slotType_ = other.slotType_;
@@ -1890,6 +1908,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->classification_ = other.classification_;
     this->appMessageId_ = other.appMessageId_;
     this->sound_ = other.sound_;
+    this->distributedHashCode_ = other.distributedHashCode_;
 
     this->groupAlertType_ = other.groupAlertType_;
     this->visiblenessType_ = other.visiblenessType_;
@@ -2773,6 +2792,26 @@ bool NotificationRequest::IsUpdateOnly() const
 const std::string NotificationRequest::GetLittleIconType() const
 {
     return littleIconType_;
+}
+
+bool NotificationRequest::GetDistributedCollaborate() const
+{
+    return distributedCollaborate_;
+}
+
+void NotificationRequest::SetDistributedCollaborate(bool distributedCollaborate)
+{
+    distributedCollaborate_ = distributedCollaborate;
+}
+
+const std::string NotificationRequest::GetDistributedHashCode() const
+{
+    return distributedHashCode_;
+}
+
+void NotificationRequest::SetDistributedHashCode(const std::string hashCode)
+{
+    distributedHashCode_ = hashCode;
 }
 }  // namespace Notification
 }  // namespace OHOS

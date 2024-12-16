@@ -127,6 +127,8 @@ public:
      */
     std::string GetKey() const;
 
+    void SetKey(const std::string& key);
+
     /**
      * @brief Obtains the notification request set by ANS.
      *
