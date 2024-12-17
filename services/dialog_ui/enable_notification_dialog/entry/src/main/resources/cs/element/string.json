@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Povolit aplikaci %s posílat oznámení?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Povolit",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Odmítnout",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

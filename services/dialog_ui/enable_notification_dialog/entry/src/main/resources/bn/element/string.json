@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"%s-কে বিজ্ঞপ্তি পাঠানোর অনুমতি দেবেন?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"অনুমতি দিন",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"প্রত্যাখ্যান করুন",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

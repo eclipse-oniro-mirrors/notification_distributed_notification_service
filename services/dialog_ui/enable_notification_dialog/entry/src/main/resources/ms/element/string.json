@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Benarkan %s menghantar pemberitahuan kepada anda?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Benarkan",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Tolak",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

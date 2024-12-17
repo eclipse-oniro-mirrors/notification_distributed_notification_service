@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Engedélyezi a(z) %s számára, hogy értesítéseket küldjön Önnek?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Engedélyezés",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Elutasítás",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

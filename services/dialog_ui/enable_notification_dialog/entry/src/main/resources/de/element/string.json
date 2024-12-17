@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Zulassen, dass %s Ihnen Benachrichtigungen sendet?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Zulassen",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Ablehnen",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}
