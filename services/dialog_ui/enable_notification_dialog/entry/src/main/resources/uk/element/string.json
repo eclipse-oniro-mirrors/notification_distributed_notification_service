@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Дозволити додатку \"%s\" надсилати вам сповіщення?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Дозволити",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Заборонити",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

@@ -1,36 +1,45 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་སྒོ་ལྕགས་བརྙན་ཡོལ་དང་། འཕྲེད་བྱང་། དྲིལ་སྒྲ། སྦིར་བརྡ་སོགས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
-    },
-    {
-      "name": "reason_simple",
-      "value": "བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་འཕྲེད་བྱང་། དྲིལ་སྒྲ་སོགས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
-    },
-    {
-      "name": "ALLOW",
-      "value": "ཆོག་པ།"
-    },
-    {
-      "name": "BAN",
-      "value": "མི་ཆོག"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "༼%s༽ཡིས་ཁྱེད་ལ་བརྡ་ཐོ་གཏོང་ཆོག་པར་བྱེད་དམ།"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་སྒོ་ལྕགས་བརྙན་ཡོལ་དང་། འཕྲེད་བྱང་། དྲིལ་སྒྲ། སྦིར་བརྡ་སོགས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
+      },
+      {
+          "name":"reason_simple",
+          "value":"བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་འཕྲེད་བྱང་། དྲིལ་སྒྲ་སོགས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
+      },
+      {
+          "name":"ALLOW",
+          "value":"ཆོག་པ།",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"མི་ཆོག",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"༼%s༽ཡིས་ཁྱེད་ལ་བརྡ་ཐོ་གཏོང་ཆོག་པར་བྱེད་དམ།",
+          "attr":{
+              "priority":"LT"
+          }
+      }
   ]
 }

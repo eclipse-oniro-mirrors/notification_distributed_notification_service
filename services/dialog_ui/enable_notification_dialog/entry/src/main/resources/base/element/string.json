@@ -1,36 +1,45 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "These may include lock screen notifications, banners, sounds, vibrations, and more. You can change this in Settings."
-    },
-    {
-      "name": "reason_simple",
-      "value": "These may include banners, sounds, and more. You can change your preferences in Settings."
-    },
-    {
-      "name": "ALLOW",
-      "value": "Allow"
-    },
-    {
-      "name": "BAN",
-      "value": "Deny"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "Allow %s to send you notifications?"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"These may include lock screen notifications, banners, sounds, vibrations, and more. You can change this in Settings."
+      },
+      {
+          "name":"reason_simple",
+          "value":"These may include banners, sounds, and more. You can change your preferences in Settings."
+      },
+      {
+          "name":"ALLOW",
+          "value":"Allow",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"Deny",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"Allow %s to send you notifications?",
+          "attr":{
+              "priority":"LT"
+          }
+      }
   ]
 }
