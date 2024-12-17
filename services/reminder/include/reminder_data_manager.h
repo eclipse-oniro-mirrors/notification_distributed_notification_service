@@ -641,8 +641,6 @@ private:
 
     int64_t CreateReminderLoadTimer(const sptr<MiscServices::TimeServiceClient> timer);
 
-    bool CheckShowLimit(std::unordered_map<int32_t, int32_t>& limits, sptr<ReminderRequest>& reminder);
-
    /**
     * Single instance.
     */

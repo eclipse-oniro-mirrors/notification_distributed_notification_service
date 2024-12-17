@@ -580,11 +580,6 @@ public:
     void OnShowFail();
 
     /**
-     * @brief Show reminder failed by number limit.
-     */
-    void OnFailByLimit();
-
-    /**
      * @brief Snooze the reminder by manual.
      *
      * 1) Updates the trigger time to the next one.
