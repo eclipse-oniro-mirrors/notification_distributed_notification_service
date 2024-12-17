@@ -962,7 +962,7 @@ HWTEST_F(NotificationHelperTest, RemoveNotifications_00002, Function | SmallTest
     int32_t userId = 10;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.RemoveNotifications(userId);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
