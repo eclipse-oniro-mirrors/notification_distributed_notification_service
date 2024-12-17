@@ -1325,34 +1325,44 @@ namespace Notification {
         // buttonNames: Array<String>
         auto vecs = button.GetAllButtonNames();
         CArrString names = { .head = nullptr, .size = 0 };
-        names.head = static_cast<char **>(malloc(sizeof(char *) * vecs.size()));
-        names.size = static_cast<int64_t>(vecs.size());
-        if (names.head == nullptr) {
-            LOGE("NotificationButton names malloc failed");
-            return false;
-        }
-        int i = 0;
-        for (auto vec : vecs) {
-            names.head[i++] = MallocCString(vec);
+        if (vecs.size() > 0) {
+            names.head = static_cast<char **>(malloc(sizeof(char *) * vecs.size()));
+            names.size = static_cast<int64_t>(vecs.size());
+            if (names.head == nullptr) {
+                LOGE("NotificationButton names malloc failed");
+                return false;
+            }
+            int i = 0;
+            for (auto vec : vecs) {
+                names.head[i++] = MallocCString(vec);
+            }
         }
         cButton.names = names;
 
         // buttonIcons: Array<PixelMap>
         int iconCount = 0;
         std::vector<std::shared_ptr<Media::PixelMap>> iconsVec = button.GetAllButtonIcons();
-        CArrI64 icons = { .head = nullptr, .size = iconsVec.size() };
-        for (auto vec : iconsVec) {
-            if (!vec) {
-                continue;
+        CArrI64 icons = { .head = nullptr, .size = 0 };
+        if (iconsVec.size()) {
+            icons.head = static_cast<int64_t *>(malloc(sizeof(int64_t) * iconsVec.size()));
+            if (icons.head == nullptr) {
+                LOGE("NotificationButton icons malloc failed");
+                return false;
             }
-            // buttonIcon
-            auto native = FFIData::Create<Media::PixelMapImpl>(vec);
-            if (native == nullptr) {
-                LOGE("Invalid object pixelMap of buttonIcons.");
-                return false; // memory free at cj
+            for (auto vec : iconsVec) {
+                if (!vec) {
+                    continue;
+                }
+                // buttonIcon
+                auto native = FFIData::Create<Media::PixelMapImpl>(vec);
+                if (native == nullptr) {
+                    LOGE("Invalid object pixelMap of buttonIcons.");
+                    return false; // memory free at cj
+                }
+                icons.head[iconCount++] = native->GetID();
             }
-            icons.head[iconCount++] = native->GetID();
         }
+        icons.size = static_cast<int64_t>(iconsVec.size());
         cButton.icons = icons;
         return true;
     }
