@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Ar leisti programėlei „%s“ siųsti jums pranešimus?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Leisti",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Atmesti",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

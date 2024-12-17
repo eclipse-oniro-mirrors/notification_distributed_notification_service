@@ -1,0 +1,16 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"[TS_917251]_Allow %s to send you notifications?"
+        },
+        {
+            "name":"ALLOW",
+            "value":"[TS_917252]_Allow"
+        },
+        {
+            "name":"BAN",
+            "value":"[TS_917253]_Deny"
+        }
+    ]
+}
