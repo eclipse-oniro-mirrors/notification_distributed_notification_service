@@ -19,7 +19,7 @@
 #include "request_box.h"
 #include "state_box.h"
 #include "in_process_call_wrapper.h"
-#include "distribued_screenlock_service.h"
+#include "distributed_screenlock_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -61,7 +61,6 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
         ANS_LOGE("Check handler is null.");
         return;
     }
-    CHECK_NULL_RETURN(serviceQueue_);
     std::function<void()> task = std::bind([&, box]() {
         int32_t type = NOTIFICATION_EVENT_TYPE_BUTT;
         if (!box->GetMessageType(type)) {

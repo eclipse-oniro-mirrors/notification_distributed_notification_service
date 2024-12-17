@@ -19,7 +19,7 @@
 #include "request_box.h"
 #include "state_box.h"
 #include "in_process_call_wrapper.h"
-#include "distribued_screenlock_service.h"
+#include "distributed_screenlock_service.h"
 
 namespace OHOS {
 namespace Notification {
