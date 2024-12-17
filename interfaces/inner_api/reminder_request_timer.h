@@ -39,7 +39,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestTimer(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestTimer(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::TIMER);
+    };
 
     /**
      * @brief Copy construct from an exist reminder.
@@ -70,12 +73,14 @@ public:
     static ReminderRequestTimer *Unmarshalling(Parcel &parcel);
 
     bool ReadFromParcel(Parcel &parcel) override;
+    bool WriteParcel(Parcel &parcel) const override;
+
+    ReminderRequestTimer() : ReminderRequest(ReminderType::TIMER) {};
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestTimer() {};
     void CheckParamsValid(const uint64_t countDownTimeInSeconds) const;
     void UpdateTimeInfo(const std::string &description);
     uint64_t countDownTimeInSeconds_ {0};

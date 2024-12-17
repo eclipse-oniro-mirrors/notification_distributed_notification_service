@@ -25,7 +25,6 @@ ohos_fuzztest("AnsManagerStubAnnexFuzzTest") {
   include_dirs = [
     "${services_path}/ans/include",
     "${core_path}/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   cflags = [

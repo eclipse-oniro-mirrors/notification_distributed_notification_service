@@ -61,12 +61,22 @@ void ExtensionWrapper::InitExtentionWrapper()
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
     reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
     bannerControl_ = (BANNER_CONTROL)dlsym(extensionWrapperHandle_, "BannerControl");
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    modifyReminderFlags_ = (MODIFY_REMINDER_FLAGS)dlsym(extensionWrapperHandle_, "ModifyReminderFlags");
+#endif
     if (syncAdditionConfig_ == nullptr || bannerControl_ == nullptr
         || localControl_ == nullptr
         || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("extension wrapper modifyReminderFlags symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+#endif
 
     std::string ctrlConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
     if (!ctrlConfig.empty()) {
@@ -166,6 +176,17 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
     }
     return bannerControl_(bundleName);
 }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+bool ExtensionWrapper::ModifyReminderFlags(const sptr<NotificationRequest> &request)
+{
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("ModifyReminderFlags wrapper symbol failed");
+        return false;
+    }
+    return modifyReminderFlags_(request);
+}
+#endif
 
 __attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
 {

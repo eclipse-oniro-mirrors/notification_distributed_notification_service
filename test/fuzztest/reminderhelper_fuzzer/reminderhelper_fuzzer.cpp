@@ -13,43 +13,29 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_helper.h"
-#undef private
-#undef protected
 #include "reminderhelper_fuzzer.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t SLOT_TYPE_NUM = 5;
-    }
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::ReminderRequest reminder;
         reminder.SetContent(stringData);
         reminder.SetExpiredContent(stringData);
-        Notification::ReminderHelper::PublishReminder(reminder);
+        int32_t reminderId2 = 0;
+        Notification::ReminderHelper::PublishReminder(reminder, reminderId2);
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderHelper::CancelReminder(reminderId);
-        sptr<Notification::ReminderRequest> valid = new Notification::ReminderRequest();
-        std::vector<sptr<Notification::ReminderRequest>> validReminders;
+        Notification::ReminderRequestAdaptation valid;
+        std::vector<Notification::ReminderRequestAdaptation> validReminders;
         validReminders.emplace_back(valid);
         Notification::ReminderHelper::GetValidReminders(validReminders);
-        Notification::NotificationSlot notificationSlot;
-        bool enabled = fdp->ConsumeBool();
-        notificationSlot.SetEnableLight(enabled);
-        notificationSlot.SetEnableVibration(enabled);
-        Notification::ReminderHelper::AddNotificationSlot(notificationSlot);
-        uint8_t type = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
-        Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
-        Notification::ReminderHelper::RemoveNotificationSlot(slotType);
-        uint64_t excludeDate = static_cast<uint64_t>(reminderId);
+        uint64_t excludeDate = static_cast<int64_t>(reminderId);
         Notification::ReminderHelper::AddExcludeDate(reminderId, excludeDate);
         Notification::ReminderHelper::DelExcludeDates(reminderId);
-        std::vector<uint64_t> dates;
+        std::vector<int64_t> dates;
         Notification::ReminderHelper::GetExcludeDates(reminderId, dates);
         return Notification::ReminderHelper::CancelAllReminders();
     }

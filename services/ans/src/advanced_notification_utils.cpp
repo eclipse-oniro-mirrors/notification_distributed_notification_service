@@ -656,6 +656,7 @@ void AdvancedNotificationService::OnBootSystemCompleted()
 {
     ANS_LOGI("Called.");
     InitNotificationEnableList();
+    TryStartReminderAgentService();
 }
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -2018,10 +2019,17 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 #endif
 }
 
+ErrCode AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    isAllowUseReminder = AllowUseReminder(bundleName);
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::ResetDistributedEnabled()
 {
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("notificationSvrQueue is nullptr");
+        return;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
         std::string value;

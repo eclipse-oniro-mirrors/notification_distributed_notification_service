@@ -58,7 +58,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestCalendar(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestCalendar(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::CALENDAR);
+    };
 
     explicit ReminderRequestCalendar(const ReminderRequestCalendar &other);
     ReminderRequestCalendar& operator = (const ReminderRequestCalendar &other);
@@ -68,9 +71,9 @@ public:
 
     std::shared_ptr<ReminderRequest::WantAgentInfo> GetRRuleWantAgentInfo();
 
-    void AddExcludeDate(const uint64_t date);
+    void AddExcludeDate(const int64_t date);
     void DelExcludeDates();
-    std::vector<uint64_t> GetExcludeDates() const;
+    std::vector<int64_t> GetExcludeDates() const;
     bool IsInExcludeDate() const;
 
     inline uint16_t GetYear() const
@@ -296,6 +299,7 @@ public:
      * @return true if read parcel success.
      */
     bool ReadFromParcel(Parcel &parcel) override;
+    bool WriteParcel(Parcel &parcel) const override;
     bool SetNextTriggerTime() override;
 
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
@@ -313,6 +317,8 @@ public:
      */
     uint64_t GetLastStartDateTime() const;
 
+    ReminderRequestCalendar() : ReminderRequest(ReminderType::CALENDAR) {};
+
 public:
     static constexpr uint8_t MAX_MONTHS_OF_YEAR = 12;
     static constexpr uint8_t MAX_DAYS_OF_MONTH = 31;
@@ -321,7 +327,6 @@ protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestCalendar() : ReminderRequest() {}
 
     uint8_t GetNextDay(const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const;
     uint64_t GetNextTriggerTime(const bool updateLast = false);
@@ -378,7 +383,7 @@ private:
     uint64_t durationTime_{0};
     uint64_t lastStartDateTime_{0};
 
-    std::set<uint64_t> excludeDates_;
+    std::set<int64_t> excludeDates_;
 
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;

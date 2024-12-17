@@ -305,8 +305,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     }
     soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
-    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
-        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
@@ -316,7 +314,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
 
     RecoverLiveViewFromDb();
-    ResetDistributedEnabled();
 
     ISystemEvent iSystemEvent = {
         std::bind(&AdvancedNotificationService::OnBundleRemoved, this, std::placeholders::_1),
@@ -332,7 +329,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
 
-    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     GetFlowCtrlConfigFromCCM();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
@@ -983,6 +979,20 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
         flags->SetStatusIconEnabled(false);
     }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    bool isPrivileged = EXTENTION_WRAPPER->ModifyReminderFlags(record->request);
+    if (isPrivileged) {
+        record->notification->SetPrivileged(true);
+        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+            record->notification->SetEnableSound(true);
+            record->notification->SetSound(DEFAULT_NOTIFICATION_SOUND);
+        }
+        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
+            record->notification->SetEnableVibration(true);
+        }
+    }
+#endif
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(
@@ -1012,7 +1022,8 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
-ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid)
+ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
+    const int32_t callingUid)
 {
     if (record->isNeedFlowCtrl == false) {
         return ERR_OK;
@@ -1051,7 +1062,7 @@ ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<Notifi
 }
 
 ErrCode AdvancedNotificationService::UpdateGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now)
+    std::chrono::system_clock::time_point now)
 {
     ANS_LOGD("UpdateGlobalFlowCtrl size %{public}zu,%{public}zu",
         flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
@@ -1086,7 +1097,7 @@ ErrCode AdvancedNotificationService::UpdateGlobalFlowCtrl(const std::shared_ptr<
 }
 
 ErrCode AdvancedNotificationService::UpdateSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid)
+    std::chrono::system_clock::time_point now, const int32_t callingUid)
 {
     std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
     auto singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
@@ -1606,7 +1617,7 @@ ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<Notificat
         result = PublishFlowCtrl(record, callingUid);
     } else {
         if (record->request->IsAlertOneTime()) {
-            CloseAlert(record); 
+            CloseAlert(record);
         }
         result = UpdateFlowCtrl(record, callingUid);
     }
@@ -1632,7 +1643,7 @@ ErrCode AdvancedNotificationService::PublishFlowCtrl(const std::shared_ptr<Notif
         return result;
     }
     result = PublishGlobalFlowCtrl(record, now);
-    if (result != ERR_OK) { 
+    if (result != ERR_OK) {
         return result;
     }
     if (record->isThirdparty == true) {

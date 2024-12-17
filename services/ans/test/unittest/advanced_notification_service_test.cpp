@@ -994,18 +994,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13100,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_13500
- * @tc.name      : ANS_GetValidReminders_0100
- * @tc.desc      : Test GetValidReminders function when the result is ERR_NO_INIT
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13500, Function | SmallTest | Level1)
-{
-    std::vector<sptr<ReminderRequest>> reminders;
-    ASSERT_EQ(advancedNotificationService_->GetValidReminders(reminders), (int)ERR_NO_INIT);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_13600
  * @tc.name      : ANS_ActiveNotificationDump_0100
  * @tc.desc      : Test ActiveNotificationDump function when the result is ERR_OK
@@ -1428,14 +1416,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     ASSERT_EQ(advancedNotificationService_->IsAllowedNotifySelf(bundleOption, needPop), ERR_ANS_INVALID_BUNDLE);
 
     ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, bundleOption), ERR_ANS_INVALID_BUNDLE);
-
-    int32_t reminderId = 1;
-    ASSERT_EQ(advancedNotificationService_->CancelReminder(reminderId), ERR_ANS_INVALID_BUNDLE);
-
-    ASSERT_EQ(advancedNotificationService_->CancelAllReminders(), ERR_ANS_INVALID_BUNDLE);
-
-    std::vector<sptr<ReminderRequest>> reminders;
-    ASSERT_EQ(advancedNotificationService_->GetValidReminders(reminders), ERR_ANS_INVALID_BUNDLE);
 
     ASSERT_EQ(advancedNotificationService_->RemoveAllSlots(), ERR_ANS_INVALID_BUNDLE);
 
@@ -3738,68 +3718,9 @@ HWTEST_F(AdvancedNotificationServiceTest, RegisterSwingCallback_00002, Function 
 #endif
 
 /**
- * @tc.number    : AddExcludeDate_00001
- * @tc.name      : Test AddExcludeDate
- * @tc.desc      : Test AddExcludeDate function when the result is ERR_NO_INIT
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AddExcludeDate_00001, Function | SmallTest | Level1)
-{
-    int32_t reminderId = 10;
-    uint64_t time = 124325;
-    MockIsVerfyPermisson(false);
-    ASSERT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_REMINDER_PERMISSION_DENIED);
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    MockIsNonBundleName(true);
-    ASSERT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_ANS_INVALID_BUNDLE);
-    MockIsNonBundleName(false);
-    ASSERT_EQ(advancedNotificationService_->AddExcludeDate(reminderId, time), (int)ERR_NO_INIT);
-    MockIsVerfyPermisson(false);
-}
-
-/**
- * @tc.number    : DelExcludeDates_00002
- * @tc.name      : Test DelExcludeDates
- * @tc.desc      : Test DelExcludeDates function when the result is ERR_NO_INIT
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, DelExcludeDates_00002, Function | SmallTest | Level1)
-{
-    int32_t reminderId = 10;
-    MockIsVerfyPermisson(false);
-    ASSERT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_REMINDER_PERMISSION_DENIED);
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    MockIsNonBundleName(true);
-    ASSERT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_ANS_INVALID_BUNDLE);
-    MockIsNonBundleName(false);
-    ASSERT_EQ(advancedNotificationService_->DelExcludeDates(reminderId), (int)ERR_NO_INIT);
-    MockIsVerfyPermisson(false);
-}
-
-/**
- * @tc.number    : GetExcludeDates_00001
- * @tc.name      : Test GetExcludeDates
- * @tc.desc      : Test GetExcludeDates function when the result is ERR_NO_INIT
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | SmallTest | Level1)
-{
-    int32_t reminderId = 10;
-    std::vector<uint64_t> times;
-    MockIsVerfyPermisson(false);
-    ASSERT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_REMINDER_PERMISSION_DENIED);
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    MockIsNonBundleName(true);
-    ASSERT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_ANS_INVALID_BUNDLE);
-    MockIsNonBundleName(false);
-    ASSERT_EQ(advancedNotificationService_->GetExcludeDates(reminderId, times), (int)ERR_NO_INIT);
-    MockIsVerfyPermisson(false);
-}
-
-/**
- * @tc.number    : PublishInNotificationList_00001
- * @tc.name      : Test PublishInNotificationList
- * @tc.desc      : Test PublishInNotificationList function when the record->slot is nullptr
+ * @tc.number    : PublishFlowControl_00001
+ * @tc.name      : Test PublishFlowControl
+ * @tc.desc      : Test PublishFlowControl function when the record->slot is nullptr
  * @tc.require   : issueI5S4VP
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Function | SmallTest | Level1)
@@ -3825,7 +3746,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Funct
 /**
  * @tc.number    : PublishGlobalFlowCtrl_00001
  * @tc.name      : Test PublishGlobalFlowCtrl
- * @tc.desc      : Test PublishGlobalFlowCtrl 
+ * @tc.desc      : Test PublishGlobalFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishGlobalFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3864,7 +3785,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishGlobalFlowCtrl_00001, Function 
 /**
  * @tc.number    : PublishSingleAppFlowCtrl_00001
  * @tc.name      : Test PublishSingleAppFlowCtrl
- * @tc.desc      : Test PublishSingleAppFlowCtrl 
+ * @tc.desc      : Test PublishSingleAppFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishSingleAppFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3924,7 +3845,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishSingleAppFlowCtrlRemoveExpire_0
 /**
  * @tc.number    : PublishFlowCtrl_00001
  * @tc.name      : Test PublishFlowCtrl
- * @tc.desc      : Test PublishFlowCtrl 
+ * @tc.desc      : Test PublishFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, PublishFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -3970,7 +3891,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishFlowCtrl_00001, Function | Smal
 /**
  * @tc.number    : UpdateGlobalFlowCtrl_00001
  * @tc.name      : Test UpdateGlobalFlowCtrl
- * @tc.desc      : Test UpdateGlobalFlowCtrl 
+ * @tc.desc      : Test UpdateGlobalFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, UpdateGlobalFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -4069,7 +3990,7 @@ HWTEST_F(AdvancedNotificationServiceTest, UpdateSingleAppFlowCtrlRemoveExpire_00
 /**
  * @tc.number    : UpdateFlowCtrl_00001
  * @tc.name      : Test UpdateFlowCtrl
- * @tc.desc      : Test UpdateFlowCtrl 
+ * @tc.desc      : Test UpdateFlowCtrl
  */
 HWTEST_F(AdvancedNotificationServiceTest, UpdateFlowCtrl_00001, Function | SmallTest | Level1)
 {
@@ -4115,7 +4036,7 @@ HWTEST_F(AdvancedNotificationServiceTest, UpdateFlowCtrl_00001, Function | Small
 /**
  * @tc.number    : FlowControl_00001
  * @tc.name      : Test FlowControl
- * @tc.desc      : Test FlowControl 
+ * @tc.desc      : Test FlowControl
  */
 HWTEST_F(AdvancedNotificationServiceTest, FlowControl_00001, Function | SmallTest | Level1)
 {

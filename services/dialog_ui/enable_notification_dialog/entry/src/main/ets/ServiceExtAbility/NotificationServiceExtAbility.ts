@@ -21,7 +21,7 @@ import CommonEventManager from '@ohos.commonEventManager';
 import type Want from '@ohos.app.ability.Want';
 import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
-import uiExtensionHost from '@ohos.uiExtensionHost';
+import uiExtension from '@ohos.arkui.uiExtension';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import configPolicy from '@ohos.configPolicy';
 import fs from '@ohos.file.fs';
@@ -86,7 +86,7 @@ export class EnableNotificationDialog {
   id: number;
   want: Want;
   window: window.Window;
-  extensionWindow:uiExtensionHost.UIExtensionHostWindowProxy;
+  extensionWindow:uiExtension.WindowProxy;
   storage: LocalStorage;
   stageModel: boolean;
   subWindow: window.Window;
@@ -102,7 +102,7 @@ export class EnableNotificationDialog {
 
   async createUiExtensionWindow(session: UIExtensionContentSession, stageModel: boolean): Promise<void> {
     try {
-      let extensionWindow = session.getUIExtensionHostWindowProxy();
+      let extensionWindow = session.getUIExtensionWindowProxy();
       this.extensionWindow = extensionWindow;
       let shouldHide = true;
 

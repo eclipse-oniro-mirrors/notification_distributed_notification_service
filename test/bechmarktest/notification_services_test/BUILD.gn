@@ -25,7 +25,6 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "${access_token_path}/interfaces/innerkits/nativetoken/include",
     "${access_token_path}/interfaces/innerkits/accesstoken/include",
     "${services_path}/ans/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [

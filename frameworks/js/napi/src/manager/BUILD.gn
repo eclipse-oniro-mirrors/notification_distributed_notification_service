@@ -94,7 +94,10 @@ ohos_shared_library("notificationmanager") {
     "napi_template.cpp",
   ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+  ]
 
   external_deps = [
     "ability_base:want",

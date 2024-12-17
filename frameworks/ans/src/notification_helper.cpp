@@ -587,5 +587,10 @@ ErrCode NotificationHelper::UpdateNotificationTimerByUid(const int32_t uid, cons
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationTimerByUid(uid, isPaused);
 }
+
+ErrCode NotificationHelper::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->AllowUseReminder(bundleName, isAllowUseReminder);
+}
 }  // namespace Notification
 }  // namespace OHOS

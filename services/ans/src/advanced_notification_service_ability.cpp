@@ -46,7 +46,6 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
     service_->CreateDialogManager();
     service_->InitPublishProcess();
-    reminderAgent_ = ReminderDataManager::InitInstance(service_);
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
@@ -55,6 +54,7 @@ void AdvancedNotificationServiceAbility::OnStart()
 #else
     ANS_LOGI("Not enabled ans_ext");
 #endif
+    AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
 
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
@@ -64,7 +64,6 @@ void AdvancedNotificationServiceAbility::OnStart()
 void AdvancedNotificationServiceAbility::OnStop()
 {
     service_ = nullptr;
-    reminderAgent_ = nullptr;
 }
 
 void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
@@ -92,6 +91,15 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
             return;
         }
         EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    } else if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        if (isDatashaReready_) {
+            return;
+        }
+        auto notificationService = AdvancedNotificationService::GetInstance();
+        if (notificationService == nullptr) {
+            return;
+        }
+        notificationService->ResetDistributedEnabled();
     }
 }
 

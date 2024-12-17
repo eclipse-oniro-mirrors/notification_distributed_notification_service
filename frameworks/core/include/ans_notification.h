@@ -876,64 +876,6 @@ public:
      * @brief try to reconnect ans SA when SA manager OnAddSystemAbility called.
      */
     void Reconnect();
-
-    /**
-     * @brief Publishes a scheduled reminder.
-     *
-     * @param reminder Indicates a reminder.
-     * @return Returns publish result.
-     */
-    ErrCode PublishReminder(ReminderRequest &reminder);
-
-    /**
-     * @brief Cancels a specified reminder.
-     *
-     * @param reminderId Indicates reminder Id.
-     * @return Returns cancel result.
-     */
-    ErrCode CancelReminder(const int32_t reminderId);
-
-    /**
-     * @brief Cancels all reminders of current third part application.
-     *
-     * @return Returns cancel result.
-     */
-    ErrCode CancelAllReminders();
-
-    /**
-     * @brief Obtains all valid reminder notifications set by the current application.
-     *
-     * @param[out] validReminders Indicates the vector to store the result.
-     * @return Returns get valid reminders result.
-     */
-    ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders);
-
-    /**
-     * @brief Add exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param date exclude date
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
-
-    /**
-     * @brief Clear exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode DelExcludeDates(const int32_t reminderId);
-
-    /**
-     * @brief Get exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param dates exclude dates
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates);
-
     /**
      * @brief Checks whether this application has permission to publish notifications under the user.
      *
@@ -1184,6 +1126,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
 
     /**
      * @brief Ans service died, OnRemoteDied called.
