@@ -710,7 +710,7 @@ void ReminderDataManager::GenPredicates(DataShare::DataSharePredicates &predicat
         if (temp[INDEX_TYPE] == "string") {
             predicates.EqualTo(temp[INDEX_KEY], temp[INDEX_VALUE]);
         } else if (temp[INDEX_TYPE] == "double") {
-            predicates.EqualTo(temp[INDEX_KEY], std::stod(temp[INDEX_VALUE]));
+            predicates.EqualTo(temp[INDEX_KEY], ReminderRequest::StringToDouble(temp[INDEX_VALUE]));
         } else if (temp[INDEX_TYPE] == "bool") {
             bool valueBool = false;
             if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true" || temp[INDEX_VALUE] == "True") {
@@ -733,7 +733,7 @@ void ReminderDataManager::GenValuesBucket(DataShare::DataShareValuesBucket & val
         if (temp[INDEX_TYPE] == "string") {
             valuesBucket.Put(temp[INDEX_KEY], temp[INDEX_VALUE]);
         } else if (temp[INDEX_TYPE] == "double") {
-            valuesBucket.Put(temp[INDEX_KEY], std::stod(temp[INDEX_VALUE]));
+            valuesBucket.Put(temp[INDEX_KEY], ReminderRequest::StringToDouble(temp[INDEX_VALUE]));
         } else if (temp[INDEX_TYPE] == "bool") {
             bool valueBool = false;
             if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true") {
