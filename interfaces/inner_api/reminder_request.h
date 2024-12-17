@@ -922,6 +922,8 @@ public:
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);
     static uint64_t GetDurationSinceEpochInMilli(const time_t target);
     static std::vector<std::string> StringSplit(std::string source, const std::string &split);
+    static double StringToDouble(const std::string& str);
+    static int32_t StringToInt(const std::string& str);
 
     static bool ReadReminderTypeFormParcel(Parcel &parcel, ReminderType& tarReminderType);
 

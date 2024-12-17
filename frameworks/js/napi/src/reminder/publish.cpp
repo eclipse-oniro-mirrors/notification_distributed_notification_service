@@ -541,7 +541,7 @@ napi_status ParseArray(const napi_env &env, std::vector<std::string>& temp, napi
     if (temp[INDEX_TYPE] == "string") {
         napi_create_string_utf8(env, temp[INDEX_VALUE].c_str(), NAPI_AUTO_LENGTH, &valueInfo);
     } else if (temp[INDEX_TYPE] == "double") {
-        napi_create_double(env, std::stod(temp[INDEX_VALUE]), &valueInfo);
+        napi_create_double(env, ReminderRequest::StringToDouble(temp[INDEX_VALUE]), &valueInfo);
     } else if (temp[INDEX_TYPE] == "bool") {
         bool valueBool = false;
         if (temp[INDEX_VALUE] == "1" || temp[INDEX_VALUE] == "true" || temp[INDEX_VALUE] == "True") {
@@ -555,7 +555,7 @@ napi_status ParseArray(const napi_env &env, std::vector<std::string>& temp, napi
             ReminderRequest::SEP_BUTTON_VALUE_BLOB);
         std::vector<uint8_t> value;
         for (auto &num : arr) {
-            value.push_back(static_cast<uint8_t>(std::stoi(num)));
+            value.push_back(static_cast<uint8_t>(ReminderRequest::StringToInt(num)));
         }
         // vector<uint8_t> to napi_value
         if (value.size() <= 0) {

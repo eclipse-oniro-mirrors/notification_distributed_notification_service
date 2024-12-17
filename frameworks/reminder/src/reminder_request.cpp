@@ -569,6 +569,32 @@ std::vector<std::string> ReminderRequest::StringSplit(std::string source, const 
     return result;
 }
 
+double ReminderRequest::StringToDouble(const std::string& str)
+{
+    char* pEnd = nullptr;
+    errno = 0;
+    double res = std::strtod(str.c_str(), &pEnd);
+    if (errno == ERANGE || pEnd == str.c_str() || *pEnd != '\0' ||
+        (res < std::numeric_limits<double>::min()) ||
+        res > std::numeric_limits<double>::max()) {
+        return 0.0;
+    }
+    return res;
+}
+
+int32_t ReminderRequest::StringToInt(const std::string& str)
+{
+    char* pEnd = nullptr;
+    errno = 0;
+    int64_t res = std::strtol(str.c_str(), &pEnd, 10);
+    if (errno == ERANGE || pEnd == str.c_str() || *pEnd != '\0' ||
+        (res < std::numeric_limits<int32_t>::min()) ||
+        res > std::numeric_limits<int32_t>::max()) {
+        return 0;
+    }
+    return static_cast<int32_t>(res);
+}
+
 void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type)
 {
     nlohmann::json root = nlohmann::json::parse(wantAgentInfo, nullptr, false);
