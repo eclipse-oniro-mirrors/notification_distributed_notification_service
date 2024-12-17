@@ -2014,8 +2014,10 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
             return ERROR_INTERNAL_ERROR;
         }
     }
-
-    pushCallBacks_.insert_or_assign(slotType, pushCallBack);
+    {
+        std::lock_guard<std::mutex> lock(pushMutex_);
+        pushCallBacks_.insert_or_assign(slotType, pushCallBack);
+    }
     ANS_LOGD("insert pushCallBack, slot type %{public}d", slotType);
     notificationCheckRequest->SetUid(uid);
     checkRequests_.insert_or_assign(slotType, notificationCheckRequest);
@@ -2048,7 +2050,10 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         return ERR_INVALID_OPERATION;
     }
 
-    pushCallBacks_.clear();
+    {
+        std::lock_guard<std::mutex> lock(pushMutex_);
+        pushCallBacks_.clear();
+    }
 
     ANS_LOGD("end");
     return ERR_OK;
