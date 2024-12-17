@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_NO_RIGHT, "No permission"},
     {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
     {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
+    {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION, "Failed to release the blocklist application notification"},
 };
 }
 
@@ -334,7 +335,8 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
         {ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE, ERROR_NETWORK_UNREACHABLE},
         {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING},
         {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING},
-        {ERR_ANS_NO_PROFILE_TEMPLATE, ERROR_NO_PROFILE_TEMPLATE}
+        {ERR_ANS_NO_PROFILE_TEMPLATE, ERROR_NO_PROFILE_TEMPLATE},
+        {ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, ERROR_REJECTED_WITH_DISABLE_NOTIFICATION}
     };
 
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;

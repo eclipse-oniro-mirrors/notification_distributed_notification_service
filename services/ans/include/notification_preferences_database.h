@@ -260,7 +260,8 @@ public:
         const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
     bool DelBatchCloneBundleInfo(const int32_t &userId,
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
-
+    bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
+    bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
 private:
     bool CheckRdbStore();
 
@@ -345,6 +346,7 @@ private:
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
+    void GetDisableNotificationInfo(NotificationPreferencesInfo &info);
     void SetSoltProperty(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
         const std::string &findString, const int32_t &userId);
     void ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,

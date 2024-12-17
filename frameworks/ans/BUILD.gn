@@ -82,6 +82,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_content.cpp",
     "${frameworks_module_ans_path}/src/notification_conversational_content.cpp",
     "${frameworks_module_ans_path}/src/notification_conversational_message.cpp",
+    "${frameworks_module_ans_path}/src/notification_disable.cpp",
     "${frameworks_module_ans_path}/src/notification_distributed_options.cpp",
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_date.cpp",
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_profile.cpp",

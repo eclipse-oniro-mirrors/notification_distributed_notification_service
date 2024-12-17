@@ -1148,6 +1148,14 @@ public:
      * @return Returns Update result.
      */
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
+
+    /**
+     * @brief Set switch and bundle list of disable notification feature.
+     *
+     * @param notificationDisable Switch and bundle list of disable notification feature.
+     * @return Returns set result.
+     */
+    ErrCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
 private:
     /**
      * @brief Gets Ans Manager proxy.

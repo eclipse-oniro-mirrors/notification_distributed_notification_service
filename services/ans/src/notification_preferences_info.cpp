@@ -408,5 +408,52 @@ void NotificationPreferencesInfo::SetBundleInfoFromDb(BundleInfo &info, std::str
 {
     infos_.insert_or_assign(bundleKey, info);
 }
+
+void NotificationPreferencesInfo::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
+{
+    if (notificationDisable == nullptr) {
+        ANS_LOGE("the notificationDisable is nullptr");
+        return;
+    }
+    if (notificationDisable->GetBundleList().empty()) {
+        ANS_LOGE("the bundle list is empty");
+        return;
+    }
+    DisableNotificationInfo disableNotificationInfo;
+    if (notificationDisable->GetDisabled()) {
+        disableNotificationInfo_.disabled = 1;
+    } else {
+        disableNotificationInfo_.disabled = 0;
+    }
+    disableNotificationInfo_.bundleList = notificationDisable->GetBundleList();
+}
+
+bool NotificationPreferencesInfo::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
+{
+    if (disableNotificationInfo_.disabled == -1) {
+        ANS_LOGD("notificationDisable is invalid");
+        return false;
+    }
+    if (disableNotificationInfo_.bundleList.empty()) {
+        ANS_LOGE("notificationDisable bundleList is empty");
+        return false;
+    }
+    notificationDisable.SetDisabled(disableNotificationInfo_.disabled);
+    notificationDisable.SetBundleList(disableNotificationInfo_.bundleList);
+    return true;
+}
+
+void NotificationPreferencesInfo::AddDisableNotificationInfo(const std::string &value)
+{
+    NotificationDisable notificationDisable;
+    notificationDisable.FromJson(value);
+    DisableNotificationInfo disableNotificationInfo;
+    if (notificationDisable.GetDisabled()) {
+        disableNotificationInfo_.disabled = 1;
+    } else {
+        disableNotificationInfo_.disabled = 0;
+    }
+    disableNotificationInfo_.bundleList = notificationDisable.GetBundleList();
+}
 }  // namespace Notification
 }  // namespace OHOS
