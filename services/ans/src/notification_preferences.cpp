@@ -859,6 +859,7 @@ ErrCode NotificationPreferences::CheckSlotForRemoveSlot(const sptr<NotificationB
     if (GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         if (bundleInfo.IsExsitSlot(slotType)) {
             bundleInfo.RemoveSlot(slotType);
+            preferencesInfo.SetBundleInfo(bundleInfo);
         } else {
             ANS_LOGE("Notification slot type does not exsited.");
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
