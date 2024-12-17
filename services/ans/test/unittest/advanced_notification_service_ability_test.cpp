@@ -23,6 +23,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace Notification {
+const int ANS_CLONE_ERROR = -1;
 class AdvancedNotificationServiceAbilityTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -71,6 +72,42 @@ HWTEST_F(
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStop();
     test.OnStart();
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_00400
+ * @tc.name      : ANS_AdvancedNotificationServiceAbility_0400
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_00400, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string extension = "backup";
+    MessageParcel data;
+    MessageParcel reply;
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    ErrCode ret = test.OnExtension(extension, data, reply);
+    EXPECT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_00500
+ * @tc.name      : ANS_AdvancedNotificationServiceAbility_0500
+ * @tc.desc      : Structure AdvancedNotificationServiceAbility with systemAbilityId and runOnCreate
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_00500, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string extension = "restore";
+    MessageParcel data;
+    MessageParcel reply;
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    ErrCode ret = test.OnExtension(extension, data, reply);
+    EXPECT_EQ(ret, (int)ANS_CLONE_ERROR);
 }
 }  // namespace Notification
 }  // namespace OHOS
