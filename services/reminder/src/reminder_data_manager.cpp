@@ -1980,9 +1980,11 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
         return;
     }
 
+    int32_t userId = reminder->GetUserId();
     EventFwk::Want want;
     // common event not add COMMON_EVENT_REMINDER_STATUS_CHANGE, Temporary use of string
     want.SetAction("usual.event.REMINDER_STATUS_CHANGE");
+    want.SetParam("userId", userId);
     EventFwk::CommonEventData eventData(want);
 
     std::string data;
@@ -1992,7 +1994,7 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
 
     EventFwk::CommonEventPublishInfo info;
     info.SetBundleName(bundleName);
-    if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
+    if (EventFwk::CommonEventManager::PublishCommonEventAsUser(eventData, info, userId)) {
         ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
     }
 }
