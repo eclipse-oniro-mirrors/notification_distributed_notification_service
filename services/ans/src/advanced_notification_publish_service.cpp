@@ -1958,8 +1958,11 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
+            ANS_LOGD("ExcuteCancelGroupCancel instanceKey(%{public}s, %{public}s).",
+                record->notification->GetInstanceKey().c_str(), bundleOption->GetAppInstanceKey().c_str());
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 record->deviceId.empty() &&
 #endif

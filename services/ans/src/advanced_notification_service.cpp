@@ -1312,7 +1312,12 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
             (record->bundleOption->GetUid() != bundleOption->GetUid())) {
             continue;
         }
-        keys.push_back(record->notification->GetKey());
+        ANS_LOGD("GetNotificationKeys instanceKey(%{public}s, %{public}s)",
+            record->notification->GetInstanceKey().c_str(), bundleOption->GetAppInstanceKey().c_str());
+        if (record->notification->GetInstanceKey() == "" || bundleOption->GetAppInstanceKey() == "" ||
+            record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) {
+                keys.push_back(record->notification->GetKey());
+        }
     }
 
     std::lock_guard<std::mutex> lock(delayNotificationMutext_);
