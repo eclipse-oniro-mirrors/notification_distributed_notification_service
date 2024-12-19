@@ -185,8 +185,8 @@ bool NotificationConfigParse::IsReminderEnabled(const std::string& bundleName) c
 bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
-    if (appPrivileges != nullptr) {
-        return appPrivileges->IsBannerEnabled();
+    if (appPrivileges != nullptr && appPrivileges->IsBannerEnabled()) {
+        return true;
     }
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     int32_t ctrlResult = EXTENTION_WRAPPER->BannerControl(bundleName);
