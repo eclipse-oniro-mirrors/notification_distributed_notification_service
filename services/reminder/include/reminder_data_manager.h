@@ -415,7 +415,7 @@ private:
     sptr<ReminderRequest> GetRecentReminder();
 
     void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged);
-    void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders);
+    void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders, const int8_t type);
 
     /**
      * @brief Refresh the reminder due to date/time or timeZone change by user.
@@ -518,8 +518,9 @@ private:
     void SetAlertingReminder(const sptr<ReminderRequest> &reminder);
     void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder,
         std::vector<sptr<ReminderRequest>>& extensionReminders);
-    static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder);
-    static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times);
+    static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder, const int8_t type);
+    static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder,
+        int32_t times, const int8_t type);
     void InitServiceHandler();
     /**
      * @brief Show the reminder on SystemUI.
@@ -640,6 +641,9 @@ private:
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
 
     int64_t CreateReminderLoadTimer(const sptr<MiscServices::TimeServiceClient> timer);
+
+    bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
+        sptr<ReminderRequest>& reminder);
 
    /**
     * Single instance.
