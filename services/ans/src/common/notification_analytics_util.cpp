@@ -185,7 +185,12 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
         return;
     }
     EventFwk::Want want;
-    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfoWithReq(message, request);
+    std::string extraInfo;
+    if (eventCode == PUBLISH_ERROR_EVENT_CODE) {
+        extraInfo = NotificationAnalyticsUtil::BuildExtraInfoWithReqPublishFail(message, request);
+    } else {
+        extraInfo = NotificationAnalyticsUtil::BuildExtraInfoWithReq(message, request);
+    }
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
 
     want.SetParam("typeCode", message.typeCode_);
@@ -369,6 +374,59 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
     reason["branch"] = message.branchId_;
     reason["innerErr"] = message.errorCode_;
     reason["detail"] = message.message_;
+
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    reason["time"] = now;
+
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    if (request->GetUnifiedGroupInfo() != nullptr &&
+        request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
+        extraInfo = request->GetUnifiedGroupInfo()->GetExtraInfo();
+    } else {
+        extraInfo = std::make_shared<AAFwk::WantParams>();
+    }
+
+    reason["detail"] = "";
+    int32_t reasonFixedSize =
+        static_cast<int32_t>(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace).size());
+    int32_t leftSpace = REASON_MAX_LENGTH - reasonFixedSize;
+    if (leftSpace < 0) {
+        std::string basicInfo = std::to_string(message.sceneId_) + MESSAGE_DELIMITER +
+            std::to_string(message.branchId_) + MESSAGE_DELIMITER +
+            std::to_string(message.errorCode_) + MESSAGE_DELIMITER +
+            std::to_string(now) + " Reason fixed size exceeds limit";
+        extraInfo->SetParam("reason", AAFwk::String::Box(basicInfo));
+        ANS_LOGI("%{public}s", basicInfo.c_str());
+    } else {
+        reason["detail"] = message.message_.substr(0, leftSpace);
+        extraInfo->SetParam("reason",
+            AAFwk::String::Box(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)));
+    }
+    
+    AAFwk::WantParamWrapper wWrapper(*extraInfo);
+
+    return wWrapper.ToString();
+}
+
+std::string NotificationAnalyticsUtil::BuildExtraInfoWithReqPublishFail(const HaMetaMessage& message,
+    const sptr<NotificationRequest>& request)
+{
+    NotificationNapi::ContentType contentType;
+    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
+        static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
+    nlohmann::json reason;
+    if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
+        auto content = request->GetContent()->GetNotificationContent();
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+        reason["status"] = static_cast<int32_t>(liveViewContent->GetLiveViewStatus());
+    }
+    
+    reason["scene"] = message.sceneId_;
+    reason["branch"] = message.branchId_;
+    reason["innerErr"] = message.errorCode_;
+    reason["detail"] = message.message_;
+    reason["fg"] = std::to_string(request->GetNotificationControlFlags());
 
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();

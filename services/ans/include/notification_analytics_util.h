@@ -125,6 +125,9 @@ private:
 
     static std::string BuildExtraInfoWithReq(const HaMetaMessage& message,
         const sptr<NotificationRequest>& request);
+    
+    static std::string BuildExtraInfoWithReqPublishFail(const HaMetaMessage& message,
+        const sptr<NotificationRequest>& request);
 
     static void SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message, std::string& extraInfo);
     
