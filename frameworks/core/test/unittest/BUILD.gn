@@ -18,7 +18,6 @@ group("unittest") {
   deps += [
     "ans_image_util_test:unittest",
     "ans_manager_proxy_test:unittest",
-    "ans_manager_stub_test:unittest",
     "ans_notification_annex_test:unittest",
     "ans_notification_branch_test:unittest",
     "ans_notification_test:unittest",

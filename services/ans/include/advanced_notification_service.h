@@ -1106,6 +1106,9 @@ public:
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
 
     void TryStartReminderAgentService();
+        
+    static sptr<NotificationBundleOption> GenerateBundleOption();
+    static sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1116,6 +1119,13 @@ protected:
      */
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
+public:
+    bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode SetDefaultNotificationEnabled(
+        const sptr<NotificationBundleOption> &bundleOption, bool enabled);
+    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationSlot> &slot, const int reason);
+    bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -1176,12 +1186,8 @@ private:
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
     ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid);
     ErrCode PublishInNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot, const int reason);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
-    static sptr<NotificationBundleOption> GenerateBundleOption();
-    static sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
 
     std::string TimeToString(int64_t time);
     int64_t GetNowSysTime();
@@ -1202,7 +1208,7 @@ private:
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
 
     void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
-    bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
+
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 
     ErrCode SetNotificationRemindType(sptr<Notification> notification, bool isLocal);
@@ -1232,7 +1238,6 @@ private:
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
     static ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);
-    bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
     void ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName);
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void GetDumpInfo(const std::vector<std::u16string> &args, std::string &result);
@@ -1266,8 +1271,6 @@ private:
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
-    ErrCode SetDefaultNotificationEnabled(
-        const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
 
