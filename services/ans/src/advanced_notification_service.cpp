@@ -207,13 +207,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_BUNDLE;
             }
             request->SetAgentBundle(agentBundle);
-        } else if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
-            int32_t uid = BundleManagerHelper::GetInstance()->
-                GetDefaultUidByBundleName(bundle, request->GetOwnerUserId());
-            if (uid < 0) {
-                return ERR_ANS_INVALID_UID;
-            }
-            request->SetOwnerUid(uid);
         }
         request->SetOwnerBundleName(sourceBundleName);
     }
