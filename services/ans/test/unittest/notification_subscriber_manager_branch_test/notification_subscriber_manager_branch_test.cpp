@@ -208,6 +208,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number  : AdvancedNotificationService_00400
  * @tc.name    : AdvancedNotificationService_00400
@@ -394,7 +395,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     advancedNotificationService.notificationList_.push_back(record);
     ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
-
+#endif
 
 /**
  * @tc.number  : AdvancedNotificationService_01400

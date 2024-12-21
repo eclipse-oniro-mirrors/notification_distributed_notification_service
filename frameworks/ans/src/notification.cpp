@@ -138,6 +138,11 @@ std::string Notification::GetKey() const
     return key_;
 }
 
+void Notification::SetKey(const std::string& key)
+{
+    key_ = key;
+}
+
 NotificationRequest Notification::GetNotificationRequest() const
 {
     return *request_;

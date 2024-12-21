@@ -31,7 +31,6 @@
 #include "notification_constant.h"
 #include "os_account_manager.h"
 #include "notification_preferences.h"
-#include "distributed_database.h"
 #include "os_account_manager_helper.h"
 #include "singleton.h"
 #include "want_agent_helper.h"
@@ -45,6 +44,7 @@
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
 #include "distributed_screen_status_manager.h"
+#include "distributed_database.h"
 #endif
 
 #include "advanced_notification_inline.cpp"

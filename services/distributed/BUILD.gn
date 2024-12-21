@@ -71,3 +71,69 @@ ohos_shared_library("libans_distributed") {
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
+
+ohos_shared_library("libans_softbus_distributed") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  sources = [
+    "src/soft_bus/distributed_client.cpp",
+    "src/soft_bus/distributed_cmd_service.cpp",
+    "src/soft_bus/distributed_extern_intferface.cpp",
+    "src/soft_bus/distributed_local_config.cpp",
+    "src/soft_bus/distributed_manager.cpp",
+    "src/soft_bus/distributed_observer_service.cpp",
+    "src/soft_bus/distributed_publish_service.cpp",
+    "src/soft_bus/distributed_server.cpp",
+    "src/soft_bus/distributed_service.cpp",
+    "src/soft_bus/distributed_socket.cpp",
+    "src/soft_bus/distributed_subscribe_service.cpp",
+    "src/soft_bus/distributed_subscriber.cpp",
+    "src/soft_bus/distributed_timer_service.cpp",
+    "src/tlv_box/box_base.cpp",
+    "src/tlv_box/match_box.cpp",
+    "src/tlv_box/request_box.cpp",
+    "src/tlv_box/state_box.cpp",
+    "src/tlv_box/tlv_box.cpp",
+  ]
+
+  include_dirs = [
+    "${services_path}/distributed/include/soft_bus",
+    "${services_path}/distributed/include/tlv_box",
+  ]
+
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+
+  defines = []
+
+  external_deps = [
+    "ability_base:zuri",
+    "ability_runtime:runtime",
+    "ability_runtime:uri_permission_mgr",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "os_account:os_account_innerkits",
+    "screenlock_mgr:screenlock_client",
+    "time_service:time_client",
+    "zlib:libz",
+  ]
+
+  if (ans_hitrace_usage) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+    defines += [ "HITRACE_METER_ENABLE" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}

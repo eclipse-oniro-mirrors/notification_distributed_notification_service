@@ -1084,6 +1084,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : AnsBranchTest_277000
  * @tc.name      : DoDistributedPublish_3000
@@ -1116,6 +1117,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
         bundleOption, enabled), ERR_ANS_INVALID_PARAM);
 }
+#endif
 
 void AnsBranchTest::InitNotificationRecord(std::shared_ptr<NotificationRecord> &record,
     const NotificationLiveViewContent::LiveViewStatus &status)

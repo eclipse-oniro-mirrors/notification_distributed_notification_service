@@ -74,6 +74,7 @@
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper_ext.h"
 #include "notification_analytics_util.h"
+#include "distributed_device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -338,6 +339,8 @@ AdvancedNotificationService::AdvancedNotificationService()
     GetFlowCtrlConfigFromCCM();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
+#else
+    DistributedDeviceManager::GetInstance().Init();
 #endif
 }
 
@@ -361,7 +364,9 @@ void AdvancedNotificationService::SelfClean()
     }
 
     NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     DistributedNotificationManager::GetInstance()->ResetFfrtQueue();
+#endif
     NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
 }
 
