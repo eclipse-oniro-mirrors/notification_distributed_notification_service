@@ -73,6 +73,21 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want 
     return bundleOption;
 }
 
+sptr<NotificationBundleOption> SystemEventObserver::GetBundleOptionDataCleared(AAFwk::Want want)
+{
+    auto element = want.GetElement();
+    std::string bundleName = element.GetBundleName();
+    int32_t appIndex = want.GetIntParam("appIndex", -1);
+    int32_t uid = want.GetIntParam("ohos.aafwk.param.targetUid", -1);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    bundleOption->SetAppIndex(appIndex);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption.");
+        return nullptr;
+    }
+    return bundleOption;
+}
+
 void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
     auto want = data.GetWant();
@@ -115,7 +130,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED) {
         if (callbacks_.onBundleDataCleared != nullptr) {
-            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
+            sptr<NotificationBundleOption> bundleOption = GetBundleOptionDataCleared(want);
             if (bundleOption != nullptr) {
                 callbacks_.onBundleDataCleared(bundleOption);
             }
