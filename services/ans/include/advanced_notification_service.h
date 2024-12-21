@@ -1389,6 +1389,8 @@ private:
         bool enabled, bool isForceControl);
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
+    void CancelWantAgent(const sptr<Notification> &notification);
+    void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
