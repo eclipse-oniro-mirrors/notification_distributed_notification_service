@@ -1380,6 +1380,8 @@ private:
         std::chrono::system_clock::time_point now, const int32_t callingUid);
     void PublishSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now);
     void GetFlowCtrlConfigFromCCM();
+    ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
+    void SetCollaborateReminderFlag(const sptr<NotificationRequest> &request);
     ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle,
         const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);

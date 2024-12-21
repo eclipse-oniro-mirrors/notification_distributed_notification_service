@@ -90,7 +90,9 @@
         "config_policy",
         "screenlock_mgr",
         "ace_engine",
-        "openssl"
+        "openssl",
+        "dsoftbus",
+        "zlib"
       ],
       "third_party": [
         "libuv",

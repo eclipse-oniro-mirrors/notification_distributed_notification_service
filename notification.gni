@@ -34,7 +34,7 @@ test_path = "${component_path}/test"
 tools_path = "${component_path}/tools"
 service_fuzz_test_path =
     "distributed_notification_service/distributed_notification_service"
-distributed_notification_supported = true
+distributed_notification_supported = false
 subsystem_name = "notification"
 component_external_deps = [
   "ability_base:base",

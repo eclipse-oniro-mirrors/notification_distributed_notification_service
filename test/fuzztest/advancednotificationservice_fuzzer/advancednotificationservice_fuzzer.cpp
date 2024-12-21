@@ -186,7 +186,7 @@ namespace OHOS {
         service->IsSmartReminderEnabled(deviceType, enabled);
         service->SetTargetDeviceStatus(deviceType, fuzzData->ConsumeIntegral<int32_t>());
         service->ClearAllNotificationGroupInfo(localSwitch);
-        
+
         OHOS::DoTestForAdvancedNotificationUtils(service, fuzzData);
         OHOS::DoTestForAdvancedNotificationService(service, fuzzData);
         return true;
@@ -228,11 +228,13 @@ namespace OHOS {
         service->OnResourceRemove(randomInt32);
         service->CheckApiCompatibility(bundleOption);
         service->OnBundleDataCleared(bundleOption);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         service->CheckPublishWithoutApp(randomInt32, request);
         service->GetLocalNotificationKeys(bundleOption);
         service->OnDistributedPublish(randomString, randomString, request);
         service->OnDistributedUpdate(randomString, randomString, request);
         service->OnDistributedDelete(randomString, randomString, randomString, randomInt32);
+#endif
         return true;
     }
 

@@ -124,6 +124,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
     ASSERT_EQ(result, 1000);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : GetDistributedNotificationEnabled_00100
  * @tc.name      : GetDistributedNotificationEnabled
@@ -156,5 +157,6 @@ HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00101, Level
     bool result = bundleManagerHelper->GetDistributedNotificationEnabled(bundle, userId);
     ASSERT_EQ(result, true);
 }
+#endif
 }  // namespace Notification
 }  // namespace OHOS

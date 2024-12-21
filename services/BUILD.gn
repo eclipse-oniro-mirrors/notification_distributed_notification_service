@@ -18,5 +18,7 @@ group("ans_service") {
 
   if (distributed_notification_supported) {
     deps += [ "distributed:libans_distributed" ]
+  } else {
+    deps += [ "distributed:libans_softbus_distributed" ]
   }
 }
