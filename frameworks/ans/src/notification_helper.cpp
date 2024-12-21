@@ -592,5 +592,10 @@ ErrCode NotificationHelper::AllowUseReminder(const std::string& bundleName, bool
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->AllowUseReminder(bundleName, isAllowUseReminder);
 }
+
+ErrCode NotificationHelper::DisableNotificationFeature(const NotificationDisable &notificationDisable)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(notificationDisable);
+}
 }  // namespace Notification
 }  // namespace OHOS

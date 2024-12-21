@@ -226,6 +226,8 @@ constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 const static std::string KEY_CLONE_LABEL = "label_ans_clone_";
 const static std::string CLONE_BUNDLE = "bundle_";
 const static std::string CLONE_PROFILE = "profile_";
+const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
+constexpr int32_t ZERO_USER_ID = 0;
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
@@ -696,6 +698,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         GetEnableAllNotification(info, iter);
         GetDoNotDisturbProfile(info, iter);
     }
+    GetDisableNotificationInfo(info);
 
     return true;
 }
@@ -2295,6 +2298,52 @@ bool NotificationPreferencesDatabase::UpdateCloneToDisturbeDB(const int32_t &use
 
     int32_t result = rdbDataManager_->InsertBatchData(values, userId);
     return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
+{
+    if (notificationDisable == nullptr || !CheckRdbStore()) {
+        ANS_LOGE("notificationDisable or rdbStore is nullptr");
+        return false;
+    }
+    if (notificationDisable->GetBundleList().empty()) {
+        ANS_LOGE("the bundle list is empty");
+        return false;
+    }
+    std::string value = notificationDisable->ToJson();
+    int32_t result = rdbDataManager_->InsertData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("rdbStore is nullptr");
+        return false;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("query disable data fail");
+        return false;
+    }
+    notificationDisable.FromJson(value);
+    return true;
+}
+
+void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPreferencesInfo &info)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("rdbStore is nullptr");
+        return;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("query disable data failed");
+        return;
+    }
+    info.AddDisableNotificationInfo(value);
 }
 }  // namespace Notification
 }  // namespace OHOS

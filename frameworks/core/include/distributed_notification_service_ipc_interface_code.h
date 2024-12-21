@@ -146,6 +146,7 @@ namespace Notification {
         GET_DONOTDISTURB_PROFILE,
         UPDATE_NOTIFICATION_TIMER,
         ALLOW_USE_REMINDER,
+        DISABLE_NOTIFICATION_FEATURE,
     };
 }
 }

@@ -429,6 +429,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleAllowUseReminder(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DISABLE_NOTIFICATION_FEATURE): {
+            result = HandleDisableNotificationFeature(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -2492,6 +2496,17 @@ ErrCode AnsManagerStub::HandleAllowUseReminder(MessageParcel &data, MessageParce
 
     if (!reply.WriteBool(isAllowUseReminder)) {
         ANS_LOGE("fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleDisableNotificationFeature(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<NotificationDisable> notificationDisable = data.ReadParcelable<NotificationDisable>();
+    ErrCode result = DisableNotificationFeature(notificationDisable);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleDisableNotificationFeature] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

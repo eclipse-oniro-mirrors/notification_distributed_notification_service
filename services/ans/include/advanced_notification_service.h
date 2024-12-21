@@ -1106,9 +1106,15 @@ public:
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
 
     void TryStartReminderAgentService();
-        
+
     static sptr<NotificationBundleOption> GenerateBundleOption();
     static sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
+
+    ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
+
+    bool IsDisableNotification(const std::string &bundleName);
+
+    bool IsDisableNotification(const sptr<NotificationRequest> &request);
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

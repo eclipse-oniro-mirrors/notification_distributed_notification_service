@@ -681,6 +681,11 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     const int32_t uid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        if (IsDisableNotification(request)) {
+            ANS_LOGE("bundle: %{public}s in blocklist", (request->GetOwnerBundleName()).c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
             !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid)) {
             result = ERR_ANS_INVALID_PARAM;
@@ -2601,6 +2606,42 @@ void AdvancedNotificationService::GetFlowCtrlConfigFromCCM()
     }
 
     ANS_LOGI("GetFlowCtrlConfigFromCCM success");
+}
+
+ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable)
+{
+    ANS_LOGD("called");
+    if (notificationDisable == nullptr) {
+        ANS_LOGE("notificationDisable is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("notificationDisable is no system app");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("notificationDisable is permission denied");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("serial queue is invalid");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyNotificationDisable = notificationDisable]() {
+            ANS_LOGD("the ffrt enter");
+            NotificationPreferences::GetInstance()->SetDisableNotificationInfo(copyNotificationDisable);
+        }));
+    notificationSvrQueue_->wait(handler);
+    if (notificationDisable->GetDisabled()) {
+        std::vector<std::string> bundleList = notificationDisable->GetBundleList();
+        for (auto bundle : bundleList) {
+            sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundle, DEFAULT_UID));
+            RemoveAllNotificationsInner(bo, NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE);
+        }
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

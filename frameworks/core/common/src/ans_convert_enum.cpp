@@ -337,6 +337,9 @@ void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
         case NotificationConstant::RECOVER_LIVE_VIEW_DELETE:
             outType = static_cast<int32_t>(RemoveReason::RECOVER_LIVE_VIEW_DELETE);
             break;
+        case NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE);
+            break;
         default:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
             ANS_LOGW("Reason %{public}d is an invalid value", inType);

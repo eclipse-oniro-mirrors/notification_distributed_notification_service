@@ -329,6 +329,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (IsDisableNotification(bundle)) {
+            ANS_LOGE("failed to release the blocklist application notification, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
         }
@@ -2406,6 +2411,11 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (!bundle.empty() && IsDisableNotification(bundle)) {
+            ANS_LOGE("failed to release the blocklist application notification, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (!bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
@@ -2841,6 +2851,47 @@ void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string loca
         }
         aggregateLocalSwitch_ = status;
     });
+}
+
+bool AdvancedNotificationService::IsDisableNotification(const std::string &bundleName)
+{
+    NotificationDisable notificationDisable;
+    if (NotificationPreferences::GetInstance()->GetDisableNotificationInfo(notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleName);
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
+    } else {
+        ANS_LOGD("no disabled has been set up or set disabled to close");
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("request is nullptr");
+        return false;
+    }
+    std::string bundleName = "";
+    auto agentBundle = request->GetAgentBundle();
+    if (agentBundle != nullptr) {
+        bundleName = agentBundle->GetBundleName();
+    }
+    bool controller = true;
+    if (!(request->GetOwnerBundleName().empty()) && !bundleName.empty() &&
+        NotificationPreferences::GetInstance()->IsAgentRelationship(bundleName, request->GetOwnerBundleName()) &&
+        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        controller = false;
+    }
+    if (controller && IsDisableNotification(request->GetOwnerBundleName())) {
+        return true;
+    }
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS
