@@ -22,6 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
 {
+#ifdef DISABLE_NOTIFICATION_FEATURE_ENABLE
     ANS_LOGD("enter NapiDisableNotificationFeature");
     NotificationDisable paras;
     if (!ParseDisableNotificationParameters(env, info, paras)) {
@@ -67,6 +68,10 @@ napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     return promise;
+#else
+    Common::NapiThrow(env, ERROR_SYSTEM_CAP_ERROR);
+    return Common::NapiGetUndefined(env);
+#endif
 }
 }
 }

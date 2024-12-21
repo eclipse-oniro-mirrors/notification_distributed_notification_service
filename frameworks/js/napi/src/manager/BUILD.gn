@@ -123,6 +123,10 @@ ohos_shared_library("notificationmanager") {
     "relational_store:native_rdb",
   ]
 
+  if (distributed_notification_service_disable_control) {
+    defines = [ "DISABLE_NOTIFICATION_FEATURE_ENABLE" ]
+  }
+
   relative_install_dir = "module"
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
