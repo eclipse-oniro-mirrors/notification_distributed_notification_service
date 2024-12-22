@@ -207,13 +207,6 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 return ERR_ANS_INVALID_BUNDLE;
             }
             request->SetAgentBundle(agentBundle);
-        } else if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
-            int32_t uid = BundleManagerHelper::GetInstance()->
-                GetDefaultUidByBundleName(bundle, request->GetOwnerUserId());
-            if (uid < 0) {
-                return ERR_ANS_INVALID_UID;
-            }
-            request->SetOwnerUid(uid);
         }
         request->SetOwnerBundleName(sourceBundleName);
     }
@@ -641,7 +634,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     NotificationConstant::SlotType oldType = request->GetSlotType();
     int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
     if (ctrlResult != ERR_OK) {
@@ -670,7 +663,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return result;
     }
 
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
     const int32_t uid = IPCSkeleton::GetCallingUid();
@@ -2311,7 +2304,7 @@ void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
 void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     std::vector<sptr<Notification>> notifications;
     notifications.emplace_back(record->notification);
     EXTENTION_WRAPPER->UpdateByCancel(notifications, NotificationConstant::FLOW_CONTROL_REASON_DELETE);

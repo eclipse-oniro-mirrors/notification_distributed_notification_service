@@ -2387,6 +2387,14 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     if (request->IsAgentNotification()) {
         record->bundleOption = new (std::nothrow) NotificationBundleOption("", request->GetCreatorUid());
     } else {
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
+        int32_t ctrlResult = EXTENTION_WRAPPER->LocalControl(request);
+        if (ctrlResult != ERR_OK) {
+            message.ErrorCode(ctrlResult);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+            return ctrlResult;
+        }
+#endif
         record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
@@ -2407,7 +2415,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
 
     SetRequestBySlotType(record->request, bundleOption);
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 

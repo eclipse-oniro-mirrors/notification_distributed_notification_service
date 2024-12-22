@@ -124,8 +124,17 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     defines += [ "SCREENLOCK_MGR_ENABLE" ]
   }
 
-  if (distributed_notification_service_feature_summary) {
+  if (distributed_notification_service_feature_summary ||
+      distributed_notification_service_feature_additional_control) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
+  }
+
+  if (distributed_notification_service_feature_additional_control) {
+    defines += [ "ENABLE_ANS_ADDITIONAL_CONTROL" ]
+  }
+
+  if (distributed_notification_service_feature_summary) {
+    defines += [ "ENABLE_ANS_AGGREGATION" ]
   }
 
   if (telephony_cust) {
