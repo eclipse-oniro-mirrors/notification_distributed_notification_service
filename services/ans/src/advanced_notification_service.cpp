@@ -74,6 +74,7 @@
 #include "advanced_notification_inline.cpp"
 #include "advanced_datashare_helper_ext.h"
 #include "notification_analytics_util.h"
+#include "advanced_notification_flow_control_service.h"
 #include "distributed_device_manager.h"
 
 namespace OHOS {
@@ -99,9 +100,6 @@ constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
 std::mutex AdvancedNotificationService::instanceMutex_;
 std::mutex AdvancedNotificationService::pushMutex_;
-std::mutex AdvancedNotificationService::flowControlMutex_;
-std::mutex AdvancedNotificationService::systemFlowControlMutex_;
-std::mutex AdvancedNotificationService::singleAppFlowControlMutex_;
 std::mutex AdvancedNotificationService::doNotDisturbMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
@@ -336,7 +334,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 #ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
     dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
 #endif
-    GetFlowCtrlConfigFromCCM();
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
 #else
@@ -375,10 +373,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
     ErrCode result = ERR_OK;
     if (!IsNotificationExists(record->notification->GetKey())) {
         if (record->request->IsUpdateOnly()) {
-            ANS_LOGE("Notification not exists when update");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_3)
-                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("Nft not exist");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            ANS_LOGW("Notification not exists when update");
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
         record->request->SetCreateTime(GetCurrentTime());
@@ -696,7 +691,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
             (void)PublishRemoveDuplicateEvent(record);
             return;
         }
-        result = FlowControl(record, uid);
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, uid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }
@@ -1036,115 +1032,6 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
 {
     notificationList_.push_back(record);
     SortNotificationList();
-}
-
-ErrCode AdvancedNotificationService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    const int32_t callingUid)
-{
-    if (record->isNeedFlowCtrl == false) {
-        return ERR_OK;
-    }
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    ErrCode result = ERR_OK;
-    result = UpdateSingleAppFlowCtrl(record, now, callingUid);
-    if (result != ERR_OK) {
-        return result;
-    }
-    result = UpdateGlobalFlowCtrl(record, now);
-    if (result != ERR_OK) {
-        return result;
-    }
-    if (record->isThirdparty == true) {
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        flowControlUpdateTimestampList_.push_back(now);
-    } else {
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        systemFlowControlUpdateTimestampList_.push_back(now);
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-        auto singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
-        if (singleAppFlowControlIter == singleAppFlowControlUpdateTimestampMap_.end()) {
-            singleAppFlowControlUpdateTimestampMap_[callingUid] =
-                std::make_shared<std::list<std::chrono::system_clock::time_point>>();
-            singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
-        }
-        singleAppFlowControlIter->second->push_back(now);
-    }
-
-    UpdateSingleAppFlowCtrlRemoveExpire(now);
-    return result;
-}
-
-ErrCode AdvancedNotificationService::UpdateGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now)
-{
-    ANS_LOGD("UpdateGlobalFlowCtrl size %{public}zu,%{public}zu",
-        flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
-    if (record->isThirdparty == true) {
-        // 三方流控
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(flowControlUpdateTimestampList_, now);
-        if (flowControlUpdateTimestampList_.size() >= maxUpdateNumPerSecond) {
-            ANS_LOGE("Third-part UpdateGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
-                .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            }
-            return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
-        }
-    } else {
-        // 系统流控
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlUpdateTimestampList_, now);
-        if (systemFlowControlUpdateTimestampList_.size() >= maxUpdateNumPerSecond) {
-            ANS_LOGE("System UpdateGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_4)
-                .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("UpdateGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            }
-            return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
-        }
-    }
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::UpdateSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now, const int32_t callingUid)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    auto singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
-    if (singleAppFlowControlIter == singleAppFlowControlUpdateTimestampMap_.end()) {
-        return ERR_OK;
-    }
-    NotificationAnalyticsUtil::RemoveExpired(*(singleAppFlowControlIter->second), now);
-    if (singleAppFlowControlIter->second->size() >= maxUpdateNumPerSecondPerApp) {
-        ANS_LOGE("SingleAppUpdateFlowControl failed");
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_6)
-            .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("SingleAppUpdateFlowControl failed");
-        if (record != nullptr) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        }
-        return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
-    }
-    return ERR_OK;
-}
-
-void AdvancedNotificationService::UpdateSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    for (auto iter = singleAppFlowControlUpdateTimestampMap_.begin();
-        iter != singleAppFlowControlUpdateTimestampMap_.end();) {
-        auto latest = iter->second->back();
-        if (std::chrono::abs(now - latest) > SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME) {
-            iter = singleAppFlowControlUpdateTimestampMap_.erase(iter);
-        } else {
-            ++iter;
-        }
-    }
 }
 
 ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
@@ -1642,144 +1529,9 @@ static bool SortNotificationsByLevelAndTime(
     return (first->slot->GetLevel() < second->slot->GetLevel());
 }
 
-ErrCode AdvancedNotificationService::FlowControl(const std::shared_ptr<NotificationRecord> &record,
-    const int32_t callingUid)
-{
-    if (record->isNeedFlowCtrl == false) {
-        return ERR_OK;
-    }
-
-    ErrCode result = ERR_OK;
-    if (!IsNotificationExists(record->notification->GetKey())) {
-        if (record->request->IsUpdateOnly()) {
-            ANS_LOGE("Notification not exists when update");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_3)
-                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("Nft not exist");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            return ERR_ANS_NOTIFICATION_NOT_EXISTS;
-        }
-        result = PublishFlowCtrl(record, callingUid);
-    } else {
-        if (record->request->IsAlertOneTime()) {
-            CloseAlert(record);
-        }
-        result = UpdateFlowCtrl(record, callingUid);
-    }
-
-    return result;
-}
-
 bool AdvancedNotificationService::IsSystemUser(int32_t userId)
 {
     return ((userId >= SUBSCRIBE_USER_SYSTEM_BEGIN) && (userId <= SUBSCRIBE_USER_SYSTEM_END));
-}
-
-ErrCode AdvancedNotificationService::PublishFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    const int32_t callingUid)
-{
-    if (record->isNeedFlowCtrl == false) {
-        return ERR_OK;
-    }
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    ErrCode result = ERR_OK;
-    result = PublishSingleAppFlowCtrl(record, now, callingUid);
-    if (result != ERR_OK) {
-        return result;
-    }
-    result = PublishGlobalFlowCtrl(record, now);
-    if (result != ERR_OK) {
-        return result;
-    }
-    if (record->isThirdparty == true) {
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        flowControlPublishTimestampList_.push_back(now);
-    } else {
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        systemFlowControlPublishTimestampList_.push_back(now);
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-        auto singleAppFlowControlIter = singleAppFlowControlPublishTimestampMap_.find(callingUid);
-        if (singleAppFlowControlIter == singleAppFlowControlPublishTimestampMap_.end()) {
-            singleAppFlowControlPublishTimestampMap_[callingUid] =
-                std::make_shared<std::list<std::chrono::system_clock::time_point>>();
-            singleAppFlowControlIter = singleAppFlowControlPublishTimestampMap_.find(callingUid);
-        }
-        singleAppFlowControlIter->second->push_back(now);
-    }
-    PublishSingleAppFlowCtrlRemoveExpire(now);
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::PublishGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now)
-{
-    ANS_LOGD("PublishGlobalFlowCtrl size %{public}zu,%{public}zu",
-        flowControlPublishTimestampList_.size(), systemFlowControlPublishTimestampList_.size());
-    if (record->isThirdparty == true) {
-        // 三方流控
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(flowControlPublishTimestampList_, now);
-        if (flowControlPublishTimestampList_.size() >= maxCreateNumPerSecond) {
-            ANS_LOGE("Third-part PublishGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
-                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            }
-            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
-        }
-    } else {
-        // 系统流控
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlPublishTimestampList_, now);
-        if (systemFlowControlPublishTimestampList_.size() >= maxCreateNumPerSecond) {
-            ANS_LOGE("System PublishGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_3)
-                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("PublishGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            }
-            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
-        }
-    }
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::PublishSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now, const int32_t callingUid)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    auto singleAppFlowControlIter = singleAppFlowControlPublishTimestampMap_.find(callingUid);
-    if (singleAppFlowControlIter == singleAppFlowControlPublishTimestampMap_.end()) {
-        return ERR_OK;
-    }
-    NotificationAnalyticsUtil::RemoveExpired(*(singleAppFlowControlIter->second), now);
-    if (singleAppFlowControlIter->second->size() >= maxCreateNumPerSecondPerApp) {
-        ANS_LOGE("SingleAppPublishFlowControl failed");
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_6)
-            .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("SingleAppPublishFlowControl failed");
-        if (record != nullptr) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        }
-        return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
-    }
-    return ERR_OK;
-}
-
-void AdvancedNotificationService::PublishSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    for (auto iter = singleAppFlowControlPublishTimestampMap_.begin();
-        iter != singleAppFlowControlPublishTimestampMap_.end();) {
-        auto latest = iter->second->back();
-        if (std::chrono::abs(now - latest) > SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME) {
-            iter = singleAppFlowControlPublishTimestampMap_.erase(iter);
-        } else {
-            ++iter;
-        }
-    }
 }
 
 ErrCode AdvancedNotificationService::PublishInNotificationList(const std::shared_ptr<NotificationRecord> &record)
@@ -2570,43 +2322,6 @@ void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<N
 PushCallbackRecipient::PushCallbackRecipient() {}
 
 PushCallbackRecipient::~PushCallbackRecipient() {}
-
-void AdvancedNotificationService::GetFlowCtrlConfigFromCCM()
-{
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE);
-    if (!NotificationConfigParse::GetInstance()->GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file");
-        return;
-    }
-    if (!root.contains(NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE)) {
-        ANS_LOGW("GetFlowCtrlConfigFromCCM not found jsonKey");
-        return;
-    }
-    nlohmann::json affects = root[NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE];
-    if (affects.is_null() || affects.empty()) {
-        ANS_LOGE("GetFlowCtrlConfigFromCCM failed as invalid ccmFlowCtrlConfig json");
-        return;
-    }
-    if (affects.contains(NotificationConfigParse::CFG_KEY_MAX_CREATE_NUM_PERSECOND)) {
-        maxCreateNumPerSecond = affects[NotificationConfigParse::CFG_KEY_MAX_CREATE_NUM_PERSECOND];
-    }
-
-    if (affects.contains(NotificationConfigParse::CFG_KEY_MAX_UPDATE_NUM_PERSECOND)) {
-        maxUpdateNumPerSecond = affects[NotificationConfigParse::CFG_KEY_MAX_UPDATE_NUM_PERSECOND];
-    }
-
-    if (affects.contains(NotificationConfigParse::CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP)) {
-        maxCreateNumPerSecondPerApp = affects[NotificationConfigParse::CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP];
-    }
-
-    if (affects.contains(NotificationConfigParse::CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP)) {
-        maxUpdateNumPerSecondPerApp = affects[NotificationConfigParse::CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP];
-    }
-
-    ANS_LOGI("GetFlowCtrlConfigFromCCM success");
-}
 
 ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable)
 {

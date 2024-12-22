@@ -29,6 +29,7 @@
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_flags.h"
+#include "advanced_notification_flow_control_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -45,7 +46,8 @@ public:
     bool IsLiveViewEnabled(const std::string bundleName) const;
     bool IsBannerEnabled(const std::string bundleName) const;
     bool IsReminderEnabled(const std::string& bundleName) const;
-    
+    void GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold);
+
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;

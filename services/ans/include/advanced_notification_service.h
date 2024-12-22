@@ -1200,7 +1200,6 @@ private:
     void SortNotificationList();
     static bool NotificationCompare(
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
-    ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid);
     ErrCode PublishInNotificationList(const std::shared_ptr<NotificationRecord> &record);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
@@ -1383,19 +1382,6 @@ private:
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
     bool IsSystemUser(int32_t userId);
-    ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid);
-    ErrCode UpdateGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now);
-    ErrCode UpdateSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid);
-    void UpdateSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now);
-    ErrCode PublishFlowCtrl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid);
-    ErrCode PublishGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now);
-    ErrCode PublishSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid);
-    void PublishSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now);
-    void GetFlowCtrlConfigFromCCM();
     ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
     void SetCollaborateReminderFlag(const sptr<NotificationRequest> &request);
     ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
@@ -1420,21 +1406,6 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
-    static std::mutex flowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
-    static std::mutex systemFlowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlPublishTimestampList_;
-    static std::mutex singleAppFlowControlMutex_;
-    std::map<int32_t,
-        std::shared_ptr<std::list<std::chrono::system_clock::time_point>>> singleAppFlowControlUpdateTimestampMap_;
-    std::map<int32_t,
-        std::shared_ptr<std::list<std::chrono::system_clock::time_point>>> singleAppFlowControlPublishTimestampMap_;
-    uint32_t maxCreateNumPerSecond = MAX_CREATE_NUM_PERSECOND;
-    uint32_t maxUpdateNumPerSecond = MAX_UPDATE_NUM_PERSECOND;
-    uint32_t maxCreateNumPerSecondPerApp = MAX_CREATE_NUM_PERSECOND_PERAPP;
-    uint32_t maxUpdateNumPerSecondPerApp = MAX_UPDATE_NUM_PERSECOND_PERAPP;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
