@@ -586,6 +586,20 @@ ErrCode AnsManagerStub::IsSmartReminderEnabled(const std::string &deviceType, bo
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGE("SetDistributedEnabledBySlot called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGE("IsDistributedEnabledBySlot called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     ANS_LOGE("Called!");

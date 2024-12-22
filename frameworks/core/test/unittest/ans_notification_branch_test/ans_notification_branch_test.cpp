@@ -528,7 +528,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode ErrCode SetDistributedEnabledBySlot(
+    ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;

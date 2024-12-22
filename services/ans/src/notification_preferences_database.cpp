@@ -111,6 +111,11 @@ const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION = "enabledDi
 const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartReminder";
 
 /**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION = "enabledSlotDistributedNotification";
+
+/**
  * Indicates that disturbe key which bundle popped dialog.
  */
 const static std::string KEY_BUNDLE_POPPED_DIALOG = "poppedDialog";
@@ -2012,7 +2017,7 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const std::string &deviceType,
     const int32_t userId) const
 {
-    return std::string(KEY_SMART_REMINDER_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE)
+    return std::string(KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE)
         .append(deviceType).append(KEY_MIDDLE_LINE)
         .append(std::to_string(static_cast<int32_t>(slotType))).append(KEY_MIDDLE_LINE)
         .append(std::to_string(userId));
