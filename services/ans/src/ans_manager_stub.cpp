@@ -337,6 +337,14 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleIsSmartReminderEnabled(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DISTRIBUTED_ENABLED_BY_SLOT): {
+            result = HandleSetDistributedEnabledBySlot(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_SLOT): {
+            result = HandleIsDistributedEnabledBySlot(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::SET_SYNC_NOTIFICATION_ENABLED_WITHOUT_APP): {
             result = HandleDistributedSetEnabledWithoutApp(data, reply);
             break;
@@ -2400,6 +2408,57 @@ ErrCode AnsManagerStub::HandleIsSmartReminderEnabled(MessageParcel &data, Messag
 
     if (!reply.WriteBool(enabled)) {
         ANS_LOGE("[HandleIsSmartReminderEnabled] fail: write enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetDistributedEnabledBySlot(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
+    
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetDistributedEnabledBySlot] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    if (!data.ReadBool(enabled)) {
+        ANS_LOGE("[HandleSetDistributedEnabledBySlot] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetDistributedEnabledBySlot(slotType, deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetDistributedEnabledBySlot] fail: write result failed, ErrCode=%{public}d",
+            result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleIsDistributedEnabledBySlot(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
+    
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleIsDistributedEnabledBySlot] fail: read deviceId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    bool enabled = false;
+    ErrCode result = IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleIsDistributedEnabledBySlot] fail: write result failed, ErrCode=%{public}d",
+            result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.WriteBool(enabled)) {
+        ANS_LOGE("[HandleIsDistributedEnabledBySlot] fail: write enabled failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;
