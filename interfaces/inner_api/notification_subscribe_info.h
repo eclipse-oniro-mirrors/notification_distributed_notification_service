@@ -124,7 +124,7 @@ public:
      **/
     int32_t GetSubscriberUid() const;
 
-    **
+    /**
      * @brief Sets a single slot type as the filter criterion,
      * which means to subscribe to notifications of this slot.
      *

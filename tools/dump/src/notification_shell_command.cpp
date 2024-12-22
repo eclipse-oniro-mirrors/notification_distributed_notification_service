@@ -86,9 +86,14 @@ constexpr char SETTING_HELP_MSG[] =
     "  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n"
     "  --set-device-status -d <device:status> set device status, eg: -d device:1\n"
     "  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
-    "  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status, eg: -b wearable:example:10100:1\n"
-    "  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status, eg: -o wearable:0:1\n";
+    "  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+    "      eg: -b wearable:example:10100:1\n"
+    "  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+    "      eg: -o wearable:0:1\n";
 }  // namespace
+
+const int PARAM_NUM_TWO = 2;
+const int PARAM_NUM_THREE = 3;
 
 NotificationShellCommand::NotificationShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "anm_dump")
 {}
@@ -425,7 +430,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledByBundleCmd()
     std::string deviceType;
     NotificationBundleOption bundleOption;
     std::string info = std::string(optarg);
-    if (std::count(info.begin(), info.end(), ':') != 3) {  // 1 (deviceType:bundleName:uid:status)
+    if (std::count(info.begin(), info.end(), ':') != PARAM_NUM_THREE) {  // 4 (deviceType:bundleName:uid:status)
         resultReceiver_.append("error: setting information error\n");
         resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_INVALID_VALUE;
@@ -463,7 +468,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledBySlotCmd()
     std::string deviceType;
     int32_t slotType;
     std::string info = std::string(optarg);
-    if (std::count(info.begin(), info.end(), ':') != 2) {  //2(deviceType:slotType:status)
+    if (std::count(info.begin(), info.end(), ':') != PARAM_NUM_TWO) {  //3(deviceType:slotType:status)
         resultReceiver_.append("error: setting information error\n");
         resultReceiver_.append(SETTING_HELP_MSG);
         return ERR_INVALID_VALUE;
