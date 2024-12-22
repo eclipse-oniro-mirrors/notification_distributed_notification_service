@@ -604,6 +604,13 @@ ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, con
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag)
+{
+    ANS_LOGE("SetTargetDeviceStatus called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     ANS_LOGE("GetDoNotDisturbProfile called!");

@@ -570,6 +570,13 @@ ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType,
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status);
 }
+
+ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, controlFlag);
+}
+
 ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)
 {
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
