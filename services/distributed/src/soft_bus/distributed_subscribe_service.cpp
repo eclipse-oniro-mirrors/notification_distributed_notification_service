@@ -26,6 +26,20 @@
 namespace OHOS {
 namespace Notification {
 
+std::string SubscribeTransDeviceType(uint16_t deviceType_)
+{
+    switch (deviceType_) {
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH: {
+            return "wearable";
+        }
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
+            return "Pad";
+        }
+        default:
+            return "";
+    }
+}
+
 void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerDevice)
 {
     if (peerDevice_.find(peerDevice.deviceId_) == peerDevice_.end()) {
@@ -37,6 +51,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     std::shared_ptr<DistribuedSubscriber> subscriber = std::make_shared<DistribuedSubscriber>();
     subscriber->SetLocalDevice(localDevice_);
     subscriber->SetPeerDevice(peerDevice);
+    subscriber->SetDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
     sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(userId_);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
