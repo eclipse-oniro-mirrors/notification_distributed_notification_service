@@ -559,6 +559,11 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

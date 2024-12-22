@@ -1989,5 +1989,21 @@ std::string AnsNotification::GetAppInstanceKey() const
         return "";
     }
 }
+
+ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &notificationDisable)
+{
+    ANS_LOGD("enter DisableNotificationFeature");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("DisableNotificationFeature fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    sptr<NotificationDisable> reqPtr = new (std::nothrow) NotificationDisable(notificationDisable);
+    if (reqPtr == nullptr) {
+        ANS_LOGE("failed to create NotificationDisable ptr");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->DisableNotificationFeature(reqPtr);
+}
 }  // namespace Notification
 }  // namespace OHOS

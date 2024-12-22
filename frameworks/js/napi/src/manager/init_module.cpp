@@ -20,6 +20,7 @@
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
 #include "napi_cancel.h"
+#include "napi_disable_notification.h"
 #include "napi_display_badge.h"
 #include "napi_distributed.h"
 #include "napi_disturb_mode.h"
@@ -125,6 +126,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDoNotDisturbProfile", NapiGetDoNotDisturbProfile),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledBySlot", NapiSetDistributedEnabledBySlot),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledBySlot", NapiIsDistributedEnabledBySlot),
+        DECLARE_NAPI_FUNCTION("disableNotificationFeature", NapiDisableNotificationFeature),
 };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

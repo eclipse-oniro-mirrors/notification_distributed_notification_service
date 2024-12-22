@@ -1362,5 +1362,44 @@ bool NotificationPreferences::DelBatchCloneBundleInfo(const int32_t &userId,
     }
     return preferncesDB_->DelBatchCloneBundleInfo(userId, cloneBundleInfo);
 }
+
+ErrCode NotificationPreferences::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
+{
+    ANS_LOGD("called");
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    preferencesInfo_.SetDisableNotificationInfo(notificationDisable);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->SetDisableNotificationInfo(notificationDisable)) {
+        ANS_LOGE("db set disable notification info fail");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
+{
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    if (preferencesInfo_.GetDisableNotificationInfo(notificationDisable)) {
+        ANS_LOGD("info get disable notification success");
+        return true;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    if (preferncesDB_->GetDisableNotificationInfo(notificationDisable)) {
+        ANS_LOGD("db get disable notification success");
+        sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
+        preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
+    } else {
+        ANS_LOGD("db get disable notification fail");
+        return false;
+    }
+    return true;
+}
 }  // namespace Notification
 }  // namespace OHOS

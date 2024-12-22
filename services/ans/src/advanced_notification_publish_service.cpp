@@ -31,7 +31,9 @@
 #include "hitrace_meter_adapter.h"
 #include "notification_unified_group_Info.h"
 #include "os_account_manager.h"
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_screen_status_manager.h"
+#endif
 #include "notification_extension_wrapper.h"
 #include "notification_local_live_view_subscriber_manager.h"
 #include "common_event_manager.h"
@@ -51,6 +53,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "datashare_predicates.h"
+#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
@@ -98,6 +101,10 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     if (!request) {
         ANSR_LOGE("ReminderRequest object is nullptr");
         return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (request->GetDistributedCollaborate()) {
+        return CollaboratePublish(request);
     }
 
     if (!InitPublishProcess()) {
@@ -173,6 +180,106 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     return result;
 }
 
+void AdvancedNotificationService::SetCollaborateReminderFlag(const sptr<NotificationRequest> &request)
+{
+    NotificationConstant::SlotType slotType = request->GetSlotType();
+    uint32_t slotFlags =
+        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slotType);
+    ANS_LOGI("Before %{public}s flags = %{public}d %{public}d", request->GetKey().c_str(), slotType, slotFlags);
+    auto flags = std::make_shared<NotificationFlags>();
+    if ((slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
+        flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+    }
+
+    if ((slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
+        flags->SetLockScreenVisblenessEnabled(true);
+    }
+
+    if ((slotFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
+        flags->SetLightScreenEnabled(true);
+    }
+
+    if ((slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
+        flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+    }
+
+    uint32_t controlFlags = request->GetNotificationControlFlags();
+    if (controlFlags != 0) {
+        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN &&
+            (controlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+        }
+
+        if (flags->IsLockScreenVisblenessEnabled() &&
+            (controlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
+            flags->SetLockScreenVisblenessEnabled(false);
+        }
+
+        if (flags->IsLightScreenEnabled() &&
+            (controlFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
+            flags->SetLightScreenEnabled(false);
+        }
+
+        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
+            (controlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+        }
+    }
+
+    request->SetFlags(flags);
+    ANS_LOGI("SetFlags Key = %{public}s flags = %{public}d %{public}d", request->GetKey().c_str(),
+        controlFlags, flags->GetReminderFlags());
+}
+
+ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationRequest> &request)
+{
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    if (!AccessTokenHelper::VerifyNativeToken(tokenCaller) ||
+        !AccessTokenHelper::VerifyCallerPermission(tokenCaller, OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGE("Collaborate publish cheak permission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    request->SetCreatorUid(uid);
+    request->SetCreatorPid(pid);
+    if (request->GetOwnerUid() == DEFAULT_UID) {
+        request->SetOwnerUid(uid);
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    request->SetCreatorUserId(userId);
+    request->SetCreateTime(GetCurrentTime());
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = new (std::nothrow) Notification(request);
+    if (record->notification == nullptr) {
+        ANS_LOGE("Failed to create notification");
+        return ERR_ANS_NO_MEMORY;
+    }
+    record->bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(), 0);
+    record->notification->SetKey(request->GetLabel() + request->GetDistributedHashCode());
+    SetCollaborateReminderFlag(record->request);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (AssignToNotificationList(record) != ERR_OK) {
+            ANS_LOGE("Failed to assign notification list");
+            return;
+        }
+
+        UpdateRecentNotification(record->notification, false, 0);
+        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
+        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+    });
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -222,6 +329,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (IsDisableNotification(bundle)) {
+            ANS_LOGE("failed to release the blocklist application notification, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
         }
@@ -2299,6 +2411,11 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (!bundle.empty() && IsDisableNotification(bundle)) {
+            ANS_LOGE("failed to release the blocklist application notification, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (!bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
@@ -2785,6 +2902,47 @@ void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string loca
         }
         aggregateLocalSwitch_ = status;
     });
+}
+
+bool AdvancedNotificationService::IsDisableNotification(const std::string &bundleName)
+{
+    NotificationDisable notificationDisable;
+    if (NotificationPreferences::GetInstance()->GetDisableNotificationInfo(notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleName);
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
+    } else {
+        ANS_LOGD("no disabled has been set up or set disabled to close");
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("request is nullptr");
+        return false;
+    }
+    std::string bundleName = "";
+    auto agentBundle = request->GetAgentBundle();
+    if (agentBundle != nullptr) {
+        bundleName = agentBundle->GetBundleName();
+    }
+    bool controller = true;
+    if (!(request->GetOwnerBundleName().empty()) && !bundleName.empty() &&
+        NotificationPreferences::GetInstance()->IsAgentRelationship(bundleName, request->GetOwnerBundleName()) &&
+        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        controller = false;
+    }
+    if (controller && IsDisableNotification(request->GetOwnerBundleName())) {
+        return true;
+    }
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS

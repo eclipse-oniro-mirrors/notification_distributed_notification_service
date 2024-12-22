@@ -932,6 +932,14 @@ public:
      * @return Returns Update result.
      */
     virtual ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+
+    /**
+     * @brief Set switch and bundle list of disable notification feature.
+     *
+     * @param notificationDisable Switch and bundle list of disable notification feature.
+     * @return Returns set result.
+     */
+    virtual ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
@@ -1034,6 +1042,7 @@ private:
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif
     ErrCode HandleUpdateNotificationTimerByUid(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleDisableNotificationFeature(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

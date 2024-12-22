@@ -932,6 +932,14 @@ public:
      */
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
+    /**
+     * @brief Set switch and bundle list of disable notification feature.
+     *
+     * @param notificationDisable Switch and bundle list of disable notification feature.
+     * @return Returns set result.
+     */
+    ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);

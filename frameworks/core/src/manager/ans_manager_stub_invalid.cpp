@@ -643,5 +643,11 @@ ErrCode AnsManagerStub::UpdateNotificationTimerByUid(const int32_t uid, const bo
     ANS_LOGE("UpdateNotificationTimerByUid called!");
     return ERR_INVALID_OPERATION;
 }
+
+ErrCode AnsManagerStub::DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable)
+{
+    ANS_LOGE("DisableNotificationFeature called!");
+    return ERR_INVALID_OPERATION;
+}
 }  // namespace Notification
 }  // namespace OHOS

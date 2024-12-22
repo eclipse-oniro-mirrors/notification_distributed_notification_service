@@ -1,0 +1,223 @@
+/*
+ * Copyright (C) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "distributed_socket.h"
+
+#include <thread>
+#include "socket.h"
+#include "session.h"
+#include "distributed_server.h"
+#include "distributed_client.h"
+
+namespace OHOS {
+namespace Notification {
+
+static const int32_t BIND_SERVICE_MAX_RETRY_TIMES = 10;
+static const int32_t BIND_SERVICE_SLEEP_TIMES_MS = 100;  // 0.1s
+static const uint32_t SOCKET_NAME_MAX_LEN = 256;
+
+static void OnServerBind(int32_t socket, PeerSocketInfo info)
+{
+    ANS_LOGI("Socket fd is %{public}d.", socket);
+    if (socket <= 0) {
+        ANS_LOGE("Socket fd invalid.");
+        return;
+    }
+    DistributedServer::GetInstance().OnBind(socket, info);
+}
+
+static void OnServerShutdown(int32_t socket, ShutdownReason reason)
+{
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}u.", socket, reason);
+    if (socket <= 0) {
+        ANS_LOGE("Socket fd invalid.");
+        return;
+    }
+    DistributedServer::GetInstance().OnShutdown(socket, reason);
+}
+
+static void OnServerBytes(int32_t socket, const void *data, uint32_t dataLen)
+{
+    ANS_LOGI("Socket byte fd %{public}d, recv len %{public}d.", socket, dataLen);
+    if ((socket <= 0) || (data == nullptr) || (dataLen == 0)) {
+        ANS_LOGW("Socket byte invalid data.");
+        return;
+    }
+    DistributedServer::GetInstance().OnBytes(socket, data, dataLen);
+}
+
+static void OnServerMessage(int32_t socket, const void *data, uint32_t dataLen)
+{
+    ANS_LOGI("Socket byte fd %{public}d, recv len %{public}d.", socket, dataLen);
+    if ((socket <= 0) || (data == nullptr) || (dataLen == 0)) {
+        ANS_LOGW("Socket byte invalid data.");
+        return;
+    }
+    DistributedServer::GetInstance().OnMessage(socket, data, dataLen);
+}
+
+static void OnClientBytes(int32_t socket, const void *data, uint32_t dataLen)
+{
+    ANS_LOGI("Socket message fd %{public}d, recv len %{public}d.", socket, dataLen);
+    if ((socket <= 0) || (data == nullptr) || (dataLen == 0)) {
+        ANS_LOGW("Socket message invalid data.");
+    }
+    DistributedServer::GetInstance().OnMessage(socket, data, dataLen);
+}
+
+static void OnClientShutdown(int32_t socket, ShutdownReason reason)
+{
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}u.", socket, reason);
+    if (socket <= 0) {
+        ANS_LOGE("Socket fd invalid.");
+        return;
+    }
+    DistributedClient::GetInstance().OnShutdown(socket, reason);
+}
+
+static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
+{
+    ANS_LOGI("OnQos %{public}d %{public}d %{public}u", socket, (int32_t)eventId, qosCount);
+    for (uint32_t idx = 0; idx < qosCount; idx++) {
+        ANS_LOGI("QosTV: type: %{public}d, value: %{public}d", (int32_t)qos[idx].qos, qos[idx].value);
+    }
+}
+
+void CloseSocket(int32_t socketId)
+{
+    ::Shutdown(socketId);
+}
+
+bool CheckAndCopyStr(char* dest, uint32_t destLen, const std::string& src)
+{
+    if (destLen < src.length() + 1) {
+        return false;
+    }
+    if (strcpy_s(dest, destLen, src.c_str()) != EOK) {
+        return false;
+    }
+    return true;
+}
+
+int32_t ServiceListen(const std::string& name, const std::string& pkgName, TransDataType dataType)
+{
+    char nameStr[SOCKET_NAME_MAX_LEN + 1];
+    if (!CheckAndCopyStr(nameStr, SOCKET_NAME_MAX_LEN, name)) {
+        return -1;
+    }
+
+    char pkgNameStr[SOCKET_NAME_MAX_LEN + 1];
+    if (!CheckAndCopyStr(pkgNameStr, SOCKET_NAME_MAX_LEN, pkgName)) {
+        return -1;
+    }
+
+    SocketInfo info = { .name = nameStr, .pkgName = pkgNameStr, .dataType = dataType };
+    int32_t socketId = ::Socket(info); // create service socket id
+    if (socketId <= 0) {
+        ANS_LOGW("Create socket faild, %{public}s %{public}s %{public}d.", nameStr, pkgNameStr, socketId);
+        return -1;
+    }
+
+    QosTV serverQos[] = {
+        { .qos = QOS_TYPE_MIN_BW,      .value = 64*1024 },
+        { .qos = QOS_TYPE_MAX_LATENCY, .value = 10000 },
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 },
+    };
+    ISocketListener listener;
+    listener.OnBind = OnServerBind; // only service may receive OnBind
+    listener.OnQos = OnQos; // only service may receive OnBind
+    listener.OnShutdown = OnServerShutdown;
+    listener.OnBytes = OnServerBytes;
+    listener.OnMessage = OnServerMessage;
+    int32_t ret = ::Listen(socketId, serverQos, 3, &listener);
+    if (ret != ERR_OK) {
+        ::Shutdown(socketId);
+        ANS_LOGW("Create listener failed, ret is %{public}d.", ret);
+        return -1;
+    }
+    ANS_LOGI("Service listen %{public}s %{public}d %{public}d.", name.c_str(), dataType, socketId);
+    return socketId;
+}
+
+int32_t ClientBind(const std::string& name, const std::string& pkgName, const std::string& peerName,
+    const std::string& peerNetWorkId, TransDataType dataType)
+{
+    char nameStr[SOCKET_NAME_MAX_LEN + 1];
+    char peerNetWorkIdStr[SOCKET_NAME_MAX_LEN + 1];
+    if (!CheckAndCopyStr(nameStr, SOCKET_NAME_MAX_LEN, name) ||
+        !CheckAndCopyStr(peerNetWorkIdStr, SOCKET_NAME_MAX_LEN, peerNetWorkId)) {
+        return -1;
+    }
+    char pkgNameStr[SOCKET_NAME_MAX_LEN + 1];
+    char peerNameStr[SOCKET_NAME_MAX_LEN + 1];
+    if (!CheckAndCopyStr(pkgNameStr, SOCKET_NAME_MAX_LEN, pkgName) ||
+        !CheckAndCopyStr(peerNameStr, SOCKET_NAME_MAX_LEN, peerName)) {
+        return -1;
+    }
+    SocketInfo info = { .name = nameStr, .peerName = peerNameStr, .peerNetworkId = peerNetWorkIdStr,
+        .pkgName = pkgNameStr, .dataType = dataType };
+    int32_t socketId = ::Socket(info); // create client socket id
+    if (socketId <= 0) {
+        ANS_LOGW("Create client socket faild, ret is %{public}d.", socketId);
+        return -1;
+    }
+
+    QosTV clientQos[] = {
+        { .qos = QOS_TYPE_MIN_BW,      .value = 64*1024 },
+        { .qos = QOS_TYPE_MAX_LATENCY, .value = 10000 },
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 },
+    };
+    ISocketListener listener;
+    listener.OnQos = OnQos;
+    listener.OnShutdown = OnClientShutdown;
+    listener.OnBytes = OnClientBytes;
+
+    // retry 10 times or bind success
+    int32_t retryTimes = 0;
+    auto sleepTime = std::chrono::milliseconds(BIND_SERVICE_SLEEP_TIMES_MS);
+    bool bindSuccess = false;
+    while (retryTimes < BIND_SERVICE_MAX_RETRY_TIMES) {
+        int32_t res = ::Bind(socketId, clientQos, 3, &listener);
+        if (res != 0) {
+            ANS_LOGE("Bind Server failed, ret is %{public}d.", res);
+            std::this_thread::sleep_for(sleepTime);
+            retryTimes++;
+            continue;
+        }
+        bindSuccess = true;
+        ANS_LOGI("Bind Server success.");
+        break;
+    }
+
+    if (!bindSuccess) {
+        ::Shutdown(socketId); // close client.
+        return -1;
+    }
+    return socketId;
+}
+
+int32_t ClientSendMsg(int32_t socketId, const void* data, int32_t length, TransDataType type)
+{
+    int32_t result = 0;
+    if (type == TransDataType::DATA_TYPE_BYTES) {
+        result = ::SendBytes(socketId, data, length);
+    } else if (type == TransDataType::DATA_TYPE_MESSAGE) {
+        result = ::SendMessage(socketId, data, length);
+    }
+    ANS_LOGI("socket Send %{public}d %{public}d %{public}d %{public}d", socketId, length, type, result);
+    return result;
+}
+
+}
+}

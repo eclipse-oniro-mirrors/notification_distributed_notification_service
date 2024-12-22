@@ -25,6 +25,7 @@
 #include "iremote_broker.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
+#include "notification_disable.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_do_not_disturb_profile.h"
 #include "notification_request.h"
@@ -941,6 +942,14 @@ public:
      * @return Returns Update result.
      */
     virtual ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) = 0;
+
+    /**
+     * @brief Set switch and bundle list of disable notification feature.
+     *
+     * @param notificationDisable Switch and bundle list of disable notification feature.
+     * @return Returns set result.
+     */
+    virtual ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

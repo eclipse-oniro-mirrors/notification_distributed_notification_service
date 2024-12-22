@@ -1672,6 +1672,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18200,
     GTEST_LOG_(INFO) << "RecentNotificationDump_1000 test end";
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18300
  * @tc.name      : DistributedNotificationDump_1000
@@ -1690,6 +1691,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18300,
 
     GTEST_LOG_(INFO) << "DistributedNotificationDump_1000 test end";
 }
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18400
@@ -1724,6 +1726,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18500,
     GTEST_LOG_(INFO) << "OnBundleRemoved_1000 test end";
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18600
  * @tc.name      : OnScreenOn_1000
@@ -1740,6 +1743,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18600,
 
     GTEST_LOG_(INFO) << "OnScreenOn_1000 test end";
 }
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_18700
@@ -1890,6 +1894,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19500,
     GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test end";
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : AdvancedNotificationServiceTest_19600
  * @tc.name      : GetLocalNotificationKeys_0100
@@ -2038,6 +2043,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20300,
 
     GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0200 test end";
 }
+#endif
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_20400

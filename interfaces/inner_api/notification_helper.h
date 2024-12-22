@@ -1142,6 +1142,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
+
+    /**
+     * @brief Set switch and bundle list of disable notification feature.
+     *
+     * @param notificationDisable Switch and bundle list of disable notification feature.
+     * @return Returns set result.
+     */
+    static ErrCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
 };
 }  // namespace Notification
 }  // namespace OHOS

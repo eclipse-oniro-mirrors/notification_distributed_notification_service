@@ -21,6 +21,8 @@ group("ans_targets") {
 config("public_ans_config") {
   include_dirs = [
     "${services_path}/ans/include",
+    "${services_path}/ans/include/notification_extension",
+    "${services_path}/ans/include/utils",
     "${core_path}/include",
     "${frameworks_module_reminder_path}/include",
   ]
@@ -49,6 +51,8 @@ ohos_source_set("ans_service_sources") {
 
   include_dirs = [
     "${services_path}/ans/include",
+    "${services_path}/ans/include/notification_extension",
+    "${services_path}/ans/include/utils",
     "${services_path}/ans/include/slot_manager",
   ]
 
@@ -91,6 +95,8 @@ ohos_source_set("ans_service_sources") {
     "src/event_report.cpp",
     "src/notification_dialog.cpp",
     "src/notification_dialog_manager.cpp",
+    "src/notification_extension/distributed_device_manager.cpp",
+    "src/notification_extension/distributed_extension_service.cpp",
     "src/notification_extension_wrapper.cpp",
     "src/notification_local_live_view_subscriber_manager.cpp",
     "src/notification_preferences.cpp",
@@ -110,6 +116,7 @@ ohos_source_set("ans_service_sources") {
     "src/system_dialog_connect_stb.cpp",
     "src/system_event_observer.cpp",
     "src/telephony_extension_wrapper.cpp",
+    "src/utils/notifictaion_load_utils.cpp",
   ]
 
   sources += [

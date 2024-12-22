@@ -148,6 +148,7 @@ namespace Notification {
         ALLOW_USE_REMINDER,
         SET_DISTRIBUTED_ENABLED_BY_SLOT,
         GET_DISTRIBUTED_ENABLED_BY_SLOT,
+        DISABLE_NOTIFICATION_FEATURE,
     };
 }
 }

@@ -423,6 +423,8 @@ public:
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool DelBatchCloneProfileInfo(const int32_t &userId,
         const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
+    ErrCode SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
+    bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
