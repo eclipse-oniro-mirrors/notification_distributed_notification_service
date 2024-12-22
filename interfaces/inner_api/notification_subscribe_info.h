@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_SUBSCRIBER_INFO_H
 
 #include "parcel.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -123,6 +124,44 @@ public:
      **/
     int32_t GetSubscriberUid() const;
 
+    **
+     * @brief Sets a single slot type as the filter criterion,
+     * which means to subscribe to notifications of this slot.
+     *
+     * @param slotType Indicates the slot type.
+     **/
+    void AddSlotType(const NotificationConstant::SlotType slotType);
+
+    /**
+     * @brief Sets multiple slot type as the filter criteria,
+     * which means to subscribe to notifications of these slotType.
+     *
+     * @param slotTypes Indicates the set of slot types.
+     **/
+    void AddSlotTypes(const std::vector<NotificationConstant::SlotType> &slotTypes);
+
+    /**
+     * @brief Obtains the slot types in the current NotificationSubscribeInfo object.
+     * The slot types can be set by calling AddSlotTypes.
+     *
+     * @return Returns the set of slot types.
+     **/
+    std::vector<NotificationConstant::SlotType> GetSlotTypes() const;
+
+    /**
+     * @brief Adds filter type.
+     *
+     * @param filterType Indicates the filter type of subscriber.
+     **/
+    void SetFilterType(const int32_t filterType);
+
+    /**
+     * @brief Obtains the filter type.
+     *
+     * @return Returns the filter type of subscriber.
+     **/
+    int32_t GetFilterType() const;
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -131,6 +170,8 @@ private:
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};
+    std::vector<NotificationConstant::SlotType> slotTypes_;
+    int32_t filterType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -51,6 +51,9 @@ private:
     ErrCode RunSetEnableCmd();
     ErrCode RunSetDeviceStatusCmd();
     void SetNativeToken();
+    ErrCode RunSetSmartReminderEnabledCmd();
+    ErrCode RunSetDistributedEnabledByBundleCmd();
+    ErrCode RunSetDistributedEnabledBySlotCmd();
 
 private:
     std::shared_ptr<AnsNotification> ans_;

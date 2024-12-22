@@ -594,6 +594,30 @@ public:
     virtual ErrCode IsDistributedEnabled(bool &enabled) = 0;
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    virtual ErrCode SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) = 0;
+
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    virtual ErrCode IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled) = 0;
+    
+    /**
      * @brief Sets distributed notification enabled or disabled.
      *
      * @param enabled Indicates the enabled flag.

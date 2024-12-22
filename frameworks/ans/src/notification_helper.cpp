@@ -556,6 +556,18 @@ ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType
     return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
+ErrCode NotificationHelper::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+}
+
 ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);

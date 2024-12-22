@@ -865,6 +865,30 @@ public:
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    ErrCode SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
+    
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    ErrCode IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled) override;
+
+    /**
      * @brief Set the status of the target device.
      *
      * @param deviceType Type of the device whose status you want to set.
@@ -998,6 +1022,8 @@ private:
     ErrCode HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleIsSmartReminderEnabled(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetDistributedEnabledBySlot(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleIsDistributedEnabledBySlot(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleCancelAsBundleWithAgent(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);

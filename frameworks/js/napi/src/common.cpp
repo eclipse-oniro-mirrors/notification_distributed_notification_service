@@ -368,6 +368,53 @@ napi_value Common::GetNotificationSubscriberInfo(
         subscriberInfo.deviceType = str;
         subscriberInfo.hasSubscribeInfo = true;
     }
+    // slotTypes?: Array<SlotType>
+    NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasProperty));
+    if (hasProperty) {
+        napi_value nSlotTypes = nullptr;
+        napi_get_named_property(env, value, "slotTypes", &nSlotTypes);
+        napi_is_array(env, nSlotTypes, &isArray);
+        if (!isArray) {
+            ANS_LOGE("Property slotTypes is expected to be an array.");
+            return nullptr;
+        }
+        napi_get_array_length(env, nSlotTypes, &length);
+        if (length == 0) {
+            ANS_LOGE("The array is empty.");
+            return nullptr;
+        }
+        for (uint32_t i = 0; i < length; ++i) {
+            napi_value nSlotType = nullptr;
+            napi_get_element(env, nSlotTypes, i, &nSlotType);
+            NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
+            if (valuetype != napi_number) {
+                ANS_LOGE("Wrong argument type. number expected.");
+                return nullptr;
+            }
+            int32_t slotType;
+            NAPI_CALL(env, napi_get_value_int32(env, nSlotType, &slotType));
+            NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+            if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+                return nullptr;
+            }
+            subscriberInfo.slotTypes.emplace_back(outType);
+            subscriberInfo.hasSubscribeInfo = true;
+        }
+    }
+
+    // filterType?: number
+    NAPI_CALL(env, napi_has_named_property(env, value, "filterType", &hasProperty));
+    if (hasProperty) {
+        napi_value nFilterType = nullptr;
+        napi_get_named_property(env, value, "filterType", &nFilterType);
+        NAPI_CALL(env, napi_typeof(env, nFilterType, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_int32(env, nFilterType, &subscriberInfo.filterType));
+        subscriberInfo.hasSubscribeInfo = true;
+    }
 
     return NapiGetNull(env);
 }

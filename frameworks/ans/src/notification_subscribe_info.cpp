@@ -35,6 +35,8 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
     deviceType_ = subscribeInfo.GetDeviceType();
     userId_ = subscribeInfo.GetAppUserId();
     subscriberUid_ = subscribeInfo.GetSubscriberUid();
+    slotTypes_ = subscribeInfo.GetSlotTypes();
+    filterType_ = subscribeInfo.GetFilterType();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -89,6 +91,22 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write userId_");
         return false;
     }
+    // write slotTypes_
+    if (!parcel.WriteUint64(slotTypes_.size())) {
+        ANS_LOGE("Failed to write the size of slotTypes");
+        return false;
+    }
+    for (auto it = slotTypes_.begin(); it != slotTypes_.end(); ++it) {
+        if (!parcel.WriteInt32(static_cast<int32_t>(*it))) {
+            ANS_LOGE("Failed to write slotType");
+            return false;
+        }
+    }
+    // write filterType_
+    if (!parcel.WriteInt32(filterType_)) {
+        ANS_LOGE("Can't write filterType_");
+        return false;
+    }
     return true;
 }
 
@@ -120,6 +138,23 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Can't read userId_");
         return false;
     }
+    // read slotTypes_
+    auto vsize = parcel.ReadUint64();
+    for (uint64_t it = 0; it < vsize; ++it) {
+        int32_t slotTypeValue = parcel.ReadInt32();
+        if (slotTypeValue < 0 ||
+            slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+            ANS_LOGE("Invalid slot type value :%{public}d. It should be in [0 , %{public}d).",
+                slotTypeValue, static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE));
+            return false;
+        }
+        slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotTypeValue));
+    }
+    // read filterType_
+    if (!parcel.ReadInt32(filterType_)) {
+        ANS_LOGE("Can't read filterType_");
+        return false;
+    }
     return true;
 }
 
@@ -130,10 +165,17 @@ std::string NotificationSubscribeInfo::Dump()
         appNames += name;
         appNames += ", ";
     }
+    std::string slotTypes = "";
+    for (auto slotType : slotTypes_) {
+        slotTypes += std::to_string(static_cast<int32_t>(slotType));
+        slotTypes += ", ";
+    }
     return "NotificationSubscribeInfo{ "
             "appNames = [" + appNames + "]" +
             "deviceType = " + deviceType_ +
             "userId = " + std::to_string(userId_) +
+            "slotTypes = [" + slotTypes + "]" +
+            "filterType = " + std::to_string(filterType_) +
             " }";
 }
 
@@ -145,6 +187,31 @@ void NotificationSubscribeInfo::SetSubscriberUid(const int32_t uid)
 int32_t NotificationSubscribeInfo::GetSubscriberUid() const
 {
     return subscriberUid_;
+}
+
+void NotificationSubscribeInfo::AddSlotType(const NotificationConstant::SlotType slotType)
+{
+    slotTypes_.push_back(slotType);
+}
+
+void NotificationSubscribeInfo::AddSlotTypes(const std::vector<NotificationConstant::SlotType> &slotTypes)
+{
+    slotTypes_.insert(slotTypes_.end(), slotTypes.begin(), slotTypes.end());
+}
+
+std::vector<NotificationConstant::SlotType> NotificationSubscribeInfo::GetSlotTypes() const
+{
+    return slotTypes_;
+}
+
+void NotificationSubscribeInfo::SetFilterType(const int32_t filterType)
+{
+    filterType_ = filterType;
+}
+
+int32_t NotificationSubscribeInfo::GetFilterType() const
+{
+    return filterType_;
 }
 }  // namespace Notification
 }  // namespace OHOS

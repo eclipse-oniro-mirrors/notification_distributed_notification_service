@@ -236,22 +236,28 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
         (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = iter->second;
     }
 
-    map<string, vector<shared_ptr<ReminderAffected>>> currentReminderMethod;
     set<string> validDevices;
+    InitValidDevices(validDevices, request);
     for (auto &reminderMethod : reminderMethods_) {
-        if (reminderMethod.first.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-            currentReminderMethod = reminderMethod.second;
-            continue;
-        }
         HandleReminderMethods(
             reminderMethod.first, reminderMethod.second, request, validDevices, notificationFlagsOfDevices);
     }
-    if (currentReminderMethod.size() > 0 && validDevices.size() > 0) {
-        HandleReminderMethods(NotificationConstant::CURRENT_DEVICE_TYPE,
-            currentReminderMethod, request, validDevices, notificationFlagsOfDevices);
-    }
-
     request->SetDeviceFlags(notificationFlagsOfDevices);
+}
+
+void SmartReminderCenter::InitValidDevices(
+    set<string> &validDevices,
+    const sptr<NotificationRequest> &request) const
+{
+    validDevices.insert(NotificationConstant::CURRENT_DEVICE_TYPE);
+    for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
+        if (IsNeedSynergy(request->GetSlotType(), deviceType, request->GetOwnerBundleName(), request->GetOwnerUid()) &&
+            NotificationSubscriberManager::GetInstance()->IsDeviceTypeSubscriberd(deviceType)) {
+            validDevices.insert(deviceType);
+            ANS_LOGI("InitValidDevices- %{public}s", deviceType.c_str());
+        }
+    }
+    return;
 }
 
 void SmartReminderCenter::HandleReminderMethods(
@@ -269,14 +275,8 @@ void SmartReminderCenter::HandleReminderMethods(
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
     bool enabledAffectedBy = true;
-    if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
-        if (IsNeedSynergy(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid())) {
-            validDevices.insert(deviceType);
-        } else {
-            enabledAffectedBy = false;
-        }
-    }
-    if (!NotificationSubscriberManager::GetInstance()->GetIsEnableEffectedRemind()) {
+    
+    if (validDevices.find(deviceType) == validDevices.end()) {
         enabledAffectedBy = false;
     }
 
@@ -286,6 +286,8 @@ void SmartReminderCenter::HandleReminderMethods(
         }
         if (reminderAffected->affectedBy_.size() <= 0) {
             (*notificationFlagsOfDevices)[deviceType] = reminderAffected->reminderFlags_;
+            ANS_LOGI("unaffect match deviceType = %{public}s ,  remindFlags = %{public}d",
+                deviceType.c_str(), reminderAffected->reminderFlags_->GetReminderFlags());
             continue;
         }
         if (enabledAffectedBy &&
@@ -295,10 +297,16 @@ void SmartReminderCenter::HandleReminderMethods(
     }
 }
 
-bool SmartReminderCenter::IsNeedSynergy(const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const
+bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &slotType,
+    const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const
 {
     bool isEnable = true;
     if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, isEnable) != ERR_OK || !isEnable) {
+        return false;
+    }
+
+    if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, isEnable) != ERR_OK
+        || !isEnable) {
         return false;
     }
 
@@ -319,8 +327,7 @@ bool SmartReminderCenter::HandleAffectedReminder(
 {
     bool ret = true;
     for (auto &affectedBy : reminderAffected->affectedBy_) {
-        if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
-            validDevices.find(affectedBy.first) == validDevices.end()) {
+        if (validDevices.find(affectedBy.first) == validDevices.end()) {
             ret = false;
             break;
         }
@@ -333,6 +340,8 @@ bool SmartReminderCenter::HandleAffectedReminder(
     }
     if (ret) {
         (*notificationFlagsOfDevices)[deviceType] = reminderAffected->reminderFlags_;
+        ANS_LOGI("affect match deviceType = %{public}s ,  remindFlags = %{public}d",
+            deviceType.c_str(), reminderAffected->reminderFlags_->GetReminderFlags());
     }
     return ret;
 }
@@ -343,15 +352,22 @@ bool SmartReminderCenter::CompareStatus(
     if (status.size() <= 0) {
         return true;
     }
-    // bitset.to_string() and config is reverse, bit[0] is behind
-    string localStatus = status;
-    reverse(localStatus.begin(), localStatus.end());
-    for (int32_t seq = 0; seq < DistributedDeviceStatus::STATUS_SIZE; seq++) {
-        if (localStatus[seq] != ReminderAffected::STATUS_DEFAULT && bitStatus[seq] != localStatus[seq] - '0') {
-            return false;
+    std::vector<std::string> statusVector;
+    StringUtils::Split(status, StringUtils::SPLIT_CHAR, statusVector);
+    for (std::string strStatus : statusVector) {
+        // bitset.to_string() and config is reverse, bit[0] is behind
+        string localStatus = strStatus;
+        reverse(localStatus.begin(), localStatus.end());
+        for (int32_t seq = 0; seq < DistributedDeviceStatus::STATUS_SIZE; seq++) {
+            if (localStatus[seq] != ReminderAffected::STATUS_DEFAULT && bitStatus[seq] != localStatus[seq] - '0') {
+                break;
+            }
+            if (seq == DistributedDeviceStatus::STATUS_SIZE -1) {
+                return true;
+            }
         }
     }
-    return true;
+    return false;
 }
 
 __attribute__((no_sanitize("cfi"))) void SmartReminderCenter::GetReminderAffecteds(

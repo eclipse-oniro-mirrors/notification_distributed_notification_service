@@ -44,6 +44,8 @@ struct NotificationSubscriberManager::SubscriberRecord {
     int32_t userId {SUBSCRIBE_USER_INIT};
     std::string deviceType {CURRENT_DEVICE_TYPE};
     int32_t subscriberUid {DEFAULT_UID};
+    std::vector<NotificationConstant::SlotType> slotTypes {};
+    int32_t filterType {0};
 };
 
 NotificationSubscriberManager::NotificationSubscriberManager()
@@ -350,6 +352,8 @@ void NotificationSubscriberManager::AddRecordInfo(
             record->deviceType = subscribeInfo->GetDeviceType();
         }
         record->subscriberUid = subscribeInfo->GetSubscriberUid();
+        record->slotTypes = subscribeInfo->GetSlotTypes();
+        record->filterType = subscribeInfo->GetFilterType();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -433,7 +437,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
-        if (IsSubscribedBysubscriber(record, notification)) {
+        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
             if (!record->subscriber->AsObject()->IsProxyObject()) {
                 MessageParcel data;
                 if (!data.WriteParcelable(notification)) {
@@ -464,6 +468,16 @@ bool NotificationSubscriberManager::GetIsEnableEffectedRemind()
     }
     return false;
 }
+
+bool NotificationSubscriberManager::IsDeviceTypeSubscriberd(const std::string deviceType)
+{
+    for (auto record : subscriberRecordList_) {
+        if (record->deviceType.compare(deviceType) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 #endif
 
 void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
@@ -482,7 +496,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         if (notification == nullptr) {
             continue;
         }
-        if (IsSubscribedBysubscriber(record, notification)) {
+        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
             currNotifications.emplace_back(notification);
         }
     }
@@ -546,6 +560,22 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     }
 
     return false;
+}
+
+bool NotificationSubscriberManager::ConsumeRecordFilter(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
+{
+    // slotType
+    NotificationRequest request = notification->GetNotificationRequest();
+    if (!record->slotTypes.empty()) {
+        auto findResult = std::find(record->slotTypes.begin(), record->slotTypes.end(), request.GetSlotType());
+        if (findResult == record->slotTypes.end()) {
+            ANS_LOGI("ConsumeRecordFilter-slotTypeFilter");
+            return false;
+        }
+    }
+    // filterType
+    return true;
 }
 
 void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
