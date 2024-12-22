@@ -352,6 +352,30 @@ public:
         const std::string &deviceType, bool &enabled);
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    ErrCode SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    ErrCode IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
+
+    /**
      * @brief Get the bundle name set for send the sound.
      *
      * @param allPackage Specifies whether to allow all bundle to publish notification with sound.

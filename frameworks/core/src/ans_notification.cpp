@@ -1815,6 +1815,32 @@ ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, 
     return proxy->SetSmartReminderEnabled(deviceType, enabled);
 }
 
+ErrCode AnsNotification::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+}
+
 ErrCode AnsNotification::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
 {
     ANS_LOGI("enter CancelAsBundleWithAgent,bundleName:%{public}s,id:%{public}d",

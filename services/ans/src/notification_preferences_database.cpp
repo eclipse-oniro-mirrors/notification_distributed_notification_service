@@ -111,6 +111,11 @@ const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION = "enabledDi
 const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartReminder";
 
 /**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION = "enabledSlotDistributedNotification";
+
+/**
  * Indicates that disturbe key which bundle popped dialog.
  */
 const static std::string KEY_BUNDLE_POPPED_DIALOG = "poppedDialog";
@@ -2007,6 +2012,16 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::str
         deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
 }
 
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(
+    const NotificationConstant::SlotType &slotType,
+    const std::string &deviceType,
+    const int32_t userId) const
+{
+    return std::string(KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE)
+        .append(deviceType).append(KEY_MIDDLE_LINE)
+        .append(std::to_string(static_cast<int32_t>(slotType))).append(KEY_MIDDLE_LINE)
+        .append(std::to_string(userId));
+}
 
 bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string deviceType, const bool &enabled)
 {
@@ -2042,6 +2057,59 @@ bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string d
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
                 enabled = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+ErrCode NotificationPreferencesDatabase::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s, %{public}d,deviceType:%{public}s,enabled[%{public}d]",
+        __FUNCTION__, slotType, deviceType.c_str(), enabled);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(slotType, deviceType, userId);
+    ANS_LOGD("%{public}s, key:%{public}s,enabled[%{public}d]", __FUNCTION__, key.c_str(), enabled);
+    int32_t result = PutDataToDB(key, enabled, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+ErrCode NotificationPreferencesDatabase::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s, %{public}d,deviceType:%{public}s]",
+        __FUNCTION__, slotType, deviceType.c_str());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(slotType, deviceType, userId);
+    bool result = false;
+    enabled = false;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                enabled = true;
                 break;
             }
             case NativeRdb::E_OK: {

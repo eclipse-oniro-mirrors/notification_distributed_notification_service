@@ -2669,6 +2669,57 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
     return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType, enabled);
 }
 
+ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_7);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    
+    ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
+        deviceType, enabled);
+
+    ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
+        "SetDistributedEnabledBySlot result: %{public}d",
+        slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    return NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+}
+
 ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<NotificationRequest> &request)
 {
     if (request->IsCommonLiveView() || request->GetAppMessageId().empty()) {

@@ -316,5 +316,88 @@ ErrCode AnsManagerProxy::IsDistributedEnabledByBundle(const sptr<NotificationBun
 
     return result;
 }
+ErrCode AnsManagerProxy::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("enter");
+    
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[SetDistributedEnabledBySlot] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(slotType)) {
+        ANS_LOGE("[SetDistributedEnabledBySlot] fail: write slotType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(deviceType)) {
+        ANS_LOGE("[SetDistributedEnabledBySlot] fail: write deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(enabled)) {
+        ANS_LOGE("[SetDistributedEnabledBySlot] fail: write enabled failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_DISTRIBUTED_ENABLED_BY_SLOT, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[SetDistributedEnabledBySlot] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[SetDistributedEnabledBySlot] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[IsDistributedEnabledBySlot] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(slotType)) {
+        ANS_LOGE("[IsDistributedEnabledBySlot] fail: write slotType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(deviceType)) {
+        ANS_LOGE("[IsDistributedEnabledBySlot] fail: write deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_DISTRIBUTED_ENABLED_BY_SLOT, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[IsDistributedEnabledBySlot] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[IsDistributedEnabledBySlot] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadBool(enabled)) {
+        ANS_LOGE("[IsDistributedEnabledBySlot] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

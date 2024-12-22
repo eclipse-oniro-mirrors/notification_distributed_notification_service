@@ -44,6 +44,7 @@ enum EventBranchId {
     BRANCH_4 = 4,
     BRANCH_5 = 5,
     BRANCH_6 = 6,
+    BRANCH_7 = 7,
 };
 class HaMetaMessage {
 public:

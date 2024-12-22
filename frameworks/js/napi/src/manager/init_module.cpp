@@ -124,6 +124,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isNotificationEnabledSync", NapiIsNotificationEnabledSync),
         DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbProfile", NapiGetDoNotDisturbProfile),
+        DECLARE_NAPI_FUNCTION("setDistributedEnabledBySlot", NapiSetDistributedEnabledBySlot),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabledBySlot", NapiIsDistributedEnabledBySlot),
         DECLARE_NAPI_FUNCTION("disableNotificationFeature", NapiDisableNotificationFeature),
         DECLARE_NAPI_FUNCTION("setTargetDeviceStatus", NapiSetTargetDeviceStatus),
 };

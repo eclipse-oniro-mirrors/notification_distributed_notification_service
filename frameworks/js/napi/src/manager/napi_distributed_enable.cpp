@@ -25,6 +25,8 @@ const int SET_DISTRIBUTED_ENABLE_MAX_PARA = 3;
 const int SET_DISTRIBUTED_ENABLE_MIN_PARA = 2;
 const int SET_SMART_REMINDER_ENABLE_MAX_PARA = 2;
 const int SET_SMART_REMINDER_ENABLE_MIN_PARA = 1;
+const int SET_DISTRIBUTED_ENABLE_BY_SLOT_PARA = 3;
+const int GET_DISTRIBUTED_ENABLE_BY_SLOT_PARA = 2;
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, DistributedEnableParams &params)
 {
     ANS_LOGD("enter");
@@ -323,6 +325,209 @@ napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info)
             }
         },
         AsyncCompleteCallbackNapiIsSmartReminderEnabled,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+
+napi_value ParseParameters(const napi_env &env,
+    const napi_callback_info &info, DistributedEnableBySlotParams &params, bool setOperation)
+{
+    ANS_LOGD("enter");
+    size_t argc = SET_DISTRIBUTED_ENABLE_BY_SLOT_PARA;
+    napi_value argv[SET_DISTRIBUTED_ENABLE_BY_SLOT_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if ((setOperation && argc != SET_DISTRIBUTED_ENABLE_BY_SLOT_PARA) ||
+        (!setOperation && argc != GET_DISTRIBUTED_ENABLE_BY_SLOT_PARA)) {
+        ANS_LOGW("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    // argv[0]: slot
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGW("Parameter type error. Object expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    int32_t slotType;
+    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &slotType));
+    NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+        std::string msg = "Incorrect parameter slot.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    params.slot = outType;
+    
+    // argv[1]: deviceType
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+    if (valuetype != napi_string) {
+        ANS_LOGW("Wrong argument type. Bool expected.");
+        std::string msg = "Incorrect parameter types.The type of param must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    char str[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property deviceType is empty");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+    params.deviceType = str;
+
+    // argv[2]: enable
+    if (setOperation) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGW("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be boolean.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_get_value_bool(env, argv[PARAM2], &params.enable);
+    }
+    
+    return Common::NapiGetNull(env);
+}
+
+void AsyncCompleteCallbackNapiSetDistributedEnabledBySlot(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("enter");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    AsyncCallbackDistributedEnableBySlot *asynccallbackinfo = static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
+    if (asynccallbackinfo) {
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete NapiSetDistributedEnabledBySlot callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+}
+
+napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    DistributedEnableBySlotParams params {};
+    if (ParseParameters(env, info, params, true) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackDistributedEnableBySlot *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackDistributedEnableBySlot {.env = env, .asyncWork = nullptr, .params = params};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "setDistributedEnabledBySlot", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiSetDistributedEnabledBySlot work excute.");
+            AsyncCallbackDistributedEnableBySlot *asynccallbackinfo =
+                static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::SetDistributedEnabledBySlot(
+                    asynccallbackinfo->params.slot,
+                    asynccallbackinfo->params.deviceType,
+                    asynccallbackinfo->params.enable);
+                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            }
+        },
+        AsyncCompleteCallbackNapiSetDistributedEnabledBySlot,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+
+    return promise;
+}
+
+void AsyncCompleteCallbackNapiIsDistributedEnabledBySlot(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("enter");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    ANS_LOGI("IsDistributedEnabledBySlot napi_create_async_work end");
+    AsyncCallbackDistributedEnableBySlot *asynccallbackinfo = static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
+    if (asynccallbackinfo) {
+        napi_value result = nullptr;
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            result = Common::NapiGetNull(env);
+        } else {
+            napi_get_boolean(env, asynccallbackinfo->params.enable, &result);
+        }
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete NapiIsDistributedEnabledBySlot callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+}
+
+napi_value NapiIsDistributedEnabledBySlot(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    DistributedEnableBySlotParams params {};
+    if (ParseParameters(env, info, params, false) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsyncCallbackDistributedEnableBySlot *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackDistributedEnableBySlot {.env = env, .asyncWork = nullptr, .params = params};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "isDistributedEnabledBySlot", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiIsDistributedEnabledBySlot work excute.");
+            AsyncCallbackDistributedEnableBySlot *asynccallbackinfo =
+                static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::IsDistributedEnabledBySlot(
+                    asynccallbackinfo->params.slot,
+                    asynccallbackinfo->params.deviceType,
+                    asynccallbackinfo->params.enable);
+                ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            }
+        },
+        AsyncCompleteCallbackNapiIsDistributedEnabledBySlot,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 

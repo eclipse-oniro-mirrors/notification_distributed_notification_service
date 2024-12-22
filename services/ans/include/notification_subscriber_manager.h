@@ -137,6 +137,7 @@ public:
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();
+    bool IsDeviceTypeSubscriberd(const std::string deviceType);
 #endif
 
 private:
@@ -166,6 +167,8 @@ private:
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    bool ConsumeRecordFilter(
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
 
 private:

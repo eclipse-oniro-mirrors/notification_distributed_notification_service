@@ -528,6 +528,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
     {
         return ERR_ANS_INVALID_PARAM;
