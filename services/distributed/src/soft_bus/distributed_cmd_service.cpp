@@ -31,7 +31,7 @@ std::string TransDeviceTypeIdToName(uint16_t deviceType)
 {
     switch (deviceType) {
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH: {
-            return "Watch";
+            return "wearable";
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
             return "Pad";
@@ -42,6 +42,10 @@ std::string TransDeviceTypeIdToName(uint16_t deviceType)
         default:
             return "";
     }
+}
+
+namespace {
+constexpr uint32_t DEFAULT_LOCK_SCREEN_FLAG = 2;
 }
 
 void DistributedService::SetCurrentUserId(int32_t userId)
@@ -83,7 +87,8 @@ void DistributedService::HandleDeviceState(const std::shared_ptr<TlvBox>& boxMes
         ANS_LOGW("Dans unbox state failed.");
         return;
     }
-    int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, static_cast<uint32_t>(state));
+    uint32_t status = (static_cast<uint32_t>(state) << 1);
+    int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status, DEFAULT_LOCK_SCREEN_FLAG);
     ANS_LOGI("Dans set state %{public}s %{public}u.", deviceName.c_str(), state);
 }
 
