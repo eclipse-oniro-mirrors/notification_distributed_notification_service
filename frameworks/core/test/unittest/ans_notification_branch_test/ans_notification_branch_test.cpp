@@ -538,6 +538,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const uint32_t controlFlag)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
     {
         return ERR_ANS_INVALID_PARAM;

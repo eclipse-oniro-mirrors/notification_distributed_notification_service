@@ -147,6 +147,7 @@ namespace Notification {
         UPDATE_NOTIFICATION_TIMER,
         ALLOW_USE_REMINDER,
         DISABLE_NOTIFICATION_FEATURE,
+        SET_TARGET_DEVICE_STATUS_WITH_FLAG,
     };
 }
 }

@@ -26,6 +26,61 @@ const int IS_ENABLED_BUNDLE_MAX_PARA = 2;
 const int IS_ENABLED_BUNDLE_MIN_PARA = 1;
 const int ENABLED_SYNC_MAX_PARA = 3;
 const int ENABLED_SYNC_MIN_PARA = 2;
+const int32_t SET_STATUS_PARA_NUM = 2;
+const int32_t USING_FLAG = 0;
+const int32_t OWNER_FLAG = 1;
+const int32_t DISTURB_MODE_FLAG = 2;
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, DeviceStatus &params)
+{
+    ANS_LOGD("enter");
+    size_t argc = SET_STATUS_PARA_NUM;
+    napi_value argv[SET_STATUS_PARA_NUM] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < SET_STATUS_PARA_NUM) {
+        ANS_LOGW("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    napi_valuetype valuetype = napi_undefined;
+    // argv[0]: deviceType: string
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype != napi_string) {
+        ANS_LOGW("Argument type error. String expected.");
+        std::string msg = "Incorrect parameter deviceType. The type of param must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    char str[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property deviceType is empty");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+    params.deviceType = str;
+
+    // argv[1]: status: number
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGW("Argument type error. number expected.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    int32_t value = 0;
+    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &value));
+    params.status = 0;
+    params.status |= (value & (1 << USING_FLAG));
+    params.status |= ((value & (1 << OWNER_FLAG)) << 1);
+    params.status |= ((value & (1 << DISTURB_MODE_FLAG)) << 1);
+    ANS_LOGI("Arguments %{public}s %{public}d, %{public}d.", str, value, params.status);
+    return Common::NapiGetNull(env);
+}
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params)
 {

@@ -992,6 +992,16 @@ public:
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
 
     /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const uint32_t controlFlag) override;
+
+    /**
      * @brief clear notification when aggregate local switch close.
      */
     void ClearAllNotificationGroupInfo(std::string localSwitch);

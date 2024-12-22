@@ -409,6 +409,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleSetTargetDeviceStatus(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS_WITH_FLAG): {
+            result = HandleSetDeviceStatus(data, reply);
+            break;
+        }
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
         case static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_SWING_CALLBACK): {
             result = HandleRegisterSwingCallback(data, reply);
@@ -2505,6 +2509,34 @@ ErrCode AnsManagerStub::HandleDisableNotificationFeature(MessageParcel &data, Me
     ErrCode result = DisableNotificationFeature(notificationDisable);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleDisableNotificationFeature] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetDeviceStatus(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t status = 0;
+    if (!data.ReadInt32(status)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read status failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t controlFlag = 0;
+    if (!data.ReadInt32(controlFlag)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read status failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetTargetDeviceStatus(deviceType, status, controlFlag);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

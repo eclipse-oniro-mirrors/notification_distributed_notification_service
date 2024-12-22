@@ -874,6 +874,17 @@ public:
     virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
 
     /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @param controlFlag The control flag.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const uint32_t controlFlag) override;
+
+    /**
      * @brief Get do not disturb profile by id.
      *
      * @param id Profile id.
@@ -1012,6 +1023,7 @@ private:
     ErrCode HandleSetTargetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleAllowUseReminder(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetDeviceStatus(MessageParcel &data, MessageParcel &reply);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif

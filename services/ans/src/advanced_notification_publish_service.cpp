@@ -2828,10 +2828,34 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
         return ERR_ANS_INVALID_PARAM;
     }
 
-    int ret = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_);
-    ANS_LOGI("%{public}s device status update with %{public}u",
-        deviceType.c_str(), DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType));
-    return ret;
+    DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_,
+        DistributedDeviceStatus::DISTURB_DEFAULT_FLAG);
+    ANS_LOGI("update %{public}s status %{public}u", deviceType.c_str(), status);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        ANS_LOGD("isSubsystem is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status, controlFlag);
+    ANS_LOGI("update %{public}s status %{public}u %{public}u", deviceType.c_str(), status, controlFlag);
+    return ERR_OK;
 }
 
 void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string localSwitch)

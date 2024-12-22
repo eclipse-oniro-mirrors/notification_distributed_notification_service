@@ -143,6 +143,46 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
     return result;
 }
 
+ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Set package config fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(deviceType)) {
+        ANS_LOGE("Set package config fail:: write deviceType failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(status)) {
+        ANS_LOGE("Set package config fail:: write status failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(controlFlag)) {
+        ANS_LOGE("Set package config fail:: write controlFlag failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS_WITH_FLAG, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Set package config fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::SetAdditionConfig(const std::string &key, const std::string &value)
 {
     MessageParcel data;

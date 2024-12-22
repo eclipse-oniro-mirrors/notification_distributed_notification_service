@@ -885,6 +885,17 @@ public:
     virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) = 0;
 
     /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @param controlFlag The control flag.
+     * @return Returns set result.
+     */
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const uint32_t controlFlag) = 0;
+
+    /**
      * @brief Get do not disturb profile by id.
      *
      * @param id Profile id.
