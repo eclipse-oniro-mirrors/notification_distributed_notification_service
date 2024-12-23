@@ -115,7 +115,8 @@ namespace OHOS {
         manager->FindReminderRequestLocked(reminderId);
         manager->StartRecentReminder();
         manager->HandleImmediatelyShow(immediatelyReminders, value);
-        manager->HandleExtensionReminder(extensionReminders);
+        int8_t type = fdp->ConsumeIntegral<int8_t>();
+        manager->HandleExtensionReminder(extensionReminders, type);
         manager->HandleSameNotificationIdShowing(reminder);
         manager->IsBelongToSameApp(uid, uid);
         manager->CheckIsSameApp(reminder, uid);

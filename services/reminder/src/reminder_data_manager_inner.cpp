@@ -52,6 +52,10 @@ namespace OHOS {
 namespace Notification {
 namespace {
 constexpr int32_t ALL_SA_READY_FLAG = 2;  // bundle service and ability service ready.
+// The maximum number of applications that can be displayed at a time
+constexpr int32_t ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE = 10;
+// The maximum number of system that can be displayed at a time
+constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 }
 
 bool ReminderDataManager::IsSystemReady()
@@ -161,6 +165,29 @@ void ReminderDataManager::ReportSysEvent(const sptr<ReminderRequest>& reminder)
         "UID", uid, "NAME", bundleName, "TYPE", type, "REPEAT", repeat, "TRIGGER_TIME", triggerTime,
         "RING_TIME", ringTime);
 #endif
+}
+
+bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
+    sptr<ReminderRequest>& reminder)
+{
+    if (totalCount > TOTAL_MAX_NUMBER_SHOW_AT_ONCE) {
+        ANSR_LOGW("The maximum number of displays that can be displayed at a time has been reached.");
+        return false;
+    }
+    ++totalCount;
+    std::string key = std::to_string(reminder->GetUid()) + "_" + std::to_string(reminder->GetTriggerTimeInMilli());
+    auto iter = limits.find(key);
+    if (iter == limits.end()) {
+        limits[key] = 1;
+        return true;
+    }
+    if (iter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE) {
+        ANSR_LOGW("The maximum number of displays that can be displayed in a single app[%{public}s] has been reached",
+            reminder->GetBundleName().c_str());
+        return false;
+    }
+    ++iter->second;
+    return true;
 }
 }
 }

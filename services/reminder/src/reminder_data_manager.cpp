@@ -65,6 +65,8 @@ const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
 const int64_t ONE_MIN_TIME = 60 * 1000;
 const int64_t NEXT_LOAD_TIME = 20 * ONE_MIN_TIME;
+constexpr int8_t NORMAL_CALLBACK = 0;  // timer callback
+constexpr int8_t REISSUE_CALLBACK = 1;  // time change, boot complte callback
 }
 
 /**
@@ -795,7 +797,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
     HandleImmediatelyShow(showImmediately, true);
-    HandleExtensionReminder(extensionReminders);
+    HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
 }
 
@@ -914,7 +916,7 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     }
     std::vector<sptr<ReminderRequest>> extensionReminders;
     ShowActiveReminderExtendLocked(reminder, extensionReminders);
-    HandleExtensionReminder(extensionReminders);
+    HandleExtensionReminder(extensionReminders, NORMAL_CALLBACK);
     StartRecentReminder();
 }
 
@@ -960,6 +962,8 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
     bool isAlerting = false;
     sptr<ReminderRequest> playSoundReminder = nullptr;
+    std::unordered_map<std::string, int32_t> limits;
+    int32_t totalCount = 0;
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         if ((*it)->IsExpired()) {
             continue;
@@ -980,6 +984,11 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
             continue;
         }
+        if (!CheckShowLimit(limits, totalCount, (*it))) {
+            (*it)->OnShow(false, false, false);
+            store_->UpdateOrInsert((*it));
+            continue;
+        }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             playSoundReminder = (*it);
             isAlerting = true;
@@ -992,7 +1001,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
     }
 }
 
-bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder)
+bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder, const int8_t type)
 {
     ANSR_LOGD("StartExtensionAbility");
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
@@ -1002,6 +1011,7 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
             AAFwk::Want want;
             want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
             want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
+            want.SetParam("PULL_TYPE", type);
             int32_t result = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
             if (result != ERR_OK) {
@@ -1013,7 +1023,8 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
     return true;
 }
 
-void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times)
+void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times,
+    const int8_t type)
 {
     auto manager = ReminderDataManager::GetInstance();
     if (manager == nullptr) {
@@ -1029,12 +1040,14 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
         return;
     }
     times--;
-    bool ret = ReminderDataManager::StartExtensionAbility(reminder);
+    bool ret = ReminderDataManager::StartExtensionAbility(reminder, type);
     if (!ret && times > 0 && serviceQueue_ != nullptr) {
         ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
         ffrt::task_attr taskAttr;
         taskAttr.delay(CONNECT_EXTENSION_INTERVAL);
-        auto callback = [reminder, times]() { ReminderDataManager::AsyncStartExtensionAbility(reminder, times); };
+        auto callback = [reminder, times, type]() {
+            ReminderDataManager::AsyncStartExtensionAbility(reminder, times, type);
+        };
         serviceQueue_->submit(callback, taskAttr);
     }
 }
@@ -1245,8 +1258,16 @@ void ReminderDataManager::HandleImmediatelyShow(
     std::vector<sptr<ReminderRequest>> &showImmediately, bool isSysTimeChanged)
 {
     bool isAlerting = false;
+    std::unordered_map<std::string, int32_t> limits;
+    int32_t totalCount = 0;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
         if ((*it)->IsShowing()) {
+            continue;
+        }
+        if (!CheckShowLimit(limits, totalCount, (*it))) {
+            std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+            (*it)->OnShow(false, isSysTimeChanged, false);
+            store_->UpdateOrInsert((*it));
             continue;
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
@@ -1260,10 +1281,11 @@ void ReminderDataManager::HandleImmediatelyShow(
     }
 }
 
-void ReminderDataManager::HandleExtensionReminder(std::vector<sptr<ReminderRequest>>& extensionReminders)
+void ReminderDataManager::HandleExtensionReminder(std::vector<sptr<ReminderRequest>>& extensionReminders,
+    const int8_t type)
 {
     for (auto& reminder : extensionReminders) {
-        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES, type);
     }
 }
 
@@ -1348,7 +1370,7 @@ void ReminderDataManager::Init()
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
     HandleImmediatelyShow(immediatelyReminders, false);
-    HandleExtensionReminder(extensionReminders);
+    HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartReminderLoadTimer();
     isReminderAgentReady_ = true;
