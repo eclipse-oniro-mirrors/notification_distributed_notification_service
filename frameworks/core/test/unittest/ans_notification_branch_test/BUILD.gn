@@ -25,8 +25,8 @@ ohos_unittest("ans_notification_branch_test") {
   ]
 
   sources = [
+    "../mock/mock_ans_manager_proxy.cpp",
     "ans_notification_branch_test.cpp",
-    "mock_ans_notification.cpp",
   ]
 
   deps = [

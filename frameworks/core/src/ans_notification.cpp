@@ -17,6 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_manager_death_recipient.h"
 #include "ans_manager_proxy.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
@@ -27,7 +28,9 @@
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
 #include "system_ability_definition.h"
+#include "unique_fd.h"
 
+#include <memory>
 #include <thread>
 
 namespace OHOS {
@@ -670,6 +673,98 @@ ErrCode AnsNotification::UnSubscribeNotification(
     return proxy->Unsubscribe(subscriberSptr, sptrInfo);
 }
 
+ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    return SubscribeNotification(subscriber, nullptr);
+}
+
+ErrCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber == nullptr) {
+        ANS_LOGE("Subscriber is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<SubscriberListener> listener = nullptr;
+    CreateSubscribeListener(subscriber, listener);
+    if (listener == nullptr) {
+        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
+    return proxy->SubscribeSelf(listener);
+}
+
+ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber == nullptr) {
+        ANS_LOGE("Subscriber is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Failed to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<SubscriberListener> listener = nullptr;
+    CreateSubscribeListener(subscriber, listener);
+    if (listener == nullptr) {
+        ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    if (subscribeInfo != nullptr) {
+        subscriber->SetDeviceType(subscribeInfo->GetDeviceType());
+    }
+    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
+    return proxy->Subscribe(listener, subscribeInfo);
+}
+
+ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    return UnSubscribeNotification(subscriber, nullptr);
+}
+
+ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (subscriber == nullptr) {
+        ANS_LOGE("Subscriber is nullptr.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    std::lock_guard<std::mutex> lock(subscriberMutex_);
+    auto item = subscribers_.find(subscriber);
+    if (item != subscribers_.end()) {
+        sptr<SubscriberListener> listener = item->second;
+        int32_t ret = proxy->Unsubscribe(listener, subscribeInfo);
+        if (ret == ERR_OK) {
+            subscribers_.erase(item);
+        }
+        return ret;
+    }
+    ANS_LOGE("Failed to unsubscribe due to subscriber not found.");
+    return ERR_ANS_INVALID_PARAM;
+}
+
 ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
     const int32_t notificationId, const NotificationButtonOption &buttonOption)
 {
@@ -1245,11 +1340,7 @@ ErrCode AnsNotification::GetDeviceRemindType(NotificationConstant::RemindType &r
 }
 
 void AnsNotification::ResetAnsManagerProxy()
-{
-    ANS_LOGD("enter");
-    std::lock_guard<std::mutex> lock(mutex_);
-    ansManagerProxy_ = nullptr;
-}
+{}
 
 void AnsNotification::Reconnect()
 {
@@ -1908,6 +1999,31 @@ ErrCode AnsNotification::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoN
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->GetDoNotDisturbProfile(id, profile);
+}
+
+void AnsNotification::CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    sptr<SubscriberListener> &listener)
+{
+    std::lock_guard<std::mutex> lock(subscriberMutex_);
+    auto item = subscribers_.find(subscriber);
+    if (item != subscribers_.end()) {
+        listener = item->second;
+        ANS_LOGD("subscriber has listener");
+        return;
+    }
+    listener = new (std::nothrow) SubscriberListener(subscriber);
+    if (listener != nullptr) {
+        subscribers_[subscriber] = listener;
+        ANS_LOGD("CreateSubscribeListener success");
+    }
+}
+
+void AnsNotification::OnServiceDied()
+{
+    std::lock_guard<std::mutex> lock(subscriberMutex_);
+    for (auto item : subscribers_) {
+        item.first->OnDied();
+    }
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

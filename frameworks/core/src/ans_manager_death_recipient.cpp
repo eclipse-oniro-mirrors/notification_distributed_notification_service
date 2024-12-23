@@ -24,6 +24,10 @@ namespace OHOS {
 namespace Notification {
 void AnsManagerDeathRecipient::SubscribeSAManager()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (statusChangeListener_ != nullptr) {
+        return;
+    }
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     statusChangeListener_ = new (std::nothrow) AnsManagerDeathRecipient::SystemAbilityStatusChangeListener();
     if (samgrProxy == nullptr || statusChangeListener_ == nullptr) {
@@ -37,29 +41,14 @@ void AnsManagerDeathRecipient::SubscribeSAManager()
         statusChangeListener_ = nullptr;
     }
 }
-
-bool AnsManagerDeathRecipient::GetIsSubscribeSAManager()
-{
-    return statusChangeListener_ != nullptr;
-}
-
 void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
-    int32_t systemAbilityId, const std::string& deviceId)
-{
-    if (!isSAOffline) {
-        return;
-    }
-    ANS_LOGI("Ans manager service restore, try to reconnect");
-    DelayedSingleton<AnsNotification>::GetInstance()->Reconnect();
-    isSAOffline = false;
-}
+    int32_t systemAbilityId, const std::string& deviceId) {}
 
 void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnRemoveSystemAbility(
     int32_t systemAbilityId, const std::string& deviceId)
 {
     ANS_LOGI("Ans manager service died");
-    DelayedSingleton<AnsNotification>::GetInstance()->ResetAnsManagerProxy();
-    isSAOffline = true;
+    DelayedSingleton<AnsNotification>::GetInstance()->OnServiceDied();
 }
 }  // namespace Notification
 }  // namespace OHOS

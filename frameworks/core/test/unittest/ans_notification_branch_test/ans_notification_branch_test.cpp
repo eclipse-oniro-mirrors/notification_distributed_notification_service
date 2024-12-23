@@ -31,7 +31,7 @@
 #include "singleton.h"
 #include "notification_subscriber.h"
 
-extern void MockGetAnsManagerProxy(bool mockRet);
+extern void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::AnsManagerInterface> mockRet);
 
 using namespace testing;
 using namespace testing::ext;
@@ -608,7 +608,10 @@ public:
     void SetUp();
 };
 
-void AnsNotificationBranchTest::SetUpTestCase() {}
+void AnsNotificationBranchTest::SetUpTestCase()
+{
+    MockGetAnsManagerProxy(nullptr);
+}
 
 void AnsNotificationBranchTest::TearDownTestCase() {}
 
@@ -645,7 +648,6 @@ HWTEST_F(AnsNotificationBranchTest, RemoveNotifications_0200, Function | MediumT
     std::vector<std::string> hashcodes;
     hashcodes.emplace_back(hashcode);
     int32_t removeReason = 1;
-    MockGetAnsManagerProxy(false);
     ErrCode ret = ansNotification->RemoveNotifications(hashcodes, removeReason);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
@@ -680,7 +682,6 @@ HWTEST_F(AnsNotificationBranchTest, RegisterPushCallback_0100, Function | Medium
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
     sptr<IRemoteObject> pushCallback = nullptr;
-    MockGetAnsManagerProxy(false);
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
     ErrCode ret = ansNotification->RegisterPushCallback(pushCallback, checkRequest);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
@@ -713,7 +714,6 @@ HWTEST_F(AnsNotificationBranchTest, UnregisterPushCallback_0100, Function | Medi
 {
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
-    MockGetAnsManagerProxy(false);
     ErrCode ret = ansNotification->UnregisterPushCallback();
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
@@ -865,7 +865,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
 HWTEST_F(AnsNotificationBranchTest, PublishNotification_0001, Function | MediumTest | Level1)
 {
     auto notification = std::make_shared<AnsNotification>();
-    notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
+    MockGetAnsManagerProxy(new (std::nothrow) MockAnsManagerInterface());
     NotificationRequest req;
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     auto content = std::make_shared<NotificationContent>(mediaContent);

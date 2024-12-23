@@ -143,8 +143,8 @@ SubscriberInstance::SubscriberInstance()
 
 SubscriberInstance::~SubscriberInstance()
 {
-    if (unsubscribeCallbackInfo_.tsfn != nullptr) {
-        napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_release);
+    if (tsfn_ != nullptr) {
+        napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
     }
     if (canceCallbackInfo_.ref != nullptr) {
         napi_delete_reference(canceCallbackInfo_.env, canceCallbackInfo_.ref);
@@ -243,9 +243,9 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
     dataWorker->ref = canceCallbackInfo_.ref;
     dataWorker->type = Type::CANCEL;
 
-    napi_acquire_threadsafe_function(canceCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(canceCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(canceCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -325,9 +325,9 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
     dataWorker->ref = batchCancelCallbackInfo_.ref;
     dataWorker->type = Type::BATCH_CANCEL;
     
-    napi_acquire_threadsafe_function(batchCancelCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(batchCancelCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(batchCancelCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
     return;
 }
 
@@ -382,7 +382,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         return;
     }
 
-    if (consumeCallbackInfo_.tsfn == nullptr) {
+    if (tsfn_ == nullptr) {
         ANS_LOGI("consume tsfn is null");
         return;
     }
@@ -413,10 +413,9 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     dataWorker->env = consumeCallbackInfo_.env;
     dataWorker->ref = consumeCallbackInfo_.ref;
     dataWorker->type = Type::CONSUME;
-
-    napi_acquire_threadsafe_function(consumeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(consumeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(consumeCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnUpdate(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -473,9 +472,9 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
     dataWorker->ref = updateCallbackInfo_.ref;
     dataWorker->type = Type::UPDATE;
 
-    napi_acquire_threadsafe_function(updateCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(updateCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(updateCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnConnected(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -502,7 +501,7 @@ void SubscriberInstance::OnConnected()
         return;
     }
 
-    if (subscribeCallbackInfo_.tsfn == nullptr) {
+    if (tsfn_ == nullptr) {
         ANS_LOGI("subscribe tsfn is null");
         return;
     }
@@ -517,9 +516,9 @@ void SubscriberInstance::OnConnected()
     dataWorker->ref = subscribeCallbackInfo_.ref;
     dataWorker->type = Type::CONNECTED;
 
-    napi_acquire_threadsafe_function(subscribeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(subscribeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(subscribeCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -547,7 +546,7 @@ void SubscriberInstance::OnDisconnected()
         return;
     }
 
-    if (unsubscribeCallbackInfo_.tsfn == nullptr) {
+    if (tsfn_ == nullptr) {
         ANS_LOGI("unsubscribe tsfn is null");
         return;
     }
@@ -560,12 +559,12 @@ void SubscriberInstance::OnDisconnected()
 
     dataWorker->env = unsubscribeCallbackInfo_.env;
     dataWorker->ref = unsubscribeCallbackInfo_.ref;
-    dataWorker->subscriber = shared_from_this();
+    dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
     dataWorker->type = Type::DIS_CONNECTED;
 
-    napi_acquire_threadsafe_function(unsubscribeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(unsubscribeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnDestroy(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -604,9 +603,9 @@ void SubscriberInstance::OnDied()
     dataWorker->ref = dieCallbackInfo_.ref;
     dataWorker->type = Type::DIE;
 
-    napi_acquire_threadsafe_function(dieCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(dieCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(dieCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnDoNotDisturbDateChange(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -666,9 +665,9 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
     dataWorker->ref = disturbDateCallbackInfo_.ref;
     dataWorker->type = Type::DISTURB_DATE_CHANGE;
 
-    napi_acquire_threadsafe_function(disturbDateCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(disturbDateCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(disturbDateCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 
@@ -723,9 +722,9 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
     dataWorker->ref = disturbChangedCallbackInfo_.ref;
     dataWorker->type = Type::DISTURB_CHANGED;
 
-    napi_acquire_threadsafe_function(disturbChangedCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(disturbChangedCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(disturbChangedCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnEnabledNotificationChanged(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -784,9 +783,9 @@ void SubscriberInstance::OnEnabledNotificationChanged(
     dataWorker->ref = enabledNotificationCallbackInfo_.ref;
     dataWorker->type = Type::ENABLE_NOTIFICATION_CHANGED;
 
-    napi_acquire_threadsafe_function(enabledNotificationCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(enabledNotificationCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(enabledNotificationCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnBadgeChanged(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -844,9 +843,9 @@ void SubscriberInstance::OnBadgeChanged(
     dataWorker->ref = setBadgeCallbackInfo_.ref;
     dataWorker->type = Type::BADGE_CHANGED;
 
-    napi_acquire_threadsafe_function(setBadgeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(setBadgeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(setBadgeCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -901,9 +900,14 @@ void SubscriberInstance::OnBadgeEnabledChanged(
     dataWorker->ref = setBadgeEnabledCallbackInfo_.ref;
     dataWorker->type = Type::BADGE_ENABLED_CHANGED;
     
-    napi_acquire_threadsafe_function(setBadgeEnabledCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(setBadgeEnabledCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(setBadgeEnabledCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+}
+
+void SubscriberInstance::SetThreadSafeFunction(const napi_threadsafe_function &tsfn)
+{
+    tsfn_ = tsfn;
 }
 
 void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -912,26 +916,10 @@ void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_r
     canceCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    canceCallbackInfo_.env = env;
-    canceCallbackInfo_.ref = ref;
-    canceCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     consumeCallbackInfo_.env = env;
     consumeCallbackInfo_.ref = ref;
-}
-
-void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    consumeCallbackInfo_.env = env;
-    consumeCallbackInfo_.ref = ref;
-    consumeCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -940,26 +928,10 @@ void SubscriberInstance::SetUpdateCallbackInfo(const napi_env &env, const napi_r
     updateCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    updateCallbackInfo_.env = env;
-    updateCallbackInfo_.ref = ref;
-    updateCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     subscribeCallbackInfo_.env = env;
     subscribeCallbackInfo_.ref = ref;
-}
-
-void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    subscribeCallbackInfo_.env = env;
-    subscribeCallbackInfo_.ref = ref;
-    subscribeCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -968,26 +940,10 @@ void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const n
     unsubscribeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    unsubscribeCallbackInfo_.env = env;
-    unsubscribeCallbackInfo_.ref = ref;
-    unsubscribeCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetDieCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     dieCallbackInfo_.env = env;
     dieCallbackInfo_.ref = ref;
-}
-
-void SubscriberInstance::SetDieCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    dieCallbackInfo_.env = env;
-    dieCallbackInfo_.ref = ref;
-    dieCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetDisturbModeCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -996,26 +952,10 @@ void SubscriberInstance::SetDisturbModeCallbackInfo(const napi_env &env, const n
     disturbModeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetDisturbModeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    disturbModeCallbackInfo_.env = env;
-    disturbModeCallbackInfo_.ref = ref;
-    disturbModeCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     enabledNotificationCallbackInfo_.env = env;
     enabledNotificationCallbackInfo_.ref = ref;
-}
-
-void SubscriberInstance::SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    enabledNotificationCallbackInfo_.env = env;
-    enabledNotificationCallbackInfo_.ref = ref;
-    enabledNotificationCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -1024,26 +964,10 @@ void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const n
     disturbDateCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    disturbDateCallbackInfo_.env = env;
-    disturbDateCallbackInfo_.ref = ref;
-    disturbDateCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     disturbChangedCallbackInfo_.env = env;
     disturbChangedCallbackInfo_.ref = ref;
-}
-
-void SubscriberInstance::SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    disturbChangedCallbackInfo_.env = env;
-    disturbChangedCallbackInfo_.ref = ref;
-    disturbChangedCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -1052,13 +976,6 @@ void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_re
     setBadgeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    setBadgeCallbackInfo_.env = env;
-    setBadgeCallbackInfo_.ref = ref;
-    setBadgeCallbackInfo_.tsfn = tsfn;
-}
 
 void SubscriberInstance::SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
@@ -1066,28 +983,11 @@ void SubscriberInstance::SetBadgeEnabledCallbackInfo(const napi_env &env, const 
     setBadgeEnabledCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    setBadgeEnabledCallbackInfo_.env = env;
-    setBadgeEnabledCallbackInfo_.ref = ref;
-    setBadgeEnabledCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     batchCancelCallbackInfo_.env = env;
     batchCancelCallbackInfo_.ref = ref;
 }
-
-void SubscriberInstance::SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    batchCancelCallbackInfo_.env = env;
-    batchCancelCallbackInfo_.ref = ref;
-    batchCancelCallbackInfo_.tsfn = tsfn;
-}
-
 
 void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref)
 {
@@ -1117,41 +1017,6 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
         SetBadgeEnabledCallbackInfo(env, ref);
     } else if (type == BATCH_CANCEL) {
         SetBatchCancelCallbackInfo(env, ref);
-    } else {
-        ANS_LOGW("type is error");
-    }
-}
-
-
-void SubscriberInstance::SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    if (type == CONSUME) {
-        SetConsumeCallbackInfo(env, ref, tsfn);
-    } else if (type == CANCEL) {
-        SetCancelCallbackInfo(env, ref, tsfn);
-    } else if (type == UPDATE) {
-        SetUpdateCallbackInfo(env, ref, tsfn);
-    } else if (type == CONNECTED) {
-        SetSubscribeCallbackInfo(env, ref, tsfn);
-    } else if (type == DIS_CONNECTED) {
-        SetUnsubscribeCallbackInfo(env, ref, tsfn);
-    } else if (type == DIE) {
-        SetDieCallbackInfo(env, ref, tsfn);
-    } else if (type == DISTURB_MODE_CHANGE) {
-        SetDisturbModeCallbackInfo(env, ref, tsfn);
-    } else if (type == DISTURB_DATE_CHANGE) {
-        SetDisturbDateCallbackInfo(env, ref, tsfn);
-    } else if (type == DISTURB_CHANGED) {
-        SetDisturbChangedCallbackInfo(env, ref, tsfn);
-    } else if (type == ENABLE_NOTIFICATION_CHANGED) {
-        SetEnabledNotificationCallbackInfo(env, ref, tsfn);
-    } else if (type == BADGE_CHANGED) {
-        SetBadgeCallbackInfo(env, ref, tsfn);
-    } else if (type == BADGE_ENABLED_CHANGED) {
-        SetBadgeEnabledCallbackInfo(env, ref, tsfn);
-    } else if (type == BATCH_CANCEL) {
-        SetBatchCancelCallbackInfo(env, ref, tsfn);
     } else {
         ANS_LOGW("type is error");
     }
@@ -1247,6 +1112,7 @@ napi_value GetNotificationSubscriber(
     napi_threadsafe_function tsfn = nullptr;
     napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
         ThreadFinished, nullptr, ThreadSafeCommon, &tsfn);
+    subscriberInfo.subscriber->SetThreadSafeFunction(tsfn);
 
     // onConsume?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConsume", &hasProperty));
@@ -1261,7 +1127,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnConsumed, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(CONSUME, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, CONSUME, result);
     }
     // onCancel?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onCancel", &hasProperty));
@@ -1276,7 +1142,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnCanceled, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(CANCEL, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, CANCEL, result);
     }
     // onUpdate?:(data: NotificationSortingMap) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onUpdate", &hasProperty));
@@ -1291,7 +1157,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnUpdate, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(UPDATE, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, UPDATE, result);
     }
     // onConnect?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConnect", &hasProperty));
@@ -1306,7 +1172,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnConnected, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(CONNECTED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, CONNECTED, result);
     }
     // onDisconnect?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDisconnect", &hasProperty));
@@ -1321,7 +1187,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnDisConnect, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(DIS_CONNECTED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, DIS_CONNECTED, result);
     }
     // onDestroy?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDestroy", &hasProperty));
@@ -1336,7 +1202,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnDied, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(DIE, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, DIE, result);
     }
     // onDisturbModeChange?:(mode: notification.DoNotDisturbMode) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDisturbModeChange", &hasProperty));
@@ -1367,7 +1233,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnDisturbDateChanged, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(DISTURB_DATE_CHANGE, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, DISTURB_DATE_CHANGE, result);
     }
 
     // onDoNotDisturbChanged?:(mode: notificationManager.DoNotDisturbDate) => void
@@ -1383,7 +1249,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnDoNotDisturbChanged, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(DISTURB_CHANGED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, DISTURB_CHANGED, result);
     }
 
     // onEnabledNotificationChanged?:(data: notification.EnabledNotificationCallbackData) => void
@@ -1399,7 +1265,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnEnabledNotificationChanged, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(ENABLE_NOTIFICATION_CHANGED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, ENABLE_NOTIFICATION_CHANGED, result);
     }
 
     // onBadgeChanged?:(data: BadgeNumberCallbackData) => void
@@ -1415,7 +1281,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnBadgeChanged, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(BADGE_CHANGED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, BADGE_CHANGED, result);
     }
 
     // onBadgeEnabledChanged?:(data: EnabledNotificationCallbackData) => void
@@ -1431,7 +1297,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnBadgeEnabledChanged, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(BADGE_ENABLED_CHANGED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, BADGE_ENABLED_CHANGED, result);
     }
 
     // onBatchCancel?:(data: Array<SubscribeCallbackData>) => void
@@ -1447,7 +1313,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, onBatchCancel, 1, &result);
-        subscriberInfo.subscriber->SetCallbackInfo(BATCH_CANCEL, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, BATCH_CANCEL, result);
     }
 
     return Common::NapiGetNull(env);

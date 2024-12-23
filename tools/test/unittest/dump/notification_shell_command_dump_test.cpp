@@ -167,7 +167,6 @@ void AnmManagerDumpTest::MakeMockObjects()
 
     // set the mock proxy
     auto ansNotificationPtr = DelayedSingleton<AnsNotification>::GetInstance();
-    ansNotificationPtr->ansManagerProxy_ = proxyPtr_;
 }
 
 /**
