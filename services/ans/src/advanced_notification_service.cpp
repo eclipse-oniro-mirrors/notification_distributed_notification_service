@@ -792,12 +792,10 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
-        DoNotDisturbUpdataReminderFlags(record);
         ANS_LOGE("profile failed. pid: %{public}s, userid: %{public}d", profileId.c_str(), userId);
         return;
     }
     if (profile == nullptr) {
-        DoNotDisturbUpdataReminderFlags(record);
         ANS_LOGE("The do not disturb profile is nullptr.");
         return;
     }
