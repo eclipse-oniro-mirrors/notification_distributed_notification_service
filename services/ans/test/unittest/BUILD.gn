@@ -978,6 +978,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
 
   sources = [
     "${services_path}/ans/src/bundle_manager_helper.cpp",
+    "${services_path}/ans/src/common/file_utils.cpp",
     "${services_path}/ans/src/common/notification_app_privileges.cpp",
     "${services_path}/ans/src/common/notification_config_parse.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",

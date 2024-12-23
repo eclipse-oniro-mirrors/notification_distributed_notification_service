@@ -401,6 +401,11 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
         onSubscriberAddCallback_(record);
     }
 
+    if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_WEARABLE ||
+        subscribeInfo->GetDeviceType() == DEVICE_TYPE_HEADSET) {
+        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(
+            subscribeInfo->GetDeviceType(), true);
+    }
     return ERR_OK;
 }
 

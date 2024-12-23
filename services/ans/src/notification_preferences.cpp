@@ -1401,5 +1401,39 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
     }
     return true;
 }
+
+ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetSubscriberExistFlag(deviceType, existFlag);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->GetSubscriberExistFlag(deviceType, existFlag);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
 }  // namespace Notification
 }  // namespace OHOS

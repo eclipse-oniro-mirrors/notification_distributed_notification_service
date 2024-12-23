@@ -62,6 +62,7 @@ namespace Notification {
 constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr uint32_t SECONDS_IN_ONE_DAY = 24 * 60 * 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
+const static std::string NOTIFICATION_EVENT_SUBSCRIBER_STATUS = "notification.event.SUBSCRIBER_STATUS";
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t ANS_UID = 5523;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
@@ -2978,6 +2979,60 @@ bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationR
         return true;
     }
     return false;
+}
+
+void AdvancedNotificationService::SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        ANS_LOGE("deviceType is empty");
+        return;
+    }
+
+    auto result = NotificationPreferences::GetInstance()->SetSubscriberExistFlag(deviceType, existFlag);
+    if (result != ERR_OK) {
+        ANS_LOGE("SetSubscriberExistFlag failed");
+        return;
+    }
+
+    bool headsetExistFlag = false;
+    bool wearableExistFlag = false;
+    if (deviceType == DEVICE_TYPE_HEADSET) {
+        headsetExistFlag = existFlag;
+        result =
+            NotificationPreferences::GetInstance()->GetSubscriberExistFlag(DEVICE_TYPE_WEARABLE, wearableExistFlag);
+        if (result != ERR_OK) {
+            ANS_LOGE("GetSubscriberExistFlag failed");
+            return;
+        }
+    } else if (deviceType == DEVICE_TYPE_WEARABLE) {
+        wearableExistFlag = existFlag;
+        result = NotificationPreferences::GetInstance()->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, headsetExistFlag);
+        if (result != ERR_OK) {
+            ANS_LOGE("GetSubscriberExistFlag failed");
+            return;
+        }
+    }
+    PublishSubscriberExistFlagEvent(headsetExistFlag, wearableExistFlag);
+}
+
+void AdvancedNotificationService::PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag)
+{
+    ANS_LOGD("%{public}s, headsetExistFlag = %{public}d, wearableExistFlag = %{public}d", __FUNCTION__,
+        headsetExistFlag, wearableExistFlag);
+    EventFwk::Want want;
+    want.SetParam("SUBSCRIBER_EXISTED_HEADSET", headsetExistFlag);
+    want.SetParam("SUBSCRIBER_EXISTED_WEARABLE", wearableExistFlag);
+    want.SetAction(NOTIFICATION_EVENT_SUBSCRIBER_STATUS);
+    EventFwk::CommonEventData commonData { want, 0, "" };
+    EventFwk::CommonEventPublishInfo publishInfo;
+    publishInfo.SetSticky(true);
+    publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
+        ANS_LOGE("PublishCommonEventAsUser failed");
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

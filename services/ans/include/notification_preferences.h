@@ -425,6 +425,8 @@ public:
         const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
     ErrCode SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    ErrCode SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
+    ErrCode GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,

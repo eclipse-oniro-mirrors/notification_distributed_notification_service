@@ -67,6 +67,9 @@ const std::string CURRENT_DEVICE_TYPE = "current";
 const std::string RING_TRUST_PKG_KEY = "RING_TRUSTLIST_PKG";
 const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
 
+const std::string DEVICE_TYPE_WEARABLE = "wearable";
+const std::string DEVICE_TYPE_HEADSET = "headset";
+
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =
     NotificationConstant::DistributedReminderPolicy::DEFAULT;
