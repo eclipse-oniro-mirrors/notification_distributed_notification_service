@@ -2979,5 +2979,92 @@ bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationR
     }
     return false;
 }
+
+ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    if (bundleName.empty()) {
+        std::string message = "bundle name is empty.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 3).ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 1).ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        std::string message = "no acl permission.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 2).ErrorCode(ERR_ANS_PERMISSION_DENIED);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        std::string message = "Serial queue is nullptr.";
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        std::vector<std::shared_ptr<NotificationRecord>> removeList;
+        ANS_LOGD("ffrt enter!");
+        for (auto record : notificationList_) {
+            if (record == nullptr) {
+                ANS_LOGE("record is nullptr");
+                continue;
+            }
+            if ((record->bundleOption->GetBundleName() == bundleName)
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+                && record->deviceId.empty()
+#endif
+            ) {
+                ProcForDeleteLiveView(record);
+                removeList.push_back(record);
+            }
+        }
+
+        std::vector<sptr<Notification>> notifications;
+        std::vector<uint64_t> timerIds;
+        for (auto record : removeList) {
+            if (record == nullptr) {
+                ANS_LOGE("record is nullptr");
+                continue;
+            }
+            notificationList_.remove(record);
+            if (record->notification != nullptr) {
+                ANS_LOGD("record->notification is not nullptr.");
+                UpdateRecentNotification(record->notification, true, reason);
+                notifications.emplace_back(record->notification);
+                timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+                DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
+#endif
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                SendNotificationsOnCanceled(notifications, nullptr, reason);
+            }
+
+            TriggerRemoveWantAgent(record->request);
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
+        }
+        BatchCancelTimer(timerIds);
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return ERR_OK;
+}
 }  // namespace Notification
 }  // namespace OHOS
