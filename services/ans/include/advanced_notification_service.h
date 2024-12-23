@@ -1149,6 +1149,9 @@ public:
     bool IsDisableNotification(const std::string &bundleName);
 
     bool IsDisableNotification(const sptr<NotificationRequest> &request);
+
+    ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
