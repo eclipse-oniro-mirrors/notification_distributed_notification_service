@@ -1,39 +1,4 @@
 {
-<<<<<<< HEAD
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "通知提醒方式可能包括锁屏、横幅、响铃、振动等。可前往“设置” 更改。"
-    },
-    {
-      "name": "reason_simple",
-      "value": "通知提醒方式可能包括横幅、响铃等。可前往“设置”更改。"
-    },
-    {
-      "name": "ALLOW",
-      "value": "允许"
-    },
-    {
-      "name": "BAN",
-      "value": "不允许"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "允许“%s”向你发送通知？"
-    }
-=======
   "string":[
       {
           "name":"entry_desc",
@@ -76,6 +41,5 @@
               "priority":"translate"
           }
       }
->>>>>>> 23b051d5 (穿戴出海多语言)
   ]
 }
