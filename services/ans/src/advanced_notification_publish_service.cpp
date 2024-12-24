@@ -2987,29 +2987,12 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
 
     if (bundleName.empty()) {
         std::string message = "bundle name is empty.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 3).ErrorCode(ERR_ANS_INVALID_BUNDLE);
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 1).ErrorCode(ERR_ANS_INVALID_BUNDLE);
         ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        std::string message = "not system app.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 1).ErrorCode(ERR_ANS_NON_SYSTEM_APP);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid != ANS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        std::string message = "no acl permission.";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 2).ErrorCode(ERR_ANS_PERMISSION_DENIED);
-        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
-        ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_PERMISSION_DENIED;
-    }
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is nullptr.";
         ANS_LOGE("%{public}s", message.c_str());
