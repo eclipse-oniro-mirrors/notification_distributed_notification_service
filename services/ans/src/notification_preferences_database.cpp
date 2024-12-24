@@ -416,9 +416,6 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled,
         bundleInfo.GetBundleUid());
-    if (enabled && result == NativeRdb::E_OK) {
-        SetDistributedEnabledForBundle(bundleInfo);
-    }
     return (result == NativeRdb::E_OK);
 }
 
@@ -2439,33 +2436,6 @@ bool NotificationPreferencesDatabase::IsDistributedEnabledEmptyForBundle(
     return result;
 }
 
-void NotificationPreferencesDatabase::SetDistributedEnabledForBundle(
-    const NotificationPreferencesInfo::BundleInfo& bundleInfo)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!isCachedMirrorNotificationEnabledStatus_) {
-        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetMirrorNotificationEnabledStatus(
-            mirrorNotificationEnabledStatus_)) {
-            ANS_LOGE("GetMirrorNotificationEnabledStatus failed from json");
-            return;
-        }
-        isCachedMirrorNotificationEnabledStatus_ = true;
-    }
-
-    if (mirrorNotificationEnabledStatus_.empty()) {
-        ANS_LOGD("mirrorNotificationEnabledStatus_ is empty");
-        return;
-    }
-
-    for (const auto& deviceType : mirrorNotificationEnabledStatus_) {
-        bool ret = IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
-        if (!ret) {
-            ANS_LOGD("get %{public}s distributedEnabled is empty", deviceType.c_str());
-            PutDistributedEnabledForBundle(deviceType, bundleInfo, true);
-        }
-    }
-}
-
 void NotificationPreferencesDatabase::GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -2508,7 +2478,7 @@ bool NotificationPreferencesDatabase::SetSubscriberExistFlag(const std::string& 
 {
     ANS_LOGD("%{public}s, deviceType:%{public}s, existFlag[%{public}d]", __FUNCTION__, deviceType.c_str(), existFlag);
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("current user acquisition failed");
         return false;
@@ -2523,7 +2493,7 @@ bool NotificationPreferencesDatabase::GetSubscriberExistFlag(const std::string& 
 {
     ANS_LOGD("%{public}s, deviceType:%{public}s, existFlag[%{public}d]", __FUNCTION__, deviceType.c_str(), existFlag);
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     if (userId == SUBSCRIBE_USER_INIT) {
         ANS_LOGE("current user acquisition failed");
         return false;

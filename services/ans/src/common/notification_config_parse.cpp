@@ -233,7 +233,7 @@ void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &thr
     ANS_LOGI("GetFlowCtrlConfigFromCCM success");
 }
 
-bool NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string>& deviceTypes) const
+bool NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string>& deviceTypes)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -255,12 +255,12 @@ bool NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string
         ANS_LOGE("smartReminderEnableList is invalid");
         return false;
     }
-
+    std::lock_guard<std::mutex> lock(mutex_);
     deviceTypes = smartReminderEnableList.get<std::vector<std::string>>();
     return true;
 }
 
-bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes) const
+bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
@@ -271,6 +271,7 @@ bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std
         ANS_LOGE("get configJson fail");
         return false;
     }
+
     if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
         ANS_LOGE("find notificationService fail");
         return false;
@@ -283,22 +284,23 @@ bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std
         ANS_LOGE("mirrorNotificationEnabledStatus is invalid");
         return false;
     }
-
+    std::lock_guard<std::mutex> lock(mutex_);
     deviceTypes = mirrorNotificationEnabledStatus.get<std::vector<std::string>>();
     return true;
 }
 
-bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap) const
+bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
     jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
     jsonPoint.append("/");
     jsonPoint.append(CFG_KEY_APP_AND_DEVICE_RELATION_MAP);
-    if (!GetInstance()->GetConfigJson(jsonPoint, root)) {
+    if (!GetConfigJson(jsonPoint, root)) {
         ANS_LOGE("get configJson fail");
         return false;
     }
+
     if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
         ANS_LOGE("find notificationService fail");
         return false;
@@ -309,6 +311,7 @@ bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, s
         ANS_LOGE("appAndDeviceRelationMap is invalid");
         return false;
     }
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto& appAndDeviceRelation : appAndDeviceRelationMap.items()) {
         relationMap[appAndDeviceRelation.key()] = appAndDeviceRelation.value();
     }

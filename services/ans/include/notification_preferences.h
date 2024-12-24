@@ -448,6 +448,7 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value);
     std::string GenerateBundleKey(const sptr<NotificationBundleOption> &bundleOption) const;
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) const;
+    void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 
 private:
     static std::mutex instanceMutex_;
@@ -455,6 +456,8 @@ private:
     NotificationPreferencesInfo preferencesInfo_ {};
     std::mutex preferenceMutex_;
     std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
+    bool isCachedMirrorNotificationEnabledStatus_ = false;
+    std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
 };
 }  // namespace Notification
 }  // namespace OHOS

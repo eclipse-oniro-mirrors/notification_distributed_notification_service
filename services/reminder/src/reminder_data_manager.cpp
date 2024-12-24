@@ -1565,6 +1565,13 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         }
         ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
     }
+    constexpr int32_t STREAM_ALARM = 4;
+    constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
+    Media::Format format;
+    (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
+    (void)format.PutIntValue(Media::PlayerKeys::STREAM_USAGE, STREAM_ALARM);
+    (void)format.PutIntValue(Media::PlayerKeys::RENDERER_FLAG, DEFAULT_VALUE);
+    soundPlayer_->SetParameter(format);
     soundPlayer_->SetLooping(true);
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();

@@ -2343,8 +2343,8 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
     if (notificationDisable->GetDisabled()) {
         std::vector<std::string> bundleList = notificationDisable->GetBundleList();
         for (auto bundle : bundleList) {
-            sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundle, DEFAULT_UID));
-            RemoveAllNotificationsInner(bo, NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE);
+            RemoveAllNotificationsByBundleName(
+                bundle, NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE);
         }
     }
     return ERR_OK;

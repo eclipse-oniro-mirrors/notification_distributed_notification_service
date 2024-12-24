@@ -47,13 +47,14 @@ public:
     bool IsBannerEnabled(const std::string bundleName) const;
     bool IsReminderEnabled(const std::string& bundleName) const;
     void GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold);
-    bool GetSmartReminderEnableList(std::vector<std::string>& deviceTypes) const;
-    bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes) const;
-    bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap) const;
+    bool GetSmartReminderEnableList(std::vector<std::string>& deviceTypes);
+    bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
+    bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
 
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
+    std::mutex mutex_;
 
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
