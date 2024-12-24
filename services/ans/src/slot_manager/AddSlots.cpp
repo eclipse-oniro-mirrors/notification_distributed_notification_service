@@ -48,12 +48,7 @@ ErrCode SlotManager::AddSlots(MessageParcel &data, MessageParcel &reply)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    ErrCode result = AddSlotsSyncQue(slots, bundleOption);
+    ErrCode result = AddSlotsSyncQue(slots);
 
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleAddSlots] fail: write result failed, ErrCode=%{public}d", result);
@@ -62,8 +57,13 @@ ErrCode SlotManager::AddSlots(MessageParcel &data, MessageParcel &reply)
     return ERR_OK;
 }
 
-ErrCode SlotManager::AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption)
+ErrCode SlotManager::AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &slots)
 {
+    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
     auto excuteQueue = AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
     if (excuteQueue == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
