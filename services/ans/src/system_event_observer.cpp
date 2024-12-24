@@ -69,7 +69,7 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want 
         ANS_LOGE("Failed to create bundleOption.");
         return nullptr;
     }
-    bundleOption->SetAppIndex(appIndex)
+    bundleOption->SetAppIndex(appIndex);
     return bundleOption;
 }
 
