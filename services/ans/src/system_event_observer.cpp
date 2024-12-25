@@ -43,7 +43,6 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -135,8 +134,6 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
                 callbacks_.onBundleDataCleared(bundleOption);
             }
         }
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START) {
-        NotificationCloneManager::GetInstance().OnRestoreStart(want);
     } else {
         OnReceiveEventInner(data);
     }

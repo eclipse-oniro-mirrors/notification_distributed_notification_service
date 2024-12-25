@@ -31,7 +31,9 @@ public:
     static std::shared_ptr<NotificationCloneDisturb> GetInstance();
     ErrCode OnBackup(nlohmann::json &jsonObject) override;
     void OnRestore(const nlohmann::json &jsonObject) override;
-    void OnRestoreStart(const std::string bundleName, int32_t appIndex, int32_t userId, int32_t uid) override;
+    void OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption);
+    void OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption);
+    void HandlerBundleEvent(const std::string bundleName, int32_t appIndex, int32_t uid);
     int32_t GetBundleUid(const std::string bundleName, int32_t userId, int32_t appIndex);
     void GetProfileUid(int32_t userId, std::map<std::string, int32_t>& uidMap,
         std::vector<NotificationBundleOption> trustList, std::vector<NotificationBundleOption>& exitBunldleList,
