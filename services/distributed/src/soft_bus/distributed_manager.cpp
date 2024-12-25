@@ -20,6 +20,7 @@
 #include "distributed_service.h"
 #include "distributed_local_config.h"
 #include "ans_log_wrapper.h"
+#include "distributed_liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -44,6 +45,7 @@ int32_t DistributedManager::InitLocalDevice(const std::string &deviceId, uint16_
     int32_t titleLength, int32_t contentLength, std::function<bool(std::string, int32_t, bool)> callback)
 {
     ANS_LOGI("InitLocalDevice %{public}s %{public}u.", deviceId.c_str(), deviceType);
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
     DistributedLocalConfig::GetInstance().SetLocalDevice(deviceId, deviceType, titleLength, contentLength);
     return DistributedService::GetInstance().InitService(deviceId, deviceType, callback);
 }
@@ -60,6 +62,7 @@ void DistributedManager::AddDevice(const std::string &deviceId, uint16_t deviceT
 void DistributedManager::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
 {
     ANS_LOGI("ReleaseDevice %{public}s %{public}u.", deviceId.c_str(), deviceType);
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->CloseExtentionWrapper();
     DistributedClient::GetInstance().ReleaseDevice(deviceId, deviceType);
     DistributedService::GetInstance().UnSubscribeNotifictaion(deviceId, deviceType);
 }

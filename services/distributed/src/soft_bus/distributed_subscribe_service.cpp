@@ -22,7 +22,7 @@
 #include "distributed_observer_service.h"
 #include "notification_subscribe_info.h"
 #include "distributed_timer_service.h"
-
+#include "distributed_liveview_all_scenarios_extension_wrapper.h"
 namespace OHOS {
 namespace Notification {
 
@@ -116,6 +116,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         auto requestPoint = request->GetNotificationRequestPoint();
         requestBox.SetNotificationHashCode(request->GetKey());
         requestBox.SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
+        requestBox.SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
         requestBox.SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
         requestBox.SetCreatorBundleName(request->GetBundleName());
         if (requestPoint->GetBigIcon() != nullptr) {
@@ -124,9 +125,16 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         if (requestPoint->GetOverlayIcon() != nullptr) {
             requestBox.SetOverlayIcon(requestPoint->GetOverlayIcon());
         }
-        auto content = request->GetNotificationRequestPoint()->GetContent();
-        requestBox.SetNotificationTitle(content->GetNotificationContent()->GetTitle());
-        requestBox.SetNotificationText(content->GetNotificationContent()->GetText());
+        bool isCommonLiveView = requestPoint->IsCommonLiveView();
+        if (isCommonLiveView) {
+            std::vector<uint8_t> buffer;
+            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
+            requestBox.SetCommonLiveView(buffer);
+        } else {
+            auto content = request->GetNotificationRequestPoint()->GetContent();
+            requestBox.SetNotificationTitle(content->GetNotificationContent()->GetTitle());
+            requestBox.SetNotificationText(content->GetNotificationContent()->GetText());
+        }
         if (!requestBox.Serialize()) {
             ANS_LOGW("Dans OnConsumed serialize failed.");
             return;

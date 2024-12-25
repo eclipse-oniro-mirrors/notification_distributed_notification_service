@@ -31,21 +31,25 @@ public:
     NotifticationRequestBox(std::shared_ptr<TlvBox> box);
     bool SetNotificationHashCode(const std::string& hasdCode);
     bool SetSlotType(int32_t type);
+    bool SetContentType(int32_t type);
     bool SetReminderFlag(int32_t flag);
     bool SetCreatorBundleName(const std::string& bundleName);
     bool SetNotificationTitle(const std::string& title);
     bool SetNotificationText(const std::string& text);
     bool SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon);
     bool SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon);
+    bool SetCommonLiveView(const std::vector<uint8_t>& byteSequence);
 
     bool GetNotificationHashCode(std::string& hasdCode) const;
     bool GetSlotType(int32_t& type) const;
+    bool GetContentType(int32_t& type) const;
     bool GetReminderFlag(int32_t& flag) const;
     bool GetCreatorBundleName(std::string& bundleName) const;
     bool GetNotificationTitle(std::string& title) const;
     bool GetNotificationText(std::string& text) const;
     bool GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const;
     bool GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const;
+    bool GetCommonLiveView(std::vector<uint8_t>& byteSequence) const;
 };
 }  // namespace Notification
 }  // namespace OHOS

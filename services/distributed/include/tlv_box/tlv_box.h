@@ -44,6 +44,8 @@ enum TlvType : int32_t {
     BUNDLE_ICON,
     NOTIFICATION_BIG_ICON = 8,
     NOTIFICATION_OVERLAY_ICON = 9,
+    NOTIFICATION_CONTENT_TYPE = 10,
+    NOTIFICATION_COMMON_LIVEVIEW = 11,
     MATCH_TYPE = 993,
     PEER_DEVICE_ID = 994,
     PEER_DEVICE_TYPE = 995,
@@ -59,7 +61,7 @@ public:
     TlvItem(int32_t type, bool value);
     TlvItem(int32_t type, int32_t value);
     TlvItem(int32_t type, std::string value);
-    TlvItem(int32_t type, unsigned char* value, int32_t length);
+    TlvItem(int32_t type, const unsigned char* value, int32_t length);
     TlvItem(int32_t type, const TlvItem& value);
     ~TlvItem();
 
@@ -87,6 +89,7 @@ public:
 
     bool GetMessageType(int32_t& messageType);
     bool GetBoolValue(int32_t type, bool& value);
+    bool GetBytes(int32_t type, std::vector<uint8_t>& value);
     bool GetStringValue(int32_t type, std::string& value);
     bool GetInt32Value(int32_t type, int32_t& value);
     bool GetObjectValue(int32_t type, TlvBox& value);

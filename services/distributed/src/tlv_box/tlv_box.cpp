@@ -81,7 +81,7 @@ TlvItem::TlvItem(int32_t type, const TlvItem& value) : type_(type)
     Initialize(value.GetValue(), value.GetLength());
 }
 
-TlvItem::TlvItem(int32_t type, unsigned char* value, int32_t length) : type_(type)
+TlvItem::TlvItem(int32_t type, const unsigned char* value, int32_t length) : type_(type)
 {
     Initialize(value, length);
 }
@@ -119,6 +119,17 @@ bool TlvBox::GetBoolValue(int32_t type, bool& value)
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
         value = (*(bool*)(iter->second->GetValue()));
+        return true;
+    }
+    return false;
+}
+
+bool TlvBox::GetBytes(int32_t type, std::vector<uint8_t>& value)
+{
+    auto iter = TlvMap_.find(type);
+    if (iter != TlvMap_.end()) {
+        auto begin = iter->second->GetValue();
+        value.assign(begin, begin + iter->second->GetLength());
         return true;
     }
     return false;

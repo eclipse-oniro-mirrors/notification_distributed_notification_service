@@ -36,6 +36,7 @@
 #include "advanced_notification_inline.cpp"
 #include "notification_extension_wrapper.h"
 #include "notification_analytics_util.h"
+#include "liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -621,6 +622,9 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
+    if (request->IsCommonLiveView()) {
+        LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
+    }
     ANS_LOGI("SetFlags-GetRemindMode, notificationKey = %{public}s flags = %{public}d",
         request->GetKey().c_str(), flags->GetReminderFlags());
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

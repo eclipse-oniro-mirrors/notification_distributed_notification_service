@@ -50,6 +50,14 @@ bool NotifticationRequestBox::SetSlotType(int32_t type)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_SLOT_TYPE, type));
 }
 
+bool NotifticationRequestBox::SetContentType(int32_t type)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT_TYPE, type));
+}
+
 bool NotifticationRequestBox::SetReminderFlag(int32_t flag)
 {
     if (box_ == nullptr) {
@@ -116,6 +124,16 @@ bool NotifticationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelM
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
 }
 
+bool NotifticationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byteSequence)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    const unsigned char* begin = byteSequence.data();
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_COMMON_LIVEVIEW,
+        begin, byteSequence.size()));
+}
+
 bool NotifticationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
     if (box_ == nullptr) {
@@ -130,6 +148,14 @@ bool NotifticationRequestBox::GetSlotType(int32_t& type) const
         return false;
     }
     return box_->GetInt32Value(NOTIFICATION_SLOT_TYPE, type);
+}
+
+bool NotifticationRequestBox::GetContentType(int32_t& type) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(NOTIFICATION_CONTENT_TYPE, type);
 }
 
 bool NotifticationRequestBox::GetCreatorBundleName(std::string& bundleName) const
@@ -190,6 +216,14 @@ bool NotifticationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& o
     ANS_LOGI("GetOverlayIcon %{public}s", overlayContent.c_str());
     overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
     return true;
+}
+
+bool NotifticationRequestBox::GetCommonLiveView(std::vector<uint8_t>& byteSequence) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetBytes(NOTIFICATION_COMMON_LIVEVIEW, byteSequence);
 }
 }
 }
