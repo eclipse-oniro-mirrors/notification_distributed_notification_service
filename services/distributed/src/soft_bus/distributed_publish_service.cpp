@@ -19,6 +19,7 @@
 #include "request_box.h"
 #include "state_box.h"
 #include "in_process_call_wrapper.h"
+#include "distributed_liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -27,38 +28,58 @@ namespace {
 constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
 }
 
-void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& box, NotificationRequest& request)
+void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request)
 {
-    std::string context;
-    std::shared_ptr<NotificationNormalContent> noramlContent = std::make_shared<NotificationNormalContent>();
-    if (box.GetNotificationText(context)) {
-        noramlContent->SetText(context);
+    int32_t slotType = 0;
+    int32_t contentType = 0;
+    bool isCommonLiveView = false;
+    if (box.GetSlotType(slotType) && box.GetContentType(contentType)) {
+        isCommonLiveView =
+            (static_cast<NotificationConstant::SlotType>(slotType) == NotificationConstant::SlotType::LIVE_VIEW) &&
+            (static_cast<NotificationContent::Type>(contentType) == NotificationContent::Type::LIVE_VIEW);
     }
-    if (box.GetNotificationTitle(context)) {
-        noramlContent->SetTitle(context);
+    if (isCommonLiveView) {
+        std::vector<uint8_t> buffer;
+        if (box.GetCommonLiveView(buffer)) {
+            auto liveviewContent = std::make_shared<NotificationLiveViewContent>();
+            auto content = std::make_shared<NotificationContent>(liveviewContent);
+            request->SetContent(content);
+            std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+            liveviewContent->SetExtraInfo(extraInfo);
+            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewDecodeContent(request, buffer);
+        }
+    } else {
+        std::string context;
+        std::shared_ptr<NotificationNormalContent> noramlContent = std::make_shared<NotificationNormalContent>();
+        if (box.GetNotificationText(context)) {
+            noramlContent->SetText(context);
+        }
+        if (box.GetNotificationTitle(context)) {
+            noramlContent->SetTitle(context);
+        }
+        std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(noramlContent);
+        request->SetContent(content);
     }
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(noramlContent);
-    request.SetContent(content);
 }
 
-void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box, NotificationRequest& request)
+void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request)
 {
     std::shared_ptr<Media::PixelMap> icon;
     if (box.GetBigIcon(icon)) {
-        request.SetBigIcon(icon);
+        request->SetBigIcon(icon);
     }
     if (box.GetOverlayIcon(icon)) {
-        request.SetOverlayIcon(icon);
+        request->SetOverlayIcon(icon);
     }
 }
 
 void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequestBox& box,
-    NotificationRequest& request)
+    sptr<NotificationRequest>& request)
 {
     int32_t type = 0;
     std::string context;
     if (box.GetSlotType(type)) {
-        request.SetSlotType(static_cast<NotificationConstant::SlotType>(type));
+        request->SetSlotType(static_cast<NotificationConstant::SlotType>(type));
     }
     if (box.GetReminderFlag(type)) {
         uint32_t controlFlags = 0;
@@ -68,27 +89,31 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
         if (!(type & NotificationConstant::ReminderFlag::VIBRATION_FLAG)) {
             controlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
         }
-        request.SetNotificationControlFlags(controlFlags);
+        request->SetNotificationControlFlags(controlFlags);
     }
     if (box.GetCreatorBundleName(context)) {
-        request.SetCreatorBundleName(context);
+        request->SetCreatorBundleName(context);
     }
     if (box.GetNotificationHashCode(context)) {
-        request.SetDistributedHashCode(context);
+        request->SetDistributedHashCode(context);
     }
-    request.SetDistributedCollaborate(true);
-    request.SetLabel(DISTRIBUTED_LABEL);
+    request->SetDistributedCollaborate(true);
+    request->SetLabel(DISTRIBUTED_LABEL);
 }
 
 void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage)
 {
-    NotificationRequest request;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    if (request == nullptr) {
+        ANS_LOGE("NotificationRequest is nullptr");
+        return;
+    }
     NotifticationRequestBox requestBox = NotifticationRequestBox(boxMessage);
     MakeNotifictaionContent(requestBox, request);
     MakeNotifictaionIcon(requestBox, request);
     MakeNotifictaionReminderFlag(requestBox, request);
-    int result = IN_PROCESS_CALL(NotificationHelper::PublishNotification(request));
-    ANS_LOGI("Dans publish message %{public}s %{public}d.", request.Dump().c_str(), result);
+    int result = IN_PROCESS_CALL(NotificationHelper::PublishNotification(*request));
+    ANS_LOGI("Dans publish message %{public}s %{public}d.", request->Dump().c_str(), result);
 }
 
 }

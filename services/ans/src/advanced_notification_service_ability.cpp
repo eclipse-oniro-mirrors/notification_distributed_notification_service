@@ -17,6 +17,7 @@
 #include "notification_extension_wrapper.h"
 #include "system_event_observer.h"
 #include "common_event_manager.h"
+#include "liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -61,6 +62,7 @@ void AdvancedNotificationServiceAbility::OnStart()
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
 #endif
+    LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
 }
 
 void AdvancedNotificationServiceAbility::OnStop()

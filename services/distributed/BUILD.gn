@@ -87,6 +87,7 @@ ohos_shared_library("libans_softbus_distributed") {
     "src/soft_bus/distributed_client.cpp",
     "src/soft_bus/distributed_cmd_service.cpp",
     "src/soft_bus/distributed_extern_intferface.cpp",
+    "src/soft_bus/distributed_liveview_all_scenarios_extension_wrapper.cpp",
     "src/soft_bus/distributed_local_config.cpp",
     "src/soft_bus/distributed_manager.cpp",
     "src/soft_bus/distributed_observer_service.cpp",

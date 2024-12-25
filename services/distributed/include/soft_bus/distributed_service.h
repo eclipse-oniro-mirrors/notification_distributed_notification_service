@@ -52,9 +52,9 @@ private:
     int64_t GetCurrentTime();
     void PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void HandleDeviceState(const std::shared_ptr<TlvBox>& boxMessage);
-    void MakeNotifictaionContent(const NotifticationRequestBox& box, NotificationRequest& request);
-    void MakeNotifictaionIcon(const NotifticationRequestBox& box, NotificationRequest& request);
-    void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box, NotificationRequest& request);
+    void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
+    void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
+    void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
     std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
     int32_t userId_ = DEFAULT_USER_ID;
     DistributedDeviceInfo localDevice_;
