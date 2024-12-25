@@ -457,6 +457,17 @@ public:
     static napi_value SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result);
 
     /**
+     * @brief Sets a js object by specified NotificationIconButton array
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param buttons Indicates a NotificationIconButton object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetCardButton(const napi_env &env, const std::vector<NotificationIconButton> buttons,
+        napi_value &result);
+
+    /**
      * @brief Sets a js object by specified NotificationProgress object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1306,6 +1317,41 @@ public:
         std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
 
     /**
+     * @brief Gets a card button of NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a button object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewCardButton(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
+     * @brief Gets a capsule button of NotificationCapsule object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsuletResult Indicates a js object to be converted
+     * @param capsule Indicates a capsule object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewCapsuleCardButton(
+        const napi_env &env, const napi_value &capsuletResult,
+            OHOS::Notification::NotificationCapsule &capsule);
+
+    /**
+     * @brief Gets array<iconbutton> of NotificationCapsule object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param buttonResult Indicates a js array<object> to be converted
+     * @param cardButtons Indicates a button array from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationIconButton(
+        const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons);
+
+    /**
      * @brief Gets a time of NotificationLocalLiveViewContent object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1748,7 +1794,7 @@ public:
         const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
     static napi_value GetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
         napi_value &value);
-    static napi_value SetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
+    static napi_value SetResourceObject(napi_env env, const std::shared_ptr<ResourceManager::Resource> &resource,
         napi_value &value);
     static napi_value SetObjectStringProperty(const napi_env &env, napi_value& object, const std::string& key,
         const std::string& value);

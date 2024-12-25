@@ -46,6 +46,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_profile_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_flags_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_helper_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_icon_button_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_live_view_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_local_live_view_button_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_local_live_view_content_test.cpp",
