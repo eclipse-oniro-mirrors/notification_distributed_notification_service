@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Dozvoliti aplikaciji %s da vam šalje obaveštenja?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Dozvoli",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Odbij",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}
