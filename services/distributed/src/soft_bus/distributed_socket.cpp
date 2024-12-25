@@ -23,8 +23,8 @@
 namespace OHOS {
 namespace Notification {
 
-static const int32_t BIND_SERVICE_MAX_RETRY_TIMES = 10;
-static const int32_t BIND_SERVICE_SLEEP_TIMES_MS = 100;  // 0.1s
+static const int32_t BIND_SERVICE_MAX_RETRY_TIMES = 5;
+static const int32_t BIND_SERVICE_SLEEP_TIMES_MS = 3000;  // 0.1s
 static const uint32_t SOCKET_NAME_MAX_LEN = 256;
 
 static void OnServerBind(int32_t socket, PeerSocketInfo info)

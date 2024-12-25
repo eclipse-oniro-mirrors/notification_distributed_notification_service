@@ -330,7 +330,6 @@ AdvancedNotificationService::AdvancedNotificationService()
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
-#else
     DistributedDeviceManager::GetInstance().Init();
 #endif
 }
@@ -1970,7 +1969,7 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
         ANS_LOGE("The registration callback has not been processed yet.");
         return ERR_INVALID_OPERATION;
     }
-    
+
     {
         std::lock_guard<std::mutex> lock(pushMutex_);
         pushCallBacks_.clear();
