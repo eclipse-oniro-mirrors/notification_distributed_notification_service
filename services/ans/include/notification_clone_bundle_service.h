@@ -30,8 +30,10 @@ public:
     ~NotificationCloneBundle() override;
     static std::shared_ptr<NotificationCloneBundle> GetInstance();
     ErrCode OnBackup(nlohmann::json &jsonObject) override;
-    void OnRestoreStart(const std::string bundleName, int32_t appIndex, int32_t userId, int32_t uid) override;
     void OnRestore(const nlohmann::json &jsonObject) override;
+    void OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption);
+    void OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption);
+    void HandleBundleEvent(const std::string bundleName, int32_t appIndex, int32_t uid);
     void OnUserSwitch(int32_t userId) override;
 private:
     std::vector<NotificationCloneBundleInfo> bundlesInfo_;

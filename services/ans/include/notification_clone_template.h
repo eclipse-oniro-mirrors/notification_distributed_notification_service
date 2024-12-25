@@ -29,8 +29,6 @@ public:
     virtual ErrCode OnBackup(nlohmann::json &jsonObject) = 0;
     virtual void OnRestore(const nlohmann::json &jsonObject) = 0;
     virtual void OnUserSwitch(int32_t userId) = 0;
-    virtual void OnRestoreStart(const std::string bundleName, int32_t appIndex,
-        int32_t userId, int32_t uid) = 0;
 };
 } // namespace Notification
 } // namespace OHOS

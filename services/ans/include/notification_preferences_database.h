@@ -247,19 +247,6 @@ public:
     bool UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
         const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots);
     bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
-    bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);
-    bool UpdateBatchCloneProfileInfo(const int32_t &userId,
-        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
-    void GetAllCloneProfileInfo(const int32_t &userId,
-        std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo);
-    void GetAllCloneBundleInfo(const int32_t &userId, std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
-    bool UpdateBatchCloneBundleInfo(const int32_t &userId,
-        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
-    bool DelCloneBundleInfo(const int32_t &userId, const NotificationCloneBundleInfo& cloneBundleInfo);
-    bool DelBatchCloneProfileInfo(const int32_t &userId,
-        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
-    bool DelBatchCloneBundleInfo(const int32_t &userId,
-        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
 
 private:
     bool CheckRdbStore();
@@ -333,8 +320,6 @@ private:
     void ParseSlotAuthorizedStatus(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotAuthHitnCnt(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
-    bool UpdateCloneToDisturbeDB(const int32_t &userId,
-        const std::unordered_map<std::string, std::string> values);
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
