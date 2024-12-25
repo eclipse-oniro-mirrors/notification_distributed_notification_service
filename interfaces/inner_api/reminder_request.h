@@ -1058,6 +1058,7 @@ private:
     void SetMaxScreenWantAgent(AppExecFwk::ElementName &element);
     void SetState(bool deSet, const uint8_t newState, std::string function);
     void SetWantAgent(AppExecFwk::ElementName &element);
+    void SetExtraInfo(const AAFwk::WantParams& params);
     void UpdateActionButtons(const bool &setSnooze);
     bool UpdateNextReminder(const bool &force);
     void UpdateNotificationContent(const bool &setSnooze);

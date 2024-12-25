@@ -730,14 +730,14 @@ std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string
         return reminders;
     }
     bool isAtLastRow = false;
-    queryResultSet->IsAtLastRow(isAtLastRow);
-    while (!isAtLastRow) {
+    int32_t ret = queryResultSet->IsAtLastRow(isAtLastRow);
+    while (ret == NativeRdb::E_OK && !isAtLastRow) {
         queryResultSet->GoToNextRow();
         sptr<ReminderRequest> reminder = BuildReminder(queryResultSet);
         if (reminder != nullptr) {
             reminders.push_back(reminder);
         }
-        queryResultSet->IsAtLastRow(isAtLastRow);
+        ret = queryResultSet->IsAtLastRow(isAtLastRow);
     }
     ANSR_LOGD("Size=%{public}zu", reminders.size());
     return reminders;
