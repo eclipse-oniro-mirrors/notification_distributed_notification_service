@@ -89,6 +89,7 @@ constexpr int32_t MAX_LIVEVIEW_HINT_COUNT = 1;
 constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t RSS_UID = 3051;
+constexpr int32_t RESSCHED_UID = 1096;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
@@ -2352,6 +2353,26 @@ ErrCode AdvancedNotificationService::RegisterSwingCallback(const sptr<IRemoteObj
     return ReminderSwingDecisionCenter::GetInstance().RegisterSwingCallback(swingCallback);
 }
 #endif
+
+ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSubSystem || callingUid != RESSCHED_UID) {
+        ANS_LOGE("caller is not ressched, callingUid: %{public}d", callingUid);
+        return ERR_ANS_NOT_SYSTEM_SERVICE;
+    }
+
+    if (!notificationSvrQueue_) {
+        ANS_LOGE("Serial queue is invalidated.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        HandleUpdateLiveViewNotificationTimer(uid, isPaused);
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
 
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {

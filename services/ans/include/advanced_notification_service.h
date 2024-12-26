@@ -1163,6 +1163,20 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
 
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+<<<<<<< Updated upstream
+=======
+
+    void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+    
+    /**
+     * @brief Update notification timer by uid
+     *
+     * @param uid uid.
+     * @param isPaused if paused
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+>>>>>>> Stashed changes
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1431,6 +1445,17 @@ private:
     bool IsSystemUser(int32_t userId);
     ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
+<<<<<<< Updated upstream
+=======
+    ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &bundle,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+    ErrCode AddSlotThenPublishEvent(
+        const sptr<NotificationSlot> &slot,
+        const sptr<NotificationBundleOption> &bundle,
+        bool enabled, bool isForceControl);
+    void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
+>>>>>>> Stashed changes
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

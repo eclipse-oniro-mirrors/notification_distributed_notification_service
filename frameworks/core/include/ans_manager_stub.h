@@ -966,6 +966,14 @@ public:
      */
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
 #endif
+
+    /**
+     * @brief Update Notification Timer by uid
+     *
+     * @param uid uid.
+     * @return Returns Update result.
+     */
+    virtual ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
@@ -1073,6 +1081,7 @@ private:
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif
+    ErrCode HandleUpdateNotificationTimerByUid(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

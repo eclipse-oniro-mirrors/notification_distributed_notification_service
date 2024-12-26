@@ -1118,6 +1118,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+
+    /**
+     * @brief Update Notification Timer by uid
+     *
+     * @param uid uid.
+     * @return Returns Update result.
+     */
+    static ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
 };
 }  // namespace Notification
 }  // namespace OHOS

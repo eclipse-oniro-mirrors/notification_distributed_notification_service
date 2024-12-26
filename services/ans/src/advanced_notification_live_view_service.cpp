@@ -40,6 +40,8 @@ namespace OHOS {
 namespace Notification {
 const std::string LOCK_SCREEN_PICTURE_TAG = "lock_screen_picture";
 const std::string PROGRESS_VALUE = "progressValue";
+constexpr int32_t BGTASK_UID = 3051;
+constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
 {
     if (notificationSvrQueue_ == nullptr) {
@@ -738,6 +740,33 @@ void AdvancedNotificationService::StartFinishTimerForUpdate(
         record->finish_status = UploadStatus::CONTINUOUS_UPDATE_TIME_OUT;
         StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
             NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
+    }
+}
+
+void AdvancedNotificationService::HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused)
+{
+    for (const auto &record : notificationList_) {
+        const auto &request = record->request;
+        if (!request || request->GetOwnerUid() != uid) {
+            continue;
+        }
+        if (!request->GetContent() || !request->GetContent()->GetNotificationContent()) {
+            continue;
+        }
+
+        bool isContinuousLiveView = request->IsSystemLiveView() && request->GetCreatorUid() == BGTASK_UID;
+        const auto &liveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+            request->GetContent()->GetNotificationContent());
+        if (isContinuousLiveView && liveViewContent->GetType() == TYPE_CODE_DOWNLOAD) {
+            if (isPaused) {
+                ANS_LOGI("liveview notification timer is being cancelled, uid: %{public}d", uid);
+                CancelTimer(record->notification->GetFinishTimer());
+            } else {
+                ANS_LOGI("liveview notification timer is being reset, uid: %{public}d", uid);
+                StartFinishTimer(record, GetCurrentTime() + NotificationConstant::FIFTEEN_MINUTES,
+                    NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
+            }
+        }
     }
 }
 }

@@ -965,6 +965,14 @@ public:
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback) override;
 #endif
 
+    /**
+     * @brief Update Notification Timer by uid
+     *
+     * @param uid uid.
+     * @return Returns Update result.
+     */
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);

@@ -317,6 +317,9 @@ namespace OHOS {
         datas.WriteString(stringData);
         datas.WriteInt32(intData);
         ansManagerStub.HandleSetTargetDeviceStatus(datas, reply);
+        datas.WriteInt32(intData);
+        datas.WriteBool(boolData);
+        ansManagerStub.HandleUpdateNotificationTimerByUid(datas, reply);
         sptr<Notification::NotificationRequest> notification2 = new Notification::NotificationRequest();
         notification2->SetOwnerUid(fuzzData.GenerateRandomInt32());
         notification2->SetCreatorUid(fuzzData.GenerateRandomInt32());

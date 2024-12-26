@@ -975,6 +975,14 @@ public:
      */
     virtual ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) = 0;
 #endif
+
+    /**
+     * @brief Update Notification Timer by uid
+     *
+     * @param uid uid.
+     * @return Returns Update result.
+     */
+    virtual ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS
