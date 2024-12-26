@@ -83,6 +83,10 @@ int32_t AnsSubscriberStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             result = HandleOnBadgeEnabledChanged(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_APPLICATION_INFO_NEED_CHANGED): {
+            result = HandleOnApplicationInfoNeedChanged(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -306,6 +310,17 @@ ErrCode AnsSubscriberStub::HandleOnBadgeEnabledChanged(MessageParcel &data, Mess
     return ERR_OK;
 }
 
+ErrCode AnsSubscriberStub::HandleOnApplicationInfoNeedChanged(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        ANS_LOGE("[HandleGetAllDistribuedEnabledBundles] fail: read deviceType failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    OnApplicationInfoNeedChanged(bundleName);
+    return ERR_OK;
+}
+
 void AnsSubscriberStub::OnConnected() {}
 
 void AnsSubscriberStub::OnDisconnected() {}
@@ -335,5 +350,7 @@ void AnsSubscriberStub::OnEnabledNotificationChanged(const sptr<EnabledNotificat
 void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) {}
 
 void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) {}
+
+void AnsSubscriberStub::OnApplicationInfoNeedChanged(const std::string& bundleName) {}
 } // namespace Notification
 } // namespace OHOS

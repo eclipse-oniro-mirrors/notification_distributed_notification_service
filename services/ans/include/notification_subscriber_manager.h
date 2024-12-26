@@ -139,8 +139,10 @@ public:
     bool GetIsEnableEffectedRemind();
     bool IsDeviceTypeSubscriberd(const std::string deviceType);
 #endif
+    void NotifyApplicationInfoNeedChanged(const std::string& bundleName);
 
 private:
+    void NotifyApplicationInfochangedInner(const std::string& bundleName);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
     std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);

@@ -72,6 +72,10 @@ public:
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(
         const std::string &inFilePath, const std::string &format = IMAGE_FORMAT_PNG);
 
+    static std::shared_ptr<Media::PixelMap> CreatePixelMapByString(const std::string &imagedata);
+
+    static bool ImageScale(const std::shared_ptr<Media::PixelMap> &pixelMap, int32_t width, int32_t height);
+
     /**
      * @brief Converts a binary string to a hexadecimal string.
      *

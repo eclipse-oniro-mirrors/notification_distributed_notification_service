@@ -367,6 +367,14 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetAllNotificationEnableStatus(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_LIVEVIEW_ENABLE_STATUS): {
+            result = HandleGetAllLiveViewEnabledBundles(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_DISTRIBUTED_ENABLE_STATUS): {
+            result = HandleGetAllDistribuedEnabledBundles(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_PUSH_CALLBACK): {
             result = HandleRegisterPushCallback(data, reply);
             break;
@@ -2442,6 +2450,72 @@ ErrCode AnsManagerStub::HandleSetDistributedEnabledBySlot(MessageParcel &data, M
             result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetAllLiveViewEnabledBundles(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllLiveViewEnabledBundles(bundleOption);
+    int32_t vectorSize = bundleOption.size();
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle bundleOption vector is over size.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(vectorSize)) {
+        ANS_LOGE("Write bundleOption size failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto &item : bundleOption) {
+        if (!reply.WriteParcelable(&item)) {
+            ANS_LOGE("Write bundleOption failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetAllDistribuedEnabledBundles(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleGetAllDistribuedEnabledBundles] fail: read deviceType failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllDistribuedEnabledBundles(deviceType, bundleOption);
+    int32_t vectorSize = bundleOption.size();
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle bundleOption vector is over size.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(vectorSize)) {
+        ANS_LOGE("Write bundleOption size failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto &item : bundleOption) {
+        if (!reply.WriteParcelable(&item)) {
+            ANS_LOGE("Write bundleOption failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
     return ERR_OK;
 }
 

@@ -63,6 +63,7 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
         return -1;
     }
     callBack_ = callback;
+    OberverService::GetInstance().Init(deviceType);
     return 0;
 }
 
@@ -75,6 +76,7 @@ void DistributedService::DestoryService()
     ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
         ANS_LOGI("Start destory service.");
         DistributedServer::GetInstance().ReleaseServer();
+        OberverService::GetInstance().Destory();
         for (auto& subscriberInfo : subscriberMap_) {
             int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
             ANS_LOGI("UnSubscribe %{public}s %{public}d.", subscriberInfo.first.c_str(), result);
@@ -90,8 +92,13 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         return;
     }
     serviceQueue_->submit_h([&, device]() {
+        ANS_LOGI("Dans AddDevice %{public}s %{public}d %{public}s %{public}d.",
+            device.deviceId_.c_str(), device.deviceType_, localDevice_.deviceId_.c_str(),
+            localDevice_.deviceType_);
         SyncDeviceMatch(device, MatchType::MATCH_SYN);
         InitDeviceState(device);
+        RequestBundlesIcon(device);
+        ReportBundleIconList(device);
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         peerDevice_.insert(std::make_pair(deviceItem.deviceId_, deviceItem));
@@ -161,6 +168,9 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
                 break;
             case NotificationEventType::NOTIFICATION_MATCH_SYNC:
                 HandleMatchSync(box);
+                break;
+            case NotificationEventType::BUNDLE_ICON_SYNC:
+                HandleBundleIconSync(box);
                 break;
             default:
                 ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);

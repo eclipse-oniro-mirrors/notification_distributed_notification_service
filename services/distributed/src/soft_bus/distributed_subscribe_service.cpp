@@ -54,6 +54,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     subscriber->SetDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
     sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(userId_);
+    subscribeInfo->SetNeedNotifyApplication(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
         subscriberMap_.insert(std::make_pair(peerDevice.deviceId_, subscriber));

@@ -278,6 +278,11 @@ public:
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
 
+    ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
+
+    ErrCode GetAllDistribuedEnabledBundles(int32_t userId,
+        const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
+
     /**
      * @brief Remove all proferences info from DB.
      *

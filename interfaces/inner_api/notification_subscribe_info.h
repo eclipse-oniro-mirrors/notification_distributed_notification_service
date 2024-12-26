@@ -162,6 +162,20 @@ public:
      **/
     int32_t GetFilterType() const;
 
+    /**
+     * @brief Obtains notify application change.
+     *
+     * @return Returns the result.
+     **/
+    bool GetNeedNotifyApplication() const;
+
+    /**
+     * @brief Obtains notify application change.
+     *
+     * @return Returns the result.
+     **/
+    void SetNeedNotifyApplication(bool isNeed);
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -172,6 +186,7 @@ private:
     int32_t subscriberUid_ {-1};
     std::vector<NotificationConstant::SlotType> slotTypes_;
     int32_t filterType_;
+    bool needNotifyApplicationChanged_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

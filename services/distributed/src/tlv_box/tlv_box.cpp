@@ -194,11 +194,13 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
     return true;
 }
 
-bool TlvBox::Serialize()
+bool TlvBox::Serialize(bool addCheck)
 {
     int offset = 0;
     int32_t bytesLeft = bytesLength_;
-    bytesLength_ = bytesLength_ + sizeof(uint32_t);
+    if (addCheck) {
+        bytesLength_ = bytesLength_ + sizeof(uint32_t);
+    }
     if (bytesLength_ > MAX_BUFFER_LENGTH) {
         ANS_LOGW("Serialize data length invalid %{public}d", bytesLength_);
         return false;
@@ -208,8 +210,6 @@ bool TlvBox::Serialize()
         int32_t type = htonl(iter->second->GetType());
         errno_t err = memcpy_s(byteBuffer_ + offset, bytesLeft, &type, sizeof(int32_t));
         if (err != EOK) {
-            ANS_LOGW("Serialize failed %{public}d %{public}d %{public}d %{public}d %{public}d",
-                iter->second->GetType(), iter->second->GetLength(), bytesLeft, err, offset);
             delete[] byteBuffer_;
             byteBuffer_ = nullptr;
             return false;
@@ -220,8 +220,6 @@ bool TlvBox::Serialize()
         int32_t lengthValue = htonl(length);
         err = memcpy_s(byteBuffer_ + offset, bytesLeft, &lengthValue, sizeof(int32_t));
         if (err != EOK) {
-            ANS_LOGW("Serialize failed %{public}d %{public}d %{public}d %{public}d %{public}d",
-                iter->second->GetType(), length, bytesLeft, err, offset);
             delete[] byteBuffer_;
             byteBuffer_ = nullptr;
             return false;
@@ -230,8 +228,6 @@ bool TlvBox::Serialize()
         bytesLeft -= sizeof(int32_t);
         err = memcpy_s(byteBuffer_ + offset, bytesLeft, iter->second->GetValue(), length);
         if (err != EOK) {
-            ANS_LOGW("Serialize failed %{public}d %{public}d %{public}d %{public}d %{public}d",
-                iter->second->GetType(), length, bytesLeft, err, offset);
             delete[] byteBuffer_;
             byteBuffer_ = nullptr;
             return false;
@@ -239,10 +235,14 @@ bool TlvBox::Serialize()
         offset += length;
         bytesLeft -= length;
     }
-    uint32_t calCrc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)byteBuffer_, offset);
-    uint32_t calValue = htonl(calCrc);
-    (void)memcpy_s(byteBuffer_ + offset, sizeof(uint32_t), &calValue, sizeof(uint32_t));
-    ANS_LOGI("Box Serialize crc32 %{public}u %{public}u.", offset + sizeof(uint32_t), calCrc);
+    if (addCheck) {
+        uint32_t calCrc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)byteBuffer_, offset);
+        uint32_t calValue = htonl(calCrc);
+        (void)memcpy_s(byteBuffer_ + offset, sizeof(uint32_t), &calValue, sizeof(uint32_t));
+        ANS_LOGI("Box Serialize crc32 %{public}lu %{public}u.", offset + sizeof(uint32_t), calCrc);
+    } else {
+        ANS_LOGI("Box Serialize crc32 %{public}d.", offset);
+    }
     return true;
 }
 

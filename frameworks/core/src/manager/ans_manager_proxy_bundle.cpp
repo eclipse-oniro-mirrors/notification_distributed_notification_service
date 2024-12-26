@@ -793,5 +793,101 @@ ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<Notificati
 
     return result;
 }
+
+ErrCode AnsManagerProxy::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    MessageParcel data;
+    int32_t vectorSize = 0;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_LIVEVIEW_ENABLE_STATUS, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadInt32(vectorSize)) {
+        ANS_LOGE("Fail: read vectorSize failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle status vector is over size");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (auto i = 0; i < vectorSize; i++) {
+        sptr<NotificationBundleOption> obj = reply.ReadParcelable<NotificationBundleOption>();
+        if (obj == nullptr) {
+            ANS_LOGE("The obj of Bundle status vector is nullptr.");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+        bundleOption.emplace_back(*obj);
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    MessageParcel data;
+    int32_t vectorSize = 0;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(deviceType)) {
+        ANS_LOGE("[GetAllDistribuedEnabledBundles] fail: write deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_DISTRIBUTED_ENABLE_STATUS, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadInt32(vectorSize)) {
+        ANS_LOGE("Fail: read vectorSize failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle status vector is over size");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (auto i = 0; i < vectorSize; i++) {
+        sptr<NotificationBundleOption> obj = reply.ReadParcelable<NotificationBundleOption>();
+        if (obj == nullptr) {
+            ANS_LOGE("The obj of Bundle status vector is nullptr.");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+        bundleOption.emplace_back(*obj);
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

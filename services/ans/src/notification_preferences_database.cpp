@@ -17,6 +17,7 @@
 
 #include <regex>
 #include <string>
+#include <sstream>
 
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
@@ -235,6 +236,9 @@ const static std::string CLONE_PROFILE = "profile_";
 const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
 constexpr int32_t ZERO_USER_ID = 0;
 const static std::string KEY_SUBSCRIBER_EXISTED_FLAG = "existFlag";
+const static int32_t DISTRIBUTED_KEY_NUM = 4;
+const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
+const static int32_t DISTRIBUTED_KEY_UID_INDEX = 2;
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
@@ -850,6 +854,52 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
         return false;
     }
     return HandleDataBaseMap(datas, bundleOption);
+}
+
+bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t userId,
+    const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE);
+    ANS_LOGD("key is %{public}s", key.c_str());
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(key, values, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        return true;
+    } else if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    for (auto& Item : values) {
+        if (!static_cast<bool>(StringToInt(Item.second))) {
+            continue;
+        }
+        std::vector<std::string> result;
+        StringSplit(Item.first, '-', result);
+        if (result.size() != DISTRIBUTED_KEY_NUM && result.back() != deviceType) {
+            continue;
+        }
+        int32_t uid = StringToInt(result[DISTRIBUTED_KEY_UID_INDEX]);
+        NotificationBundleOption bundleInfo(result[DISTRIBUTED_KEY_BUNDLE_INDEX], uid);
+        bundleOption.push_back(bundleInfo);
+        result.clear();
+    }
+    return true;
+}
+
+void NotificationPreferencesDatabase::StringSplit(const std::string content, char delim,
+    std::vector<std::string>& result) const
+{
+    std::string token;
+    std::istringstream in(content);
+    while (std::getline(in, token, delim)) {
+        result.push_back(token);
+    }
 }
 
 bool NotificationPreferencesDatabase::HandleDataBaseMap(

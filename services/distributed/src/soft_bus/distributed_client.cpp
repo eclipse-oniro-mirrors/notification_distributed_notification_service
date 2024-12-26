@@ -93,13 +93,14 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
     std::string name = (dataType == TransDataType::DATA_TYPE_MESSAGE) ? ANS_SOCKET_CMD : ANS_SOCKET_MSG;
     int32_t socketId = ClientBind(name, ANS_SOCKET_PKG, name, networkId, dataType);
     if (socketId == -1) {
-        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d", deviceId.c_str(),
-            networkId.c_str(), deviceType);
+        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", deviceId.c_str(),
+            networkId.c_str(), deviceType, dataType);
         return socketId;
     }
     {
         std::lock_guard<std::mutex> lock(clientLock_);
         socketsId_.insert(std::make_pair(key, socketId));
+        ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
     }
     return socketId;
 }

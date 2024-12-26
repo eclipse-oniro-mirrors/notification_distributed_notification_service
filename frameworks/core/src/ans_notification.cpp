@@ -1727,6 +1727,27 @@ ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<Notificati
     return proxy->GetAllNotificationEnabledBundles(bundleOption);
 }
 
+ErrCode AnsNotification::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllLiveViewEnabledBundles(bundleOption);
+}
+
+ErrCode AnsNotification::GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllDistribuedEnabledBundles(deviceType, bundleOption);
+}
+
 ErrCode AnsNotification::RegisterPushCallback(
     const sptr<IRemoteObject>& pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {

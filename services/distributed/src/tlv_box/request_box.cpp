@@ -109,8 +109,14 @@ bool NotifticationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>&
     if (box_ == nullptr) {
         return false;
     }
-    std::string icon = AnsImageUtil::PackImage(bigIcon);
-    ANS_LOGI("SetBigIcon %{public}s", icon.c_str());
+
+    std::string copyIcon = AnsImageUtil::PackImage(bigIcon);
+    auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
+    if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
+        return false;
+    }
+    std::string icon = AnsImageUtil::PackImage(copyPixelMap);
+    ANS_LOGI("SetBigIcon %{public}lu, %{public}lu", copyIcon.size(), icon.size());
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
 }
 
@@ -119,8 +125,13 @@ bool NotifticationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelM
     if (box_ == nullptr) {
         return false;
     }
-    std::string icon = AnsImageUtil::PackImage(overlayIcon);
-    ANS_LOGI("SetOverlayIcon %{public}s", icon.c_str());
+    std::string copyIcon = AnsImageUtil::PackImage(overlayIcon);
+    auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
+    if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
+        return false;
+    }
+    std::string icon = AnsImageUtil::PackImage(copyPixelMap);
+    ANS_LOGI("SetOverlayIcon %{public}lu, %{public}lu", copyIcon.size(), icon.size());
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
 }
 
@@ -199,7 +210,7 @@ bool NotifticationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIc
     if (!box_->GetStringValue(NOTIFICATION_BIG_ICON, bigIconContent)) {
         return false;
     }
-    ANS_LOGI("GetBigIcon %{public}s", bigIconContent.c_str());
+    ANS_LOGI("GetBigIcon %{public}lu", bigIconContent.size());
     bigIcon = AnsImageUtil::UnPackImage(bigIconContent);
     return true;
 }
@@ -213,7 +224,7 @@ bool NotifticationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& o
     if (!box_->GetStringValue(NOTIFICATION_OVERLAY_ICON, overlayContent)) {
         return false;
     }
-    ANS_LOGI("GetOverlayIcon %{public}s", overlayContent.c_str());
+    ANS_LOGI("GetOverlayIcon %{public}lu", overlayContent.size());
     overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
     return true;
 }

@@ -28,6 +28,8 @@ constexpr char const ANS_SOCKET_CMD[] = "notification_service.cmd";
 constexpr char const ANS_SOCKET_MSG[] = "notification_service.content";
 constexpr char const ANS_SOCKET_PKG[] = "ohos.distributed_notification";
 const int32_t CURRENT_VERSION = 1000;
+const int32_t DEFAULT_ICON_WITHE = 60;
+const int32_t DEFAULT_ICON_HEIGHT = 60;
 
 enum DeviceState {
     STATE_INIT = 0,

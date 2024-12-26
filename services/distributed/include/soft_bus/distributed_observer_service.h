@@ -38,6 +38,7 @@ class OberverService {
 public:
     static OberverService& GetInstance();
     int32_t IsScreenLocked();
+    void Destory();
     void Init(uint16_t deviceType);
 private:
     OberverService() = default;

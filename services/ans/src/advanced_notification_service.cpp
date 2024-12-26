@@ -1986,16 +1986,18 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     ANS_LOGD("NotificationRequest slotType:%{public}d, contentType:%{public}d", slotType, contentType);
 
     if (request->IsCommonLiveView()) {
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            ANS_LOGI("The creator has the permission, no need to check.");
-            return false;
-        }
         std::shared_ptr<NotificationContent> content = request->GetContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
         auto status = liveViewContent->GetLiveViewStatus();
         if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE) {
             ANS_LOGI("Status of common live view is not create, no need to check.");
+            return false;
+        }
+
+        NotificationSubscriberManager::GetInstance()->NotifyApplicationInfoNeedChanged(request->GetCreatorBundleName());
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            ANS_LOGI("The creator has the permission, no need to check.");
             return false;
         }
         ANS_LOGI("Common live view requires push check.");
