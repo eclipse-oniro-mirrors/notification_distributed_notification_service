@@ -356,7 +356,6 @@ void NotificationSubscriberManager::AddRecordInfo(
             record->deviceType = subscribeInfo->GetDeviceType();
         }
         record->subscriberUid = subscribeInfo->GetSubscriberUid();
-        record->slotTypes = subscribeInfo->GetSlotTypes();
         record->filterType = subscribeInfo->GetFilterType();
     } else {
         record->bundleList_.clear();
@@ -577,15 +576,6 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
 bool NotificationSubscriberManager::ConsumeRecordFilter(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
-    // slotType
-    NotificationRequest request = notification->GetNotificationRequest();
-    if (!record->slotTypes.empty()) {
-        auto findResult = std::find(record->slotTypes.begin(), record->slotTypes.end(), request.GetSlotType());
-        if (findResult == record->slotTypes.end()) {
-            ANS_LOGI("ConsumeRecordFilter-slotTypeFilter");
-            return false;
-        }
-    }
     // filterType
     return true;
 }
