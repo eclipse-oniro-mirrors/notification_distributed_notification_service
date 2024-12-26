@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -84,6 +84,13 @@ ohos_shared_library("libans_softbus_distributed") {
   branch_protector_ret = "pac_ret"
 
   sources = [
+    "${services_path}/ans/src/common/file_utils.cpp",
+    "${services_path}/ans/src/common/notification_app_privileges.cpp",
+    "${services_path}/ans/src/common/notification_config_parse.cpp",
+    "${services_path}/distributed/src/distributed_flow_control.cpp",
+    "${services_path}/distributed/src/distributed_preferences.cpp",
+    "${services_path}/distributed/src/distributed_preferences_database.cpp",
+    "${services_path}/distributed/src/distributed_preferences_info.cpp",
     "src/soft_bus/distributed_client.cpp",
     "src/soft_bus/distributed_cmd_service.cpp",
     "src/soft_bus/distributed_extern_intferface.cpp",
@@ -98,8 +105,10 @@ ohos_shared_library("libans_softbus_distributed") {
     "src/soft_bus/distributed_subscribe_service.cpp",
     "src/soft_bus/distributed_subscriber.cpp",
     "src/soft_bus/distributed_timer_service.cpp",
+    "src/tlv_box/batch_remove_box.cpp",
     "src/tlv_box/box_base.cpp",
     "src/tlv_box/match_box.cpp",
+    "src/tlv_box/remove_box.cpp",
     "src/tlv_box/request_box.cpp",
     "src/tlv_box/state_box.cpp",
     "src/tlv_box/tlv_box.cpp",
@@ -108,6 +117,8 @@ ohos_shared_library("libans_softbus_distributed") {
   include_dirs = [
     "${services_path}/distributed/include/soft_bus",
     "${services_path}/distributed/include/tlv_box",
+    "${services_path}/ans/include",
+    "${services_path}/distributed/include",
   ]
 
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
@@ -124,6 +135,7 @@ ohos_shared_library("libans_softbus_distributed") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "screenlock_mgr:screenlock_client",
     "time_service:time_client",

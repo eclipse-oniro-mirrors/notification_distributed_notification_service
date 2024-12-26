@@ -317,5 +317,36 @@ bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, s
     }
     return true;
 }
+
+std::unordered_set<std::string> NotificationConfigParse::GetCollaborativeDeleteType() const
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    JsonPoint.append("/");
+    JsonPoint.append(CFG_KEY_COLLABORATIVE_DELETE_TYPES);
+    if (!GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("GetConfigJson faild");
+        return std::unordered_set<std::string>();
+    }
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("appPrivileges null");
+        return std::unordered_set<std::string>();
+    }
+
+    nlohmann::json collaborativeDeleteTypes = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_COLLABORATIVE_DELETE_TYPES];
+    if (collaborativeDeleteTypes.empty() && !collaborativeDeleteTypes.is_array()) {
+        ANS_LOGE("collaborativeDeleteTypes null or no array");
+        return std::unordered_set<std::string>();
+    }
+    std::unordered_set<std::string> collaborativeDeleteTypeSet;
+    for (const auto &item : collaborativeDeleteTypes) {
+        if (item.is_string()) {
+            collaborativeDeleteTypeSet.insert(item.get<std::string>());
+        }
+    }
+
+    return collaborativeDeleteTypeSet;
+}
 } // namespace Notification
 } // namespace OHOS

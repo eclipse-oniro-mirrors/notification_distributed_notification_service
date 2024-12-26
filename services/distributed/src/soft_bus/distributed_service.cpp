@@ -162,6 +162,12 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
             case NotificationEventType::NOTIFICATION_MATCH_SYNC:
                 HandleMatchSync(box);
                 break;
+            case NotificationEventType::REMOVE_NOTIFICATION:
+                RemoveNotifictaion(box);
+                break;
+            case NotificationEventType::REMOVE_ALL_NOTIFICATIONS:
+                RemoveNotifictaions(box);
+                break;
             default:
                 ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);
                 break;

@@ -17,6 +17,8 @@
 
 #include "ans_log_wrapper.h"
 #include "distributed_service.h"
+#include "notification_config_parse.h"
+#include "distributed_preferences.h"
 
 namespace OHOS {
 namespace Notification {
@@ -52,6 +54,13 @@ void DistribuedSubscriber::OnCanceled(const std::shared_ptr<Notification> &reque
     ANS_LOGI("Subscriber on canceled %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
         localDevice_.deviceId_.c_str());
+    if (deleteReason == NotificationConstant::REMOVE_REASON_CROSS_DEVICE) {
+        ANS_LOGD("is cross device deletion");
+        return;
+    }
+    if (CheckNeedCollaboration(request)) {
+        DistributedService::GetInstance().OnCanceled(request, peerDevice_);
+    }
 }
 
 void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &request,
@@ -93,6 +102,22 @@ void DistribuedSubscriber::OnBadgeEnabledChanged(const sptr<EnabledNotificationC
 void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
+    ANS_LOGI("Subscriber on batch canceled %{public}d %{public}s %{public}d %{public}s.",
+        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
+        localDevice_.deviceId_.c_str());
+    if (deleteReason == NotificationConstant::REMOVE_REASON_CROSS_DEVICE) {
+        ANS_LOGD("is cross device deletion");
+        return;
+    }
+    std::vector<std::shared_ptr<Notification>> notifications;
+    for (auto notification : requestList) {
+        if (CheckNeedCollaboration(notification)) {
+            notifications.push_back(notification);
+        }
+    }
+    if (!notifications.empty()) {
+        DistributedService::GetInstance().OnBatchCanceled(notifications, peerDevice_);
+    }
 }
 
 void DistribuedSubscriber::SetLocalDevice(DistributedDeviceInfo localDevice)
@@ -105,5 +130,60 @@ void DistribuedSubscriber::SetPeerDevice(DistributedDeviceInfo peerDevice)
     peerDevice_ = peerDevice;
 }
 
+bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConstant::SlotType& slotType)
+{
+    std::string type;
+    switch (slotType) {
+        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
+            type = "SOCIAL_COMMUNICATION";
+            break;
+        case NotificationConstant::SlotType::SERVICE_REMINDER:
+            type = "SERVICE_REMINDER";
+            break;
+        case NotificationConstant::SlotType::CONTENT_INFORMATION:
+            type = "CONTENT_INFORMATION";
+            break;
+        case NotificationConstant::SlotType::OTHER:
+            type = "OTHER";
+            break;
+        case NotificationConstant::SlotType::CUSTOM:
+            type = "CUSTOM";
+            break;
+        case NotificationConstant::SlotType::LIVE_VIEW:
+            type = "LIVE_VIEW";
+            break;
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+            type = "CUSTOMER_SERVICE";
+            break;
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            type = "EMERGENCY_INFORMATION";
+            break;
+        case NotificationConstant::SlotType::ILLEGAL_TYPE:
+            type = "ILLEGAL_TYPE";
+            break;
+        default:
+            return false;
+    }
+    auto collaboratives = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
+    return collaboratives.find(type) != collaboratives.end();
+}
+
+bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notification>& notification)
+{
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("notification or request is nullptr");
+        return false;
+    }
+    if (!CheckCollaborativeRemoveType(notification->GetNotificationRequestPoint()->GetSlotType())) {
+        ANS_LOGE("CheckCollaborativeRemoveType failed");
+        return false;
+    }
+    if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
+        !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+        ANS_LOGE("notification not collaborative");
+        return false;
+    }
+    return true;
+}
 }
 }

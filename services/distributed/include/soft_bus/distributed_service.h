@@ -39,6 +39,9 @@ public:
     void OnReceiveMsg(const void *data, uint32_t dataLen);
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& device);
+    void OnCanceled(const std::shared_ptr<Notification>& notification, const DistributedDeviceInfo& peerDevice);
+    void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>& notifications,
+        const DistributedDeviceInfo& peerDevice);
     void InitDeviceState(const DistributedDeviceInfo device);
     void SyncDeviceState(int32_t state);
     void SetCurrentUserId(int32_t userId);
@@ -47,6 +50,7 @@ public:
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
     void DestoryService();
     void ReportDeviceStatus(std::string deviceId);
+    std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
 
 private:
     int64_t GetCurrentTime();
@@ -55,6 +59,8 @@ private:
     void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
+    void RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
+    void RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage);
     std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
     int32_t userId_ = DEFAULT_USER_ID;
     DistributedDeviceInfo localDevice_;
