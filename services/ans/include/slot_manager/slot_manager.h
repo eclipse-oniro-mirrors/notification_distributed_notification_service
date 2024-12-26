@@ -43,13 +43,12 @@ public:
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply);
 private:
     ErrCode AddSlots(MessageParcel &data, MessageParcel &reply);
-    ErrCode AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption);
+    ErrCode AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &slots);
     ErrCode AddSlotsInner(const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption);
 
     ErrCode SetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode SetEnabledForBundleSlotSyncQue(
         const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationBundleOption> &bundle,
         const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
     ErrCode SetEnabledForBundleSlotInner(
         const sptr<NotificationBundleOption> &bundleOption,

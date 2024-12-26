@@ -45,7 +45,10 @@ int32_t SlotManager::OnRemoteRequest(uint32_t code, MessageParcel &data, Message
 {
     ErrCode result = CheckInterfacePermission(code);
     if (result != ERR_OK) {
-        return result;
+        if (!reply.WriteInt32(result)) {
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+        return ERR_OK;
     }
     
     switch (code) {

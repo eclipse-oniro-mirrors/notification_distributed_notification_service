@@ -70,11 +70,6 @@ ErrCode SlotManager::SetEnabledForBundleSlot(MessageParcel &data, MessageParcel 
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    sptr<NotificationBundleOption> bundle = AdvancedNotificationService::GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_4);
@@ -82,7 +77,7 @@ ErrCode SlotManager::SetEnabledForBundleSlot(MessageParcel &data, MessageParcel 
         " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
         " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
 
-    ErrCode result = SetEnabledForBundleSlotSyncQue(bundleOption, bundle, slotType, enabled, isForceControl);
+    ErrCode result = SetEnabledForBundleSlotSyncQue(bundleOption, slotType, enabled, isForceControl);
 
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetEnabledForBundleSlot] fail: write result failed, ErrCode=%{public}d", result);
@@ -99,9 +94,13 @@ ErrCode SlotManager::SetEnabledForBundleSlot(MessageParcel &data, MessageParcel 
 
 ErrCode SlotManager::SetEnabledForBundleSlotSyncQue(
     const sptr<NotificationBundleOption> &bundleOption,
-    const sptr<NotificationBundleOption> &bundle,
     const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
+    sptr<NotificationBundleOption> bundle = AdvancedNotificationService::GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
     auto excuteQueue = AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
     if (excuteQueue == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
