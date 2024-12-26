@@ -43,6 +43,8 @@ const int32_t BUTTON_PKG_INDEX = 2;
 const int32_t BUTTON_ABILITY_INDEX = 3;
 const int32_t WANT_AGENT_URI_INDEX = 2;
 const int32_t INDENT = -1;
+
+const char* const PARAM_EXTRA_KEY = "NotificationRequest_extraInfo";
 }
 
 int32_t ReminderRequest::GLOBAL_ID = 0;
@@ -1023,6 +1025,7 @@ void ReminderRequest::UpdateNotificationRequest(UpdateNotificationType type, std
             ANSR_LOGI("UpdateNotification want_agent");
             AppExecFwk::ElementName wantAgent("", wantAgentInfo_->pkgName, wantAgentInfo_->abilityName);
             SetWantAgent(wantAgent);
+            SetExtraInfo(wantAgentInfo_->parameters);
             break;
         }
         case UpdateNotificationType::MAX_SCREEN_WANT_AGENT: {
@@ -1580,6 +1583,15 @@ void ReminderRequest::SetWantAgent(AppExecFwk::ElementName &element)
     notificationRequest_->SetWantAgent(wantAgent);
 }
 
+void ReminderRequest::SetExtraInfo(const AAFwk::WantParams& params)
+{
+    if (params.HasParam(PARAM_EXTRA_KEY)) {
+        std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>(
+            params.GetWantParams(PARAM_EXTRA_KEY));
+        notificationRequest_->SetAdditionalData(extras);
+    }
+}
+
 void ReminderRequest::SetState(bool deSet, const uint8_t newState, std::string function)
 {
     uint8_t oldState = state_;
@@ -1674,6 +1686,7 @@ void ReminderRequest::UpdateNotificationBundleInfo()
     ANSR_LOGD("ownerBundleName=%{public}s, bundleName_=%{public}s",
         ownerBundleName.c_str(), bundleName_.c_str());
     notificationRequest_->SetOwnerBundleName(bundleName_);
+    notificationRequest_->SetOwnerUid(uid_);
     notificationRequest_->SetCreatorBundleName(bundleName_);
     notificationRequest_->SetCreatorUid(uid_);
     notificationRequest_->SetCreatorUserId(userId_);

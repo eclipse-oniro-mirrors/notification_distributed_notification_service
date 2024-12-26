@@ -106,7 +106,7 @@ public:
      * @param want Want information that transferred when the event trigger by user.
      * @param cancelNotification Indicates whether need to cancel notification or not.
      */
-    void CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification);
+    void CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification, bool isButtonClick = true);
 
     /**
      * Dump all the reminders information.
@@ -259,7 +259,7 @@ public:
      * Update action button title.
      */
     void UpdateReminderLanguageLocked(const int32_t uid, const std::vector<sptr<ReminderRequest>>& reminders);
-    
+
     /**
      * @brief System language change
      */
@@ -536,7 +536,8 @@ private:
 
     void SetActiveReminder(const sptr<ReminderRequest> &reminder);
     void SetAlertingReminder(const sptr<ReminderRequest> &reminder);
-    void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder);
+    void ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder,
+        std::vector<sptr<ReminderRequest>>& extensionReminders);
     static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder);
     static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times);
     void InitServiceHandler();
@@ -661,6 +662,9 @@ private:
      * @brief report event to dfx
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
+
+    ErrCode PublishNotificationRequest(sptr<NotificationRequest>& request,
+        const sptr<NotificationBundleOption>& bundleOption);
 
    /**
     * Single instance.

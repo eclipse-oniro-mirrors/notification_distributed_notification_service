@@ -505,7 +505,7 @@ bool ReminderDataManager::cmp(sptr<ReminderRequest> &reminderRequest, sptr<Remin
     return reminderRequest->GetTriggerTimeInMilli() < other->GetTriggerTimeInMilli();
 }
 
-void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification)
+void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification, bool isButtonClick)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
@@ -520,8 +520,10 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         CloseRemindersByGroupId(reminderId, packageName, groupId);
     }
     CloseReminder(reminder, cancelNotification);
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    if (isButtonClick) {
+        UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
+        CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    }
     StartRecentReminder();
 }
 
@@ -813,7 +815,9 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
+    // Since Ans and reminder share a notificationRequest, there is a multi-threaded contention,
+    // so need to make a copy when calling the Ans interface
+    PublishNotificationRequest(notificationRequest, bundleOption);
     store_->UpdateOrInsert(reminder, bundleOption);
 }
 
@@ -905,7 +909,9 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     if (HandleSysTimeChange(reminder)) {
         return;
     }
-    ShowActiveReminderExtendLocked(reminder);
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    ShowActiveReminderExtendLocked(reminder, extensionReminders);
+    HandleExtensionReminder(extensionReminders);
     StartRecentReminder();
 }
 
@@ -944,7 +950,8 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
     ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
 }
 
-void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &reminder)
+void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& reminder,
+    std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     uint64_t triggerTime = reminder->GetTriggerTimeInMilli();
@@ -965,7 +972,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest> &
         if (!(*it)->IsNeedNotification()) {
             continue;
         }
-        ReminderDataManager::AsyncStartExtensionAbility((*it), CONNECT_EXTENSION_MAX_RETRY_TIMES);
+        extensionReminders.push_back((*it));
         if ((*it)->CheckExcludeDate()) {
             ANSR_LOGI("reminder[%{public}d] trigger time is in exclude date", (*it)->GetReminderId());
             continue;
@@ -1032,8 +1039,6 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
     const bool &isNeedToStartNext, const bool &isSysTimeChanged, const bool &needScheduleTimeout)
 {
-    ANSR_LOGD("Show the reminder(Play sound: %{public}d), %{public}s",
-        static_cast<int32_t>(isNeedToPlaySound), reminder->Dump().c_str());
     int32_t reminderId = reminder->GetReminderId();
     sptr<NotificationBundleOption> bundleOption = reminder->GetNotificationBundleOption();
     sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
@@ -1064,7 +1069,9 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    ErrCode errCode = advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
+    // Since Ans and reminder share a notificationRequest, there is a multi-threaded contention,
+    // so need to make a copy when calling the Ans interface
+    ErrCode errCode = PublishNotificationRequest(notificationRequest, bundleOption);
     if (errCode != ERR_OK) {
         reminder->OnShowFail();
         RemoveFromShowedReminders(reminder);
@@ -1148,7 +1155,9 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
     }
     // Set the notification SoundEnabled and VibrationEnabled by soltType
     advancedNotificationService_->SetRequestBySlotType(notificationRequest, bundleOption);
-    advancedNotificationService_->PublishPreparedNotification(notificationRequest, bundleOption);
+    // Since Ans and reminder share a notificationRequest, there is a multi-threaded contention,
+    // so need to make a copy when calling the Ans interface
+    PublishNotificationRequest(notificationRequest, bundleOption);
     StartRecentReminder();
 }
 
@@ -1830,15 +1839,18 @@ void ReminderDataManager::StopTimer(TimerType type)
 
 void ReminderDataManager::ResetStates(TimerType type)
 {
+    uint64_t timerId = 0;
     switch (type) {
         case TimerType::TRIGGER_TIMER: {
             ANSR_LOGD("ResetStates(activeReminderId, timerId(next triggerTime))");
+            timerId = timerId_;
             timerId_ = 0;
             activeReminderId_ = -1;
             break;
         }
         case TimerType::ALERTING_TIMER: {
             ANSR_LOGD("ResetStates(alertingReminderId, timeId(alerting time out))");
+            timerId = timerIdAlerting_;
             timerIdAlerting_ = 0;
             alertingReminderId_ = -1;
             break;
@@ -1847,6 +1859,14 @@ void ReminderDataManager::ResetStates(TimerType type)
             ANSR_LOGE("TimerType not support");
             break;
         }
+    }
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANSR_LOGE("Failed to destroy timer due to get TimeServiceClient is null.");
+        return;
+    }
+    if (timerId != 0) {
+        timer->DestroyTimer(timerId);
     }
 }
 
@@ -1892,8 +1912,6 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
         return;
     }
     CloseReminder(reminder, true);
-    UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
-    CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
     StartRecentReminder();
 
     auto wantInfo = reminder->GetWantAgentInfo();
@@ -1985,6 +2003,9 @@ void ReminderDataManager::OnLanguageChanged()
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            if ((*it)->IsExpired() || (*it)->GetTriggerTimeInMilli() == 0) {
+                continue;
+            }
             reminders[(*it)->GetUid()].push_back((*it));
         }
     }
@@ -2070,6 +2091,19 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
     if (EventFwk::CommonEventManager::PublishCommonEvent(eventData, info)) {
         ANSR_LOGI("notify reminder status change %{public}s", bundleName.c_str());
     }
+}
+
+ErrCode ReminderDataManager::PublishNotificationRequest(sptr<NotificationRequest>& request,
+    const sptr<NotificationBundleOption>& bundleOption)
+{
+    MessageParcel data;
+    data.WriteParcelable(request);
+    sptr<NotificationRequest> newRequest = data.ReadParcelable<NotificationRequest>();
+    if (newRequest == nullptr) {
+        ANSR_LOGE("NotificationRequest is nullptr");
+        return ERR_REMINDER_INVALID_PARAM;
+    }
+    return advancedNotificationService_->PublishPreparedNotification(newRequest, bundleOption);
 }
 }
 }

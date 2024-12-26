@@ -167,7 +167,7 @@ void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const E
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION) {
-        reminderDataManager_->CloseReminder(want, false);
+        reminderDataManager_->CloseReminder(want, false, false);
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_CLICK_ALERT) {
@@ -312,6 +312,7 @@ void ReminderEventManager::ReminderNotificationSubscriber::OnCanceled(
     const std::shared_ptr<Notification> &notification,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int deleteReason)
 {
+    // Note: Don't modify param notification
     if (deleteReason != NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE) {
         return;
     }

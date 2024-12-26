@@ -108,7 +108,7 @@ namespace OHOS {
         manager->RemoveReminderLocked(reminderId);
         manager->SetActiveReminder(reminder);
         manager->SetAlertingReminder(reminder);
-        manager->ShowActiveReminderExtendLocked(reminder);
+        manager->ShowActiveReminderExtendLocked(reminder, reminders);
 
         std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
         std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
