@@ -1163,6 +1163,15 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
 
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+
+    /**
+     * @brief Update notification timer by uid
+     *
+     * @param uid uid.
+     * @param isPaused if paused
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1431,6 +1440,7 @@ private:
     bool IsSystemUser(int32_t userId);
     ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
+    void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;

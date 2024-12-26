@@ -8188,5 +8188,27 @@ HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0500, Funct
     int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
     EXPECT_EQ(ERR_OK, result);
 }
+
+/*
+ * @tc.name: UpdateNotificationTimerByUid_0100
+ * @tc.desc: test UpdateNotificationTimerByUid function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, UpdateNotificationTimerByUid_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, UpdateNotificationTimerByUid_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    int32_t uid = 20099999;
+    bool isPaused = true;
+    int32_t result = proxy->UpdateNotificationTimerByUid(uid, isPaused);
+    EXPECT_EQ(ERR_OK, result);
+}
 }  // namespace Notification
 }  // namespace OHOS

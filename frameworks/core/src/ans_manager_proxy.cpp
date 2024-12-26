@@ -2262,5 +2262,34 @@ ErrCode AnsManagerProxy::RegisterSwingCallback(const sptr<IRemoteObject> &swingC
     return result;
 }
 #endif
+
+ErrCode AnsManagerProxy::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(uid)) {
+        ANS_LOGE("write uid failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteBool(isPaused)) {
+        ANS_LOGE("write isPaused failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::UPDATE_NOTIFICATION_TIMER, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

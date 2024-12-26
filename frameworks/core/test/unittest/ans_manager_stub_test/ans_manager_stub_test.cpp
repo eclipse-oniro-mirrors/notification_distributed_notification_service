@@ -5473,5 +5473,18 @@ HWTEST_F(AnsManagerStubTest, IsNeedSilentInDoNotDisturbMode01, Function | SmallT
     ErrCode result = ansManagerStub_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
+
+/**
+ * @tc.name: UpdateNotificationTimerByUid_01
+ * @tc.desc: Test UpdateNotificationTimerByUid return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, UpdateNotificationTimerByUid_01, Function | SmallTest | Level1)
+{
+    int32_t uid = 20099999;
+    bool isPaused = true;
+    ErrCode result = ansManagerStub_->UpdateNotificationTimerByUid(uid, isPaused);
+    EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
 }
 }

@@ -457,6 +457,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetDoNotDisturbProfile(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_NOTIFICATION_TIMER): {
+            result = HandleUpdateNotificationTimerByUid(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -2691,5 +2695,17 @@ ErrCode AnsManagerStub::HandleRegisterSwingCallback(MessageParcel &data, Message
     return result;
 }
 #endif
+
+ErrCode AnsManagerStub::HandleUpdateNotificationTimerByUid(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t uid = data.ReadInt32();
+    bool isPaused = data.ReadBool();
+    ErrCode result = UpdateNotificationTimerByUid(uid, isPaused);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleUpdateNotificationTimerByUid] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
 } // namespace Notification
 } // namespace OHOS

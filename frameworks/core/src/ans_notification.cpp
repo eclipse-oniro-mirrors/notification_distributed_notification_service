@@ -2043,5 +2043,15 @@ ErrCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, in
     return proxy->RegisterSwingCallback(swingCallBackStub_->AsObject());
 }
 #endif
+
+ErrCode AnsNotification::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UpdateNotificationTimerByUid fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->UpdateNotificationTimerByUid(uid, isPaused);
+}
 }  // namespace Notification
 }  // namespace OHOS

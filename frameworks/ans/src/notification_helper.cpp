@@ -592,5 +592,10 @@ ErrCode NotificationHelper::GetDoNotDisturbProfile(int32_t id, sptr<Notification
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile);
 }
+
+ErrCode NotificationHelper::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationTimerByUid(uid, isPaused);
+}
 }  // namespace Notification
 }  // namespace OHOS

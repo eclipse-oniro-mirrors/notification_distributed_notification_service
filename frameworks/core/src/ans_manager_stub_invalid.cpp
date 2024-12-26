@@ -671,5 +671,11 @@ ErrCode AnsManagerStub::RegisterSwingCallback(const sptr<IRemoteObject>& swingCa
     return ERR_INVALID_OPERATION;
 }
 #endif
+
+ErrCode AnsManagerStub::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    ANS_LOGE("UpdateNotificationTimerByUid called!");
+    return ERR_INVALID_OPERATION;
+}
 }  // namespace Notification
 }  // namespace OHOS
