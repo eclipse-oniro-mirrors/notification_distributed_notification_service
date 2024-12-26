@@ -286,6 +286,11 @@ public:
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
+    bool GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
+    bool IsDistributedEnabledEmptyForBundle(
+        const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+
 private:
     bool CheckRdbStore();
 
@@ -379,6 +384,10 @@ private:
         const std::string &findString, const int32_t &userId);
     bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
+    std::string GenerateSubscriberExistFlagKey(const std::string& deviceType, const int32_t userId) const;
+    void GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled);
+    bool isCachedSmartReminderEnableList_ = false;
+    std::vector<std::string> smartReminderEnableList_ = {};
 };
 } // namespace Notification
 } // namespace OHOS

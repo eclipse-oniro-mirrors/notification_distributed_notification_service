@@ -1150,6 +1150,7 @@ public:
 
     bool IsDisableNotification(const sptr<NotificationRequest> &request);
 
+    void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
 
 protected:
@@ -1422,6 +1423,7 @@ private:
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
+    void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
@@ -1453,6 +1455,8 @@ private:
     std::mutex delayNotificationMutext_;
     static std::mutex doNotDisturbMutex_;
     std::map<int32_t, std::string> doNotDisturbEnableRecord_;
+    bool isCachedAppAndDeviceRelationMap_ = false;
+    std::map<std::string, std::string> appAndDeviceRelationMap_;
 };
 
 /**

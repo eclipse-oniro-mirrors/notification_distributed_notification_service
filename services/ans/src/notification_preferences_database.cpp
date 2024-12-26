@@ -27,6 +27,7 @@
 #include "ipc_skeleton.h"
 #include "bundle_manager_helper.h"
 #include "notification_analytics_util.h"
+#include "notification_config_parse.h"
 #include "uri.h"
 namespace OHOS {
 namespace Notification {
@@ -233,6 +234,7 @@ const static std::string CLONE_BUNDLE = "bundle_";
 const static std::string CLONE_PROFILE = "profile_";
 const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
 constexpr int32_t ZERO_USER_ID = 0;
+const static std::string KEY_SUBSCRIBER_EXISTED_FLAG = "existFlag";
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
@@ -1988,7 +1990,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
-                enabled = false;
+                GetSmartReminderEnableFromCCM(deviceType, enabled);
                 break;
             }
             case NativeRdb::E_OK: {
@@ -2056,7 +2058,7 @@ bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string d
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
-                enabled = false;
+                GetSmartReminderEnableFromCCM(deviceType, enabled);
                 break;
             }
             case NativeRdb::E_OK: {
@@ -2412,6 +2414,111 @@ void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPre
         return;
     }
     info.AddDisableNotificationInfo(value);
+}
+
+bool NotificationPreferencesDatabase::IsDistributedEnabledEmptyForBundle(
+    const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("bundle name is empty.");
+        return true;
+    }
+
+    std::string key = GenerateBundleLablel(bundleInfo, deviceType);
+    bool result = true;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+            result = false;
+        }
+    });
+    return result;
+}
+
+void NotificationPreferencesDatabase::GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!isCachedSmartReminderEnableList_) {
+        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetSmartReminderEnableList(
+            smartReminderEnableList_)) {
+            ANS_LOGE("GetSmartReminderEnableList failed from json");
+            enabled = false;
+            return;
+        }
+        isCachedSmartReminderEnableList_ = true;
+    }
+
+    if (smartReminderEnableList_.empty()) {
+        ANS_LOGD("smartReminderEnableList_ is empty");
+        enabled = false;
+        return;
+    }
+
+    if (std::find(smartReminderEnableList_.begin(), smartReminderEnableList_.end(), deviceType) !=
+        smartReminderEnableList_.end()) {
+        enabled = true;
+    } else {
+        enabled = false;
+    }
+    ANS_LOGD("get %{public}s smartReminderEnable is %{public}d from json", deviceType.c_str(), enabled);
+}
+
+std::string NotificationPreferencesDatabase::GenerateSubscriberExistFlagKey(
+    const std::string& deviceType, const int32_t userId) const
+{
+    return std::string(KEY_SUBSCRIBER_EXISTED_FLAG)
+        .append(KEY_MIDDLE_LINE)
+        .append(deviceType)
+        .append(KEY_MIDDLE_LINE)
+        .append(std::to_string(userId));
+}
+
+bool NotificationPreferencesDatabase::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s, existFlag[%{public}d]", __FUNCTION__, deviceType.c_str(), existFlag);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateSubscriberExistFlagKey(deviceType, userId);
+    int32_t result = PutDataToDB(key, existFlag, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s, existFlag[%{public}d]", __FUNCTION__, deviceType.c_str(), existFlag);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateSubscriberExistFlagKey(deviceType, userId);
+    bool result = false;
+    existFlag = false;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                existFlag = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS
