@@ -1242,6 +1242,18 @@ public:
 
     void SetRemoveAllowed(bool isRemoveAllowed);
 
+    bool IsForceDistributed() const;
+
+    void SetForceDistributed(bool forceDistributed);
+
+    bool IsNotDistributed() const;
+
+    void SetNotDistributed(bool notDistributed);
+
+    bool IsSystemApp() const;
+
+    void SetIsSystemApp(bool isSystemApp);
+
     bool IsCommonLiveView() const;
 
     bool IsSystemLiveView() const;
@@ -1562,6 +1574,9 @@ private:
     bool isUpdateByOwnerAllowed_ {false};
     bool distributedCollaborate_ {false};
     bool updateOnly_ {false};
+    bool forceDistributed_ {false};
+    bool notDistributed_ {false};
+    bool isSystemApp_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};

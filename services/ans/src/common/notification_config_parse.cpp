@@ -348,5 +348,67 @@ std::unordered_set<std::string> NotificationConfigParse::GetCollaborativeDeleteT
 
     return collaborativeDeleteTypeSet;
 }
+
+void NotificationConfigParse::GetCollaborationFilter()
+{
+    nlohmann::json root;
+    std::string jsonPoint = "/";
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    jsonPoint.append("/");
+    jsonPoint.append(COLLABORATION_FILTER);
+    if (!GetConfigJson(jsonPoint, root)) {
+        ANS_LOGE("Failed to get jsonPoint CCM config file.");
+        return;
+    }
+
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
+        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(COLLABORATION_FILTER)) {
+        ANS_LOGE("Not found jsonKey collaborationFilter.");
+        return;
+    }
+    nlohmann::json collaborationFilter = root[CFG_KEY_NOTIFICATION_SERVICE][COLLABORATION_FILTER];
+    if (collaborationFilter.is_null() || collaborationFilter.empty()) {
+        ANS_LOGE("GetCollaborationFilter failed as invalid ccmCollaborationFilter json.");
+        return;
+    }
+    if (collaborationFilter.contains(COLLABORATION_FILTER_KEY_UID) &&
+        collaborationFilter[COLLABORATION_FILTER_KEY_UID].is_array()) {
+        for (const auto& item : collaborationFilter[COLLABORATION_FILTER_KEY_UID]) {
+            if (item.is_number_integer()) {
+                uidList_.push_back(item.get<int32_t>());
+            }
+        }
+    }
+
+    if (collaborationFilter.contains(COLLABORATION_FILTER_KEY_NAME) &&
+        collaborationFilter[COLLABORATION_FILTER_KEY_NAME].is_array()) {
+        for (const auto& item : collaborationFilter[COLLABORATION_FILTER_KEY_NAME]) {
+            if (item.is_string()) {
+                bundleNameList_.push_back(item.get<std::string>());
+            }
+        }
+    }
+}
+
+bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleName, int32_t uid) const
+{
+    if (uidList_.empty() && bundleNameList_.empty()) {
+        ANS_LOGW("UidList and bundleNameList empty.");
+        return false;
+    }
+
+    if (std::find(uidList_.begin(), uidList_.end(), uid) != uidList_.end()) {
+        ANS_LOGI("Uid <%{public}d> in CollaborationFilter.", uid);
+        return true;
+    }
+
+    if (std::find(bundleNameList_.begin(), bundleNameList_.end(), bundleName) != bundleNameList_.end()) {
+        ANS_LOGI("BundleName <%{public}s> in CollaborationFilter.", bundleName.c_str());
+        return true;
+    }
+
+    ANS_LOGI("Uid <%{public}d> and BundleName <%{public}s> not in CollaborationFilter.", uid, bundleName.c_str());
+    return false;
+}
 } // namespace Notification
 } // namespace OHOS

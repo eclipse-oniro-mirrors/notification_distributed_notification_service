@@ -30,6 +30,7 @@ namespace Notification {
 using namespace std;
 SmartReminderCenter::SmartReminderCenter()
 {
+    DelayedSingleton<NotificationConfigParse>::GetInstance()->GetCollaborationFilter();
     if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetCurrentSlotReminder(currentReminderMethods_)) {
         return;
     }
@@ -225,6 +226,24 @@ void SmartReminderCenter::ParseReminderFilterCode(
     }
 }
 
+bool SmartReminderCenter::IsCollaborationAllowed(const sptr<NotificationRequest>& request) const
+{
+    if (!request->IsSystemApp()) {
+        ANS_LOGI("IsSystemApp <%{public}d> allowed to collaborate.", request->IsSystemApp());
+        return true;
+    }
+    if (request->IsNotDistributed()) {
+        ANS_LOGI("IsNotDistributed <%{public}d> not allowed to collaborate", request->IsNotDistributed());
+        return false;
+    }
+    if (request->IsForceDistributed()) {
+        ANS_LOGI("IsForceDistributed <%{public}d> allowed to collaborate", request->IsForceDistributed());
+        return true;
+    }
+    return !DelayedSingleton<NotificationConfigParse>::GetInstance()->IsInCollaborationFilter(
+        request->GetOwnerBundleName(), request->GetCreatorUid());
+}
+
 void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest> &request) const
 {
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
@@ -234,6 +253,10 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     if (iter != currentReminderMethods_.end()) {
         // Only config file can set reminder open now. Otherwise, change iter->second to 11111
         (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = iter->second;
+    }
+    if (!IsCollaborationAllowed(request)) {
+        request->SetDeviceFlags(notificationFlagsOfDevices);
+        return;
     }
 
     set<string> validDevices;
