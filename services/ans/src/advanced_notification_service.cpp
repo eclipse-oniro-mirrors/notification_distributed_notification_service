@@ -1310,7 +1310,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
                 TriggerRemoveWantAgent(record->request);
             }
         }
-
+        CancelWantAgent(notification);
         notificationList_.remove(record);
         return ERR_OK;
     }
