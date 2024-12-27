@@ -59,6 +59,7 @@ public:
 
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
+    void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 public:
     std::weak_ptr<NotificationSubscriber> subscriber_;
 };

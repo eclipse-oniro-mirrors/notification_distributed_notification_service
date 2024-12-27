@@ -59,6 +59,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     subscriber->SetDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
     sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(userId_);
+    subscribeInfo->SetNeedNotifyApplication(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
         subscriberMap_.insert(std::make_pair(peerDevice.deviceId_, subscriber));
@@ -160,19 +161,22 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
     }
     std::function<void()> task = std::bind([peerDevice, notifications, this]() {
         BatchRemoveNotifticationBox batchRemoveBox;
-        std::vector<std::string> hasdCodes;
-        std::string hasdCode;
+        std::vector<std::string> notificationKeys;
         for (auto notification : notifications) {
             if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
                 continue;
             }
+            if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
+                !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+                continue;
+            }
             ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
-            hasdCodes.push_back(GetNotificationKey(notification));
+            notificationKeys.push_back(GetNotificationKey(notification));
         }
-        if (!hasdCodes.empty()) {
-            batchRemoveBox.SetNotificationHashCode(hasdCodes[0]);
+        if (!notificationKeys.empty()) {
+            batchRemoveBox.SetNotificationHashCode(notificationKeys[0]);
         }
-        batchRemoveBox.SetNotificationKeys(hasdCodes);
+        batchRemoveBox.SetNotificationKeys(notificationKeys);
 
         if (!batchRemoveBox.Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
@@ -194,6 +198,11 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
     std::function<void()> task = std::bind([peerDevice, notification, this]() {
         NotificationRemoveBox removeBox;
         if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            return;
+        }
+        if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
+            !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+            ANS_LOGE("notification not collaborative");
             return;
         }
         ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());

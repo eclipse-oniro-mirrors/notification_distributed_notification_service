@@ -125,7 +125,7 @@ void DistributedService::RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMe
     }
     boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hasdCode);
     int result = IN_PROCESS_CALL(NotificationHelper::RemoveNotification(
-        hasdCode, NotificationConstant::REMOVE_REASON_CROSS_DEVICE));
+        hasdCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans remove message %{public}d.", result);
 }
 
@@ -136,9 +136,9 @@ void DistributedService::RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxM
         ANS_LOGE("boxMessage is nullptr");
         return;
     }
-    boxMessage->GetVectorValue(NOTIFICATION_KEYS, hasdCodes);
+    boxMessage->GetVectorValue(BATCH_REMOVE_NOTIFICATIONS, hasdCodes);
     int result = IN_PROCESS_CALL(
-        NotificationHelper::RemoveNotifications(hasdCodes, NotificationConstant::REMOVE_REASON_CROSS_DEVICE));
+        NotificationHelper::RemoveNotifications(hasdCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans batch remove message %{public}d.", result);
 }
 }

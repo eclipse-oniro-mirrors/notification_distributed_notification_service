@@ -397,5 +397,28 @@ void AnsSubscriberProxy::OnBadgeEnabledChanged(const sptr<EnabledNotificationCal
         return;
     }
 }
+
+void AnsSubscriberProxy::OnApplicationInfoNeedChanged(const std::string& bundleName)
+{
+    MessageParcel data;
+    ANS_LOGE("OnApplicationInfoNeedChanged  AnsSubscriberProxy 1.");
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        ANS_LOGE("Write callback data failed.");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_APPLICATION_INFO_NEED_CHANGED, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact error code is: %{public}d.", result);
+        return;
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

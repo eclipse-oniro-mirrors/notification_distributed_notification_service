@@ -88,6 +88,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_profile.cpp",
     "${frameworks_module_ans_path}/src/notification_flags.cpp",
     "${frameworks_module_ans_path}/src/notification_helper.cpp",
+    "${frameworks_module_ans_path}/src/notification_icon_button.cpp",
     "${frameworks_module_ans_path}/src/notification_live_view_content.cpp",
     "${frameworks_module_ans_path}/src/notification_local_live_view_button.cpp",
     "${frameworks_module_ans_path}/src/notification_local_live_view_content.cpp",

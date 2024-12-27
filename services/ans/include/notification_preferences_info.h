@@ -323,6 +323,7 @@ public:
     void SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
     void AddDisableNotificationInfo(const std::string &value);
+    ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;

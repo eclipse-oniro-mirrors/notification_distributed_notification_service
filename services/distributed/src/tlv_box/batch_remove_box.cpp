@@ -37,7 +37,7 @@ bool BatchRemoveNotifticationBox::SetNotificationKeys(const std::vector<std::str
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_KEYS, keys));
+    return box_->PutValue(std::make_shared<TlvItem>(BATCH_REMOVE_NOTIFICATIONS, keys));
 }
 
 bool BatchRemoveNotifticationBox::SetNotificationHashCode(const std::string& hasdCode)

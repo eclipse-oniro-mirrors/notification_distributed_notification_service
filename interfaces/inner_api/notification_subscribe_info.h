@@ -123,28 +123,18 @@ public:
      * @return Returns the uid of subscriber.
      **/
     int32_t GetSubscriberUid() const;
-
+ 
     /**
-     * @brief Sets a single slot type as the filter criterion,
-     * which means to subscribe to notifications of this slot.
+     * @brief Adds subscriber slotTypes.
      *
-     * @param slotType Indicates the slot type.
+     * @param slotTypes Indicates the slotTypes of subscriber.
      **/
-    void AddSlotType(const NotificationConstant::SlotType slotType);
+    void SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes);
 
     /**
-     * @brief Sets multiple slot type as the filter criteria,
-     * which means to subscribe to notifications of these slotType.
+     * @brief Obtains the slotTypes of subscriber.
      *
-     * @param slotTypes Indicates the set of slot types.
-     **/
-    void AddSlotTypes(const std::vector<NotificationConstant::SlotType> &slotTypes);
-
-    /**
-     * @brief Obtains the slot types in the current NotificationSubscribeInfo object.
-     * The slot types can be set by calling AddSlotTypes.
-     *
-     * @return Returns the set of slot types.
+     * @return Returns the slotTypes of subscriber.
      **/
     std::vector<NotificationConstant::SlotType> GetSlotTypes() const;
 
@@ -162,6 +152,20 @@ public:
      **/
     int32_t GetFilterType() const;
 
+    /**
+     * @brief Obtains notify application change.
+     *
+     * @return Returns the result.
+     **/
+    bool GetNeedNotifyApplication() const;
+
+    /**
+     * @brief Obtains notify application change.
+     *
+     * @return Returns the result.
+     **/
+    void SetNeedNotifyApplication(bool isNeed);
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -170,8 +174,9 @@ private:
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};
-    std::vector<NotificationConstant::SlotType> slotTypes_;
     int32_t filterType_;
+    std::vector<NotificationConstant::SlotType> slotTypes_ {};
+    bool needNotifyApplicationChanged_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

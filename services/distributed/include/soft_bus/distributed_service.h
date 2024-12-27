@@ -24,7 +24,7 @@
 #include "request_box.h"
 #include "match_box.h"
 #include <functional>
-
+#include "bundle_icon_box.h"
 namespace OHOS {
 namespace Notification {
 
@@ -50,10 +50,20 @@ public:
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
     void DestoryService();
     void ReportDeviceStatus(std::string deviceId);
+    void ReportBundleIconList(const DistributedDeviceInfo peerDevice);
+    void UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
+        const DistributedDeviceInfo peerDevice);
+    void RequestBundlesIcon(const DistributedDeviceInfo peerDevice);
+    void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
+    void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
-
 private:
     int64_t GetCurrentTime();
+    void HandleBundleRemoved(const std::string& bundleName);
+    bool GetBundleResourceInfo(const std::string bundleName, std::string& icon);
+    void HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage);
+    void GenerateBundleIconSync(const DistributedDeviceInfo& device);
+    bool CheckPeerDevice(const BundleIconBox& boxMessage, DistributedDeviceInfo& device);
     void PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void HandleDeviceState(const std::shared_ptr<TlvBox>& boxMessage);
     void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
@@ -62,6 +72,7 @@ private:
     void RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage);
     std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
+    std::set<std::string> bundleIconCache_;
     int32_t userId_ = DEFAULT_USER_ID;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;

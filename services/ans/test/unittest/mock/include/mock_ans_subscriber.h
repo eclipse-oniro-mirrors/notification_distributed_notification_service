@@ -55,6 +55,8 @@ public:
     void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override {};
 
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override {};
+
+    void OnApplicationInfoNeedChanged(const std::string& bundleName) override {};
 };
 } // namespace Notification
 } // namespace OHOS

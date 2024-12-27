@@ -40,6 +40,7 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
+    void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
     void SetLocalDevice(DistributedDeviceInfo localDevice);
     void SetPeerDevice(DistributedDeviceInfo localDevice);
     bool CheckCollaborativeRemoveType(const NotificationConstant::SlotType &slotType);

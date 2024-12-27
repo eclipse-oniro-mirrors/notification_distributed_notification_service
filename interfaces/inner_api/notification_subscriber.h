@@ -114,6 +114,10 @@ public:
         return false;
     }
 
+    virtual void OnApplicationInfoNeedChanged(const std::string& bundleName)
+    {
+    }
+
     void SetDeviceType(const std::string &deviceType);
 
     std::string GetDeviceType() const;
@@ -169,6 +173,8 @@ private:
         void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
         void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+
+        void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 
         sptr<AnsManagerInterface> GetAnsManagerProxy();
 

@@ -302,6 +302,7 @@ napi_value Common::GetNotificationSubscriberInfo(
     size_t strLen = 0;
     bool hasProperty = false;
     bool isArray = false;
+    bool hasSlotTypes = false;
     napi_valuetype valuetype = napi_undefined;
 
     // bundleNames?: Array<string>
@@ -368,39 +369,6 @@ napi_value Common::GetNotificationSubscriberInfo(
         subscriberInfo.deviceType = str;
         subscriberInfo.hasSubscribeInfo = true;
     }
-    // slotTypes?: Array<SlotType>
-    NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasProperty));
-    if (hasProperty) {
-        napi_value nSlotTypes = nullptr;
-        napi_get_named_property(env, value, "slotTypes", &nSlotTypes);
-        napi_is_array(env, nSlotTypes, &isArray);
-        if (!isArray) {
-            ANS_LOGE("Property slotTypes is expected to be an array.");
-            return nullptr;
-        }
-        napi_get_array_length(env, nSlotTypes, &length);
-        if (length == 0) {
-            ANS_LOGE("The array is empty.");
-            return nullptr;
-        }
-        for (uint32_t i = 0; i < length; ++i) {
-            napi_value nSlotType = nullptr;
-            napi_get_element(env, nSlotTypes, i, &nSlotType);
-            NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
-            if (valuetype != napi_number) {
-                ANS_LOGE("Wrong argument type. number expected.");
-                return nullptr;
-            }
-            int32_t slotType;
-            NAPI_CALL(env, napi_get_value_int32(env, nSlotType, &slotType));
-            NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-            if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
-                return nullptr;
-            }
-            subscriberInfo.slotTypes.emplace_back(outType);
-            subscriberInfo.hasSubscribeInfo = true;
-        }
-    }
 
     // filterType?: number
     NAPI_CALL(env, napi_has_named_property(env, value, "filterType", &hasProperty));
@@ -414,6 +382,40 @@ napi_value Common::GetNotificationSubscriberInfo(
         }
         NAPI_CALL(env, napi_get_value_int32(env, nFilterType, &subscriberInfo.filterType));
         subscriberInfo.hasSubscribeInfo = true;
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasSlotTypes));
+    if (hasSlotTypes) {
+        napi_value nSlotTypes = nullptr;
+        napi_get_named_property(env, value, "slotTypes", &nSlotTypes);
+        napi_is_array(env, nSlotTypes, &isArray);
+        if (!isArray) {
+            ANS_LOGE("Property slotTypes is expected to be an array.");
+            return nullptr;
+        }
+        napi_get_array_length(env, nSlotTypes, &length);
+        if (length == 0) {
+            ANS_LOGE("The array is empty.");
+            return nullptr;
+        }
+
+        for (uint32_t i = 0; i < length; ++i) {
+            napi_value nSlotType = nullptr;
+            int32_t slotType = 0;
+            napi_get_element(env, nSlotTypes, i, &nSlotType);
+            NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
+            if (valuetype != napi_number) {
+                ANS_LOGE("Wrong argument type. Number expected.");
+                return nullptr;
+            }
+            napi_get_value_int32(env, nSlotType, &slotType);
+            NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+            if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+                return nullptr;
+            }
+            subscriberInfo.slotTypes.emplace_back(outType);
+            subscriberInfo.hasSubscribeInfo = true;
+        }
     }
 
     return NapiGetNull(env);

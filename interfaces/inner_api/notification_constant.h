@@ -305,7 +305,7 @@ public:
     /**
      * Indicates that a notification is deleted because collaborative delete.
      */
-    static const int32_t REMOVE_REASON_CROSS_DEVICE = 32;
+    static const int32_t DISTRIBUTED_COLLABORATIVE_DELETE = 32;
 
     /**
      * Indicates that a notification is deleted for other reasons.

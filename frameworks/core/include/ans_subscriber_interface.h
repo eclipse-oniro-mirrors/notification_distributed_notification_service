@@ -106,6 +106,8 @@ public:
      * @param callbackData Indicates the EnabledNotificationCallbackData object.
      */
     virtual void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) = 0;
+
+    virtual void OnApplicationInfoNeedChanged(const std::string& bundleName) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS
