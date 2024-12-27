@@ -174,7 +174,7 @@ private:
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};
-    int32_t filterType_;
+    int32_t filterType_ {0};
     std::vector<NotificationConstant::SlotType> slotTypes_ {};
     bool needNotifyApplicationChanged_ = false;
 };

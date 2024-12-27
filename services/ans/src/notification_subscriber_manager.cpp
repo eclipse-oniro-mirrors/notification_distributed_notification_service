@@ -49,6 +49,8 @@ struct NotificationSubscriberManager::SubscriberRecord {
     std::set<NotificationConstant::SlotType> slotTypes {};
 };
 
+const uint32_t FILTETYPE_IM = 1 << 0;
+
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
     ANS_LOGI("constructor");
@@ -608,7 +610,16 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
 bool NotificationSubscriberManager::ConsumeRecordFilter(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
+    NotificationRequest request = notification->GetNotificationRequest();
     // filterType
+    int32_t res = record->filterType & FILTETYPE_IM;
+    ANS_LOGI("filterType = %{public}d res = %{public}d", record->filterType, res);
+    if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == request.GetSlotType() &&
+        ((record->filterType & FILTETYPE_IM) > 0)) {
+        ANS_LOGI("ConsumeRecordFilter-filterType");
+        return false;
+    }
+    
     return true;
 }
 
