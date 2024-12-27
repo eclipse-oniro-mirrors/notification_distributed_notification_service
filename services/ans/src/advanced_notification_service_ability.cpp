@@ -95,11 +95,13 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
         }
         EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
     } else if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        ANS_LOGW("BUNDLE_MGR_SERVICE_SYS_ABILITY_ID");
         if (isDatashaReready_) {
             return;
         }
         auto notificationService = AdvancedNotificationService::GetInstance();
         if (notificationService == nullptr) {
+            ANS_LOGW("notification service is not initial.");
             return;
         }
         notificationService->ResetDistributedEnabled();

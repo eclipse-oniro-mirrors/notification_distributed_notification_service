@@ -1777,6 +1777,7 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Noti
     int64_t deleteTimePoint, int32_t reason)
 {
     ANS_LOGD("Enter");
+    
     wptr<AdvancedNotificationService> wThis = this;
     auto triggerFunc = [wThis, record, reason, deleteTimePoint] {
         sptr<AdvancedNotificationService> sThis = wThis.promote();
@@ -2040,11 +2041,6 @@ ErrCode AdvancedNotificationService::OnRecoverLiveView(
     const std::vector<std::string> &keys)
 {
     ANS_LOGD("enter");
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue is nullptr.");
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     std::vector<sptr<Notification>> notifications;
     int32_t removeReason = NotificationConstant::RECOVER_LIVE_VIEW_DELETE;

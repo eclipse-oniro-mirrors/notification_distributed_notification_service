@@ -15,6 +15,7 @@
 
 #include "subscribe.h"
 #include "ans_inner_errors.h"
+#include "inner_event.h"
 #include <mutex>
 #include <uv.h>
 
@@ -22,6 +23,7 @@ namespace OHOS {
 namespace NotificationNapi {
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
+
 const std::string CONSUME = "onConsume";
 const std::string CANCEL = "onCancel";
 const std::string UPDATE = "onUpdate";
@@ -1360,6 +1362,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<Subsc
     }
     return false;
 }
+
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback)
 {

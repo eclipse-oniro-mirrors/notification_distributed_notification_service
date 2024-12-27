@@ -18,8 +18,8 @@
 #include "notification_config_parse.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_slot.h"
 #include "notification_trust_list.h"
+#include "notification_slot.h"
 #include "file_utils.h"
 
 namespace OHOS {
