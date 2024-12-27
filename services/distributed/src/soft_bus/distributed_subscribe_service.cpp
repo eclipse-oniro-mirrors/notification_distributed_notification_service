@@ -23,7 +23,7 @@
 #include "notification_subscribe_info.h"
 #include "distributed_timer_service.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
-#include "distributed_preferences.h"
+#include "distributed_preference.h"
 #include "batch_remove_box.h"
 #include "remove_box.h"
 namespace OHOS {
@@ -145,7 +145,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             ANS_LOGW("Dans OnConsumed serialize failed.");
             return;
         }
-        DistributedPreferences::GetInstance()->AddCollaborativeNotification(request->GetKey());
+        DistributedPreferences::GetInstance().AddCollaborativeNotification(request->GetKey());
         DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
             TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
     });
@@ -167,7 +167,7 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
                 continue;
             }
             if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
-                !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+                !DistributedPreferences::GetInstance().CheckCollaborativeNotification(notification->GetKey())) {
                 continue;
             }
             ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
@@ -201,7 +201,7 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
             return;
         }
         if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
-            !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+            !DistributedPreferences::GetInstance().CheckCollaborativeNotification(notification->GetKey())) {
             ANS_LOGE("notification not collaborative");
             return;
         }

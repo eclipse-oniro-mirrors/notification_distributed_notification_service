@@ -90,22 +90,6 @@ public:
     ErrCode SetSyncEnabledWithoutApp(const int32_t userId, const bool enabled);
     ErrCode GetSyncEnabledWithoutApp(const int32_t userId, bool &enabled);
 
-    /**
-     * @brief Add notification for participating in collaboration.
-     *
-     * @param notificationKey Notification key value.
-     * @return Returns add  notification result.
-     */
-    ErrCode AddCollaborativeNotification(const std::string &notificationKey);
-
-    /**
-     * @brief Check if the notification has participated in the collaboration and delete it.
-     *
-     * @param notificationKey Notification key value.
-     * @return Return whether if the notification has participated in collaboration result.
-     */
-    bool CheckCollaborativeNotification(const std::string &notificationKey);
-
 private:
     bool InitDistributedAllInfo();
     void GetDistributedMainKey(std::string &key);
