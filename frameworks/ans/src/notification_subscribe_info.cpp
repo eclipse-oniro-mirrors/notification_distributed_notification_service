@@ -91,13 +91,13 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write userId_");
         return false;
     }
-    // write slotTypes_
-    if (!parcel.WriteUint64(slotTypes_.size())) {
-        ANS_LOGE("Failed to write the size of slotTypes");
+     //write slotTypes_
+    if (!parcel.WriteInt32(slotTypes_.size())) {
+        ANS_LOGE("Failed to write slotTypes_ size.");
         return false;
     }
-    for (auto it = slotTypes_.begin(); it != slotTypes_.end(); ++it) {
-        if (!parcel.WriteInt32(static_cast<int32_t>(*it))) {
+    for (auto slotType : slotTypes_) {
+        if (!parcel.WriteInt32(static_cast<int32_t>(slotType))) {
             ANS_LOGE("Failed to write slotType");
             return false;
         }
@@ -144,18 +144,20 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Can't read userId_");
         return false;
     }
-    // read slotTypes_
-    auto vsize = parcel.ReadUint64();
-    for (uint64_t it = 0; it < vsize; ++it) {
-        int32_t slotTypeValue = parcel.ReadInt32();
-        if (slotTypeValue < 0 ||
-            slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-            ANS_LOGE("Invalid slot type value :%{public}d. It should be in [0 , %{public}d).",
-                slotTypeValue, static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE));
+    //read slotTypes_
+    int32_t size = 0;
+    if (!parcel.ReadInt32(size)) {
+        ANS_LOGE("read slotType_ size failed.");
+        return false;
+    }
+    for (int32_t index = 0; index < size; index++) {
+        int32_t slotType = -1;
+        if (!parcel.ReadInt32(slotType)) {
+            ANS_LOGE("read Parcelable slotType failed.");
             return false;
         }
-        slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotTypeValue));
-    }
+        slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
+        }
     // read filterType_
     if (!parcel.ReadInt32(filterType_)) {
         ANS_LOGE("Can't read filterType_");
@@ -199,14 +201,9 @@ int32_t NotificationSubscribeInfo::GetSubscriberUid() const
     return subscriberUid_;
 }
 
-void NotificationSubscribeInfo::AddSlotType(const NotificationConstant::SlotType slotType)
+void NotificationSubscribeInfo::SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes)
 {
-    slotTypes_.push_back(slotType);
-}
-
-void NotificationSubscribeInfo::AddSlotTypes(const std::vector<NotificationConstant::SlotType> &slotTypes)
-{
-    slotTypes_.insert(slotTypes_.end(), slotTypes.begin(), slotTypes.end());
+    slotTypes_ = slotTypes;
 }
 
 std::vector<NotificationConstant::SlotType> NotificationSubscribeInfo::GetSlotTypes() const
