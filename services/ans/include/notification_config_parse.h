@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <singleton.h>
+#include <unordered_set>
 
 #ifdef CONFIG_POLICY_ENABLE
 #include "config_policy_utils.h"
@@ -50,6 +51,7 @@ public:
     bool GetSmartReminderEnableList(std::vector<std::string>& deviceTypes);
     bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
     bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
+    std::unordered_set<std::string> GetCollaborativeDeleteType() const;
 
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
@@ -74,6 +76,7 @@ public:
     # else
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "system/etc/notification/notification_config.json";
     #endif
+    constexpr static const char* CFG_KEY_COLLABORATIVE_DELETE_TYPES = "collaborativeDeleteTypes";
 };
 } // namespace Notification
 } // namespace OHOS

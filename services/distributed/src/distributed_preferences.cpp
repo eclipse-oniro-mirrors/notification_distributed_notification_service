@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,6 +270,18 @@ ErrCode DistributedPreferences::GetSyncEnabledWithoutApp(const int32_t userId, b
 {
     return preferencesInfo_ == nullptr ?
         ERR_ANS_DISTRIBUTED_OPERATION_FAILED : preferencesInfo_->GetSyncEnabledWithoutApp(userId, enabled);
+}
+
+ErrCode DistributedPreferences::AddCollaborativeNotification(const std::string &notificationKey)
+{
+    return preferencesInfo_ == nullptr ?
+        ERR_ANS_DISTRIBUTED_OPERATION_FAILED : preferencesInfo_->AddCollaborativeNotification(notificationKey);
+}
+
+bool DistributedPreferences::CheckCollaborativeNotification(const std::string &notificationKey)
+{
+    return preferencesInfo_ == nullptr ?
+        false : preferencesInfo_->CheckCollaborativeNotification(notificationKey);
 }
 }  // namespace Notification
 }  // namespace OHOS

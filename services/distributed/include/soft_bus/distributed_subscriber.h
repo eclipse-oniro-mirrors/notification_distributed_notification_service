@@ -43,6 +43,8 @@ public:
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
     void SetLocalDevice(DistributedDeviceInfo localDevice);
     void SetPeerDevice(DistributedDeviceInfo localDevice);
+    bool CheckCollaborativeRemoveType(const NotificationConstant::SlotType &slotType);
+    bool CheckNeedCollaboration(const std::shared_ptr<Notification> &notification);
 private:
     DistributedDeviceInfo localDevice_;
     DistributedDeviceInfo peerDevice_;

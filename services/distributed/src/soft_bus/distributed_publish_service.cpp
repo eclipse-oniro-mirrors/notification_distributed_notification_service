@@ -116,5 +116,30 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
     ANS_LOGI("Dans publish message %{public}s %{public}d.", request->Dump().c_str(), result);
 }
 
+void DistributedService::RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    std::string hasdCode;
+    if (boxMessage == nullptr) {
+        ANS_LOGE("boxMessage is nullptr");
+        return;
+    }
+    boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hasdCode);
+    int result = IN_PROCESS_CALL(NotificationHelper::RemoveNotification(
+        hasdCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+    ANS_LOGI("dans remove message %{public}d.", result);
+}
+
+void DistributedService::RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    std::vector<std::string> hasdCodes;
+    if (boxMessage == nullptr) {
+        ANS_LOGE("boxMessage is nullptr");
+        return;
+    }
+    boxMessage->GetVectorValue(BATCH_REMOVE_NOTIFICATIONS, hasdCodes);
+    int result = IN_PROCESS_CALL(
+        NotificationHelper::RemoveNotifications(hasdCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+    ANS_LOGI("dans batch remove message %{public}d.", result);
+}
 }
 }

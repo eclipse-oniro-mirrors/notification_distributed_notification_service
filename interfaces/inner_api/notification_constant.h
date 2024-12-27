@@ -303,6 +303,11 @@ public:
     static const int32_t DISABLE_NOTIFICATION_FEATURE_REASON_DELETE = 31;
 
     /**
+     * Indicates that a notification is deleted because collaborative delete.
+     */
+    static const int32_t DISTRIBUTED_COLLABORATIVE_DELETE = 32;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;

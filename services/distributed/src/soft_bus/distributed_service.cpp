@@ -169,6 +169,12 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
             case NotificationEventType::NOTIFICATION_MATCH_SYNC:
                 HandleMatchSync(box);
                 break;
+            case NotificationEventType::REMOVE_NOTIFICATION:
+                RemoveNotifictaion(box);
+                break;
+            case NotificationEventType::REMOVE_ALL_NOTIFICATIONS:
+                RemoveNotifictaions(box);
+                break;
             case NotificationEventType::BUNDLE_ICON_SYNC:
                 HandleBundleIconSync(box);
                 break;

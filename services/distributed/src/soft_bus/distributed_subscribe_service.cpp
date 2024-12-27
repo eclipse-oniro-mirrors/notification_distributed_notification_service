@@ -23,8 +23,13 @@
 #include "notification_subscribe_info.h"
 #include "distributed_timer_service.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
+#include "distributed_preferences.h"
+#include "batch_remove_box.h"
+#include "remove_box.h"
 namespace OHOS {
 namespace Notification {
+
+const std::string DISTRIBUTED_LABEL = "ans_distributed";
 
 std::string SubscribeTransDeviceType(uint16_t deviceType_)
 {
@@ -140,11 +145,90 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             ANS_LOGW("Dans OnConsumed serialize failed.");
             return;
         }
+        DistributedPreferences::GetInstance()->AddCollaborativeNotification(request->GetKey());
         DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
             TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
     });
     serviceQueue_->submit(task);
 }
 
+void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>& notifications,
+    const DistributedDeviceInfo& peerDevice)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("check handler is null.");
+        return;
+    }
+    std::function<void()> task = std::bind([peerDevice, notifications, this]() {
+        BatchRemoveNotifticationBox batchRemoveBox;
+        std::vector<std::string> notificationKeys;
+        for (auto notification : notifications) {
+            if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+                continue;
+            }
+            if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
+                !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+                continue;
+            }
+            ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
+            notificationKeys.push_back(GetNotificationKey(notification));
+        }
+        if (!notificationKeys.empty()) {
+            batchRemoveBox.SetNotificationHashCode(notificationKeys[0]);
+        }
+        batchRemoveBox.SetNotificationKeys(notificationKeys);
+
+        if (!batchRemoveBox.Serialize()) {
+            ANS_LOGW("dans OnCanceled serialize failed");
+            return;
+        }
+        DistributedClient::GetInstance().SendMessage(batchRemoveBox.GetByteBuffer(), batchRemoveBox.GetByteLength(),
+            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, peerDevice.deviceType_);
+    });
+    serviceQueue_->submit(task);
+}
+
+void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notification,
+    const DistributedDeviceInfo& peerDevice)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("check handler is null");
+        return;
+    }
+    std::function<void()> task = std::bind([peerDevice, notification, this]() {
+        NotificationRemoveBox removeBox;
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            return;
+        }
+        if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
+            !DistributedPreferences::GetInstance()->CheckCollaborativeNotification(notification->GetKey())) {
+            ANS_LOGE("notification not collaborative");
+            return;
+        }
+        ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());
+        removeBox.SetNotificationHashCode(GetNotificationKey(notification));
+        if (!removeBox.Serialize()) {
+            ANS_LOGW("dans OnCanceled serialize failed");
+            return;
+        }
+        DistributedClient::GetInstance().SendMessage(removeBox.GetByteBuffer(), removeBox.GetByteLength(),
+            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, peerDevice.deviceType_);
+    });
+    serviceQueue_->submit(task);
+}
+
+std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notification>& notification)
+{
+    std::string notificationKey = notification->GetKey();
+    if (notification->GetNotificationRequestPoint()->GetDistributedCollaborate()) {
+        size_t pos = notificationKey.find(DISTRIBUTED_LABEL);
+        if (pos != std::string::npos) {
+            notificationKey.erase(pos, DISTRIBUTED_LABEL.length());
+        }
+    } else {
+        notificationKey = DISTRIBUTED_LABEL + notificationKey;
+    }
+    return notificationKey;
+}
 }
 }
