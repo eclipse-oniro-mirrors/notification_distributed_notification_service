@@ -216,19 +216,6 @@ bool NotificationCapsule::Marshalling(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteInt32(time_)) {
-        ANS_LOGE("Write time_ fail.");
-        return false;
-    }
-
-    parcel.WriteInt32(static_cast<int>(capsuleButton_.size()));
-    for (const auto& button : capsuleButton_) {
-        if (!parcel.WriteParcelable(&button)) {
-            ANS_LOGE("Failed to write card button");
-            return false;
-        }
-    }
-
     return true;
 }
 
