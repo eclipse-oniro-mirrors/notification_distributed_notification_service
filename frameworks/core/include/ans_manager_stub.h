@@ -968,7 +968,7 @@ public:
 #endif
 
     /**
-     * @brief Update Notification Timer by uid
+     * @brief Update Notification Timer by uid.
      *
      * @param uid uid.
      * @return Returns Update result.

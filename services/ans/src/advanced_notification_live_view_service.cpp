@@ -81,11 +81,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 continue;
             }
 
-            if (FlowControl(record) != ERR_OK) {
-                ANS_LOGE("Flow control failed.");
-                continue;
-            }
-
             // Turn off ringtone and vibration during recovery process
             auto notificationFlags = record->request->GetFlags();
             notificationFlags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
@@ -364,6 +359,10 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
                 ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error");
                 return static_cast<int>(errorCode);
             }
+        }
+        if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
+            ANS_LOGE("Invalid json");
+            continue;
         }
         auto jsonObject = nlohmann::json::parse(decryptValue);
         auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
@@ -719,6 +718,8 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         }
         StartFinishTimerForUpdate(record, process);
         timerId = record->notification->GetFinishTimer();
+        ANS_LOGI("TimerForUpdate,oldTimeId:%{public}d,newTimeId:%{public}d",
+            (int)(oldRecord->notification->GetFinishTimer()), (int)timerId);
     }
     record->notification = new (std::nothrow) Notification(record->request);
     if (record->notification == nullptr) {

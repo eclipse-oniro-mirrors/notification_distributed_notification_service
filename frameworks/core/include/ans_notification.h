@@ -1205,17 +1205,17 @@ public:
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
 
     /**
+     * @brief Ans service died, OnRemoteDied called.
+     */
+    void OnServiceDied();
+
+    /**
      * @brief Update Notification Timer by uid
      *
      * @param uid uid.
      * @return Returns Update result.
      */
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
-
-    /**
-     * @brief Ans service died, OnRemoteDied called.
-     */
-    void OnServiceDied();
 private:
     /**
      * @brief Gets Ans Manager proxy.

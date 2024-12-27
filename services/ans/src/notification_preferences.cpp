@@ -321,6 +321,14 @@ ErrCode NotificationPreferences::GetNotificationSlotFlagsForBundle(
     return GetBundleProperty(bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
 }
 
+bool NotificationPreferences::IsNotificationSlotFlagsExists(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return false;
+    }
+    return preferncesDB_->IsNotificationSlotFlagsExists(bundleOption);
+}
 
 ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
     const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags)
@@ -572,15 +580,6 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     }
     preferencesInfo_ = preferencesInfo;
     return ERR_OK;
-}
-
-bool NotificationPreferences::IsNotificationSlotFlagsExists(
-    const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return false;
-    }
-    return preferncesDB_->IsNotificationSlotFlagsExists(bundleOption);
 }
 
 bool NotificationPreferences::GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,

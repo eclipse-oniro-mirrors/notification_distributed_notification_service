@@ -64,11 +64,11 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want 
     int32_t appIndex = want.GetIntParam("appIndex", -1);
     int32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-    bundleOption->SetAppIndex(appIndex);
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption.");
         return nullptr;
     }
+    bundleOption->SetAppIndex(appIndex);
     return bundleOption;
 }
 
@@ -79,11 +79,11 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOptionDataCleared(A
     int32_t appIndex = want.GetIntParam("appIndex", -1);
     int32_t uid = want.GetIntParam("ohos.aafwk.param.targetUid", -1);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-    bundleOption->SetAppIndex(appIndex);
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption.");
         return nullptr;
     }
+    bundleOption->SetAppIndex(appIndex);
     return bundleOption;
 }
 

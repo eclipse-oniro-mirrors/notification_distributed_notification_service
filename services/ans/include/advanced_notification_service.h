@@ -1149,8 +1149,6 @@ public:
      */
     bool AllowUseReminder(const std::string& bundleName);
 
-    void ResetDistributedEnabled();
-
     /**
      * @brief Get do not disturb profile by id.
      *
@@ -1163,6 +1161,8 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
 
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+
+    void ResetDistributedEnabled();
 
     /**
      * @brief Update notification timer by uid
@@ -1436,10 +1436,11 @@ private:
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
-    ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     bool IsSystemUser(int32_t userId);
     ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
     ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
+    
+    ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
 private:
     static sptr<AdvancedNotificationService> instance_;

@@ -313,20 +313,6 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     return result;
 }
 
-bool NotificationPreferencesDatabase::IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return false;
-    }
-    std::string bundleKey = bundleOption->GetBundleName().append(std::to_string(bundleOption->GetUid()));
-    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
-    std::string value;
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    int32_t result = rdbDataManager_->QueryData(key, value, userId);
-    return  (result == NativeRdb::E_OK) || (!value.empty());
-}
-
 bool NotificationPreferencesDatabase::PutShowBadge(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enable)
 {
@@ -447,6 +433,20 @@ bool NotificationPreferencesDatabase::PutHasPoppedDialog(
     int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped,
         bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return false;
+    }
+    std::string bundleKey = bundleOption->GetBundleName().append(std::to_string(bundleOption->GetUid()));
+    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
+    std::string value;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    int32_t result = rdbDataManager_->QueryData(key, value, userId);
+    return  (result == NativeRdb::E_OK) || (!value.empty());
 }
 
 bool NotificationPreferencesDatabase::PutDoNotDisturbDate(
@@ -1221,7 +1221,7 @@ int32_t NotificationPreferencesDatabase::StringToInt(const std::string &str) con
 {
     int32_t value = 0;
     if (!str.empty()) {
-        value = stoi(str, nullptr);
+        value = atoi(str.c_str());
     }
     return value;
 }
@@ -1230,7 +1230,7 @@ int64_t NotificationPreferencesDatabase::StringToInt64(const std::string &str) c
 {
     int64_t value = 0;
     if (!str.empty()) {
-        value = stoll(str, nullptr);
+        value = atoll(str.c_str());
     }
     return value;
 }
