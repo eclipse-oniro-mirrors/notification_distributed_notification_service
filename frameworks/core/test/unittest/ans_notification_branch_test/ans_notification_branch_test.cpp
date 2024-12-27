@@ -275,6 +275,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetAllDistribuedEnabledBundles(const std::string& deviceType,
+        std::vector<NotificationBundleOption> &bundleOption) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNatives) override
     {

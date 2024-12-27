@@ -47,10 +47,14 @@ public:
     bool IsBannerEnabled(const std::string bundleName) const;
     bool IsReminderEnabled(const std::string& bundleName) const;
     void GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold);
+    bool GetSmartReminderEnableList(std::vector<std::string>& deviceTypes);
+    bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
+    bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
 
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
+    std::mutex mutex_;
 
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
@@ -62,6 +66,9 @@ public:
     constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND = "MaxUpdateNumPerSecond";
     constexpr static const char* CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP = "MaxCreateNumPerSecondPerApp";
     constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP = "MaxUpdateNumPerSecondPerApp";
+    constexpr static const char* CFG_KEY_SMART_REMINDER_ENABLE_LIST = "smartReminderEnableList";
+    constexpr static const char* CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS = "mirrorNotificationEnabledStatus";
+    constexpr static const char* CFG_KEY_APP_AND_DEVICE_RELATION_MAP = "appAndDeviceRelationMap";
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else

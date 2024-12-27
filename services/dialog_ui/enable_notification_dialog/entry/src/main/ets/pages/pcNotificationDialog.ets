@@ -280,7 +280,7 @@ struct PermissionDialog {
   
   updateSubWindowSize(): void {
     try {
-      this.dialog?.extensionWindow.on('windowRectChange', (data):void => {
+      this.dialog?.extensionWindow.on('rectChange', uiextension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
         let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
         console.info(TAG, `windowRectChange event, size = ${windowRect?.left}-${windowRect?.top}-${windowRect?.width}-${windowRect?.height}`);
         this.dialog?.subWindow?.moveWindowTo(windowRect?.left, windowRect?.top);

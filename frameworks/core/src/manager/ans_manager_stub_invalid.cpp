@@ -612,6 +612,19 @@ ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOpt
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("AnsManagerStub::GetAllLiveViewEnabledBundles called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("AnsManagerStub::GetAllDistribuedEnabledBundles called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
 {
     ANS_LOGE("SetTargetDeviceStatus called!");

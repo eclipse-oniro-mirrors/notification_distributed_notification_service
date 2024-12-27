@@ -44,6 +44,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     int32_t userId {SUBSCRIBE_USER_INIT};
     std::string deviceType {CURRENT_DEVICE_TYPE};
     int32_t subscriberUid {DEFAULT_UID};
+    bool needNotifyApplicationChanged = false;
     int32_t filterType {0};
     std::set<NotificationConstant::SlotType> slotTypes {};
 };
@@ -166,6 +167,31 @@ void NotificationSubscriberManager::NotifyConsumed(
         std::bind(&NotificationSubscriberManager::NotifyConsumedInner, this, notification, notificationMap);
 
     notificationSubQueue_->submit(NotifyConsumedFunc);
+}
+
+void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::string& bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (notificationSubQueue_ == nullptr || bundleName.empty()) {
+        ANS_LOGE("queue is nullptr");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
+        std::bind(&NotificationSubscriberManager::NotifyApplicationInfochangedInner, this, bundleName);
+
+    notificationSubQueue_->submit(NotifyConsumedFunc);
+}
+
+
+void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std::string& bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGI("NotifyApplicationInfochangedInner %{public}s", bundleName.c_str());
+    for (auto record : subscriberRecordList_) {
+        if (record->needNotifyApplicationChanged) {
+            record->subscriber->OnApplicationInfoNeedChanged(bundleName);
+        }
+    }
 }
 
 void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<Notification>> &notifications,
@@ -357,6 +383,7 @@ void NotificationSubscriberManager::AddRecordInfo(
         }
         record->subscriberUid = subscribeInfo->GetSubscriberUid();
         record->filterType = subscribeInfo->GetFilterType();
+        record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -405,6 +432,11 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
         onSubscriberAddCallback_(record);
     }
 
+    if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_WEARABLE ||
+        subscribeInfo->GetDeviceType() == DEVICE_TYPE_HEADSET) {
+        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(
+            subscribeInfo->GetDeviceType(), true);
+    }
     return ERR_OK;
 }
 

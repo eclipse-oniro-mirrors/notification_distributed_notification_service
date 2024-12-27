@@ -23,6 +23,9 @@
 #include "dm_device_info.h"
 #include "match_box.h"
 #include "distributed_timer_service.h"
+#include "bundle_icon_box.h"
+#include "distributed_preference.h"
+#include "bundle_resource_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -165,6 +168,190 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
         SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
     } else if (matchType == MatchType::MATCH_ACK) {
         SubscribeNotifictaion(peerDevice);
+    }
+}
+
+bool DistributedService::CheckPeerDevice(const BundleIconBox& boxMessage, DistributedDeviceInfo& device)
+{
+    std::string deviceId;
+    if (!boxMessage.GetLocalDeviceId(deviceId)) {
+        ANS_LOGI("Dans get deviceId failed.");
+        return false;
+    }
+    auto iter = peerDevice_.find(deviceId);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGI("Dans get deviceId unknonw %{public}s.", deviceId.c_str());
+        return false;
+    }
+    device = iter->second;
+    return true;
+}
+
+void DistributedService::ReportBundleIconList(const DistributedDeviceInfo peerDevice)
+{
+    if (localDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+    std::vector<std::string> bundlesName;
+    DistributedPreferences::GetInstance().GetSavedBundlesIcon(bundlesName);
+    BundleIconBox iconBox;
+    iconBox.SetIconSyncType(IconSyncType::REPORT_SAVED_ICON);
+    iconBox.SetBundleList(bundlesName);
+    iconBox.SetLocalDeviceId(localDevice_.deviceId_);
+    if (!iconBox.Serialize()) {
+        ANS_LOGW("Dans ReportBundleIconList serialize failed.");
+        return;
+    }
+
+    DistributedClient::GetInstance().SendMessage(iconBox.GetByteBuffer(),
+        iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
+        peerDevice.deviceId_, peerDevice.deviceType_);
+    ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d %{public}s %{public}d.",
+        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
+        localDevice_.deviceType_);
+}
+
+void DistributedService::RequestBundlesIcon(const DistributedDeviceInfo peerDevice)
+{
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+    BundleIconBox iconBox;
+    iconBox.SetIconSyncType(IconSyncType::REQUEST_BUNDLE_ICON);
+    iconBox.SetLocalDeviceId(localDevice_.deviceId_);
+    if (!iconBox.Serialize()) {
+        ANS_LOGW("Dans RequestBundlesIcon serialize failed.");
+        return;
+    }
+
+    DistributedClient::GetInstance().SendMessage(iconBox.GetByteBuffer(),
+        iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
+        peerDevice.deviceId_, peerDevice.deviceType_);
+    ANS_LOGI("Dans RequestBundlesIcon %{public}s %{public}d %{public}s %{public}d.",
+        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
+        localDevice_.deviceType_);
+}
+
+void DistributedService::UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
+    const DistributedDeviceInfo peerDevice)
+{
+    BundleIconBox iconBox;
+    iconBox.SetIconSyncType(IconSyncType::UPDATE_BUNDLE_ICON);
+    iconBox.SetBundlesIcon(icons);
+    if (!iconBox.Serialize()) {
+        ANS_LOGW("Dans UpdateBundlesIcon serialize failed.");
+        return;
+    }
+
+    DistributedClient::GetInstance().SendMessage(iconBox.GetByteBuffer(),
+        iconBox.GetByteLength(), TransDataType::DATA_TYPE_BYTES,
+        peerDevice.deviceId_, peerDevice.deviceType_);
+    ANS_LOGI("Dans UpdateBundlesIcon %{public}s %{public}d %{public}s %{public}d.",
+        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
+        localDevice_.deviceType_);
+}
+
+void DistributedService::GenerateBundleIconSync(const DistributedDeviceInfo& device)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    if (NotificationHelper::GetAllLiveViewEnabledBundles(bundleOption) != 0) {
+        ANS_LOGW("Dans get all live view enable bundle failed.");
+        return;
+    }
+
+    std::vector<NotificationBundleOption> enableBundleOption;
+    if (NotificationHelper::GetAllDistribuedEnabledBundles("liteWearable", enableBundleOption) != 0) {
+        ANS_LOGW("Dans get all live view enable bundle failed.");
+    }
+
+    std::set<std::string> enabledBundles;
+    for (auto item : enableBundleOption) {
+        enabledBundles.insert(item.GetBundleName());
+    }
+    std::vector<std::string> unCachedBundleList;
+    for (auto item : bundleOption) {
+        if (enabledBundles.find(item.GetBundleName()) != enabledBundles.end()) {
+            continue;
+        }
+        if (bundleIconCache_.find(item.GetBundleName()) != bundleIconCache_.end()) {
+            continue;
+        }
+        unCachedBundleList.push_back(item.GetBundleName());
+        bundleIconCache_.insert(item.GetBundleName());
+    }
+
+    ANS_LOGI("Dans Generate bundleIconSync bundle %{public}lu %{public}lu %{public}lu.",
+        bundleOption.size(), enableBundleOption.size(), unCachedBundleList.size());
+    std::unordered_map<std::string, std::string> icons;
+    for (auto bundle : unCachedBundleList) {
+        std::string icon;
+        if (!GetBundleResourceInfo(bundle, icon)) {
+            continue;
+        }
+        icons.insert(std::make_pair(bundle, icon));
+        if (icons.size() == BundleIconBox::MAX_ICON_NUM) {
+            UpdateBundlesIcon(icons, device);
+            icons.clear();
+        }
+    }
+    if (!icons.empty()) {
+        UpdateBundlesIcon(icons, device);
+    }
+}
+
+void DistributedService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t type = 0;
+    BundleIconBox iconBox = BundleIconBox(boxMessage);
+    if (!iconBox.GetIconSyncType(type)) {
+        ANS_LOGI("Dans handle bundle icon sync failed.");
+        return;
+    }
+
+    ANS_LOGI("Dans handle bundl icon type %{public}d %{public}d.", type, localDevice_.deviceType_);
+    if (type == IconSyncType::REPORT_SAVED_ICON &&
+        localDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        std::vector<std::string> bundleList;
+        iconBox.GetBundleList(bundleList);
+        for (auto bundle : bundleList) {
+            ANS_LOGI("Dans handle receive %{public}s.", bundle.c_str());
+            bundleIconCache_.insert(bundle);
+        }
+        DistributedDeviceInfo device;
+        if (!CheckPeerDevice(iconBox, device)) {
+            return;
+        }
+        GenerateBundleIconSync(device);
+    }
+
+    if (type == IconSyncType::UPDATE_BUNDLE_ICON &&
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        std::unordered_map<std::string, std::string> bundlesIcon;
+        if (!iconBox.GetBundlesIcon(bundlesIcon)) {
+            ANS_LOGI("Dans handle bundle icon get icon failed.");
+            return;
+        }
+        DistributedPreferences::GetInstance().InertBatchBundleIcons(bundlesIcon);
+    }
+
+    if (type == IconSyncType::REQUEST_BUNDLE_ICON &&
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        DistributedDeviceInfo device;
+        if (!CheckPeerDevice(iconBox, device)) {
+            return;
+        }
+        ReportBundleIconList(device);
+    }
+
+    if (type == IconSyncType::REMOVE_BUNDLE_ICON &&
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        std::vector<std::string> bundleList;
+        if (!iconBox.GetBundleList(bundleList)) {
+            ANS_LOGW("Dans handle bundle remove bundle failed.");
+        }
+        for (auto& bundle : bundleList) {
+            DistributedPreferences::GetInstance().DeleteBundleIcon(bundle);
+        }
     }
 }
 }

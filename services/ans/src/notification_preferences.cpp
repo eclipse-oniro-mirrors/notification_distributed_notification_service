@@ -763,6 +763,28 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<No
     return ERR_OK;
 }
 
+ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t userId,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    return preferencesInfo_.GetAllLiveViewEnabledBundles(userId, bundleOption);
+}
+
+ErrCode NotificationPreferences::GetAllDistribuedEnabledBundles(int32_t userId,
+    const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->GetAllDistribuedEnabledBundles(userId, deviceType, bundleOption)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;
@@ -939,6 +961,9 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
         case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
             bundleInfo.SetEnableNotification(value);
             storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, value);
+            if (value && storeDBResult) {
+                SetDistributedEnabledForBundle(bundleInfo);
+            }
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
             ANS_LOGI("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
@@ -1400,6 +1425,66 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
         return false;
     }
     return true;
+}
+
+ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->SetSubscriberExistFlag(deviceType, existFlag);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = preferncesDB_->GetSubscriberExistFlag(deviceType, existFlag);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!isCachedMirrorNotificationEnabledStatus_) {
+        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetMirrorNotificationEnabledStatus(
+            mirrorNotificationEnabledStatus_)) {
+            ANS_LOGE("GetMirrorNotificationEnabledStatus failed from json");
+            return;
+        }
+        isCachedMirrorNotificationEnabledStatus_ = true;
+    }
+    if (mirrorNotificationEnabledStatus_.empty()) {
+        ANS_LOGD("mirrorNotificationEnabledStatus_ is empty");
+        return;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGD("preferncesDB_ is nullptr");
+        return;
+    }
+    for (const auto& deviceType : mirrorNotificationEnabledStatus_) {
+        bool ret = preferncesDB_->IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
+        if (!ret) {
+            ANS_LOGD("get %{public}s distributedEnabled is empty", deviceType.c_str());
+            preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, true);
+        }
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

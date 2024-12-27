@@ -191,5 +191,17 @@ void SubscriberListener::OnBadgeEnabledChanged(
     }
     subscriber->OnBadgeEnabledChanged(callbackData);
 }
+
+void SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGE("OnApplicationInfoNeedChanged  SubscriberListener 1.");
+    auto subscriber = subscriber_.lock();
+    if (subscriber == nullptr) {
+        ANS_LOGW("Subscriber is nullptr");
+        return;
+    }
+    subscriber->OnApplicationInfoNeedChanged(bundleName);
+}
 }  // namespace Notification
 }  // namespace OHOS

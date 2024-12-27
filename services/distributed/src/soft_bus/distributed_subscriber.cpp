@@ -95,6 +95,15 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
 {
 }
 
+void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
+{
+    ANS_LOGI("Notify changed %{public}s %{public}u.", bundleName.c_str(), localDevice_.deviceType_);
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+    DistributedService::GetInstance().HandleBundleChanged(bundleName, false);
+}
+
 void DistribuedSubscriber::SetLocalDevice(DistributedDeviceInfo localDevice)
 {
     localDevice_ = localDevice;

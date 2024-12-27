@@ -49,6 +49,17 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
         DistributedService::GetInstance().SetCurrentUserId(userId);
         return;
     }
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
+        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+        OHOS::AppExecFwk::ElementName ele = want.GetElement();
+        std::string bundleName = ele.GetBundleName();
+        if (bundleName.empty()) {
+            ANS_LOGE("Illegal bundle name.");
+            return;
+        }
+        DistributedService::GetInstance().HandleBundlesEvent(bundleName, action);
+        return;
+    }
 }
 
 OberverService& OberverService::GetInstance()
@@ -65,6 +76,10 @@ void OberverService::Init(uint16_t deviceType)
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     }
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    }
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<DistributedEventSubscriber>(subscribeInfo);
     if (subscriber_ == nullptr) {
@@ -72,7 +87,7 @@ void OberverService::Init(uint16_t deviceType)
         return;
     }
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
-    ANS_LOGI("ScreenLock service successfully.");
+    ANS_LOGI("OberverService service successfully.");
 }
 
 int32_t OberverService::IsScreenLocked()
@@ -81,5 +96,10 @@ int32_t OberverService::IsScreenLocked()
     return state ? SCREEN_OFF : SCREEN_ON;
 }
 
+void OberverService::Destory()
+{
+    EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
+    ANS_LOGI("OberverService service destory.");
+}
 }
 }

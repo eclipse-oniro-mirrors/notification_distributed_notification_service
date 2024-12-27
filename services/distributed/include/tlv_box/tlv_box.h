@@ -31,6 +31,7 @@ enum NotificationEventType : int32_t {
     NOTIFICATION_QUICK_REPLY = 4,
     NOTIFICATION_STATE_SYNC = 5,
     NOTIFICATION_MATCH_SYNC = 6,
+    BUNDLE_ICON_SYNC = 7,
 };
 
 enum TlvType : int32_t {
@@ -46,6 +47,7 @@ enum TlvType : int32_t {
     NOTIFICATION_OVERLAY_ICON = 9,
     NOTIFICATION_CONTENT_TYPE = 10,
     NOTIFICATION_COMMON_LIVEVIEW = 11,
+    BUNDLE_ICON_SYNC_TYPE = 992,
     MATCH_TYPE = 993,
     PEER_DEVICE_ID = 994,
     PEER_DEVICE_TYPE = 995,
@@ -80,7 +82,7 @@ private:
 class TlvBox {
 public:
     ~TlvBox();
-    bool Serialize();
+    bool Serialize(bool addCheck = true);
     bool Parse(const unsigned char* buffer, int32_t buffersize);
     bool PutValue(std::shared_ptr<TlvItem> value);
     bool SetMessageType(int32_t messageType);

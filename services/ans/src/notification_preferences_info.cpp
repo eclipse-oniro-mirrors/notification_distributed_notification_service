@@ -455,5 +455,33 @@ void NotificationPreferencesInfo::AddDisableNotificationInfo(const std::string &
     }
     disableNotificationInfo_.bundleList = notificationDisable.GetBundleList();
 }
+
+ErrCode NotificationPreferencesInfo::GetAllLiveViewEnabledBundles(const int32_t userId,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    auto iter = isEnabledAllNotification_.find(userId);
+    if (iter == isEnabledAllNotification_.end()) {
+        ANS_LOGW("Get user all notification info failed.");
+        return ERR_OK;
+    }
+
+    if (iter->second == false) {
+        ANS_LOGI("Get user all notification enable is false.");
+        return ERR_OK;
+    }
+
+    sptr<NotificationSlot> liveSlot;
+    for (auto bundleInfo : infos_) {
+        if (!bundleInfo.second.GetSlot(NotificationConstant::SlotType::LIVE_VIEW, liveSlot)) {
+            continue;
+        }
+        if (liveSlot->GetEnable()) {
+            NotificationBundleOption bundleItem(bundleInfo.second.GetBundleName(), bundleInfo.second.GetBundleUid());
+            bundleOption.push_back(bundleItem);
+        }
+    }
+    return ERR_OK;
+}
 }  // namespace Notification
 }  // namespace OHOS

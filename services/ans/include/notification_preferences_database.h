@@ -286,6 +286,13 @@ public:
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
+    bool GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
+    bool IsDistributedEnabledEmptyForBundle(
+        const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+    bool GetAllDistribuedEnabledBundles(int32_t userId,
+        const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
+
 private:
     bool CheckRdbStore();
 
@@ -319,6 +326,7 @@ private:
     void StringToVector(const std::string &str, std::vector<int64_t> &data) const;
     int32_t StringToInt(const std::string &str) const;
     int64_t StringToInt64(const std::string &str) const;
+    void StringSplit(const std::string content, char delim, std::vector<std::string>& result) const;
     bool IsSlotKey(const std::string &bundleKey, const std::string &key) const;
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
@@ -379,6 +387,10 @@ private:
         const std::string &findString, const int32_t &userId);
     bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
+    std::string GenerateSubscriberExistFlagKey(const std::string& deviceType, const int32_t userId) const;
+    void GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled);
+    bool isCachedSmartReminderEnableList_ = false;
+    std::vector<std::string> smartReminderEnableList_ = {};
 };
 } // namespace Notification
 } // namespace OHOS

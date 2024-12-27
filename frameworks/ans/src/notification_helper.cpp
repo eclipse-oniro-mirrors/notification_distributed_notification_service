@@ -520,6 +520,17 @@ ErrCode NotificationHelper::GetAllNotificationEnabledBundles(std::vector<Notific
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
 }
 
+ErrCode NotificationHelper::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllLiveViewEnabledBundles(bundleOption);
+}
+
+ErrCode NotificationHelper::GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllDistribuedEnabledBundles(deviceType, bundleOption);
+}
+
 ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,
     const sptr<NotificationCheckRequest> &notificationCheckRequest)
 {

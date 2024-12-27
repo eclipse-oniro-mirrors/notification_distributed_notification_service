@@ -567,6 +567,19 @@ ErrCode AnsManagerStub::SetDistributedEnabledByBundle(const sptr<NotificationBun
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("AnsManagerStub::GetAllLiveViewEnabledBundles called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("AnsManagerStub::GetAllDistribuedEnabledBundles called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
     const std::string &deviceType, bool &enabled)
 {

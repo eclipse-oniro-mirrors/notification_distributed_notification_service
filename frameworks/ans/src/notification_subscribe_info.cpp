@@ -107,6 +107,12 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write filterType_");
         return false;
     }
+
+    // write needNotifyApplicationChanged_
+    if (!parcel.WriteBool(needNotifyApplicationChanged_)) {
+        ANS_LOGE("Can't write needNotifyApplicationChanged");
+        return false;
+    }
     return true;
 }
 
@@ -157,6 +163,9 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Can't read filterType_");
         return false;
     }
+
+    // read needNotifyApplicationChanged_
+    needNotifyApplicationChanged_ = parcel.ReadBool();
     return true;
 }
 
@@ -178,6 +187,7 @@ std::string NotificationSubscribeInfo::Dump()
             "userId = " + std::to_string(userId_) +
             "slotTypes = [" + slotTypes + "]" +
             "filterType = " + std::to_string(filterType_) +
+            "needNotify = " + std::to_string(needNotifyApplicationChanged_) +
             " }";
 }
 
@@ -209,6 +219,16 @@ void NotificationSubscribeInfo::SetFilterType(const int32_t filterType)
 int32_t NotificationSubscribeInfo::GetFilterType() const
 {
     return filterType_;
+}
+
+bool NotificationSubscribeInfo::GetNeedNotifyApplication() const
+{
+    return needNotifyApplicationChanged_;
+}
+
+void NotificationSubscribeInfo::SetNeedNotifyApplication(bool isNeed)
+{
+    needNotifyApplicationChanged_ = isNeed;
 }
 }  // namespace Notification
 }  // namespace OHOS

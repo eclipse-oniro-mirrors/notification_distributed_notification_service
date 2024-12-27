@@ -572,6 +572,19 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
     EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
 #endif
+
+    if (!isCachedAppAndDeviceRelationMap_) {
+        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetAppAndDeviceRelationMap(
+            appAndDeviceRelationMap_)) {
+            ANS_LOGE("GetAppAndDeviceRelationMap failed");
+            return;
+        }
+        isCachedAppAndDeviceRelationMap_ = true;
+    }
+    auto appAndDeviceRelation = appAndDeviceRelationMap_.find(bundleOption->GetBundleName());
+    if (appAndDeviceRelation != appAndDeviceRelationMap_.end()) {
+        SetAndPublishSubscriberExistFlag(appAndDeviceRelation->second, false);
+    }
 }
 
 void AdvancedNotificationService::ExecBatchCancel(std::vector<sptr<Notification>> &notifications,
