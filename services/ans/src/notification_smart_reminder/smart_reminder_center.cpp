@@ -239,6 +239,9 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     set<string> validDevices;
     InitValidDevices(validDevices, request);
     for (auto &reminderMethod : reminderMethods_) {
+        if (validDevices.size() <= 1 && reminderMethod.first.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+            continue;
+        }
         HandleReminderMethods(
             reminderMethod.first, reminderMethod.second, request, validDevices, notificationFlagsOfDevices);
     }
@@ -300,12 +303,17 @@ void SmartReminderCenter::HandleReminderMethods(
 bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &slotType,
     const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const
 {
+    std::string device = deviceType;
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0) {
+        device = NotificationConstant::LITEWEARABLE_DEVICE_TYPE;
+    }
+
     bool isEnable = true;
-    if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, isEnable) != ERR_OK || !isEnable) {
+    if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(device, isEnable) != ERR_OK || !isEnable) {
         return false;
     }
 
-    if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, isEnable) != ERR_OK
+    if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, device, isEnable) != ERR_OK
         || !isEnable) {
         return false;
     }
@@ -313,7 +321,7 @@ bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &sl
     sptr<NotificationBundleOption> bundleOption =
         new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
-        bundleOption, deviceType, isEnable) != ERR_OK || !isEnable) {
+        bundleOption, device, isEnable) != ERR_OK || !isEnable) {
         return false;
     }
     return true;
