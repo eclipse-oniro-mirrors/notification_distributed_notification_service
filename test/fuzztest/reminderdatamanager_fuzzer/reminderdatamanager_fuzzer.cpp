@@ -117,7 +117,7 @@ namespace OHOS {
         manager->FindReminderRequestLocked(reminderId, bundleName);
         manager->GetRecentReminderLocked();
         manager->HandleImmediatelyShow(immediatelyReminders, value);
-        manager->HandleExtensionReminder(extensionReminders);
+        manager->HandleExtensionReminder(extensionReminders, 0);
         manager->HandleSameNotificationIdShowing(reminder);
         manager->IsBelongToSameApp(option, option);
         manager->CheckIsSameApp(reminder, option);
