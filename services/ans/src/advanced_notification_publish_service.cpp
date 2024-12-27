@@ -237,7 +237,7 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
 {
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     if (!AccessTokenHelper::VerifyNativeToken(tokenCaller) ||
-        !AccessTokenHelper::VerifyCallerPermission(tokenCaller, OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        !AccessTokenHelper::VerifyCallerPermission(tokenCaller, OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Collaborate publish cheak permission failed.");
         return ERR_ANS_PERMISSION_DENIED;
     }

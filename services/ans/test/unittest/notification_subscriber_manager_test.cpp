@@ -65,6 +65,8 @@ private:
         void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>
         &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override
         {}
+        void OnApplicationInfoNeedChanged(const std::string& bundleName) override
+        {}
     };
 
     static std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager_;

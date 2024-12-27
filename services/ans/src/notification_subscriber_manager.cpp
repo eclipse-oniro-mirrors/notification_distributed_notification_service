@@ -45,6 +45,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     std::string deviceType {CURRENT_DEVICE_TYPE};
     int32_t subscriberUid {DEFAULT_UID};
     std::vector<NotificationConstant::SlotType> slotTypes {};
+    bool needNotifyApplicationChanged = false;
     int32_t filterType {0};
 };
 
@@ -166,6 +167,31 @@ void NotificationSubscriberManager::NotifyConsumed(
         std::bind(&NotificationSubscriberManager::NotifyConsumedInner, this, notification, notificationMap);
 
     notificationSubQueue_->submit(NotifyConsumedFunc);
+}
+
+void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::string& bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (notificationSubQueue_ == nullptr || bundleName.empty()) {
+        ANS_LOGE("queue is nullptr");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
+        std::bind(&NotificationSubscriberManager::NotifyApplicationInfochangedInner, this, bundleName);
+
+    notificationSubQueue_->submit(NotifyConsumedFunc);
+}
+
+
+void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std::string& bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    ANS_LOGI("NotifyApplicationInfochangedInner %{public}s", bundleName.c_str());
+    for (auto record : subscriberRecordList_) {
+        if (record->needNotifyApplicationChanged) {
+            record->subscriber->OnApplicationInfoNeedChanged(bundleName);
+        }
+    }
 }
 
 void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<Notification>> &notifications,
@@ -354,6 +380,7 @@ void NotificationSubscriberManager::AddRecordInfo(
         record->subscriberUid = subscribeInfo->GetSubscriberUid();
         record->slotTypes = subscribeInfo->GetSlotTypes();
         record->filterType = subscribeInfo->GetFilterType();
+        record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;

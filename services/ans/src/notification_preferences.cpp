@@ -763,6 +763,28 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<No
     return ERR_OK;
 }
 
+ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t userId,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    return preferencesInfo_.GetAllLiveViewEnabledBundles(userId, bundleOption);
+}
+
+ErrCode NotificationPreferences::GetAllDistribuedEnabledBundles(int32_t userId,
+    const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    if (!preferncesDB_->GetAllDistribuedEnabledBundles(userId, deviceType, bundleOption)) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;

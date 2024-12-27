@@ -232,6 +232,13 @@ void NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     subscriber_.OnBadgeEnabledChanged(callbackData);
 }
 
+void NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
+    const std::string& bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    subscriber_.OnApplicationInfoNeedChanged(bundleName);
+}
+
 sptr<AnsManagerInterface> NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =

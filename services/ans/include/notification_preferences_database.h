@@ -290,6 +290,8 @@ public:
     bool GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
     bool IsDistributedEnabledEmptyForBundle(
         const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+    bool GetAllDistribuedEnabledBundles(int32_t userId,
+        const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
 
 private:
     bool CheckRdbStore();
@@ -324,6 +326,7 @@ private:
     void StringToVector(const std::string &str, std::vector<int64_t> &data) const;
     int32_t StringToInt(const std::string &str) const;
     int64_t StringToInt64(const std::string &str) const;
+    void StringSplit(const std::string content, char delim, std::vector<std::string>& result) const;
     bool IsSlotKey(const std::string &bundleKey, const std::string &key) const;
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;

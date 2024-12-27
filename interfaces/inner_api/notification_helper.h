@@ -992,6 +992,24 @@ public:
     static ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
 
     /**
+     * @brief Obtains allow liveview application list.
+     *
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains allow distribued application list.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetAllDistribuedEnabledBundles(const std::string &deviceType,
+        std::vector<NotificationBundleOption> &bundleOption);
+
+    /**
      * @brief Register Push Callback.
      *
      * @param pushCallback push appliction's Callback.

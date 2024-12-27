@@ -109,6 +109,7 @@ public:
      */
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
+    void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 private:
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
@@ -122,6 +123,7 @@ private:
     ErrCode HandleOnEnabledNotificationChanged(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnBadgeChanged(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnBadgeEnabledChanged(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleOnApplicationInfoNeedChanged(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data);
 };

@@ -174,9 +174,9 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName, const st
     }
 
     QosTV clientQos[] = {
-        { .qos = QOS_TYPE_MIN_BW,      .value = 64*1024 },
-        { .qos = QOS_TYPE_MAX_LATENCY, .value = 10000 },
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 },
+        { .qos = QOS_TYPE_MIN_BW,      .value = 64*1024 }, { .qos = QOS_TYPE_MAX_LATENCY, .value = 10000 },
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000 }, { .qos = QOS_TYPE_TRANS_CONTINUOUS, .value = 1 },
+        { .qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 600000 },
     };
     ISocketListener listener;
     listener.OnQos = OnQos;
@@ -188,7 +188,7 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName, const st
     auto sleepTime = std::chrono::milliseconds(BIND_SERVICE_SLEEP_TIMES_MS);
     bool bindSuccess = false;
     while (retryTimes < BIND_SERVICE_MAX_RETRY_TIMES) {
-        int32_t res = ::Bind(socketId, clientQos, 3, &listener);
+        int32_t res = ::Bind(socketId, clientQos, 5, &listener);
         if (res != 0) {
             ANS_LOGE("Bind Server failed, ret is %{public}d.", res);
             std::this_thread::sleep_for(sleepTime);
