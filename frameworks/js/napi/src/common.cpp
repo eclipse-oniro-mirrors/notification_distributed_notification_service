@@ -391,11 +391,15 @@ napi_value Common::GetNotificationSubscriberInfo(
         napi_is_array(env, nSlotTypes, &isArray);
         if (!isArray) {
             ANS_LOGE("Property slotTypes is expected to be an array.");
+            std::string msg = "Incorrect parameter types.The type of slotTypes must be array.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_array_length(env, nSlotTypes, &length);
         if (length == 0) {
             ANS_LOGE("The array is empty.");
+            std::string msg = "Incorrect parameters are left unspecified. The slotTypes list length is zero.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -406,11 +410,15 @@ napi_value Common::GetNotificationSubscriberInfo(
             NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
             if (valuetype != napi_number) {
                 ANS_LOGE("Wrong argument type. Number expected.");
+                std::string msg = "Incorrect parameter types.The type of slotType must be number.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             napi_get_value_int32(env, nSlotType, &slotType);
             NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
             if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+                std::string msg = "Incorrect parameter types.slotType name must be in enum.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             subscriberInfo.slotTypes.emplace_back(outType);

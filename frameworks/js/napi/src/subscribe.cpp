@@ -532,6 +532,12 @@ void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context
         return;
     }
 
+    if (dataWorkerData->ref == nullptr) {
+        ANS_LOGI("unsubscribe callback unset");
+        DelSubscriberInstancesInfo(dataWorkerData->env, dataWorkerData->subscriber);
+        return;
+    }
+
     Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, Common::NapiGetNull(dataWorkerData->env));
     DelSubscriberInstancesInfo(dataWorkerData->env, dataWorkerData->subscriber);
     delete dataWorkerData;
@@ -541,11 +547,6 @@ void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context
 void SubscriberInstance::OnDisconnected()
 {
     ANS_LOGD("enter");
-
-    if (unsubscribeCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("unsubscribe callback unset");
-        return;
-    }
 
     if (tsfn_ == nullptr) {
         ANS_LOGI("unsubscribe tsfn is null");
