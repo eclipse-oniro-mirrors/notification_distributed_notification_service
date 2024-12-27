@@ -1913,6 +1913,18 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
     return proxy->SetTargetDeviceStatus(deviceType, status, controlFlag);
 }
 
+ErrCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetTargetDeviceStatus(deviceType, status);
+}
+
 bool AnsNotification::IsValidTemplate(const NotificationRequest &request) const
 {
     if (request.GetTemplate() == nullptr) {

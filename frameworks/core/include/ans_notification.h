@@ -1180,6 +1180,15 @@ public:
     ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
 
     /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t& status);
+
+    /**
      * @brief Whether reminders are allowed.
      *
      * @param bundleName app bundleName

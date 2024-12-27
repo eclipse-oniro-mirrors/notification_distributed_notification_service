@@ -68,7 +68,7 @@ constexpr char DUMP_HELP_MSG[] =
     "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
     "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
-constexpr char SETTING_SHORT_OPTIONS[] = "c:e:d:k:b:o:";
+constexpr char SETTING_SHORT_OPTIONS[] = "c:e:d:k:b:o:g:";
 const struct option SETTING_LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"recent-count", required_argument, nullptr, 'c'},
@@ -77,6 +77,7 @@ const struct option SETTING_LONG_OPTIONS[] = {
     {"collaboration-switch", required_argument, nullptr, 'k'},
     {"collaboration-switch-bundle", required_argument, nullptr, 'b'},
     {"collaboration-switch-slot", required_argument, nullptr, 'o'},
+    {"get-device-status", required_argument, nullptr, 'g'},
 };
 constexpr char SETTING_HELP_MSG[] =
     "usage: anm setting [<options>]\n"
@@ -89,6 +90,7 @@ constexpr char SETTING_HELP_MSG[] =
     "  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
     "      eg: -b wearable:example:10100:1\n"
     "  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+    "  --get-device-status -o <device> set device status\n"
     "      eg: -o wearable:0:1\n";
 }  // namespace
 
@@ -295,6 +297,8 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
             resultReceiver_.append("error: option 'b' requires a value.\n");
         } else if (optopt == 'o') {
             resultReceiver_.append("error: option 'o' requires a value.\n");
+        } else if (optopt == 'g') {
+            resultReceiver_.append("error: option 'g' requires a value.\n");
         } else {
             resultReceiver_.append("error: unknown option.\n");
         }
@@ -328,6 +332,9 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
     if (option == 'o') {
         return RunSetDistributedEnabledBySlotCmd();
     }
+    if (option == 'g') {
+        return RunGetDeviceStatusCmd();
+    }
     resultReceiver_.append(SETTING_HELP_MSG);
     return ERR_INVALID_VALUE;
 }
@@ -359,6 +366,30 @@ ErrCode NotificationShellCommand::RunSetEnableCmd()
         resultReceiver_.append("set notification enabled success\n");
     } else {
         resultReceiver_.append("set notification enabled failed\n");
+    }
+    return ret;
+}
+
+ErrCode NotificationShellCommand::RunGetDeviceStatusCmd()
+{
+    if (ans_ == nullptr) {
+        resultReceiver_.append("error: object is null\n");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::string info = std::string(optarg);
+    if (info.empty()) {
+        resultReceiver_.append("error: getting information error\n");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t status = 0;
+    ErrCode ret = ans_->GetTargetDeviceStatus(info, status);
+    if (ret == ERR_OK) {
+        resultReceiver_.append("Get device status success: ");
+        resultReceiver_.append(std::to_string(status));
+    } else {
+        resultReceiver_.append("Get device status failed\n");
     }
     return ret;
 }

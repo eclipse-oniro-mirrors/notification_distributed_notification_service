@@ -567,6 +567,12 @@ ErrCode AnsManagerStub::SetDistributedEnabledByBundle(const sptr<NotificationBun
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+{
+    ANS_LOGE("GetTargetDeviceStatus called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGE("AnsManagerStub::GetAllLiveViewEnabledBundles called!");

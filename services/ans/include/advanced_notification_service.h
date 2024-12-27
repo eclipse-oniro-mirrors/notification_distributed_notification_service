@@ -1100,6 +1100,15 @@ public:
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
 
     /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) override;
+
+    /**
      * @brief Init publish process.
      */
     bool InitPublishProcess();

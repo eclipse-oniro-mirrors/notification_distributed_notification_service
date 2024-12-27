@@ -907,6 +907,15 @@ public:
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled) override;
 
     /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) override;
+
+    /**
      * @brief Set the status of the target device.
      *
      * @param deviceType Type of the device whose status you want to set.
@@ -1070,6 +1079,7 @@ private:
     ErrCode HandleSetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllLiveViewEnabledBundles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllDistribuedEnabledBundles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetDeviceStatus(MessageParcel &data, MessageParcel &reply);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif

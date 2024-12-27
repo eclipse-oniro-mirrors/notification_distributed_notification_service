@@ -453,6 +453,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleDisableNotificationFeature(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_TARGET_DEVICE_STATUS): {
+            result = HandleGetDeviceStatus(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -2672,6 +2676,27 @@ ErrCode AnsManagerStub::HandleSetDeviceStatus(MessageParcel &data, MessageParcel
     ErrCode result = SetTargetDeviceStatus(deviceType, status, controlFlag);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetDeviceStatus(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleGetDeviceStatus] fail: read deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t status = 0;
+    ErrCode result = GetTargetDeviceStatus(deviceType, status);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.WriteInt32(status)) {
+        ANS_LOGE("[HandleGetDeviceStatus] fail: write slot failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

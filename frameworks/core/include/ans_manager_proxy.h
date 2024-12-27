@@ -969,6 +969,15 @@ public:
      */
     ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
 
+    /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) override;
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);
