@@ -2476,6 +2476,25 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    uint32_t status_ = status;
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        ANS_LOGD("isSubsystem is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    uint32_t result = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetDeviceStatus(deviceType);
+    status = static_cast<int32_t>(result);
+    ANS_LOGI("Get %{public}s status %{public}u", deviceType.c_str(), status);
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

@@ -606,6 +606,12 @@ ErrCode AnsManagerStub::SetAdditionConfig(const std::string &key, const std::str
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+{
+    ANS_LOGE("GetTargetDeviceStatus called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
 {
     ANS_LOGE("Called.");

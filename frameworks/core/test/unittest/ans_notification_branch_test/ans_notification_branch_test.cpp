@@ -275,6 +275,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override
     {
         return ERR_ANS_INVALID_PARAM;

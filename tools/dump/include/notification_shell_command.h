@@ -54,6 +54,7 @@ private:
     ErrCode RunSetSmartReminderEnabledCmd();
     ErrCode RunSetDistributedEnabledByBundleCmd();
     ErrCode RunSetDistributedEnabledBySlotCmd();
+    ErrCode RunGetDeviceStatusCmd();
 
 private:
     std::shared_ptr<AnsNotification> ans_;

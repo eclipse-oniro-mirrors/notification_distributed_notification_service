@@ -979,6 +979,15 @@ public:
      * @return Returns set result.
      */
     virtual ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) = 0;
+
+    /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    virtual ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS
