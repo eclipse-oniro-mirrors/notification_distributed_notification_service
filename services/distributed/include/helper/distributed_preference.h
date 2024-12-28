@@ -16,6 +16,8 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_PREFERENCE_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_PREFERENCE_H
 
+#include <unordered_set>
+
 #include "distributed_rdb_helper.h"
 
 namespace OHOS {
@@ -35,9 +37,12 @@ public:
     int32_t InertBatchBundleIcons(std::unordered_map<std::string, std::string>  &values);
     int32_t GetIconByBundleName(const std::string& bundleName, std::string &icon);
     int32_t GetSavedBundlesIcon(std::vector<std::string>& bundleNames);
+    void AddCollaborativeNotification(const std::string &notificationKey);
+    bool CheckCollaborativeNotification(const std::string &notificationKey);
 private:
     std::mutex preferenceMutex_;
     std::shared_ptr<DistributedRdbHelper> preferncesDB_ = nullptr;
+    std::unordered_set<std::string> collaborativeNotificationList_;
 };
 }
 }

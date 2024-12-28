@@ -271,17 +271,5 @@ ErrCode DistributedPreferences::GetSyncEnabledWithoutApp(const int32_t userId, b
     return preferencesInfo_ == nullptr ?
         ERR_ANS_DISTRIBUTED_OPERATION_FAILED : preferencesInfo_->GetSyncEnabledWithoutApp(userId, enabled);
 }
-
-ErrCode DistributedPreferences::AddCollaborativeNotification(const std::string &notificationKey)
-{
-    return preferencesInfo_ == nullptr ?
-        ERR_ANS_DISTRIBUTED_OPERATION_FAILED : preferencesInfo_->AddCollaborativeNotification(notificationKey);
-}
-
-bool DistributedPreferences::CheckCollaborativeNotification(const std::string &notificationKey)
-{
-    return preferencesInfo_ == nullptr ?
-        false : preferencesInfo_->CheckCollaborativeNotification(notificationKey);
-}
 }  // namespace Notification
 }  // namespace OHOS

@@ -73,22 +73,5 @@ ErrCode DistributedPreferencesInfo::GetSyncEnabledWithoutApp(const int32_t userI
     }
     return ERR_OK;
 }
-
-ErrCode DistributedPreferencesInfo::AddCollaborativeNotification(const std::string &notificationKey)
-{
-    collaborativeNotificationList_.insert(notificationKey);
-    return ERR_OK;
-}
-
-bool DistributedPreferencesInfo::CheckCollaborativeNotification(const std::string &notificationKey)
-{
-    auto it = collaborativeNotificationList_.find(notificationKey);
-    if (it != collaborativeNotificationList_.end()) {
-        collaborativeNotificationList_.erase(it);
-        return true;
-    }
-    ANS_LOGE("CheckCollaborativeNotification failed");
-    return false;
-}
 }  // namespace Notification
 }  // namespace OHOS
