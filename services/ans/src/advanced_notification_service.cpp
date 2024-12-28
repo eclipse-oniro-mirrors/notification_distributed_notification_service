@@ -92,8 +92,10 @@ constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 constexpr int32_t RSS_UID = 3051;
 constexpr int32_t RESSCHED_UID = 1096;
+constexpr int32_t TYPE_CODE_VOIP = 0;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
+const std::string ANS_CALL = "ANS_CALL";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
 
@@ -459,6 +461,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
+    SetClassificationWithVoip(request);
     ANS_LOGI(
         "bundleName=%{public}s, uid=%{public}d", (bundleOption->GetBundleName()).c_str(), bundleOption->GetUid());
 
@@ -2349,6 +2352,25 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         }
     }
     return ERR_OK;
+}
+
+void AdvancedNotificationService::SetClassificationWithVoip(const sptr<NotificationRequest> &request)
+{
+    ANS_LOGI("classification:%{public}s", request->GetClassification().c_str());
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGI("set classification empty");
+        request->SetClassification("");
+        return;
+    }
+    auto requestContent = request->GetContent();
+    if (request->IsSystemLiveView() && requestContent != nullptr &&
+        requestContent->GetNotificationContent() != nullptr) {
+        auto localLiveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
+            requestContent->GetNotificationContent());
+        if (localLiveViewContent->GetType() == TYPE_CODE_VOIP) {
+            request->SetClassification(ANS_CALL);
+        }
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1442,6 +1442,7 @@ private:
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
+    void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
