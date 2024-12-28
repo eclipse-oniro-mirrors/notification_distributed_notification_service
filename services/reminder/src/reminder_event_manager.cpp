@@ -32,6 +32,7 @@ using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
 static const std::string NOTIFICATION_LABEL = "REMINDER_AGENT";
+static constexpr const char* UNLOCK_SCREEN_EVENT = "common.event.UNLOCK_SCREEN";
 std::shared_ptr<ReminderEventManager::ReminderNotificationSubscriber> ReminderEventManager::subscriber_
     = nullptr;
 
@@ -68,9 +69,16 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     subscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
     auto subscriber = std::make_shared<ReminderEventSubscriber>(subscriberInfo, reminderDataManager);
 
+    MatchingSkills screenMatchingSkills;
+    screenMatchingSkills.AddEvent(UNLOCK_SCREEN_EVENT);
+    CommonEventSubscribeInfo screenSubscriberInfo(screenMatchingSkills);
+    screenSubscriberInfo.SetPublisherBundleName(AppExecFwk::Constants::SCENE_BOARD_BUNDLE_NAME);
+    auto screenSubscriber = std::make_shared<ReminderEventSubscriber>(screenSubscriberInfo, reminderDataManager);
+
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     if (CommonEventManager::SubscribeCommonEvent(subscriber) &&
-        CommonEventManager::SubscribeCommonEvent(customSubscriber)) {
+        CommonEventManager::SubscribeCommonEvent(customSubscriber) &&
+        CommonEventManager::SubscribeCommonEvent(screenSubscriber)) {
         ANSR_LOGD("SubscribeCommonEvent ok");
     } else {
         ANSR_LOGD("SubscribeCommonEvent fail");
@@ -175,7 +183,7 @@ void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const E
         return;
     }
     if (action == ReminderRequest::REMINDER_EVENT_LOAD_REMINDER) {
-        reminderDataManager_->ReceiveLoadReminderEvent();
+        reminderDataManager_->OnLoadReminderEvent(want);
         return;
     }
 }
@@ -212,6 +220,9 @@ void ReminderEventManager::ReminderEventSubscriber::OnReceiveEvent(const EventFw
     if (action == CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         reminderDataManager_->OnUserRemove(data.GetCode());
         return;
+    }
+    if (action.compare(UNLOCK_SCREEN_EVENT) == 0) {
+        reminderDataManager_->OnUnlockScreen();
     }
 }
 

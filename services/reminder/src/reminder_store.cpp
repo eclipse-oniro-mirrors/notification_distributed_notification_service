@@ -382,6 +382,9 @@ int32_t ReminderStore::UpdateOrInsert(
         ANSR_LOGE("Rdb store is not initialized.");
         return STATE_FAIL;
     }
+    if (reminder != nullptr && reminder->IsShare()) {
+        return STATE_OK;
+    }
     if (IsReminderExist(reminder)) {
         return Update(reminder);
     } else {

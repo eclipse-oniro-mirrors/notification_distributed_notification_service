@@ -1699,5 +1699,31 @@ HWTEST_F(ReminderRequestCalendarTest, InitTriggerTime_001, Function | SmallTest 
     calendar.repeatDaysOfWeek_ = 1;
     EXPECT_EQ(calendar.InitTriggerTime(), true);
 }
+
+/**
+ * @tc.name: Copy_001
+ * @tc.desc: Test Copy parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, Copy_001, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> reminder1 = new ReminderRequestCalendar(1);
+    reminder1->SetTitle("test_reminder1");
+    sptr<ReminderRequest> reminder2 = new ReminderRequestCalendar(1);
+    reminder2->SetTitle("test_reminder2");
+
+    ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder1.GetRefPtr());
+    calendar->Copy(nullptr);
+    EXPECT_EQ(reminder1->GetTitle(), "test_reminder1");
+    calendar->Copy(reminder2);
+    EXPECT_EQ(reminder1->GetTitle(), "test_reminder1");
+    reminder1->SetShare(true);
+    calendar->Copy(reminder2);
+    EXPECT_EQ(reminder1->GetTitle(), "test_reminder1");
+    reminder2->SetShare(true);
+    calendar->Copy(reminder2);
+    EXPECT_EQ(reminder1->GetTitle(), "test_reminder2");
+}
 }
 }

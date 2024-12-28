@@ -319,6 +319,11 @@ public:
 
     ReminderRequestCalendar() : ReminderRequest(ReminderType::CALENDAR) {};
 
+    /**
+     * @brief Copy datashare reminder
+     */
+    void Copy(const sptr<ReminderRequest>& other);
+
 public:
     static constexpr uint8_t MAX_MONTHS_OF_YEAR = 12;
     static constexpr uint8_t MAX_DAYS_OF_MONTH = 31;

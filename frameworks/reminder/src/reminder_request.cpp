@@ -72,6 +72,7 @@ const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
 const std::string ReminderRequest::REMINDER_EVENT_LOAD_REMINDER = "ohos.event.notification.reminder.LOAD_REMINDER";
 const std::string ReminderRequest::PARAM_REMINDER_ID = "REMINDER_ID";
+const std::string ReminderRequest::PARAM_REMINDER_SHARE = "REMINDER_SHARE_FLAG";
 const std::string ReminderRequest::SEP_BUTTON_SINGLE = "<SEP,/>";
 const std::string ReminderRequest::SEP_BUTTON_MULTI = "<SEP#/>";
 const std::string ReminderRequest::SEP_WANT_AGENT = "<SEP#/>";
@@ -87,16 +88,20 @@ const uint16_t ReminderRequest::SECONDS_PER_HOUR = 3600;
 template <typename T>
 void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
 {
-    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
-    if constexpr (std::is_same_v<std::string, ValueType>) {
-        if (!root.contains(name) || !root[name].is_string()) {
-            value = T();
-            return;
-        }
-        value = root[name].get<std::string>();
+    value = T();
+    if (!root.contains(name)) {
         return;
     }
-    value = T();
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_same_v<std::string, ValueType>) {
+        if (root[name].is_string()) {
+            value = root[name].get<std::string>();
+        }
+    } else if constexpr (std::is_same_v<int32_t, ValueType>) {
+        if (root[name].is_number()) {
+            value = root[name].get<int32_t>();
+        }
+    }
 }
 
 inline static bool IsVaildButtonType(const std::string& type)
@@ -377,8 +382,8 @@ bool ReminderRequest::HandleTimeZoneChange(
 
 void ReminderRequest::OnSameNotificationIdCovered()
 {
-    SetState(false, REMINDER_STATUS_ALERTING | REMINDER_STATUS_SHOWING | REMINDER_STATUS_SNOOZE,
-        "OnSameNotificationIdCovered");
+    ANSR_LOGI("Reminder[%{public}d] same notification id covered.", reminderId_);
+    OnClose(true);
 }
 
 void ReminderRequest::OnShow(bool isPlaySoundOrVibration, bool isSysTimeChanged, bool allowToNotify)
@@ -514,6 +519,52 @@ void ReminderRequest::RecoverActionButtonJsonMode(const std::string &jsonString)
         resource, buttonWantAgent, buttonDataShareUpdate);
 }
 
+void ReminderRequest::DeserializeButtonInfoFromJson(const std::string& jsonString)
+{
+    if (jsonString.empty()) {
+        return;
+    }
+    if (!nlohmann::json::accept(jsonString)) {
+        ANSR_LOGW("Not a json string.");
+        return;
+    }
+    nlohmann::json root = nlohmann::json::parse(jsonString, nullptr, false);
+    if (root.is_discarded()) {
+        ANSR_LOGW("Parse json data failed.");
+        return;
+    }
+    if (!root.is_array()) {
+        return;
+    }
+    for (auto& button : root) {
+        int32_t type = static_cast<int32_t>(ActionButtonType::INVALID);
+        GetJsonValue<int32_t>(button, "type", type);
+        std::string title;
+        GetJsonValue<std::string>(button, "title", title);
+        std::string resource;
+        GetJsonValue<std::string>(button, "titleResource", resource);
+        std::string uri;
+        auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+        if (button.contains("wantAgent") && !button["wantAgent"].empty()) {
+            nlohmann::json wantAgent = button["wantAgent"];
+            GetJsonValue<std::string>(wantAgent, "pkgName", buttonWantAgent->pkgName);
+            GetJsonValue<std::string>(wantAgent, "abilityName", buttonWantAgent->abilityName);
+            GetJsonValue<std::string>(wantAgent, "uri", uri);
+        }
+        auto buttonDataShareUpdate = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+        if (button.contains("dataShareUpdate") && !button["dataShareUpdate"].empty()) {
+            nlohmann::json dataShareUpdate = button["dataShareUpdate"];
+            GetJsonValue<std::string>(dataShareUpdate, "uri", buttonDataShareUpdate->uri);
+            GetJsonValue<std::string>(dataShareUpdate, "equalTo", buttonDataShareUpdate->equalTo);
+            GetJsonValue<std::string>(dataShareUpdate, "valuesBucket", buttonDataShareUpdate->valuesBucket);
+        }
+        if (type == static_cast<int32_t>(ActionButtonType::CUSTOM)) {
+            customButtonUri_ = uri;
+        }
+        SetActionButton(title, ActionButtonType(type), resource, buttonWantAgent, buttonDataShareUpdate);
+    }
+}
+
 void ReminderRequest::DeserializeButtonInfo(const std::string& buttonInfoStr)
 {
     std::vector<std::string> multiButton = StringSplit(buttonInfoStr, SEP_BUTTON_MULTI);
@@ -602,31 +653,22 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
         ANSR_LOGW("parse json data failed");
         return;
     }
-    if (!root.contains("pkgName") || !root["pkgName"].is_string() ||
-        !root.contains("abilityName") || !root["abilityName"].is_string() ||
-        !root.contains("uri") || !root["uri"].is_string() ||
-        !root.contains("parameters") || !root["parameters"].is_string()) {
-        return;
-    }
-
-    std::string pkgName = root.at("pkgName").get<std::string>();
-    std::string abilityName = root.at("abilityName").get<std::string>();
-    std::string uri = root.at("uri").get<std::string>();
-    std::string parameters = root.at("parameters").get<std::string>();
     switch (type) {
         case WANT_AGENT_FLAG: {
             auto wai = std::make_shared<ReminderRequest::WantAgentInfo>();
-            wai->pkgName = pkgName;
-            wai->abilityName = abilityName;
-            wai->uri = uri;
+            GetJsonValue<std::string>(root, "pkgName", wai->pkgName);
+            GetJsonValue<std::string>(root, "abilityName", wai->abilityName);
+            GetJsonValue<std::string>(root, "uri", wai->uri);
+            std::string parameters;
+            GetJsonValue<std::string>(root, "parameters", parameters);
             wai->parameters = AAFwk::WantParamWrapper::ParseWantParams(parameters);
             SetWantAgentInfo(wai);
             break;
         }
         case MAX_WANT_AGENT_FLAG: {
             auto maxScreenWantAgentInfo = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
-            maxScreenWantAgentInfo->pkgName = pkgName;
-            maxScreenWantAgentInfo->abilityName = abilityName;
+            GetJsonValue<std::string>(root, "pkgName", maxScreenWantAgentInfo->pkgName);
+            GetJsonValue<std::string>(root, "abilityName", maxScreenWantAgentInfo->abilityName);
             SetMaxScreenWantAgentInfo(maxScreenWantAgentInfo);
             break;
         }
@@ -779,6 +821,11 @@ std::map<ReminderRequest::ActionButtonType, ReminderRequest::ActionButtonInfo> R
     ) const
 {
     return actionButtonMap_;
+}
+
+void ReminderRequest::SetActionButtons(const std::map<ActionButtonType, ActionButtonInfo>& buttons)
+{
+    actionButtonMap_ = buttons;
 }
 
 std::string ReminderRequest::GetCreatorBundleName() const
@@ -956,6 +1003,16 @@ void ReminderRequest::SetCustomButtonUri(const std::string &uri)
 std::string ReminderRequest::GetCustomButtonUri() const
 {
     return customButtonUri_;
+}
+
+bool ReminderRequest::IsShare() const
+{
+    return isShare_;
+}
+
+void ReminderRequest::SetShare(const bool isShare)
+{
+    isShare_ = isShare;
 }
 
 void ReminderRequest::SetCustomRingUri(const std::string &uri)
@@ -1476,15 +1533,14 @@ void ReminderRequest::AddActionButtons(NotificationRequest& notificationRequest,
                 break;
         }
         want->SetParam(PARAM_REMINDER_ID, reminderId_);
+        want->SetParam(PARAM_REMINDER_SHARE, isShare_);
         std::vector<std::shared_ptr<AAFwk::Want>> wants;
         wants.push_back(want);
         auto title = static_cast<std::string>(button.second.title);
         AbilityRuntime::WantAgent::WantAgentInfo buttonWantAgentInfo(
             requestCode,
             AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
-            flags,
-            wants,
-            nullptr
+            flags, wants, nullptr
         );
 
         std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -1507,6 +1563,7 @@ void ReminderRequest::UpdateNotificationAddRemovalWantAgent(NotificationRequest&
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetAction(REMINDER_EVENT_REMOVE_NOTIFICATION);
     want->SetParam(PARAM_REMINDER_ID, reminderId_);
+    want->SetParam(PARAM_REMINDER_SHARE, isShare_);
     std::vector<std::shared_ptr<AAFwk::Want>> wants;
     wants.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
@@ -1534,6 +1591,7 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWan
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetAction(REMINDER_EVENT_CLICK_ALERT);
     want->SetParam(PARAM_REMINDER_ID, reminderId_);
+    want->SetParam(PARAM_REMINDER_SHARE, isShare_);
     std::vector<std::shared_ptr<AAFwk::Want>> wantes;
     wantes.push_back(want);
     AbilityRuntime::WantAgent::WantAgentInfo wantInfo(
@@ -1656,9 +1714,7 @@ void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notification
 
 void ReminderRequest::UpdateNotificationBundleInfo(NotificationRequest& notificationRequest)
 {
-    notificationRequest.SetOwnerUid(uid_);
     notificationRequest.SetCreatorUid(uid_);
-    notificationRequest.SetCreatorUserId(userId_);
 }
 
 void ReminderRequest::UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze)

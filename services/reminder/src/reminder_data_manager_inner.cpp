@@ -189,5 +189,41 @@ bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t
     ++iter->second;
     return true;
 }
+
+void ReminderDataManager::OnDataShareInsertOrDelete()
+{
+    LoadShareReminders();
+    std::vector<sptr<ReminderRequest>> immediatelyReminders;
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    CheckReminderTime(immediatelyReminders, extensionReminders);
+    HandleImmediatelyShow(immediatelyReminders, false);
+    StartRecentReminder();
+}
+
+void ReminderDataManager::OnDataShareUpdate(const std::map<std::string, sptr<ReminderRequest>>& reminders)
+{
+    UpdateShareReminders(reminders);
+}
+
+void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<ReminderRequest>>& reminders)
+{
+    std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+        if (!(*it)->IsShare() || (*it)->GetReminderType() != ReminderRequest::ReminderType::CALENDAR) {
+            continue;
+        }
+        int32_t reminderId = (*it)->GetReminderId();
+        std::string identifier = (*it)->GetIdentifier();
+        auto iter = reminders.find(identifier);
+        if (iter == reminders.end()) {
+            continue;
+        }
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>((*it).GetRefPtr());
+        calendar->Copy(iter->second);
+        if ((*it)->IsShowing()) {
+            ShowReminder((*it), false, false, false, false);
+        }
+    }
+}
 }
 }

@@ -51,6 +51,8 @@
 #endif
 #include "reminder_utils.h"
 #include "notification_helper.h"
+#include "reminder_datashare_helper.h"
+#include "reminder_calendar_share_table.h"
 
 namespace OHOS {
 namespace Notification {
@@ -67,6 +69,13 @@ const int64_t ONE_MIN_TIME = 60 * 1000;
 const int64_t NEXT_LOAD_TIME = 20 * ONE_MIN_TIME;
 constexpr int8_t NORMAL_CALLBACK = 0;  // timer callback
 constexpr int8_t REISSUE_CALLBACK = 1;  // time change, boot complte callback
+constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
+constexpr int32_t FIRST_QUERY_DELAY = 5 * 1000 * 1000;  // 5s, ut: microsecond
+
+inline int64_t TimeDistance(int64_t first, int64_t last)
+{
+    return first > last ? first - last : last - first;
+}
 }
 
 /**
@@ -116,7 +125,7 @@ ErrCode ReminderDataManager::CancelReminder(
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
     ANSR_LOGI("cancel reminder id: %{public}d", reminderId);
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, false);
     if (reminder == nullptr) {
         ANSR_LOGW("Cancel reminder, not find the reminder");
         return ERR_REMINDER_NOT_EXIST;
@@ -138,7 +147,7 @@ ErrCode ReminderDataManager::CancelReminder(
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     CancelNotification(reminder);
-    RemoveReminderLocked(reminderId);
+    RemoveReminderLocked(reminderId, false);
     StartRecentReminder();
     return ERR_OK;
 }
@@ -155,7 +164,7 @@ ErrCode ReminderDataManager::CancelAllReminders(const std::string& bundleName,
 sptr<ReminderRequest> ReminderDataManager::CheckExcludeDateParam(const int32_t reminderId,
     const int32_t callingUid)
 {
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, false);
     if (reminder == nullptr) {
         ANSR_LOGW("Check reminder failed, not find the reminder");
         return nullptr;
@@ -266,8 +275,12 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string& packageNa
             }
             CancelNotification(*vit);
             RemoveFromShowedReminders(*vit);
-            vit = reminderVector_.erase(vit);
-            totalCount_--;
+            if (!(*vit)->IsShare()) {
+                vit = reminderVector_.erase(vit);
+                totalCount_--;
+            } else {
+                ++vit;
+            }
             continue;
         }
         ++vit;
@@ -322,8 +335,10 @@ void ReminderDataManager::CancelNotification(const sptr<ReminderRequest> &remind
         return;
     }
     ANSR_LOGD("Cancel notification");
-    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::CancelNotification(
-        ReminderRequest::NOTIFICATION_LABEL, reminder->GetNotificationId()));
+    NotificationBundleOption bundleOption(reminder->GetBundleName(), reminder->GetUid());
+    IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::RemoveNotification(
+        bundleOption, reminder->GetNotificationId(), ReminderRequest::NOTIFICATION_LABEL,
+        NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE));
 }
 
 bool ReminderDataManager::CheckReminderLimitExceededLocked(const int32_t callingUid,
@@ -353,11 +368,30 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const int32_t calling
     return false;
 }
 
+void ReminderDataManager::OnUnlockScreen()
+{
+    bool expected = false;
+    if (isScreenUnLocked_.compare_exchange_strong(expected, true)) {
+        ffrt::task_attr taskAttr;
+        taskAttr.delay(FIRST_QUERY_DELAY);
+        auto callback = []() {
+            auto manager = ReminderDataManager::GetInstance();
+            if (manager == nullptr) {
+                ANSR_LOGE("ReminderDataManager is nullptr.");
+                return;
+            }
+            manager->InitShareReminders();
+        };
+        queue_->submit(callback, taskAttr);
+    }
+}
+
 void ReminderDataManager::AddToShowedReminders(const sptr<ReminderRequest> &reminder)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
-        if (reminder->GetReminderId() == (*it)->GetReminderId()) {
+        if (reminder->GetReminderId() == (*it)->GetReminderId() &&
+            reminder->IsShare() == (*it)->IsShare()) {
             ANSR_LOGD("Showed reminder is already exist");
             return;
         }
@@ -378,6 +412,7 @@ void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 {
     ANSR_LOGD("Switch user id from %{private}d to %{private}d", currentUserId_, userId);
     currentUserId_ = userId;
+    ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     if ((alertingReminderId_ != -1) && IsReminderAgentReady()) {
         TerminateAlerting(alertingReminder_, "OnUserSwitch");
@@ -440,6 +475,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
             sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, activeReminderId_);
+            want->SetParam(ReminderRequest::PARAM_REMINDER_SHARE, reminderRequest->IsShare());
             break;
         }
         case (TimerType::ALERTING_TIMER): {
@@ -450,6 +486,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
             sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, alertingReminderId_);
+            want->SetParam(ReminderRequest::PARAM_REMINDER_SHARE, reminderRequest->IsShare());
             break;
         }
         default:
@@ -472,11 +509,11 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
     return sharedTimerInfo;
 }
 
-sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(const int32_t &reminderId)
+sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(const int32_t reminderId, const bool isShare)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
-        if (reminderId == (*it)->GetReminderId()) {
+        if (reminderId == (*it)->GetReminderId() && isShare == (*it)->IsShare()) {
             return *it;
         }
     }
@@ -492,7 +529,8 @@ bool ReminderDataManager::cmp(sptr<ReminderRequest> &reminderRequest, sptr<Remin
 void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool cancelNotification, bool isButtonClick)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
@@ -555,11 +593,15 @@ void ReminderDataManager::CloseReminder(const sptr<ReminderRequest> &reminder, b
         StopSoundAndVibrationLocked(reminder);
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
-    reminder->OnClose(true);
-    RemoveFromShowedReminders(reminder);
-    store_->UpdateOrInsert(reminder);
     if (cancelNotification) {
         CancelNotification(reminder);
+    }
+    reminder->OnClose(true);
+    RemoveFromShowedReminders(reminder);
+    if (reminder->IsShare()) {
+        ReminderDataShareHelper::GetInstance().Update(reminderId, ReminderCalendarShareTable::STATE_DISMISSED);
+    } else {
+        store_->UpdateOrInsert(reminder);
     }
 }
 
@@ -577,7 +619,7 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance()
     return REMINDER_DATA_MANAGER;
 }
 
-void ReminderDataManager::StartReminderLoadTimer()
+void ReminderDataManager::StartLoadTimer()
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
@@ -586,14 +628,27 @@ void ReminderDataManager::StartReminderLoadTimer()
     }
     std::lock_guard<std::mutex> locker(timeLoadMutex_);
     if (reminderLoadtimerId_ == 0) {
-        reminderLoadtimerId_ = CreateReminderLoadTimer(timer);
+        reminderLoadtimerId_ = CreateTimer(timer);
     }
     timer->StopTimer(reminderLoadtimerId_);
     uint64_t nowMilli = GetCurrentTime() + NEXT_LOAD_TIME;
     timer->StartTimer(reminderLoadtimerId_, nowMilli);
 }
 
-int64_t ReminderDataManager::CreateReminderLoadTimer(const sptr<MiscServices::TimeServiceClient> timer)
+void ReminderDataManager::InitShareReminders()
+{
+    ANSR_LOGD("Call.");
+    ReminderDataShareHelper::GetInstance().UpdateCalendarUid();
+    ReminderDataShareHelper::GetInstance().RegisterObserver();
+    LoadShareReminders();
+    std::vector<sptr<ReminderRequest>> immediatelyReminders;
+    std::vector<sptr<ReminderRequest>> extensionReminders;
+    CheckReminderTime(immediatelyReminders, extensionReminders);
+    HandleImmediatelyShow(immediatelyReminders, false);
+    StartRecentReminder();
+}
+
+uint64_t ReminderDataManager::CreateTimer(const sptr<MiscServices::TimeServiceClient>& timer)
 {
     auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
     sharedTimerInfo->SetRepeat(true);
@@ -793,6 +848,13 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
         StopTimerLocked(TimerType::TRIGGER_TIMER);
     }
     LoadReminderFromDb();
+    int64_t now = GetCurrentTime();
+    LoadShareReminders();
+    if (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME) {
+        lastStartTime_ = now;
+        ReminderDataShareHelper::GetInstance().StartDataExtension(type == TIME_ZONE_CHANGE ?
+            ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE : ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+    }
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
@@ -804,7 +866,8 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
 void ReminderDataManager::TerminateAlerting(const OHOS::EventFwk::Want &want)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
         ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
         return;
@@ -902,11 +965,12 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
 void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
+    bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     ANSR_LOGI("Begin to show reminder(reminderId=%{public}d)", reminderId);
     if (reminderId == activeReminderId_) {
         ResetStates(TimerType::TRIGGER_TIMER);
     }
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
@@ -1058,6 +1122,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     ANSR_LOGD("Show the reminder(Play sound: %{public}d), %{public}s",
         static_cast<int32_t>(isNeedToPlaySound), reminder->Dump().c_str());
     int32_t reminderId = reminder->GetReminderId();
+    bool isShare = reminder->IsShare();
     if (!IsAllowedNotify(reminder)) {
         ANSR_LOGE("Not allow to notify.");
         reminder->OnShow(false, isSysTimeChanged, false);
@@ -1088,6 +1153,9 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
             }
         }
         HandleSameNotificationIdShowing(reminder);
+        if (isShare) {
+            ReminderDataShareHelper::GetInstance().Update(reminderId, ReminderCalendarShareTable::STATE_FIRED);
+        }
     }
     store_->UpdateOrInsert(reminder);
 
@@ -1099,7 +1167,8 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
 void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
@@ -1247,9 +1316,11 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
         }
         int32_t reminderId = (*it)->GetReminderId();
         ANSR_LOGD("Containers(vector) remove. reminderId=%{public}d", reminderId);
+        if (!(*it)->IsShare()) {
+            totalCount_--;
+            store_->Delete(reminderId);
+        }
         it = reminderVector_.erase(it);
-        totalCount_--;
-        store_->Delete(reminderId);
     }
     return nullptr;
 }
@@ -1316,12 +1387,13 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 {
     // not add ReminderDataManager::MUTEX, as ShowActiveReminderExtendLocked has locked
     int32_t notificationId = reminder->GetNotificationId();
+    bool isShare = reminder->IsShare();
     ANSR_LOGD("HandleSameNotificationIdShowing notificationId=%{public}d", notificationId);
     int32_t curReminderId = reminder->GetReminderId();
 
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
         int32_t tmpId = (*it)->GetReminderId();
-        if (tmpId == curReminderId) {
+        if (tmpId == curReminderId && (*it)->IsShare() == isShare) {
             continue;
         }
         if (!(*it)->IsShowing()) {
@@ -1333,7 +1405,11 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
             }
             (*it)->OnSameNotificationIdCovered();
             RemoveFromShowedReminders(*it);
-            store_->UpdateOrInsert((*it));
+            if ((*it)->IsShare()) {
+                ReminderDataShareHelper::GetInstance().Update(tmpId, ReminderCalendarShareTable::STATE_DISMISSED);
+            } else {
+                store_->UpdateOrInsert((*it));
+            }
         }
     }
 }
@@ -1364,6 +1440,8 @@ void ReminderDataManager::Init()
         return;
     }
     InitServiceHandler();
+    ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_BOOT_COMPLETE);
+    lastStartTime_ = GetCurrentTime();
     LoadReminderFromDb();
     InitUserId();
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
@@ -1372,8 +1450,19 @@ void ReminderDataManager::Init()
     HandleImmediatelyShow(immediatelyReminders, false);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
-    StartReminderLoadTimer();
+    StartLoadTimer();
     isReminderAgentReady_ = true;
+    ffrt::task_attr taskAttr;
+    taskAttr.delay(FIRST_QUERY_DELAY);
+    auto callback = []() {
+        auto manager = ReminderDataManager::GetInstance();
+        if (manager == nullptr) {
+            ANSR_LOGE("ReminderDataManager is nullptr.");
+            return;
+        }
+        manager->InitShareReminders();
+    };
+    queue_->submit(callback, taskAttr);
     ANSR_LOGD("ReminderAgent is ready.");
 }
 
@@ -1487,16 +1576,23 @@ bool ReminderDataManager::IsBelongToSameApp(const int32_t uidSrc,
     return result;
 }
 
-void ReminderDataManager::ReceiveLoadReminderEvent()
+void ReminderDataManager::OnLoadReminderEvent(const EventFwk::Want& want)
 {
     LoadReminderFromDb();
+    LoadShareReminders();
+    int64_t now = GetCurrentTime();
+    if (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME) {
+        lastStartTime_ = now;
+        ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_NORMAL);
+    }
     StartRecentReminder();
+    StartLoadTimer();
 }
 
 void ReminderDataManager::LoadReminderFromDb()
 {
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     std::vector<sptr<ReminderRequest>> existReminders = store_->GetHalfHourReminders();
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     reminderVector_ = existReminders;
     totalCount_ = static_cast<int16_t>(reminderVector_.size());
     ReminderRequest::GLOBAL_ID = store_->GetMaxId() + 1;
@@ -1620,7 +1716,8 @@ void ReminderDataManager::RemoveFromShowedReminders(const sptr<ReminderRequest> 
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
-        if ((*it)->GetReminderId() == reminder->GetReminderId()) {
+        if ((*it)->GetReminderId() == reminder->GetReminderId() &&
+            (*it)->IsShare() == reminder->IsShare()) {
             ANSR_LOGD("Containers(shownVector) remove. reminderId=%{public}d", reminder->GetReminderId());
             showedReminderVector_.erase(it);
             break;
@@ -1644,15 +1741,17 @@ void ReminderDataManager::RefreshRemindersLocked(uint8_t type,
     }
 }
 
-void ReminderDataManager::RemoveReminderLocked(const int32_t &reminderId)
+void ReminderDataManager::RemoveReminderLocked(const int32_t reminderId, bool isShare)
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end();) {
-        if (reminderId == (*it)->GetReminderId()) {
+        if (reminderId == (*it)->GetReminderId() && isShare == (*it)->IsShare()) {
             ANSR_LOGD("Containers(vector) remove. reminderId=%{public}d", reminderId);
             it = reminderVector_.erase(it);
-            totalCount_--;
-            store_->Delete(reminderId);
+            if (!isShare) {
+                totalCount_--;
+                store_->Delete(reminderId);
+            }
             break;
         } else {
             ++it;
@@ -1809,7 +1908,8 @@ void ReminderDataManager::ResetStates(TimerType type)
 void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &want)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
         ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
         return;
@@ -1841,13 +1941,14 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
 void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
+    bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     ANSR_LOGI("click reminder[%{public}d] start", reminderId);
-    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId);
+    sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
         ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
         return;
     }
-    CloseReminder(reminder, true);
+    CloseReminder(reminder, false);
     StartRecentReminder();
 
     auto wantInfo = reminder->GetWantAgentInfo();
@@ -1939,6 +2040,9 @@ void ReminderDataManager::OnLanguageChanged()
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            if ((*it)->IsShare()) {
+                continue;
+            }
             reminders[(*it)->GetUid()].push_back((*it));
         }
     }
@@ -1951,9 +2055,13 @@ void ReminderDataManager::OnLanguageChanged()
         showedReminder = showedReminderVector_;
     }
     for (auto it = showedReminder.begin(); it != showedReminder.end(); ++it) {
+        if ((*it)->IsShare()) {
+            continue;
+        }
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder((*it), false, false, false, false);
     }
+    ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_LANGUAGE_CHANGE);
     ANSR_LOGI("System language config changed end.");
 }
 
@@ -2030,6 +2138,50 @@ void ReminderDataManager::CheckNeedNotifyStatus(const sptr<ReminderRequest> &rem
 int32_t ReminderDataManager::QueryActiveReminderCount()
 {
     return store_->QueryActiveReminderCount();
+}
+
+void ReminderDataManager::LoadShareReminders()
+{
+    std::map<std::string, sptr<ReminderRequest>> reminders;
+    ReminderDataShareHelper::GetInstance().Query(reminders);
+    std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+    for (auto it = reminderVector_.begin(); it != reminderVector_.end();) {
+        if (!(*it)->IsShare() || (*it)->GetReminderType() != ReminderRequest::ReminderType::CALENDAR) {
+            ++it;
+            continue;
+        }
+        std::string identifier = (*it)->GetIdentifier();
+        int32_t reminderId = (*it)->GetReminderId();
+        auto iter = reminders.find(identifier);
+        if (iter != reminders.end()) {
+            // only exit, need update
+            ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>((*it).GetRefPtr());
+            calendar->Copy(iter->second);
+            // In the logic of insertion or deletion, it can only be updated if the id changes.
+            if ((*it)->IsShowing() && reminderId != iter->second->GetReminderId()) {
+                ShowReminder((*it), false, false, false, false);
+            }
+            reminders.erase(iter);
+            ++it;
+            continue;
+        }
+        // already remove
+        if ((*it)->IsShowing()) {
+            CloseReminder(*it, true);
+        }
+        if (activeReminderId_ == reminderId) {
+            {
+                std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+                activeReminder_->OnStop();
+            }
+            StopTimerLocked(TimerType::TRIGGER_TIMER);
+        }
+        it = reminderVector_.erase(it);
+    }
+    // new reminder
+    for (auto& each : reminders) {
+        reminderVector_.push_back(each.second);
+    }
 }
 }
 }
