@@ -332,7 +332,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
         if (IsDisableNotification(bundle)) {
-            ANS_LOGE("failed to release the blocklist application notification, bundleName=%{public}s", bundle.c_str());
+            ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
@@ -2423,7 +2423,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
         if (!bundle.empty() && IsDisableNotification(bundle)) {
-            ANS_LOGE("failed to release the blocklist application notification, bundleName=%{public}s", bundle.c_str());
+            ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
@@ -2958,7 +2958,7 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
     return false;
 }
 
-bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationRequest> &request)
+bool AdvancedNotificationService::IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request)
 {
     if (request == nullptr) {
         ANS_LOGE("request is nullptr");
@@ -2969,16 +2969,12 @@ bool AdvancedNotificationService::IsDisableNotification(const sptr<NotificationR
     if (agentBundle != nullptr) {
         bundleName = agentBundle->GetBundleName();
     }
-    bool controller = true;
     if (!(request->GetOwnerBundleName().empty()) && !bundleName.empty() &&
         NotificationPreferences::GetInstance()->IsAgentRelationship(bundleName, request->GetOwnerBundleName()) &&
         AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-        controller = false;
+        return false;
     }
-    if (controller && IsDisableNotification(request->GetOwnerBundleName())) {
-        return true;
-    }
-    return false;
+    return true;
 }
 
 void AdvancedNotificationService::SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag)

@@ -56,7 +56,8 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_NO_RIGHT, "No permission"},
     {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
     {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
-    {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION, "Failed to release the blocklist application notification"},
+    {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION,
+        "The application is not allowed to publish notifications due to permission control settings"},
 };
 }
 
