@@ -388,6 +388,7 @@ ErrCode NotificationShellCommand::RunGetDeviceStatusCmd()
     if (ret == ERR_OK) {
         resultReceiver_.append("Get device status success: ");
         resultReceiver_.append(std::to_string(status));
+        resultReceiver_.append("\n");
     } else {
         resultReceiver_.append("Get device status failed\n");
     }
