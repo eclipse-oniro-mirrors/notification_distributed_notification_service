@@ -614,13 +614,13 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
 HWTEST_F(ReminderDataManagerTest, StartExtensionAbilityTest_001, Level1)
 {
     auto reminder1 = new ReminderRequestCalendar(10);
-    bool ret1 = manager->StartExtensionAbility(reminder1);
+    bool ret1 = manager->StartExtensionAbility(reminder1, 0);
     EXPECT_TRUE(ret1);
 
     auto reminder2 = new ReminderRequestCalendar(10);
     auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
     reminder2->SetRRuleWantAgentInfo(wantInfo);
-    bool ret2 = manager->StartExtensionAbility(reminder2);
+    bool ret2 = manager->StartExtensionAbility(reminder2, 0);
     EXPECT_TRUE(ret2);
 }
 
