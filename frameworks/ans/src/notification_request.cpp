@@ -781,6 +781,8 @@ std::string NotificationRequest::Dump()
             ", onlyLocal = " + (onlyLocal_ ? "true" : "false") + ", permitted = " + (permitted_ ? "true" : "false") +
             ", isAgent = " + (isAgent_ ? "true" : "false") +
             ", updateOnly = " + (updateOnly_ ? "true" : "false") +
+            ", isForceDistributed = " + (forceDistributed_ ? "true" : "false") +
+            ", isNotDistributed = " + (notDistributed_ ? "true" : "false") +
             ", removalWantAgent = " + (removalWantAgent_ ? "not null" : "null") +
             ", maxScreenWantAgent = " + (maxScreenWantAgent_ ? "not null" : "null") +
             ", additionalParams = " + (additionalParams_ ? "not null" : "null") +
@@ -1193,6 +1195,16 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteBool(isRemoveAllowed_)) {
         ANS_LOGE("Failed to write flag isRemoveAllowed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(forceDistributed_)) {
+        ANS_LOGE("Failed to write flag forceDistributed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(notDistributed_)) {
+        ANS_LOGE("Failed to write flag notDistributed");
         return false;
     }
 
@@ -1616,6 +1628,8 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     permitted_ = parcel.ReadBool();
     isAgent_ = parcel.ReadBool();
     isRemoveAllowed_ = parcel.ReadBool();
+    forceDistributed_ = parcel.ReadBool();
+    notDistributed_ = parcel.ReadBool();
 
     bool valid {false};
 
@@ -1889,6 +1903,36 @@ void NotificationRequest::SetRemoveAllowed(bool isRemoveAllowed)
     isRemoveAllowed_ = isRemoveAllowed;
 }
 
+bool NotificationRequest::IsForceDistributed() const
+{
+    return forceDistributed_;
+}
+
+void NotificationRequest::SetForceDistributed(bool forceDistributed)
+{
+    forceDistributed_ = forceDistributed;
+}
+
+bool NotificationRequest::IsNotDistributed() const
+{
+    return notDistributed_;
+}
+
+void NotificationRequest::SetNotDistributed(bool notDistributed)
+{
+    notDistributed_ = notDistributed;
+}
+
+bool NotificationRequest::IsSystemApp() const
+{
+    return isSystemApp_;
+}
+
+void NotificationRequest::SetIsSystemApp(bool isSystemApp)
+{
+    isSystemApp_ = isSystemApp;
+}
+
 void NotificationRequest::CopyBase(const NotificationRequest &other)
 {
     this->notificationId_ = other.notificationId_;
@@ -1913,6 +1957,9 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->appInstanceKey_ = other.appInstanceKey_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
+    this->forceDistributed_ = other.forceDistributed_;
+    this->notDistributed_ = other.notDistributed_;
+    this->isSystemApp_ = other.isSystemApp_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->isUpdateByOwnerAllowed_ = other.isUpdateByOwnerAllowed_;
     this->distributedCollaborate_ = other.distributedCollaborate_;

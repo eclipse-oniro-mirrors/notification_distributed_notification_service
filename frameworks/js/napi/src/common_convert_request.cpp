@@ -671,6 +671,14 @@ napi_value Common::GetNotificationRequestByBool(
     if (GetNotificationIsRemoveAllowed(env, value, request) == nullptr) {
         return nullptr;
     }
+    // forceDistributed?: boolean
+    if (GetNotificationForceDistributed(env, value, request) == nullptr) {
+        return nullptr;
+    }
+    // notDistributed?: boolean
+    if (GetNotificationIsNotDistributed(env, value, request) == nullptr) {
+        return nullptr;
+    }
 
     return NapiGetNull(env);
 }
@@ -1683,6 +1691,60 @@ napi_value Common::GetNotificationIsRemoveAllowed(
         }
         napi_get_value_bool(env, result, &isRemoveAllowed);
         request.SetRemoveAllowed(isRemoveAllowed);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationForceDistributed(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("enter");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    bool forceDistributed = false;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "forceDistributed", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "forceDistributed", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of forceDistributed must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &forceDistributed);
+        request.SetForceDistributed(forceDistributed);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationIsNotDistributed(
+    const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("enter");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    bool notDistributed = false;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "notDistributed", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "notDistributed", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of notDistributed must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &notDistributed);
+        request.SetNotDistributed(notDistributed);
     }
 
     return NapiGetNull(env);

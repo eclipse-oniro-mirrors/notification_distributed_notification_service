@@ -129,6 +129,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return result;
     }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    request->SetIsSystemApp(AccessTokenHelper::IsSystemApp() || isSubsystem);
     if (isSubsystem) {
         return PublishNotificationBySa(request);
     }

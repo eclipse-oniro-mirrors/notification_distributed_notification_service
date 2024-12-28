@@ -52,11 +52,15 @@ public:
     bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
     bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
     std::unordered_set<std::string> GetCollaborativeDeleteType() const;
+    void GetCollaborationFilter();
+    bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
 
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
     std::mutex mutex_;
+    std::vector<int32_t> uidList_;
+    std::vector<std::string> bundleNameList_;
 
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
@@ -64,6 +68,9 @@ public:
     constexpr static const char* CFG_KEY_NAME = "name";
     constexpr static const char* CFG_KEY_REMINDER_FLAGS = "reminderFlags";
     constexpr static const char* APP_PRIVILEGES = "appPrivileges";
+    constexpr static const char* COLLABORATION_FILTER = "collaborationFilter";
+    constexpr static const char* COLLABORATION_FILTER_KEY_NAME = "bundleName";
+    constexpr static const char* COLLABORATION_FILTER_KEY_UID = "uid";
     constexpr static const char* CFG_KEY_MAX_CREATE_NUM_PERSECOND = "MaxCreateNumPerSecond";
     constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND = "MaxUpdateNumPerSecond";
     constexpr static const char* CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP = "MaxCreateNumPerSecondPerApp";

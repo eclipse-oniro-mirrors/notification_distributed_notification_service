@@ -932,6 +932,28 @@ public:
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
+     * @brief Gets the forceDistributed flag of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationForceDistributed(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the notDistributed flag of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationIsNotDistributed(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
      * @brief Gets the content of NotificationRequest object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under

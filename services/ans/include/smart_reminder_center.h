@@ -81,6 +81,7 @@ private:
     bool IsNeedSynergy(const NotificationConstant::SlotType &slotType,
         const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
     void InitValidDevices(set<string> &validDevices, const sptr<NotificationRequest> &request) const;
+    bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;
 
