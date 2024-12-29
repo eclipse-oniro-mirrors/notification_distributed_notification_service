@@ -22,6 +22,7 @@
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -118,6 +119,11 @@ bool BundleManagerHelper::GetBundleInfoByBundleName(
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     ret = bundleMgr_->GetBundleInfo(bundle, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId);
     IPCSkeleton::SetCallingIdentity(identity);
+    if (!ret) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_1);
+        message.Message(bundle + std::to_string(userId) + "msg: Get bundle info by bundle name failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     return ret;
 }
 
@@ -208,6 +214,11 @@ bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const App
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     bool ret = bundleMgr_->GetBundleInfo(bundleName, flag, bundleInfo, callingUserId);
     IPCSkeleton::SetCallingIdentity(identity);
+    if (!ret) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_2);
+        message.Message(bundleName + std::to_string(userId) + "msg: Get bundle info failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     return ret;
 }
 
@@ -224,6 +235,11 @@ bool BundleManagerHelper::GetBundleInfos(
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     bool ret = bundleMgr_->GetBundleInfos(flag, bundleInfos, userId);
     IPCSkeleton::SetCallingIdentity(identity);
+    if (!ret) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_3);
+        message.Message(std::to_string(userId) + "msg: Get bundle infos failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     return ret;
 }
 

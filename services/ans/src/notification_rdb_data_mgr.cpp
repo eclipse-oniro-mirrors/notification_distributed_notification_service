@@ -21,6 +21,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -632,6 +633,9 @@ std::vector<std::string> NotificationDataMgr::GenerateOperatedTables(const int32
 
 int32_t NotificationDataMgr::RestoreForMasterSlaver()
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_1)
+        .ErrorCode(NativeRdb::E_SQLITE_CORRUPT).Message("Rdb is corruped.");
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGI("RestoreForMasterSlaver start");
     int32_t result =  rdbStore_->Restore("");
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
