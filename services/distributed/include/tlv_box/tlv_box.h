@@ -79,8 +79,8 @@ private:
     void Initialize(const void* value, int32_t length);
 
     int32_t type_;
-    int32_t length_;
-    unsigned char* value_;
+    int32_t length_ = 0;
+    unsigned char* value_ = nullptr;
 };
 
 class TlvBox {

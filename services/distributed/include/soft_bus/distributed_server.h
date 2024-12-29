@@ -27,6 +27,7 @@ namespace Notification {
 class DistributedServer {
 public:
     static DistributedServer& GetInstance();
+    void CheckServer();
     void ReleaseServer();
     int32_t InitServer(const std::string &deviceId, uint16_t deviceType);
     void OnBind(int32_t socket, PeerSocketInfo info);
@@ -36,6 +37,7 @@ public:
 private:
     DistributedServer() = default;
     ~DistributedServer() = default;
+    std::atomic<bool> init = false;
     std::mutex serverLock_;
     DistributedDeviceInfo localDevice_;
     std::vector<std::shared_ptr<ConnectedSocketInfo>> peerSockets_;

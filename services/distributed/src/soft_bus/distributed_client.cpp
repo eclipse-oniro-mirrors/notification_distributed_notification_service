@@ -17,7 +17,7 @@
 #include "socket.h"
 #include "session.h"
 #include "distributed_socket.h"
-
+#include "distributed_server.h"
 namespace OHOS {
 namespace Notification {
 
@@ -108,6 +108,7 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
 int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDataType dataType,
     const std::string &deviceId, uint16_t deviceType)
 {
+    DistributedServer::GetInstance().CheckServer();
     int32_t socketId = GetSocketId(deviceId, deviceType, dataType);
     if (socketId == -1) {
         ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", deviceId.c_str(), deviceType, dataType);
