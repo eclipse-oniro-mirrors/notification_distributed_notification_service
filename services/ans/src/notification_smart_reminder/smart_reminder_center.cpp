@@ -316,7 +316,7 @@ void SmartReminderCenter::HandleReminderMethods(
       CompareStatus(STATUS_UNUSED, bitStatus)) {
         bool wearEnabled = false;
         NotificationPreferences::GetInstance()->IsSmartReminderEnabled(
-          NotificationConstant::LITEWEARABLE_DEVICE_TYPE, wearEnabled);
+            NotificationConstant::LITEWEARABLE_DEVICE_TYPE, wearEnabled);
         if (wearEnabled) {
             if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
               NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
