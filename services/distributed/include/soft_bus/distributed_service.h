@@ -45,7 +45,8 @@ public:
     void InitDeviceState(const DistributedDeviceInfo device);
     void SyncDeviceState(int32_t state);
     void SetCurrentUserId(int32_t userId);
-    void SyncDeviceMatch(const DistributedDeviceInfo device, MatchType type);
+    void SyncConnectedDevice(DistributedDeviceInfo device);
+    int32_t SyncDeviceMatch(const DistributedDeviceInfo device, MatchType type);
     void AddDevice(DistributedDeviceInfo device);
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
     void DestoryService();

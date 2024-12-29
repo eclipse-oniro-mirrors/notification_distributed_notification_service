@@ -28,6 +28,10 @@
 namespace OHOS {
 namespace Notification {
 
+namespace {
+static const int32_t MAX_CONNECTED_TYR = 5;
+}
+
 DistributedService& DistributedService::GetInstance()
 {
     static DistributedService distributedService;
@@ -85,6 +89,33 @@ void DistributedService::DestoryService()
     serviceQueue_->wait(handler);
 }
 
+void DistributedService::SyncConnectedDevice(DistributedDeviceInfo device)
+{
+    auto iter = peerDevice_.find(device.deviceId_);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGE("SyncConnectedDevice device is valid.");
+        return;
+    }
+    if (iter->second.connectedTry_ >= MAX_CONNECTED_TYR || iter->second.peerState_ != DeviceState::STATE_SYNC) {
+        ANS_LOGE("SyncConnectedDevice no need try %{public}d.", iter->second.connectedTry_);
+        return;
+    }
+    int32_t result = SyncDeviceMatch(device, MatchType::MATCH_SYN);
+    ANS_LOGE("SyncConnectedDevice try %{public}d %{public}d.", iter->second.connectedTry_, result);
+    iter->second.connectedTry_ = iter->second.connectedTry_ + 1;
+    if (result != 0) {
+        if (serviceQueue_ == nullptr) {
+            ANS_LOGE("Check handler is null.");
+            return;
+        }
+        serviceQueue_->submit_h([&, device]() {
+            SyncConnectedDevice(device);
+        });
+    } else {
+        iter->second.connectedTry_ = 0;
+    }
+}
+
 void DistributedService::AddDevice(DistributedDeviceInfo device)
 {
     if (serviceQueue_ == nullptr) {
@@ -95,10 +126,6 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         ANS_LOGI("Dans AddDevice %{public}s %{public}d %{public}s %{public}d.",
             device.deviceId_.c_str(), device.deviceType_, localDevice_.deviceId_.c_str(),
             localDevice_.deviceType_);
-        SyncDeviceMatch(device, MatchType::MATCH_SYN);
-        InitDeviceState(device);
-        RequestBundlesIcon(device);
-        ReportBundleIconList(device);
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         peerDevice_.insert(std::make_pair(deviceItem.deviceId_, deviceItem));
@@ -110,6 +137,7 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         }
         DistributedTimerService::GetInstance().StartTimer(device.deviceId_,
             GetCurrentTime() + TEN_SECEND);
+        SyncConnectedDevice(device);
     });
 }
 
@@ -130,10 +158,7 @@ void DistributedService::ReportDeviceStatus(std::string deviceId)
             ANS_LOGE("Report device status callback is null.");
             return;
         }
-
-        if (callBack_(deviceId, 0, true)) {
-            DistributedServer::GetInstance().ReleaseServer();
-        }
+        callBack_(deviceId, 0, true);
         return;
     });
 }

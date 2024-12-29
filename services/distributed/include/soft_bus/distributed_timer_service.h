@@ -22,8 +22,8 @@
 namespace OHOS {
 namespace Notification {
 
-static const int64_t TEN_SECEND = 30000;
-static const int64_t THIRTY_SECEND = 60000;
+static const int64_t TEN_SECEND = 120000;
+static const int64_t THIRTY_SECEND = 600000;
 
 class DistributedTimerInfo : public MiscServices::ITimerInfo {
 public:

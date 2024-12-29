@@ -38,10 +38,21 @@ void DistributedServer::ReleaseServer()
     for (auto& item : serverSocket_) {
         CloseSocket(item.second);
     }
+    serverSocket_.clear();
+    init.store(false);
+}
+
+void DistributedServer::CheckServer()
+{
+    InitServer(localDevice_.deviceId_, localDevice_.deviceType_);
 }
 
 int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t deviceType)
 {
+    if (init.load()) {
+        ANS_LOGI("Server has inited %{public}lu.", serverSocket_.size());
+        return 0;
+    }
     localDevice_.deviceId_ = deviceId;
     localDevice_.deviceType_ = deviceType;
     int32_t socketId = ServiceListen(ANS_SOCKET_CMD, ANS_SOCKET_PKG, TransDataType::DATA_TYPE_MESSAGE);
@@ -64,6 +75,7 @@ int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t devi
         ANS_LOGI("InitServer %{public}s %{public}s %{public}d", deviceId.c_str(),
             item.first.c_str(), item.second);
     }
+    init.store(true);
     return 0;
 }
 

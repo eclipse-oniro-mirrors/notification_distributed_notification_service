@@ -120,7 +120,7 @@ void DistributedService::SyncDeviceState(int32_t state)
     serviceQueue_->submit(task);
 }
 
-void DistributedService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
+int32_t DistributedService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
 {
     NotifticationMatchBox matchBox;
     matchBox.SetVersion(CURRENT_VERSION);
@@ -133,14 +133,15 @@ void DistributedService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice,
     }
     if (!matchBox.Serialize()) {
         ANS_LOGW("Dans SyncDeviceMatch serialize failed.");
-        return;
+        return -1;
     }
-    DistributedClient::GetInstance().SendMessage(matchBox.GetByteBuffer(),
+    int32_t result = DistributedClient::GetInstance().SendMessage(matchBox.GetByteBuffer(),
         matchBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d %{public}s %{public}d %{public}d.",
         peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
         localDevice_.deviceType_, type);
+    return result;
 }
 
 void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage)
@@ -167,6 +168,9 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
     if (matchType == MatchType::MATCH_SYN) {
         SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
     } else if (matchType == MatchType::MATCH_ACK) {
+        InitDeviceState(peerDevice);
+        RequestBundlesIcon(peerDevice);
+        ReportBundleIconList(peerDevice);
         SubscribeNotifictaion(peerDevice);
     }
 }

@@ -44,7 +44,7 @@ unsigned char* TlvItem::GetValue() const
 void TlvItem::Initialize(const void* data, int32_t length)
 {
     if (length > MAX_BUFFER_LENGTH) {
-        ANS_LOGW("Initialize data length invalid %{public}d", length);
+        ANS_LOGW("Initialize data invalid %{public}d %{public}d %{public}d", type_, length, length_);
         return;
     }
     length_ = length;
@@ -57,7 +57,10 @@ void TlvItem::Initialize(const void* data, int32_t length)
 
 TlvItem::~TlvItem()
 {
-    delete[] value_;
+    if (value_ != nullptr) {
+        delete[] value_;
+        value_ = nullptr;
+    }
 }
 
 TlvItem::TlvItem(int32_t type, bool value) : type_(type)
