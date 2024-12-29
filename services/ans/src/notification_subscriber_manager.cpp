@@ -514,6 +514,7 @@ bool NotificationSubscriberManager::IsDeviceTypeSubscriberd(const std::string de
             return true;
         }
     }
+    ANS_LOGE("device not subscribe, device = %{public}s", deviceType.c_str());
     return false;
 }
 #endif
