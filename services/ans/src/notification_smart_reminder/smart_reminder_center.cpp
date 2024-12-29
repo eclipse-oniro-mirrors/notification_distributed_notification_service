@@ -309,6 +309,24 @@ void SmartReminderCenter::HandleReminderMethods(
     }
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
+
+    // filter
+    NotificationConstant::SlotType slotType = request->GetSlotType();
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
+      CompareStatus(STATUS_UNUSED, bitStatus)) {
+        bool wearEnabled = false;
+        NotificationPreferences::GetInstance()->IsSmartReminderEnabled(NotificationConstant::LITEWEARABLE_DEVICE_TYPE, wearEnabled);
+        if (wearEnabled) {
+            if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
+              NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
+              NotificationConstant::SlotType::CUSTOMER_SERVICE == slotType
+            ) {
+                ANS_LOGI("wearable switch is open and unused and  slotType in [social|service|customer], not notify");
+                return;
+            }
+        }
+    }
+
     bool enabledAffectedBy = true;
     
     if (validDevices.find(deviceType) == validDevices.end()) {
@@ -342,11 +360,13 @@ bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &sl
 
     bool isEnable = true;
     if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(device, isEnable) != ERR_OK || !isEnable) {
+        ANS_LOGI("switch-status, smartReminderEnable closed. device = %{public}s", device.c_str());
         return false;
     }
 
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, device, isEnable) != ERR_OK
         || !isEnable) {
+        ANS_LOGI("switch-status, slot switch closed. device = %{public}s", device.c_str());
         return false;
     }
 
@@ -354,6 +374,7 @@ bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &sl
         new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
         bundleOption, device, isEnable) != ERR_OK || !isEnable) {
+        ANS_LOGI("switch-status, app switch closed. device = %{public}s", device.c_str());
         return false;
     }
     return true;
@@ -457,7 +478,7 @@ void SmartReminderCenter::GetDeviceStatusByType(
         screenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
         bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, !screenLocked);
     }
-    ANS_LOGD("GetDeviceStatusByType deviceType: %{public}s, bitStatus: %{public}s.",
+    ANS_LOGI("GetDeviceStatusByType deviceType: %{public}s, bitStatus: %{public}s.",
         deviceType.c_str(), bitStatus.to_string().c_str());
 }
 }  // namespace Notification
