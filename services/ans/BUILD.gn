@@ -51,6 +51,7 @@ ohos_source_set("ans_service_sources") {
 
   include_dirs = [
     "${services_path}/ans/include",
+    "${services_path}/ans/include/disturb_manager",
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/include/utils",
     "${services_path}/ans/include/slot_manager",
@@ -93,6 +94,10 @@ ohos_source_set("ans_service_sources") {
     "src/common/notification_app_privileges.cpp",
     "src/common/notification_config_parse.cpp",
     "src/distributed_device_status.cpp",
+    "src/disturb_manager/GetDoNotDisturbDate.cpp",
+    "src/disturb_manager/RemoveDoNotDisturbProfiles.cpp",
+    "src/disturb_manager/SetDoNotDisturbDate.cpp",
+    "src/disturb_manager/disturb_manager.cpp",
     "src/event_report.cpp",
     "src/liveview_all_scenarios_extension_wrapper.cpp",
     "src/notification_dialog.cpp",
