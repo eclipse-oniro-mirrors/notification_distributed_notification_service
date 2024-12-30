@@ -91,5 +91,27 @@ void DistributedDeviceManager::Init()
     }
     ANS_LOGI("Notification distributed manager init successfully.");
 }
+
+void DistributedDeviceManager::RegisterDms()
+{
+    if (initCallback_ == nullptr) {
+        initCallback_ = std::make_shared<DmsInitCallback>();
+    }
+    int32_t ret = DeviceManager::GetInstance().InitDeviceManager(APP_ID, initCallback_);
+    if (ret != 0) {
+        ANS_LOGE("init device manager failed, ret:%{public}d", ret);
+        return;
+    }
+
+    if (stateCallback_ == nullptr) {
+        stateCallback_ = std::make_shared<DmsStateCallback>();
+    }
+    ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID, "", stateCallback_);
+    if (ret != 0) {
+        ANS_LOGE("register state callback failed, ret:%{public}d", ret);
+        return;
+    }
+    ANS_LOGI("Notification distributed register dms successfully.");
+}
 }
 }

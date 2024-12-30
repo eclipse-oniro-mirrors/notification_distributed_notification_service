@@ -38,6 +38,7 @@ public:
 class DistributedDeviceManager {
 public:
     void Init();
+    void RegisterDms();
     static DistributedDeviceManager& GetInstance();
 private:
     std::shared_ptr<DmsInitCallback> initCallback_;
