@@ -664,15 +664,16 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
-
+    bool isDisableNotification = IsNeedToControllerByDisableNotification(request);
+    auto ownerBundleName = request->GetOwnerBundleName();
 #ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
     const int32_t uid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        if (IsDisableNotification(request)) {
-            ANS_LOGE("bundle: %{public}s in blocklist", (request->GetOwnerBundleName()).c_str());
+        if (isDisableNotification && IsDisableNotification(ownerBundleName)) {
+            ANS_LOGE("bundle: %{public}s in disable notification list", (request->GetOwnerBundleName()).c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }

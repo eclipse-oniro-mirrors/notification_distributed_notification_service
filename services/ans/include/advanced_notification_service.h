@@ -1175,7 +1175,7 @@ public:
 
     bool IsDisableNotification(const std::string &bundleName);
 
-    bool IsDisableNotification(const sptr<NotificationRequest> &request);
+    bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
