@@ -225,5 +225,14 @@ void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<
         }
     }
 }
+
+void ReminderDataManager::CollapseNotificationPanel()
+{
+    EventFwk::Want want;
+    want.SetAction("sceneboard.event.HIDE_DROPDOWN_WINDOW");
+    want.SetParam("Code", 0);
+    EventFwk::CommonEventData eventData(want);
+    EventFwk::CommonEventManager::PublishCommonEvent(eventData);
+}
 }
 }

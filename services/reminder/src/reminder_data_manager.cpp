@@ -1936,6 +1936,8 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
         ANSR_LOGE("Start ability failed, result = %{public}d", result);
         return;
     }
+    // Collapse the notification panel
+    CollapseNotificationPanel();
 }
 
 void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
