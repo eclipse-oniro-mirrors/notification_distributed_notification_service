@@ -104,7 +104,7 @@ namespace OHOS {
         manager->StopSoundAndVibrationLocked(reminder);
         manager->StopSoundAndVibration(reminder);
         manager->RemoveFromShowedReminders(reminder);
-        manager->RemoveReminderLocked(reminderId);
+        manager->RemoveReminderLocked(reminderId, false);
         manager->SetActiveReminder(reminder);
         manager->SetAlertingReminder(reminder);
         manager->ShowActiveReminderExtendLocked(reminder, reminders);
@@ -112,7 +112,7 @@ namespace OHOS {
         std::vector<sptr<Notification::ReminderRequest>> extensionReminders;
         std::vector<sptr<Notification::ReminderRequest>> immediatelyReminders;
         manager->PublishReminder(reminder, callingUid);
-        manager->FindReminderRequestLocked(reminderId);
+        manager->FindReminderRequestLocked(reminderId, false);
         manager->StartRecentReminder();
         manager->HandleImmediatelyShow(immediatelyReminders, value);
         int8_t type = fdp->ConsumeIntegral<int8_t>();

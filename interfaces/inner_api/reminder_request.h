@@ -311,6 +311,11 @@ public:
     std::map<ActionButtonType, ActionButtonInfo> GetActionButtons() const;
 
     /**
+     * @brief Set the reminder action buttons.
+     */
+    void SetActionButtons(const std::map<ActionButtonType, ActionButtonInfo>& buttons);
+
+    /**
      * @brief Obtains creator bundle name
      *
      * @return creator bundle name
@@ -747,6 +752,16 @@ public:
      */
     void SetTriggerTimeInMilli(uint64_t triggerTimeInMilli);
 
+    void SetIdentifier(const std::string& identifier)
+    {
+        identifier_ = identifier;
+    }
+
+    std::string GetIdentifier() const
+    {
+        return identifier_;
+    }
+
     /**
      * @brief Sets want agent information.
      *
@@ -849,6 +864,16 @@ public:
     std::string GetCustomButtonUri() const;
 
     /**
+     * @brief Is the reminder from datashare.
+     */
+    bool IsShare() const;
+
+    /**
+     * @brief Set the reminder from datashare.
+     */
+    void SetShare(const bool isShare);
+
+    /**
      * @brief Gets custom ring uri.
      *
      * @return custom ring uri.
@@ -917,6 +942,7 @@ public:
      * Recover from the rdb.
      */
     void DeserializeButtonInfo(const std::string& buttonInfoStr);
+    void DeserializeButtonInfoFromJson(const std::string& jsonString);
 
     static int32_t GetActualTime(const TimeTransferType &type, int32_t cTime);
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);
@@ -973,6 +999,7 @@ public:
     static const std::string REMINDER_EVENT_REMOVE_NOTIFICATION;
     static const std::string REMINDER_EVENT_LOAD_REMINDER;
     static const std::string PARAM_REMINDER_ID;
+    static const std::string PARAM_REMINDER_SHARE;
     static const uint8_t REMINDER_STATUS_INACTIVE;
     static const uint8_t REMINDER_STATUS_ACTIVE;
     static const uint8_t REMINDER_STATUS_ALERTING;
@@ -1090,6 +1117,7 @@ private:
     std::string title_ {};
     std::string bundleName_ {};
     bool isExpired_ {false};
+    bool isShare_ {false};
     uint8_t snoozeTimes_ {0};
     uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
@@ -1122,6 +1150,7 @@ private:
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
+    std::string identifier_;
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -1853,19 +1853,19 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility"})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
-    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "MainAbility");
 
     jsonValue = R"({"pkgName":"com.example.myapplication","abilityName":"MainAbility","uri":"","parameters":""})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
@@ -1907,11 +1907,11 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00007, Function | SmallTest | Lev
 
     jsonValue = R"({})";
     rrc->DeserializeWantAgent(jsonValue, 1);
-    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "");
 
     jsonValue = "fawexcdvasdfwessdf";
     rrc->DeserializeWantAgent(jsonValue, 1);
-    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "MainAbility");
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "");
 }
 
 /**
@@ -2239,6 +2239,31 @@ HWTEST_F(ReminderRequestTest, SetMaxWantAgentStr_001, Function | SmallTest | Lev
     EXPECT_EQ(rrc->GetMaxWantAgentStr(), "test123sevxgasdr5");
     rrc->SetMaxWantAgentStr("@#$^%&*)(&&*^(@!#%$#$))");
     EXPECT_EQ(rrc->GetMaxWantAgentStr(), "@#$^%&*)(&&*^(@!#%$#$))");
+}
+
+/**
+ * @tc.name: DeserializeButtonInfoFromJson_001
+ * @tc.desc: Test DeserializeButtonInfoFromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, DeserializeButtonInfoFromJson_001, Function | SmallTest | Level1)
+{
+    ReminderRequest request(1);
+    request.DeserializeButtonInfoFromJson("");
+    EXPECT_EQ(request.GetActionButtons().size(), 0);
+    request.DeserializeButtonInfoFromJson("{11");
+    EXPECT_EQ(request.GetActionButtons().size(), 0);
+    request.DeserializeButtonInfoFromJson("{}");
+    EXPECT_EQ(request.GetActionButtons().size(), 0);
+    request.DeserializeButtonInfoFromJson("[]");
+    EXPECT_EQ(request.GetActionButtons().size(), 0);
+    request.DeserializeButtonInfoFromJson(
+        R"([{"titleResource":"join","title":"test","type":0,"wantAgent":{"pkgName":"","abilityName":"","uri":""}}])");
+    EXPECT_EQ(request.GetActionButtons().size(), 1);
+    request.DeserializeButtonInfoFromJson(
+        R"([{"titleResource":"join","title":"test","type":2,"wantAgent":{"pkgName":"","abilityName":"","uri":""}}])");
+    EXPECT_EQ(request.GetActionButtons().size(), 2);
 }
 }
 }
