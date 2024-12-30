@@ -2040,7 +2040,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
-                GetSmartReminderEnableFromCCM(deviceType, enabled);
+                enabled = false;
                 break;
             }
             case NativeRdb::E_OK: {

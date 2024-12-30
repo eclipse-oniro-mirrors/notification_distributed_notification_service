@@ -435,9 +435,11 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     }
 
     if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_WEARABLE ||
-        subscribeInfo->GetDeviceType() == DEVICE_TYPE_HEADSET) {
-        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(
-            subscribeInfo->GetDeviceType(), true);
+        subscribeInfo->GetDeviceType() == DEVICE_TYPE_LITE_WEARABLE) {
+        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_WEARABLE, true);
+    }
+    if (subscribeInfo->GetDeviceType() == DEVICE_TYPE_HEADSET) {
+        AdvancedNotificationService::GetInstance()->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
     }
     return ERR_OK;
 }
