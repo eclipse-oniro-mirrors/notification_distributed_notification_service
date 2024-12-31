@@ -95,6 +95,7 @@ private:
     constexpr static const char* REMINDER_FILTER_CODE = "reminderFilterCode";
     constexpr static const char* SPLIT_FLAG = "|";
     constexpr static const char* STATUS_UNUSED = "xxx0";
+    constexpr static const char* STATUS_UNLOCK_OWNER = "x01x";
 };
 }  // namespace Notification
 }  // namespace OHOS

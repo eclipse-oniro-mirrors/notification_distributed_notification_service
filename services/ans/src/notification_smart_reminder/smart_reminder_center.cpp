@@ -328,6 +328,19 @@ void SmartReminderCenter::HandleReminderMethods(
         }
     }
 
+    bitset<DistributedDeviceStatus::STATUS_SIZE> currentStatus;
+    GetDeviceStatusByType(NotificationConstant::CURRENT_DEVICE_TYPE, currentStatus);
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
+      CompareStatus(STATUS_UNLOCK_OWNER, currentStatus)) {
+        if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
+            NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
+            NotificationConstant::SlotType::CUSTOMER_SERVICE == slotType
+        ) {
+            ANS_LOGI("current is unlocked and owner user, wearable not notify");
+            return;
+        }
+    }
+
     bool enabledAffectedBy = true;
     
     if (validDevices.find(deviceType) == validDevices.end()) {
