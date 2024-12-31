@@ -2634,13 +2634,13 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
 
     std::stringstream stream;
     if (IsAgentNotification()) {
-        stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
-            ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+        stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
+            ownerUserId_ << keySpliter << ownerUid_ << keySpliter <<
+            ownerBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
     } else {
-        stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
-            creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+        stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
+            creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
+            creatorBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
     }
     return stream.str();
 }
