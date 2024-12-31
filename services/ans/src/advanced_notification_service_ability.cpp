@@ -108,7 +108,7 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
         notificationService->ResetDistributedEnabled();
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) {
         ANS_LOGW("DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID");
-        DistributedDeviceManager::GetInstance().RegisterDms();
+        DistributedDeviceManager::GetInstance().RegisterDms(true);
     }
 }
 
