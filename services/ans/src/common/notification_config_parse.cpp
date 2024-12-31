@@ -349,44 +349,48 @@ std::unordered_set<std::string> NotificationConfigParse::GetCollaborativeDeleteT
     return collaborativeDeleteTypeSet;
 }
 
-void NotificationConfigParse::GetCollaborationFilter()
+bool NotificationConfigParse::GetFilterUidAndBundleName(const std::string &key)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(COLLABORATION_FILTER);
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE).append("/").append(COLLABORATION_FILTER).append("/").append(key);
     if (!GetConfigJson(jsonPoint, root)) {
         ANS_LOGE("Failed to get jsonPoint CCM config file.");
-        return;
+        return false;
     }
 
     if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
         !root[CFG_KEY_NOTIFICATION_SERVICE].contains(COLLABORATION_FILTER)) {
         ANS_LOGE("Not found jsonKey collaborationFilter.");
-        return;
+        return false;
     }
+
     nlohmann::json collaborationFilter = root[CFG_KEY_NOTIFICATION_SERVICE][COLLABORATION_FILTER];
     if (collaborationFilter.is_null() || collaborationFilter.empty()) {
         ANS_LOGE("GetCollaborationFilter failed as invalid ccmCollaborationFilter json.");
-        return;
+        return false;
     }
-    if (collaborationFilter.contains(COLLABORATION_FILTER_KEY_UID) &&
-        collaborationFilter[COLLABORATION_FILTER_KEY_UID].is_array()) {
-        for (const auto& item : collaborationFilter[COLLABORATION_FILTER_KEY_UID]) {
+    if (collaborationFilter.contains(key) && collaborationFilter[key].is_array()) {
+        for (const auto& item : collaborationFilter[key]) {
             if (item.is_number_integer()) {
                 uidList_.push_back(item.get<int32_t>());
             }
-        }
-    }
-
-    if (collaborationFilter.contains(COLLABORATION_FILTER_KEY_NAME) &&
-        collaborationFilter[COLLABORATION_FILTER_KEY_NAME].is_array()) {
-        for (const auto& item : collaborationFilter[COLLABORATION_FILTER_KEY_NAME]) {
             if (item.is_string()) {
                 bundleNameList_.push_back(item.get<std::string>());
             }
         }
+        return true;
+    }
+    return false;
+}
+
+void NotificationConfigParse::GetCollaborationFilter()
+{
+    if (!GetFilterUidAndBundleName(COLLABORATION_FILTER_KEY_UID)) {
+        ANS_LOGW("Failed to get filterUid.");
+    }
+    if (!GetFilterUidAndBundleName(COLLABORATION_FILTER_KEY_NAME)) {
+        ANS_LOGW("Failed to get filterBundleName.");
     }
 }
 

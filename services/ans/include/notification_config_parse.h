@@ -52,6 +52,7 @@ public:
     bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
     bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
     std::unordered_set<std::string> GetCollaborativeDeleteType() const;
+    bool GetFilterUidAndBundleName(const std::string &key);
     void GetCollaborationFilter();
     bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
 
