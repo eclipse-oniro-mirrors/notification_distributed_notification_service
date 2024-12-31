@@ -22,6 +22,7 @@
 #include "common_event_support.h"
 #include "notification_preferences.h"
 #include "notification_clone_manager.h"
+#include "distributed_device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -121,6 +122,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);
+        DistributedDeviceManager::GetInstance().InitTrustList();
         return;
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();

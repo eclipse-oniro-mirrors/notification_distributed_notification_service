@@ -332,7 +332,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
-    DistributedDeviceManager::GetInstance().Init();
+    DistributedDeviceManager::GetInstance().RegisterDms(true);
 #endif
 }
 

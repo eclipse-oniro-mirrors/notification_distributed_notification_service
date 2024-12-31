@@ -63,23 +63,14 @@ DistributedDeviceManager& DistributedDeviceManager::GetInstance()
     return distributedDeviceManager;
 }
 
-void DistributedDeviceManager::Init()
+void DistributedDeviceManager::InitTrustList()
 {
-    initCallback_ = std::make_shared<DmsInitCallback>();
-    int32_t ret = DeviceManager::GetInstance().InitDeviceManager(APP_ID, initCallback_);
-    if (ret != 0) {
-        ANS_LOGE("init device manager failed, ret:%{public}d", ret);
-        return;
-    }
-
-    stateCallback_ = std::make_shared<DmsStateCallback>();
-    ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID, "", stateCallback_);
-    if (ret != 0) {
-        ANS_LOGE("register state callback failed, ret:%{public}d", ret);
+    if (!RegisterDms(false)) {
         return;
     }
     std::vector<DmDeviceInfo> deviceInfoList;
-    ret = DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList(APP_ID, "", true, deviceInfoList);
+    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetTrustedDeviceList(APP_ID, "",
+        true, deviceInfoList);
     if (ret != 0) {
         ANS_LOGE("Get trust list failed, ret:%{public}d", ret);
         return;
@@ -89,18 +80,21 @@ void DistributedDeviceManager::Init()
             deviceInfo.networkType, deviceInfo.deviceId, deviceInfo.networkId);
         DistributedExtensionService::GetInstance().OnDeviceOnline(deviceInfo);
     }
-    ANS_LOGI("Notification distributed manager init successfully.");
 }
 
-void DistributedDeviceManager::RegisterDms()
+bool DistributedDeviceManager::RegisterDms(bool forceInit)
 {
+    if (hasInit.load() && !forceInit) {
+        ANS_LOGE("init device manager has inited.");
+        return true;
+    }
     if (initCallback_ == nullptr) {
         initCallback_ = std::make_shared<DmsInitCallback>();
     }
     int32_t ret = DeviceManager::GetInstance().InitDeviceManager(APP_ID, initCallback_);
     if (ret != 0) {
         ANS_LOGE("init device manager failed, ret:%{public}d", ret);
-        return;
+        return false;
     }
 
     if (stateCallback_ == nullptr) {
@@ -109,9 +103,11 @@ void DistributedDeviceManager::RegisterDms()
     ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID, "", stateCallback_);
     if (ret != 0) {
         ANS_LOGE("register state callback failed, ret:%{public}d", ret);
-        return;
+        return false;
     }
+    hasInit.store(true);
     ANS_LOGI("Notification distributed register dms successfully.");
+    return true;
 }
 }
 }
