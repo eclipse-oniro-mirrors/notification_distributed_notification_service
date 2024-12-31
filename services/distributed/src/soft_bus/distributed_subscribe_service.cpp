@@ -106,6 +106,38 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
     serviceQueue_->submit(subscribeTask);
 }
 
+void DistributedService::SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
+    NotificationContent::Type type, NotifticationRequestBox &requestBox)
+{
+    if (content == nullptr || content->GetNotificationContent() == nullptr) {
+        return;
+    }
+    std::string title;
+    std::string text;
+    switch (type) {
+        case NotificationContent::Type::PICTURE:
+        case NotificationContent::Type::BASIC_TEXT:
+        case NotificationContent::Type::MULTILINE: {
+            std::shared_ptr<NotificationBasicContent> contentBasic =
+                std::static_pointer_cast<NotificationBasicContent>(content->GetNotificationContent());
+            title = contentBasic->GetTitle();
+            text = contentBasic->GetText();
+            break;
+        }
+        case NotificationContent::Type::LONG_TEXT: {
+            std::shared_ptr<NotificationLongTextContent> contentLong =
+                std::static_pointer_cast<NotificationLongTextContent>(content->GetNotificationContent());
+            title = contentLong->GetTitle();
+            text = contentLong->GetLongText();
+            break;
+        }
+        default:
+            break;
+    }
+    requestBox.SetNotificationTitle(title);
+    requestBox.SetNotificationText(text);
+}
+
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
 {
@@ -113,7 +145,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         ANS_LOGE("Check handler is null.");
         return;
     }
-    std::function<void()> task = std::bind([peerDevice, request]() {
+    std::function<void()> task = std::bind([&, peerDevice, request]() {
         NotifticationRequestBox requestBox;
         ANS_LOGI("Dans OnConsumed %{public}s", request->Dump().c_str());
         if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
@@ -137,9 +169,8 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
             requestBox.SetCommonLiveView(buffer);
         } else {
-            auto content = request->GetNotificationRequestPoint()->GetContent();
-            requestBox.SetNotificationTitle(content->GetNotificationContent()->GetTitle());
-            requestBox.SetNotificationText(content->GetNotificationContent()->GetText());
+            SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
+                requestPoint->GetNotificationType(), requestBox);
         }
         if (!requestBox.Serialize()) {
             ANS_LOGW("Dans OnConsumed serialize failed.");

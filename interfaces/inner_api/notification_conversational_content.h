@@ -152,7 +152,7 @@ protected:
      */
     bool ReadFromParcel(Parcel &parcel) override;
 
-private:
+public:
     NotificationConversationalContent() = default;
 
 private:

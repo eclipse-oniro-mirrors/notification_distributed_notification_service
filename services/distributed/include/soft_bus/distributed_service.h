@@ -67,11 +67,17 @@ private:
     bool CheckPeerDevice(const BundleIconBox& boxMessage, DistributedDeviceInfo& device);
     void PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void HandleDeviceState(const std::shared_ptr<TlvBox>& boxMessage);
-    void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
-    void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
+    void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+        bool isCommonLiveView, int32_t contentType);
+    void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+        bool isCommonLiveView);
+    void SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+        int32_t contentType);
     void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
     void RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage);
+    void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
+        NotificationContent::Type type, NotifticationRequestBox &requestBox);
     std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
     std::set<std::string> bundleIconCache_;
     int32_t userId_ = DEFAULT_USER_ID;

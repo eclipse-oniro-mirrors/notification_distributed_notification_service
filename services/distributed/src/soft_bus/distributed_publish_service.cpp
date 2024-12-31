@@ -18,7 +18,9 @@
 #include "distributed_client.h"
 #include "request_box.h"
 #include "state_box.h"
+#include "ans_image_util.h"
 #include "in_process_call_wrapper.h"
+#include "distributed_preference.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
@@ -28,16 +30,60 @@ namespace {
 constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
 }
 
-void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request)
+void DistributedService::SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    int32_t contentType)
 {
-    int32_t slotType = 0;
-    int32_t contentType = 0;
-    bool isCommonLiveView = false;
-    if (box.GetSlotType(slotType) && box.GetContentType(contentType)) {
-        isCommonLiveView =
-            (static_cast<NotificationConstant::SlotType>(slotType) == NotificationConstant::SlotType::LIVE_VIEW) &&
-            (static_cast<NotificationContent::Type>(contentType) == NotificationContent::Type::LIVE_VIEW);
+    std::string title;
+    std::string context;
+    box.GetNotificationText(context);
+    box.GetNotificationTitle(title);
+    std::shared_ptr<NotificationContent> content;
+    NotificationContent::Type type = static_cast<NotificationContent::Type>(contentType);
+    switch (type) {
+        case NotificationContent::Type::BASIC_TEXT: {
+            auto pContent = std::make_shared<NotificationNormalContent>();
+            pContent->SetText(context);
+            pContent->SetTitle(title);
+            content = std::make_shared<NotificationContent>(pContent);
+            break;
+        }
+        case NotificationContent::Type::CONVERSATION: {
+            auto pContent = std::make_shared<NotificationConversationalContent>();
+            pContent->SetText(context);
+            pContent->SetTitle(title);
+            content = std::make_shared<NotificationContent>(pContent);
+            break;
+        }
+        case NotificationContent::Type::LONG_TEXT: {
+            auto pContent = std::make_shared<NotificationLongTextContent>();
+            pContent->SetLongText(context);
+            pContent->SetTitle(title);
+            content = std::make_shared<NotificationContent>(pContent);
+            break;
+        }
+        case NotificationContent::Type::MULTILINE: {
+            auto pContent = std::make_shared<NotificationMultiLineContent>();
+            pContent->SetText(context);
+            pContent->SetTitle(title);
+            content = std::make_shared<NotificationContent>(pContent);
+            break;
+        }
+        case NotificationContent::Type::PICTURE: {
+            auto pContent = std::make_shared<NotificationPictureContent>();
+            pContent->SetText(context);
+            pContent->SetTitle(title);
+            content = std::make_shared<NotificationContent>(pContent);
+            break;
+        }
+        default:
+            break;
     }
+    request->SetContent(content);
+}
+
+void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    bool isCommonLiveView, int32_t contentType)
+{
     if (isCommonLiveView) {
         std::vector<uint8_t> buffer;
         if (box.GetCommonLiveView(buffer)) {
@@ -48,21 +94,13 @@ void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& 
             liveviewContent->SetExtraInfo(extraInfo);
             DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewDecodeContent(request, buffer);
         }
-    } else {
-        std::string context;
-        std::shared_ptr<NotificationNormalContent> noramlContent = std::make_shared<NotificationNormalContent>();
-        if (box.GetNotificationText(context)) {
-            noramlContent->SetText(context);
-        }
-        if (box.GetNotificationTitle(context)) {
-            noramlContent->SetTitle(context);
-        }
-        std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(noramlContent);
-        request->SetContent(content);
+        return;
     }
+    SetNotifictaionContent(box, request, contentType);
 }
 
-void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request)
+void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    bool isCommonLiveView)
 {
     std::shared_ptr<Media::PixelMap> icon;
     if (box.GetBigIcon(icon)) {
@@ -70,6 +108,19 @@ void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box
     }
     if (box.GetOverlayIcon(icon)) {
         request->SetOverlayIcon(icon);
+    }
+
+    if (isCommonLiveView) {
+        std::string bundleName;
+        if (!box.GetCreatorBundleName(bundleName)) {
+            return;
+        }
+        std::string icon;
+        DistributedPreferences::GetInstance().GetIconByBundleName(bundleName, icon);
+        if (!icon.empty()) {
+            auto iconPixelMap = AnsImageUtil::UnPackImage(icon);
+            request->SetLittleIcon(iconPixelMap);
+        }
     }
 }
 
@@ -108,9 +159,17 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
         ANS_LOGE("NotificationRequest is nullptr");
         return;
     }
+    int32_t slotType = 0;
+    int32_t contentType = 0;
     NotifticationRequestBox requestBox = NotifticationRequestBox(boxMessage);
-    MakeNotifictaionContent(requestBox, request);
-    MakeNotifictaionIcon(requestBox, request);
+    bool isCommonLiveView = false;
+    if (requestBox.GetSlotType(slotType) && requestBox.GetContentType(contentType)) {
+        isCommonLiveView =
+            (static_cast<NotificationContent::Type>(contentType) == NotificationContent::Type::LIVE_VIEW) &&
+            (static_cast<NotificationConstant::SlotType>(slotType) == NotificationConstant::SlotType::LIVE_VIEW);
+    }
+    MakeNotifictaionContent(requestBox, request, isCommonLiveView, contentType);
+    MakeNotifictaionIcon(requestBox, request, isCommonLiveView);
     MakeNotifictaionReminderFlag(requestBox, request);
     int result = IN_PROCESS_CALL(NotificationHelper::PublishNotification(*request));
     ANS_LOGI("Dans publish message %{public}s %{public}d.", request->Dump().c_str(), result);
