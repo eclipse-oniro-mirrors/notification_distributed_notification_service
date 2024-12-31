@@ -689,6 +689,7 @@ HWTEST_F(ReminderDataManagerTest, CheckPulishReminder_0001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, OnLanguageChanged_0001, Level1)
 {
+    sleep(2);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     reminder->SetReminderId(10);
     std::string title = "this is title";
