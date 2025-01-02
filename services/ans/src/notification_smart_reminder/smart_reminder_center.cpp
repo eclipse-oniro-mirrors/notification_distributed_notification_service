@@ -30,7 +30,6 @@ namespace Notification {
 using namespace std;
 namespace {
     const std::string ANS_VOIP = "ANS_VOIP";
-    const std::string ANS_CALL = "ANS_CALL";
 }
 SmartReminderCenter::SmartReminderCenter()
 {
@@ -298,7 +297,7 @@ void SmartReminderCenter::HandleReminderMethods(
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
 {
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
-        (request->GetClassification() == ANS_VOIP || request->GetClassification() == ANS_CALL)) {
+        (request->GetClassification() == ANS_VOIP)) {
         ANS_LOGI("VOIP or CALL is not affected with SmartReminder");
         return;
     }
