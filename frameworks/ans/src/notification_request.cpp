@@ -2887,5 +2887,14 @@ void NotificationRequest::SetDistributedHashCode(const std::string hashCode)
     distributedHashCode_ = hashCode;
 }
 
+bool NotificationRequest::GetCollaborateDelete() const
+{
+    return isCollaborateDelete_;
+}
+
+void NotificationRequest::SetCollaborateDelete(bool isCollaborateDelete)
+{
+    isCollaborateDelete_ = isCollaborateDelete;
+}
 }  // namespace Notification
 }  // namespace OHOS

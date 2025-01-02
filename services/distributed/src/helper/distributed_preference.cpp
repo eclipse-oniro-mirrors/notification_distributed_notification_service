@@ -117,21 +117,5 @@ int32_t DistributedPreferences::GetSavedBundlesIcon(std::vector<std::string>& bu
     }
     return 0;
 }
-
-void DistributedPreferences::AddCollaborativeNotification(const std::string& notificationKey)
-{
-    collaborativeNotificationList_.insert(notificationKey);
-}
-
-bool DistributedPreferences::CheckCollaborativeNotification(const std::string& notificationKey)
-{
-    auto it = collaborativeNotificationList_.find(notificationKey);
-    if (it != collaborativeNotificationList_.end()) {
-        collaborativeNotificationList_.erase(it);
-        return true;
-    }
-    ANS_LOGE("CheckCollaborativeNotification failed");
-    return false;
-}
 }
 }

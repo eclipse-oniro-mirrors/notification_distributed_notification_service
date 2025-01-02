@@ -58,6 +58,7 @@ void DistribuedSubscriber::OnCanceled(const std::shared_ptr<Notification> &reque
         ANS_LOGD("is cross device deletion");
         return;
     }
+    
     if (CheckNeedCollaboration(request)) {
         DistributedService::GetInstance().OnCanceled(request, peerDevice_);
     }
@@ -139,52 +140,14 @@ void DistribuedSubscriber::SetPeerDevice(DistributedDeviceInfo peerDevice)
     peerDevice_ = peerDevice;
 }
 
-bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConstant::SlotType& slotType)
-{
-    std::string type;
-    switch (slotType) {
-        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
-            type = "SOCIAL_COMMUNICATION";
-            break;
-        case NotificationConstant::SlotType::SERVICE_REMINDER:
-            type = "SERVICE_REMINDER";
-            break;
-        case NotificationConstant::SlotType::CONTENT_INFORMATION:
-            type = "CONTENT_INFORMATION";
-            break;
-        case NotificationConstant::SlotType::OTHER:
-            type = "OTHER";
-            break;
-        case NotificationConstant::SlotType::CUSTOM:
-            type = "CUSTOM";
-            break;
-        case NotificationConstant::SlotType::LIVE_VIEW:
-            type = "LIVE_VIEW";
-            break;
-        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
-            type = "CUSTOMER_SERVICE";
-            break;
-        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
-            type = "EMERGENCY_INFORMATION";
-            break;
-        case NotificationConstant::SlotType::ILLEGAL_TYPE:
-            type = "ILLEGAL_TYPE";
-            break;
-        default:
-            return false;
-    }
-    auto collaboratives = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
-    return collaboratives.find(type) != collaboratives.end();
-}
-
 bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notification>& notification)
 {
     if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
         ANS_LOGE("notification or request is nullptr");
         return false;
     }
-    if (!CheckCollaborativeRemoveType(notification->GetNotificationRequestPoint()->GetSlotType())) {
-        ANS_LOGE("CheckCollaborativeRemoveType failed");
+    if (!notification->GetNotificationRequestPoint()->GetCollaborateDelete()) {
+        ANS_LOGE("checkCollaborativeDeleteType failed");
         return false;
     }
     return true;
