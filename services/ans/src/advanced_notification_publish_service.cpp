@@ -1726,9 +1726,6 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
         std::string message = "remove notificaiton error";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 7)
-            .ErrorCode(result).NotificationId(notificationId);
-        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
     }
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
