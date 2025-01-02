@@ -86,6 +86,10 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
+    if (sptrInfo == nullptr) {
+        ANS_LOGE("Failed to create sptrInfo");
+        return ERR_ANS_NO_MEMORY;
+    }
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {

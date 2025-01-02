@@ -76,6 +76,9 @@ void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
     }
     for (const auto &profile : jsonObject) {
         sptr<NotificationDoNotDisturbProfile> item = new (std::nothrow) NotificationDoNotDisturbProfile();
+        if (item == nullptr) {
+            return;
+        }
         item->FromJson(profile.dump());
         profiles_.push_back(item);
     }

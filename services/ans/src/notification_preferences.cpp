@@ -678,7 +678,10 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    if (bundleOption == nullptr) {
+        return;
+    }
     bundleOption->SetBundleName(cloneBundleInfo.GetBundleName());
     bundleOption->SetUid(cloneBundleInfo.GetUid());
     std::lock_guard<std::mutex> lock(preferenceMutex_);
@@ -708,6 +711,9 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     std::vector<sptr<NotificationSlot>> slots;
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
+        if (slotInfo == nullptr) {
+            return;
+        }
         uint32_t slotFlags = bundleInfo.GetSlotFlags();
         auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
             GetConfigSlotReminderModeByType(slotInfo->GetType());
