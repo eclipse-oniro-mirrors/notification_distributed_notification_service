@@ -678,7 +678,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     if (bundleOption == nullptr) {
         return;
     }
