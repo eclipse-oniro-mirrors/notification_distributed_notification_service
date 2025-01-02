@@ -201,12 +201,12 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     record->request = request;
     record->isThirdparty = false;
     record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
-    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
+    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
@@ -2267,12 +2267,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     } else {
         record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     }
-    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
+    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
