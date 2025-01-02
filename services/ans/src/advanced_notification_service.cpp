@@ -2369,7 +2369,7 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
         auto localLiveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
             requestContent->GetNotificationContent());
         if (localLiveViewContent->GetType() == TYPE_CODE_VOIP) {
-            request->SetClassification(ANS_CALL);
+            request->SetClassification(ANS_VOIP);
         }
     }
 }
