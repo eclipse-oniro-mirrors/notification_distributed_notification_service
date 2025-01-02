@@ -156,7 +156,6 @@ ErrCode ReminderDataManager::CancelAllReminders(const std::string& bundleName,
     const int32_t userId, const int32_t callingUid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
     CancelRemindersImplLocked(bundleName, userId, callingUid);
     return ERR_OK;
 }
@@ -252,7 +251,6 @@ void ReminderDataManager::GetValidReminders(
 
 void ReminderDataManager::CancelAllReminders(const int32_t userId)
 {
-    ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
     CancelRemindersImplLocked(ALL_PACKAGES, userId, -1, true);
 }
 
@@ -370,6 +368,9 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const int32_t calling
 
 void ReminderDataManager::OnUnlockScreen()
 {
+    if (queue_ == nullptr) {
+        return;
+    }
     bool expected = false;
     if (isScreenUnLocked_.compare_exchange_strong(expected, true)) {
         ffrt::task_attr taskAttr;
@@ -410,7 +411,6 @@ void ReminderDataManager::OnUserRemove(const int32_t& userId)
 
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 {
-    ANSR_LOGD("Switch user id from %{private}d to %{private}d", currentUserId_, userId);
     currentUserId_ = userId;
     ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
