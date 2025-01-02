@@ -76,6 +76,7 @@
 #include "notification_analytics_util.h"
 #include "advanced_notification_flow_control_service.h"
 #include "distributed_device_manager.h"
+#include "liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1034,6 +1035,9 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
     while (iter != notificationList_.end()) {
         if ((*iter)->notification->GetKey() == record->notification->GetKey()) {
             record->request->FillMissingParameters((*iter)->request);
+            if (record->request->IsCommonLiveView()) {
+                LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(record->request);
+            }
             FillLockScreenPicture(record->request, (*iter)->request);
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
             if (!record->request->IsSystemLiveView()) {
