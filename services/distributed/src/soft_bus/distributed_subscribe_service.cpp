@@ -30,6 +30,7 @@ namespace OHOS {
 namespace Notification {
 
 const std::string DISTRIBUTED_LABEL = "ans_distributed";
+const int32_t DEFAULT_FILTER_TYPE = 1;
 
 std::string SubscribeTransDeviceType(uint16_t deviceType_)
 {
@@ -57,6 +58,11 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     subscriber->SetLocalDevice(localDevice_);
     subscriber->SetPeerDevice(peerDevice);
     sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    std::vector<NotificationConstant::SlotType> slotTypes;
+    slotTypes.push_back(NotificationConstant::SlotType::LIVE_VIEW);
+    slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    subscribeInfo->SetSlotTypes(slotTypes);
+    subscribeInfo->SetFilterType(DEFAULT_FILTER_TYPE);
     subscribeInfo->AddDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
     subscribeInfo->AddAppUserId(userId_);
     subscribeInfo->SetNeedNotifyApplication(true);
