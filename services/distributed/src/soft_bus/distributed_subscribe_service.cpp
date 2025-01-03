@@ -182,7 +182,6 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             ANS_LOGW("Dans OnConsumed serialize failed.");
             return;
         }
-        DistributedPreferences::GetInstance().AddCollaborativeNotification(request->GetKey());
         DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
             TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
     });
@@ -196,15 +195,13 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         ANS_LOGE("check handler is null.");
         return;
     }
+
     std::function<void()> task = std::bind([peerDevice, notifications, this]() {
         BatchRemoveNotifticationBox batchRemoveBox;
         std::vector<std::string> notificationKeys;
         for (auto notification : notifications) {
             if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-                continue;
-            }
-            if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
-                !DistributedPreferences::GetInstance().CheckCollaborativeNotification(notification->GetKey())) {
+                ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
                 continue;
             }
             ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
@@ -235,11 +232,7 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
     std::function<void()> task = std::bind([peerDevice, notification, this]() {
         NotificationRemoveBox removeBox;
         if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-            return;
-        }
-        if (!notification->GetNotificationRequestPoint()->GetDistributedCollaborate() &&
-            !DistributedPreferences::GetInstance().CheckCollaborativeNotification(notification->GetKey())) {
-            ANS_LOGE("notification not collaborative");
+            ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
             return;
         }
         ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());
@@ -256,6 +249,10 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
 
 std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notification>& notification)
 {
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
+        return "";
+    }
     std::string notificationKey = notification->GetKey();
     if (notification->GetNotificationRequestPoint()->GetDistributedCollaborate()) {
         size_t pos = notificationKey.find(DISTRIBUTED_LABEL);
