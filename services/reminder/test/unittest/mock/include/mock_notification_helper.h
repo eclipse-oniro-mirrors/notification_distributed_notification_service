@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
-#define BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+#ifndef BASE_NOTIFICATION_REMINDER_MOCK_NOTIFICATION_HELPER_H
+#define BASE_NOTIFICATION_REMINDER_MOCK_NOTIFICATION_HELPER_H
 
 #include <cstdint>
 
 namespace OHOS::Notification {
-class MockOsAccountManager {
+class MockNotificationHelper {
 public:
-    static void MockGetForegroundOsAccountLocalId(const int32_t ret);
+    static void MockIsAllowUseReminder(const bool isAllowUseReminder);
+    static void MockIsAllowedNotify(const bool isAllowedNotify, const int32_t ret);
 };
 }  // namespace OHOS::Notification
 
-#endif  // BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+#endif  // BASE_NOTIFICATION_REMINDER_MOCK_NOTIFICATION_HELPER_H

@@ -13,16 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
-#define BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+#include "mock_os_account_manager.h"
 
-#include <cstdint>
+#include "os_account_manager.h"
 
-namespace OHOS::Notification {
-class MockOsAccountManager {
-public:
-    static void MockGetForegroundOsAccountLocalId(const int32_t ret);
-};
-}  // namespace OHOS::Notification
+namespace OHOS {
+namespace {
+int32_t g_mockGetForegroundOsAccountLocalIdRet = 0;
+}
 
-#endif  // BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+namespace Notification {
+void MockOsAccountManager::MockGetForegroundOsAccountLocalId(const int32_t ret)
+{
+    g_mockGetForegroundOsAccountLocalIdRet = ret;
+}
+}
+
+namespace AccountSA {
+ErrCode OsAccountManager::GetForegroundOsAccountLocalId(int32_t& id)
+{
+    return g_mockGetForegroundOsAccountLocalIdRet;
+}
+}
+} // namespace OHOS
