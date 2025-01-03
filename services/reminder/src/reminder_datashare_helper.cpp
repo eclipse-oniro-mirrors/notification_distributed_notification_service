@@ -199,7 +199,7 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::GetCacheRe
         std::lock_guard<std::mutex> locker(cacheMutex_);
         results = std::move(cache_);
     }
-    return cache_;
+    return results;
 }
 
 void ReminderDataShareHelper::InsertCacheReminders(const std::map<std::string, sptr<ReminderRequest>>& reminders)

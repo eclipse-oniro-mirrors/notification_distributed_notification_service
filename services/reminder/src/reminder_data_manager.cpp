@@ -638,6 +638,7 @@ void ReminderDataManager::StartLoadTimer()
 void ReminderDataManager::InitShareReminders()
 {
     ANSR_LOGD("Call.");
+    ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     ReminderDataShareHelper::GetInstance().UpdateCalendarUid();
     ReminderDataShareHelper::GetInstance().RegisterObserver();
     LoadShareReminders();
