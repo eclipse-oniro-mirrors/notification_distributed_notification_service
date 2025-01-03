@@ -50,6 +50,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "datashare_predicates.h"
+#include "advanced_notification_flow_control_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -230,7 +231,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             }
             return;
         }
-
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
+        if (result != ERR_OK) {
+            return;
+        }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;
@@ -2401,16 +2406,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         return ERR_ANS_INVALID_PARAM;
     }
 
-    result = FlowControl(record);
-    if (result != ERR_OK) {
-        return result;
-    }
     SetRequestBySlotType(record->request, bundleOption);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
-    auto ipcUid = IPCSkeleton::GetCallingUid();
+    const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
         if (!bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
@@ -2429,7 +2430,11 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
             return;
         }
-
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
+        if (result != ERR_OK) {
+            return;
+        }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;

@@ -3762,12 +3762,12 @@ HWTEST_F(AdvancedNotificationServiceTest, GetExcludeDates_00001, Function | Smal
 }
 
 /**
- * @tc.number    : PublishFlowControl_00001
- * @tc.name      : Test PublishFlowControl
- * @tc.desc      : Test PublishFlowControl function when the record->slot is nullptr
+ * @tc.number    : PublishInNotificationList_00001
+ * @tc.name      : Test PublishInNotificationList
+ * @tc.desc      : Test PublishInNotificationList function when the record->slot is nullptr
  * @tc.require   : issueI5S4VP
  */
-HWTEST_F(AdvancedNotificationServiceTest, PublishFlowControl_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Function | SmallTest | Level1)
 {
     for (int i = 0; i < 100; i++) {
         sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
@@ -3783,7 +3783,7 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishFlowControl_00001, Function | S
     auto record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->notification = notification;
-    advancedNotificationService_->PublishFlowControl(record);
+    advancedNotificationService_->PublishInNotificationList(record);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 100);
 }
 }  // namespace Notification

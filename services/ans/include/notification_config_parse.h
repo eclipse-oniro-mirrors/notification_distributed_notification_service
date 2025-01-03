@@ -28,6 +28,7 @@
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_flags.h"
+#include "advanced_notification_flow_control_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -42,6 +43,7 @@ public:
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
         const sptr<NotificationBundleOption> &bundleOption) const;
+    void GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold);
     
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
@@ -53,6 +55,10 @@ public:
     constexpr static const char* CFG_KEY_NAME = "name";
     constexpr static const char* CFG_KEY_REMINDER_FLAGS = "reminderFlags";
     constexpr static const char* APP_PRIVILEGES = "appPrivileges";
+    constexpr static const char* CFG_KEY_MAX_CREATE_NUM_PERSECOND = "MaxCreateNumPerSecond";
+    constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND = "MaxUpdateNumPerSecond";
+    constexpr static const char* CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP = "MaxCreateNumPerSecondPerApp";
+    constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP = "MaxUpdateNumPerSecondPerApp";
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else
