@@ -38,7 +38,7 @@ DistributedManager& DistributedManager::GetInstance()
 
 void DistributedManager::ReleaseLocalDevice()
 {
-    DistributedServer::GetInstance().ReleaseServer();
+    DistributedService::GetInstance().DestoryService();
 }
 
 int32_t DistributedManager::InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
