@@ -18,6 +18,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_subscriber_local_live_view_interface.h"
+#include "disturb_manager.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "notification_bundle_option.h"
@@ -229,12 +230,9 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleIsSpecialBundleAllowedNotify(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE): {
-            result = HandleSetDoNotDisturbDate(data, reply);
-            break;
-        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE): 
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE): {
-            result = HandleGetDoNotDisturbDate(data, reply);
+            result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE): {
@@ -410,7 +408,7 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES): {
-            result = HandleRemoveDoNotDisturbProfiles(data, reply);
+            result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS): {
