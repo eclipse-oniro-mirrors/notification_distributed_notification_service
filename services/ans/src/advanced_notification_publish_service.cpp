@@ -2020,6 +2020,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
+        case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
             Uri uri(CONTACT_DATA);
             isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
             break;

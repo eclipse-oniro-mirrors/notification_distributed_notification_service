@@ -29,6 +29,7 @@ constexpr const char *KEY_FOCUS_MODE_ENABLE = "focus_mode_enable";
 constexpr const char *KEY_FOCUS_MODE_PROFILE = "focus_mode_profile";
 constexpr const char *KEY_FOCUS_MODE_CALL_MESSAGE_POLICY = "focus_mode_call_message_policy";
 constexpr const char *KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE = "focus_mode_repeate_callers_enable";
+constexpr const char *KEY_INTELLIGENT_SCENE_DATA = "intelligent_scene_data";
 } // namespace
 
 class AdvancedDatashareHelper : DelayedSingleton<AdvancedDatashareHelper> {

@@ -1224,6 +1224,7 @@ private:
         ALLOW_EXISTING_CONTACTS = 3,
         ALLOW_FAVORITE_CONTACTS = 4,
         ALLOW_SPECIFIED_CONTACTS = 5,
+        FORBID_SPECIFIED_CONTACTS = 6,
     };
 
     AdvancedNotificationService();

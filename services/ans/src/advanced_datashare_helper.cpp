@@ -15,6 +15,7 @@
 
 #include "advanced_datashare_helper.h"
 
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
