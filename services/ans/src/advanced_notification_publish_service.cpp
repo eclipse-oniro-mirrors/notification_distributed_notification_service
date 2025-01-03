@@ -2019,14 +2019,36 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
             break;
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
+            isNeedSilent = QueryContactByProfileId(CONTACT_DATA, phoneNumber, policy, userId);
+            break;
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
         case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
-            Uri uri(CONTACT_DATA);
-            isNeedSilent = datashareHelper->QueryContact(uri, phoneNumber, policy);
+            isNeedSilent = QueryContactByProfileId(datashareHelper->GetIntelligentUri(),
+                phoneNumber, policy, userId);
             break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
     return isNeedSilent;
+}
+
+ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &uri, const std::string &phoneNumber,
+    const std::string &policy, int32_t userId)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return -1;
+    }
+    std::string profileId;
+    Uri profileIdUri(datashareHelper->GetFocusModeProfileUri(userId));
+    bool profile_ret = datashareHelper->Query(profileIdUri, KEY_FOCUS_MODE_PROFILE, profileId);
+    if (!profile_ret) {
+        ANS_LOGE("Query profile id fail.");
+        return -1;
+    }
+
+    Uri contactUri(uri);
+    return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId);
 }
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, const std::string &instanceKey)
