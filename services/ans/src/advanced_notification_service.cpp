@@ -96,7 +96,7 @@ constexpr int32_t RESSCHED_UID = 1096;
 constexpr int32_t TYPE_CODE_VOIP = 0;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
-const std::string ANS_CALL = "ANS_CALL";
+const std::string ANS_VOIP = "ANS_VOIP";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
 
@@ -2373,7 +2373,7 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
         auto localLiveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
             requestContent->GetNotificationContent());
         if (localLiveViewContent->GetType() == TYPE_CODE_VOIP) {
-            request->SetClassification(ANS_CALL);
+            request->SetClassification(ANS_VOIP);
         }
     }
 }
