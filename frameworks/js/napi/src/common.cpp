@@ -371,10 +371,10 @@ napi_value Common::GetNotificationSubscriberInfo(
     }
 
     // filterType?: number
-    NAPI_CALL(env, napi_has_named_property(env, value, "filterType", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, value, "filterLimit", &hasProperty));
     if (hasProperty) {
         napi_value nFilterType = nullptr;
-        napi_get_named_property(env, value, "filterType", &nFilterType);
+        napi_get_named_property(env, value, "filterLimit", &nFilterType);
         NAPI_CALL(env, napi_typeof(env, nFilterType, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
