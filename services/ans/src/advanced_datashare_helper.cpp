@@ -15,11 +15,13 @@
 
 #include "advanced_datashare_helper.h"
 
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "message_parcel.h"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "ipc_skeleton.h"
@@ -40,6 +42,8 @@ constexpr const char *FOCUS_MODE_PROFILE_URI = "?Proxy=true&key=focus_mode_profi
 constexpr const char *FOCUS_MODE_CALL_POLICY_URI = "?Proxy=true&key=focus_mode_call_message_policy";
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI = "?Proxy=true&key=focus_mode_repeate_callers_enable";
 constexpr const char *UNIFIED_GROUP_ENABLE_URI = "?Proxy=true&key=unified_group_enable";
+constexpr const char *INTELLIGENT_SCENE_DATA = "?Proxy=true&key=intelligent_scene_data";
+constexpr const char *INTELLIGENT_URI = "?Proxy=true&key=intelligent_uri";
 constexpr const char *CONTACT_URI = "datashare:///com.ohos.contactsdataability";
 constexpr const char *CALLLOG_URI = "datashare:///com.ohos.calllogability";
 constexpr const char *CALL_SUBSECTION = "datashare:///com.ohos.calllogability/calls/calllog?Proxy=true";
@@ -50,16 +54,20 @@ constexpr const char *DETAIL_INFO = "detail_info";
 constexpr const char *FORMAT_PHONE_NUMBER = "format_phone_number";
 constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
+constexpr const char *MODE_ID = "modeId";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
 constexpr const char *CALL_DIRECTION = "call_direction";
 constexpr const char *CREATE_TIME = "create_time";
+constexpr const char *WHITE_LIST = "1";
+constexpr const char *BLACK_LIST = "2";
 constexpr const unsigned int PHONE_NUMBER_LENGTH = 7;
 constexpr const unsigned int MAX_TIME_INTERVAL = 15 * 60;
 constexpr const int TYPE_ID_FIVE = 5;
 constexpr const int ERROR_QUERY_INFO_FAILED = -1;
 constexpr const int QUERY_INFO_SUCCESS = 1;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
+std::vector<std::string> QUERY_INTELLIGENT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
 AdvancedDatashareHelper::AdvancedDatashareHelper()
 {
@@ -96,6 +104,26 @@ std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateConta
     return DataShare::DataShareHelper::Creator(remoteObj, uri);
 }
 
+std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateIntelligentDataShareHelper(std::string uri)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saManager == nullptr) {
+        ANS_LOGE("The sa manager is nullptr.");
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObj = saManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    if (remoteObj == nullptr) {
+        ANS_LOGE("The remoteObj is nullptr.");
+        return nullptr;
+    }
+    auto [error, helper] = DataShare::DataShareHelper::Create(remoteObj, uri, GetIntelligentUri());
+    if (error != DataShare::E_OK) {
+        ANS_LOGE("Create Intelligent DataShareHelper failed.");
+        return nullptr;
+    }
+    return helper;
+}
+
 bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::string &value)
 {
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
@@ -127,35 +155,24 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
     return true;
 }
 
-ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy)
+ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy,
+    const std::string &profileId)
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CONTACT_URI);
-    if (helper == nullptr) {
-        ANS_LOGE("The data share helper is nullptr.");
-        return ERROR_QUERY_INFO_FAILED;
-    }
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(IS_DELETED, 0);
-    predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
-    if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
-        predicates.EndsWith(DETAIL_INFO,
-            phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
-    } else {
-        predicates.EqualTo(DETAIL_INFO, phoneNumber);
-    }
-    auto resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
-    IPCSkeleton::SetCallingIdentity(identity);
+    auto resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId);
     if (resultSet == nullptr) {
-        ANS_LOGE("Query error, resultSet is null.");
-        helper->Release();
+        ANS_LOGE("QueryContact error, resultSet is null.");
         return ERROR_QUERY_INFO_FAILED;
     }
+    IPCSkeleton::SetCallingIdentity(identity);
     int isFound = 0;
     int rowCount = 0;
     resultSet->GetRowCount(rowCount);
     if (rowCount <= 0) {
         ANS_LOGI("Query success, but rowCount is 0.");
+        if (atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS) {
+            isFound = 1;
+        }
     } else {
         int resultId = -1;
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
@@ -164,16 +181,62 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
 #endif
         if ((phoneNumber.size() >= PHONE_NUMBER_LENGTH && resultSet->GoToRow(resultId) == DataShare::E_OK) ||
             (phoneNumber.size() < PHONE_NUMBER_LENGTH && resultSet->GoToFirstRow() == DataShare::E_OK)) {
-            isFound = dealWithContactResult(helper, resultSet, policy) ? QUERY_INFO_SUCCESS : ERR_OK;
+            isFound = dealWithContactResult(resultSet, policy) ? QUERY_INFO_SUCCESS : ERR_OK;
         }
     }
     resultSet->Close();
-    helper->Release();
     return isFound;
 }
 
-bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::DataShareHelper> helper,
-    std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy)
+std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetContactResultSet(Uri &uri,
+    const std::string &phoneNumber, const std::string &policy, const std::string &profileId)
+{
+    std::shared_ptr<DataShare::DataShareHelper> helper;
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet;
+    if (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
+        atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS) {
+        helper = CreateIntelligentDataShareHelper(GetIntelligentData(INTELLIGENT_URI, KEY_INTELLIGENT_URI));
+        if (helper == nullptr) {
+            ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
+            return nullptr;
+        }
+        std::string focusModeList = atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ?
+            WHITE_LIST : BLACK_LIST;
+        ANS_LOGI("GetContactResultSet, profileId: %{public}s, focusModeList: %{public}s",
+            profileId.c_str(), focusModeList.c_str());
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(MODE_ID, profileId);
+        predicates.EqualTo(FOCUS_MODE_LIST, focusModeList);
+        if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
+            predicates.EndsWith(DETAIL_INFO,
+                phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
+        } else {
+            predicates.EqualTo(DETAIL_INFO, phoneNumber);
+        }
+        resultSet = helper->Query(uri, predicates, QUERY_INTELLIGENT_COLUMN_LIST);
+    } else {
+        helper = CreateContactDataShareHelper(CONTACT_URI);
+        if (helper == nullptr) {
+            ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
+            return nullptr;
+        }
+        DataShare::DataSharePredicates predicates;
+        predicates.EqualTo(IS_DELETED, 0);
+        predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
+        if (phoneNumber.size() >= PHONE_NUMBER_LENGTH) {
+            predicates.EndsWith(DETAIL_INFO,
+                phoneNumber.substr(phoneNumber.size() - PHONE_NUMBER_LENGTH, phoneNumber.size()));
+        } else {
+            predicates.EqualTo(DETAIL_INFO, phoneNumber);
+        }
+        resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
+    }
+    helper->Release();
+    return resultSet;
+}
+
+bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::DataShareResultSet> resultSet,
+    const std::string &policy)
 {
     bool isNoNeedSilent = false;
     int32_t columnIndex;
@@ -192,19 +255,26 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
             ANS_LOGI("dealWithContactResult: favorite = %{public}d", favorite);
             break;
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
-            do {
-                resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
-                resultSet->GetString(columnIndex, focus_mode_list);
-                if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
-                    isNoNeedSilent = false;
-                }
-                if (focus_mode_list.c_str()[0] == '1') {
-                    isNoNeedSilent = true;
-                    break;
-                }
-            } while (resultSet->GoToNextRow() == DataShare::E_OK);
-            ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
-            break;
+        case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
+            {
+                do {
+                    resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
+                    resultSet->GetString(columnIndex, focus_mode_list);
+                    if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
+                        isNoNeedSilent = false;
+                    }
+                    if (focus_mode_list.c_str()[0] == '1') {
+                        isNoNeedSilent = true;
+                        break;
+                    }
+                    if (focus_mode_list.c_str()[0] == '2') {
+                        isNoNeedSilent = false;
+                        break;
+                    }
+                } while (resultSet->GoToNextRow() == DataShare::E_OK);
+                ANS_LOGI("dealWithContactResult: focus_mode_list = %{public}s", focus_mode_list.c_str());
+                break;
+            }
         default:
             isNoNeedSilent = true;
             break;
@@ -270,6 +340,29 @@ std::string AdvancedDatashareHelper::GetFocusModeCallPolicyUri(const int32_t &us
 std::string AdvancedDatashareHelper::GetFocusModeRepeatCallUri(const int32_t &userId) const
 {
     return USER_SETTINGS_DATA_URI + std::to_string(userId) + FOCUS_MODE_REPEAT_CALLERS_ENABLE_URI;
+}
+
+std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, const std::string &key)
+{
+    std::string value;
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGD("GetActiveUserId is false");
+        return "";
+    }
+
+    Uri tempUri(USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + uri);
+    bool ret = Query(tempUri, key, value);
+    if (!ret) {
+        ANS_LOGE("Query Intelligent Data id fail.");
+        return "";
+    }
+    return value + std::to_string(userId);
+}
+
+std::string AdvancedDatashareHelper::GetIntelligentUri()
+{
+    return GetIntelligentData(INTELLIGENT_SCENE_DATA, KEY_INTELLIGENT_SCENE_DATA);
 }
 } // namespace Notification
 } // namespace OHOS
