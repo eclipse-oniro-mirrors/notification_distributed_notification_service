@@ -72,7 +72,7 @@ ohos_shared_library("libans_distributed") {
   part_name = "${component_name}"
 }
 
-ohos_shared_library("libans_softbus_distributed") {
+ohos_shared_library("libdans") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -82,6 +82,18 @@ ohos_shared_library("libans_softbus_distributed") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+
+  version_script = "libdans.map"
+  cflags = [
+    "-fno-math-errno",
+    "-fno-unroll-loops",
+    "-fmerge-all-constants",
+    "-fno-ident",
+    "-Oz",
+    "-flto",
+    "-ffunction-sections",
+    "-fdata-sections",
+  ]
 
   sources = [
     "${services_path}/ans/src/common/file_utils.cpp",

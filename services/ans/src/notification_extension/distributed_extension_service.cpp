@@ -145,7 +145,7 @@ int32_t DistributedExtensionService::InitDans()
     if (dansRunning_.load() && dansHandler_ != nullptr && dansHandler_->IsValid()) {
         return 0;
     }
-    dansHandler_ = std::make_shared<NotificationLoadUtils>("libans_softbus_distributed.z.so");
+    dansHandler_ = std::make_shared<NotificationLoadUtils>("libdans.z.so");
     if (dansHandler_ == nullptr) {
         ANS_LOGW("Dans handler init failed.");
         return -1;
