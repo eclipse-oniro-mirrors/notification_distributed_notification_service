@@ -79,7 +79,7 @@ bool BundleIconBox::SetBundlesIcon(const std::unordered_map<std::string, std::st
         TlvBox box;
         box.PutValue(std::make_shared<TlvItem>(BUNDLE_NAME_TYPE, bundle.first));
         box.PutValue(std::make_shared<TlvItem>(ICON_TYPE, bundle.second));
-        ANS_LOGW("SetBundlesIcon %{public}s %{public}lu.", bundle.first.c_str(), bundle.second.size());
+        ANS_LOGW("SetBundlesIcon %{public}s %{public}u.", bundle.first.c_str(), bundle.second.size());
         if (!box.Serialize(false)) {
             ANS_LOGW("Set bundles icon failed %{public}s.", bundle.first.c_str());
             continue;
@@ -145,7 +145,7 @@ bool BundleIconBox::GetBundlesIcon(std::unordered_map<std::string, std::string>&
         }
         if (box.GetStringValue(ICON_TYPE, icon) &&
             box.GetStringValue(BUNDLE_NAME_TYPE, bundleName)) {
-            ANS_LOGI("GetBundlesIcon %{public}s %{public}lu.", bundleName.c_str(), icon.size());
+            ANS_LOGI("GetBundlesIcon %{public}s %{public}u.", bundleName.c_str(), icon.size());
             bundles.insert(std::make_pair(bundleName, icon));
         }
     }

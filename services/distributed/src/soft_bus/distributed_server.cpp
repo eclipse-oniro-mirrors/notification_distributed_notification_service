@@ -50,7 +50,7 @@ void DistributedServer::CheckServer()
 int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t deviceType)
 {
     if (init.load()) {
-        ANS_LOGI("Server has inited %{public}lu.", serverSocket_.size());
+        ANS_LOGI("Server has inited %{public}u.", serverSocket_.size());
         return 0;
     }
     localDevice_.deviceId_ = deviceId;

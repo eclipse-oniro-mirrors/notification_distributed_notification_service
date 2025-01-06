@@ -78,8 +78,10 @@ private:
     void RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
         NotificationContent::Type type, NotifticationRequestBox &requestBox);
+    void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
+        std::vector<DistributedDeviceInfo>& updateDeviceList);
     std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
-    std::set<std::string> bundleIconCache_;
+    std::map<std::string, std::set<std::string>> bundleIconCache_;
     int32_t userId_ = DEFAULT_USER_ID;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;

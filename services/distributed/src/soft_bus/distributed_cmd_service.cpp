@@ -272,19 +272,24 @@ void DistributedService::GenerateBundleIconSync(const DistributedDeviceInfo& dev
     for (auto item : enableBundleOption) {
         enabledBundles.insert(item.GetBundleName());
     }
+    std::set<std::string> cachedIcons;
     std::vector<std::string> unCachedBundleList;
+    auto itemIter = bundleIconCache_.find(device.deviceId_);
+    if (itemIter != bundleIconCache_.end()) {
+        cachedIcons = itemIter->second;
+    }
     for (auto item : bundleOption) {
         if (enabledBundles.find(item.GetBundleName()) != enabledBundles.end()) {
             continue;
         }
-        if (bundleIconCache_.find(item.GetBundleName()) != bundleIconCache_.end()) {
+        if (cachedIcons.find(item.GetBundleName()) != cachedIcons.end()) {
             continue;
         }
         unCachedBundleList.push_back(item.GetBundleName());
-        bundleIconCache_.insert(item.GetBundleName());
+        cachedIcons.insert(item.GetBundleName());
     }
-
-    ANS_LOGI("Dans Generate bundleIconSync bundle %{public}lu %{public}lu %{public}lu.",
+    bundleIconCache_.insert(std::make_pair(device.deviceId_, cachedIcons));
+    ANS_LOGI("Dans Generate bundleIconSync bundle %{public}u %{public}u %{public}u.",
         bundleOption.size(), enableBundleOption.size(), unCachedBundleList.size());
     std::unordered_map<std::string, std::string> icons;
     for (auto bundle : unCachedBundleList) {
@@ -315,16 +320,18 @@ void DistributedService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& box
     ANS_LOGI("Dans handle bundl icon type %{public}d %{public}d.", type, localDevice_.deviceType_);
     if (type == IconSyncType::REPORT_SAVED_ICON &&
         localDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        std::vector<std::string> bundleList;
-        iconBox.GetBundleList(bundleList);
-        for (auto bundle : bundleList) {
-            ANS_LOGI("Dans handle receive %{public}s.", bundle.c_str());
-            bundleIconCache_.insert(bundle);
-        }
         DistributedDeviceInfo device;
         if (!CheckPeerDevice(iconBox, device)) {
             return;
         }
+        std::set<std::string> bundleSet;
+        std::vector<std::string> bundleList;
+        iconBox.GetBundleList(bundleList);
+        for (auto bundle : bundleList) {
+            ANS_LOGI("Dans handle receive %{public}s.", bundle.c_str());
+            bundleSet.insert(bundle);
+        }
+        bundleIconCache_.insert(std::make_pair(device.deviceId_, bundleSet));
         GenerateBundleIconSync(device);
     }
 
@@ -350,9 +357,7 @@ void DistributedService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& box
     if (type == IconSyncType::REMOVE_BUNDLE_ICON &&
         localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         std::vector<std::string> bundleList;
-        if (!iconBox.GetBundleList(bundleList)) {
-            ANS_LOGW("Dans handle bundle remove bundle failed.");
-        }
+        iconBox.GetBundleList(bundleList);
         for (auto& bundle : bundleList) {
             DistributedPreferences::GetInstance().DeleteBundleIcon(bundle);
         }

@@ -32,11 +32,11 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
     auto const &want = data.GetWant();
     std::string action = want.GetAction();
     ANS_LOGI("DistributedEventSubscriber receiver event %{public}s", action.c_str());
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) {
         DistributedService::GetInstance().SyncDeviceState(SCREEN_OFF);
         return;
     }
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
         DistributedService::GetInstance().SyncDeviceState(SCREEN_ON);
         return;
     }
@@ -73,8 +73,8 @@ void OberverService::Init(uint16_t deviceType)
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     if (deviceType != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
     }
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
