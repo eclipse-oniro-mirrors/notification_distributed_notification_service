@@ -19,7 +19,7 @@
 #include <string>
 
 namespace OHOS::Notification {
-const std::string DISTRIBUTED_EXTENTION_LIVEVIEW_ALL_SCENARIOS_PATH = "libnotification_all_scenarios.z.so";
+const std::string DISTRIBUTED_EXTENTION_LIVEVIEW_ALL_SCENARIOS_PATH = "libliveview.z.so";
 DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveviewAllScenariosExtensionWrapper() = default;
 DistributedLiveviewAllScenariosExtensionWrapper::~DistributedLiveviewAllScenariosExtensionWrapper() = default;
 
