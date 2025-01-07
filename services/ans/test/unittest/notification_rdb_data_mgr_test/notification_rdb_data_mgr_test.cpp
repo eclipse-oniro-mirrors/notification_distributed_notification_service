@@ -127,7 +127,7 @@ class RdbStoreTest : public RdbStore {
             return nullptr;
         };
         virtual std::shared_ptr<ResultSet> QueryByStep(
-            const std::string &sql, const std::vector<ValueObject> &bindArgs = {})
+            const std::string &sql, const std::vector<ValueObject> &bindArgs = {}, bool preCount = true)
         {
             return nullptr;
         };
@@ -185,7 +185,7 @@ class RdbStoreTest : public RdbStore {
             return nullptr;
         };
         virtual std::shared_ptr<ResultSet> QueryByStep(
-            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns)
+            const AbsRdbPredicates &predicates, const std::vector<std::string> &columns, bool preCount = true)
         {
             return nullptr;
         };
