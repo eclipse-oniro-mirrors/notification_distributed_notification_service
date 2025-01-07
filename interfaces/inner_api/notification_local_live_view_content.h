@@ -41,6 +41,12 @@ public:
         CARD_BUTTON,
     };
 
+    enum class LiveViewTypes {
+        LIVE_VIEW_ACTIVITY,
+        LIVE_VIEW_INSTANT,
+        LIVE_VIEW_LONG_TERM
+    };
+
     NotificationLocalLiveViewContent() = default;
     ~NotificationLocalLiveViewContent() = default;
 
@@ -141,13 +147,13 @@ public:
      *
      * @param type Indicates the type to be included.
      */
-    void SetLiveviewType(int32_t type);
+    void SetLiveViewType(const LiveViewTypes type);
 
     /*
      * @brief Get the type of a local live view notification.
      *
      */
-    int32_t GetLiveviewType();
+    LiveViewTypes GetLiveViewType() const;
 
     /**
      * @brief Returns a string representation of the object.
@@ -209,7 +215,7 @@ private:
     NotificationProgress progress_ {};
     NotificationTime time_ {};
     std::vector<int32_t> flags_ {};
-    int32_t liveviewType_ {-1};
+    LiveViewTypes liveviewType_;
 };
 }  // namespace Notification
 }  // namespace OHOS
