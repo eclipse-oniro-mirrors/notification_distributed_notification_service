@@ -100,6 +100,8 @@ public:
 
     static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, HaMetaMessage& message);
 
+    static void ReportPublishSuccessEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
     static void ReportModifyEvent(const HaMetaMessage& message);
 
     static void ReportDeleteFailedEvent(const HaMetaMessage& message);
@@ -124,6 +126,14 @@ private:
 
     static FlowControllerOption GetFlowOptionByType(const int32_t reportType);
 
+    static bool IsAllowedBundle(const sptr<NotificationRequest>& request);
+
+    static std::string BuildAnsData(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
+    static ReportCache Aggregate();
+
+    static uint32_t SetControlFlags(const std::shared_ptr<NotificationFlags> &flags, uint32_t controlFlags);
+
     static std::string BuildExtraInfo(const HaMetaMessage& message);
 
     static std::string BuildExtraInfoWithReq(const HaMetaMessage& message,
@@ -137,6 +147,8 @@ private:
     static void AddListCache(EventFwk::Want& want, int32_t eventCode);
 
     static void ExecuteCacheList();
+
+    static void ExecuteSuccessCacheList();
     
     static void ReportCommonEvent(const ReportCache& reportCache);
 };

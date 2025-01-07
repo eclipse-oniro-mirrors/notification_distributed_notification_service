@@ -28,6 +28,7 @@
 namespace OHOS {
 namespace Notification {
 using namespace std;
+constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 14;
 namespace {
     const std::string ANS_VOIP = "ANS_VOIP";
 }
@@ -331,6 +332,10 @@ void SmartReminderCenter::HandleReminderMethods(
         }
         if (enabledAffectedBy &&
             HandleAffectedReminder(deviceType, reminderAffected, validDevices, notificationFlagsOfDevices)) {
+            if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+                auto notificationControlFlags = request->GetNotificationControlFlags();
+                request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
+            }
             break;
         }
     }
