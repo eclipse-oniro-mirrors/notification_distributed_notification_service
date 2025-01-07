@@ -135,8 +135,6 @@ public:
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
 
-    void CheckCollaborativeRemoveType(sptr<Notification> &notification);
-
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();
     bool IsDeviceTypeSubscriberd(const std::string deviceType);

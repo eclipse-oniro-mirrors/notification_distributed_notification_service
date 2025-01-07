@@ -16,6 +16,8 @@
 
 #include <dlfcn.h>
 #include <cstdint>
+#include <unordered_set>
+#include <utility>
 
 #define SYMBOL_EXPORT __attribute__ ((visibility("default")))
 namespace OHOS {
@@ -25,10 +27,11 @@ extern "C" {
 #endif
 
 SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    int32_t titleLength, int32_t contentLength, std::function<bool(std::string, int32_t, bool)> callback)
+    std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
+    std::function<bool(std::string, int32_t, bool)> callback)
 {
-    return DistributedManager::GetInstance().InitLocalDevice(deviceId, deviceType,
-        titleLength, contentLength, callback);
+    return DistributedManager::GetInstance().InitLocalDevice(deviceId, deviceType, titleAndContentLength,
+        collaborativeDeleteTypes, callback);
 }
 
 SYMBOL_EXPORT void AddDevice(const std::string &deviceId, uint16_t deviceType,

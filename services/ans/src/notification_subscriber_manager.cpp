@@ -231,12 +231,6 @@ void NotificationSubscriberManager::NotifyCanceled(
         ANS_LOGE("queue is nullptr");
         return;
     }
-    if (deleteReason != NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE) {
-        auto nonConstNotification = const_cast<sptr<Notification> &>(notification);
-        if (nonConstNotification) {
-            CheckCollaborativeRemoveType(nonConstNotification);
-        }
-    }
     AppExecFwk::EventHandler::Callback NotifyCanceledFunc = std::bind(
         &NotificationSubscriberManager::NotifyCanceledInner, this, notification, notificationMap, deleteReason);
 
@@ -254,14 +248,6 @@ void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<N
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGD("queue is nullptr");
         return;
-    }
-    if (deleteReason != NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE) {
-        for (auto &notification : notifications) {
-            auto nonConstNotification = const_cast<sptr<Notification> &>(notification);
-            if (nonConstNotification) {
-                CheckCollaborativeRemoveType(nonConstNotification);
-            }
-        }
     }
     AppExecFwk::EventHandler::Callback NotifyCanceledFunc = std::bind(
         &NotificationSubscriberManager::BatchNotifyCanceledInner, this, notifications, notificationMap, deleteReason);
@@ -784,48 +770,5 @@ std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecor
     return subscriberRecordList_;
 }
 
-void NotificationSubscriberManager::CheckCollaborativeRemoveType(sptr<Notification> &notification)
-{
-    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-        ANS_LOGE("notification or NotificationRequest is nullptr");
-        return;
-    }
-    std::string type;
-    switch (notification->GetNotificationRequestPoint()->GetSlotType()) {
-        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
-            type = "SOCIAL_COMMUNICATION";
-            break;
-        case NotificationConstant::SlotType::SERVICE_REMINDER:
-            type = "SERVICE_REMINDER";
-            break;
-        case NotificationConstant::SlotType::CONTENT_INFORMATION:
-            type = "CONTENT_INFORMATION";
-            break;
-        case NotificationConstant::SlotType::OTHER:
-            type = "OTHER";
-            break;
-        case NotificationConstant::SlotType::CUSTOM:
-            type = "CUSTOM";
-            break;
-        case NotificationConstant::SlotType::LIVE_VIEW:
-            type = "LIVE_VIEW";
-            break;
-        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
-            type = "CUSTOMER_SERVICE";
-            break;
-        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
-            type = "EMERGENCY_INFORMATION";
-            break;
-        case NotificationConstant::SlotType::ILLEGAL_TYPE:
-            type = "ILLEGAL_TYPE";
-            break;
-        default:
-            return;
-    }
-    auto collaboratives = DelayedSingleton<NotificationConfigParse>::GetInstance()->GetCollaborativeDeleteType();
-    if (collaboratives.find(type) != collaboratives.end()) {
-        notification->GetNotificationRequestPoint()->SetCollaborateDelete(true);
-    }
-}
 }  // namespace Notification
 }  // namespace OHOS

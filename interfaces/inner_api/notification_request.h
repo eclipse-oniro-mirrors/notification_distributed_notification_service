@@ -1449,10 +1449,6 @@ public:
 
     const std::string GetDistributedHashCode() const;
 
-    bool GetCollaborateDelete() const;
-    
-    void SetCollaborateDelete(bool isCollaborateDelete);
-
     void SetDistributedHashCode(const std::string hashCode);
 
 private:
@@ -1581,7 +1577,6 @@ private:
     bool forceDistributed_ {false};
     bool notDistributed_ {false};
     bool isSystemApp_ {false};
-    bool isCollaborateDelete_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};

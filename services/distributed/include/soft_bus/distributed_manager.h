@@ -18,6 +18,9 @@
 
 #include "distributed_device_data.h"
 
+#include <unordered_set>
+#include <utility>
+
 namespace OHOS {
 namespace Notification {
 class DistributedManager {
@@ -27,7 +30,7 @@ public:
     static DistributedManager& GetInstance();
     void ReleaseLocalDevice();
     int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-        int32_t titleLength, int32_t contentLength,
+        std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
         std::function<bool(std::string, int32_t, bool)> callback);
     void AddDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);

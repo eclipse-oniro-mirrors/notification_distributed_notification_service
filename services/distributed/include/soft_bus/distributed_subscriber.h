@@ -44,6 +44,8 @@ public:
     void SetLocalDevice(DistributedDeviceInfo localDevice);
     void SetPeerDevice(DistributedDeviceInfo localDevice);
     bool CheckNeedCollaboration(const std::shared_ptr<Notification> &notification);
+    bool CheckCollaborativeRemoveType(const NotificationConstant::SlotType& slotType);
+
 private:
     DistributedDeviceInfo localDevice_;
     DistributedDeviceInfo peerDevice_;

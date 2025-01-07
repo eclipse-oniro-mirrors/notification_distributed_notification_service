@@ -42,12 +42,14 @@ void DistributedManager::ReleaseLocalDevice()
 }
 
 int32_t DistributedManager::InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    int32_t titleLength, int32_t contentLength, std::function<bool(std::string, int32_t, bool)> callback)
+    std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
+    std::function<bool(std::string, int32_t, bool)> callback)
 {
     ANS_LOGI("InitLocalDevice %{public}s %{public}u.", deviceId.c_str(), deviceType);
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
-    DistributedLocalConfig::GetInstance().SetLocalDevice(deviceId, deviceType, titleLength, contentLength);
-    return DistributedService::GetInstance().InitService(deviceId, deviceType, callback);
+    DistributedLocalConfig::GetInstance().SetLocalDevice(deviceId, deviceType, titleAndContentLength.first,
+        titleAndContentLength.second);
+    return DistributedService::GetInstance().InitService(deviceId, deviceType, collaborativeDeleteTypes, callback);
 }
 
 void DistributedManager::AddDevice(const std::string &deviceId, uint16_t deviceType,

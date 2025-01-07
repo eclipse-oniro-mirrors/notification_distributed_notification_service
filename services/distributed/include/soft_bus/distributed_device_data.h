@@ -20,6 +20,7 @@
 #include "socket.h"
 #include "ans_log_wrapper.h"
 #include "dm_device_info.h"
+#include <unordered_set>
 
 namespace OHOS {
 namespace Notification {
@@ -51,6 +52,7 @@ struct DistributedDeviceInfo {
     int32_t peerState_ = DeviceState::STATE_INIT;
     int32_t socketId_ = -1;
     int32_t connectedTry_ = 0;
+    std::unordered_set<std::string> collaborativeDeleteTypes_;
 };
 
 struct ConnectedSocketInfo {

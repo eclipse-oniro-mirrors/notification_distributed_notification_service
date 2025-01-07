@@ -25,6 +25,8 @@
 #include "match_box.h"
 #include <functional>
 #include "bundle_icon_box.h"
+#include <unordered_set>
+
 namespace OHOS {
 namespace Notification {
 
@@ -35,6 +37,7 @@ public:
     void SubscribeNotifictaion(const DistributedDeviceInfo device);
     void UnSubscribeNotifictaion(const std::string &deviceId, uint16_t deviceType);
     int32_t InitService(const std::string &deviceId, uint16_t deviceType,
+        std::unordered_set<std::string> collaborativeDeleteTypes,
         std::function<bool(std::string, int32_t, bool)> callback);
     void OnReceiveMsg(const void *data, uint32_t dataLen);
     void OnConsumed(const std::shared_ptr<Notification> &request,
@@ -58,6 +61,8 @@ public:
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
     void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
+    std::unordered_set<std::string> GetCollaborativeDeleteTypes();
+    
 private:
     int64_t GetCurrentTime();
     void HandleBundleRemoved(const std::string& bundleName);
