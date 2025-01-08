@@ -18,7 +18,6 @@
 
 #include <map>
 #include <string>
-#include <unordered_set>
 
 #include "ans_inner_errors.h"
 
@@ -82,7 +81,6 @@ private:
     bool distributedEnable_ = false;
     std::map<std::pair<const std::string, int32_t>, bool> bundleEnable_;
     std::map<int32_t, bool> enabledWithoutApp_;
-    std::unordered_set<std::string> collaborativeNotificationList_;
 };
 }  // namespace Notification
 }  // namespace OHOS

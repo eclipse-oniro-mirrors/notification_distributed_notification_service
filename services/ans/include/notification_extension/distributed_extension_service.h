@@ -20,8 +20,11 @@
 
 #include "notifictaion_load_utils.h"
 #include "ffrt.h"
+#include "notification_config_parse.h"
+
 #include <set>
 #include <mutex>
+#include <unordered_set>
 
 namespace OHOS {
 namespace Notification {
@@ -55,6 +58,7 @@ public:
     int32_t maxContentLength;
     std::string localType;
     std::set<std::string> supportPeerDevice_;
+    std::unordered_set<std::string> collaborativeDeleteTypes_;
 };
 
 class DistributedExtensionService {
@@ -72,6 +76,7 @@ private:
     ~DistributedExtensionService() = default;
     bool CheckAllDeviceOffLine();
     bool releaseSameDevice(const DmDeviceInfo &deviceInfo);
+    void SetMaxContentLength(nlohmann::json &configJson);
     std::mutex mapLock_;
     std::atomic<bool> dansRunning_ = false;
     std::shared_ptr<ffrt::queue> distributedQueue_ = nullptr;

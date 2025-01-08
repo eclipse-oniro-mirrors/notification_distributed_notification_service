@@ -16,7 +16,8 @@
 #include "distributed_extension_service.h"
 
 #include "ans_log_wrapper.h"
-#include "notification_config_parse.h"
+
+#include <utility>
 
 namespace OHOS {
 namespace Notification {
@@ -25,7 +26,8 @@ using namespace DistributedHardware;
 
 using DeviceCallback = std::function<bool(std::string, int32_t, bool)>;
 typedef int32_t (*INIT_LOCAL_DEVICE)(const std::string &deviceId, uint16_t deviceType,
-    int32_t titleLength, int32_t contentLength, DeviceCallback callback);
+    std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
+    DeviceCallback callback);
 typedef void (*RELEASE_LOCAL_DEVICE)();
 typedef void (*ADD_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
@@ -129,14 +131,9 @@ bool DistributedExtensionService::initConfig()
         ANS_LOGI("Dans initConfig title length %{public}d.", deviceConfig_.maxTitleLength);
     }
 
-    nlohmann::json contentJson = configJson[CFG_KEY_CONTENT_LENGTH];
-    if (contentJson.is_null() || contentJson.empty() || !contentJson.is_number_integer()) {
-        deviceConfig_.maxContentLength = DEFAULT_CONTENT_LENGTH;
-    } else {
-        deviceConfig_.maxContentLength = contentJson.get<int32_t>();
-        ANS_LOGI("Dans initConfig content length %{public}d.", deviceConfig_.maxContentLength);
-    }
+    SetMaxContentLength(configJson);
 
+    deviceConfig_.collaborativeDeleteTypes_ = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
     return true;
 }
 
@@ -163,11 +160,11 @@ int32_t DistributedExtensionService::InitDans()
         ANS_LOGW("Dans get local device failed.");
         return -1;
     }
-
+    std::pair<int32_t, int32_t> titleAndContentLength = {deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength};
     ANS_LOGI("Dans get local device %{public}s, %{public}d, %{public}d, %{public}d.", deviceInfo.deviceId,
         deviceInfo.deviceTypeId, deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength);
-    if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceConfig_.maxTitleLength,
-        deviceConfig_.maxContentLength, std::bind(&DistributedExtensionService::DeviceStatusCallback, this,
+    if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, titleAndContentLength,
+        deviceConfig_.collaborativeDeleteTypes_, std::bind(&DistributedExtensionService::DeviceStatusCallback, this,
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)) != 0) {
         dansRunning_.store(false);
         return -1;
@@ -311,6 +308,17 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
         ANS_LOGI("Dans refresh %{public}s %{public}s.", deviceInfo.deviceId, deviceInfo.networkId);
     });
     distributedQueue_->submit(changeTask);
+}
+
+void DistributedExtensionService::SetMaxContentLength(nlohmann::json &configJson)
+{
+    nlohmann::json contentJson = configJson[CFG_KEY_CONTENT_LENGTH];
+    if (contentJson.is_null() || contentJson.empty() || !contentJson.is_number_integer()) {
+        deviceConfig_.maxContentLength = DEFAULT_CONTENT_LENGTH;
+    } else {
+        deviceConfig_.maxContentLength = contentJson.get<int32_t>();
+        ANS_LOGI("Dans initConfig content length %{public}d.", deviceConfig_.maxContentLength);
+    }
 }
 }
 }
