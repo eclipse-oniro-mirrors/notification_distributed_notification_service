@@ -44,7 +44,8 @@ public:
     enum class LiveViewTypes {
         LIVE_VIEW_ACTIVITY,
         LIVE_VIEW_INSTANT,
-        LIVE_VIEW_LONG_TERM
+        LIVE_VIEW_LONG_TERM,
+        LIVE_VIEW_INSTANT_BANNER,
     };
 
     NotificationLocalLiveViewContent() = default;

@@ -209,6 +209,9 @@ bool AnsEnumUtil::LiveViewTypesJSToC(
         case LiveViewTypes::LIVE_VIEW_LONG_TERM:
             outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM;
             break;
+        case LiveViewTypes::LIVE_VIEW_INSTANT_BANNER:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+            break;
         default:
             ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
             return false;
@@ -491,6 +494,9 @@ bool AnsEnumUtil::LiveViewTypesCToJS(const NotificationLocalLiveViewContent::Liv
             break;
         case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM:
             outType = LiveViewTypes::LIVE_VIEW_LONG_TERM;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER:
+            outType = LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
             break;
         default:
             ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
