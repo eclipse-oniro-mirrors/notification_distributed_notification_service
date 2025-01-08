@@ -28,7 +28,7 @@
 
 namespace OHOS::Notification {
 namespace {
-constexpr int64_t DURATION_ONE_HOUR = 60 * 60 * 1000;  // 1h, millisecond
+constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
 constexpr int64_t DURATION_DELAY_TASK = 1 * 1000 * 1000;  // 1s, microsecond
 constexpr int64_t CYCLE_DATASHARE_TASK = 1;  // 1s
 constexpr int64_t DURATION_ONE_MINUTE = 60 * 1000;  // 1min, millisecond
@@ -112,7 +112,7 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
         return false;
     }
     int64_t timestamp = GetCurrentTime();
-    int64_t targetTimestamp = timestamp + DURATION_ONE_HOUR;
+    int64_t targetTimestamp = timestamp + DURATION_PRELOAD_TIME;
 
     std::string proxy = ReminderCalendarShareTable::PROXY;
     proxy.append("?user=").append(std::to_string(curUserId_));
