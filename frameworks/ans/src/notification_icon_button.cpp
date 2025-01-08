@@ -192,7 +192,7 @@ bool NotificationIconButton::Marshalling(Parcel &parcel) const
         return false;
     }
 
-     if (!WriteIconToParcel(parcel)) {
+    if (!WriteIconToParcel(parcel)) {
         return false;
     }
 

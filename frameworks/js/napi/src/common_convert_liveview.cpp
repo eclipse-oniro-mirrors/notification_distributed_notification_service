@@ -373,7 +373,7 @@ napi_value Common::SetCardButton(const napi_env &env, const std::vector<Notifica
             if (!SetResourceObject(env, btn.GetIconResource(), object)) {
                 return NapiGetBoolean(env, false);
             }
-         }
+        }
 
         napi_set_named_property(env, item, "iconResource", object);
         status = napi_set_element(env, result, iconCount, item);
@@ -723,7 +723,6 @@ napi_value Common::GetNotificationIconButton(
         } else {
             // if icon type is Rersouce, get the resource object and return.
             napi_value iconResource = nullptr;
-            auto resource = std::make_shared<ResourceManager::Resource>();
             napi_get_named_property(env, cardButton, "iconResource", &iconResource);
             NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
             if (valuetype != napi_object) {
@@ -1163,7 +1162,7 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
         if (!AnsEnumUtil::LiveViewTypesJSToC(LiveViewTypes(type), outType)) {
             ANS_LOGE("The liveview types is not valid.");
             return nullptr;
-         }
+        }
     }
     content->SetLiveViewType(outType);
 
