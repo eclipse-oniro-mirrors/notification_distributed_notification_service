@@ -103,7 +103,7 @@ bool NotificationIconButton::ToJson(nlohmann::json &jsonObject) const
     resourceObj["bundleName"] = iconResource_->bundleName;
     resourceObj["moduleName"] = iconResource_->moduleName;
     jsonObject["iconResource"] = resourceObj;
-    jsonObject["iconResource"] = AnsImageUtil::PackImage(iconImage_);
+    jsonObject["iconImage"] = AnsImageUtil::PackImage(iconImage_);
     return true;
 }
 
@@ -143,7 +143,17 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         if (pIcon == nullptr) {
             ANS_LOGE("Failed to parse button icon");
             delete button;
-            return nullptr;
+        } else {
+            button->SetIconImage(pIcon);
+        }
+    }
+
+    if (jsonObject.find("iconImage") != jsonEnd) {
+        auto resources = jsonObject.at("iconImage");
+        auto pIcon = AnsImageUtil::UnPackImage(resources);
+        if (pIcon == nullptr) {
+            ANS_LOGE("Failed to parse button icon");
+            delete button;
         } else {
             button->SetIconImage(pIcon);
         }
