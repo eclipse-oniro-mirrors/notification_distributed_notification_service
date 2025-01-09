@@ -631,7 +631,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("PublishPreparedNotification,notificationId:%{public}d,bundleOption:[%{public}s, %{public}d]", 
+    ANS_LOGI("PublishPreparedNotification,notificationId:%{public}d,bundleOption:[%{public}s, %{public}d]",
         request->GetNotificationId(), bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
