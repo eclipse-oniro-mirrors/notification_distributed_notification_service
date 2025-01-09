@@ -110,12 +110,12 @@ bool NotificationLocalLiveViewContent::isFlagExist(int32_t flag)
     }
 }
 
-void NotificationLocalLiveViewContent::SetLiveviewType(int32_t type)
+void NotificationLocalLiveViewContent::SetLiveViewType(const LiveViewTypes type)
 {
     liveviewType_ = type;
 }
 
-int32_t NotificationLocalLiveViewContent::GetLiveviewType()
+NotificationLocalLiveViewContent::LiveViewTypes NotificationLocalLiveViewContent::GetLiveViewType() const
 {
     return liveviewType_;
 }
@@ -128,7 +128,7 @@ std::string NotificationLocalLiveViewContent::Dump()
             ", button = " + button_.Dump() +
             ", progress = " + progress_.Dump() +
             ", time = " + time_.Dump() +
-            ", liveviewType = " + std::to_string(liveviewType_) +
+            ", liveviewType = " + std::to_string(static_cast<int32_t>(liveviewType_)) +
             " }";
 }
 
@@ -176,11 +176,11 @@ bool NotificationLocalLiveViewContent::ToJson(nlohmann::json &jsonObject) const
     jsonObject["type"] = type_;
     jsonObject["capsule"] = capsuleObj;
     jsonObject["button"] = buttonObj;
-    jsonObject["cardButton"] = cardBtnArr;
+    jsonObject["cardButtons"] = cardBtnArr;
     jsonObject["progress"] = progressObj;
     jsonObject["time"] = timeObj;
     jsonObject["flags"] = nlohmann::json(flags_);
-    jsonObject["liveviewType"] = liveviewType_;
+    jsonObject["liveviewType"] = static_cast<int32_t>(liveviewType_);
 
     return true;
 }
@@ -225,9 +225,9 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
         }
     }
 
-    if (jsonObject.find("cardButton") != jsonEnd && jsonObject.at("cardButton").is_array()) {
+    if (jsonObject.find("cardButtons") != jsonEnd && jsonObject.at("cardButtons").is_array()) {
         std::vector<NotificationIconButton> cardButtons;
-        for (auto &item : jsonObject.at("cardButton").items()) {
+        for (auto &item : jsonObject.at("cardButtons").items()) {
             nlohmann::json cardBtnObject = item.value();
             auto pButton = NotificationJsonConverter::ConvertFromJson<NotificationIconButton>(cardBtnObject);
             if (pButton != nullptr) {
@@ -264,7 +264,8 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
     }
 
     if (jsonObject.find("liveviewType") != jsonEnd && jsonObject.at("liveviewType").is_number_integer()) {
-        pContent->liveviewType_ = jsonObject.at("liveviewType").get<int32_t>();
+        auto typeValue = jsonObject.at("liveviewType").get<int32_t>();
+        pContent->liveviewType_ = static_cast<NotificationLocalLiveViewContent::LiveViewTypes>(typeValue);
     }
 
     return pContent;
@@ -319,7 +320,7 @@ bool NotificationLocalLiveViewContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(liveviewType_)) {
+    if (!parcel.WriteInt32(static_cast<int32_t>(liveviewType_))) {
         ANS_LOGE("Write liveviewType fail.");
         return false;
     }
@@ -405,10 +406,7 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    if (!parcel.ReadInt32(liveviewType_)) {
-        ANS_LOGE("Read liveviewType_ failed.");
-        return false;
-    }
+    liveviewType_ = static_cast<NotificationLocalLiveViewContent::LiveViewTypes>(parcel.ReadInt32());
 
     return true;
 }

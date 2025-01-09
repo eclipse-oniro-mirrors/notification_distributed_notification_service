@@ -196,6 +196,30 @@ bool AnsEnumUtil::LiveViewStatusJSToC(
     return true;
 }
 
+bool AnsEnumUtil::LiveViewTypesJSToC(
+    const LiveViewTypes &inType, NotificationLocalLiveViewContent::LiveViewTypes &outType)
+{
+    switch (inType) {
+        case LiveViewTypes::LIVE_VIEW_ACTIVITY:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY;
+            break;
+        case LiveViewTypes::LIVE_VIEW_INSTANT:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT;
+            break;
+        case LiveViewTypes::LIVE_VIEW_LONG_TERM:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM;
+            break;
+        case LiveViewTypes::LIVE_VIEW_INSTANT_BANNER:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+            break;
+        default:
+            ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
+            return false;
+    }
+
+    return true;
+}
+
 bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel)
 {
     switch (inLevel) {
@@ -453,6 +477,29 @@ bool AnsEnumUtil::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveVie
             break;
         default:
             ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
+            return false;
+    }
+
+    return true;
+}
+bool AnsEnumUtil::LiveViewTypesCToJS(const NotificationLocalLiveViewContent::LiveViewTypes &inType,
+    LiveViewTypes &outType)
+{
+    switch (inType) {
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY:
+            outType = LiveViewTypes::LIVE_VIEW_ACTIVITY;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT:
+            outType = LiveViewTypes::LIVE_VIEW_INSTANT;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM:
+            outType = LiveViewTypes::LIVE_VIEW_LONG_TERM;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER:
+            outType = LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+            break;
+        default:
+            ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
             return false;
     }
 

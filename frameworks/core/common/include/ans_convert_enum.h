@@ -125,6 +125,13 @@ enum class LiveViewStatus {
     LIVE_VIEW_BUTT
 };
 
+enum class LiveViewTypes {
+    LIVE_VIEW_ACTIVITY,
+    LIVE_VIEW_INSTANT,
+    LIVE_VIEW_LONG_TERM,
+    LIVE_VIEW_INSTANT_BANNER
+};
+
 class AnsEnumUtil {
 public:
     /**
@@ -180,6 +187,15 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool LiveViewStatusJSToC(const LiveViewStatus &inType, NotificationLiveViewContent::LiveViewStatus &outType);
+
+    /**
+     * @brief Converts liveview types from js to native
+     *
+     * @param in Indicates a js liveview type object
+     * @param out Indicates a liveview type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool LiveViewTypesJSToC(const LiveViewTypes &in, NotificationLocalLiveViewContent::LiveViewTypes &out);
 
     /**
      * @brief Converts slot level from native to js
@@ -261,6 +277,15 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool LiveViewStatusCToJS(const NotificationLiveViewContent::LiveViewStatus &inType, LiveViewStatus &outType);
+
+    /**
+     * @brief Converts liveview type from native to js
+     *
+     * @param in Indicates a native liveview type object
+     * @param out Indicates a js liveview type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool LiveViewTypesCToJS(const NotificationLocalLiveViewContent::LiveViewTypes &in, LiveViewTypes &out);
 };
 }
 }

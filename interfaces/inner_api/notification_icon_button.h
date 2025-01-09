@@ -21,7 +21,7 @@
 #include "parcel.h"
 #include <string>
 #include <vector>
-
+#include "pixel_map.h"
 namespace OHOS {
 namespace Notification {
 using namespace Global::Resource;
@@ -43,6 +43,10 @@ public:
     const std::shared_ptr<ResourceManager::Resource> GetIconResource() const;
 
     void SetIconResource(const std::shared_ptr<ResourceManager::Resource> &iconResource);
+
+    const std::shared_ptr<Media::PixelMap> GetIconImage() const;
+
+    void SetIconImage(const std::shared_ptr<Media::PixelMap> &iconImage);
 
     /**
      * @brief Obtains the text of the notification button.
@@ -111,6 +115,10 @@ public:
     static NotificationIconButton *Unmarshalling(Parcel &parcel);
 
     void ClearButtonIconsResource();
+
+    bool WriteIconToParcel(Parcel &parcel) const;
+
+    bool ReadResourceFromParcel(Parcel &parcel, std::shared_ptr<ResourceManager::Resource> &resourceObj);
 private:
 
     /**
@@ -126,8 +134,9 @@ private:
     std::string text_ {};
     std::string name_ {};
     std::shared_ptr<ResourceManager::Resource> iconResource_ {};
+    std::shared_ptr<Media::PixelMap> iconImage_ {};
     bool hidePanel_;
 };
 }  // namespace Notification
 }  // namespace OHOS
-#endif  //BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_ICON_BUTTON_H
+#endif  //BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_ICON_BUTTON_H

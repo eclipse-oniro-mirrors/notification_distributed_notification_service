@@ -39,6 +39,15 @@ void NotificationIconButton::SetIconResource(const std::shared_ptr<ResourceManag
     iconResource_ = iconResource;
 }
 
+const std::shared_ptr<Media::PixelMap> NotificationIconButton::GetIconImage() const
+{
+    return iconImage_;
+}
+
+void NotificationIconButton::SetIconImage(const std::shared_ptr<Media::PixelMap> &iconImage)
+{
+    iconImage_ = iconImage;
+}
 
 std::string NotificationIconButton::GetText() const
 {
@@ -94,6 +103,7 @@ bool NotificationIconButton::ToJson(nlohmann::json &jsonObject) const
     resourceObj["bundleName"] = iconResource_->bundleName;
     resourceObj["moduleName"] = iconResource_->moduleName;
     jsonObject["iconResource"] = resourceObj;
+    jsonObject["iconImage"] = AnsImageUtil::PackImage(iconImage_);
     return true;
 }
 
@@ -128,6 +138,24 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         auto resourceObj = std::make_shared<Global::Resource::ResourceManager::Resource>();
         if (ResourceFromJson(resources, resourceObj)) {
             button->SetIconResource(resourceObj);
+        }
+        auto pIcon = AnsImageUtil::UnPackImage(resources);
+        if (pIcon == nullptr) {
+            ANS_LOGE("Failed to parse button icon");
+            delete button;
+        } else {
+            button->SetIconImage(pIcon);
+        }
+    }
+
+    if (jsonObject.find("iconImage") != jsonEnd) {
+        auto resources = jsonObject.at("iconImage");
+        auto pIcon = AnsImageUtil::UnPackImage(resources);
+        if (pIcon == nullptr) {
+            ANS_LOGE("Failed to parse button icon");
+            delete button;
+        } else {
+            button->SetIconImage(pIcon);
         }
     }
     return button;
@@ -174,14 +202,10 @@ bool NotificationIconButton::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    std::vector<std::string> iconsResource  = {};
-    iconsResource.push_back(iconResource_->bundleName);
-    iconsResource.push_back(iconResource_->moduleName);
-    iconsResource.push_back(std::to_string(iconResource_->id));
-    if (!parcel.WriteStringVector(iconsResource)) {
-        ANS_LOGE("Failed to write button icon resource");
+    if (!WriteIconToParcel(parcel)) {
         return false;
     }
+
     return true;
 }
 
@@ -213,7 +237,63 @@ bool NotificationIconButton::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    std::vector<std::string> iconsResource;
+    bool valid {false};
+    valid = parcel.ReadBool();
+    if (valid) {
+        iconImage_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
+        if (!iconImage_) {
+            ANS_LOGE("Failed to read button icon.");
+            return false;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
+        if (!ReadResourceFromParcel(parcel, iconResource_)) {
+            ANS_LOGE("Failed to read button icon resource.");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NotificationIconButton::WriteIconToParcel(Parcel &parcel) const
+{
+    bool valid {false};
+    valid = iconImage_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether button icon is null");
+        return false;
+    }
+    if (valid) {
+        if (!parcel.WriteParcelable(iconImage_.get())) {
+            ANS_LOGE("Failed to write iconImage.");
+            return false;
+        }
+    }
+
+    valid = iconResource_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether button icon resource is null");
+        return false;
+    }
+    if (valid) {
+        std::vector<std::string> iconResource  = {};
+        iconResource.push_back(iconResource_->bundleName);
+        iconResource.push_back(iconResource_->moduleName);
+        iconResource.push_back(std::to_string(iconResource_->id));
+        if (!parcel.WriteStringVector(iconResource)) {
+            ANS_LOGE("Failed to write button icon resource");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool NotificationIconButton::ReadResourceFromParcel(Parcel &parcel,
+    std::shared_ptr<ResourceManager::Resource> &resourceObj)
+{
+    std::vector<std::string> iconsResource = {};
     if (!parcel.ReadStringVector(&iconsResource)) {
         ANS_LOGE("Failed to read button names");
         return false;
@@ -232,9 +312,8 @@ bool NotificationIconButton::ReadFromParcel(Parcel &parcel)
         return false;
     }
     resource->id = std::stoi(iconsResource[RESOURCE_ID_INDEX]);
-    iconResource_ = resource;
-
+    resourceObj = resource;
     return true;
 }
 }
-}
+}

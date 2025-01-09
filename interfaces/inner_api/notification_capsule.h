@@ -140,7 +140,7 @@ private:
     std::string content_ {};
     std::shared_ptr<Media::PixelMap> icon_ {};
     std::vector<NotificationIconButton> capsuleButton_;
-    int32_t time_ {-1};
+    int32_t time_ {0};
 };
 }  // namespace Notification
 }  // namespace OHOS

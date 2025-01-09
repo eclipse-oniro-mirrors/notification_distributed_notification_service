@@ -79,7 +79,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
         napi_set_named_property(env, result, "button", button);
     }
 
-    // cardButton?: Array<NotificationIconButton>;
+    // cardButtons?: Array<NotificationIconButton>;
     if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::CARD_BUTTON)) {
         napi_value cardBtn = nullptr;
         napi_create_array_with_length(env, localLiveViewContent->GetCardButton().size(), &cardBtn);
@@ -87,15 +87,17 @@ napi_value Common::SetNotificationLocalLiveViewContent(
             ANS_LOGE("SetCardButton call failed");
             return NapiGetBoolean(env, false);
         }
-        napi_set_named_property(env, result, "cardButton", cardBtn);
+        napi_set_named_property(env, result, "cardButtons", cardBtn);
     }
 
-    // liveViewType?: number
-    napi_create_int32(env, localLiveViewContent->GetLiveviewType(), &value);
-    if (localLiveViewContent->GetLiveviewType() != -1) {
-        ANS_LOGE("localLiveViewContent->GetLiveviewType() %{public}d ", localLiveViewContent->GetLiveviewType());
-        napi_set_named_property(env, result, "liveViewType", value);
+    // liveViewType?: LiveViewTypes
+    LiveViewTypes outType = LiveViewTypes::LIVE_VIEW_ACTIVITY;
+    if (!AnsEnumUtil::LiveViewTypesCToJS(localLiveViewContent->GetLiveViewType(), outType)) {
+        ANS_LOGE("Liveview type is invalid");
+        return NapiGetBoolean(env, false);
     }
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
+    napi_set_named_property(env, result, "liveViewType", value);
 
     // progress: NotificationProgress
     if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::PROGRESS)) {
@@ -160,14 +162,14 @@ napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &ca
     napi_create_int32(env, capsule.GetTime(), &value);
     napi_set_named_property(env, result, "time", value);
 
-    // capsuleButton?: Array<NotificationIconButton>;
+    // capsuleButtons?: Array<NotificationIconButton>;
     napi_value cardBtn = nullptr;
     napi_create_array_with_length(env, capsule.GetCapsuleButton().size(), &cardBtn);
     if (!SetCardButton(env, capsule.GetCapsuleButton(), cardBtn)) {
         ANS_LOGE("capsuleButton call failed");
         return NapiGetBoolean(env, false);
     }
-    napi_set_named_property(env, result, "capsuleButton", cardBtn);
+    napi_set_named_property(env, result, "capsuleButtons", cardBtn);
 
     return NapiGetBoolean(env, true);
 }
@@ -356,17 +358,24 @@ napi_value Common::SetCardButton(const napi_env &env, const std::vector<Notifica
         napi_get_boolean(env, btn.GetHidePanel(), &value);
         napi_set_named_property(env, item, "hidePanel", value);
 
-        // iconsResource: Resource;
+        // iconResource: Resource;
         napi_value object;
         status = napi_create_object(env, &object);
         if (status != napi_ok) {
             ANS_LOGE("Failed to create card button item.resource");
             return NapiGetBoolean(env, false);
         }
-        if (!SetResourceObject(env, btn.GetIconResource(), object)) {
-            return NapiGetBoolean(env, false);
+        // resource | pixelMap
+        std::shared_ptr<Media::PixelMap> icon = btn.GetIconImage();
+        if (icon) {
+            object = Media::PixelMapNapi::CreatePixelMap(env, icon);
+        } else {
+            if (!SetResourceObject(env, btn.GetIconResource(), object)) {
+                return NapiGetBoolean(env, false);
+            }
         }
-        napi_set_named_property(env, item, "iconsResource", object);
+
+        napi_set_named_property(env, item, "iconResource", object);
         status = napi_set_element(env, result, iconCount, item);
         iconCount++;
     }
@@ -600,9 +609,9 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         capsule.SetTime(intValue);
     }
 
-    NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "capsuleButton", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "capsuleButtons", &hasProperty));
     if (hasProperty) {
-        napi_get_named_property(env, capsuleResult, "capsuleButton", &result);
+        napi_get_named_property(env, capsuleResult, "capsuleButtons", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
@@ -626,7 +635,7 @@ napi_value Common::GetNotificationLocalLiveViewCardButton(
     napi_value buttonResult = nullptr;
 
     ANS_LOGD("enter");
-    napi_get_named_property(env, contentResult, "cardButton", &buttonResult);
+    napi_get_named_property(env, contentResult, "cardButtons", &buttonResult);
     
     // 解析iconbutton数组
     std::vector<NotificationIconButton> cardButtons;
@@ -706,25 +715,35 @@ napi_value Common::GetNotificationIconButton(
             button.SetName(str);
         }
 
-        // iconsResource: Resource
-        NAPI_CALL(env, napi_has_named_property(env, cardButton, "iconsResource", &hasProperty));
+        // iconResource: Resource
+        NAPI_CALL(env, napi_has_named_property(env, cardButton, "iconResource", &hasProperty));
         if (!hasProperty) {
-            ANS_LOGE("Property iconsResource expected.");
+            ANS_LOGE("Property iconResource expected.");
             return nullptr;
         } else {
+            // if icon type is Rersouce, get the resource object and return.
             napi_value iconResource = nullptr;
-            auto resource = std::make_shared<ResourceManager::Resource>();
-            napi_get_named_property(env, cardButton, "iconsResource", &iconResource);
+            napi_get_named_property(env, cardButton, "iconResource", &iconResource);
             NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
             if (valuetype != napi_object) {
-                ANS_LOGE("Wrong argument type. iconsResource Object expected.");
+                ANS_LOGE("Wrong argument type. iconResource Object expected.");
                 return nullptr;
             }
+
+            // icon?: Resource
+            auto resource = std::make_shared<ResourceManager::Resource>();
             if (Common::GetResourceObject(env, resource, iconResource) == nullptr) {
-                ANS_LOGW("Invalid icon resource object.");
-                return nullptr;
+                ANS_LOGI("Invalid icon resource object or not resource.");
             } else {
                 button.SetIconResource(resource);
+            }
+
+            // icon?: image.PixelMap
+            auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, iconResource);
+            if (pixelMap == nullptr) {
+                ANS_LOGE("Invalid pixelMap object is null.");
+            } else {
+                button.SetIconImage(pixelMap);
             }
         }
 
@@ -1131,24 +1150,21 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     }
 
     //cardButton?
-    NAPI_CALL(env, napi_has_named_property(env, contentResult, "cardButton", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "cardButtons", &hasProperty));
     if (hasProperty && GetNotificationLocalLiveViewCardButton(env, contentResult, content) == nullptr) {
         return nullptr;
     }
 
-    // liveViewType?: number
+    // liveViewType?: LiveViewTypes
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "liveViewType", &hasProperty));
-    if (hasProperty) {
-        napi_get_named_property(env, contentResult, "liveViewType", &result);
-        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-        if (valuetype != napi_number) {
-            ANS_LOGE("Wrong argument liveViewType. Number expected.");
+    NotificationLocalLiveViewContent::LiveViewTypes outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY;
+    if (hasProperty && AppExecFwk::UnwrapInt32ByPropertyName(env, contentResult, "liveViewType", type)) {
+        if (!AnsEnumUtil::LiveViewTypesJSToC(LiveViewTypes(type), outType)) {
+            ANS_LOGE("The liveview types is not valid.");
             return nullptr;
         }
-        napi_get_value_int32(env, result, &type);
-        content->SetLiveviewType(type);
-        ANS_LOGD("localLiveView SetLiveviewType = %{public}d", type);
     }
+    content->SetLiveViewType(outType);
 
     //progress?
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "progress", &hasProperty));
