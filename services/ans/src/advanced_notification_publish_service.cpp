@@ -346,6 +346,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             return;
         }
 
+        CheckDoNotDisturbProfile(record);
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
