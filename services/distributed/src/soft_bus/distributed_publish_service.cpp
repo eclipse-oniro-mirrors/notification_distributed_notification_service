@@ -87,7 +87,13 @@ void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& 
     if (isCommonLiveView) {
         std::vector<uint8_t> buffer;
         if (box.GetCommonLiveView(buffer)) {
+            std::string title;
+            std::string context;
+            box.GetNotificationText(context);
+            box.GetNotificationTitle(title);
             auto liveviewContent = std::make_shared<NotificationLiveViewContent>();
+            liveviewContent->SetText(context);
+            liveviewContent->SetTitle(title);
             auto content = std::make_shared<NotificationContent>(liveviewContent);
             request->SetContent(content);
             std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
