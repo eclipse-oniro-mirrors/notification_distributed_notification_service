@@ -2146,7 +2146,6 @@ ErrCode AnsManagerStub::HandleDistributedGetEnabledWithoutApp(MessageParcel &dat
 
 ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply)
 {
-    ANSR_LOGI("HandleSetBadgeNumber");
     int32_t badgeNumber = -1;
     if (!data.ReadInt32(badgeNumber)) {
         ANSR_LOGE("Read badge number failed.");

@@ -22,7 +22,6 @@ namespace OHOS {
 namespace NotificationNapi {
 void NapiRemoveExecuteCallback(napi_env env, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work start");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -45,7 +44,6 @@ void NapiRemoveExecuteCallback(napi_env env, void *data)
 
 void NapiRemoveCompleteCallback(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work end");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;

@@ -276,7 +276,6 @@ napi_value ParseParameters(
 
 void RemoveExecuteCallback(napi_env env, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work start");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -296,7 +295,6 @@ void RemoveExecuteCallback(napi_env env, void *data)
 
 void RemoveCompleteCallback(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work end");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
