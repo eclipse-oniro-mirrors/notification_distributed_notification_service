@@ -74,14 +74,16 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
     networksId_.insert(std::make_pair(deviceId, networkId));
 }
 
-int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType)
+int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
+    int32_t& socketId)
 {
     std::string key = deviceId + '_' + std::to_string(dataType);
     {
         std::lock_guard<std::mutex> lock(clientLock_);
         auto socketItem = socketsId_.find(key);
         if (socketItem != socketsId_.end() && socketItem->second != -1) {
-            return socketItem->second;
+            socketId = socketItem->second;
+            return ERR_OK;
         }
     }
 
@@ -91,28 +93,29 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
         networkId = networkIdItem->second;
     }
     std::string name = (dataType == TransDataType::DATA_TYPE_MESSAGE) ? ANS_SOCKET_CMD : ANS_SOCKET_MSG;
-    int32_t socketId = ClientBind(name, ANS_SOCKET_PKG, name, networkId, dataType);
-    if (socketId == -1) {
+    int32_t result = ClientBind(name, ANS_SOCKET_PKG, networkId, dataType, socketId);
+    if (result != ERR_OK) {
         ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", deviceId.c_str(),
             networkId.c_str(), deviceType, dataType);
-        return socketId;
+        return result;
     }
     {
         std::lock_guard<std::mutex> lock(clientLock_);
         socketsId_.insert(std::make_pair(key, socketId));
         ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
     }
-    return socketId;
+    return ERR_OK;
 }
 
 int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDataType dataType,
     const std::string &deviceId, uint16_t deviceType)
 {
+    int32_t socketId = 0;
     DistributedServer::GetInstance().CheckServer();
-    int32_t socketId = GetSocketId(deviceId, deviceType, dataType);
-    if (socketId == -1) {
+    int32_t result = GetSocketId(deviceId, deviceType, dataType, socketId);
+    if (result != ERR_OK) {
         ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", deviceId.c_str(), deviceType, dataType);
-        return -1;
+        return result;
     }
     return ClientSendMsg(socketId, data, length, dataType);
 }

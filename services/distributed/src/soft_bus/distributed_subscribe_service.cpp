@@ -123,6 +123,8 @@ void DistributedService::SetNotificationContent(const std::shared_ptr<Notificati
     switch (type) {
         case NotificationContent::Type::PICTURE:
         case NotificationContent::Type::BASIC_TEXT:
+        case NotificationContent::Type::LIVE_VIEW:
+        case NotificationContent::Type::LOCAL_LIVE_VIEW:
         case NotificationContent::Type::MULTILINE: {
             std::shared_ptr<NotificationBasicContent> contentBasic =
                 std::static_pointer_cast<NotificationBasicContent>(content->GetNotificationContent());
@@ -174,10 +176,9 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             std::vector<uint8_t> buffer;
             DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
             requestBox.SetCommonLiveView(buffer);
-        } else {
-            SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
-                requestPoint->GetNotificationType(), requestBox);
         }
+        SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
+            requestPoint->GetNotificationType(), requestBox);
         if (!requestBox.Serialize()) {
             ANS_LOGW("Dans OnConsumed serialize failed.");
             return;

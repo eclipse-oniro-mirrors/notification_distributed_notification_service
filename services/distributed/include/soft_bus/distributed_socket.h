@@ -23,10 +23,11 @@
 namespace OHOS {
 namespace Notification {
 
-int32_t ServiceListen(const std::string& name, const std::string& pkgName, TransDataType dataType);
+int32_t ServiceListen(const std::string& name, const std::string& pkgName, TransDataType dataType,
+    int32_t& socketId);
 
-int32_t ClientBind(const std::string& name, const std::string& pkgName, const std::string& peerName,
-    const std::string& peerNetWorkId, TransDataType dataType);
+int32_t ClientBind(const std::string& name, const std::string& pkgName,
+    const std::string& peerNetWorkId, TransDataType dataType, int32_t& socketId);
 
 void CloseSocket(int32_t socketId);
 
