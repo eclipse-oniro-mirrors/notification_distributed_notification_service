@@ -220,6 +220,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             ANS_LOGE("Can not assign valid slot!");
         }
 
+        CheckDoNotDisturbProfile(record);
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
