@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <sstream>
+
 #include "distributed_service.h"
 
 #include "notification_helper.h"
@@ -26,15 +29,16 @@
 #include "distributed_preference.h"
 #include "batch_remove_box.h"
 #include "remove_box.h"
+
 namespace OHOS {
 namespace Notification {
 
 const std::string DISTRIBUTED_LABEL = "ans_distributed";
 const int32_t DEFAULT_FILTER_TYPE = 1;
 
-std::string SubscribeTransDeviceType(uint16_t deviceType_)
+std::string SubscribeTransDeviceType(uint16_t deviceType)
 {
-    switch (deviceType_) {
+    switch (deviceType) {
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH: {
             return "wearable";
         }
@@ -196,21 +200,22 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         return;
     }
 
-    std::function<void()> task = std::bind([peerDevice, notifications, this]() {
-        BatchRemoveNotifticationBox batchRemoveBox;
-        std::vector<std::string> notificationKeys;
-        for (auto notification : notifications) {
-            if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-                ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
-                continue;
-            }
-            ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
-            notificationKeys.push_back(GetNotificationKey(notification));
+    std::ostringstream keysStream;
+    for (auto notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
+            continue;
         }
+        ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
+        keysStream << GetNotificationKey(notification) << ' ';
+    }
+    std::string notificationKeys = keysStream.str();
+
+    std::function<void()> task = std::bind([peerDevice, notifications, notificationKeys]() {
+        BatchRemoveNotificationBox batchRemoveBox;
         if (!notificationKeys.empty()) {
-            batchRemoveBox.SetNotificationHashCode(notificationKeys[0]);
+            batchRemoveBox.SetNotificationHashCode(notificationKeys);
         }
-        batchRemoveBox.SetNotificationKeys(notificationKeys);
 
         if (!batchRemoveBox.Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
@@ -229,14 +234,15 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
         ANS_LOGE("check handler is null");
         return;
     }
-    std::function<void()> task = std::bind([peerDevice, notification, this]() {
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
+        return;
+    }
+    std::string notificationKey = GetNotificationKey(notification);
+    std::function<void()> task = std::bind([peerDevice, notification, notificationKey]() {
         NotificationRemoveBox removeBox;
-        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-            ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
-            return;
-        }
         ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());
-        removeBox.SetNotificationHashCode(GetNotificationKey(notification));
+        removeBox.SetNotificationHashCode(notificationKey);
         if (!removeBox.Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
             return;
