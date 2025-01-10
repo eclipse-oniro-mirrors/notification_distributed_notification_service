@@ -45,6 +45,10 @@ public:
     void SetPeerDevice(DistributedDeviceInfo localDevice);
     bool CheckNeedCollaboration(const std::shared_ptr<Notification> &notification);
     bool CheckCollaborativeRemoveType(const NotificationConstant::SlotType& slotType);
+    bool HasOnBatchCancelCallback() override
+    {
+        return true;
+    }
 
 private:
     DistributedDeviceInfo localDevice_;

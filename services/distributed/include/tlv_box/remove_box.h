@@ -27,8 +27,7 @@ public:
     NotificationRemoveBox();
     ~NotificationRemoveBox();
     NotificationRemoveBox(std::shared_ptr<TlvBox> box);
-    bool SetNotificationHashCode(const std::string& hasdCode);
-    bool SetDistributedCollaborate(bool distributedCollaborate);
+    bool SetNotificationHashCode(const std::string& hashCode);
 };
 }  // namespace Notification
 }  // namespace OHOS

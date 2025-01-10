@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <sstream>
+
 #include "distributed_service.h"
 
 #include "notification_helper.h"
@@ -181,29 +184,41 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
     ANS_LOGI("Dans publish message %{public}s %{public}d.", request->Dump().c_str(), result);
 }
 
-void DistributedService::RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMessage)
+void DistributedService::RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage)
 {
-    std::string hasdCode;
+    std::string hashCode;
     if (boxMessage == nullptr) {
         ANS_LOGE("boxMessage is nullptr");
         return;
     }
-    boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hasdCode);
+    boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hashCode);
     int result = IN_PROCESS_CALL(NotificationHelper::RemoveNotification(
-        hasdCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+        hashCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans remove message %{public}d.", result);
 }
 
-void DistributedService::RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage)
+void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage)
 {
-    std::vector<std::string> hasdCodes;
+    std::vector<std::string> hashCodes;
+    std::string hashCodesString;
     if (boxMessage == nullptr) {
         ANS_LOGE("boxMessage is nullptr");
         return;
     }
-    boxMessage->GetVectorValue(BATCH_REMOVE_NOTIFICATIONS, hasdCodes);
+    if (!boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hashCodesString)) {
+        ANS_LOGE("failed GetStringValue from boxMessage");
+        return;
+    }
+    std::istringstream hashCodesStream(hashCodesString);
+    std::string hashCode;
+    while (hashCodesStream >> hashCode) {
+        if (!hashCode.empty()) {
+            hashCodes.push_back(hashCode);
+        }
+    }
+
     int result = IN_PROCESS_CALL(
-        NotificationHelper::RemoveNotifications(hasdCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+        NotificationHelper::RemoveNotifications(hashCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans batch remove message %{public}d.", result);
 }
 }

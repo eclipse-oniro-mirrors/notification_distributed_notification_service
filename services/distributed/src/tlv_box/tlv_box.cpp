@@ -79,11 +79,6 @@ TlvItem::TlvItem(int32_t type, std::string value) : type_(type)
     Initialize(value.c_str(), value.size() + 1);
 }
 
-TlvItem::TlvItem(int32_t type, std::vector<std::string> value) : type_(type)
-{
-    Initialize(&value, value.size());
-}
-
 TlvItem::TlvItem(int32_t type, const TlvItem& value) : type_(type)
 {
     Initialize(value.GetValue(), value.GetLength());
@@ -148,16 +143,6 @@ bool TlvBox::GetStringValue(int32_t type, std::string& value)
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
         value = reinterpret_cast<char*>(iter->second->GetValue());
-        return true;
-    }
-    return false;
-}
-
-bool TlvBox::GetVectorValue(int32_t type, std::vector<std::string>& value)
-{
-    auto iter = TlvMap_.find(type);
-    if (iter != TlvMap_.end()) {
-        value = *reinterpret_cast<std::vector<std::string> *>(iter->second->GetValue());
         return true;
     }
     return false;

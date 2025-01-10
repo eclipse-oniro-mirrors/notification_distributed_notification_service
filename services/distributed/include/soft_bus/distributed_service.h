@@ -79,8 +79,8 @@ private:
     void SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
         int32_t contentType);
     void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
-    void RemoveNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
-    void RemoveNotifictaions(const std::shared_ptr<TlvBox>& boxMessage);
+    void RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage);
+    void RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
         NotificationContent::Type type, NotifticationRequestBox &requestBox);
     void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,

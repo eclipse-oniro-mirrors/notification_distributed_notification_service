@@ -23,13 +23,12 @@
 
 namespace OHOS {
 namespace Notification {
-class BatchRemoveNotifticationBox : public BoxBase {
+class BatchRemoveNotificationBox : public BoxBase {
 public:
-    BatchRemoveNotifticationBox();
-    ~BatchRemoveNotifticationBox();
-    BatchRemoveNotifticationBox(std::shared_ptr<TlvBox> box);
-    bool SetNotificationHashCode(const std::string& hasdCode);
-    bool SetNotificationKeys(const std::vector<std::string>& keys);
+    BatchRemoveNotificationBox();
+    ~BatchRemoveNotificationBox();
+    BatchRemoveNotificationBox(std::shared_ptr<TlvBox> box);
+    bool SetNotificationHashCode(const std::string& hashCode);
 };
 }  // namespace Notification
 }  // namespace OHOS
