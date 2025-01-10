@@ -137,6 +137,7 @@ ohos_source_set("ans_service_sources") {
     "${frameworks_module_reminder_path}:reminder_innerkits",
     "../ans:ans.para",
     "../ans:ans.para.dac",
+    "../ans:external.json",
   ]
 
   if (is_double_framework) {
@@ -290,6 +291,7 @@ ohos_shared_library("libans") {
     "${services_path}/ans:ans_service_sources",
     "../ans:ans.para",
     "../ans:ans.para.dac",
+    "../ans:external.json",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/libxml2:libxml2",
   ]
@@ -373,6 +375,13 @@ ohos_prebuilt_etc("ans.para") {
 ohos_prebuilt_etc("ans.para.dac") {
   source = "etc/ans.para.dac"
   relative_install_dir = "param"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_prebuilt_etc("external.json") {
+  source = "etc/external.json"
+  relative_install_dir = "notification_template"
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
