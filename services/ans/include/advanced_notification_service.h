@@ -1351,7 +1351,6 @@ private:
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
-    void OnSubscriberAddInffrt(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);

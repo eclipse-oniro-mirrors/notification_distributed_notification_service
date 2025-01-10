@@ -308,10 +308,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
 
-    std::function<void(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &)> callback =
-        std::bind(&AdvancedNotificationService::OnSubscriberAddInffrt, this, std::placeholders::_1);
-    NotificationSubscriberManager::GetInstance()->RegisterOnSubscriberAddCallback(callback);
-
     RecoverLiveViewFromDb();
 
     ISystemEvent iSystemEvent = {
