@@ -98,7 +98,7 @@ void DistributedScreenStatusManager::GetKvDataManager()
 #endif
     ret = DistributedHardware::DeviceManager::GetInstance().RegisterDevStateCallback(APP_ID + STORE_ID, "", deviceCb_);
     if (ret != 0) {
-        ANS_LOGE("register devStateCallback failed, ret:%{public}d", ret);
+        ANS_LOGD("register devStateCallback failed, ret:%{public}d", ret);
         return;
     }
 

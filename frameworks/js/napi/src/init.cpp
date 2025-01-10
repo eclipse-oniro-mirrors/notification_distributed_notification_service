@@ -37,8 +37,6 @@ EXTERN_C_START
 
 napi_value NotificationInit(napi_env env, napi_value exports)
 {
-    ANS_LOGI("notificationInit start");
-
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("subscribe", Subscribe),
         DECLARE_NAPI_FUNCTION("unsubscribe", Unsubscribe),

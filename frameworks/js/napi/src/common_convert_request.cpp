@@ -469,7 +469,6 @@ napi_value Common::SetNotificationActionButtonByUserInput(
     ANS_LOGD("enter");
 
     if (!userInput) {
-        ANS_LOGE("userInput is null");
         return NapiGetBoolean(env, false);
     }
 
@@ -967,7 +966,6 @@ napi_value Common::GetNotificationId(const napi_env &env, const napi_value &valu
         }
         napi_get_value_int32(env, result, &notificationId);
         request.SetNotificationId(notificationId);
-        ANS_LOGI("notificationId = %{public}d", notificationId);
     } else {
         ANS_LOGI("default notificationId = 0");
         request.SetNotificationId(0);

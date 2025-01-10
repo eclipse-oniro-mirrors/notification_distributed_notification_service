@@ -628,7 +628,8 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGI("PublishPreparedNotification");
+    ANS_LOGI("PublishPreparedNotification,notificationId:%{public}d,bundleOption:[%{public}s, %{public}d]",
+        request->GetNotificationId(), bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
@@ -1288,8 +1289,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             return ERR_OK;
         }
     }
-    std::string message = "notification not exist";
-    ANS_LOGE("%{public}s", message.c_str());
+    ANS_LOGE("notification not exist,notification:%{public}d, bundleName:%{public}s, uid:%{public}d",
+        notificationId, bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 

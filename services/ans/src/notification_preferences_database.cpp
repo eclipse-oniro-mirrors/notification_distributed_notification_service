@@ -725,7 +725,7 @@ bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundl
     std::string bundleKey;
     int32_t result = rdbDataManager_->QueryData(bundleDBKey, bundleKey, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get Bundle Info failed.");
+        ANS_LOGE("Get Bundle Info failed,key:%{public}s", bundleDBKey.c_str());
         return false;
     }
     ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());

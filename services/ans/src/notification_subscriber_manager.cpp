@@ -315,7 +315,7 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
         return;
     }
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, object]() {
-        ANS_LOGE("ffrt enter!");
+        ANS_LOGD("ffrt enter!");
         std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
             auto subscriberUid = record->subscriberUid;

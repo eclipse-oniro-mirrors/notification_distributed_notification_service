@@ -79,7 +79,7 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     }
 
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGD("sortingMap is null");
         return Common::NapiGetBoolean(env, false);
     }
 
@@ -292,7 +292,6 @@ void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context,
 void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS::Notification::Notification>>
     &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
-    ANS_LOGI("OnBatchCancel");
     if (batchCancelCallbackInfo_.ref == nullptr || batchCancelCallbackInfo_.env == nullptr) {
         ANS_LOGI("batchCancelCallbackInfo_ callback or env unset");
         return;
@@ -305,8 +304,8 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
         ANS_LOGE("sortingMap is null");
         return;
     }
-    ANS_LOGI("OnBatchCancel sortingMap size = %{public}zu", sortingMap->GetKey().size());
-    ANS_LOGI("OnBatchCancel deleteReason = %{public}d", deleteReason);
+    ANS_LOGI("OnBatchCancel deleteReason = %{public}d, sortingMap size = %{public}zu",
+        deleteReason, sortingMap->GetKey().size());
     std::string notificationKeys = "";
     for (auto notification : requestList) {
         notificationKeys.append(notification->GetKey()).append("-");

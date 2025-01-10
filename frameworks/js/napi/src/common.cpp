@@ -44,11 +44,11 @@ napi_value Common::SetNotificationSortingMap(
 {
     ANS_LOGD("enter");
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGD("sortingMap is null");
         return NapiGetBoolean(env, false);
     }
     if (sortingMap->GetKey().size() == 0) {
-        ANS_LOGE("sortingMap GetKey().size is empty");
+        ANS_LOGD("sortingMap GetKey().size is empty");
         return NapiGetBoolean(env, false);
     }
 
@@ -502,7 +502,6 @@ napi_value Common::GetNotificationUserInputByTag(
     size_t strLen = 0;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
     // tag: string
@@ -537,7 +536,6 @@ napi_value Common::GetNotificationUserInputByOptions(
     bool isArray = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -590,7 +588,6 @@ napi_value Common::GetNotificationUserInputByPermitMimeTypes(
     bool isArray = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -634,7 +631,6 @@ napi_value Common::GetNotificationUserInputByPermitFreeFormInput(
     bool hasProperty = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -666,7 +662,6 @@ napi_value Common::GetNotificationUserInputByEditType(
     int32_t editType = 0;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -697,7 +692,6 @@ napi_value Common::GetNotificationUserInputByAdditionalData(
     bool hasProperty = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
