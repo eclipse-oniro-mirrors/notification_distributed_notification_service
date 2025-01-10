@@ -1467,15 +1467,21 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
                     ANS_LOGD("Subscribe with NotificationSubscribeInfo excute.");
-                    OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
-                    subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
-                    subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    sptr<OHOS::Notification::NotificationSubscribeInfo> subscribeInfo =
+                        new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
+                    if (subscribeInfo == nullptr) {
+                        ANS_LOGE("Invalid subscribeInfo!");
+                        asynccallbackinfo->info.errorCode = OHOS::Notification::ErrorCode::ERR_ANS_NO_MEMORY;
+                        return;
+                    }
+                    subscribeInfo->AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
+                    subscribeInfo->AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
                     ANS_LOGD("SubscribeNotification execute.");
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo);
                 }
             }
         },
