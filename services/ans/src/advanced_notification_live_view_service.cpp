@@ -167,14 +167,6 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
     CancelArchiveTimer(record);
 }
 
-void AdvancedNotificationService::OnSubscriberAddInffrt(
-    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
-{
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([this, record]() {
-        OnSubscriberAdd(record);
-    }));
-}
-
 void AdvancedNotificationService::OnSubscriberAdd(
     const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
 {
