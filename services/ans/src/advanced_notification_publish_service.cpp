@@ -179,12 +179,6 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         }
     } while (0);
 
-    if (result == ERR_OK) {
-        message.ErrorCode(result).Message("Publish success.");
-        NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
-    } else {
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-    }
     SendPublishHiSysEvent(request, result);
     return result;
 }
