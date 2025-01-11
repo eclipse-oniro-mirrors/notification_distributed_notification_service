@@ -1456,15 +1456,8 @@ void ReminderDataManager::CheckReminderTime(std::vector<sptr<ReminderRequest>>& 
 
 void ReminderDataManager::InitUserId()
 {
-    std::vector<int32_t> activeUserId;
-    AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-    if (activeUserId.size() > 0) {
-        currentUserId_ = activeUserId[0];
-        ANSR_LOGD("Init user id=%{private}d", currentUserId_);
-    } else {
-        currentUserId_ = MAIN_USER_ID;
-        ANSR_LOGE("Failed to get active user id.");
-    }
+    currentUserId_ = MAIN_USER_ID;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId_);
 }
 
 bool ReminderDataManager::RegisterConfigurationObserver()

@@ -832,9 +832,9 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
 {
     std::regex matchBundlenamePattern("^ans_bundle_(.*)_name$");
     std::smatch match;
-    std::vector<int32_t> ids;
+    int32_t currentUserId = SUBSCRIBE_USER_INIT;
     ErrCode result = ERR_OK;
-    result = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    result = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
     if (result != ERR_OK) {
         ANS_LOGE("Get account id fail");
         return false;
@@ -859,13 +859,12 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
                 continue;
             }
             int userid = -1;
-            constexpr int FIRST_USERID = 0;
             result =
-                OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
+                OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
             if (result != ERR_OK) {
                 return false;
             }
-            if (userid != ids[FIRST_USERID]) {
+            if (userid != currentUserId) {
                 continue;
             }
             NotificationBundleOption obj(value, StringToInt(uidItem->second));
