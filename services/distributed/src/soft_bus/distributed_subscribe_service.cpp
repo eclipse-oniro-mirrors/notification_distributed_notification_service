@@ -168,7 +168,11 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         requestBox.SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
         requestBox.SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
         requestBox.SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
-        requestBox.SetCreatorBundleName(request->GetBundleName());
+        if (request->GetBundleName().empty()) {
+            requestBox.SetCreatorBundleName(request->GetCreateBundle());
+        } else {
+            requestBox.SetCreatorBundleName(request->GetBundleName());
+        }
         if (requestPoint->GetBigIcon() != nullptr) {
             requestBox.SetBigIcon(requestPoint->GetBigIcon());
         }
