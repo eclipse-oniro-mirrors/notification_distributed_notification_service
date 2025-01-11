@@ -34,6 +34,7 @@
 #include "notification_analytics_util.h"
 
 #include "advanced_notification_inline.cpp"
+#include "liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -473,6 +474,9 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
 
+    bool wearableFlag = false;
+    bool headsetFlag = false;
+    bool keyNodeFlag = false;
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d> BundleName  = <%{public}s deviceType = %{public}s",
             __FUNCTION__, record->userId, notification->GetBundleName().c_str(), record->deviceType.c_str());
@@ -489,11 +493,15 @@ void NotificationSubscriberManager::NotifyConsumedInner(
                     continue;
                 }
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
+                NotificationSubscriberManager::IsDeviceFlag(
+                    record, notification, wearableFlag, headsetFlag, keyNodeFlag);
                 continue;
             }
             record->subscriber->OnConsumed(notification, notificationMap);
+            NotificationSubscriberManager::IsDeviceFlag(record, notification, wearableFlag, headsetFlag, keyNodeFlag);
         }
     }
+    NotificationSubscriberManager::TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -536,8 +544,16 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
         if (notification == nullptr) {
             continue;
         }
+        bool wearableFlag = false;
+        bool headsetFlag = false;
+        bool keyNodeFlag = false;
         if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
             currNotifications.emplace_back(notification);
+            if (record->subscriber != nullptr) {
+                NotificationSubscriberManager::IsDeviceFlag(
+                    record, notification, wearableFlag, headsetFlag, keyNodeFlag);
+                NotificationSubscriberManager::TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
+            }
         }
     }
     if (!currNotifications.empty()) {
@@ -770,6 +786,85 @@ std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecor
     return subscriberRecordList_;
 }
 
+void NotificationSubscriberManager::IsDeviceFlag(const std::shared_ptr<SubscriberRecord> &record,
+    const sptr<Notification> &notification, bool &wearableFlag, bool &headsetFlag, bool &keyNodeFlag)
+{
+    if (record == nullptr || notification == nullptr) {
+        ANS_LOGE("record or notification is nullptr.");
+        return;
+    }
+    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("request is nullptr.");
+        return;
+    }
+    auto flagsMap = request->GetDeviceFlags();
+    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+        return;
+    }
+
+    if (record->deviceType == DEVICE_TYPE_LITE_WEARABLE) {
+        auto flagIter = flagsMap->find(DEVICE_TYPE_LITE_WEARABLE);
+        if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+            wearableFlag = true;
+        }
+    } else if (record->deviceType == DEVICE_TYPE_WEARABLE) {
+        auto flagIter = flagsMap->find(DEVICE_TYPE_WEARABLE);
+        if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+            wearableFlag = true;
+        }
+    } else if (record->deviceType == DEVICE_TYPE_HEADSET) {
+        auto flagIter = flagsMap->find(DEVICE_TYPE_HEADSET);
+        if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+            headsetFlag = true;
+        }
+    }
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
+        LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
+        auto flags = request->GetFlags();
+        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
+            flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+            keyNodeFlag = true;
+        }
+    }
+}
+
+void NotificationSubscriberManager::TrackCodeLog(
+    const sptr<Notification> &notification, const bool &wearableFlag, const bool &headsetFlag, const bool &keyNodeFlag)
+{
+    if (notification == nullptr) {
+        ANS_LOGE("notification is empty.");
+        return;
+    }
+    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("request is nullptr.");
+        return;
+    }
+    auto slotType = request->GetSlotType();
+    bool isLiveViewType = (slotType == NotificationConstant::SlotType::LIVE_VIEW);
+    if (wearableFlag && headsetFlag) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
+                                    .syncWatchHeadSet(isLiveViewType)
+                                    .keyNode(keyNodeFlag)
+                                    .SlotType(slotType);
+        NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+    } else {
+        if (headsetFlag) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
+                                        .syncHeadSet(isLiveViewType)
+                                        .keyNode(keyNodeFlag)
+                                        .SlotType(slotType);
+            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+        } else if (wearableFlag) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
+                                        .syncWatch(isLiveViewType)
+                                        .keyNode(keyNodeFlag)
+                                        .SlotType(slotType);
+            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+        }
+    }
+}
 void NotificationSubscriberManager::DistributeOperation(const sptr<Notification>& notification)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);

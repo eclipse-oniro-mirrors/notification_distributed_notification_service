@@ -56,6 +56,18 @@ SYMBOL_EXPORT void ReleaseLocalDevice()
     DistributedManager::GetInstance().ReleaseLocalDevice();
 }
 
+SYMBOL_EXPORT void InitHACallBack(
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
+{
+    DistributedManager::GetInstance().InitHACallBack(callback);
+}
+
+SYMBOL_EXPORT void InitSendReportCallBack(
+    std::function<void(int32_t, int32_t, std::string)> callback)
+{
+    DistributedManager::GetInstance().InitSendReportCallBack(callback);
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -76,5 +76,15 @@ void DistributedManager::RefreshDevice(const std::string &deviceId, uint16_t dev
     DistributedClient::GetInstance().RefreshDevice(deviceId, deviceType, networkId);
 }
 
+void DistributedManager::InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
+{
+    DistributedService::GetInstance().InitHACallBack(callback);
+}
+
+void DistributedManager::InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback)
+{
+    DistributedService::GetInstance().InitSendReportCallBack(callback);
+}
+
 }
 }

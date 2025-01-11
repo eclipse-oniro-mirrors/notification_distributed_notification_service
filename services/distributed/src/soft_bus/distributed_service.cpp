@@ -222,9 +222,49 @@ int64_t DistributedService::GetCurrentTime()
     return duration.count();
 }
 
+void DistributedService::SendEventReport(
+    int32_t messageType, int32_t errCode, const std::string& errorReason)
+{
+    if (sendReportCallback_ != nullptr) {
+        sendReportCallback_(messageType, errCode, errorReason);
+    }
+}
+
+void DistributedService::InitHACallBack(
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
+{
+    haCallback_ = callback;
+}
+
+void DistributedService::InitSendReportCallBack(
+    std::function<void(int32_t, int32_t, std::string)> callback)
+{
+    sendReportCallback_ = callback;
+}
+
+std::string DistributedService::AnonymousProcessing(std::string data)
+{
+    if (!data.empty()) {
+        int length = data.length();
+        int count = length / 3;
+        for (int i = 0; i < count; i++) {
+            data[i] = '*';
+            data[length - i - 1] = '*';
+        }
+    }
+    return data;
+}
+
 std::unordered_set<std::string> DistributedService::GetCollaborativeDeleteTypes()
 {
     return localDevice_.collaborativeDeleteTypes_;
+}
+
+void DistributedService::SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason)
+{
+    if (haCallback_ != nullptr) {
+        haCallback_(code_, errorCode, branchId, errorReason);
+    }
 }
 
 }

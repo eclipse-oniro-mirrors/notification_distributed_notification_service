@@ -40,5 +40,14 @@ bool NotificationRemoveBox::SetNotificationHashCode(const std::string& hashCode)
     }
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
 }
+
+bool NotificationRemoveBox::setNotificationSlotType(int32_t slotType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_SLOT_TYPE, slotType));
+}
+
 }
 }

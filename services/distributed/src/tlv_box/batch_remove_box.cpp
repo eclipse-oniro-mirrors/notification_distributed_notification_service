@@ -39,5 +39,13 @@ bool BatchRemoveNotificationBox::SetNotificationHashCode(const std::string& hash
     }
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
 }
+
+bool BatchRemoveNotificationBox::SetNotificationSlotTypes(const std::string &slotTypes)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(BATCH_REMOVE_SLOT_TYPE, slotTypes));
+}
 }
 }

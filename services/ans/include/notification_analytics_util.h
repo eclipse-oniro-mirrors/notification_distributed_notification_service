@@ -36,6 +36,8 @@ enum EventSceneId {
     SCENE_9 = 9,
     SCENE_10 = 10,
     SCENE_11 = 11,
+    SCENE_20 = 20,
+    SCENE_21 = 21,
 };
 
 enum EventBranchId {
@@ -65,6 +67,12 @@ public:
     HaMetaMessage& TypeCode(int32_t typeCode);
     HaMetaMessage& NotificationId(int32_t notificationId);
     HaMetaMessage& SlotType(int32_t slotType);
+    HaMetaMessage& syncWatch(bool isLiveView);
+    HaMetaMessage& syncHeadSet(bool isLiveView);
+    HaMetaMessage& syncWatchHeadSet(bool isLiveView);
+    HaMetaMessage& keyNode(bool isKeyNode);
+    HaMetaMessage& delByWatch(bool isLiveView);
+    HaMetaMessage& deleteReason(int32_t deleteReason);
     std::string GetMessage() const;
     HaMetaMessage& Checkfailed(bool checkfailed);
     bool NeedReport() const;
@@ -81,8 +89,19 @@ public:
     uint32_t errorCode_ = ERR_OK;
     std::string message_;
     bool checkfailed_ = true;
+    int32_t deleteReason_ = -1;
+    static int32_t syncWatch_;
+    static int32_t syncHeadSet_;
+    static int32_t syncWatchHeadSet_;
+    static int32_t delByWatch_;
+    static int32_t keyNode_;
+    static int64_t time_;
+    static int32_t syncLiveViewWatch_;
+    static int32_t syncLiveViewHeadSet_;
+    static int32_t syncLiveViewWatchHeadSet_;
+    static int64_t liveViewTime_;
+    static int32_t liveViewDelByWatch_;
 };
-
 
 struct FlowControllerOption {
     int32_t count;
@@ -108,6 +127,11 @@ public:
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
 
     static int64_t GetCurrentTime();
+
+    static void ReportOperationsDotEvent(const HaMetaMessage& message);
+
+    static void ReportPublishFailedEvent(const HaMetaMessage& message);
+
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
@@ -139,6 +163,8 @@ private:
     static void ExecuteCacheList();
     
     static void ReportCommonEvent(const ReportCache& reportCache);
+
+    static bool DetermineWhetherToSend(uint32_t slotType);
 };
 } // namespace Notification
 } // namespace OHOS

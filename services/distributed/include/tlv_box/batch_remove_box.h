@@ -29,6 +29,7 @@ public:
     ~BatchRemoveNotificationBox();
     BatchRemoveNotificationBox(std::shared_ptr<TlvBox> box);
     bool SetNotificationHashCode(const std::string& hashCode);
+    bool SetNotificationSlotTypes(const std::string &slotTypes);
 };
 }  // namespace Notification
 }  // namespace OHOS
