@@ -53,34 +53,73 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("cancelAsBundle", CancelAsBundle),
         DECLARE_NAPI_FUNCTION("addSlot", AddSlot),
         DECLARE_NAPI_FUNCTION("addSlots", AddSlots),
-        DECLARE_NAPI_FUNCTION("setSlotByBundle", SetSlotByBundle),
         DECLARE_NAPI_FUNCTION("getSlot", GetSlot),
-        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", GetSlotNumByBundle),
         DECLARE_NAPI_FUNCTION("getSlots", GetSlots),
-        DECLARE_NAPI_FUNCTION("getSlotsByBundle", GetSlotsByBundle),
         DECLARE_NAPI_FUNCTION("removeSlot", RemoveSlot),
         DECLARE_NAPI_FUNCTION("removeAllSlots", RemoveAllSlots),
         DECLARE_NAPI_FUNCTION("removeGroupByBundle", RemoveGroupByBundle),
         DECLARE_NAPI_FUNCTION("enableNotification", EnableNotification),
         DECLARE_NAPI_FUNCTION("isNotificationEnabled", IsNotificationEnabled),
-        DECLARE_NAPI_FUNCTION("requestEnableNotification", RequestEnableNotification),
+        DECLARE_NAPI_FUNCTION("enableNotificationSlot", EnableNotificationSlot),
+        DECLARE_NAPI_FUNCTION("isSupportTemplate", IsSupportTemplate),
+
+#ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", DisplayBadge),
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", IsBadgeDisplayed),
-        DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", SetDoNotDisturbDate),
-        DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", GetDoNotDisturbDate),
-        DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", SupportDoNotDisturbMode),
-        DECLARE_NAPI_FUNCTION("isSupportTemplate", IsSupportTemplate),
+#else
+        DECLARE_NAPI_FUNCTION("displayBadge", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("isBadgeDisplayed", Common::NapiThrowCapErr),
+#endif
+
+#ifdef ANS_FEATURE_LIVEVIEW_PUSH_CHECK
+        DECLARE_NAPI_FUNCTION("show", ShowNotification),
+#else
+        DECLARE_NAPI_FUNCTION("show", Common::NapiThrowCapErr),
+#endif
+
+#ifdef ANS_FEATURE_DISTRIBUTED_DB
         DECLARE_NAPI_FUNCTION("isDistributedEnabled", IsDistributedEnabled),
         DECLARE_NAPI_FUNCTION("enableDistributed", EnableDistributed),
         DECLARE_NAPI_FUNCTION("enableDistributedByBundle", EnableDistributedByBundle),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", EnableDistributedSelf),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", IsDistributedEnableByBundle),
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", GetDeviceRemindType),
-        DECLARE_NAPI_FUNCTION("show", ShowNotification),
-        DECLARE_NAPI_FUNCTION("enableNotificationSlot", EnableNotificationSlot),
-        DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", IsEnableNotificationSlot),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", SetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", GetSyncNotificationEnabledWithoutApp),
+#else
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("enableDistributed", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("enableDistributedByBundle", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("getDeviceRemindType", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", Common::NapiThrowCapErr),
+#endif
+
+#ifdef ANS_FEATURE_DISTURB_MANAGER
+        DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", SetDoNotDisturbDate),
+        DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", GetDoNotDisturbDate),
+        DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", SupportDoNotDisturbMode),
+        DECLARE_NAPI_FUNCTION("requestEnableNotification", RequestEnableNotification),
+#else
+        DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("requestEnableNotification", Common::NapiThrowCapErr),
+#endif
+
+#ifdef ANS_FEATURE_SLOT_MANAGER
+        DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", IsEnableNotificationSlot),
+        DECLARE_NAPI_FUNCTION("getSlotsByBundle", GetSlotsByBundle),
+        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", GetSlotNumByBundle),
+        DECLARE_NAPI_FUNCTION("setSlotByBundle", SetSlotByBundle),
+#else
+        DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("getSlotsByBundle", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", Common::NapiThrowCapErr),
+        DECLARE_NAPI_FUNCTION("setSlotByBundle", Common::NapiThrowCapErr),
+#endif
     };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));

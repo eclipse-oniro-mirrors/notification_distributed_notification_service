@@ -60,6 +60,11 @@ declare_args() {
   distributed_notification_service_feature_disable_fa_model = false
   distributed_notification_service_feature_additional_control = false
   distributed_notification_service_feature_privileged_message = false
+  distributed_notification_service_feature_badge_manager = true
+  distributed_notification_service_feature_liveview_push_check = true
+  distributed_notification_service_feature_distributed_db = true
+  distributed_notification_service_feature_disturb_manager = true
+  distributed_notification_service_feature_slot_manager = true
   distributed_notification_service_disable_control = false
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true
