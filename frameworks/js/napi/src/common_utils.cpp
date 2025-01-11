@@ -351,5 +351,11 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
     ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
     return ExternalCode;
 }
+
+napi_value Common::NapiThrowCapErr(napi_env env, napi_callback_info info)
+{
+    Common::NapiThrow(env, ERROR_SYSTEM_CAP_ERROR);
+    return nullptr;
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS
