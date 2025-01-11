@@ -598,6 +598,17 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode DistributeOperation(const std::string &hashCode) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

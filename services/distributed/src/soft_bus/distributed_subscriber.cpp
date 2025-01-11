@@ -121,6 +121,14 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     }
 }
 
+void DistribuedSubscriber::OnResponse(const std::shared_ptr<Notification> &notification)
+{
+    ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s.",
+        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
+        localDevice_.deviceId_.c_str());
+    DistributedService::GetInstance().OnResponse(notification, peerDevice_);
+}
+
 void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
 {
     ANS_LOGI("Notify changed %{public}s %{public}u.", bundleName.c_str(), localDevice_.deviceType_);

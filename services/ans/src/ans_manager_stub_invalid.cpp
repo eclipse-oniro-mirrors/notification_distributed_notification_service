@@ -32,6 +32,13 @@ ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<Notificatio
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    ANS_LOGE("AnsManagerStub::Publish called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification)
 {
     ANS_LOGE("AnsManagerStub::PublishNotificationForIndirectProxy called!");
@@ -570,6 +577,12 @@ ErrCode AnsManagerStub::SetDistributedEnabledByBundle(const sptr<NotificationBun
 ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
 {
     ANS_LOGE("GetTargetDeviceStatus called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::DistributeOperation(const std::string &hashCode)
+{
+    ANS_LOGE("DistributeOperation called!");
     return ERR_INVALID_OPERATION;
 }
 

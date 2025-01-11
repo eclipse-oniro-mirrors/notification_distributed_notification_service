@@ -770,5 +770,32 @@ std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecor
     return subscriberRecordList_;
 }
 
+void NotificationSubscriberManager::DistributeOperation(const sptr<Notification>& notification)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (notificationSubQueue_ == nullptr) {
+        ANS_LOGE("queue is nullptr");
+        return;
+    }
+    AppExecFwk::EventHandler::Callback func =
+        std::bind(&NotificationSubscriberManager::DistributeOperationInner, this, notification);
+
+    notificationSubQueue_->submit(func);
+}
+
+void NotificationSubscriberManager::DistributeOperationInner(const sptr<Notification>& notification)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    for (const auto& record : subscriberRecordList_) {
+        if (record == nullptr) {
+            continue;
+        }
+        if (IsSubscribedBysubscriber(record, notification)) {
+            if (record->subscriber != nullptr) {
+                record->subscriber->OnResponse(notification);
+            }
+        }
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

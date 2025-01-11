@@ -55,6 +55,7 @@ public:
     bool GetFilterUidAndBundleName(const std::string &key);
     void GetCollaborationFilter();
     bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
+    uint32_t GetStartAbilityTimeout();
 
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
@@ -85,6 +86,7 @@ public:
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "system/etc/notification/notification_config.json";
     #endif
     constexpr static const char* CFG_KEY_COLLABORATIVE_DELETE_TYPES = "collaborativeDeleteTypes";
+    constexpr static const char* CFG_KEY_START_ABILITY_TIMEOUT = "startAbilityTimeout";
 };
 } // namespace Notification
 } // namespace OHOS

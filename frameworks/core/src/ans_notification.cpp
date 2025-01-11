@@ -2050,5 +2050,36 @@ ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &n
     }
     return proxy->DisableNotificationFeature(reqPtr);
 }
+
+ErrCode AnsNotification::DistributeOperation(const std::string& hashCode)
+{
+    ANS_LOGI("DistributeOperation, hashCode:%{public}s", hashCode.c_str());
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    if (hashCode.empty()) {
+        ANS_LOGE("Input hashCode is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->DistributeOperation(hashCode);
+}
+
+ErrCode AnsNotification::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    ANS_LOGI("Get notification request by hashCode, hashCode:%{public}s", hashCode.c_str());
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetNotificationRequestByHashCode(hashCode, notificationRequest);
+}
 }  // namespace Notification
 }  // namespace OHOS

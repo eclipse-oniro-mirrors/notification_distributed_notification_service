@@ -612,6 +612,12 @@ ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::DistributeOperation(const std::string &hashCode)
+{
+    ANS_LOGE("DistributeOperation called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
 {
     ANS_LOGE("Called.");

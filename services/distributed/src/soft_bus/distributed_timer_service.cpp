@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 #include "distributed_timer_service.h"
+
 #include "distributed_service.h"
+#include "notification_config_parse.h"
 #include "time_service_client.h"
 
 namespace OHOS {
 namespace Notification {
+
+const int32_t SECOND_TRANSTO_MS = 1000;
 
 void DistributedTimerInfo::OnTrigger()
 {
@@ -79,5 +83,24 @@ void DistributedTimerService::StartTimer(const std::string& deviceId, int64_t de
         deleteTimePoint, timerId);
 }
 
+int64_t DistributedTimerService::GetCurrentTime()
+{
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return duration.count();
+}
+
+void DistributedTimerService::StartTimerWithTrigger(const std::shared_ptr<MiscServices::ITimerInfo>& timerInfo)
+{
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        return;
+    }
+    int64_t timerId = timer->CreateTimer(timerInfo);
+    uint32_t startAbilityTimeout = DelayedSingleton<NotificationConfigParse>::GetInstance()->GetStartAbilityTimeout();
+    ANS_LOGI("Get startAbility timeout %{public}u", startAbilityTimeout);
+    timer->StartTimer(timerId, GetCurrentTime() + startAbilityTimeout * SECOND_TRANSTO_MS);
+}
 }
 }

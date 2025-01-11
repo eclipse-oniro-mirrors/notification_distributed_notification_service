@@ -29,6 +29,7 @@
 #include "distributed_preference.h"
 #include "batch_remove_box.h"
 #include "remove_box.h"
+#include "response_box.h"
 
 namespace OHOS {
 namespace Notification {
@@ -274,6 +275,35 @@ std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notific
         notificationKey = DISTRIBUTED_LABEL + notificationKey;
     }
     return notificationKey;
+}
+
+void DistributedService::OnResponse(
+    const std::shared_ptr<Notification>& notification, const DistributedDeviceInfo& device)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("service queue is null.");
+        return;
+    }
+    std::function<void()> task = std::bind([device, notification]() {
+        NotificationResponseBox responseBox;
+        ANS_LOGI("dans OnResponse %{public}s", notification->Dump().c_str());
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            return;
+        }
+        auto hashCode = notification->GetKey();
+        if (hashCode.find(DISTRIBUTED_LABEL) == 0) {
+            hashCode.erase(0, DISTRIBUTED_LABEL.length());
+        }
+
+        responseBox.SetNotificationHashCode(hashCode);
+        if (!responseBox.Serialize()) {
+            ANS_LOGW("dans OnCanceled serialize failed");
+            return;
+        }
+        DistributedClient::GetInstance().SendMessage(responseBox.GetByteBuffer(), responseBox.GetByteLength(),
+            TransDataType::DATA_TYPE_MESSAGE, device.deviceId_, device.deviceType_);
+    });
+    serviceQueue_->submit(task);
 }
 }
 }

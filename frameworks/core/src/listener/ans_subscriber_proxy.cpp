@@ -420,5 +420,27 @@ void AnsSubscriberProxy::OnApplicationInfoNeedChanged(const std::string& bundleN
         return;
     }
 }
+
+void AnsSubscriberProxy::OnResponse(const sptr<Notification> &notification)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return;
+    }
+
+    if (!data.WriteParcelable(notification)) {
+        ANS_LOGE("Write notification failed.");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_RESPONSE_LISTENER, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact error code is: %{public}d.", result);
+        return;
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

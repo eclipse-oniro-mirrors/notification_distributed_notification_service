@@ -239,6 +239,11 @@ void NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
     subscriber_.OnApplicationInfoNeedChanged(bundleName);
 }
 
+void NotificationSubscriber::SubscriberImpl::OnResponse(const sptr<Notification> &notification)
+{
+    subscriber_.OnResponse(std::make_shared<Notification>(*notification));
+}
+
 sptr<AnsManagerInterface> NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =

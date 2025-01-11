@@ -371,6 +371,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleUnregisterPushCallback(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::DISTRIBUTE_OPERATION): {
+            result = HandleDistributeOperation(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::SUBSCRIBE_LOCAL_LIVE_VIEW_NOTIFICATION): {
             result = HandleSubscribeLocalLiveView(data, reply);
             break;
@@ -443,6 +447,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_TARGET_DEVICE_STATUS): {
             result = HandleGetDeviceStatus(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_REQUEST_BY_HASHCODE): {
+            result = HandleGetNotificationRequest(data, reply);
             break;
         }
         default: {
@@ -2246,6 +2254,44 @@ ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, Messag
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return result;
+}
+
+ErrCode AnsManagerStub::HandleDistributeOperation(MessageParcel &data, MessageParcel &reply)
+{
+    std::string hashCode;
+    if (!data.ReadString(hashCode)) {
+        ANS_LOGE("read hashCode failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = DistributeOperation(hashCode);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetNotificationRequest(MessageParcel &data, MessageParcel &reply)
+{
+    std::string hashCode;
+    if (!data.ReadString(hashCode)) {
+        ANS_LOGE("read hashCode failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationRequest> request;
+    ErrCode result = GetNotificationRequestByHashCode(hashCode, request);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteParcelable(request)) {
+        ANS_LOGE("get request failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)

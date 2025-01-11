@@ -1014,5 +1014,69 @@ ErrCode AnsManagerProxy::DisableNotificationFeature(const sptr<NotificationDisab
 
     return result;
 }
+
+ErrCode AnsManagerProxy::DistributeOperation(const std::string& hashCode)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(hashCode)) {
+        ANS_LOGE("write hashCode failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DISTRIBUTE_OPERATION, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(hashCode)) {
+        ANS_LOGE("write hashCode failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result =
+        InnerTransact(NotificationInterfaceCode::GET_NOTIFICATION_REQUEST_BY_HASHCODE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return result;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    notificationRequest = reply.ReadParcelable<NotificationRequest>();
+    if (notificationRequest == nullptr) {
+        ANS_LOGE("read request is nullptr.");
+    }
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -3144,5 +3144,41 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
 
     return ERR_OK;
 }
+
+ErrCode AdvancedNotificationService::DistributeOperation(const std::string &hashCode)
+{
+    if (hashCode.empty()) {
+        ANS_LOGE("hashCode is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("is not system app.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("not have permission.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidated");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    for (auto record : notificationList_) {
+        if (record->notification->GetKey() != hashCode) {
+            continue;
+        }
+        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+            NotificationSubscriberManager::GetInstance()->DistributeOperation(record->notification);
+        }));
+        notificationSvrQueue_->wait(handler);
+        return ERR_OK;
+    }
+    return ERR_ANS_INVALID_PARAM;
+}
 }  // namespace Notification
 }  // namespace OHOS

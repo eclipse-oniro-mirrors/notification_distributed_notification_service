@@ -205,6 +205,8 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
             case NotificationEventType::BUNDLE_ICON_SYNC:
                 HandleBundleIconSync(box);
                 break;
+            case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
+                HandleResponseSync(box);
             default:
                 ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);
                 break;

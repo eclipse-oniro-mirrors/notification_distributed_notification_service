@@ -457,6 +457,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetDeviceStatus(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_REQUEST_BY_HASHCODE): {
+            result = HandleGetNotificationRequest(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
