@@ -1306,5 +1306,18 @@ HWTEST_F(NotificationHelperTest, UpdateNotificationTimerByUid_00001, Function | 
     ErrCode ret = notificationHelper.UpdateNotificationTimerByUid(uid, isPaused);
     EXPECT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
 }
+
+/**
+ * @tc.name: DisableNotificationFeature_00001
+ * @tc.desc: Test DisableNotificationFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, DisableNotificationFeature_00001, Function | SmallTest | Level1)
+{
+    NotificationDisable notificationDisable;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }
 }

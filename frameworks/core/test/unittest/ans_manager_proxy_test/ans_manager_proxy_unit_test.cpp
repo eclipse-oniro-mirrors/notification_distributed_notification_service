@@ -7914,5 +7914,27 @@ HWTEST_F(AnsManagerProxyUnitTest, UpdateNotificationTimerByUid_0100, Function | 
     int32_t result = proxy->UpdateNotificationTimerByUid(uid, isPaused);
     EXPECT_EQ(ERR_OK, result);
 }
+
+/*
+ * @tc.name: DisableNotificationFeature_0100
+ * @tc.desc: test DisableNotificationFeature
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerProxyUnitTest, DisableNotificationFeature_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsManagerProxyUnitTest, DisableNotificationFeature_0100, TestSize.Level1";
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1)
+        .WillRepeatedly(DoAll(Invoke(std::bind(SendRequestReplace, _1, _2, _3, _4,
+        ERR_OK, true, false, false)), Return(NO_ERROR)));
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    sptr<NotificationDisable> notificationDisable = nullptr;
+    ErrCode res = proxy->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(res, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS

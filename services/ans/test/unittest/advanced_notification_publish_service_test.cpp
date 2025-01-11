@@ -1115,5 +1115,43 @@ HWTEST_F(AnsPublishServiceTest, CanPopEnableNotificationDialog_001, Function | S
     ASSERT_EQ(result, ERROR_INTERNAL_ERROR);
 }
 
+/**
+ * @tc.name: IsDisableNotification_001
+ * @tc.desc: Test IsDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotification_001, Function | SmallTest | Level1)
+{
+    std::string bundleName = "";
+    bool result = advancedNotificationService_->IsDisableNotification(bundleName);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsNeedToControllerByDisableNotification_001
+ * @tc.desc: Test IsNeedToControllerByDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsNeedToControllerByDisableNotification_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    bool result = advancedNotificationService_->IsNeedToControllerByDisableNotification(request);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsNeedToControllerByDisableNotification_002
+ * @tc.desc: Test IsNeedToControllerByDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsNeedToControllerByDisableNotification_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    bool result = advancedNotificationService_->IsNeedToControllerByDisableNotification(request);
+    EXPECT_FALSE(result);
+}
 }  // namespace Notification
 }  // namespace OHOS

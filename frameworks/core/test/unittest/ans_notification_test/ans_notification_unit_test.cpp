@@ -1580,5 +1580,25 @@ HWTEST_F(AnsNotificationUnitTest, IsNeedSilentInDoNotDisturbMode_0100, Function 
     ErrCode ret = ans_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
+
+/*
+ * @tc.name: DisableNotificationFeature_0100
+ * @tc.desc: test DisableNotificationFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, DisableNotificationFeature_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_FALSE(ret);
+
+    NotificationDisable notificationDisable;
+    ErrCode res = ans_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
 }  // namespace Notification
 }  // namespace OHOS
