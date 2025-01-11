@@ -48,7 +48,12 @@
       "distributed_notification_service_feature_additional_control",
       "distributed_notification_service_feature_disable_fa_model",
       "distributed_notification_service_feature_privileged_message",
-      "distributed_notification_service_disable_control"
+      "distributed_notification_service_disable_control",
+      "distributed_notification_service_feature_badge_manager",
+      "distributed_notification_service_feature_local_liveview",
+      "distributed_notification_service_feature_distributed_db",
+      "distributed_notification_service_feature_disturb_manager",
+      "distributed_notification_service_feature_slot_manager"
     ],
     "adapted_system_type": [
       "standard"

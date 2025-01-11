@@ -73,7 +73,7 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isBadgeDisplayed", Common::NapiThrowCapErr),
 #endif
 
-#ifdef ANS_FEATURE_LIVEVIEW_PUSH_CHECK
+#ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
         DECLARE_NAPI_FUNCTION("show", ShowNotification),
 #else
         DECLARE_NAPI_FUNCTION("show", Common::NapiThrowCapErr),
