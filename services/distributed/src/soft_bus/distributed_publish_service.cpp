@@ -152,6 +152,7 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
         request->SetNotificationControlFlags(controlFlags);
     }
     if (box.GetCreatorBundleName(context)) {
+        request->SetOwnerBundleName(context);
         request->SetCreatorBundleName(context);
     }
     if (box.GetNotificationHashCode(context)) {
