@@ -41,6 +41,7 @@ ohos_unittest("ans_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_message_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_disable_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_date_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_profile_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_flags_test.cpp",

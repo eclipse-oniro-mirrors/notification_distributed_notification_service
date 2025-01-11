@@ -5041,5 +5041,25 @@ HWTEST_F(AnsManagerStubTest, UpdateNotificationTimerByUid_01, Function | SmallTe
     ErrCode result = ansManagerStub_->UpdateNotificationTimerByUid(uid, isPaused);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
 }
+
+/**
+ * @tc.name: HandleDisableNotificationFeature_01
+ * @tc.desc: Test HandleDisableNotificationFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleDisableNotificationFeature_01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DISABLE_NOTIFICATION_FEATURE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<NotificationDisable> testNotificationDisable = new (std::nothrow) NotificationDisable();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(testNotificationDisable);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }
 }

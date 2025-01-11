@@ -1534,5 +1534,60 @@ HWTEST_F(NotificationPreferencesTest, GetBundleSoundPermission_0100, TestSize.Le
     auto res = NotificationPreferences::GetInstance()->GetBundleSoundPermission(allPackage, bundleNames);
     ASSERT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0100
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    auto res = NotificationPreferences::GetInstance()->SetDisableNotificationInfo(notificationDisable);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0200
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    auto res = NotificationPreferences::GetInstance()->SetDisableNotificationInfo(nullptr);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0100
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    NotificationDisable notificationDisable;
+    auto res = notificationPreferences.GetDisableNotificationInfo(notificationDisable);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0200
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationPreferences.SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    auto res = notificationPreferences.GetDisableNotificationInfo(disable);
+    EXPECT_TRUE(res);
+}
 }  // namespace Notification
 }  // namespace OHOS

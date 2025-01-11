@@ -3748,5 +3748,22 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Funct
     advancedNotificationService_->PublishInNotificationList(record);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 100);
 }
+
+/**
+ * @tc.number    : DisableNotificationFeature_00001
+ * @tc.name      : Test DisableNotificationFeature
+ * @tc.desc      : Test DisableNotificationFeature
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationDisable> notificationDisable = nullptr;
+    ErrCode ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    notificationDisable = new (std::nothrow) NotificationDisable();
+    ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
