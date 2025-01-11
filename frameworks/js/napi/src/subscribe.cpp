@@ -22,6 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
+const int32_t DISTRIBUTE_OPERATION_PARA = 1;
 const std::string CONSUME = "onConsume";
 const std::string CANCEL = "onCancel";
 const std::string UPDATE = "onUpdate";
@@ -1536,6 +1537,37 @@ void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
     if (iter != DeletingSubscriber.end()) {
         DeletingSubscriber.erase(iter);
     }
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode)
+{
+    ANS_LOGD("enter");
+
+    size_t argc = DISTRIBUTE_OPERATION_PARA;
+    napi_value argv[DISTRIBUTE_OPERATION_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < DISTRIBUTE_OPERATION_PARA) {
+        ANS_LOGE("Wrong number of arguments");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype == napi_string) {
+        size_t strLen = 0;
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
+        hashCode = str;
+    } else {
+        ANS_LOGE("Wrong argument type for arg0. string expected.");
+        std::string msg = "Incorrect parameter type.The type of param must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    return Common::NapiGetNull(env);
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

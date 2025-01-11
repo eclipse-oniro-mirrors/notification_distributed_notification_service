@@ -14,7 +14,6 @@
  */
 #include "distributed_observer_service.h"
 
-#include "screenlock_manager.h"
 #include "distributed_service.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -100,6 +99,12 @@ void OberverService::Destory()
 {
     EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
     ANS_LOGI("OberverService service destory.");
+}
+
+int32_t OberverService::Unlock(
+    const ScreenLock::Action &action, const sptr<ScreenLock::ScreenLockCallbackInterface> &listener)
+{
+    return ScreenLock::ScreenLockManager::GetInstance()->Unlock(action, listener);
 }
 }
 }

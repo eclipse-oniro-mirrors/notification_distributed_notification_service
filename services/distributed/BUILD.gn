@@ -123,6 +123,7 @@ ohos_shared_library("libdans") {
     "src/tlv_box/match_box.cpp",
     "src/tlv_box/remove_box.cpp",
     "src/tlv_box/request_box.cpp",
+    "src/tlv_box/response_box.cpp",
     "src/tlv_box/state_box.cpp",
     "src/tlv_box/tlv_box.cpp",
   ]
@@ -141,6 +142,7 @@ ohos_shared_library("libdans") {
 
   external_deps = [
     "ability_base:zuri",
+    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "ability_runtime:uri_permission_mgr",
     "bundle_framework:appexecfwk_base",

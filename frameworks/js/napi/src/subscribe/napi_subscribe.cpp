@@ -23,6 +23,46 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
+{
+    ANS_LOGI("DistributeOperation napi_create_async_work start");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    auto distributeOperationInfo = static_cast<AsyncCallbackInfoDistributeOperation *>(data);
+    if (distributeOperationInfo == nullptr) {
+        ANS_LOGE("distributeOperationInfo is nullptr");
+        return;
+    }
+    if (distributeOperationInfo->hashCode.empty()) {
+        ANS_LOGE("hashCode is empty");
+        distributeOperationInfo->info.errorCode = ERR_ANS_INVALID_PARAM;
+        return;
+    }
+    distributeOperationInfo->info.errorCode =
+        NotificationHelper::DistributeOperation(distributeOperationInfo->hashCode);
+}
+
+void NapiDistributeOperationCompleteCallback(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGI("Remove napi_create_async_work end");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    auto distributeOperationInfo = static_cast<AsyncCallbackInfoDistributeOperation *>(data);
+    if (distributeOperationInfo) {
+        Common::CreateReturnValue(env, distributeOperationInfo->info, Common::NapiGetNull(env));
+        if (distributeOperationInfo->info.callback != nullptr) {
+            napi_delete_reference(env, distributeOperationInfo->info.callback);
+        }
+        napi_delete_async_work(env, distributeOperationInfo->asyncWork);
+        delete distributeOperationInfo;
+        distributeOperationInfo = nullptr;
+    }
+}
+
 napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
@@ -255,6 +295,38 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
 
     if (isCallback) {
         ANS_LOGD("napiUnsubscribe callback is nullptr.");
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
+napi_value NapiDistributeOperation(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    std::string hashCode;
+    if (ParseParameters(env, info, hashCode) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    auto distributeOperationInfo = new (std::nothrow)
+        AsyncCallbackInfoDistributeOperation {.env = env, .asyncWork = nullptr, .hashCode = hashCode};
+    if (!distributeOperationInfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::NapiGetNull(env);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, distributeOperationInfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "distributeOperation", NAPI_AUTO_LENGTH, &resourceName);
+
+    // Asynchronous function call
+    napi_create_async_work(env, nullptr, resourceName, NapiDistributeOperationExecuteCallback,
+        NapiDistributeOperationCompleteCallback, (void *)distributeOperationInfo, &distributeOperationInfo->asyncWork);
+    napi_queue_async_work_with_qos(env, distributeOperationInfo->asyncWork, napi_qos_user_initiated);
+    if (distributeOperationInfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;

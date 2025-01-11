@@ -1026,6 +1026,16 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
+ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    auto record = GetFromNotificationList(hashCode);
+    if (record != nullptr) {
+        notificationRequest = record->request;
+    }
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
     auto iter = notificationList_.begin();

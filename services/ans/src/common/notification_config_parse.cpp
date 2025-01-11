@@ -414,5 +414,30 @@ bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleN
     ANS_LOGI("Uid <%{public}d> and BundleName <%{public}s> not in CollaborationFilter.", uid, bundleName.c_str());
     return false;
 }
+
+uint32_t NotificationConfigParse::GetStartAbilityTimeout()
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    if (!GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file");
+        return 0;
+    }
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
+        ANS_LOGW("GetStartAbilityTimeout not found jsonKey");
+        return 0;
+    }
+    nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
+    if (affects.is_null() || affects.empty()) {
+        ANS_LOGE("GetStartAbilityTimeout failed as invalid ccmFlowCtrlConfig json");
+        return 0;
+    }
+    if (affects.contains(CFG_KEY_START_ABILITY_TIMEOUT)) {
+        return affects[CFG_KEY_START_ABILITY_TIMEOUT];
+    }
+
+    return 0;
+}
 } // namespace Notification
 } // namespace OHOS

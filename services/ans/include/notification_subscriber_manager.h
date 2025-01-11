@@ -129,6 +129,13 @@ public:
      */
     void ResetFfrtQueue();
 
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param notification Indicates the Notification object.
+     */
+    void DistributeOperation(const sptr<Notification> &notification);
+
     void RegisterOnSubscriberAddCallback(std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback);
 
     void UnRegisterOnSubscriberAddCallback();
@@ -167,6 +174,7 @@ private:
     void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
+    void DistributeOperationInner(const sptr<Notification> &notification);
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);

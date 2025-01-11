@@ -978,6 +978,24 @@ public:
      */
     ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) override;
 
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DistributeOperation(const std::string& hashCode) override;
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override;
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);

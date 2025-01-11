@@ -17,20 +17,82 @@
 
 #include "distributed_service.h"
 
+#include "ability_manager_client.h"
 #include "notification_helper.h"
 #include "distributed_client.h"
 #include "request_box.h"
 #include "state_box.h"
 #include "ans_image_util.h"
 #include "in_process_call_wrapper.h"
+#include "distributed_observer_service.h"
 #include "distributed_preference.h"
+#include "distributed_timer_service.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
+#include "response_box.h"
+#include "screenlock_callback_stub.h"
 
 namespace OHOS {
 namespace Notification {
 
 namespace {
 constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
+}
+
+class UnlockScreenCallback : public ScreenLock::ScreenLockCallbackStub {
+public:
+    explicit UnlockScreenCallback();
+    ~UnlockScreenCallback() override;
+    void OnCallBack(const int32_t screenLockResult) override;
+    void SetWant(AAFwk::Want want);
+    void OnTriggerTimeout();
+
+private:
+    AAFwk::Want want_;
+    bool isTimeout_ = false;
+};
+
+UnlockScreenCallback::~UnlockScreenCallback() {}
+
+UnlockScreenCallback::UnlockScreenCallback() {}
+
+void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
+{
+    ANS_LOGI("Unlock Screen result: %{public}d", screenLockResult);
+    if (!isTimeout_) {
+        IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want_));
+    }
+}
+
+void UnlockScreenCallback::SetWant(AAFwk::Want want)
+{
+    want_ = want;
+}
+
+void UnlockScreenCallback::OnTriggerTimeout()
+{
+    isTimeout_ = true;
+}
+
+class DistributedResponseTimerInfo : public DistributedTimerInfo {
+public:
+    DistributedResponseTimerInfo() : DistributedTimerInfo("") {}
+    void OnTrigger() override;
+    void SetListener(sptr<UnlockScreenCallback> listener);
+
+private:
+    sptr<UnlockScreenCallback> listener_ = nullptr;
+};
+
+void DistributedResponseTimerInfo::OnTrigger()
+{
+    if (listener_ != nullptr) {
+        listener_->OnTriggerTimeout();
+    }
+}
+
+void DistributedResponseTimerInfo::SetListener(sptr<UnlockScreenCallback> listener)
+{
+    listener_ = listener;
 }
 
 void DistributedService::SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
@@ -221,6 +283,51 @@ void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxM
     int result = IN_PROCESS_CALL(
         NotificationHelper::RemoveNotifications(hashCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans batch remove message %{public}d.", result);
+}
+
+void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    NotificationResponseBox responseBox = NotificationResponseBox(boxMessage);
+    std::string hashCode;
+    responseBox.GetNotificationHashCode(hashCode);
+    ANS_LOGI("handle response, hashCode: %{public}s.", hashCode.c_str());
+
+    sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
+    IN_PROCESS_CALL(NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest));
+    if (notificationRequest == nullptr) {
+        ANS_LOGE("Check notificationRequest is null.");
+        return;
+    }
+
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = notificationRequest->GetWantAgent();
+    if (wantAgentPtr == nullptr) {
+        ANS_LOGE("Check wantAgentPtr is null.");
+        return;
+    }
+
+    std::shared_ptr<AbilityRuntime::WantAgent::PendingWant> pendingWantPtr = wantAgentPtr->GetPendingWant();
+    if (pendingWantPtr == nullptr) {
+        ANS_LOGE("Check pendingWantPtr is null.");
+        return;
+    }
+
+    std::shared_ptr<AAFwk::Want> wantPtr = pendingWantPtr->GetWant(pendingWantPtr->GetTarget());
+    if (wantPtr == nullptr) {
+        ANS_LOGE("Check wantPtr is null.");
+        return;
+    }
+
+    auto isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
+    if (isScreenLocked) {
+        sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>(new (std::nothrow) UnlockScreenCallback());
+        listener->SetWant(*wantPtr);
+        IN_PROCESS_CALL(OberverService::GetInstance().Unlock(ScreenLock::Action::UNLOCKSCREEN, listener));
+        std::shared_ptr<DistributedResponseTimerInfo> timerInfo = std::make_shared<DistributedResponseTimerInfo>();
+        timerInfo->SetListener(listener);
+        DistributedTimerService::GetInstance().StartTimerWithTrigger(timerInfo);
+    } else {
+        IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
+    }
 }
 }
 }

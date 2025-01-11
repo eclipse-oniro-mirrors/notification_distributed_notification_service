@@ -109,6 +109,7 @@ namespace Notification {
         SET_BADGE_NUMBER_BY_BUNDLE,
         REGISTER_PUSH_CALLBACK,
         UNREGISTER_PUSH_CALLBACK,
+        DISTRIBUTE_OPERATION,
         // ans_subscriber_interface
         ON_CONNECTED,
         ON_DISCONNECTED,
@@ -154,6 +155,8 @@ namespace Notification {
         GET_ALL_DISTRIBUTED_ENABLE_STATUS,
         ON_APPLICATION_INFO_NEED_CHANGED,
         GET_TARGET_DEVICE_STATUS,
+        ON_RESPONSE_LISTENER,
+        GET_NOTIFICATION_REQUEST_BY_HASHCODE,
     };
 }
 }

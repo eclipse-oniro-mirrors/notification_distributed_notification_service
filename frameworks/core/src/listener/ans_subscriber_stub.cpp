@@ -87,6 +87,10 @@ int32_t AnsSubscriberStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
             result = HandleOnApplicationInfoNeedChanged(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_RESPONSE_LISTENER): {
+            result = HandleOnResponse(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -321,6 +325,17 @@ ErrCode AnsSubscriberStub::HandleOnApplicationInfoNeedChanged(MessageParcel &dat
     return ERR_OK;
 }
 
+ErrCode AnsSubscriberStub::HandleOnResponse(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<Notification> notification = data.ReadParcelable<Notification>();
+    if (!notification) {
+        ANS_LOGW("notification ReadParcelable failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    OnResponse(notification);
+    return ERR_OK;
+}
+
 void AnsSubscriberStub::OnConnected() {}
 
 void AnsSubscriberStub::OnDisconnected() {}
@@ -352,5 +367,7 @@ void AnsSubscriberStub::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badg
 void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) {}
 
 void AnsSubscriberStub::OnApplicationInfoNeedChanged(const std::string& bundleName) {}
+
+void AnsSubscriberStub::OnResponse(const sptr<Notification> &request) {}
 } // namespace Notification
 } // namespace OHOS

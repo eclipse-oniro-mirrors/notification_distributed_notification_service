@@ -62,7 +62,8 @@ public:
     void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
     std::unordered_set<std::string> GetCollaborativeDeleteTypes();
-    
+    void OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
+
 private:
     int64_t GetCurrentTime();
     void HandleBundleRemoved(const std::string& bundleName);
@@ -72,6 +73,7 @@ private:
     bool CheckPeerDevice(const BundleIconBox& boxMessage, DistributedDeviceInfo& device);
     void PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void HandleDeviceState(const std::shared_ptr<TlvBox>& boxMessage);
+    void HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage);
     void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView, int32_t contentType);
     void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,

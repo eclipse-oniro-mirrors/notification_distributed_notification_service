@@ -1217,6 +1217,25 @@ public:
      * @return Returns set result.
      */
     ErrCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
+
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DistributeOperation(const std::string& hashCode);
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.
