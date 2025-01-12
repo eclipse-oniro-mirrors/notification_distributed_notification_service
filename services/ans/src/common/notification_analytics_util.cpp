@@ -623,31 +623,8 @@ void NotificationAnalyticsUtil::ReportOperationsDotEvent(const HaMetaMessage& me
     if (!NotificationAnalyticsUtil::DetermineWhetherToSend(message.slotType_)) {
         return;
     }
-    want.SetParam("slotType", static_cast<int32_t>(message.slotType_));
-    want.SetParam("subCode", SUB_CODE);
-    if (message.slotType_ == NotificationConstant::SlotType::LIVE_VIEW) {
-        want.SetParam("syncWatch", HaMetaMessage::syncLiveViewWatch_);
-        want.SetParam("syncHeadSet", HaMetaMessage::syncLiveViewHeadSet_);
-        want.SetParam("syncWatchHeadSet", HaMetaMessage::syncLiveViewWatchHeadSet_);
-        want.SetParam("keyNode", HaMetaMessage::keyNode_);
-        want.SetParam("delByWatch", HaMetaMessage::liveViewDelByWatch_);
-        HaMetaMessage::syncLiveViewWatch_ = 0;
-        HaMetaMessage::syncLiveViewHeadSet_ = 0;
-        HaMetaMessage::syncLiveViewWatchHeadSet_ = 0;
-        HaMetaMessage::keyNode_ = 0;
-        HaMetaMessage::liveViewDelByWatch_ = 0;
-        HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
-    } else {
-        want.SetParam("syncWatch", HaMetaMessage::syncWatch_);
-        want.SetParam("syncHeadSet", HaMetaMessage::syncHeadSet_);
-        want.SetParam("syncWatchHeadSet", HaMetaMessage::syncWatchHeadSet_);
-        want.SetParam("delByWatch", HaMetaMessage::delByWatch_);
-        HaMetaMessage::syncWatch_ = 0;
-        HaMetaMessage::syncHeadSet_ = 0;
-        HaMetaMessage::syncWatchHeadSet_ = 0;
-        HaMetaMessage::delByWatch_ = 0;
-        HaMetaMessage::time_ = NotificationAnalyticsUtil::GetCurrentTime();
-    }
+    std::string ansData = NotificationAnalyticsUtil::BuildAnsData(message);
+    want.SetParam("ansData", ansData);
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
 }
 
@@ -689,6 +666,39 @@ bool NotificationAnalyticsUtil::DetermineWhetherToSend(uint32_t slotType)
         }
     }
     return false;
+}
+
+std::string NotificationAnalyticsUtil::BuildAnsData(const HaMetaMessage& message)
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(SUB_CODE);
+    nlohmann::json data;
+    data["slotType"] = std::to_string(message.slotType_);
+    if (message.slotType_ == NotificationConstant::SlotType::LIVE_VIEW) {
+        data["syncWatch"] = std::to_string(HaMetaMessage::syncLiveViewWatch_);
+        data["syncHeadSet"] = std::to_string(HaMetaMessage::syncLiveViewHeadSet_);
+        data["syncWatchHeadSet"] = std::to_string(HaMetaMessage::syncLiveViewWatchHeadSet_);
+        data["keyNode"] = std::to_string(HaMetaMessage::keyNode_);
+        data["delByWatch"] = std::to_string(HaMetaMessage::liveViewDelByWatch_);
+        HaMetaMessage::syncLiveViewWatch_ = 0;
+        HaMetaMessage::syncLiveViewHeadSet_ = 0;
+        HaMetaMessage::syncLiveViewWatchHeadSet_ = 0;
+        HaMetaMessage::keyNode_ = 0;
+        HaMetaMessage::liveViewDelByWatch_ = 0;
+        HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
+    } else {
+        data["syncWatch"] = std::to_string(HaMetaMessage::syncWatch_);
+        data["syncHeadSet"] = std::to_string(HaMetaMessage::syncHeadSet_);
+        data["syncWatchHeadSet"] = std::to_string(HaMetaMessage::syncWatchHeadSet_);
+        data["delByWatch"] = std::to_string(HaMetaMessage::delByWatch_);
+        HaMetaMessage::syncWatch_ = 0;
+        HaMetaMessage::syncHeadSet_ = 0;
+        HaMetaMessage::syncWatchHeadSet_ = 0;
+        HaMetaMessage::delByWatch_ = 0;
+        HaMetaMessage::time_ = NotificationAnalyticsUtil::GetCurrentTime();
+    }
+    ansData["data"] = data.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 } // namespace Notification

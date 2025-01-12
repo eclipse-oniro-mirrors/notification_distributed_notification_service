@@ -165,6 +165,8 @@ private:
     static void ReportCommonEvent(const ReportCache& reportCache);
 
     static bool DetermineWhetherToSend(uint32_t slotType);
+
+    static std::string BuildAnsData(const HaMetaMessage& message);
 };
 } // namespace Notification
 } // namespace OHOS
