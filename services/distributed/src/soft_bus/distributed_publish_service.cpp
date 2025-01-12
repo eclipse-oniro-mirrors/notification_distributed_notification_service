@@ -36,6 +36,10 @@ namespace Notification {
 
 namespace {
 constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
+constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+constexpr const int32_t OPERATION_DELETE_BRANCH = 2;
+constexpr const int32_t BRANCH3_ID = 3;
+constexpr const int32_t BRANCH4_ID = 4;
 }
 
 class UnlockScreenCallback : public ScreenLock::ScreenLockCallbackStub {
@@ -250,13 +254,24 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
 void DistributedService::RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage)
 {
     std::string hashCode;
+    int32_t slotType;
     if (boxMessage == nullptr) {
         ANS_LOGE("boxMessage is nullptr");
         return;
     }
     boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hashCode);
+    boxMessage->GetInt32Value(NOTIFICATION_SLOT_TYPE, slotType);
+
     int result = IN_PROCESS_CALL(NotificationHelper::RemoveNotification(
         hashCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+    std::string errorReason = "delete message failed";
+    if (result == 0) {
+        errorReason = "delete message success";
+        AbnormalReporting(result, BRANCH4_ID, errorReason);
+        OperationalReporting(OPERATION_DELETE_BRANCH, slotType);
+    } else {
+        AbnormalReporting(result, BRANCH3_ID, errorReason);
+    }
     ANS_LOGI("dans remove message %{public}d.", result);
 }
 
@@ -283,6 +298,46 @@ void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxM
     int result = IN_PROCESS_CALL(
         NotificationHelper::RemoveNotifications(hashCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans batch remove message %{public}d.", result);
+    std::string errorReason = "delete message failed";
+    if (result == 0) {
+        errorReason = "delete message success";
+        AbnormalReporting(result, BRANCH4_ID, errorReason);
+        std::string slotTypesString;
+        if (!boxMessage->GetStringValue(BATCH_REMOVE_SLOT_TYPE, slotTypesString)) {
+            ANS_LOGE("failed GetStringValue from boxMessage");
+            return;
+        }
+        std::istringstream slotTypesStream(slotTypesString);
+        std::string slotTypeString;
+        while (slotTypesStream >> slotTypeString) {
+            if (!slotTypeString.empty()) {
+                OperationalReporting(OPERATION_DELETE_BRANCH, std::stoi(slotTypeString));
+            }
+        }
+    } else {
+        AbnormalReporting(result, BRANCH3_ID, errorReason);
+    }
+}
+
+void DistributedService::AbnormalReporting(int result, uint32_t branchId, const std::string &errorReason)
+{
+    if (result != 0) {
+        SendEventReport(0, result, errorReason);
+    }
+    if (haCallback_ == nullptr) {
+        return;
+    }
+    haCallback_(code_, result, branchId, errorReason);
+}
+
+void DistributedService::OperationalReporting(int branchId, int32_t slotType)
+{
+    if (haCallback_ == nullptr ||
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+    std::string reason;
+    haCallback_(ANS_CUSTOMIZE_CODE, slotType, branchId, reason);
 }
 
 void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage)

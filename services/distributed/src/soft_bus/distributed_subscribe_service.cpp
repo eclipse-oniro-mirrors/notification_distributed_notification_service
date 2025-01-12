@@ -36,6 +36,9 @@ namespace Notification {
 
 const std::string DISTRIBUTED_LABEL = "ans_distributed";
 const int32_t DEFAULT_FILTER_TYPE = 1;
+constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
+constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
+constexpr const int32_t BRANCH3_ID = 3;
 
 std::string SubscribeTransDeviceType(uint16_t deviceType)
 {
@@ -80,6 +83,11 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
             ANS_LOGW("Dans status callback is null.");
         } else {
             callBack_(peerDevice.deviceId_, DeviceState::STATE_ONLINE, false);
+        }
+        if (DistributedService::GetInstance().haCallback_ != nullptr) {
+            std::string reason = "deviceType: " + std::to_string(localDevice_.deviceType_) +
+                                 "deviceId: " + AnonymousProcessing(localDevice_.deviceId_);
+            DistributedService::GetInstance().haCallback_(PUBLISH_ERROR_EVENT_CODE, 0, BRANCH3_ID, reason);
         }
     }
     ANS_LOGI("Subscribe notification %{public}s %{public}d %{public}d %{public}d.",
@@ -190,8 +198,13 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             requestPoint->GetNotificationType(), requestBox);
         if (!requestBox.Serialize()) {
             ANS_LOGW("Dans OnConsumed serialize failed.");
+            if (haCallback_ != nullptr) {
+                std::string reason = "serialization failed";
+                haCallback_(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID, reason);
+            }
             return;
         }
+        this->code_ = PUBLISH_ERROR_EVENT_CODE;
         DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
             TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
     });
@@ -205,8 +218,9 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         ANS_LOGE("check handler is null.");
         return;
     }
-
+    code_ = DELETE_ERROR_EVENT_CODE;
     std::ostringstream keysStream;
+    std::ostringstream slotTypesStream;
     for (auto notification : notifications) {
         if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
             ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
@@ -214,14 +228,17 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         }
         ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
         keysStream << GetNotificationKey(notification) << ' ';
+        slotTypesStream << notification->GetNotificationRequestPoint()->GetSlotType() << ' ';
     }
     std::string notificationKeys = keysStream.str();
+    std::string slotTypes = slotTypesStream.str();
 
-    std::function<void()> task = std::bind([peerDevice, notifications, notificationKeys]() {
+    std::function<void()> task = std::bind([peerDevice, notifications, notificationKeys, slotTypes]() {
         BatchRemoveNotificationBox batchRemoveBox;
         if (!notificationKeys.empty()) {
             batchRemoveBox.SetNotificationHashCode(notificationKeys);
         }
+        batchRemoveBox.SetNotificationSlotTypes(slotTypes);
 
         if (!batchRemoveBox.Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
@@ -244,11 +261,13 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
         ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
         return;
     }
+    code_ = DELETE_ERROR_EVENT_CODE;
     std::string notificationKey = GetNotificationKey(notification);
     std::function<void()> task = std::bind([peerDevice, notification, notificationKey]() {
         NotificationRemoveBox removeBox;
         ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());
         removeBox.SetNotificationHashCode(notificationKey);
+        removeBox.setNotificationSlotType(notification->GetNotificationRequestPoint()->GetSlotType());
         if (!removeBox.Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
             return;

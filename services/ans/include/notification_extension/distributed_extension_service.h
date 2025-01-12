@@ -71,12 +71,16 @@ public:
     void OnDeviceOffline(const DmDeviceInfo &deviceInfo);
     void OnDeviceChanged(const DmDeviceInfo &deviceInfo);
     static DistributedExtensionService& GetInstance();
+    void HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason);
+    void SendReportCallback(int32_t messageType, int32_t errCode, std::string reason);
 private:
     DistributedExtensionService();
     ~DistributedExtensionService() = default;
     bool CheckAllDeviceOffLine();
     bool releaseSameDevice(const DmDeviceInfo &deviceInfo);
     void SetMaxContentLength(nlohmann::json &configJson);
+    std::string AnonymousProcessing(std::string data);
+
     std::mutex mapLock_;
     std::atomic<bool> dansRunning_ = false;
     std::shared_ptr<ffrt::queue> distributedQueue_ = nullptr;

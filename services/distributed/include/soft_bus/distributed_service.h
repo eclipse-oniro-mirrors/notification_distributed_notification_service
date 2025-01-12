@@ -61,7 +61,11 @@ public:
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
     void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
+    void SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason);
+    void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
+    void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
     std::unordered_set<std::string> GetCollaborativeDeleteTypes();
+    void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason);
     void OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
 
 private:
@@ -87,13 +91,19 @@ private:
         NotificationContent::Type type, NotifticationRequestBox &requestBox);
     void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
         std::vector<DistributedDeviceInfo>& updateDeviceList);
+    void AbnormalReporting(int result, uint32_t branchId, const std::string& errorReason);
+    void OperationalReporting(int branchId, int32_t slotType);
+    std::string AnonymousProcessing(std::string data);
     std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> haCallback_ = nullptr;
+    std::function<void(int32_t, int32_t, std::string)> sendReportCallback_ = nullptr;
     std::map<std::string, std::set<std::string>> bundleIconCache_;
     int32_t userId_ = DEFAULT_USER_ID;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;
     std::map<std::string, std::shared_ptr<DistribuedSubscriber>> subscriberMap_;
+    int32_t code_ = -1;
 };
 }
 }

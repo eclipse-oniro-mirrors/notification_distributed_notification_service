@@ -41,6 +41,7 @@ private:
     DistributedClient() = default;
     ~DistributedClient() = default;
 
+    std::string ShutdownReasonToString(ShutdownReason reason);
     std::mutex clientLock_;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, int32_t> socketsId_;

@@ -37,6 +37,8 @@ public:
     void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);
     void RefreshDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
+    void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
+    void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
 };
 }
 }

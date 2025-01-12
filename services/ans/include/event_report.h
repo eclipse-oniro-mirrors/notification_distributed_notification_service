@@ -30,6 +30,7 @@ constexpr char SUBSCRIBE_ERROR[] = "SUBSCRIBE_ERROR";
 constexpr char ENABLE_NOTIFICATION_ERROR[] = "ENABLE_NOTIFICATION_ERROR";
 constexpr char ENABLE_NOTIFICATION_SLOT_ERROR[] = "ENABLE_NOTIFICATION_SLOT_ERROR";
 constexpr char PUBLISH_ERROR[] = "PUBLISH_ERROR";
+constexpr char EVENT_NOTIFICATION_ERROR[] = "EVENT_NOTIFICATION_ERROR";
 constexpr char FLOW_CONTROL_OCCUR[] = "FLOW_CONTROL_OCCUR";
 
 constexpr char SUBSCRIBE[] = "SUBSCRIBE";
@@ -55,6 +56,8 @@ struct EventInfo {
     std::string bundleName;
     std::string notificationLabel;
     int32_t operateFlag;
+    int32_t messageType;
+    std::string reason;
 };
 
 class EventReport {
@@ -75,6 +78,7 @@ private:
     static void InnerSendEnableNotificationSlotErrorEvent(const EventInfo &eventInfo);
     static void InnerSendPublishErrorEvent(const EventInfo &eventInfo);
     static void InnerSendFlowControlOccurEvent(const EventInfo &eventInfo);
+    static void InnerSendNotificationSystemErrorEvent(const EventInfo &eventInfo);
 
     // behavior event
     static void InnerSendSubscribeEvent(const EventInfo &eventInfo);

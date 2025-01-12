@@ -21,6 +21,13 @@
 namespace OHOS {
 namespace Notification {
 
+namespace {
+constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
+constexpr const int32_t BRANCH1_ID = 1;
+constexpr const int32_t BRANCH2_ID = 2;
+constexpr const int32_t BRANCH4_ID = 4;
+}
+
 DistributedClient& DistributedClient::GetInstance()
 {
     static DistributedClient distributedClient;
@@ -33,6 +40,9 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
     for (auto& socketItem : socketsId_) {
         if (socketItem.second == socket) {
             socketItem.second = -1;
+            std::string message = "socketID: " + std::to_string(socket) + "ShutdownReason: " +
+                                  ShutdownReasonToString(reason);
+            DistributedService::GetInstance().SendHaReport(0, BRANCH4_ID, message);
         }
     }
 }
@@ -115,10 +125,50 @@ int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDa
     int32_t result = GetSocketId(deviceId, deviceType, dataType, socketId);
     if (result != ERR_OK) {
         ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", deviceId.c_str(), deviceType, dataType);
+        int32_t messageType = 0;
+        std::string errorReason = "Bind server failed,";
+        errorReason.append("dataType: " + std::to_string(dataType));
+        DistributedService::GetInstance().SendEventReport(messageType, result, errorReason);
+        DistributedService::GetInstance().SendHaReport(result, BRANCH1_ID, errorReason);
         return result;
     }
-    return ClientSendMsg(socketId, data, length, dataType);
+    result = ClientSendMsg(socketId, data, length, dataType);
+    if (result != ERR_OK) {
+        int32_t messageType = 0;
+        std::string errorReason = "send message failed,";
+        errorReason.append("dataType: " + std::to_string(dataType));
+        DistributedService::GetInstance().SendEventReport(messageType, result, errorReason);
+        DistributedService::GetInstance().SendHaReport(result, BRANCH2_ID, errorReason);
+    }
+    return result;
 }
+
+std::string DistributedClient::ShutdownReasonToString(ShutdownReason reason)
+{
+    switch (reason) {
+        case ShutdownReason::SHUTDOWN_REASON_UNKNOWN:
+            return "SHUTDOWN_REASON_UNKNOWN";
+        case ShutdownReason::SHUTDOWN_REASON_PEER:
+            return "SHUTDOWN_REASON_PEER";
+        case ShutdownReason::SHUTDOWN_REASON_LNN_CHANGED:
+            return "SHUTDOWN_REASON_LNN_CHANGED";
+        case ShutdownReason::SHUTDOWN_REASON_CONN_CHANGED:
+            return "SHUTDOWN_REASON_CONN_CHANGED";
+        case ShutdownReason::SHUTDOWN_REASON_TIMEOUT:
+            return "SHUTDOWN_REASON_TIMEOUT";
+        case ShutdownReason::SHUTDOWN_REASON_SEND_FILE_ERR:
+            return "SHUTDOWN_REASON_SEND_FILE_ERR";
+        case ShutdownReason::SHUTDOWN_REASON_RECV_FILE_ERR:
+            return "SHUTDOWN_REASON_RECV_FILE_ERR";
+        case ShutdownReason::SHUTDOWN_REASON_RECV_DATA_ERR:
+            return "SHUTDOWN_REASON_RECV_DATA_ERR";
+        case ShutdownReason::SHUTDOWN_REASON_UNEXPECTED:
+            return "SHUTDOWN_REASON_UNEXPECTED";
+        default:
+            return "unknown";
+    }
+}
+
 }
 }
 

@@ -16,6 +16,8 @@
 #include "distributed_extension_service.h"
 
 #include "ans_log_wrapper.h"
+#include "event_report.h"
+#include "notification_analytics_util.h"
 
 #include <utility>
 
@@ -34,6 +36,10 @@ typedef void (*ADD_DEVICE)(const std::string &deviceId, uint16_t deviceType,
 typedef void (*RELEASE_DEVICE)(const std::string &deviceId, uint16_t deviceType);
 typedef void (*REFRESH_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
+typedef void (*INIT_HA_CALLBACK)(
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
+typedef void (*INIT_SENDREPORT_CALLBACK)(
+    std::function<void(int32_t, int32_t, std::string)> callback);
 
 namespace {
 constexpr int32_t DEFAULT_TITLE_LENGTH = 200;
@@ -45,6 +51,9 @@ constexpr const char* CFG_KEY_LOCAL_TYPE = "localType";
 constexpr const char* CFG_KEY_SUPPORT_DEVICES = "supportPeerDevice";
 constexpr const char* CFG_KEY_TITLE_LENGTH = "maxTitleLength";
 constexpr const char* CFG_KEY_CONTENT_LENGTH = "maxContentLength";
+constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
+constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
+constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 }
 
 std::string TransDeviceTypeToName(uint16_t deviceType_)
@@ -169,6 +178,20 @@ int32_t DistributedExtensionService::InitDans()
         dansRunning_.store(false);
         return -1;
     }
+
+    INIT_HA_CALLBACK haHandler = (INIT_HA_CALLBACK)dansHandler_->GetProxyFunc("InitHACallBack");
+    if (haHandler != nullptr) {
+        haHandler(std::bind(&DistributedExtensionService::HADotCallback, this, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+    }
+
+    INIT_SENDREPORT_CALLBACK sendHandler =
+        (INIT_SENDREPORT_CALLBACK)dansHandler_->GetProxyFunc("InitSendReportCallBack");
+    if (sendHandler != nullptr) {
+        sendHandler(std::bind(&DistributedExtensionService::SendReportCallback, this, std::placeholders::_1,
+        std::placeholders::_2, std::placeholders::_3));
+    }
+
     dansRunning_.store(true);
     return 0;
 }
@@ -211,6 +234,10 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
         }
         std::lock_guard<std::mutex> lock(mapLock_);
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
+        std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
+            "deviceId: " + AnonymousProcessing(deviceInfo.deviceId) + "networkId: " +
+            AnonymousProcessing(deviceInfo.networkId);
+        HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_1, reason);
         DistributedDeviceInfo device = DistributedDeviceInfo(deviceInfo.deviceId, deviceInfo.deviceName,
             deviceInfo.networkId, deviceInfo.deviceTypeId);
         deviceMap_.insert(std::make_pair(deviceInfo.deviceId, device));
@@ -258,6 +285,48 @@ bool DistributedExtensionService::DeviceStatusCallback(std::string deviceId, int
     return release;
 }
 
+void DistributedExtensionService::HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason)
+{
+    ANS_LOGI("Dans ha callback %{public}d, %{public}d, %{public}s.", code, ErrCode, reason.c_str());
+    if (code == PUBLISH_ERROR_EVENT_CODE) {
+        if (reason.find("deviceType") != std::string::npos ||
+            reason.find("ShutdownReason") != std::string::npos) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_21, branchId).Message(reason);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(message);
+        } else {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_20, branchId)
+                                        .ErrorCode(ErrCode)
+                                        .Message(reason);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(message);
+        }
+    } else if (code == DELETE_ERROR_EVENT_CODE) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_20, branchId)
+                                    .deleteReason(NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE)
+                                    .ErrorCode(ErrCode)
+                                    .Message(reason);
+        NotificationAnalyticsUtil::ReportDeleteFailedEvent(message);
+    } else if (code == ANS_CUSTOMIZE_CODE) {
+        bool isLiveView = false;
+        if (ErrCode == NotificationConstant::SlotType::LIVE_VIEW) {
+            isLiveView = true;
+        }
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
+                                    .delByWatch(isLiveView)
+                                    .SlotType(ErrCode);
+        NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+    }
+}
+
+void DistributedExtensionService::SendReportCallback(
+    int32_t messageType, int32_t errCode, std::string reason)
+{
+    EventInfo eventInfo;
+    eventInfo.messageType = messageType;
+    eventInfo.errCode = errCode;
+    eventInfo.reason = reason;
+    EventReport::SendHiSysEvent(EVENT_NOTIFICATION_ERROR, eventInfo);
+}
+
 void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo)
 {
     if (distributedQueue_ == nullptr) {
@@ -279,6 +348,9 @@ void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo
             return;
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId);
+        std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
+                             "deviceId: " + AnonymousProcessing(deviceInfo.deviceId);
+        HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_2, reason);
         deviceMap_.erase(deviceInfo.deviceId);
     });
     distributedQueue_->submit(offlineTask);
@@ -319,6 +391,19 @@ void DistributedExtensionService::SetMaxContentLength(nlohmann::json &configJson
         deviceConfig_.maxContentLength = contentJson.get<int32_t>();
         ANS_LOGI("Dans initConfig content length %{public}d.", deviceConfig_.maxContentLength);
     }
+}
+
+std::string DistributedExtensionService::AnonymousProcessing(std::string data)
+{
+    if (!data.empty()) {
+        int length = data.length();
+        int count = length / 3;
+        for (int i = 0; i < count; i++) {
+            data[i] = '*';
+            data[length - i - 1] = '*';
+        }
+    }
+    return data;
 }
 }
 }

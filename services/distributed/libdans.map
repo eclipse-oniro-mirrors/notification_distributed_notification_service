@@ -18,6 +18,8 @@
     ReleaseDevice;
     RefreshDevice;
     ReleaseLocalDevice;
+    InitHACallBack;
+    InitSendReportCallBack;
   local:
     *;
 };
