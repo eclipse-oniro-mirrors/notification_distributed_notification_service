@@ -546,7 +546,7 @@ public:
      */
     ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
-    
+
     /**
      * @brief remove enable notification dialog.
      *
@@ -1011,7 +1011,7 @@ public:
      */
     ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Query the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
@@ -1258,8 +1258,9 @@ private:
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
-        int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
+    ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason,
+        bool isCancel = false);
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
@@ -1296,7 +1297,7 @@ private:
     ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
 
-    void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
+    void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request, int32_t removeReason, bool isThirdParty);
 
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 

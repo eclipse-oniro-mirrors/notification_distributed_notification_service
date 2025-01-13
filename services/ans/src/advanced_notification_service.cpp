@@ -400,7 +400,10 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
-        result = RemoveFromNotificationList(bundleOption, label, notificationId, notification, true);
+        NotificationKey notificationKey;
+        notificationKey.id = notificationId;
+        notificationKey.label = label;
+        result = RemoveFromNotificationList(bundleOption, notificationKey, notification, reason, true);
         if (result != ERR_OK) {
             return;
         }
@@ -1257,14 +1260,14 @@ void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &noti
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
-    const std::string &label, int32_t notificationId, sptr<Notification> &notification, bool isCancel)
+    NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason, bool isCancel)
 {
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
             (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
-            (record->notification->GetLabel() == label) &&
-            (record->notification->GetId() == notificationId)
+            (record->notification->GetLabel() == notificationKey.label) &&
+            (record->notification->GetId() == notificationKey.id)
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
             && record->deviceId.empty()
 #endif
@@ -1276,7 +1279,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             notification = record->notification;
             // delete or delete all, call the function
             if (!isCancel) {
-                TriggerRemoveWantAgent(record->request);
+                TriggerRemoveWantAgent(record->request, removeReason, record->isThirdparty);
             }
             CancelWantAgent(notification);
             ProcForDeleteLiveView(record);
@@ -1292,15 +1295,15 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
     std::lock_guard<std::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         if ((delayNotification.first->bundleOption->GetUid() == bundleOption->GetUid()) &&
-            (delayNotification.first->notification->GetLabel() == label) &&
-            (delayNotification.first->notification->GetId() == notificationId)) {
+            (delayNotification.first->notification->GetLabel() == notificationKey.label) &&
+            (delayNotification.first->notification->GetId() == notificationKey.id)) {
             CancelTimer(delayNotification.second);
             delayNotificationList_.remove(delayNotification);
             return ERR_OK;
         }
     }
     ANS_LOGE("notification not exist,notification:%{public}d, bundleName:%{public}s, uid:%{public}d",
-        notificationId, bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+        notificationKey.id, bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
 
@@ -1321,7 +1324,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
             ProcForDeleteLiveView(record);
             if (!isCancel) {
-                TriggerRemoveWantAgent(record->request);
+                TriggerRemoveWantAgent(record->request, removeReason, record->isThirdparty);
             }
         }
         CancelWantAgent(notification);

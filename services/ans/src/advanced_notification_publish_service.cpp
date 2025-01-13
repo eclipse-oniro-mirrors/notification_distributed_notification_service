@@ -1677,6 +1677,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
+        bool isThirdParty = true;
         sptr<Notification> notification = nullptr;
         sptr<NotificationRequest> notificationRequest = nullptr;
 
@@ -1701,6 +1702,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 #endif
                 notification = record->notification;
                 notificationRequest = record->request;
+                isThirdParty = record->isThirdparty;
 
                 if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
                     ProcForDeleteLiveView(record);
@@ -1721,7 +1723,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
 #endif
         }
         if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
-            TriggerRemoveWantAgent(notificationRequest);
+            TriggerRemoveWantAgent(notificationRequest, removeReason, isThirdParty);
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -1840,7 +1842,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
                 SendNotificationsOnCanceled(notifications, nullptr, reason);
             }
 
-            TriggerRemoveWantAgent(record->request);
+            TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
         }
 
         if (!notifications.empty()) {
@@ -1927,6 +1929,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     }
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    bool isThirdParty = true;
     sptr<Notification> notification = nullptr;
     sptr<NotificationRequest> notificationRequest = nullptr;
 
@@ -1940,6 +1943,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
                 it++;
                 continue;
             }
+            isThirdParty = (*it)->isThirdparty;
             notification = (*it)->notification;
             notificationRequest = (*it)->request;
 
@@ -1953,7 +1957,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
                     NotificationConstant::DISABLE_SLOT_REASON_DELETE);
             }
 
-            TriggerRemoveWantAgent(notificationRequest);
+            TriggerRemoveWantAgent(notificationRequest, reason, isThirdParty);
             result = ERR_OK;
         } else {
             it++;
@@ -2730,7 +2734,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
-    
+
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enabled);
 
@@ -3132,7 +3136,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
                 SendNotificationsOnCanceled(notifications, nullptr, reason);
             }
 
-            TriggerRemoveWantAgent(record->request);
+            TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
         }
 
         if (!notifications.empty()) {
