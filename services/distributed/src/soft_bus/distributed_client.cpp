@@ -50,8 +50,9 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
 void DistributedClient::AddDevice(DistributedDeviceInfo peerDevice)
 {
     std::lock_guard<std::mutex> lock(clientLock_);
-    ANS_LOGI("Distributed client AddDevice %{public}s", peerDevice.deviceId_.c_str());
-    networksId_.insert(std::make_pair(peerDevice.deviceId_, peerDevice.networkId_));
+    ANS_LOGI("Distributed client AddDevice %{public}s %{public}s", peerDevice.deviceId_.c_str(),
+        peerDevice.networkId_.c_str());
+    networksId_[peerDevice.deviceId_] = peerDevice.networkId_;
 }
 
 void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
@@ -69,6 +70,7 @@ void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t devi
         CloseSocket(socket->second);
         socketsId_.erase(socket);
     }
+    networksId_.erase(deviceId);
 }
 
 void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t deviceType,
@@ -76,12 +78,9 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
 {
     ReleaseDevice(deviceId, deviceType);
     std::lock_guard<std::mutex> lock(clientLock_);
-    auto networkIdItem = networksId_.find(deviceId);
-    if (networkIdItem != networksId_.end()) {
-        networkIdItem->second = networkId;
-        return;
-    }
-    networksId_.insert(std::make_pair(deviceId, networkId));
+    networksId_[deviceId] = networkId;
+    ANS_LOGI("Distributed refresh device %{public}s %{public}s", deviceId.c_str(),
+        networkId.c_str());
 }
 
 int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
