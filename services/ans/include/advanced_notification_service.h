@@ -1240,8 +1240,7 @@ private:
     void SortNotificationList();
     static bool NotificationCompare(
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
-    ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PublishInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, const int reason);
 
@@ -1437,8 +1436,6 @@ private:
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
     bool IsSystemUser(int32_t userId);
-    ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode PublishFlowControlInner(const std::shared_ptr<NotificationRecord> &record);
     
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
@@ -1452,14 +1449,6 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
-    static std::mutex flowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
-    std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
-    static std::mutex systemFlowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlTimestampList_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlPublishTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;

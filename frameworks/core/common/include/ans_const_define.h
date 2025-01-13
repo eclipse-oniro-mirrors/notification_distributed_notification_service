@@ -27,8 +27,11 @@ namespace Notification {
 // Max active notification number
 constexpr size_t MAX_ACTIVE_NUM = 1000;
 constexpr uint32_t MAX_ACTIVE_NUM_PERAPP = 100;
-constexpr uint32_t MAX_ACTIVE_NUM_PERSECOND = 10;
-constexpr uint32_t MAX_UPDATE_NUM_PERSECOND = 20;
+constexpr uint32_t MAX_CREATE_NUM_PERSECOND = 15;
+constexpr uint32_t MAX_UPDATE_NUM_PERSECOND = 30;
+constexpr uint32_t MAX_CREATE_NUM_PERSECOND_PERAPP = 10;
+constexpr uint32_t MAX_UPDATE_NUM_PERSECOND_PERAPP = 20;
+constexpr std::chrono::seconds SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME = std::chrono::seconds(1);
 constexpr size_t MAX_SLOT_NUM = 5;
 constexpr uint32_t MAX_ICON_SIZE = 192 * 1024;
 constexpr uint32_t MAX_PICTURE_SIZE = 2 * 1024 * 1024;

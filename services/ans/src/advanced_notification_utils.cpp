@@ -51,6 +51,7 @@
 #include "notification_analytics_util.h"
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
+#include "advanced_notification_flow_control_service.h"
 
 #define CHECK_BUNDLE_OPTION_IS_INVALID(option)                              \
     if (option == nullptr || option->GetBundleName().empty()) {             \
@@ -916,7 +917,8 @@ void AdvancedNotificationService::OnDistributedPublish(
         ANS_LOGE("notificationSvrQueue_ is nullptr.");
         return;
     }
-    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+    const int32_t callingUid = IPCSkeleton::GetCallingUid();
+    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("CheckDistributedNotificationType is false.");
@@ -966,7 +968,12 @@ void AdvancedNotificationService::OnDistributedPublish(
             return;
         }
 
-        result = PublishFlowControl(record);
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, isNotificationExists);
+        if (result != ERR_OK) {
+            return;
+        }
+        result = PublishInNotificationList(record);
         if (result != ERR_OK) {
             return;
         }
@@ -991,7 +998,8 @@ void AdvancedNotificationService::OnDistributedUpdate(
         ANS_LOGE("Serial queue is invalid.");
         return;
     }
-    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId]() {
+    const int32_t callingUid = IPCSkeleton::GetCallingUid();
+    notificationSvrQueue_->submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
             ANS_LOGD("device type not support display.");
@@ -1039,7 +1047,11 @@ void AdvancedNotificationService::OnDistributedUpdate(
             ANS_LOGE("Reject by filters: %{public}d", result);
             return;
         }
-
+        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
+        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, isNotificationExists);
+        if (result != ERR_OK) {
+            return;
+        }
         if (IsNotificationExists(record->notification->GetKey())) {
             if (record->request->IsAlertOneTime()) {
                 CloseAlert(record);
