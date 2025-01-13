@@ -330,6 +330,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
     TestAddNotification(notificationId, bundle);
 
     advancedNotificationService_->OnBundleDataCleared(bundle);
+    EXPECT_NE(advancedNotificationService_, nullptr);
 }
 
 /**
@@ -408,6 +409,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00001, Function | SmallTest | Level1)
 
     NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true);
     advancedNotificationService_->OnBundleDataUpdate(bundle);
+    EXPECT_NE(advancedNotificationService_, nullptr);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -326,6 +326,7 @@ HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_001, Function | SmallTe
     notificationSubscriberManager_->notificationSubQueue_ = nullptr;
     wptr<IRemoteObject> obj = nullptr;
     notificationSubscriberManager_->OnRemoteDied(obj);
+    EXPECT_NE(notificationSubscriberManager_, nullptr);
 }
 }  // namespace Notification
 }  // namespace OHOS
