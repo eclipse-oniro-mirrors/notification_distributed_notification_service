@@ -55,7 +55,7 @@ static napi_value NapiPushInit(napi_env env, napi_value exports)
     napi_wrap(env, exports, napiPush.release(), NapiPush::Finalizer, nullptr, nullptr);
 
     const char *moduleName = "NapiPush";
-#ifdef ANS_FEATURE_LIVEVIEW_PUSH_CHECK
+#ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
     OHOS::AbilityRuntime::BindNativeFunction(env, exports, "on", moduleName, NapiPush::RegisterPushCallback);
     OHOS::AbilityRuntime::BindNativeFunction(env, exports, "off", moduleName, NapiPush::UnregisterPushCallback);
 #else
@@ -176,7 +176,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getSlotByBundle", Common::NapiThrowCapErr),
 #endif
 
-#ifdef ANS_FEATURE_SLOT_MANAGER
+#ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
         DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", NapiSubscriteLocalAcitvity),
         DECLARE_NAPI_FUNCTION("triggerSystemLiveView", NapiTriggerLocalLiveView),
 #else
