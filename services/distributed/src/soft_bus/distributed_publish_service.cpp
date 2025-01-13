@@ -37,6 +37,7 @@ namespace Notification {
 namespace {
 constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t OPERATION_DELETE_BRANCH = 2;
 constexpr const int32_t BRANCH3_ID = 3;
 constexpr const int32_t BRANCH4_ID = 4;
@@ -265,6 +266,7 @@ void DistributedService::RemoveNotification(const std::shared_ptr<TlvBox>& boxMe
     int result = IN_PROCESS_CALL(NotificationHelper::RemoveNotification(
         hashCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     std::string errorReason = "delete message failed";
+    code_ = DELETE_ERROR_EVENT_CODE;
     if (result == 0) {
         errorReason = "delete message success";
         AbnormalReporting(result, BRANCH4_ID, errorReason);
@@ -299,6 +301,7 @@ void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxM
         NotificationHelper::RemoveNotifications(hashCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
     ANS_LOGI("dans batch remove message %{public}d.", result);
     std::string errorReason = "delete message failed";
+    code_ = DELETE_ERROR_EVENT_CODE;
     if (result == 0) {
         errorReason = "delete message success";
         AbnormalReporting(result, BRANCH4_ID, errorReason);

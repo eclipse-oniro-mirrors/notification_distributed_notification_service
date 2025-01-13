@@ -800,6 +800,7 @@ void NotificationSubscriberManager::IsDeviceFlag(const std::shared_ptr<Subscribe
     }
     auto flagsMap = request->GetDeviceFlags();
     if (flagsMap == nullptr || flagsMap->size() <= 0) {
+        ANS_LOGE("flagsMap is nullptr or flagsMap size <= 0.");
         return;
     }
 
@@ -819,9 +820,12 @@ void NotificationSubscriberManager::IsDeviceFlag(const std::shared_ptr<Subscribe
             headsetFlag = true;
         }
     }
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
-        LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
+    if (request->IsCommonLiveView()) {
         auto flags = request->GetFlags();
+        if (flags == nullptr) {
+            ANS_LOGE("flags is nullptr.");
+            return;
+        }
         if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
             flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
             keyNodeFlag = true;
