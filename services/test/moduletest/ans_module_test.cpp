@@ -1788,6 +1788,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0107, Function | SmallTest | Level1)
     uint64_t nums = 0;
     g_advancedNotificationService->GetActiveNotificationNums(nums);
     g_advancedNotificationService->Unsubscribe(listener, subscriberInfo);
+    EXPECT_NE(g_advancedNotificationService, nullptr);
 }
 
 /**
