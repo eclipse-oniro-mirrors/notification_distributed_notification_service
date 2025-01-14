@@ -33,6 +33,7 @@
 #include "notification_bundle_option.h"
 #include "notification_unified_group_Info.h"
 #include <string>
+#include <map>
 
 namespace OHOS {
 namespace Notification {
@@ -1451,6 +1452,10 @@ public:
 
     void SetDistributedHashCode(const std::string hashCode);
 
+    void AdddeviceStatu(const std::string &deviceType, const std::string deviceStatu);
+    
+    const std::map<std::string, std::string> GetdeviceStatus() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1548,6 +1553,7 @@ private:
     std::string appMessageId_ {};
     std::string sound_ {};
     std::string distributedHashCode_ {};
+    std::map<std::string, std::string> deviceStatus_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};

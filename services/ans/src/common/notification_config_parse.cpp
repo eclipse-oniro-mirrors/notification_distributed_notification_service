@@ -439,5 +439,38 @@ uint32_t NotificationConfigParse::GetStartAbilityTimeout()
 
     return 0;
 }
+
+void NotificationConfigParse::GetReportTrustListConfig()
+{
+    nlohmann::json root;
+    std::string reportJsonPoint = "/";
+    reportJsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    reportJsonPoint.append("/");
+    reportJsonPoint.append(CFG_KEY_DFX_NORMAL_EVENT);
+    if (!GetConfigJson(reportJsonPoint, root)) {
+        return;
+    }
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file");
+        return;
+    }
+
+    nlohmann::json reportTrustList = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DFX_NORMAL_EVENT];
+    if (reportTrustList.is_null() || reportTrustList.empty() || !reportTrustList.is_array()) {
+        ANS_LOGE("GetReportTrustListConfig failed as invalid dfx_normal_events json.");
+        return;
+    }
+    for (auto &reportTrust : reportTrustList) {
+        reporteTrustSet_.emplace(reportTrust);
+    }
+    return;
+}
+
+
+bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
+{
+    return reporteTrustSet_.count(bundleName);
+}
+
 } // namespace Notification
 } // namespace OHOS

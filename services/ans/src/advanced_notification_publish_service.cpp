@@ -159,6 +159,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         result = CheckSoundPermission(request, bundleOption->GetBundleName());
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("Check sound failed.");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             break;
         }
 
@@ -169,12 +170,10 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 #endif
 
         if (result != ERR_OK) {
-            message.ErrorCode(result).Message("Push check failed.");
             break;
         }
         result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (result != ERR_OK) {
-            message.ErrorCode(result).Message("Publish prepared failed.");
             break;
         }
     } while (0);

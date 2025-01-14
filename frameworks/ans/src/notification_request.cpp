@@ -2886,5 +2886,16 @@ void NotificationRequest::SetDistributedHashCode(const std::string hashCode)
 {
     distributedHashCode_ = hashCode;
 }
+
+void NotificationRequest::AdddeviceStatu(const std::string &deviceType,
+    const std::string deviceStatu)
+{
+    deviceStatus_[deviceType] = deviceStatu;
+}
+
+const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() const
+{
+    return deviceStatus_;
+}
 }  // namespace Notification
 }  // namespace OHOS

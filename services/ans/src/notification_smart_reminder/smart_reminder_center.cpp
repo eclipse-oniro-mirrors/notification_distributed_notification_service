@@ -28,6 +28,7 @@
 namespace OHOS {
 namespace Notification {
 using namespace std;
+constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 14;
 namespace {
     const std::string ANS_VOIP = "ANS_VOIP";
 }
@@ -278,11 +279,13 @@ void SmartReminderCenter::InitValidDevices(
     set<string> &validDevices,
     const sptr<NotificationRequest> &request) const
 {
+    auto notificationControlFlags = request->GetNotificationControlFlags();
     validDevices.insert(NotificationConstant::CURRENT_DEVICE_TYPE);
     for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
         if (IsNeedSynergy(request->GetSlotType(), deviceType, request->GetOwnerBundleName(), request->GetOwnerUid()) &&
             NotificationSubscriberManager::GetInstance()->IsDeviceTypeSubscriberd(deviceType)) {
             validDevices.insert(deviceType);
+            request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
             ANS_LOGI("InitValidDevices- %{public}s", deviceType.c_str());
         }
     }
@@ -308,7 +311,7 @@ void SmartReminderCenter::HandleReminderMethods(
     }
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
-
+    request->AdddeviceStatu(deviceType, bitStatus.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
     if (!HandleReminderFilter(deviceType, request, bitStatus)) {
         return;
     }
