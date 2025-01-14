@@ -1332,15 +1332,21 @@ ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templa
     return result;
 }
 
-void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<NotificationRequest> &request)
+void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<NotificationRequest> &request,
+    int32_t removeReason, bool isThirdParty)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("%{public}s %{public}d %{public}d", __FUNCTION__, isThirdParty, removeReason);
 
     if ((request == nullptr) || (request->GetRemovalWantAgent() == nullptr)) {
         return;
     }
-    OHOS::AbilityRuntime::WantAgent::TriggerInfo triggerInfo;
+
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    if (!isThirdParty) {
+        want->SetParam("deleteReason", removeReason);
+    }
+    OHOS::AbilityRuntime::WantAgent::TriggerInfo triggerInfo("", nullptr, want, 0);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = request->GetRemovalWantAgent();
     AbilityRuntime::WantAgent::WantAgentHelper::TriggerWantAgent(agent, nullptr, triggerInfo);
 }

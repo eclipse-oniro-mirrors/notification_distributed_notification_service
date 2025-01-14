@@ -2062,7 +2062,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20400,
 
     request->SetRemovalWantAgent(wantAgent);
     ASSERT_NE(nullptr, advancedNotificationService_);
-    advancedNotificationService_->TriggerRemoveWantAgent(request);
+    advancedNotificationService_->TriggerRemoveWantAgent(request, 0, false);
 
     GTEST_LOG_(INFO) << "TriggerRemoveWantAgent_0100 test end";
 }
