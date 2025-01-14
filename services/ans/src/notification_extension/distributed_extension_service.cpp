@@ -216,6 +216,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
 {
     std::string name = TransDeviceTypeToName(deviceInfo.deviceTypeId);
     if (deviceConfig_.supportPeerDevice_.find(name) == deviceConfig_.supportPeerDevice_.end()) {
+        ANS_LOGI("The current device type not support %{public}d.", deviceInfo.deviceTypeId);
         return;
     }
     if (distributedQueue_ == nullptr) {
