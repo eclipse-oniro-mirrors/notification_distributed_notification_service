@@ -94,7 +94,6 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getActiveNotificationByFilter", NapiGetActiveNotificationByFilter),
         DECLARE_NAPI_FUNCTION("isSupportTemplate", NapiIsSupportTemplate),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
-        DECLARE_NAPI_FUNCTION("setAdditionalConfig", NapiSetAdditionConfig),
         DECLARE_NAPI_FUNCTION("isNotificationEnabledSync", NapiIsNotificationEnabledSync),
         DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledBySlot", NapiSetDistributedEnabledBySlot),
@@ -182,6 +181,12 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 #else
         DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", Common::NapiThrowCapErr),
         DECLARE_NAPI_FUNCTION("triggerSystemLiveView", Common::NapiThrowCapErr),
+#endif
+
+#ifdef ANS_FEATURE_ADDITIONAL_CONFIG
+        DECLARE_NAPI_FUNCTION("setAdditionalConfig", NapiSetAdditionConfig),
+#else
+        DECLARE_NAPI_FUNCTION("setAdditionalConfig", Common::NapiThrowCapErr),
 #endif
 };
 
