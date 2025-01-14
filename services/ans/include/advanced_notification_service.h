@@ -1271,6 +1271,7 @@ private:
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
+    std::vector<std::string> GetNotificationKeysByBundle(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
     void SortNotificationList();
     static bool NotificationCompare(

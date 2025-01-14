@@ -1217,6 +1217,32 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
             (record->bundleOption->GetUid() != bundleOption->GetUid())) {
             continue;
         }
+        keys.push_back(record->notification->GetKey());
+    }
+
+    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    for (auto delayNotification : delayNotificationList_) {
+        auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
+        if (bundleOption != nullptr && delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
+            keys.push_back(delayNotification.first->notification->GetKey());
+        }
+    }
+
+    return keys;
+}
+
+std::vector<std::string> AdvancedNotificationService::GetNotificationKeysByBundle(
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    std::vector<std::string> keys;
+    if (bundleOption == nullptr) {
+        return keys;
+    }
+
+    for (auto record : notificationList_) {
+        if ((record->bundleOption->GetUid() != bundleOption->GetUid())) {
+            continue;
+        }
         ANS_LOGD("GetNotificationKeys instanceKey(%{public}s, %{public}s)",
             record->notification->GetInstanceKey().c_str(), bundleOption->GetAppInstanceKey().c_str());
         if (record->notification->GetInstanceKey() == "" || bundleOption->GetAppInstanceKey() == "" ||

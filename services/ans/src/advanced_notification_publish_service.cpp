@@ -465,7 +465,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
 
-        std::vector<std::string> keys = GetNotificationKeys(bundleOption);
+        std::vector<std::string> keys = GetNotificationKeysByBundle(bundleOption);
         std::vector<sptr<Notification>> notifications;
         std::vector<uint64_t> timerIds;
         for (auto key : keys) {
