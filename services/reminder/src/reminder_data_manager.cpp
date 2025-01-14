@@ -139,7 +139,10 @@ ErrCode ReminderDataManager::CancelReminder(
             std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
         }
-        StopTimerLocked(TimerType::TRIGGER_TIMER);
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+            StopTimerLocked(TimerType::TRIGGER_TIMER);
+        }
     }
     if (alertingReminderId_ == reminderId) {
         StopSoundAndVibrationLocked(reminder);
@@ -1315,7 +1318,6 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
             continue;
         }
         int32_t reminderId = (*it)->GetReminderId();
-        ANSR_LOGD("Containers(vector) remove. reminderId=%{public}d", reminderId);
         if (!(*it)->IsShare()) {
             totalCount_--;
             store_->Delete(reminderId);
@@ -1578,6 +1580,13 @@ bool ReminderDataManager::IsBelongToSameApp(const int32_t uidSrc,
 
 void ReminderDataManager::OnLoadReminderEvent(const EventFwk::Want& want)
 {
+    if (activeReminderId_ != -1) {
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+        }
+        StopTimerLocked(TimerType::TRIGGER_TIMER);
+    }
     LoadReminderFromDb();
     LoadShareReminders();
     int64_t now = GetCurrentTime();
@@ -1602,14 +1611,6 @@ void ReminderDataManager::PlaySoundAndVibrationLocked(const sptr<ReminderRequest
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::ALERT_MUTEX);
     PlaySoundAndVibration(reminder);
-}
-
-std::string ReminderDataManager::GetCustomRingUri(const sptr<ReminderRequest> &reminder)
-{
-    if (reminder == nullptr) {
-        return "";
-    }
-    return reminder->GetCustomRingUri();
 }
 
 std::string ReminderDataManager::GetFullPath(const std::string& oriPath)
@@ -1746,7 +1747,6 @@ void ReminderDataManager::RemoveReminderLocked(const int32_t reminderId, bool is
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end();) {
         if (reminderId == (*it)->GetReminderId() && isShare == (*it)->IsShare()) {
-            ANSR_LOGD("Containers(vector) remove. reminderId=%{public}d", reminderId);
             it = reminderVector_.erase(it);
             if (!isShare) {
                 totalCount_--;

@@ -501,7 +501,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_018, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     std::string ringUri = "123";
     reminder->SetCustomRingUri(ringUri);
-    std::string getRingUri = manager->GetCustomRingUri(reminder);
+    std::string getRingUri = reminder->GetCustomRingUri();
     ASSERT_EQ(ringUri, getRingUri);
 }
 
