@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <set>
 #include <vector>
 #include <singleton.h>
 
@@ -40,6 +41,8 @@ public:
     bool GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const;
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
+    void GetReportTrustListConfig();
+    bool IsReportTrustList(const std::string& bundleName) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType,
         const sptr<NotificationBundleOption> &bundleOption) const;
@@ -48,7 +51,8 @@ public:
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
-
+    std::set<std::string> reporteTrustSet_ {};
+    
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
     constexpr static const char* CFG_KEY_SLOT_TYPE_REMINDER = "slotTypeReminder";
@@ -59,6 +63,7 @@ public:
     constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND = "MaxUpdateNumPerSecond";
     constexpr static const char* CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP = "MaxCreateNumPerSecondPerApp";
     constexpr static const char* CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP = "MaxUpdateNumPerSecondPerApp";
+    constexpr static const char* CFG_KEY_DFX_NORMAL_EVENT = "dfxNormalEvent";
     #ifdef CONFIG_POLICY_ENABLE
         constexpr static const char* NOTIFICAITON_CONFIG_FILE = "etc/notification/notification_config.json";
     # else

@@ -27,21 +27,34 @@
 #include "time_service_client.h"
 #include "nlohmann/json.hpp"
 #include "bundle_manager_helper.h"
+#include "notification_config_parse.h"
+
 namespace OHOS {
 namespace Notification {
 constexpr char MESSAGE_DELIMITER = '#';
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
+constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 5;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
 constexpr const int32_t MODIFY_ERROR_EVENT_COUNT = 6;
 constexpr const int32_t MODIFY_ERROR_EVENT_TIME = 60;
+constexpr const int32_t MAX_NUMBER_EVERY_REPORT = 20;
+constexpr const int32_t MAX_REPORT_COUNT = 3;
 
 constexpr const int32_t REPORT_CACHE_MAX_SIZE = 50;
+constexpr const int32_t SUCCESS_REPORT_CACHE_MAX_SIZE = 60;
 constexpr const int32_t REPORT_CACHE_INTERVAL_TIME = 30;
+constexpr const int32_t SUCCESS_REPORT_CACHE_INTERVAL_TIME = 1800;
 constexpr const int32_t REASON_MAX_LENGTH = 127;
+
+constexpr const int32_t SOUND_FLAG = 1 << 10;
+constexpr const int32_t LOCKSCREEN_FLAG = 1 << 11;
+constexpr const int32_t BANNER_FLAG = 1 << 12;
+constexpr const int32_t VIBRATION_FLAG = 1 << 13;
+
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 static std::mutex reportFlowControlMutex_;
 static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_ = {
@@ -55,6 +68,12 @@ static uint64_t reportTimerId = 0;
 static std::list<ReportCache> reportCacheList;
 static bool g_reportFlag = false;
 static std::shared_ptr<ReportTimerInfo> reportTimeInfo = std::make_shared<ReportTimerInfo>();
+
+static std::mutex reportSuccessCacheMutex_;
+static uint64_t reportSuccessTimerId = 0;
+static std::list<ReportCache> successReportCacheList;
+static bool g_successReportFlag = false;
+static std::shared_ptr<ReportTimerInfo> reportSuccessTimeInfo = std::make_shared<ReportTimerInfo>();
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -254,6 +273,116 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& mes
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, DELETE_ERROR_EVENT_CODE));
 }
 
+void NotificationAnalyticsUtil::ReportPublishSuccessEvent(const sptr<NotificationRequest>& request,
+    const HaMetaMessage& message)
+{
+    ANS_LOGD("ReportPublishSuccessEvent enter");
+    if (request == nullptr) {
+        return;
+    }
+    if (!IsAllowedBundle(request)) {
+        ANS_LOGW("This Bundle not allowed.");
+        return;
+    }
+
+    EventFwk::Want want;
+    if (!request->GetOwnerBundleName().empty()) {
+        want.SetBundle(request->GetOwnerBundleName());
+    }
+    if (!request->GetCreatorBundleName().empty()) {
+        want.SetParam("agentBundleName", request->GetCreatorBundleName());
+    }
+    std::string ansData = NotificationAnalyticsUtil::BuildAnsData(request, message);
+    want.SetParam("ansData", ansData);
+
+    IN_PROCESS_CALL_WITHOUT_RET(AddSuccessListCache(want, ANS_CUSTOMIZE_CODE));
+}
+
+bool NotificationAnalyticsUtil::IsAllowedBundle(const sptr<NotificationRequest>& request)
+{
+    ANS_LOGD("IsAllowedBundle enter");
+    std::string bundleName = request->GetOwnerBundleName();
+    return DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReportTrustList(bundleName);
+}
+
+std::string NotificationAnalyticsUtil::BuildAnsData(const sptr<NotificationRequest>& request,
+    const HaMetaMessage& message)
+{
+    ANS_LOGD("BuildAnsData enter.");
+    nlohmann::json ansData;
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    if (request->GetUnifiedGroupInfo() != nullptr &&
+        request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
+        extraInfo = request->GetUnifiedGroupInfo()->GetExtraInfo();
+    } else {
+        extraInfo = std::make_shared<AAFwk::WantParams>();
+    }
+    nlohmann::json extraInfoJson;
+    std::string msgId = extraInfo->GetWantParams("pushData").GetStringParam("msgId");
+    if (!msgId.empty()) {
+        extraInfoJson["msgId"] = msgId;
+    }
+    std::string uniqMsgId = extraInfo->GetWantParams("pushData").GetStringParam("mcMsgId");
+    if (!uniqMsgId.empty()) {
+        extraInfoJson["mcMsgId"] = uniqMsgId;
+    }
+
+    ansData["extraInfo"] = extraInfoJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    ansData["uid"] = std::to_string(request->GetOwnerUid());
+    ansData["id"] = std::to_string(request->GetNotificationId());
+    NotificationNapi::SlotType slotType;
+    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(
+        static_cast<NotificationConstant::SlotType>(request->GetSlotType()), slotType);
+    NotificationNapi::ContentType contentType;
+    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
+        static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
+    ansData["slotType"] = static_cast<int32_t>(slotType);
+    ansData["contentType"] = std::to_string(static_cast<int32_t>(contentType));
+    ansData["reminderFlags"] = std::to_string(static_cast<int32_t>(request->GetFlags()->GetReminderFlags()));
+    uint32_t controlFlags = request->GetNotificationControlFlags();
+    std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
+    ansData["ControlFlags"] = SetControlFlags(tempFlags, controlFlags);
+    ansData["class"] = request->GetClassification();
+    ansData["deviceStatus"] = GetDeviceStatus(request);
+    ANS_LOGI("Report success, the controlFlags is %{public}d, deviceStatus is %{public}s",
+        controlFlags, GetDeviceStatus(request).c_str());
+    return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+}
+
+std::string NotificationAnalyticsUtil::GetDeviceStatus(const sptr<NotificationRequest>& request)
+{
+    std::map<std::string, std::string> deviceStatus = request->GetdeviceStatus();
+    nlohmann::json deviceStatusJson;
+    for (map<string, string>::const_iterator iter = deviceStatus.begin(); iter != deviceStatus.end(); ++iter) {
+        deviceStatusJson[iter->first] = iter->second;
+    }
+    return deviceStatusJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+}
+uint32_t NotificationAnalyticsUtil::SetControlFlags(const std::shared_ptr<NotificationFlags> &flags,
+    uint32_t controlFlags)
+{
+    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        controlFlags |= SOUND_FLAG;
+    } else {
+        controlFlags &= ~SOUND_FLAG;
+    }
+    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
+        controlFlags |= VIBRATION_FLAG;
+    } else {
+        controlFlags &= ~VIBRATION_FLAG;
+    }
+    if (flags->IsLockScreenVisblenessEnabled()) {
+        controlFlags |= LOCKSCREEN_FLAG;
+    } else {
+        controlFlags &= ~LOCKSCREEN_FLAG;
+    }
+    if (flags->IsBannerEnabled()) {
+        controlFlags |= BANNER_FLAG;
+    } else {
+        controlFlags &= ~BANNER_FLAG;
+    }
+    return controlFlags;
+}
 void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
     int32_t eventCode, const std::string& reason)
 {
@@ -438,6 +567,104 @@ void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t event
     }
 }
 
+void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_t eventCode)
+{
+    std::lock_guard<std::mutex> lock(reportSuccessCacheMutex_);
+    int32_t size = static_cast<int32_t>(successReportCacheList.size());
+    if (size >= SUCCESS_REPORT_CACHE_MAX_SIZE) {
+        ANS_LOGW("Success list size is max.");
+        return;
+    }
+
+    if (reportSuccessTimerId == 0) {
+        sptr<MiscServices::TimeServiceClient> successTimer = MiscServices::TimeServiceClient::GetInstance();
+        if (successTimer == nullptr) {
+            ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+            return;
+        }
+        reportSuccessTimerId = successTimer->CreateTimer(reportSuccessTimeInfo);
+    }
+
+    ReportCache reportCache;
+    reportCache.want = want;
+    reportCache.eventCode = eventCode;
+    successReportCacheList.push_back(reportCache);
+    if (!g_successReportFlag) {
+        ExecuteSuccessCacheList();
+    }
+}
+
+ReportCache NotificationAnalyticsUtil::Aggregate()
+{
+    ANS_LOGI("Success list aggregated.");
+    EventFwk::Want want;
+    auto reportCachetemp = successReportCacheList.front();
+
+    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    AAFwk::WantParamWrapper wWrapper(*extraInfo);
+    std::string extralInfoStr = wWrapper.ToString();
+    want.SetParam("extraInfo", extralInfoStr);
+    want.SetBundle(reportCachetemp.want.GetBundle());
+    std::string agentBundleName = reportCachetemp.want.GetStringParam("agentBundleName");
+    if (!agentBundleName.empty()) {
+        want.SetParam("agentBundleName", agentBundleName);
+    }
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+
+    std::string ansData = reportCachetemp.want.GetStringParam("ansData");
+    successReportCacheList.pop_front();
+    int32_t aggreCount = MAX_NUMBER_EVERY_REPORT;
+    while (aggreCount > 0) {
+        if (successReportCacheList.empty()) {
+            break;
+        }
+        auto reportCache = successReportCacheList.front();
+
+        ansData += "|" + reportCache.want.GetStringParam("ansData");
+        successReportCacheList.pop_front();
+        aggreCount--;
+    }
+    want.SetParam("ansData", ansData);
+    ReportCache reportInfo;
+    reportInfo.want = want;
+    reportInfo.eventCode = ANS_CUSTOMIZE_CODE ;
+    return reportInfo;
+}
+
+void NotificationAnalyticsUtil::ExecuteSuccessCacheList()
+{
+    if (successReportCacheList.empty()) {
+        g_successReportFlag = false;
+        ANS_LOGI("successReportCacheList is end");
+        return;
+    }
+
+    auto reportCount = MAX_REPORT_COUNT;
+    while (reportCount > 0) {
+        if (successReportCacheList.empty()) {
+            break;
+        }
+        auto reportCache = Aggregate();
+        ReportCommonEvent(reportCache);
+        reportCount--;
+    }
+    auto triggerFunc = [] {
+        std::lock_guard<std::mutex> lock(reportSuccessCacheMutex_);
+        NotificationAnalyticsUtil::ExecuteSuccessCacheList();
+    };
+    reportSuccessTimeInfo->SetCallbackInfo(triggerFunc);
+    sptr<MiscServices::TimeServiceClient> successTimer = MiscServices::TimeServiceClient::GetInstance();
+    if (successTimer == nullptr || reportSuccessTimerId == 0) {
+        g_successReportFlag = false;
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        return;
+    }
+    successTimer->StartTimer(reportSuccessTimerId, NotificationAnalyticsUtil::GetCurrentTime() +
+        SUCCESS_REPORT_CACHE_INTERVAL_TIME * NotificationConstant::SECOND_TO_MS);
+    g_successReportFlag = true;
+}
+
+
 void NotificationAnalyticsUtil::ExecuteCacheList()
 {
     if (reportCacheList.empty()) {
@@ -467,7 +694,7 @@ void NotificationAnalyticsUtil::ExecuteCacheList()
 void NotificationAnalyticsUtil::ReportCommonEvent(const ReportCache& reportCache)
 {
     EventFwk::CommonEventPublishInfo publishInfo;
-    publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER});
+    publishInfo.SetSubscriberPermissions({OHOS_PERMISSION_NOTIFICATION_CONTROLLER});
     EventFwk::CommonEventData commonData {reportCache.want, reportCache.eventCode, ""};
     if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData, publishInfo)) {
         ANS_LOGE("Publish event failed %{public}d", reportCache.eventCode);

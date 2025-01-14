@@ -28,6 +28,7 @@
 namespace OHOS {
 namespace Notification {
 using namespace std;
+constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 15;
 SmartReminderCenter::SmartReminderCenter()
 {
     if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetCurrentSlotReminder(currentReminderMethods_)) {
@@ -268,10 +269,13 @@ void SmartReminderCenter::HandleReminderMethods(
     }
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
+    request->AdddeviceStatu(deviceType, bitStatus.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
     bool enabledAffectedBy = true;
+    auto notificationControlFlags = request->GetNotificationControlFlags();
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) != 0) {
         if (IsNeedSynergy(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid())) {
             validDevices.insert(deviceType);
+            request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
         } else {
             enabledAffectedBy = false;
         }
