@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <type_traits>
 
 #include "access_token_helper.h"
 #include "ans_inner_errors.h"
@@ -28,61 +29,88 @@
 
 namespace OHOS {
 namespace Notification {
-int32_t DisturbManager::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
+DisturbManager::DisturbManager()
 {
-    ErrCode result = CheckInterfacePermission(code);
-    if (result != ERR_OK) {
-        if (!reply.WriteInt32(result)) {
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-        return ERR_OK;
-    }
-    switch (code) {
-        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES): {
-            result = RemoveDoNotDisturbProfiles(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE): {
-            result = SetDoNotDisturbDate(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE): {
-            result = GetDoNotDisturbDate(data, reply);
-            break;
-        }
-        default: {
-            ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
-            return ERR_ANS_INVALID_PARAM;
-        }
-    }
-    if (SUCCEEDED(result)) {
-        return NO_ERROR;
-    }
-
-    return result;
+    codeAndExecuteFuncMap_ = {
+        {static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES),
+            std::bind(&DisturbManager::HandleRemoveDoNotDisturbProfiles, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE),
+            std::bind(&DisturbManager::HandleSetDoNotDisturbDate, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE),
+            std::bind(&DisturbManager::HandleGetDoNotDisturbDate, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER),
+            std::bind(&DisturbManager::HandleSetDoNotDisturbDateByUser, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER),
+            std::bind(&DisturbManager::HandleGetDoNotDisturbDateByUser, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES),
+            std::bind(&DisturbManager::HandleAddDoNotDisturbProfiles, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE),
+            std::bind(&DisturbManager::HandleGetDoNotDisturbProfile, this, std::placeholders::_1,
+                std::placeholders::_2)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE),
+            std::bind(&DisturbManager::HandleDoesSupportDoNotDisturbMode, this, std::placeholders::_1,
+                std::placeholders::_2)},
+    };
+    codeAndPermissionFuncMap_ = {
+        {static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+        {static_cast<uint32_t>(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE),
+            std::bind(&DisturbManager::CheckSystemAndControllerPermission, this)},
+    };
 }
 
-int32_t DisturbManager::CheckInterfacePermission(uint32_t code)
+int32_t DisturbManager::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
 {
-    switch (code) {
-        case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES):
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE):
-        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE): {
-            bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-            if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-                return ERR_ANS_NON_SYSTEM_APP;
-            }
-
-            if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-                return ERR_ANS_PERMISSION_DENIED;
+    ANS_LOGD("[DisturbManager] called.");
+    auto permissionChecker = codeAndPermissionFuncMap_.find(code);
+    if (permissionChecker != codeAndPermissionFuncMap_.end()) {
+        ErrCode result = permissionChecker->second();
+        if (result != ERR_OK) {
+            if (!reply.WriteInt32(result)) {
+                return ERR_ANS_PARCELABLE_FAILED;
             }
             return ERR_OK;
         }
-        default: {
-            ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
-            return ERR_ANS_INVALID_PARAM;
-        }
     }
+    auto execution = codeAndExecuteFuncMap_.find(code);
+    if (execution == codeAndExecuteFuncMap_.end()) {
+        ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = execution->second(data, reply);
+    if (SUCCEEDED(result)) {
+        return NO_ERROR;
+    }
+    return result;
+}
+
+int32_t DisturbManager::CheckSystemAndControllerPermission()
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

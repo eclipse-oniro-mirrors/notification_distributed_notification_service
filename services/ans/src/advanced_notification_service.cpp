@@ -1848,50 +1848,6 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
 #endif
 }
 
-ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const int32_t &userId,
-    const sptr<NotificationDoNotDisturbDate> &date)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Input userId is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    return SetDoNotDisturbDateByUser(userId, date);
-}
-
-ErrCode AdvancedNotificationService::GetDoNotDisturbDate(const int32_t &userId,
-    sptr<NotificationDoNotDisturbDate> &date)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Input userId is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    return GetDoNotDisturbDateByUser(userId, date);
-}
-
 ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     const sptr<NotificationBundleOption> bundleOption, bool &hasPopped)
 {
