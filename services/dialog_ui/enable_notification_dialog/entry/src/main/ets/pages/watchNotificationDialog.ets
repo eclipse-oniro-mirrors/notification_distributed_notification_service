@@ -77,7 +77,7 @@ struct PermissionDialog {
         .width('92px')
         .height('92px')
         .margin({
-            top: '2%'
+            top: 6
         })
 
         Scroll() {
@@ -87,14 +87,14 @@ struct PermissionDialog {
                 Text() {
                   Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                 }
-                .fontSize('38px')
+                .fontSize('36px')
                 .fontColor('#FFFFFF')
                 .fontWeight(500)
-                .lineHeight('45px')
+                .lineHeight('Auto')
                 .margin({
-                  top: '4.1%',
-                  left: '11.2%',
-                  right: '11.2%'
+                  top: 12,
+                  left: 26,
+                  right: 26
                 })
                 .textAlign(TextAlign.Center)
               }
@@ -106,14 +106,14 @@ struct PermissionDialog {
                 .onClick(async (): Promise<void> => {
                   await this.enableNotification(true);
                 })
-                .backgroundColor('#1F71FF')
+                .backgroundColor('#FF1F71FF')
                 .width('232px')
                 .height('80px')  
                 .fontColor('#FFFFFF')
                 .fontSize('30px')
                 .fontWeight(500)
               }
-              .margin({top:'4.1%'})
+              .margin({top:16})
             }
 
             Row() {
@@ -122,14 +122,14 @@ struct PermissionDialog {
                 .onClick(async (): Promise<void> => {
                   await this.enableNotification(false);
                 })
-                .backgroundColor('#255EA1FF')
+                .backgroundColor('#405ea1ff')
                 .width('232px')
                 .height('80px')  
-                .fontColor('#5EA1FF')
+                .fontColor('#ff5ea1ff')
                 .fontSize('30px')
                 .fontWeight(500)
               }
-              .margin({top:'4.1%'})
+              .margin({top:12})
             }
           }
         } 
@@ -145,7 +145,7 @@ struct PermissionDialog {
     })
     .width('100%')
     .height('100%')
-    .backgroundColor('#35000000')
+    .backgroundColor('#ff000000')
     .backgroundEffect({
       radius: 20,
       saturation: 50,
