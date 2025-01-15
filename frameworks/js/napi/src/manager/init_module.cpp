@@ -101,6 +101,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isDistributedEnabledBySlot", NapiIsDistributedEnabledBySlot),
         DECLARE_NAPI_FUNCTION("disableNotificationFeature", NapiDisableNotificationFeature),
         DECLARE_NAPI_FUNCTION("setTargetDeviceStatus", NapiSetTargetDeviceStatus),
+        DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
@@ -139,7 +140,6 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
 #endif
         
 #ifdef ANS_FEATURE_DISTURB_MANAGER
-        DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),
         DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", NapiSetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", NapiGetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("addDoNotDisturbProfile", NapiAddDoNotDisturbProfiles),
@@ -148,7 +148,6 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isSupportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbProfile", NapiGetDoNotDisturbProfile),
 #else
-        DECLARE_NAPI_FUNCTION("requestEnableNotification", Common::NapiThrowCapErr),
         DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", Common::NapiThrowCapErr),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", Common::NapiThrowCapErr),
         DECLARE_NAPI_FUNCTION("addDoNotDisturbProfile", Common::NapiThrowCapErr),
