@@ -364,14 +364,6 @@ private:
     void GenDstBundleName(std::string &dstBundleName, const std::string &uri) const;
 
     /**
-     * @brief get custom ring uri.
-     *
-     * @param reminder Indicates the reminder.
-     * @return Returns the uri of ring tone.
-     */
-    std::string GetCustomRingUri(const sptr<ReminderRequest> &reminder);
-
-    /**
      * @brief Cancels all the reminders of the target bundle or user.
      *
      * @param packageName Indicates the packageName need to cancel.
