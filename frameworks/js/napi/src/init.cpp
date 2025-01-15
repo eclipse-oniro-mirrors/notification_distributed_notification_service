@@ -62,6 +62,7 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isNotificationEnabled", IsNotificationEnabled),
         DECLARE_NAPI_FUNCTION("enableNotificationSlot", EnableNotificationSlot),
         DECLARE_NAPI_FUNCTION("isSupportTemplate", IsSupportTemplate),
+        DECLARE_NAPI_FUNCTION("requestEnableNotification", RequestEnableNotification),
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", DisplayBadge),
@@ -101,12 +102,10 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", SetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", GetDoNotDisturbDate),
         DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", SupportDoNotDisturbMode),
-        DECLARE_NAPI_FUNCTION("requestEnableNotification", RequestEnableNotification),
 #else
         DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", Common::NapiThrowCapErr),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", Common::NapiThrowCapErr),
         DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", Common::NapiThrowCapErr),
-        DECLARE_NAPI_FUNCTION("requestEnableNotification", Common::NapiThrowCapErr),
 #endif
 
 #ifdef ANS_FEATURE_SLOT_MANAGER
