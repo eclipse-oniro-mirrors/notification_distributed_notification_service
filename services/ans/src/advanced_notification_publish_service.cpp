@@ -252,7 +252,7 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     request->SetCreatorUserId(userId);
     request->SetCreateTime(GetCurrentTime());
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
