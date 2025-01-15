@@ -13,16 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
-#define BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+#ifndef BASE_NOTIFICATION_REMINDER_MOCK_REMINDER_DATA_MANAGER_H
+#define BASE_NOTIFICATION_REMINDER_MOCK_REMINDER_DATA_MANAGER_H
 
 #include <cstdint>
 
 namespace OHOS::Notification {
-class MockOsAccountManager {
+class MockReminderDataManager {
 public:
-    static void MockGetForegroundOsAccountLocalId(const int32_t ret);
+    static void MockPublishReminder(const int32_t ret);
+    static void MockCancelReminder(const int32_t ret);
+    static void MockCancelAllReminders(const int32_t ret);
+    static void MockAddExcludeDate(const int32_t ret);
+    static void MockDelExcludeDates(const int32_t ret);
+    static void MockGetExcludeDates(const int32_t ret);
+    static void MockQueryActiveReminderCount(const int32_t ret);
 };
 }  // namespace OHOS::Notification
 
-#endif  // BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+#endif  // BASE_NOTIFICATION_REMINDER_MOCK_REMINDER_DATA_MANAGER_H
