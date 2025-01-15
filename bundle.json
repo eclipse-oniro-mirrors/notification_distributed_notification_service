@@ -123,6 +123,7 @@
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
           "//base/notification/distributed_notification_service/services:ans_service",
+          "//base/notification/distributed_notification_service/services/dialog_ui/enable_notification_dialog:dialog_hap",
           "//base/notification/distributed_notification_service/services/reminder/sa_profile:reminder_sa_profile",
           "//base/notification/distributed_notification_service/services/reminder:reminder_service",
           "//base/notification/distributed_notification_service/tools:tools_shell"
