@@ -90,7 +90,8 @@ int64_t DistributedTimerService::GetCurrentTime()
     return duration.count();
 }
 
-void DistributedTimerService::StartTimerWithTrigger(const std::shared_ptr<MiscServices::ITimerInfo>& timerInfo)
+void DistributedTimerService::StartTimerWithTrigger(
+    const std::shared_ptr<MiscServices::ITimerInfo>& timerInfo, uint32_t startAbilityTimeout)
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
@@ -98,8 +99,7 @@ void DistributedTimerService::StartTimerWithTrigger(const std::shared_ptr<MiscSe
         return;
     }
     int64_t timerId = timer->CreateTimer(timerInfo);
-    uint32_t startAbilityTimeout = DelayedSingleton<NotificationConfigParse>::GetInstance()->GetStartAbilityTimeout();
-    ANS_LOGI("Get startAbility timeout %{public}u", startAbilityTimeout);
+    ANS_LOGI("Start ability timeout %{public}u", startAbilityTimeout);
     timer->StartTimer(timerId, GetCurrentTime() + startAbilityTimeout * SECOND_TRANSTO_MS);
 }
 }

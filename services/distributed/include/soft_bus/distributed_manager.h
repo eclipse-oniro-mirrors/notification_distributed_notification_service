@@ -31,7 +31,7 @@ public:
     void ReleaseLocalDevice();
     int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
         std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
-        std::function<bool(std::string, int32_t, bool)> callback);
+        std::function<bool(std::string, int32_t, bool)> callback, uint32_t startAbilityTimeout);
     void AddDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
     void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);

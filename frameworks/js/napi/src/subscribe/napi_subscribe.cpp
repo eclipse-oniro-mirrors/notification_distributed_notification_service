@@ -46,7 +46,7 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
 
 void NapiDistributeOperationCompleteCallback(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work end");
+    ANS_LOGI("DistributeOperation napi_create_async_work end");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -303,7 +303,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
 
 napi_value NapiDistributeOperation(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGI("Distribute operation called");
     std::string hashCode;
     if (ParseParameters(env, info, hashCode) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

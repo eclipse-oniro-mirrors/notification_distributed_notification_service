@@ -28,10 +28,10 @@ extern "C" {
 
 SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
     std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
-    std::function<bool(std::string, int32_t, bool)> callback)
+    std::function<bool(std::string, int32_t, bool)> callback, uint32_t startAbilityTimeout)
 {
     return DistributedManager::GetInstance().InitLocalDevice(deviceId, deviceType, titleAndContentLength,
-        collaborativeDeleteTypes, callback);
+        collaborativeDeleteTypes, callback, startAbilityTimeout);
 }
 
 SYMBOL_EXPORT void AddDevice(const std::string &deviceId, uint16_t deviceType,

@@ -56,6 +56,7 @@ class DistributedDeviceConfig {
 public:
     int32_t maxTitleLength;
     int32_t maxContentLength;
+    uint32_t startAbilityTimeout;
     std::string localType;
     std::set<std::string> supportPeerDevice_;
     std::unordered_set<std::string> collaborativeDeleteTypes_;

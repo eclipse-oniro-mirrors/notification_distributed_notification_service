@@ -50,12 +50,13 @@ DistributedService::DistributedService()
 
 int32_t DistributedService::InitService(const std::string &deviceId, uint16_t deviceType,
     std::unordered_set<std::string> collaborativeDeleteTypes,
-    std::function<bool(std::string, int32_t, bool)> callback)
+    std::function<bool(std::string, int32_t, bool)> callback, uint32_t startAbilityTimeout)
 {
     int32_t userId;
     localDevice_.deviceId_ = deviceId;
     localDevice_.deviceType_ = deviceType;
     localDevice_.collaborativeDeleteTypes_ = collaborativeDeleteTypes;
+    localDevice_.startAbilityTimeout = startAbilityTimeout;
     if (DistributedServer::GetInstance().InitServer(deviceId, deviceType) != 0) {
         ANS_LOGI("Distributed service init server failed.");
         return -1;

@@ -29,7 +29,7 @@ using namespace DistributedHardware;
 using DeviceCallback = std::function<bool(std::string, int32_t, bool)>;
 typedef int32_t (*INIT_LOCAL_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
-    DeviceCallback callback);
+    DeviceCallback callback, uint32_t startAbilityTimeout);
 typedef void (*RELEASE_LOCAL_DEVICE)();
 typedef void (*ADD_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
@@ -143,6 +143,7 @@ bool DistributedExtensionService::initConfig()
     SetMaxContentLength(configJson);
 
     deviceConfig_.collaborativeDeleteTypes_ = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
+    deviceConfig_.startAbilityTimeout = NotificationConfigParse::GetInstance()->GetStartAbilityTimeout();
     return true;
 }
 
@@ -169,12 +170,13 @@ int32_t DistributedExtensionService::InitDans()
         ANS_LOGW("Dans get local device failed.");
         return -1;
     }
+
     std::pair<int32_t, int32_t> titleAndContentLength = {deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength};
     ANS_LOGI("Dans get local device %{public}s, %{public}d, %{public}d, %{public}d.", deviceInfo.deviceId,
         deviceInfo.deviceTypeId, deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength);
     if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, titleAndContentLength,
         deviceConfig_.collaborativeDeleteTypes_, std::bind(&DistributedExtensionService::DeviceStatusCallback, this,
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)) != 0) {
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), deviceConfig_.startAbilityTimeout) != 0) {
         dansRunning_.store(false);
         return -1;
     }

@@ -38,7 +38,8 @@ public:
     void UnSubscribeNotifictaion(const std::string &deviceId, uint16_t deviceType);
     int32_t InitService(const std::string &deviceId, uint16_t deviceType,
         std::unordered_set<std::string> collaborativeDeleteTypes,
-        std::function<bool(std::string, int32_t, bool)> callback);
+        std::function<bool(std::string, int32_t, bool)> callback,
+        uint32_t startAbilityTimeout);
     void OnReceiveMsg(const void *data, uint32_t dataLen);
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& device);
