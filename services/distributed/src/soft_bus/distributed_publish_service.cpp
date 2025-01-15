@@ -30,6 +30,7 @@
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "response_box.h"
 #include "screenlock_callback_stub.h"
+#include "power_mgr_client.h"
 
 namespace OHOS {
 namespace Notification {
@@ -62,9 +63,10 @@ UnlockScreenCallback::UnlockScreenCallback() {}
 
 void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
 {
-    ANS_LOGI("Unlock Screen result: %{public}d", screenLockResult);
+    ANS_LOGI("Unlock Screen result: %{public}d, isTimeout: %{public}d", screenLockResult, isTimeout_);
     if (!isTimeout_) {
-        IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want_));
+        auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want_));
+        ANS_LOGI("StartAbility result:%{public}d", ret);
     }
 }
 
@@ -75,6 +77,7 @@ void UnlockScreenCallback::SetWant(AAFwk::Want want)
 
 void UnlockScreenCallback::OnTriggerTimeout()
 {
+    ANS_LOGI("User unlock screen timeout.");
     isTimeout_ = true;
 }
 
@@ -374,17 +377,27 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
         ANS_LOGE("Check wantPtr is null.");
         return;
     }
+    ANS_LOGI("want uri:%{public}s", wantPtr->GetElement().GetURI().c_str());
+    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
+    ANS_LOGI("isScreenOn: %{public}d", isScreenOn);
+    if (!isScreenOn) {
+        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+    }
 
-    auto isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
+    bool isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
+    ANS_LOGI("Screen locked status, isScreenLocked: %{public}d.", isScreenLocked);
     if (isScreenLocked) {
         sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>(new (std::nothrow) UnlockScreenCallback());
         listener->SetWant(*wantPtr);
-        IN_PROCESS_CALL(OberverService::GetInstance().Unlock(ScreenLock::Action::UNLOCKSCREEN, listener));
+        int32_t unlockResult = IN_PROCESS_CALL(
+            ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener));
+        ANS_LOGI("unlock result:%{public}d", unlockResult);
         std::shared_ptr<DistributedResponseTimerInfo> timerInfo = std::make_shared<DistributedResponseTimerInfo>();
         timerInfo->SetListener(listener);
-        DistributedTimerService::GetInstance().StartTimerWithTrigger(timerInfo);
+        DistributedTimerService::GetInstance().StartTimerWithTrigger(timerInfo, localDevice_.startAbilityTimeout);
     } else {
-        IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
+        auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
+        ANS_LOGI("StartAbility result:%{public}d", ret);
     }
 }
 }

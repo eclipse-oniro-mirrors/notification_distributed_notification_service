@@ -891,6 +891,7 @@ void NotificationSubscriberManager::DistributeOperationInner(const sptr<Notifica
         }
         if (IsSubscribedBysubscriber(record, notification)) {
             if (record->subscriber != nullptr) {
+                ANS_LOGI("call OnResponse.");
                 record->subscriber->OnResponse(notification);
             }
         }

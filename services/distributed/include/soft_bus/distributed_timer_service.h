@@ -62,7 +62,8 @@ public:
     static DistributedTimerService& GetInstance();
     void CancelTimer(const std::string& deviceId);
     void StartTimer(const std::string& deviceId, int64_t deleteTimePoint);
-    void StartTimerWithTrigger(const std::shared_ptr<MiscServices::ITimerInfo> &timerInfo);
+    void StartTimerWithTrigger(
+        const std::shared_ptr<MiscServices::ITimerInfo>& timerInfo, uint32_t startAbilityTimeout);
     int64_t GetCurrentTime();
 
 private:

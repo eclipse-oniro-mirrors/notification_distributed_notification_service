@@ -99,6 +99,7 @@
         "screenlock_mgr",
         "ace_engine",
         "openssl",
+        "power_manager",
         "dsoftbus",
         "zlib"
       ],
