@@ -129,7 +129,7 @@ void EventReport::InnerSendPublishErrorEvent(const EventInfo &eventInfo)
 {
     InnerEventWrite(
         PUBLISH_ERROR,
-        HiviewDFX::HiSysEvent::EventType::FAULT,
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
         EVENT_PARAM_CONTENT_TYPE, eventInfo.contentType,
         EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
