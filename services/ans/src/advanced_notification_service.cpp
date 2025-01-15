@@ -1197,7 +1197,8 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
 void AdvancedNotificationService::CancelOnceWantAgent(
     const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent)
 {
-    AbilityRuntime::WantAgent::WantAgentHelper::Cancel(wantAgent, AbilityRuntime::WantAgent::FLAG_ONE_SHOT);
+    AbilityRuntime::WantAgent::WantAgentHelper::Cancel(wantAgent, AbilityRuntime::WantAgent::FLAG_ONE_SHOT |
+        AbilityRuntime::WantAgent::FLAG_ALLOW_CANCEL);
 }
 
 void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &notification)
