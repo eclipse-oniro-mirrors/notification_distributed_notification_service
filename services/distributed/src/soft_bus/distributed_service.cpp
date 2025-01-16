@@ -82,6 +82,7 @@ void DistributedService::DestoryService()
     }
     ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
         ANS_LOGI("Start destory service.");
+        DistributedClient::GetInstance().ReleaseClient();
         DistributedServer::GetInstance().ReleaseServer();
         OberverService::GetInstance().Destory();
         for (auto& subscriberInfo : subscriberMap_) {
