@@ -303,18 +303,6 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
             wantAgentName.c_str(), maxWantAgentName.c_str());
         return ERR_REMINDER_INVALID_PARAM;
     }
-    std::string bundleName = bundle;
-    if (wantAgentName != bundle && wantAgentName != "") {
-        bundleName = wantAgentName;
-    } else if (maxWantAgentName != bundle && maxWantAgentName != "") {
-        bundleName = maxWantAgentName;
-    }
-    // Only system applications can proxy other applications to send notifications
-    bool isSystemApp = IsSystemApp();
-    if (bundleName != bundle && !isSystemApp) {
-        ANSR_LOGE("Only system applications can proxy other applications to send notifications.");
-        return ERR_REMINDER_INVALID_PARAM;
-    }
     int32_t activeUserId = -1;
     if (AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(activeUserId) != ERR_OK) {
         ANSR_LOGE("Failed to get active user id.");
@@ -325,12 +313,27 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
         ANSR_LOGE("Failed to bundle manager.");
         return ERR_REMINDER_INVALID_PARAM;
     }
+    std::string bundleName = bundle;
+    int32_t uid = callingUid;
+    if (wantAgentName != bundle && wantAgentName != "") {
+        bundleName = wantAgentName;
+        uid = bundleMgr->GetDefaultUidByBundleName(bundleName, activeUserId);
+    } else if (maxWantAgentName != bundle && maxWantAgentName != "") {
+        bundleName = maxWantAgentName;
+        uid = bundleMgr->GetDefaultUidByBundleName(bundleName, activeUserId);
+    }
+    // Only system applications can proxy other applications to send notifications
+    bool isSystemApp = IsSystemApp();
+    if (bundleName != bundle && !isSystemApp) {
+        ANSR_LOGE("Only system applications can proxy other applications to send notifications.");
+        return ERR_REMINDER_INVALID_PARAM;
+    }
     reminder->SetSystemApp(isSystemApp);
     reminder->InitUserId(activeUserId);
     reminder->InitBundleName(bundleName);
     reminder->InitCreatorBundleName(bundle);
     reminder->InitCreatorUid(callingUid);
-    reminder->InitUid(bundleMgr->GetDefaultUidByBundleName(bundleName, activeUserId));
+    reminder->InitUid(uid);
     return ERR_OK;
 }
 
