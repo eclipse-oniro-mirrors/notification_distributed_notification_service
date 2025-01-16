@@ -634,7 +634,8 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReqPublishFail(const Ha
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (request->GetUnifiedGroupInfo() != nullptr &&
         request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
-        extraInfo = request->GetUnifiedGroupInfo()->GetExtraInfo();
+        const auto originExtraInfo = request->GetUnifiedGroupInfo()->GetExtraInfo();
+        extraInfo = std::make_shared<AAFwk::WantParams>(*originExtraInfo);
     } else {
         extraInfo = std::make_shared<AAFwk::WantParams>();
     }
