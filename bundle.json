@@ -3,7 +3,7 @@
   "version": "",
   "description": "为应用程序提供发布通知的能力",
   "homePage": "https://gitee.com/openharmony",
-  "license": "Apache V2",
+  "license": "Apache-2.0",
   "repository": "https://gitee.com/openharmony/notification_ans_standard",
   "domain": "os",
   "language": "",
