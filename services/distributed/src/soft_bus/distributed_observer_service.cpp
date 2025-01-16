@@ -97,7 +97,7 @@ int32_t OberverService::IsScreenLocked()
 
 void OberverService::Destory()
 {
-    EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
+    EventFwk::CommonEventManager::NewUnSubscribeCommonEventSync(subscriber_);
     ANS_LOGI("OberverService service destory.");
 }
 
