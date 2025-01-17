@@ -1452,6 +1452,8 @@ public:
 
     void SetDistributedHashCode(const std::string hashCode);
 
+    bool HasUserInputButton();
+
     void AdddeviceStatu(const std::string &deviceType, const std::string deviceStatu);
     
     const std::map<std::string, std::string> GetdeviceStatus() const;
