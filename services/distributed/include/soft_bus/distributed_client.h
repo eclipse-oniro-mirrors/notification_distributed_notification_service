@@ -37,6 +37,7 @@ public:
         int32_t& socketId);
     int32_t SendMessage(const void* data, int32_t length, TransDataType dataType,
         const std::string &deviceId, uint16_t deviceType);
+    void ReleaseClient();
 private:
     DistributedClient() = default;
     ~DistributedClient() = default;

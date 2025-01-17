@@ -39,6 +39,11 @@ void DistributedServer::ReleaseServer()
         CloseSocket(item.second);
     }
     serverSocket_.clear();
+    std::lock_guard<std::mutex> lock(serverLock_);
+    for (auto& item : peerSockets_) {
+        CloseSocket(item->socketId_);
+    }
+    peerSockets_.clear();
     init.store(false);
 }
 

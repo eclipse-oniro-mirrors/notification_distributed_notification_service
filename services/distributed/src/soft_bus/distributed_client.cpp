@@ -34,6 +34,16 @@ DistributedClient& DistributedClient::GetInstance()
     return distributedClient;
 }
 
+void DistributedClient::ReleaseClient()
+{
+    std::lock_guard<std::mutex> lock(clientLock_);
+    ANS_LOGI("Release client socket %{public}u.", socketsId_.size());
+    for (auto& socketItem : socketsId_) {
+        CloseSocket(socketItem.second);
+    }
+    socketsId_.clear();
+}
+
 void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
 {
     std::lock_guard<std::mutex> lock(clientLock_);
