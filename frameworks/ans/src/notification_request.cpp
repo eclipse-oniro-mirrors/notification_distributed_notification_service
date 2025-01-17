@@ -2763,6 +2763,16 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
     }
 }
 
+bool NotificationRequest::HasUserInputButton()
+{
+    for (std::shared_ptr<NotificationActionButton> button : actionButtons_) {
+        if (button->GetUserInput() != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void NotificationRequest::SetIsCoverActionButtons(bool isCoverActionButtons)
 {
     isCoverActionButtons_ = isCoverActionButtons;

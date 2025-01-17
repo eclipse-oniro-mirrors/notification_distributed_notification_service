@@ -51,6 +51,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
 };
 
 const uint32_t FILTETYPE_IM = 1 << 0;
+const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
@@ -630,12 +631,17 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
 {
     NotificationRequest request = notification->GetNotificationRequest();
     // filterType
-    int32_t res = record->filterType & FILTETYPE_IM;
-    ANS_LOGI("filterType = %{public}d res = %{public}d", record->filterType, res);
-    if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == request.GetSlotType() &&
-        ((record->filterType & FILTETYPE_IM) > 0)) {
-        ANS_LOGI("ConsumeRecordFilter-filterType");
-        return false;
+    ANS_LOGI("filterType = %{public}d", record->filterType);
+    if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == request.GetSlotType()) {
+        bool isQuickReply = request.HasUserInputButton();
+        if (isQuickReply && (record->filterType & FILTETYPE_QUICK_REPLY_IM) > 0) {
+            ANS_LOGI("ConsumeRecordFilter-filterType-quickReply");
+            return false;
+        }
+        if (!isQuickReply && (record->filterType & FILTETYPE_IM) > 0) {
+            ANS_LOGI("ConsumeRecordFilter-filterType-im");
+            return false;
+        }
     }
     
     return true;
