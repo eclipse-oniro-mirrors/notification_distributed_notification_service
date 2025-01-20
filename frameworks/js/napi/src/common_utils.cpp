@@ -352,10 +352,13 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
     return ExternalCode;
 }
 
-napi_value Common::NapiThrowCapErr(napi_env env, napi_callback_info info)
+napi_value Common::NapiReturnCapErr(napi_env env, napi_callback_info info)
 {
-    Common::NapiThrow(env, ERROR_SYSTEM_CAP_ERROR);
-    return nullptr;
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+    SetPromise(env, deferred, ERROR_SYSTEM_CAP_ERROR, Common::NapiGetNull(env), false);
+    return promise;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS
