@@ -61,11 +61,20 @@ static char g_dumpActiveUser[] =
 "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
 static char g_enableErrorInformation[] =
-"error: option 'e' requires a value.\nusage: anm setting [<options>]\noptions list:\n"
+"error: option 'e' requires a value.\n"
+"usage: anm setting [<options>]\n"
+"options list:\n"
 "  --help, -h                   help menu\n"
-"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
-" -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
-" -d <device:status> set device status, eg: -d device:1\n";
+"  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
+"  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, "
+"eg: -e com.example:10100:1\n"
+"  --set-device-status -d <device:status> set device status, eg: -d device:1\n"
+"  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
+"  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+"      eg: -b wearable:example:10100:1\n"
+"  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+"  --get-device-status -o <device> set device status\n"
+"      eg: -o wearable:0:1\n";
 
 static char g_enableBundleNameNull[] =
 "error: setting information error\n"
@@ -73,7 +82,13 @@ static char g_enableBundleNameNull[] =
 "options list:\n  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
 " -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
-" -d <device:status> set device status, eg: -d device:1\n";
+" -d <device:status> set device status, eg: -d device:1\n"
+"  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
+"  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+"      eg: -b wearable:example:10100:1\n"
+"  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+"  --get-device-status -o <device> set device status\n"
+"      eg: -o wearable:0:1\n";
 
 static char g_enableObjectNull[] =
 "error: object is null\n"
@@ -82,7 +97,13 @@ static char g_enableObjectNull[] =
 "options list:\n  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
 " -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
-" -d <device:status> set device status, eg: -d device:1\n";
+" -d <device:status> set device status, eg: -d device:1\n"
+"  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
+"  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+"      eg: -b wearable:example:10100:1\n"
+"  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+"  --get-device-status -o <device> set device status\n"
+"      eg: -o wearable:0:1\n";
 
 static char g_unknownOption[] =
 "error: unknown option.\n"
@@ -102,7 +123,13 @@ static char g_dumpActiveCount[] =
 "  --help, -h                   help menu\n"
 "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n  --enable-notification"
 " -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n  --set-device-status"
-" -d <device:status> set device status, eg: -d device:1\n";
+" -d <device:status> set device status, eg: -d device:1\n"
+"  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
+"  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+"      eg: -b wearable:example:10100:1\n"
+"  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+"  --get-device-status -o <device> set device status\n"
+"      eg: -o wearable:0:1\n";
 
 static char g_helpMsg[] =
 "error: unknown option.\n"
