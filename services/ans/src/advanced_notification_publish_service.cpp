@@ -3008,6 +3008,9 @@ bool AdvancedNotificationService::IsNeedToControllerByDisableNotification(const 
         ANS_LOGE("request is nullptr");
         return false;
     }
+    if (request->IsAgentNotification()) {
+        return true;
+    }
     std::string bundleName = "";
     auto agentBundle = request->GetAgentBundle();
     if (agentBundle != nullptr) {
