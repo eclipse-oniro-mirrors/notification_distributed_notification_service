@@ -1194,6 +1194,29 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
     return keys;
 }
 
+void AdvancedNotificationService::CancelOnceWantAgent(
+    const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent)
+{
+    AbilityRuntime::WantAgent::WantAgentHelper::Cancel(wantAgent, AbilityRuntime::WantAgent::FLAG_ONE_SHOT);
+}
+
+void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &notification)
+{
+    if (notification->GetNotificationRequestPoint()->GetWantAgent()) {
+        CancelOnceWantAgent(notification->GetNotificationRequestPoint()->GetWantAgent());
+    }
+    if (notification->GetNotificationRequestPoint()->GetRemovalWantAgent()) {
+        CancelOnceWantAgent(notification->GetNotificationRequestPoint()->GetRemovalWantAgent());
+    }
+    if (notification->GetNotificationRequestPoint()->GetMaxScreenWantAgent()) {
+        CancelOnceWantAgent(notification->GetNotificationRequestPoint()->GetMaxScreenWantAgent());
+    }
+    auto actionButtons = notification->GetNotificationRequestPoint()->GetActionButtons();
+    for (auto it = actionButtons.begin(); it != actionButtons.end(); ++it) {
+        CancelOnceWantAgent((*it)->GetWantAgent());
+    }
+}
+
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
     const std::string &label, int32_t notificationId, sptr<Notification> &notification, bool isCancel)
 {
@@ -1221,7 +1244,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             if (!isCancel) {
                 TriggerRemoveWantAgent(record->request);
             }
-
+            CancelWantAgent(notification);
             ProcForDeleteLiveView(record);
             notificationList_.remove(record);
             if (IsSaCreateSystemLiveViewAsBundle(record,
@@ -1272,7 +1295,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
                 TriggerRemoveWantAgent(record->request);
             }
         }
-
+        CancelWantAgent(notification);
         notificationList_.remove(record);
         return ERR_OK;
     }
