@@ -58,7 +58,7 @@ void DistribuedSubscriber::OnCanceled(const std::shared_ptr<Notification> &reque
         ANS_LOGD("is cross device deletion");
         return;
     }
-    
+
     if (CheckNeedCollaboration(request)) {
         DistributedService::GetInstance().OnCanceled(request, peerDevice_);
     }
@@ -121,12 +121,12 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     }
 }
 
-void DistribuedSubscriber::OnResponse(const std::shared_ptr<Notification> &notification)
+ErrCode DistribuedSubscriber::OnResponse(const std::shared_ptr<Notification> &notification)
 {
     ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
         localDevice_.deviceId_.c_str());
-    DistributedService::GetInstance().OnResponse(notification, peerDevice_);
+    return DistributedService::GetInstance().OnResponse(notification, peerDevice_);
 }
 
 void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)

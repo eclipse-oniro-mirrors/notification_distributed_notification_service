@@ -58,7 +58,7 @@ public:
 
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override {};
 
-    void OnResponse(const sptr<Notification> &notification) {}
+    ErrCode OnResponse(const sptr<Notification> &notification) { return 0; }
 };
 } // namespace Notification
 } // namespace OHOS

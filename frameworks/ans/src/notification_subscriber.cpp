@@ -239,9 +239,9 @@ void NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
     subscriber_.OnApplicationInfoNeedChanged(bundleName);
 }
 
-void NotificationSubscriber::SubscriberImpl::OnResponse(const sptr<Notification> &notification)
+ErrCode NotificationSubscriber::SubscriberImpl::OnResponse(const sptr<Notification> &notification)
 {
-    subscriber_.OnResponse(std::make_shared<Notification>(*notification));
+    return subscriber_.OnResponse(std::make_shared<Notification>(*notification));
 }
 
 sptr<AnsManagerInterface> NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()

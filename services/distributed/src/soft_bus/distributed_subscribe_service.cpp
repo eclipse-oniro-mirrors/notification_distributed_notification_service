@@ -28,6 +28,7 @@
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_preference.h"
 #include "batch_remove_box.h"
+#include "ans_inner_errors.h"
 #include "remove_box.h"
 #include "response_box.h"
 
@@ -74,6 +75,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     subscribeInfo->AddDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
     subscribeInfo->AddAppUserId(userId_);
     subscribeInfo->SetNeedNotifyApplication(true);
+    subscribeInfo->SetNeedNotifyResponse(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
         subscriberMap_.insert(std::make_pair(peerDevice.deviceId_, subscriber));
@@ -296,33 +298,31 @@ std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notific
     return notificationKey;
 }
 
-void DistributedService::OnResponse(
+ErrCode DistributedService::OnResponse(
     const std::shared_ptr<Notification>& notification, const DistributedDeviceInfo& device)
 {
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("service queue is null.");
-        return;
+    NotificationResponseBox responseBox;
+    ANS_LOGI("dans OnResponse %{public}s", notification->Dump().c_str());
+    if (notification == nullptr) {
+        return ERR_ANS_INVALID_PARAM;
     }
-    std::function<void()> task = std::bind([device, notification]() {
-        NotificationResponseBox responseBox;
-        ANS_LOGI("dans OnResponse %{public}s", notification->Dump().c_str());
-        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-            return;
-        }
-        auto hashCode = notification->GetKey();
-        if (hashCode.find(DISTRIBUTED_LABEL) == 0) {
-            hashCode.erase(0, DISTRIBUTED_LABEL.length());
-        }
+    auto hashCode = notification->GetKey();
+    if (hashCode.find(DISTRIBUTED_LABEL) == 0) {
+        hashCode.erase(0, DISTRIBUTED_LABEL.length());
+    }
 
-        responseBox.SetNotificationHashCode(hashCode);
-        if (!responseBox.Serialize()) {
-            ANS_LOGW("dans OnCanceled serialize failed");
-            return;
-        }
-        DistributedClient::GetInstance().SendMessage(responseBox.GetByteBuffer(), responseBox.GetByteLength(),
-            TransDataType::DATA_TYPE_MESSAGE, device.deviceId_, device.deviceType_);
-    });
-    serviceQueue_->submit(task);
+    responseBox.SetNotificationHashCode(hashCode);
+    if (!responseBox.Serialize()) {
+        ANS_LOGW("dans OnCanceled serialize failed");
+        return ERR_ANS_NO_MEMORY;
+    }
+    auto result = DistributedClient::GetInstance().SendMessage(responseBox.GetByteBuffer(), responseBox.GetByteLength(),
+        TransDataType::DATA_TYPE_MESSAGE, device.deviceId_, device.deviceType_);
+    if (result != ERR_OK) {
+        ANS_LOGE("dans OnResponse send message failed result: %{public}d", result);
+        result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
+    return ERR_OK;
 }
 }
 }

@@ -123,7 +123,7 @@ public:
      * @return Returns the uid of subscriber.
      **/
     int32_t GetSubscriberUid() const;
- 
+
     /**
      * @brief Adds subscriber slotTypes.
      *
@@ -166,6 +166,20 @@ public:
      **/
     void SetNeedNotifyApplication(bool isNeed);
 
+    /**
+     * @brief Obtains notify repsponse.
+     *
+     * @return Returns the result.
+     **/
+    bool GetNeedNotifyResponse() const;
+
+    /**
+     * @brief Obtains notify repsponse.
+     *
+     * @return Returns the result.
+     **/
+    void SetNeedNotifyResponse(bool isNeed);
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -177,6 +191,7 @@ private:
     int32_t filterType_ {0};
     std::vector<NotificationConstant::SlotType> slotTypes_ {};
     bool needNotifyApplicationChanged_ = false;
+    bool needNotifyResponse_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

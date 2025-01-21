@@ -46,6 +46,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     std::string deviceType {CURRENT_DEVICE_TYPE};
     int32_t subscriberUid {DEFAULT_UID};
     bool needNotifyApplicationChanged = false;
+    bool needNotifyResponse = false;
     int32_t filterType {0};
     std::set<NotificationConstant::SlotType> slotTypes {};
 };
@@ -387,6 +388,7 @@ void NotificationSubscriberManager::AddRecordInfo(
         record->subscriberUid = subscribeInfo->GetSubscriberUid();
         record->filterType = subscribeInfo->GetFilterType();
         record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
+        record->needNotifyResponse = subscribeInfo->GetNeedNotifyResponse();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -643,7 +645,7 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -875,33 +877,30 @@ void NotificationSubscriberManager::TrackCodeLog(
         }
     }
 }
-void NotificationSubscriberManager::DistributeOperation(const sptr<Notification>& notification)
+
+ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<Notification>& notification)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
-        return;
+        return ERR_ANS_TASK_ERR;
     }
-    AppExecFwk::EventHandler::Callback func =
-        std::bind(&NotificationSubscriberManager::DistributeOperationInner, this, notification);
 
-    notificationSubQueue_->submit(func);
-}
-
-void NotificationSubscriberManager::DistributeOperationInner(const sptr<Notification>& notification)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    for (const auto& record : subscriberRecordList_) {
-        if (record == nullptr) {
-            continue;
-        }
-        if (IsSubscribedBysubscriber(record, notification)) {
-            if (record->subscriber != nullptr) {
-                ANS_LOGI("call OnResponse.");
-                record->subscriber->OnResponse(notification);
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([&]() {
+        for (const auto& record : subscriberRecordList_) {
+            if (record == nullptr) {
+                continue;
             }
+            if (record->needNotifyResponse && record->subscriber != nullptr) {
+                result = record->subscriber->OnResponse(notification);
+                return;
+            }
+            result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
         }
-    }
+    }));
+    notificationSubQueue_->wait(handler);
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -114,8 +114,9 @@ public:
      *
      * @param notification Indicates the received Notification object.
      */
-    virtual void OnResponse(const std::shared_ptr<Notification> &notification)
+    virtual ErrCode OnResponse(const std::shared_ptr<Notification> &notification)
     {
+        return 0;
     }
 
     virtual bool HasOnBatchCancelCallback()
@@ -185,7 +186,7 @@ private:
 
         void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 
-        void OnResponse(const sptr<Notification> &notification) override;
+        ErrCode OnResponse(const sptr<Notification> &notification) override;
 
         sptr<AnsManagerInterface> GetAnsManagerProxy();
 

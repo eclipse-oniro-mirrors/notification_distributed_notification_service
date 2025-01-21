@@ -421,26 +421,31 @@ void AnsSubscriberProxy::OnApplicationInfoNeedChanged(const std::string& bundleN
     }
 }
 
-void AnsSubscriberProxy::OnResponse(const sptr<Notification> &notification)
+ErrCode AnsSubscriberProxy::OnResponse(const sptr<Notification> &notification)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
         ANS_LOGE("Write interface token failed.");
-        return;
+        return ERR_ANS_PARCELABLE_FAILED;
     }
 
     if (!data.WriteParcelable(notification)) {
         ANS_LOGE("Write notification failed.");
-        return;
+        return ERR_ANS_PARCELABLE_FAILED;
     }
 
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option(MessageOption::TF_SYNC);
     ErrCode result = InnerTransact(NotificationInterfaceCode::ON_RESPONSE_LISTENER, option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("Transact error code is: %{public}d.", result);
-        return;
+        return ERR_ANS_TRANSACT_FAILED;
     }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("AnsSubscriberProxy onresponse fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS
