@@ -120,7 +120,7 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
     }
     {
         std::lock_guard<std::mutex> lock(clientLock_);
-        socketsId_.insert(std::make_pair(key, socketId));
+        socketsId_[key] = socketId;
         ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
     }
     return ERR_OK;

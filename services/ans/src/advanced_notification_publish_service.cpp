@@ -233,6 +233,42 @@ void AdvancedNotificationService::SetCollaborateReminderFlag(const sptr<Notifica
         controlFlags, flags->GetReminderFlags());
 }
 
+void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record)
+{
+    if (!record->request->IsCommonLiveView()) {
+        return;
+    }
+
+    auto content = record->request->GetContent()->GetNotificationContent();
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+    auto status = liveViewContent->GetLiveViewStatus();
+    switch (status) {
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE: {
+            SetFinishTimer(record);
+            SetUpdateTimer(record);
+            return;
+        }
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE: {
+            if (record->notification->GetFinishTimer() == NotificationConstant::INVALID_TIMER_ID) {
+                int64_t finishedTime = record->request->GetFinishDeadLine();
+                StartFinishTimer(record, finishedTime,
+                    NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+            }
+            CancelUpdateTimer(record);
+            SetUpdateTimer(record);
+            return;
+        }
+        case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:
+            CancelUpdateTimer(record);
+            CancelFinishTimer(record);
+            StartArchiveTimer(record);
+            break;
+        default:
+            ANS_LOGE("Invalid status %{public}d.", status);
+    }
+}
+
 ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationRequest> &request)
 {
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
@@ -277,6 +313,10 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+
+        NotificationRequestDb requestDb = { .request = record->request, .bundleOption = record->bundleOption};
+        UpdateCollaborateTimerInfo(record);
+        SetNotificationRequestToDb(requestDb);
     });
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
