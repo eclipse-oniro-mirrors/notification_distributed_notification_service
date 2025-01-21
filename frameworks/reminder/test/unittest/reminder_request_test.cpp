@@ -2265,5 +2265,96 @@ HWTEST_F(ReminderRequestTest, DeserializeButtonInfoFromJson_001, Function | Smal
         R"([{"titleResource":"join","title":"test","type":2,"wantAgent":{"pkgName":"","abilityName":"","uri":""}}])");
     EXPECT_EQ(request.GetActionButtons().size(), 2);
 }
+
+/**
+ * @tc.name: ReminderRequestTest_001
+ * @tc.desc: Test CanShow parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_001, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    uint64_t now = child.GetNowInstantMilli();
+    child.reminderTimeInMilli_ = now;
+    EXPECT_EQ(child.CanShow(), false);
+
+    ReminderRequest::GLOBAL_ID = -1;
+    child.InitReminderId();
+    EXPECT_EQ(child.reminderId_, 1);
+}
+
+/**
+ * @tc.name: ReminderRequestTest_002
+ * @tc.desc: Test DeserializeButtonInfoFromJson parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_002, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    child.DeserializeButtonInfoFromJson("");
+    child.DeserializeButtonInfoFromJson("{");
+    child.DeserializeButtonInfoFromJson("1");
+    child.DeserializeButtonInfoFromJson("[]");
+    std::string jsonValue = R"([{"type":1, "title":"111", "titleResource":""}])";
+    child.DeserializeButtonInfoFromJson(jsonValue);
+
+    jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "wantAgent":""}])";
+    child.DeserializeButtonInfoFromJson(jsonValue);
+
+    jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "wantAgent":{"pkgName": ""}}])";
+    child.DeserializeButtonInfoFromJson(jsonValue);
+
+    jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "dataShareUpdate":""}])";
+    child.DeserializeButtonInfoFromJson(jsonValue);
+
+    jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "dataShareUpdate":{"uri":""}}])";
+    child.DeserializeButtonInfoFromJson(jsonValue);
+
+    jsonValue = R"([{"type":3, "title":"111", "titleResource":"", "dataShareUpdate":{"uri":""}}])";
+    child.DeserializeButtonInfoFromJson(jsonValue);
+    EXPECT_GE(child.actionButtonMap_.size(), 0);
+}
+
+/**
+ * @tc.name: ReminderRequestTest_003
+ * @tc.desc: Test StringToInt parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_003, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    int32_t ret = child.StringToInt("");
+    EXPECT_EQ(ret, 0);
+    ret = child.StringToInt("1a");
+    EXPECT_EQ(ret, 0);
+    ret = child.StringToInt("-99999999999999999999");
+    EXPECT_EQ(ret, 0);
+    ret = child.StringToInt("2147483648");
+    EXPECT_EQ(ret, 0);
+    ret = child.StringToInt("-2147483649");
+    EXPECT_EQ(ret, 0);
+    ret = child.StringToInt("100");
+    EXPECT_EQ(ret, 100);
+}
+
+/**
+ * @tc.name: ReminderRequestTest_004
+ * @tc.desc: Test StringToInt parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_004, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    NotificationRequest request;
+    child.wantAgentInfo_->parameters.SetParam("NotificationRequest_extraInfo", nullptr);
+    child.UpdateNotificationWantAgent(request);
+
+    child.OnLanguageChange(nullptr);
+    EXPECT_NE(request.GetAdditionalData(), nullptr);
+}
 }
 }
