@@ -52,10 +52,10 @@ constexpr const int32_t REASON_MAX_LENGTH = 127;
 constexpr const int32_t SUB_CODE = 100;
 constexpr const int32_t MAX_TIME = 43200000;
 constexpr const int32_t NOTIFICATION_MAX_DATA = 100;
-constexpr const int32_t SOUND_FLAG = 1 << 9;
-constexpr const int32_t LOCKSCREEN_FLAG = 1 << 10;
-constexpr const int32_t BANNER_FLAG = 1 << 11;
-constexpr const int32_t VIBRATION_FLAG = 1 << 12;
+constexpr const int32_t SOUND_FLAG = 1 << 10;
+constexpr const int32_t LOCKSCREEN_FLAG = 1 << 11;
+constexpr const int32_t BANNER_FLAG = 1 << 12;
+constexpr const int32_t VIBRATION_FLAG = 1 << 13;
 
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 static std::mutex reportFlowControlMutex_;
