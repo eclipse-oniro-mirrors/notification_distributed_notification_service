@@ -1725,5 +1725,119 @@ HWTEST_F(ReminderRequestCalendarTest, Copy_001, Function | SmallTest | Level1)
     calendar->Copy(reminder2);
     EXPECT_EQ(reminder1->GetTitle(), "test_reminder2");
 }
+
+/**
+ * @tc.name: ReminderRequestCalendarTest_001
+ * @tc.desc: Test InitTriggerTime parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, ReminderRequestCalendarTest_001, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar;
+    uint64_t now = calendar.GetNowInstantMilli();
+    calendar.startDateTime_ = now - 10 * 60 * 1000;
+    calendar.endDateTime_ = now + 10 * 60 * 1000;
+    EXPECT_EQ(calendar.InitTriggerTime(), true);
+
+    calendar.startDateTime_ = now + 10 * 60 * 1000;
+    calendar.endDateTime_ = now + 20 * 60 * 1000;
+    EXPECT_EQ(calendar.InitTriggerTime(), true);
+
+    calendar.startDateTime_ = now - 20 * 60 * 1000;
+    calendar.endDateTime_ = now - 10 * 60 * 1000;
+    EXPECT_EQ(calendar.InitTriggerTime(), false);
+
+    calendar.startDateTime_ = now - 20 * 60 * 1000;
+    calendar.endDateTime_ = now - 10 * 60 * 1000;
+    calendar.repeatDaysOfWeek_ = 1;
+    EXPECT_EQ(calendar.InitTriggerTime(), true);
+}
+
+/**
+ * @tc.name: ReminderRequestCalendarTest_002
+ * @tc.desc: Test CheckCalenderIsExpired parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, ReminderRequestCalendarTest_002, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar;
+    uint64_t now = calendar.GetNowInstantMilli();
+    calendar.lastStartDateTime_ = now - 10 * 60 * 1000;
+    calendar.durationTime_ = 30 * 60 * 1000;
+    EXPECT_EQ(calendar.CheckCalenderIsExpired(now), true);
+
+    calendar.startDateTime_ = now - 20 * 60 * 1000;
+    calendar.endDateTime_ = now - 10 * 60 * 1000;
+    calendar.lastStartDateTime_ = now + 30 * 60 * 1000;
+    EXPECT_EQ(calendar.OnDateTimeChange(), false);
+
+    calendar.endDateTime_ = calendar.startDateTime_;
+    EXPECT_EQ(calendar.IsNeedNotification(), true);
+}
+
+/**
+ * @tc.name: ReminderRequestCalendarTest_003
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, ReminderRequestCalendarTest_003, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar;
+    uint64_t now = calendar.GetNowInstantMilli();
+    calendar.timeIntervalInMilli_ = 60 * 1000;
+    calendar.snoozeTimes_ = 3;
+    calendar.snoozeTimesDynamic_ = 1;
+    EXPECT_EQ(calendar.UpdateNextReminder(), true);
+
+    calendar.startDateTime_ = now;
+    calendar.endDateTime_ = now;
+    EXPECT_EQ(calendar.UpdateNextReminder(), false);
+    EXPECT_EQ(calendar.IsExpired(), true);
+
+    calendar.startDateTime_ = now - 60 * 1000;
+    calendar.endDateTime_ = now;
+    calendar.snoozeTimesDynamic_ = 0;
+    calendar.SetExpired(false);
+    EXPECT_EQ(calendar.IsExpired(), false);
+    EXPECT_EQ(calendar.UpdateNextReminder(), false);
+}
+
+/**
+ * @tc.name: ReminderRequestCalendarTest_004
+ * @tc.desc: Test Copy parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestCalendarTest, ReminderRequestCalendarTest_004, Function | SmallTest | Level1)
+{
+    ReminderRequestCalendar calendar;
+    calendar.SetShare(true);
+    sptr<ReminderRequest> reminder = new ReminderRequestCalendar();
+
+    calendar.Copy(nullptr);
+    EXPECT_EQ(calendar.IsShare(), true);
+
+    reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    calendar.Copy(reminder);
+    EXPECT_EQ(calendar.IsShare(), true);
+
+    reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    calendar.SetShare(false);
+    calendar.Copy(reminder);
+    EXPECT_EQ(calendar.IsShare(), false);
+
+    calendar.SetShare(true);
+    reminder->SetShare(false);
+    calendar.Copy(reminder);
+    EXPECT_EQ(calendar.IsShare(), true);
+
+    reminder->SetTitle("test");
+    reminder->SetShare(true);
+    calendar.Copy(reminder);
+    EXPECT_EQ(calendar.GetTitle(), "test");
+}
 }
 }

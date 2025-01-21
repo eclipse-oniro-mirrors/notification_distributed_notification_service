@@ -589,5 +589,41 @@ HWTEST_F(ReminderRequestAlarmTest, Construct_001, Function | SmallTest | Level1)
     ReminderRequestAlarm alarm4;
     EXPECT_EQ(alarm4.GetReminderId(), -1);
 }
+
+/**
+ * @tc.name: ReminderRequestAlarmTest_001
+ * @tc.desc: Test UpdateNextReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestAlarmTest, ReminderRequestAlarmTest_001, Function | SmallTest | Level1)
+{
+    ReminderRequestAlarm alarm;
+    alarm.timeIntervalInMilli_ = 1000;
+    alarm.snoozeTimes_ = 1;
+    alarm.snoozeTimesDynamic_ = 0;
+    alarm.UpdateNextReminder();
+    EXPECT_EQ(alarm.IsExpired(), true);
+}
+
+/**
+ * @tc.name: ReminderRequestAlarmTest_002
+ * @tc.desc: Test PreGetNextTriggerTimeIgnoreSnooze parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestAlarmTest, ReminderRequestAlarmTest_002, Function | SmallTest | Level1)
+{
+    ReminderRequestAlarm alarm;
+    alarm.repeatDaysOfWeek_ = 0;
+    uint64_t ret = alarm.PreGetNextTriggerTimeIgnoreSnooze(true, false);
+    EXPECT_GE(ret, ReminderRequest::INVALID_LONG_LONG_VALUE);
+    alarm.repeatDaysOfWeek_ = 1;
+    ret = alarm.PreGetNextTriggerTimeIgnoreSnooze(false, false);
+    EXPECT_GE(ret, ReminderRequest::INVALID_LONG_LONG_VALUE);
+    alarm.repeatDaysOfWeek_ = 0;
+    ret = alarm.PreGetNextTriggerTimeIgnoreSnooze(false, false);
+    EXPECT_EQ(ret, ReminderRequest::INVALID_LONG_LONG_VALUE);
+}
 }
 }

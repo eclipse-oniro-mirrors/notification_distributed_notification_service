@@ -30,6 +30,7 @@
 #include "reminder_request_calendar.h"
 #include "ability_manager_client.h"
 #include "mock_ipc_skeleton.h"
+#include "reminder_datashare_helper.h"
 
 using namespace testing::ext;
 using namespace OHOS::EventFwk;
@@ -883,6 +884,155 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManager_002, Level1)
     statusChangeListener->OnRemoveSystemAbility(APP_MGR_SERVICE_ID, "");
     statusChangeListener->OnRemoveSystemAbility(ABILITY_MGR_SERVICE_ID, "");
     statusChangeListener->OnRemoveSystemAbility(-1, "");
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderEventManagerTest_005
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_005, Level1)
+{
+    MatchingSkills customMatchingSkills;
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
+    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
+    CommonEventSubscribeInfo subscriberInfo(customMatchingSkills);
+    auto subscriber = std::make_shared<ReminderEventManager::ReminderEventCustomSubscriber>(subscriberInfo, manager);
+    EventFwk::CommonEventData data;
+    Want want;
+    want.SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_CLOSE_ALERT);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_SNOOZE_ALERT);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    want.SetAction(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
+    data.SetWant(want);
+    subscriber->OnReceiveEvent(data);
+    system("rm -rf /data/service/el1/public/notification/");
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderEventManagerTest_006
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_006, Level1)
+{
+    std::shared_ptr<ReminderDataManager> data;
+    ReminderEventManager::ReminderNotificationSubscriber subscriber(data);
+    subscriber.OnCanceled(nullptr, nullptr, NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
+    subscriber.OnCanceled(nullptr, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    std::shared_ptr<Notification> notification = std::make_shared<Notification>(request);
+    subscriber.OnCanceled(notification, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    request->SetAutoDeletedTime(100);
+    subscriber.OnCanceled(notification, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    request->SetLabel("REMINDER_AGENT");
+    subscriber.OnCanceled(notification, nullptr, NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_020
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_020, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(500);
+    manager->CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    reminder->InitBundleName("test");
+    manager->CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
+
+    manager->isReminderAgentReady_ = false;
+    manager->OnUnlockScreen();
+    manager->isReminderAgentReady_ = true;
+    auto queue = manager->queue_;
+    manager->queue_ = nullptr;
+    manager->OnUnlockScreen();
+    manager->queue_ = queue;
+
+    EventFwk::Want want;
+    manager->TerminateAlerting(want);
+    manager->SnoozeReminder(want);
+    manager->ClickReminder(want);
+    manager->SnoozeReminderImpl(reminder);
+    manager->OnLoadReminderEvent(want);
+    manager->GetFullPath("1p");
+    manager->PlaySoundAndVibration(nullptr);
+    manager->RemoveReminderLocked(500, true);
+    manager->RemoveReminderLocked(500, false);
+    manager->ResetStates(ReminderDataManager::TimerType::ALERTING_TIMER);
+    manager->ConnectAppMgr();
+    manager->ConnectAppMgr();
+    manager->OnRemoveAppMgr();
+    Global::Resource::ResourceManager::RawFileDescriptor desc;
+    manager->GetCustomRingFileDesc(reminder, desc);
+    manager->CloseCustomRingFileDesc(500, "");
+    manager->HandleAutoDeleteReminder(500, 100, 123456);
+    std::map<std::string, sptr<ReminderRequest>> reminders;
+    reminders["500"] = reminder;
+    manager->UpdateShareReminders(reminders);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_021
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_021, Level1)
+{
+    ReminderDataShareHelper::GetInstance().RegisterObserver();
+    ReminderDataShareHelper::GetInstance().RegisterObserver();
+    ReminderDataShareHelper::GetInstance().Update(1, 1);
+    ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
+    ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
+    DataShare::DataShareObserver::ChangeInfo info;
+    ReminderDataShareHelper::GetInstance().OnDataUpdate(info);
+    info.valueBuckets_.resize(1);
+    ReminderDataShareHelper::GetInstance().OnDataUpdate(info);
+    ReminderDataShareHelper::GetInstance().UnRegisterObserver();
+    ReminderDataShareHelper::GetInstance().UnRegisterObserver();
+
+    ReminderDataShareHelper::ReminderDataObserver observer;
+    DataShare::DataShareObserver::ChangeInfo info1;
+    info1.changeType_ = DataShare::DataShareObserver::ChangeType::INSERT;
+    observer.OnChange(info1);
+    info1.changeType_ = DataShare::DataShareObserver::ChangeType::UPDATE;
+    observer.OnChange(info1);
+    info1.changeType_ = DataShare::DataShareObserver::ChangeType::DELETE;
+    observer.OnChange(info1);
+    info1.changeType_ = DataShare::DataShareObserver::ChangeType::OTHER;
+    observer.OnChange(info1);
     EXPECT_TRUE(manager != nullptr);
 }
 }  // namespace Notification
