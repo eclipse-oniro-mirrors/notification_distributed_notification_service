@@ -132,7 +132,7 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
             localDevice_.deviceType_);
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
-        peerDevice_.insert(std::make_pair(deviceItem.deviceId_, deviceItem));
+        peerDevice_[deviceItem.deviceId_] = deviceItem;
         DistributedTimerService::GetInstance().CancelTimer(localDevice_.deviceId_);
         if (callBack_ == nullptr) {
             ANS_LOGW("Dans status callback is null.");

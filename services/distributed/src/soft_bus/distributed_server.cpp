@@ -67,7 +67,7 @@ int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t devi
     }
 
     std::string key = std::to_string(TransDataType::DATA_TYPE_MESSAGE) + "_" + std::to_string(deviceType);
-    serverSocket_.insert(std::make_pair(key, socketId));
+    serverSocket_[key] = socketId;
     // Not phone, create msg socket for receive notification
     if (deviceType != DmDeviceType::DEVICE_TYPE_PHONE) {
         ret = ServiceListen(ANS_SOCKET_MSG, ANS_SOCKET_PKG, TransDataType::DATA_TYPE_BYTES, socketId);
@@ -75,7 +75,7 @@ int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t devi
             return ret;
         }
         std::string key = std::to_string(TransDataType::DATA_TYPE_BYTES) + "_" + std::to_string(deviceType);
-        serverSocket_.insert(std::make_pair(key, socketId));
+        serverSocket_[key] = socketId;
     }
     for (auto& item : serverSocket_) {
         ANS_LOGI("InitServer %{public}s %{public}s %{public}d", deviceId.c_str(),

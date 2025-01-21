@@ -145,6 +145,22 @@ bool NotifticationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byte
         begin, byteSequence.size()));
 }
 
+bool NotifticationRequestBox::SetFinishTime(int64_t time)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(FINISH_DEADLINE_TIME, time));
+}
+
+bool NotifticationRequestBox::SetAutoDeleteTime(int64_t time)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
+}
+
 bool NotifticationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
     if (box_ == nullptr) {
@@ -235,6 +251,22 @@ bool NotifticationRequestBox::GetCommonLiveView(std::vector<uint8_t>& byteSequen
         return false;
     }
     return box_->GetBytes(NOTIFICATION_COMMON_LIVEVIEW, byteSequence);
+}
+
+bool NotifticationRequestBox::GetFinishTime(int64_t& time) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt64Value(FINISH_DEADLINE_TIME, time);
+}
+
+bool NotifticationRequestBox::GetAutoDeleteTime(int64_t& time) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt64Value(AUTO_DELETE_TIME, time);
 }
 }
 }

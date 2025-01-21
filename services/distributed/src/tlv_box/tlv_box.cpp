@@ -24,6 +24,17 @@ namespace Notification {
 
 namespace {
 constexpr int32_t MAX_BUFFER_LENGTH = 1024 * 4 * 1024;
+constexpr int32_t INT_LENGTH = 32;
+}
+
+uint64_t Htonll(uint64_t value)
+{
+    return ((static_cast<uint64_t>(htonl(value))) << INT_LENGTH) + htonl(value >> INT_LENGTH);
+}
+
+uint64_t Ntohll(uint64_t value)
+{
+    return ((static_cast<uint64_t>(ntohl(value))) << INT_LENGTH) + ntohl(value >> INT_LENGTH);
 }
 
 int32_t TlvItem::GetType() const
@@ -72,6 +83,12 @@ TlvItem::TlvItem(int32_t type, int32_t value) : type_(type)
 {
     int32_t newValue = htonl(value);
     Initialize(&newValue, sizeof(int32_t));
+}
+
+TlvItem::TlvItem(int32_t type, int64_t value) : type_(type)
+{
+    uint64_t newValue = Htonll(static_cast<uint64_t>(value));
+    Initialize(&newValue, sizeof(uint64_t));
 }
 
 TlvItem::TlvItem(int32_t type, std::string value) : type_(type)
@@ -153,6 +170,16 @@ bool TlvBox::GetInt32Value(int32_t type, int32_t& value)
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
         value = ntohl((*(int32_t*)(iter->second->GetValue())));
+        return true;
+    }
+    return false;
+}
+
+bool TlvBox::GetInt64Value(int32_t type, int64_t& value)
+{
+    auto iter = TlvMap_.find(type);
+    if (iter != TlvMap_.end()) {
+        value = static_cast<int64_t>(Ntohll((*(uint64_t*)(iter->second->GetValue()))));
         return true;
     }
     return false;

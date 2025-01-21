@@ -168,11 +168,13 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
     }
     std::function<void()> task = std::bind([&, peerDevice, request]() {
         NotifticationRequestBox requestBox;
-        ANS_LOGI("Dans OnConsumed %{public}s", request->Dump().c_str());
         if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
             return;
         }
         auto requestPoint = request->GetNotificationRequestPoint();
+        ANS_LOGI("Dans OnConsumed %{public}s", requestPoint->Dump().c_str());
+        requestBox.SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
+        requestBox.SetFinishTime(requestPoint->GetFinishDeadLine());
         requestBox.SetNotificationHashCode(request->GetKey());
         requestBox.SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
         requestBox.SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
@@ -188,8 +190,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         if (requestPoint->GetOverlayIcon() != nullptr) {
             requestBox.SetOverlayIcon(requestPoint->GetOverlayIcon());
         }
-        bool isCommonLiveView = requestPoint->IsCommonLiveView();
-        if (isCommonLiveView) {
+        if (requestPoint->IsCommonLiveView()) {
             std::vector<uint8_t> buffer;
             DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
             requestBox.SetCommonLiveView(buffer);
@@ -199,8 +200,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         if (!requestBox.Serialize()) {
             ANS_LOGW("Dans OnConsumed serialize failed.");
             if (haCallback_ != nullptr) {
-                std::string reason = "serialization failed";
-                haCallback_(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID, reason);
+                haCallback_(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID, "serialization failed");
             }
             return;
         }
