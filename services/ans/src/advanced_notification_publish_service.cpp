@@ -3214,17 +3214,20 @@ ErrCode AdvancedNotificationService::DistributeOperation(const std::string &hash
         return ERR_ANS_INVALID_PARAM;
     }
 
-    for (auto record : notificationList_) {
-        if (record->notification->GetKey() != hashCode) {
-            continue;
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        for (auto record : notificationList_) {
+            if (record->notification->GetKey() != hashCode) {
+                continue;
+            }
+            result = NotificationSubscriberManager::GetInstance()->DistributeOperation(record->notification);
+            return;
         }
-        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-            NotificationSubscriberManager::GetInstance()->DistributeOperation(record->notification);
-        }));
-        notificationSvrQueue_->wait(handler);
-        return ERR_OK;
-    }
-    return ERR_ANS_INVALID_PARAM;
+        ANS_LOGI("DistributeOperation not exist hashcode.");
+        result = ERR_ANS_INVALID_PARAM;
+    }));
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

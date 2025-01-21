@@ -67,7 +67,7 @@ public:
     void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
     std::unordered_set<std::string> GetCollaborativeDeleteTypes();
     void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason);
-    void OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
+    ErrCode OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
 
 private:
     int64_t GetCurrentTime();

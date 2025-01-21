@@ -114,7 +114,7 @@ public:
      *
      * @param notification Indicates the received Notification object.
      */
-    virtual void OnResponse(const sptr<Notification> &notification) = 0;
+    virtual ErrCode OnResponse(const sptr<Notification> &notification) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

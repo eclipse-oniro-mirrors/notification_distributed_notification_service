@@ -41,7 +41,7 @@ public:
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
-    void OnResponse(const std::shared_ptr<Notification> &notification) override;
+    ErrCode OnResponse(const std::shared_ptr<Notification> &notification) override;
     void SetLocalDevice(DistributedDeviceInfo localDevice);
     void SetPeerDevice(DistributedDeviceInfo localDevice);
     bool CheckNeedCollaboration(const std::shared_ptr<Notification> &notification);

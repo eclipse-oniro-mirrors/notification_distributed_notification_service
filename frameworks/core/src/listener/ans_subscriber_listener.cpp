@@ -204,16 +204,16 @@ void SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleN
     subscriber->OnApplicationInfoNeedChanged(bundleName);
 }
 
-void SubscriberListener::OnResponse(const sptr<Notification> &notification)
+ErrCode SubscriberListener::OnResponse(const sptr<Notification> &notification)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGW("Subscriber is nullptr");
-        return;
+        return ERR_OK;
     }
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
-    subscriber->OnResponse(sharedNotification);
+    return subscriber->OnResponse(sharedNotification);
 }
 }  // namespace Notification
 }  // namespace OHOS

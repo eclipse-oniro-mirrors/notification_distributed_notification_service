@@ -113,6 +113,12 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write needNotifyApplicationChanged");
         return false;
     }
+
+    // write needNotifyResponse
+    if (!parcel.WriteBool(needNotifyResponse_)) {
+        ANS_LOGE("Can't write needNotifyResponse");
+        return false;
+    }
     return true;
 }
 
@@ -166,6 +172,8 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
 
     // read needNotifyApplicationChanged_
     needNotifyApplicationChanged_ = parcel.ReadBool();
+    // read needNotifyResponse
+    needNotifyResponse_ = parcel.ReadBool();
     return true;
 }
 
@@ -188,6 +196,7 @@ std::string NotificationSubscribeInfo::Dump()
             "slotTypes = [" + slotTypes + "]" +
             "filterType = " + std::to_string(filterType_) +
             "needNotify = " + std::to_string(needNotifyApplicationChanged_) +
+            "needResponse = " + std::to_string(needNotifyResponse_) +
             " }";
 }
 
@@ -229,6 +238,16 @@ bool NotificationSubscribeInfo::GetNeedNotifyApplication() const
 void NotificationSubscribeInfo::SetNeedNotifyApplication(bool isNeed)
 {
     needNotifyApplicationChanged_ = isNeed;
+}
+
+bool NotificationSubscribeInfo::GetNeedNotifyResponse() const
+{
+    return needNotifyResponse_;
+}
+
+void NotificationSubscribeInfo::SetNeedNotifyResponse(bool isNeed)
+{
+    needNotifyResponse_ = isNeed;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -332,7 +332,11 @@ ErrCode AnsSubscriberStub::HandleOnResponse(MessageParcel &data, MessageParcel &
         ANS_LOGW("notification ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    OnResponse(notification);
+    ErrCode result = OnResponse(notification);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     return ERR_OK;
 }
 
@@ -368,6 +372,6 @@ void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCall
 
 void AnsSubscriberStub::OnApplicationInfoNeedChanged(const std::string& bundleName) {}
 
-void AnsSubscriberStub::OnResponse(const sptr<Notification> &request) {}
+ErrCode AnsSubscriberStub::OnResponse(const sptr<Notification> &request) { return 0; }
 } // namespace Notification
 } // namespace OHOS
