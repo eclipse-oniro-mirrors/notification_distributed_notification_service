@@ -95,7 +95,7 @@ constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 constexpr int32_t RSS_UID = 3051;
 constexpr int32_t RESSCHED_UID = 1096;
 constexpr int32_t TYPE_CODE_VOIP = 0;
-constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 13;
+constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 14;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 const std::string ANS_VOIP = "ANS_VOIP";

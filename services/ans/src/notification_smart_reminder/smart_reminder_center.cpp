@@ -28,7 +28,7 @@
 namespace OHOS {
 namespace Notification {
 using namespace std;
-constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 14;
+constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 15;
 namespace {
     const std::string ANS_VOIP = "ANS_VOIP";
 }
