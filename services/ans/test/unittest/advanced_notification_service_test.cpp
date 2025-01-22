@@ -3765,5 +3765,51 @@ HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00001, Func
     ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: SetAndPublishSubscriberExistFlag_0100
+ * @tc.desc: test SetAndPublishSubscriberExistFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetAndPublishSubscriberExistFlag_0100, TestSize.Level1)
+{
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag("", false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag("testType", false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_WEARABLE, false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+}
+
+/**
+ * @tc.name: PublishSubscriberExistFlagEvent_0100
+ * @tc.desc: test PublishSubscriberExistFlagEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishSubscriberExistFlagEvent_0100, TestSize.Level1)
+{
+    advancedNotificationService_->PublishSubscriberExistFlagEvent(false, false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+}
+
+/**
+ * @tc.name: OnBundleRemoved_0100
+ * @tc.desc: test OnBundleRemoved.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnBundleRemoved_0100, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testBundleName01";
+    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, SYSTEM_APP_UID);
+    advancedNotificationService_->OnBundleRemoved(bundleOption);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->isCachedAppAndDeviceRelationMap_ = true;
+    advancedNotificationService_->appAndDeviceRelationMap_.insert(std::make_pair(bundleName, "testType"));
+    advancedNotificationService_->OnBundleRemoved(bundleOption);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS
