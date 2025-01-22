@@ -36,10 +36,7 @@ public:
     static DistributedService& GetInstance();
     void SubscribeNotifictaion(const DistributedDeviceInfo device);
     void UnSubscribeNotifictaion(const std::string &deviceId, uint16_t deviceType);
-    int32_t InitService(const std::string &deviceId, uint16_t deviceType,
-        std::unordered_set<std::string> collaborativeDeleteTypes,
-        std::function<bool(std::string, int32_t, bool)> callback,
-        uint32_t startAbilityTimeout);
+    int32_t InitService(const std::string &deviceId, uint16_t deviceType);
     void OnReceiveMsg(const void *data, uint32_t dataLen);
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& device);
@@ -54,7 +51,6 @@ public:
     void AddDevice(DistributedDeviceInfo device);
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
     void DestoryService();
-    void ReportDeviceStatus(std::string deviceId);
     void ReportBundleIconList(const DistributedDeviceInfo peerDevice);
     void UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
         const DistributedDeviceInfo peerDevice);
@@ -65,7 +61,6 @@ public:
     void SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason);
     void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
     void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
-    std::unordered_set<std::string> GetCollaborativeDeleteTypes();
     void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason);
     ErrCode OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
 
@@ -95,7 +90,6 @@ private:
     void AbnormalReporting(int result, uint32_t branchId, const std::string& errorReason);
     void OperationalReporting(int branchId, int32_t slotType);
     std::string AnonymousProcessing(std::string data);
-    std::function<bool(std::string, int32_t, bool)> callBack_ = nullptr;
     std::function<void(int32_t, int32_t, uint32_t, std::string)> haCallback_ = nullptr;
     std::function<void(int32_t, int32_t, std::string)> sendReportCallback_ = nullptr;
     std::map<std::string, std::set<std::string>> bundleIconCache_;

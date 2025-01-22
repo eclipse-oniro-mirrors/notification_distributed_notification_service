@@ -30,6 +30,7 @@ namespace Notification {
 
 namespace {
 static const int32_t MAX_CONNECTED_TYR = 5;
+static const uint64_t SYNC_TASK_DELAY = 7 * 1000 * 1000;
 }
 
 DistributedService& DistributedService::GetInstance()
@@ -48,15 +49,11 @@ DistributedService::DistributedService()
     ANS_LOGI("Distributed service init successfully.");
 }
 
-int32_t DistributedService::InitService(const std::string &deviceId, uint16_t deviceType,
-    std::unordered_set<std::string> collaborativeDeleteTypes,
-    std::function<bool(std::string, int32_t, bool)> callback, uint32_t startAbilityTimeout)
+int32_t DistributedService::InitService(const std::string &deviceId, uint16_t deviceType)
 {
     int32_t userId;
     localDevice_.deviceId_ = deviceId;
     localDevice_.deviceType_ = deviceType;
-    localDevice_.collaborativeDeleteTypes_ = collaborativeDeleteTypes;
-    localDevice_.startAbilityTimeout = startAbilityTimeout;
     if (DistributedServer::GetInstance().InitServer(deviceId, deviceType) != 0) {
         ANS_LOGI("Distributed service init server failed.");
         return -1;
@@ -65,11 +62,6 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
     if (OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId) == 0) {
         userId_ = userId;
     }
-    if (callback == nullptr) {
-        ANS_LOGI("Distributed service callback is null.");
-        return -1;
-    }
-    callBack_ = callback;
     OberverService::GetInstance().Init(deviceType);
     return 0;
 }
@@ -112,9 +104,8 @@ void DistributedService::SyncConnectedDevice(DistributedDeviceInfo device)
             ANS_LOGE("Check handler is null.");
             return;
         }
-        serviceQueue_->submit_h([&, device]() {
-            SyncConnectedDevice(device);
-        });
+        serviceQueue_->submit_h([&, device]() { SyncConnectedDevice(device); },
+            ffrt::task_attr().name("sync").delay(SYNC_TASK_DELAY));
     } else {
         iter->second.connectedTry_ = 0;
     }
@@ -133,37 +124,7 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         peerDevice_[deviceItem.deviceId_] = deviceItem;
-        DistributedTimerService::GetInstance().CancelTimer(localDevice_.deviceId_);
-        if (callBack_ == nullptr) {
-            ANS_LOGW("Dans status callback is null.");
-        } else {
-            callBack_(device.deviceId_, DeviceState::STATE_SYNC, false);
-        }
-        DistributedTimerService::GetInstance().StartTimer(device.deviceId_,
-            GetCurrentTime() + TEN_SECEND);
         SyncConnectedDevice(device);
-    });
-}
-
-void DistributedService::ReportDeviceStatus(std::string deviceId)
-{
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    serviceQueue_->submit_h([&, deviceId]() {
-        ANS_LOGI("Report device status %{public}s.", deviceId.c_str());
-        auto iter = peerDevice_.find(deviceId);
-        if (iter != peerDevice_.end() &&
-            iter->second.peerState_ == DeviceState::STATE_ONLINE) {
-            return;
-        }
-        if (callBack_ == nullptr) {
-            ANS_LOGE("Report device status callback is null.");
-            return;
-        }
-        callBack_(deviceId, 0, true);
-        return;
     });
 }
 
@@ -255,11 +216,6 @@ std::string DistributedService::AnonymousProcessing(std::string data)
         }
     }
     return data;
-}
-
-std::unordered_set<std::string> DistributedService::GetCollaborativeDeleteTypes()
-{
-    return localDevice_.collaborativeDeleteTypes_;
 }
 
 void DistributedService::SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason)

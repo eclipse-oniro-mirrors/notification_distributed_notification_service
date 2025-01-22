@@ -22,9 +22,6 @@
 namespace OHOS {
 namespace Notification {
 
-static const int64_t TEN_SECEND = 120000;
-static const int64_t THIRTY_SECEND = 600000;
-
 class DistributedTimerInfo : public MiscServices::ITimerInfo {
 public:
     DistributedTimerInfo(std::string deviceId): deviceId_(deviceId) {}
@@ -60,8 +57,6 @@ private:
 class DistributedTimerService {
 public:
     static DistributedTimerService& GetInstance();
-    void CancelTimer(const std::string& deviceId);
-    void StartTimer(const std::string& deviceId, int64_t deleteTimePoint);
     void StartTimerWithTrigger(
         const std::shared_ptr<MiscServices::ITimerInfo>& timerInfo, uint32_t startAbilityTimeout);
     int64_t GetCurrentTime();

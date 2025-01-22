@@ -25,7 +25,6 @@ const int32_t SECOND_TRANSTO_MS = 1000;
 
 void DistributedTimerInfo::OnTrigger()
 {
-    DistributedService::GetInstance().ReportDeviceStatus(deviceId_);
 }
 
 void DistributedTimerInfo::SetType(const int32_t &typeInfo)
@@ -52,35 +51,6 @@ DistributedTimerService& DistributedTimerService::GetInstance()
 {
     static DistributedTimerService distributedTimerService;
     return distributedTimerService;
-}
-
-void DistributedTimerService::CancelTimer(const std::string& deviceId)
-{
-    ANS_LOGD("Enter");
-    if (timerIdMap_.find(deviceId) == timerIdMap_.end()) {
-        return;
-    }
-    int64_t timerId = timerIdMap_[deviceId];
-    MiscServices::TimeServiceClient::GetInstance()->StopTimer(timerIdMap_[deviceId]);
-    MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(timerIdMap_[deviceId]);
-    timerIdMap_.erase(deviceId);
-    ANS_LOGI("Dans timer delete %{public}s %{public}lld.", deviceId.c_str(), timerId);
-}
-
-void DistributedTimerService::StartTimer(const std::string& deviceId, int64_t deleteTimePoint)
-{
-    CancelTimer(deviceId);
-    std::shared_ptr<DistributedTimerInfo> timerInfo = std::make_shared<DistributedTimerInfo>(deviceId);
-    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
-    if (timer == nullptr) {
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
-        return;
-    }
-    int64_t timerId = timer->CreateTimer(timerInfo);
-    timer->StartTimer(timerId, deleteTimePoint);
-    timerIdMap_[deviceId] = timerId;
-    ANS_LOGI("Dans start auto delete %{public}s %{public}lld %{public}lld.", deviceId.c_str(),
-        deleteTimePoint, timerId);
 }
 
 int64_t DistributedTimerService::GetCurrentTime()

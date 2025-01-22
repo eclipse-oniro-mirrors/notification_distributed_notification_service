@@ -98,8 +98,8 @@ static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t q
 
 void CloseSocket(int32_t socketId)
 {
-    ::Shutdown(socketId);
     ANS_LOGI("Close socket id %{public}d", socketId);
+    ::Shutdown(socketId);
 }
 
 bool CheckAndCopyStr(char* dest, uint32_t destLen, const std::string& src)
