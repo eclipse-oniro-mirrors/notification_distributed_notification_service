@@ -639,7 +639,7 @@ napi_value Common::GetNotificationLocalLiveViewCardButton(
     
     // 解析iconbutton数组
     std::vector<NotificationIconButton> cardButtons;
-    if (GetNotificationIconButton(env, buttonResult, cardButtons) == nullptr) {
+    if (GetNotificationIconButton(env, buttonResult, cardButtons, BUTTON_MAX_SIZE) == nullptr) {
         return nullptr;
     }
 
@@ -654,7 +654,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
 {
     ANS_LOGD("enter");
     std::vector<NotificationIconButton> cardButtons;
-    if (GetNotificationIconButton(env, capsuletResult, cardButtons) == nullptr) {
+    if (GetNotificationIconButton(env, capsuletResult, cardButtons, CAPSULE_BTN_MAX_SIZE) == nullptr) {
         return nullptr;
     }
 
@@ -663,7 +663,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
 }
 
 napi_value Common::GetNotificationIconButton(
-    const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons)
+    const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen)
 {
     // cardButton_item?: NotificationIconButton;
     napi_value cardButton = nullptr;
@@ -685,8 +685,8 @@ napi_value Common::GetNotificationIconButton(
         return nullptr;
     }
     napi_get_array_length(env, buttonResult, &length);
-    if (length > BUTTON_MAX_SIZE) {
-        length = BUTTON_MAX_SIZE;
+    if (length > maxLen) {
+        length = maxLen;
     }
 
     for (size_t i = 0; i < length; i++) {

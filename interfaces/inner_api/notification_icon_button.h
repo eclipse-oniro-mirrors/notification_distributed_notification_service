@@ -26,6 +26,7 @@ namespace OHOS {
 namespace Notification {
 using namespace Global::Resource;
 const uint32_t BUTTON_MAX_SIZE = 3;
+const uint32_t CAPSULE_BTN_MAX_SIZE = 2;
 const uint32_t BUTTON_RESOURCE_SIZE = 3;
 const uint32_t RESOURCE_BUNDLENAME_INDEX = 0;
 const uint32_t RESOURCE_MODULENAME_INDEX = 1;
