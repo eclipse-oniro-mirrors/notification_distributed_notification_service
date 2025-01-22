@@ -1820,6 +1820,7 @@ public:
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
     static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
+    static napi_value NapiReturnCapErrCb(napi_env env, napi_callback_info info);
     static napi_value NapiReturnCapErr(napi_env env, napi_callback_info info);
     static int32_t ErrorToExternal(uint32_t errCode);
     static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);

@@ -108,10 +108,10 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setBadgeNumber", NapiSetBadgeNumber),
         DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", NapiSetBadgeNumberByBundle),
 #else
-        DECLARE_NAPI_FUNCTION("displayBadge", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("isBadgeDisplayed", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setBadgeNumber", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("displayBadge", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("isBadgeDisplayed", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setBadgeNumber", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setBadgeNumberByBundle", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_DISTRIBUTED_DB
@@ -126,15 +126,15 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", NapiIsSmartReminderEnabled),
 #else
-        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setDistributedEnable", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setDistributedEnable", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabledByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledByBundle", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("setSmartReminderEnabled", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("getDeviceRemindType", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("getDeviceRemindType", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", Common::NapiReturnCapErr),
 #endif
         
@@ -147,13 +147,13 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isSupportDoNotDisturbMode", NapiSupportDoNotDisturbMode),
         DECLARE_NAPI_FUNCTION("getDoNotDisturbProfile", NapiGetDoNotDisturbProfile),
 #else
-        DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setDoNotDisturbDate", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getDoNotDisturbDate", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("addDoNotDisturbProfile", Common::NapiReturnCapErr),
         DECLARE_NAPI_FUNCTION("removeDoNotDisturbProfile", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("isSupportDoNotDisturbMode", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("getDoNotDisturbProfile", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("supportDoNotDisturbMode", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("isSupportDoNotDisturbMode", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getDoNotDisturbProfile", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_SLOT_MANAGER
@@ -165,21 +165,21 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", NapiGetSlotFlagsByBundle),
         DECLARE_NAPI_FUNCTION("getSlotByBundle", NapiGetSlotByBundle),
 #else
-        DECLARE_NAPI_FUNCTION("setSlotByBundle", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("getSlotsByBundle", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setNotificationEnableSlot", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("getSlotByBundle", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setSlotByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getSlotsByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setNotificationEnableSlot", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("isNotificationSlotEnabled", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getSlotByBundle", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
         DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", NapiSubscriteLocalAcitvity),
         DECLARE_NAPI_FUNCTION("triggerSystemLiveView", NapiTriggerLocalLiveView),
 #else
-        DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", Common::NapiReturnCapErr),
-        DECLARE_NAPI_FUNCTION("triggerSystemLiveView", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("subscribeSystemLiveView", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("triggerSystemLiveView", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_ADDITIONAL_CONFIG
