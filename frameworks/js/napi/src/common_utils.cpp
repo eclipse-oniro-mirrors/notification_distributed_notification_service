@@ -366,7 +366,7 @@ napi_value Common::NapiReturnCapErrCb(napi_env env, napi_callback_info info)
         NAPI_CALL(env, napi_typeof(env, argv[i], &valuetype));
         if (valuetype == napi_function) {
             napi_create_reference(env, argv[i], 1, &callback);
-            SetCallback(env, callback, ERROR_SYSTEM_CAP_ERROR, bullptr, false);
+            SetCallback(env, callback, ERROR_SYSTEM_CAP_ERROR, nullptr, false);
             napi_delete_reference(env, callback);
             return NapiGetNull(env);
         }
