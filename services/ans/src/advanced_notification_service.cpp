@@ -2397,7 +2397,6 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
 
 void AdvancedNotificationService::SetClassificationWithVoip(const sptr<NotificationRequest> &request)
 {
-    ANS_LOGI("classification:%{public}s", request->GetClassification().c_str());
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         ANS_LOGI("set classification empty");
         request->SetClassification("");
