@@ -29,6 +29,8 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+const uint32_t MAX_PARAM_NUM = 3;
+
 namespace {
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
@@ -350,6 +352,27 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
 
     ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
     return ExternalCode;
+}
+
+napi_value Common::NapiReturnCapErrCb(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_PARAM_NUM;
+    napi_value argv[MAX_PARAM_NUM] = {nullptr};
+    napi_value thisVar = nullptr;
+    napi_ref callback = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    for (size_t i = 0; i < argc && i < MAX_PARAM_NUM; ++i) {
+        napi_valuetype valuetype = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, argv[i], &valuetype));
+        if (valuetype == napi_function) {
+            napi_create_reference(env, argv[i], 1, &callback);
+            SetCallback(env, callback, ERROR_SYSTEM_CAP_ERROR, nullptr, false);
+            napi_delete_reference(env, callback);
+            return NapiGetNull(env);
+        }
+    }
+
+    return NapiReturnCapErr(env, info);
 }
 
 napi_value Common::NapiReturnCapErr(napi_env env, napi_callback_info info)
