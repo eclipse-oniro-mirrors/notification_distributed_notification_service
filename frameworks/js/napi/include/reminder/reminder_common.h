@@ -46,7 +46,9 @@ const char* CALENDAR_SECOND = "second";
 const char* CALENDAR_REPEAT_MONTHS = "repeatMonths";
 const char* CALENDAR_REPEAT_DAYS = "repeatDays";
 const char* CONTENT = "content";
+const char* CONTENT_RESOURCE_ID = "contentResourceId";
 const char* EXPIRED_CONTENT = "expiredContent";
+const char* EXPIRED_CONTENT_RESOURCE_ID = "expiredContentResourceId";
 const char* MAX_SCREEN_WANT_AGENT = "maxScreenWantAgent";
 const char* MAX_SCREEN_WANT_AGENT_PKG = "pkgName";
 const char* MAX_SCREEN_WANT_AGENT_ABILITY = "abilityName";
@@ -55,9 +57,11 @@ const char* REMINDER_TYPE = "reminderType";
 const char* RING_DURATION = "ringDuration";
 const char* SLOT_TYPE = "slotType";
 const char* SNOOZE_CONTENT = "snoozeContent";
+const char* SNOOZE_CONTENT_RESOURCE_ID = "snoozeContentResourceId";
 const char* SNOOZE_TIMES = "snoozeTimes";
 const char* TIME_INTERVAL = "timeInterval";
 const char* TITLE = "title";
+const char* TITLE_RESOURCE_ID = "titleResourceId";
 const char* TIMER_COUNT_DOWN_TIME = "triggerTimeInSeconds";
 const char* WANT_AGENT = "wantAgent";
 const char* RRULL_WANT_AGENT = "rruleWantAgent";
@@ -179,6 +183,9 @@ private:
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static bool GenReminderIntInner(
+        const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
+
+    static bool GenReminderIntInnerOther(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
 
     static void GenReminderBoolInner(

@@ -903,7 +903,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_005, Level1)
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
     CommonEventSubscribeInfo subscriberInfo(customMatchingSkills);
     auto subscriber = std::make_shared<ReminderEventManager::ReminderEventCustomSubscriber>(subscriberInfo, manager);
     EventFwk::CommonEventData data;
@@ -927,9 +926,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_005, Level1)
     data.SetWant(want);
     subscriber->OnReceiveEvent(data);
     want.SetAction(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
-    data.SetWant(want);
-    subscriber->OnReceiveEvent(data);
-    want.SetAction(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
     data.SetWant(want);
     subscriber->OnReceiveEvent(data);
     system("rm -rf /data/service/el1/public/notification/");
@@ -984,7 +980,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_020, Level1)
     manager->SnoozeReminder(want);
     manager->ClickReminder(want);
     manager->SnoozeReminderImpl(reminder);
-    manager->OnLoadReminderEvent(want);
+    manager->OnLoadReminderEvent();
     manager->GetFullPath("1p");
     manager->PlaySoundAndVibration(nullptr);
     manager->RemoveReminderLocked(500, true);

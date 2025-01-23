@@ -25,6 +25,12 @@ namespace OHOS {
 namespace Notification {
 class ReminderTimerInfo : public MiscServices::ITimerInfo {
 public:
+    enum class ReminderTimerType : uint8_t {
+        REMINDER_TIMER_UNKNOWN = 0,
+        REMINDER_TIMER_LOAD = 1,
+    };
+
+public:
     ReminderTimerInfo() {};
     virtual ~ReminderTimerInfo() {};
 
@@ -49,6 +55,11 @@ public:
     inline void SetBundleName(const std::string &bundleName)
     {
         bundleName_ = bundleName;
+    }
+
+    inline void SetReminderTimerType(const ReminderTimerType type)
+    {
+        reminderTimerType_ = type;
     }
 
     /**
@@ -81,6 +92,7 @@ private:
     int32_t pid_ {-1};
     int32_t uid_ {-1};
     std::string bundleName_;
+    ReminderTimerType reminderTimerType_ {ReminderTimerType::REMINDER_TIMER_UNKNOWN};
 };
 } // namespace OHOS
 } // namespace Notification

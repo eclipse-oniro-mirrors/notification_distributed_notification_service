@@ -112,7 +112,7 @@ bool ReminderRequestCalendar::IsInExcludeDate() const
         ANSR_LOGW("error start date time");
         return false;
     }
-    int64_t notificationTime = ReminderRequest::GetDurationSinceEpochInMilli(target);
+    int64_t notificationTime = static_cast<int64_t>(ReminderRequest::GetDurationSinceEpochInMilli(target));
     if (excludeDates_.find(notificationTime) != excludeDates_.end()) {
         ANSR_LOGI("Reminder[%{public}d] trigger time is in exclude date", GetReminderId());
         return true;

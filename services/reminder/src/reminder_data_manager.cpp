@@ -65,11 +65,11 @@ const int REASON_APP_API = 1;
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
-constexpr int64_t NEXT_LOAD_TIME = 8 * 60 * 60 * 1000;  // 8h, ut: millisecond
 constexpr int8_t NORMAL_CALLBACK = 0;  // timer callback
 constexpr int8_t REISSUE_CALLBACK = 1;  // time change, boot complte callback
-constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
 constexpr int32_t FIRST_QUERY_DELAY = 5 * 1000 * 1000;  // 5s, ut: microsecond
+constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
+constexpr uint64_t NEXT_LOAD_TIME = 8 * 60 * 60 * 1000;  // 8h, ut: millisecond
 
 inline int64_t TimeDistance(int64_t first, int64_t last)
 {
@@ -370,7 +370,8 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const int32_t calling
 
 void ReminderDataManager::OnUnlockScreen()
 {
-    if (queue_ == nullptr) {
+    if (!IsReminderAgentReady() || queue_ == nullptr) {
+        ANSR_LOGE("Reminder service not ready.");
         return;
     }
     bool expected = false;
@@ -380,7 +381,6 @@ void ReminderDataManager::OnUnlockScreen()
         auto callback = []() {
             auto manager = ReminderDataManager::GetInstance();
             if (manager == nullptr) {
-                ANSR_LOGE("ReminderDataManager is nullptr.");
                 return;
             }
             manager->InitShareReminders();
@@ -633,7 +633,7 @@ void ReminderDataManager::StartLoadTimer()
         reminderLoadtimerId_ = CreateTimer(timer);
     }
     timer->StopTimer(reminderLoadtimerId_);
-    uint64_t nowMilli = GetCurrentTime() + NEXT_LOAD_TIME;
+    uint64_t nowMilli = static_cast<uint64_t>(GetCurrentTime()) + NEXT_LOAD_TIME;
     timer->StartTimer(reminderLoadtimerId_, nowMilli);
 }
 
@@ -653,34 +653,12 @@ void ReminderDataManager::InitShareReminders()
 
 uint64_t ReminderDataManager::CreateTimer(const sptr<MiscServices::TimeServiceClient>& timer)
 {
-    auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
-    sharedTimerInfo->SetRepeat(true);
-    sharedTimerInfo->SetInterval(NEXT_LOAD_TIME);
-    uint8_t timerTypeWakeup = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_WAKEUP);
-    uint8_t timerTypeExact = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_EXACT);
-    int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-    sharedTimerInfo->SetType(timerType);
-
-    int32_t requestCode = 10;
-    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
-    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
-
-    auto want = std::make_shared<OHOS::AAFwk::Want>();
-    want->SetAction(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
-    std::vector<std::shared_ptr<AAFwk::Want>> wants;
-    wants.push_back(want);
-    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
-        requestCode,
-        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
-        flags, wants, nullptr);
-
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
-        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, 0);
-    IPCSkeleton::SetCallingIdentity(identity);
-
-    sharedTimerInfo->SetWantAgent(wantAgent);
-    return timer->CreateTimer(sharedTimerInfo);
+    auto timerInfo = std::make_shared<ReminderTimerInfo>();
+    timerInfo->SetRepeat(false);
+    timerInfo->SetInterval(0);
+    timerInfo->SetType(timerInfo->TIMER_TYPE_EXACT | timerInfo->TIMER_TYPE_WAKEUP);
+    timerInfo->SetReminderTimerType(ReminderTimerInfo::ReminderTimerType::REMINDER_TIMER_LOAD);
+    return timer->CreateTimer(timerInfo);
 }
 
 bool ReminderDataManager::CheckUpdateConditions(const sptr<ReminderRequest> &reminder,
@@ -864,6 +842,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     HandleImmediatelyShow(showImmediately, true);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
+    StartLoadTimer();
 }
 
 void ReminderDataManager::TerminateAlerting(const OHOS::EventFwk::Want &want)
@@ -1578,7 +1557,23 @@ bool ReminderDataManager::IsBelongToSameApp(const int32_t uidSrc,
     return result;
 }
 
-void ReminderDataManager::OnLoadReminderEvent(const EventFwk::Want& want)
+void ReminderDataManager::OnLoadReminderEvent()
+{
+    if (!IsReminderAgentReady() || queue_ == nullptr) {
+        ANSR_LOGE("Reminder service not ready.");
+        return;
+    }
+    auto callback = []() {
+        auto manager = ReminderDataManager::GetInstance();
+        if (manager == nullptr) {
+            return;
+        }
+        manager->OnLoadReminderInFfrt();
+    };
+    queue_->submit(callback);
+}
+
+void ReminderDataManager::OnLoadReminderInFfrt()
 {
     if (activeReminderId_ != -1) {
         {

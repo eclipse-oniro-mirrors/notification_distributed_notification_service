@@ -127,21 +127,25 @@ public:
      * notification title
      */
     static const std::string TITLE;
+    static const std::string TITLE_RESOURCE_ID;
 
     /*
      * notification content
      */
     static const std::string CONTENT;
+    static const std::string CONTENT_RESOURCE_ID;
 
     /*
      * notification snooze content
      */
     static const std::string SNOOZE_CONTENT;
+    static const std::string SNOOZE_CONTENT_RESOURCE_ID;
 
     /*
      * notification expired content
      */
     static const std::string EXPIRED_CONTENT;
+    static const std::string EXPIRED_CONTENT_RESOURCE_ID;
 
     /*
      * want agent information

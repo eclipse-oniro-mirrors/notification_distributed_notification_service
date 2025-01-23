@@ -230,7 +230,12 @@ public:
     /**
      * @brief Load reminder event.
      */
-    void OnLoadReminderEvent(const EventFwk::Want& want);
+    void OnLoadReminderEvent();
+
+    /**
+     * @brief Load reminder event for ffrt.
+     */
+    void OnLoadReminderInFfrt();
 
     /**
      * @brief datashare notify, share reminder insert or delete.

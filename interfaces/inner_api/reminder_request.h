@@ -422,6 +422,40 @@ public:
      */
     uint64_t GetTriggerTimeInMilli() const;
 
+    int32_t GetTitleResourceId() const
+    {
+        return titleResourceId_;
+    }
+    int32_t GetContentResourceId() const
+    {
+        return contentResourceId_;
+    }
+    int32_t GetExpiredContentResourceId() const
+    {
+        return expiredContentResourceId_;
+    }
+    int32_t GetSnoozeContentResourceId() const
+    {
+        return snoozeContentResourceId_;
+    }
+
+    void SetTitleResourceId(const int32_t titleResourceId)
+    {
+        titleResourceId_ = titleResourceId;
+    }
+    void SetContentResourceId(const int32_t contentResourceId)
+    {
+        contentResourceId_ = contentResourceId;
+    }
+    void SetExpiredContentResourceId(const int32_t expiredContentResourceId)
+    {
+        expiredContentResourceId_ = expiredContentResourceId;
+    }
+    void SetSnoozeContentResourceId(const int32_t snoozeContentResourceId)
+    {
+        snoozeContentResourceId_ = snoozeContentResourceId;
+    }
+
     int32_t GetUserId() const;
     int32_t GetUid() const;
 
@@ -997,7 +1031,6 @@ public:
      * @brief Update the reminder when remove notification from the systemUI.
      */
     static const std::string REMINDER_EVENT_REMOVE_NOTIFICATION;
-    static const std::string REMINDER_EVENT_LOAD_REMINDER;
     static const std::string PARAM_REMINDER_ID;
     static const std::string PARAM_REMINDER_SHARE;
     static const uint8_t REMINDER_STATUS_INACTIVE;
@@ -1151,6 +1184,11 @@ private:
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
     std::string identifier_;
+
+    int32_t titleResourceId_ {0};
+    int32_t contentResourceId_ {0};
+    int32_t expiredContentResourceId_ {0};
+    int32_t snoozeContentResourceId_ {0};
 };
 }  // namespace Notification
 }  // namespace OHOS
