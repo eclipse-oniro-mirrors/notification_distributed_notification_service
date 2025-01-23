@@ -31,8 +31,6 @@ using namespace std;
 constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 15;
 namespace {
     const std::string ANS_VOIP = "ANS_VOIP";
-    const std::string ANS_CALL = "ANS_CALL";
-    const std::string ANS_DEFAULT_VOIP = "ANS_DEFAULT_VOIP";
 }
 SmartReminderCenter::SmartReminderCenter()
 {
@@ -303,7 +301,7 @@ void SmartReminderCenter::HandleReminderMethods(
 {
     std::string classfication = request->GetClassification();
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
-        (classfication == ANS_VOIP || classfication == ANS_CALL || classfication == ANS_DEFAULT_VOIP)) {
+        classfication == ANS_VOIP) {
         ANS_LOGI("VOIP or CALL is not affected with SmartReminder");
         return;
     }
