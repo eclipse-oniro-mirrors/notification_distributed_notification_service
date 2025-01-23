@@ -28,8 +28,7 @@ using namespace DistributedHardware;
 
 using DeviceCallback = std::function<bool(std::string, int32_t, bool)>;
 typedef int32_t (*INIT_LOCAL_DEVICE)(const std::string &deviceId, uint16_t deviceType,
-    std::pair<int32_t, int32_t> titleAndContentLength, std::unordered_set<std::string> collaborativeDeleteTypes,
-    DeviceCallback callback, uint32_t startAbilityTimeout);
+    DistributedDeviceConfig config);
 typedef void (*RELEASE_LOCAL_DEVICE)();
 typedef void (*ADD_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
@@ -91,6 +90,18 @@ DistributedExtensionService::DistributedExtensionService()
     }
 }
 
+DistributedExtensionService::~DistributedExtensionService()
+{
+    std::function<void()> task = std::bind([&]() {
+        ReleaseLocalDevice();
+        dansHandler_.reset();
+        dansRunning_.store(false);
+    });
+    ANS_LOGI("Dans release.");
+    ffrt::task_handle handler = distributedQueue_->submit_h(task);
+    distributedQueue_->wait(handler);
+}
+
 bool DistributedExtensionService::initConfig()
 {
     nlohmann::json root;
@@ -129,7 +140,7 @@ bool DistributedExtensionService::initConfig()
 
     for (auto &deviceJson : supportJson) {
         ANS_LOGI("Dans initConfig support type %{public}s.", deviceJson.get<std::string>().c_str());
-        deviceConfig_.supportPeerDevice_.insert(deviceJson.get<std::string>());
+        deviceConfig_.supportPeerDevice.insert(deviceJson.get<std::string>());
     }
 
     nlohmann::json titleJson = configJson[CFG_KEY_TITLE_LENGTH];
@@ -142,7 +153,7 @@ bool DistributedExtensionService::initConfig()
 
     SetMaxContentLength(configJson);
 
-    deviceConfig_.collaborativeDeleteTypes_ = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
+    deviceConfig_.collaborativeDeleteTypes = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
     deviceConfig_.startAbilityTimeout = NotificationConfigParse::GetInstance()->GetStartAbilityTimeout();
     return true;
 }
@@ -171,12 +182,9 @@ int32_t DistributedExtensionService::InitDans()
         return -1;
     }
 
-    std::pair<int32_t, int32_t> titleAndContentLength = {deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength};
     ANS_LOGI("Dans get local device %{public}s, %{public}d, %{public}d, %{public}d.", deviceInfo.deviceId,
         deviceInfo.deviceTypeId, deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength);
-    if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, titleAndContentLength,
-        deviceConfig_.collaborativeDeleteTypes_, std::bind(&DistributedExtensionService::DeviceStatusCallback, this,
-        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), deviceConfig_.startAbilityTimeout) != 0) {
+    if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceConfig_) != 0) {
         dansRunning_.store(false);
         return -1;
     }
@@ -217,7 +225,7 @@ int32_t DistributedExtensionService::ReleaseLocalDevice()
 void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
 {
     std::string name = TransDeviceTypeToName(deviceInfo.deviceTypeId);
-    if (deviceConfig_.supportPeerDevice_.find(name) == deviceConfig_.supportPeerDevice_.end()) {
+    if (deviceConfig_.supportPeerDevice.find(name) == deviceConfig_.supportPeerDevice.end()) {
         ANS_LOGI("The current device type not support %{public}d.", deviceInfo.deviceTypeId);
         return;
     }
@@ -246,46 +254,6 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
         deviceMap_.insert(std::make_pair(deviceInfo.deviceId, device));
     });
     distributedQueue_->submit(onlineTask);
-}
-
-bool DistributedExtensionService::CheckAllDeviceOffLine()
-{
-    std::lock_guard<std::mutex> lock(mapLock_);
-    for (auto& device : deviceMap_) {
-        if (device.second.status_ == DeviceState::STATE_INIT ||
-            device.second.status_ == DeviceState::STATE_ONLINE) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool DistributedExtensionService::DeviceStatusCallback(std::string deviceId, int32_t status,
-    bool checkStatus)
-{
-    ANS_LOGI("Dans device status %{public}s, %{public}d, %{public}d.", deviceId.c_str(), status, checkStatus);
-    if (!checkStatus) {
-        std::lock_guard<std::mutex> lock(mapLock_);
-        auto iter = deviceMap_.find(deviceId);
-        if (iter != deviceMap_.end()) {
-            iter->second.status_ = status;
-        }
-        return false;
-    }
-
-    bool release = CheckAllDeviceOffLine();
-    std::function<void()> task = std::bind([&]() {
-        if (CheckAllDeviceOffLine()) {
-            ReleaseLocalDevice();
-            dansHandler_.reset();
-            dansRunning_.store(false);
-        }
-    });
-    ANS_LOGI("Dans status %{public}s, %{public}d, %{public}d.", deviceId.c_str(), status, release);
-    if (release) {
-        distributedQueue_->submit(task);
-    }
-    return release;
 }
 
 void DistributedExtensionService::HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason)

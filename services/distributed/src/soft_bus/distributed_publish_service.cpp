@@ -31,6 +31,7 @@
 #include "response_box.h"
 #include "screenlock_callback_stub.h"
 #include "power_mgr_client.h"
+#include "distributed_local_config.h"
 
 namespace OHOS {
 namespace Notification {
@@ -402,7 +403,8 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
         ANS_LOGI("unlock result:%{public}d", unlockResult);
         std::shared_ptr<DistributedResponseTimerInfo> timerInfo = std::make_shared<DistributedResponseTimerInfo>();
         timerInfo->SetListener(listener);
-        DistributedTimerService::GetInstance().StartTimerWithTrigger(timerInfo, localDevice_.startAbilityTimeout);
+        auto timeout = DistributedLocalConfig::GetInstance().GetStartAbilityTimeout();
+        DistributedTimerService::GetInstance().StartTimerWithTrigger(timerInfo, timeout);
     } else {
         auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
         ANS_LOGI("StartAbility result:%{public}d", ret);

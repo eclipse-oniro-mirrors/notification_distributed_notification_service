@@ -80,12 +80,6 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     if (result == 0) {
         subscriberMap_.insert(std::make_pair(peerDevice.deviceId_, subscriber));
         peerDevice_[peerDevice.deviceId_].peerState_ = DeviceState::STATE_ONLINE;
-        DistributedTimerService::GetInstance().CancelTimer(peerDevice.deviceId_);
-        if (callBack_ == nullptr) {
-            ANS_LOGW("Dans status callback is null.");
-        } else {
-            callBack_(peerDevice.deviceId_, DeviceState::STATE_ONLINE, false);
-        }
         if (DistributedService::GetInstance().haCallback_ != nullptr) {
             std::string reason = "deviceType: " + std::to_string(localDevice_.deviceType_) +
                                  "deviceId: " + AnonymousProcessing(localDevice_.deviceId_);
@@ -112,15 +106,6 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
         if (NotificationHelper::UnSubscribeNotification(iter->second) == 0) {
             subscriberMap_.erase(deviceId);
             peerDevice_.erase(deviceId);
-            if (callBack_ == nullptr) {
-                ANS_LOGW("Dans status callback is null.");
-            } else {
-                callBack_(deviceId, DeviceState::STATE_OFFLINE, false);
-            }
-        }
-        if (peerDevice_.empty()) {
-            DistributedTimerService::GetInstance().StartTimer(localDevice_.deviceId_,
-                GetCurrentTime() + THIRTY_SECEND);
         }
         ANS_LOGI("UnSubscribe notification %{public}s %{public}d.", deviceId.c_str(), deviceType);
     });

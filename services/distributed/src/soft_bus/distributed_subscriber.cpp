@@ -19,6 +19,7 @@
 #include "distributed_service.h"
 #include "notification_config_parse.h"
 #include "distributed_preferences.h"
+#include "distributed_local_config.h"
 
 namespace OHOS {
 namespace Notification {
@@ -195,7 +196,7 @@ bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConsta
         default:
             return false;
     }
-    auto collaborativeDeleteTypes = DistributedService::GetInstance().GetCollaborativeDeleteTypes();
+    auto collaborativeDeleteTypes = DistributedLocalConfig::GetInstance().GetCollaborativeDeleteTypes();
     return collaborativeDeleteTypes.find(type) != collaborativeDeleteTypes.end();
 }
 

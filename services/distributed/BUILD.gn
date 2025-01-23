@@ -96,9 +96,6 @@ ohos_shared_library("libdans") {
   ]
 
   sources = [
-    "${services_path}/ans/src/common/file_utils.cpp",
-    "${services_path}/ans/src/common/notification_app_privileges.cpp",
-    "${services_path}/ans/src/common/notification_config_parse.cpp",
     "src/helper/bundle_resource_helper.cpp",
     "src/helper/distributed_preference.cpp",
     "src/helper/distributed_rdb_helper.cpp",

@@ -25,28 +25,29 @@ DistributedLocalConfig& DistributedLocalConfig::GetInstance()
     return distributedLocalConfig;
 }
 
-void DistributedLocalConfig::SetLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    int32_t titleLength, int32_t contentLength)
+void DistributedLocalConfig::SetLocalDevice(const DistributedDeviceConfig config)
 {
-    localDevice_.deviceId_ = deviceId;
-    localDevice_.deviceType_ = deviceType;
-    maxTitleLength_ = titleLength;
-    maxContentLength_ = contentLength;
-}
-
-const DistributedDeviceInfo& DistributedLocalConfig::GetLocalDevice() const
-{
-    return localDevice_;
+    localConfig_ = config;
 }
 
 int32_t DistributedLocalConfig::GetTitleLength() const
 {
-    return maxTitleLength_;
+    return localConfig_.maxTitleLength;
 }
 
 int32_t DistributedLocalConfig::GetContentLength() const
 {
-    return maxContentLength_;
+    return localConfig_.maxContentLength;
+}
+
+uint32_t DistributedLocalConfig::GetStartAbilityTimeout() const
+{
+    return localConfig_.startAbilityTimeout;
+}
+
+std::unordered_set<std::string> DistributedLocalConfig::GetCollaborativeDeleteTypes() const
+{
+    return localConfig_.collaborativeDeleteTypes;
 }
 
 }
