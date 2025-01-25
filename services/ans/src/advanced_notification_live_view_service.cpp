@@ -746,11 +746,13 @@ void AdvancedNotificationService::HandleUpdateLiveViewNotificationTimer(const in
         if (!request->GetContent() || !request->GetContent()->GetNotificationContent()) {
             continue;
         }
-
         bool isContinuousLiveView = request->IsSystemLiveView() && request->GetCreatorUid() == BGTASK_UID;
+        if (!isContinuousLiveView) {
+            continue;
+        }
         const auto &liveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
             request->GetContent()->GetNotificationContent());
-        if (isContinuousLiveView && liveViewContent->GetType() == TYPE_CODE_DOWNLOAD) {
+        if (liveViewContent->GetType() == TYPE_CODE_DOWNLOAD) {
             if (isPaused) {
                 ANS_LOGI("liveview notification timer is being cancelled, uid: %{public}d", uid);
                 CancelTimer(record->notification->GetFinishTimer());
