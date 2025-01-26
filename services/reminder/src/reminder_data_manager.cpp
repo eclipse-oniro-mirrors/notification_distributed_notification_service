@@ -134,7 +134,6 @@ ErrCode ReminderDataManager::CancelReminder(
         return ERR_REMINDER_NOT_EXIST;
     }
     if (activeReminderId_ == reminderId) {
-        ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
         {
             std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
@@ -656,7 +655,10 @@ uint64_t ReminderDataManager::CreateTimer(const sptr<MiscServices::TimeServiceCl
     auto timerInfo = std::make_shared<ReminderTimerInfo>();
     timerInfo->SetRepeat(false);
     timerInfo->SetInterval(0);
-    timerInfo->SetType(timerInfo->TIMER_TYPE_EXACT | timerInfo->TIMER_TYPE_WAKEUP);
+    uint8_t timerTypeWakeup = static_cast<uint8_t>(timerInfo->TIMER_TYPE_WAKEUP);
+    uint8_t timerTypeExact = static_cast<uint8_t>(timerInfo->TIMER_TYPE_EXACT);
+    int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
+    timerInfo->SetType(timerType);
     timerInfo->SetReminderTimerType(ReminderTimerInfo::ReminderTimerType::REMINDER_TIMER_LOAD);
     return timer->CreateTimer(timerInfo);
 }

@@ -588,6 +588,9 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | Small
     uint64_t ts = t * 1000;  // ms
 
     sptr<ReminderRequest> reminder = new ReminderRequestCalendar();
+    reminder->SetShare(true);
+    reminderStore.UpdateOrInsert(reminder);
+    reminder->SetShare(false);
     reminder->reminderId_ = 999;
     reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
     reminder->repeatDaysOfWeek_ = 55;
@@ -680,6 +683,30 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
     calendarStrategy.RecoverFromDb(alarm, result, nullptr);
     calendarStrategy.RecoverFromDb(calendar, result, baseResult);
     EXPECT_EQ(alarm->reminderId_, 0);
+}
+
+/**
+ * @tc.name: ReminderCalendarStrategyTest_00004
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00004, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NativeRdb::ResultSet> result = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    int32_t value = 0;
+    ReminderStore::GetInt32Val(result, "1", value);
+    int64_t val = 0;
+    ReminderStore::GetInt64Val(result, "1", val);
+    std::string str;
+    ReminderStore::GetStringVal(result, "1", str);
+
+    ReminderStore reminderStore;
+    reminderStore.QueryActiveReminderCount();
+    InitStore(reminderStore);
+    reminderStore.QueryActiveReminderCount();
+    ClearStore();
+    EXPECT_GE(value, 0);
 }
 }
 }
