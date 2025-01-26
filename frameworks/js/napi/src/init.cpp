@@ -88,7 +88,7 @@ napi_value NotificationInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", SetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", GetSyncNotificationEnabledWithoutApp),
 #else
-        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCb),
         DECLARE_NAPI_FUNCTION("enableDistributed", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("enableDistributedByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiReturnCapErrCb),
