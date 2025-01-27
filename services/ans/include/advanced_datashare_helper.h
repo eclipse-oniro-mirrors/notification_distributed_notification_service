@@ -40,7 +40,7 @@ public:
     bool Query(Uri &uri, const std::string &key, std::string &value);
     bool isRepeatCall(const std::string &phoneNumber);
     ErrCode QueryContact(Uri &uri, const std::string &phoneNumber,
-        const std::string &policy, const std::string &profileId);
+        const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
     std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
@@ -57,8 +57,8 @@ private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     std::shared_ptr<DataShare::DataShareHelper> CreateContactDataShareHelper(std::string uri);
     std::shared_ptr<DataShare::DataShareHelper> CreateIntelligentDataShareHelper(std::string uri);
-    std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSet(Uri &uri,
-        const std::string &phoneNumber, const std::string &policy, const std::string &profileId);
+    std::shared_ptr<DataShare::DataShareResultSet> GetContactResultSet(Uri &uri, const std::string &phoneNumber,
+        const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
     bool dealWithContactResult(std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
 };
