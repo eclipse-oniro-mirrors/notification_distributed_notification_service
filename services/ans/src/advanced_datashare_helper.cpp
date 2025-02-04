@@ -195,7 +195,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
 {
     std::shared_ptr<DataShare::DataShareHelper> helper;
     std::shared_ptr<DataShare::DataShareResultSet> resultSet;
-    if (isSupportIntelligentScene.c_str() == SUPPORT_INTEGELLIGENT_SCENE &&
+    if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
         (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
         atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS)) {
         helper = CreateIntelligentDataShareHelper(GetIntelligentData(INTELLIGENT_URI, KEY_INTELLIGENT_URI));
@@ -223,6 +223,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
             ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
             return nullptr;
         }
+        ANS_LOGE("GetContactResultSet, not support IntelligentScene.");
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(IS_DELETED, 0);
         predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
