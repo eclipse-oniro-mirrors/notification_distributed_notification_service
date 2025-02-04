@@ -1454,10 +1454,8 @@ private:
         const std::string &groupName, const int32_t reason);
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
-    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId,
-        const std::string isSupportIntelligentScene);
-    ErrCode QueryContactByProfileId(const std::string &uri, const std::string &phoneNumber,
-        const std::string &policy, int32_t userId, const std::string isSupportIntelligentScene);
+    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
+    ErrCode QueryContactByProfileId(const std::string &phoneNumber, const std::string &policy, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
     bool IsSystemUser(int32_t userId);
     ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
