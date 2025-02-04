@@ -2023,21 +2023,7 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
         ANS_LOGD("GetActiveUserId is false");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
-
-    char buf[256] = { 0 };
-    const std::string &paramName = "const.intelligentscene.enable";
-    std::string isSupportIntelligentScene = "false";
-    const std::string defaultValue = "false";
-
-    auto res = GetParameter(paramName.c_str(), defaultValue.c_str(), buf, sizeof(buf));
-    if (res <= 0) {
-        ANS_LOGD("isSupportIntelligentScene GetParameter is false");
-    } else {
-        isSupportIntelligentScene = buf;
-        ANS_LOGI("isSupportIntelligentScene is %{public}s", isSupportIntelligentScene.c_str());
-    }
-
-    return CheckNeedSilent(phoneNumber, callerType, userId, isSupportIntelligentScene);
+    return CheckNeedSilent(phoneNumber, callerType, userId);
 }
 
 ErrCode AdvancedNotificationService::CheckNeedSilent(
