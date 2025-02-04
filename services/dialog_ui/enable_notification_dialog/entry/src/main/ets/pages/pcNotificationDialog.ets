@@ -162,12 +162,12 @@ struct PermissionDialog {
                   )
                   .fontWeight(FontWeight.Medium)
                   .fontColor($r('sys.color.font_primary'))
-                  .margin({
-                    left: Constants.PC_CONTENT_MARGIN_SIDE,
-                    right: Constants.PC_CONTENT_MARGIN_SIDE,
-                    top: Constants.PC_CONTENT_MARGIN_TOP
-                  })
                 }
+                .margin({
+                  left: Constants.PC_CONTENT_MARGIN_SIDE,
+                  right: Constants.PC_CONTENT_MARGIN_SIDE,
+                  top: Constants.PC_CONTENT_MARGIN_TOP
+                })
               }
               Row() {
                 Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
