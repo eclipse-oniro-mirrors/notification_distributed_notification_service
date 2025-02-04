@@ -18,6 +18,8 @@ import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
 
+const TAG = 'NotificationDialog_Service ';
+
 /**
  * Omit display when application name is too long
  * @param {String} Application name
@@ -42,19 +44,20 @@ export function calContainerWidth(
     try {
       let textWidth = px2vp(measureUtils.measureText(options));
       let ratio = (textWidth % containerWidth) / containerWidth;
-      let crossLineFlag: boolean = textWidth > containerWidth;
+      let crossLineFlag: boolean = (textWidth > containerWidth) && (textWidth < 2 * containerWidth);
       if (crossLineFlag && ratio < crossLineRatio) {
         targetContainerWidth = containerWidth / Constants.CROSS_LINE_RESIZE_PARAM;
+        console.info(TAG, 'afford condition, cal new width.');
       }
     } catch (err) {
-      console.error(`refresh width failed, code=${err?.code0}, msg=${err?.message}.`);
+      console.error(TAG, `refresh width failed, code=${err?.code0}, msg=${err?.message}.`);
     }
     return targetContainerWidth;
   }
 
 export function getFontSizeScale(context: common.UIAbilityContext, maxScale: number = 3.2): number {
   let fontSizeScale = context.config?.fontSizeScale;
-  console.log(`NotificationDialog_Service fontSizeScale = ${fontSizeScale}`);
+  console.log(TAG, `fontSizeScale = ${fontSizeScale}`);
   if(fontSizeScale === undefined) {
     return Constants.FONT_SCALE_DEFAULT;
   }
