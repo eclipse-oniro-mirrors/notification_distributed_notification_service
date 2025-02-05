@@ -54,6 +54,7 @@ HWTEST_F(
     bool runOnCreate = true;
     ReminderAgentServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStart();
+    test.OnStart();
 }
 
 /**

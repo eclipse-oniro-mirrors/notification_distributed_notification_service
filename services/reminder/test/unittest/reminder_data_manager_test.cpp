@@ -31,6 +31,9 @@
 #include "ability_manager_client.h"
 #include "mock_ipc_skeleton.h"
 #include "reminder_datashare_helper.h"
+#include "reminder_config_change_observer.h"
+#include "reminder_calendar_share_table.h"
+#include "reminder_timer_info.h"
 
 using namespace testing::ext;
 using namespace OHOS::EventFwk;
@@ -986,6 +989,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_020, Level1)
     manager->RemoveReminderLocked(500, true);
     manager->RemoveReminderLocked(500, false);
     manager->ResetStates(ReminderDataManager::TimerType::ALERTING_TIMER);
+    manager->ResetStates(static_cast<ReminderDataManager::TimerType>(100));
+    manager->StopTimer(static_cast<ReminderDataManager::TimerType>(100));
     manager->ConnectAppMgr();
     manager->ConnectAppMgr();
     manager->OnRemoveAppMgr();
@@ -1029,6 +1034,258 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_021, Level1)
     observer.OnChange(info1);
     info1.changeType_ = DataShare::DataShareObserver::ChangeType::OTHER;
     observer.OnChange(info1);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_022
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_022, Level1)
+{
+    ReminderConfigChangeObserver observer;
+    AppExecFwk::Configuration config;
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "");
+    observer.OnConfigurationUpdated(config);
+    config.RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "test");
+    observer.languageInfo_ = "test";
+    observer.OnConfigurationUpdated(config);
+    observer.languageInfo_ = "1111";
+    observer.OnConfigurationUpdated(config);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_023
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_023, Level1)
+{
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer(500);
+    auto buttonWantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    auto datashare = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    reminder->SetActionButton("title", ReminderRequest::ActionButtonType::CLOSE, "resource",
+        buttonWantAgent, datashare);
+    manager->IsActionButtonDataShareValid(reminder, 0);
+    datashare->uri = "1111";
+    manager->IsActionButtonDataShareValid(reminder, 0);
+
+    std::unordered_map<std::string, int32_t> limits;
+    int32_t totalCount = 0;
+    reminder->InitUid(1);
+    reminder->SetTriggerTimeInMilli(100);
+    manager->CheckShowLimit(limits, totalCount, reminder);
+    manager->CheckShowLimit(limits, totalCount, reminder);
+    limits["1_100"] = 100;
+    manager->CheckShowLimit(limits, totalCount, reminder);
+    totalCount = 1000;
+    manager->CheckShowLimit(limits, totalCount, reminder);
+
+    sleep(1);
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.push_back(reminder);
+    }
+    manager->HandleAutoDeleteReminder(231, 232, 233);
+    reminder->InitUid(232);
+    manager->HandleAutoDeleteReminder(231, 232, 233);
+    reminder->SetNotificationId(231);
+    manager->HandleAutoDeleteReminder(231, 232, 233);
+    reminder->SetAutoDeletedTime(233);
+    manager->HandleAutoDeleteReminder(231, 232, 233);
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.clear();
+    }
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_024
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_024, Level1)
+{
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(241);
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar();
+    calendar->SetReminderId(242);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.push_back(timer);
+        manager->reminderVector_.push_back(calendar);
+    }
+    std::map<std::string, sptr<ReminderRequest>> reminders;
+    manager->UpdateShareReminders(reminders);
+    timer->SetShare(true);
+    calendar->SetShare(true);
+    manager->UpdateShareReminders(reminders);
+    calendar->SetIdentifier("242");
+    reminders["242"] = calendar;
+    manager->UpdateShareReminders(reminders);
+    manager->LoadShareReminders();
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_025
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_025, Level1)
+{
+    DataShare::DataShareObserver::ChangeInfo info;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    info.valueBuckets_.resize(1);
+
+    DataShare::DataShareObserver::ChangeInfo::Value alarmTime = static_cast<double>(251);
+    info.valueBuckets_[0][ReminderCalendarShareTable::ALARM_TIME] = alarmTime;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value id = static_cast<double>(252);
+    info.valueBuckets_[0][ReminderCalendarShareTable::ID] = id;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value eventId = static_cast<double>(253);
+    info.valueBuckets_[0][ReminderCalendarShareTable::EVENT_ID] = eventId;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value slotType = static_cast<double>(0);
+    info.valueBuckets_[0][ReminderCalendarShareTable::SLOT_TYPE] = slotType;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value title = std::string("25");
+    info.valueBuckets_[0][ReminderCalendarShareTable::TITLE] = title;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value content = std::string("255");
+    info.valueBuckets_[0][ReminderCalendarShareTable::CONTENT] = content;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value buttons = std::string("");
+    info.valueBuckets_[0][ReminderCalendarShareTable::BUTTONS] = buttons;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value wantAgent = std::string("");
+    info.valueBuckets_[0][ReminderCalendarShareTable::WANT_AGENT] = wantAgent;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value identifier = std::string("256");
+    info.valueBuckets_[0][ReminderCalendarShareTable::IDENTIFIER] = identifier;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value minutes = static_cast<double>(1);
+    info.valueBuckets_[0][ReminderCalendarShareTable::MINUTES] = minutes;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value begin = static_cast<double>(1737861639000);
+    info.valueBuckets_[0][ReminderCalendarShareTable::BEGIN] = begin;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+
+    DataShare::DataShareObserver::ChangeInfo::Value ends = static_cast<double>(1737948039000);
+    info.valueBuckets_[0][ReminderCalendarShareTable::END] = ends;
+    ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_026
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_026, Level1)
+{
+    ReminderTimerInfo info;
+    info.OnTrigger();
+    info.SetReminderTimerType(ReminderTimerInfo::ReminderTimerType::REMINDER_TIMER_LOAD);
+    info.OnTrigger();
+    info.SetReminderTimerType(static_cast<ReminderTimerInfo::ReminderTimerType>(9));
+    info.OnTrigger();
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_027
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_027, Level1)
+{
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(271);
+    auto wantInfo = timer->wantAgentInfo_;
+    timer->wantAgentInfo_ = nullptr;
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 271);
+    manager->ClickReminder(want);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    timer->wantAgentInfo_ = wantInfo;
+    manager->ClickReminder(want);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    timer->wantAgentInfo_->pkgName = "test";
+    manager->ClickReminder(want);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    timer->SetSystemApp(true);
+    manager->HandleCustomButtonClick(want);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_028
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_028, Level1)
+{
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(281);
+    sptr<ReminderRequest> timer2 = new ReminderRequestTimer(500);
+    timer2->SetReminderId(282);
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.push_back(timer);
+        manager->showedReminderVector_.push_back(timer2);
+    }
+    manager->RemoveFromShowedReminders(timer);
+    {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        manager->showedReminderVector_.clear();
+    }
     EXPECT_TRUE(manager != nullptr);
 }
 }  // namespace Notification

@@ -469,6 +469,8 @@ ohos_unittest("reminder_agent_service_ability_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
@@ -512,6 +514,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":reminder_access_token_helper_test",
+    ":reminder_agent_service_ability_test",
     ":reminder_agent_service_test",
     ":reminder_bundle_manager_helper_branch_test",
     ":reminder_os_account_manager_helper_test",
