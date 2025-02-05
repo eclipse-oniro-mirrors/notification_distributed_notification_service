@@ -3615,7 +3615,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber03, Function | SmallTest | Leve
     data.WriteInt32(type);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
