@@ -149,6 +149,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         result = CheckSoundPermission(request, bundleOption->GetBundleName());
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("Check sound failed.");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             break;
         }
 
@@ -156,12 +157,10 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             result = PushCheck(request);
         }
         if (result != ERR_OK) {
-            message.ErrorCode(result).Message("Push check failed.");
             break;
         }
         result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (result != ERR_OK) {
-            message.ErrorCode(result).Message("Publish prepared failed.");
             break;
         }
     } while (0);
@@ -1603,9 +1602,6 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
         std::string message = "remove notificaiton error";
-        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(4, 7)
-            .ErrorCode(result).NotificationId(notificationId);
-        ReportDeleteFailedEventPush(haMetaMessage, removeReason, message);
         ANS_LOGE("%{public}s", message.c_str());
     }
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);

@@ -2751,5 +2751,16 @@ const std::string NotificationRequest::GetLittleIconType() const
 {
     return littleIconType_;
 }
+
+void NotificationRequest::AdddeviceStatu(const std::string &deviceType,
+    const std::string deviceStatu)
+{
+    deviceStatus_[deviceType] = deviceStatu;
+}
+
+const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() const
+{
+    return deviceStatus_;
+}
 }  // namespace Notification
 }  // namespace OHOS

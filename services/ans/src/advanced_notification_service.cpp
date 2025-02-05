@@ -64,6 +64,7 @@
 #include "reminder_swing_decision_center.h"
 #include "notification_extension_wrapper.h"
 #include "bool_wrapper.h"
+#include "notification_config_parse.h"
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
@@ -91,6 +92,7 @@ constexpr int32_t BUNDLE_OPTION_UID_DEFAULT_VALUE = 0;
 constexpr int32_t MAX_SOUND_ITEM_LENGTH = 2048;
 constexpr int32_t RSS_UID = 3051;
 constexpr int32_t RESSCHED_UID = 1096;
+constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 14;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
@@ -328,8 +330,9 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnBootSystemCompleted, this),
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
-
+    
     dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
+    DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
 #endif
@@ -698,6 +701,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         if (result != ERR_OK) {
             return;
         }
+        NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
@@ -771,6 +775,10 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     if (enable != DO_NOT_DISTURB_MODE) {
         ANS_LOGD("Currently not is do not disturb mode.");
         return;
+    }
+    auto notificationControlFlags = record->request->GetNotificationControlFlags();
+    if ((notificationControlFlags & CONTROL_BY_DO_NOT_DISTURB_MODE) == 0) {
+        record->request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_DO_NOT_DISTURB_MODE);
     }
     std::string bundleName = record->bundleOption->GetBundleName();
     ANS_LOGI("The disturbMode is on, userId:%{public}d, bundle:%{public}s, profileId:%{public}s",
