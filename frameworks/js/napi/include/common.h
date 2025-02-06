@@ -1385,7 +1385,7 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationIconButton(
-        const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons);
+        const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen);
 
     /**
      * @brief Gets a time of NotificationLocalLiveViewContent object from specified js object
