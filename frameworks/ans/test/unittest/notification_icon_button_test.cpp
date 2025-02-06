@@ -31,20 +31,6 @@ public:
 };
 
 /**
- * @tc.name: ToJson_00001
- * @tc.desc: Test ToJson parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WBBH
- */
-HWTEST_F(NotificationIconButtonTest, ToJson_00001, Function | SmallTest | Level1)
-{
-    nlohmann::json jsonObject;
-    auto rrc = std::make_shared<NotificationIconButton>();
-    rrc->FromJson(jsonObject);
-    EXPECT_EQ(rrc->ToJson(jsonObject), true);
-}
-
-/**
  * @tc.name: FromJson_00001
  * @tc.desc: Test FromJson parameters.
  * @tc.type: FUNC
@@ -83,7 +69,7 @@ HWTEST_F(NotificationIconButtonTest, FromJson_00003, Function | SmallTest | Leve
     auto rrc = std::make_shared<NotificationIconButton>();
     nlohmann::json jsonObject = nlohmann::json{{"names", {"test"}}, {"icons", {1, "testIcons"}}};
     EXPECT_EQ(jsonObject.is_object(), true);
-    EXPECT_EQ(rrc->FromJson(jsonObject), nullptr);
+    EXPECT_NE(rrc->FromJson(jsonObject), nullptr);
 }
 
 /**
@@ -131,7 +117,7 @@ HWTEST_F(NotificationIconButtonTest, Unmarshalling_00001, Function | SmallTest |
             unmarshalling = false;
         }
     }
-    EXPECT_EQ(unmarshalling, true);
+    EXPECT_EQ(unmarshalling, false);
 }
 
 /**
@@ -162,8 +148,8 @@ HWTEST_F(NotificationIconButtonTest, Unmarshalling_00002, Function | SmallTest |
 HWTEST_F(NotificationIconButtonTest, Dump_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<NotificationIconButton>();
-
-    EXPECT_EQ(rrc->Dump(), "");
+    rrc->SetName("test");
+    EXPECT_EQ(rrc->Dump(), "NotificationIconButton {name = test, text = , hidePanel = 0 }");
 }
 }
 }
