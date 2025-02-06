@@ -61,6 +61,7 @@ constexpr const char *CALL_DIRECTION = "call_direction";
 constexpr const char *CREATE_TIME = "create_time";
 constexpr const char *WHITE_LIST = "1";
 constexpr const char *BLACK_LIST = "2";
+constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr const unsigned int PHONE_NUMBER_LENGTH = 7;
 constexpr const unsigned int MAX_TIME_INTERVAL = 15 * 60;
 constexpr const int TYPE_ID_FIVE = 5;
@@ -156,10 +157,10 @@ bool AdvancedDatashareHelper::Query(Uri &uri, const std::string &key, std::strin
 }
 
 ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy,
-    const std::string &profileId)
+    const std::string &profileId, const std::string isSupportIntelligentScene)
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    auto resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId);
+    auto resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId, isSupportIntelligentScene);
     if (resultSet == nullptr) {
         ANS_LOGE("QueryContact error, resultSet is null.");
         return ERROR_QUERY_INFO_FAILED;
@@ -189,12 +190,14 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
 }
 
 std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetContactResultSet(Uri &uri,
-    const std::string &phoneNumber, const std::string &policy, const std::string &profileId)
+    const std::string &phoneNumber, const std::string &policy, const std::string &profileId,
+    const std::string isSupportIntelligentScene)
 {
     std::shared_ptr<DataShare::DataShareHelper> helper;
     std::shared_ptr<DataShare::DataShareResultSet> resultSet;
-    if (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
-        atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS) {
+    if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
+        (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
+        atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS)) {
         helper = CreateIntelligentDataShareHelper(GetIntelligentData(INTELLIGENT_URI, KEY_INTELLIGENT_URI));
         if (helper == nullptr) {
             ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
@@ -220,6 +223,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
             ANS_LOGE("GetContactResultSet, The data share helper is nullptr.");
             return nullptr;
         }
+        ANS_LOGE("GetContactResultSet, not support IntelligentScene.");
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(IS_DELETED, 0);
         predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);

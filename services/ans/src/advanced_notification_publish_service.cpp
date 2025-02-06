@@ -49,6 +49,7 @@
 #include "advanced_datashare_helper.h"
 #include "advanced_datashare_helper_ext.h"
 #include "datashare_result_set.h"
+#include "parameter.h"
 #include "system_ability_definition.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -68,6 +69,7 @@ constexpr int32_t ANS_UID = 5523;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
@@ -2063,26 +2065,45 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
             break;
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
-            isNeedSilent = QueryContactByProfileId(CONTACT_DATA, phoneNumber, policy, userId);
-            break;
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
         case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
-            isNeedSilent = QueryContactByProfileId(datashareHelper->GetIntelligentUri(),
-                phoneNumber, policy, userId);
+            isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
             break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
     return isNeedSilent;
 }
 
-ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &uri, const std::string &phoneNumber,
+ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &phoneNumber,
     const std::string &policy, int32_t userId)
 {
+    char buf[256] = { 0 };
+    const std::string &paramName = "const.intelligentscene.enable";
+    std::string isSupportIntelligentScene = "false";
+    const std::string defaultValue = "false";
+ 
+    auto res = GetParameter(paramName.c_str(), defaultValue.c_str(), buf, sizeof(buf));
+    if (res <= 0) {
+        ANS_LOGD("isSupportIntelligentScene GetParameter is false");
+    } else {
+        isSupportIntelligentScene = buf;
+    }
+    ANS_LOGI("isSupportIntelligentScene is %{public}s", isSupportIntelligentScene.c_str());
+ 
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return -1;
     }
+ 
+    std::string uri = CONTACT_DATA;
+    if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
+        (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
+        atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS)) {
+        uri = datashareHelper->GetIntelligentUri();
+    }
+    ANS_LOGI("QueryContactByProfileId uri is %{public}s", uri.c_str());
+    
     std::string profileId;
     Uri profileIdUri(datashareHelper->GetFocusModeProfileUri(userId));
     bool profile_ret = datashareHelper->Query(profileIdUri, KEY_FOCUS_MODE_PROFILE, profileId);
@@ -2090,9 +2111,9 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         ANS_LOGE("Query profile id fail.");
         return -1;
     }
-
+ 
     Uri contactUri(uri);
-    return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId);
+    return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId, isSupportIntelligentScene);
 }
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, const std::string &instanceKey)
