@@ -22,7 +22,6 @@
 #include "distributed_device_data.h"
 #include "dm_device_info.h"
 #include "match_box.h"
-#include "distributed_timer_service.h"
 #include "bundle_icon_box.h"
 #include "distributed_preference.h"
 #include "bundle_resource_helper.h"

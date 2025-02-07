@@ -17,6 +17,7 @@
 #include "distributed_service.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "distributed_operation_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -37,6 +38,10 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
     }
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
         DistributedService::GetInstance().SyncDeviceState(SCREEN_ON);
+        return;
+    }
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        OperationService::GetInstance().HandleScreenEvent();
         return;
     }
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
@@ -78,6 +83,7 @@ void OberverService::Init(uint16_t deviceType)
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     }
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<DistributedEventSubscriber>(subscribeInfo);

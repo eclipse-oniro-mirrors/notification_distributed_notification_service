@@ -26,12 +26,11 @@
 #include "in_process_call_wrapper.h"
 #include "distributed_observer_service.h"
 #include "distributed_preference.h"
-#include "distributed_timer_service.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "response_box.h"
-#include "screenlock_callback_stub.h"
 #include "power_mgr_client.h"
 #include "distributed_local_config.h"
+#include "distributed_operation_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -45,63 +44,11 @@ constexpr const int32_t BRANCH3_ID = 3;
 constexpr const int32_t BRANCH4_ID = 4;
 }
 
-class UnlockScreenCallback : public ScreenLock::ScreenLockCallbackStub {
-public:
-    explicit UnlockScreenCallback();
-    ~UnlockScreenCallback() override;
-    void OnCallBack(const int32_t screenLockResult) override;
-    void SetWant(AAFwk::Want want);
-    void OnTriggerTimeout();
-
-private:
-    AAFwk::Want want_;
-    bool isTimeout_ = false;
-};
-
-UnlockScreenCallback::~UnlockScreenCallback() {}
-
-UnlockScreenCallback::UnlockScreenCallback() {}
-
-void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
+int64_t GetCurrentTime()
 {
-    ANS_LOGI("Unlock Screen result: %{public}d, isTimeout: %{public}d", screenLockResult, isTimeout_);
-    if (!isTimeout_) {
-        auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want_));
-        ANS_LOGI("StartAbility result:%{public}d", ret);
-    }
-}
-
-void UnlockScreenCallback::SetWant(AAFwk::Want want)
-{
-    want_ = want;
-}
-
-void UnlockScreenCallback::OnTriggerTimeout()
-{
-    ANS_LOGI("User unlock screen timeout.");
-    isTimeout_ = true;
-}
-
-class DistributedResponseTimerInfo : public DistributedTimerInfo {
-public:
-    DistributedResponseTimerInfo() : DistributedTimerInfo("") {}
-    void OnTrigger() override;
-    void SetListener(sptr<UnlockScreenCallback> listener);
-
-private:
-    sptr<UnlockScreenCallback> listener_ = nullptr;
-};
-
-void DistributedResponseTimerInfo::OnTrigger()
-{
-    if (listener_ != nullptr) {
-        listener_->OnTriggerTimeout();
-    }
-}
-
-void DistributedResponseTimerInfo::SetListener(sptr<UnlockScreenCallback> listener)
-{
-    listener_ = listener;
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return duration.count();
 }
 
 void DistributedService::SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
@@ -396,15 +343,15 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
     bool isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     ANS_LOGI("Screen locked status, isScreenLocked: %{public}d.", isScreenLocked);
     if (isScreenLocked) {
-        sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>(new (std::nothrow) UnlockScreenCallback());
-        listener->SetWant(*wantPtr);
+        OperationInfo info;
+        info.type = OperationType::OPERATION_CLICK_JUMP;
+        info.eventId = std::to_string(GetCurrentTime());
+        sptr<UnlockScreenCallback> listener = new (std::nothrow) UnlockScreenCallback(info.eventId);
         int32_t unlockResult = IN_PROCESS_CALL(
             ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener));
         ANS_LOGI("unlock result:%{public}d", unlockResult);
-        std::shared_ptr<DistributedResponseTimerInfo> timerInfo = std::make_shared<DistributedResponseTimerInfo>();
-        timerInfo->SetListener(listener);
-        auto timeout = DistributedLocalConfig::GetInstance().GetStartAbilityTimeout();
-        DistributedTimerService::GetInstance().StartTimerWithTrigger(timerInfo, timeout);
+        info.want = *wantPtr;
+        OperationService::GetInstance().AddOperation(info);
     } else {
         auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
         ANS_LOGI("StartAbility result:%{public}d", ret);

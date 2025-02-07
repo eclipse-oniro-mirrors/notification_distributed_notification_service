@@ -24,7 +24,6 @@
 #include "in_process_call_wrapper.h"
 #include "distributed_observer_service.h"
 #include "notification_subscribe_info.h"
-#include "distributed_timer_service.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_preference.h"
 #include "batch_remove_box.h"
