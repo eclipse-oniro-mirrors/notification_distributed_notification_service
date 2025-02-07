@@ -23,7 +23,6 @@
 #include "os_account_manager.h"
 #include "distributed_server.h"
 #include "distributed_device_data.h"
-#include "distributed_timer_service.h"
 
 namespace OHOS {
 namespace Notification {
