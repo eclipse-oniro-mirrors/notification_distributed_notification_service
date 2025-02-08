@@ -77,7 +77,11 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     subscribeInfo->SetNeedNotifyResponse(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
-        subscriberMap_.insert(std::make_pair(peerDevice.deviceId_, subscriber));
+        auto iter = subscriberMap_.find(peerDevice.deviceId_);
+        if (iter != subscriberMap_.end()) {
+            NotificationHelper::UnSubscribeNotification(iter->second);
+        }
+        subscriberMap_[peerDevice.deviceId_] = subscriber;
         peerDevice_[peerDevice.deviceId_].peerState_ = DeviceState::STATE_ONLINE;
         if (DistributedService::GetInstance().haCallback_ != nullptr) {
             std::string reason = "deviceType: " + std::to_string(localDevice_.deviceType_) +
