@@ -61,7 +61,7 @@ public:
     void SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason);
     void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
     void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
-    void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason);
+    void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code = -1);
     ErrCode OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
 
 private:

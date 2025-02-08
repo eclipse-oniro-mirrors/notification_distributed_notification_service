@@ -52,7 +52,11 @@ constexpr const char* CFG_KEY_TITLE_LENGTH = "maxTitleLength";
 constexpr const char* CFG_KEY_CONTENT_LENGTH = "maxContentLength";
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
+constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+
+static const int32_t MAX_DATA_LENGTH = 7;
+static const int32_t START_ANONYMOUS_INDEX = 5;
 }
 
 std::string TransDeviceTypeToName(uint16_t deviceType_)
@@ -246,7 +250,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
         std::lock_guard<std::mutex> lock(mapLock_);
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
-            "deviceId: " + AnonymousProcessing(deviceInfo.deviceId) + "networkId: " +
+            " ; deviceId: " + AnonymousProcessing(deviceInfo.deviceId) + " ; networkId: " +
             AnonymousProcessing(deviceInfo.networkId);
         HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_1, reason);
         DistributedDeviceInfo device = DistributedDeviceInfo(deviceInfo.deviceId, deviceInfo.deviceName,
@@ -272,19 +276,31 @@ void DistributedExtensionService::HADotCallback(int32_t code, int32_t ErrCode, u
         }
     } else if (code == DELETE_ERROR_EVENT_CODE) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_20, branchId)
-                                    .deleteReason(NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE)
+                                    .DeleteReason(NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE)
                                     .ErrorCode(ErrCode)
                                     .Message(reason);
         NotificationAnalyticsUtil::ReportDeleteFailedEvent(message);
     } else if (code == ANS_CUSTOMIZE_CODE) {
-        bool isLiveView = false;
-        if (ErrCode == NotificationConstant::SlotType::LIVE_VIEW) {
-            isLiveView = true;
+        if (branchId == BRANCH_3) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
+                                        .ClickByWatch()
+                                        .SlotType(ErrCode);
+            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+        } else {
+            bool isLiveView = false;
+            if (ErrCode == NotificationConstant::SlotType::LIVE_VIEW) {
+                isLiveView = true;
+            }
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
+                                        .DelByWatch(isLiveView)
+                                        .SlotType(ErrCode);
+            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
         }
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
-                                    .delByWatch(isLiveView)
-                                    .SlotType(ErrCode);
-        NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+    } else if (code == MODIFY_ERROR_EVENT_CODE) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_20, branchId)
+                                    .ErrorCode(ErrCode)
+                                    .Message(reason);
+        NotificationAnalyticsUtil::ReportSkipFailedEvent(message);
     }
 }
 
@@ -320,7 +336,7 @@ void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
-                             "deviceId: " + AnonymousProcessing(deviceInfo.deviceId);
+                             " ; deviceId: " + AnonymousProcessing(deviceInfo.deviceId);
         HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_2, reason);
         deviceMap_.erase(deviceInfo.deviceId);
     });
@@ -366,13 +382,9 @@ void DistributedExtensionService::SetMaxContentLength(nlohmann::json &configJson
 
 std::string DistributedExtensionService::AnonymousProcessing(std::string data)
 {
-    if (!data.empty()) {
-        int length = data.length();
-        int count = length / 3;
-        for (int i = 0; i < count; i++) {
-            data[i] = '*';
-            data[length - i - 1] = '*';
-        }
+    int32_t length = data.length();
+    if (length >= MAX_DATA_LENGTH) {
+        data.replace(START_ANONYMOUS_INDEX, length - 1, "**");
     }
     return data;
 }

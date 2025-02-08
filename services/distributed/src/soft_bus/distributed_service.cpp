@@ -30,6 +30,8 @@ namespace Notification {
 namespace {
 static const int32_t MAX_CONNECTED_TYR = 5;
 static const uint64_t SYNC_TASK_DELAY = 7 * 1000 * 1000;
+static const int32_t MAX_DATA_LENGTH = 7;
+static const int32_t START_ANONYMOUS_INDEX = 5;
 }
 
 DistributedService& DistributedService::GetInstance()
@@ -187,7 +189,8 @@ int64_t DistributedService::GetCurrentTime()
 void DistributedService::SendEventReport(
     int32_t messageType, int32_t errCode, const std::string& errorReason)
 {
-    if (sendReportCallback_ != nullptr) {
+    if (sendReportCallback_ != nullptr ||
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         sendReportCallback_(messageType, errCode, errorReason);
     }
 }
@@ -206,21 +209,23 @@ void DistributedService::InitSendReportCallBack(
 
 std::string DistributedService::AnonymousProcessing(std::string data)
 {
-    if (!data.empty()) {
-        int length = data.length();
-        int count = length / 3;
-        for (int i = 0; i < count; i++) {
-            data[i] = '*';
-            data[length - i - 1] = '*';
-        }
+    int32_t length = data.length();
+    if (length >= MAX_DATA_LENGTH) {
+        data.replace(START_ANONYMOUS_INDEX, length - 1, "**");
     }
     return data;
 }
 
-void DistributedService::SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason)
+void DistributedService::SendHaReport(
+    int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code)
 {
-    if (haCallback_ != nullptr) {
+    if (haCallback_ == nullptr || localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+    if (code == -1) {
         haCallback_(code_, errorCode, branchId, errorReason);
+    } else {
+        haCallback_(code, errorCode, branchId, errorReason);
     }
 }
 
