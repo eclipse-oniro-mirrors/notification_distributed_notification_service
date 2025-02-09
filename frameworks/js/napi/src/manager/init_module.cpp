@@ -95,7 +95,6 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isSupportTemplate", NapiIsSupportTemplate),
         DECLARE_NAPI_FUNCTION("getSyncNotificationEnabledWithoutApp", NapiGetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("isNotificationEnabledSync", NapiIsNotificationEnabledSync),
-        DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
         DECLARE_NAPI_FUNCTION("setDistributedEnabledBySlot", NapiSetDistributedEnabledBySlot),
         DECLARE_NAPI_FUNCTION("isDistributedEnabledBySlot", NapiIsDistributedEnabledBySlot),
         DECLARE_NAPI_FUNCTION("disableNotificationFeature", NapiDisableNotificationFeature),
@@ -186,6 +185,12 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setAdditionalConfig", NapiSetAdditionConfig),
 #else
         DECLARE_NAPI_FUNCTION("setAdditionalConfig", Common::NapiReturnCapErr),
+#endif
+
+#ifdef ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS
+        DECLARE_NAPI_FUNCTION("openNotificationSettings", NapiOpenNotificationSettings),
+#else
+        DECLARE_NAPI_FUNCTION("openNotificationSettings", Common::NapiReturnCapErr),
 #endif
 };
 
