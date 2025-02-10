@@ -156,13 +156,13 @@ struct PermissionDialog {
                   .fontWeight(FontWeight.Regular)
                   .fontColor($r('app.color.text_primary'))
                   .lineHeight(Constants.DIALOG_DESP_LINE_HEIGHT)
-                  .margin({
-                    top: Constants.DIALOG_DESP_MARGIN_TOP,
-                    left: Constants.DIALOG_DESP_MARGIN_LEFT,
-                    right: Constants.DIALOG_DESP_MARGIN_RIGHT,
-                    bottom: Constants.DIALOG_DESP_MARGIN_BOTTOM
-                  })
                 }
+                .margin({
+                  top: Constants.DIALOG_DESP_MARGIN_TOP,
+                  left: Constants.DIALOG_DESP_MARGIN_LEFT,
+                  right: Constants.DIALOG_DESP_MARGIN_RIGHT,
+                  bottom: Constants.DIALOG_DESP_MARGIN_BOTTOM
+                })
               }
               Row() {
                 Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
