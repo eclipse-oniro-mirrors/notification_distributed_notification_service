@@ -628,6 +628,10 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif
+    if (!request->IsSystemLiveView() && request->GetClassification() == "ANS_VOIP") {
+        request->SetClassification("");
+    }
+    ANS_LOGI("classification:%{public}s", request->GetClassification().c_str());
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(

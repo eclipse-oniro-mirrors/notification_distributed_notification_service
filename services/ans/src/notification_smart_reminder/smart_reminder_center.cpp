@@ -262,6 +262,11 @@ void SmartReminderCenter::HandleReminderMethods(
     set<string> &validDevices,
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
 {
+    if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
+        (request->GetClassification() == ANS_VOIP)) {
+        ANS_LOGI("VOIP or CALL is not affected with SmartReminder");
+        return;
+    }
     vector<shared_ptr<ReminderAffected>> reminderAffecteds;
     GetReminderAffecteds(reminderFilterDevice, request, reminderAffecteds);
     if (reminderAffecteds.size() <= 0) {

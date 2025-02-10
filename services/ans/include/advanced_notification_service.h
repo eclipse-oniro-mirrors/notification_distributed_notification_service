@@ -1441,6 +1441,7 @@ private:
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
+    void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
 
 private:
     static sptr<AdvancedNotificationService> instance_;
