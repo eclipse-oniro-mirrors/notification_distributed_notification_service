@@ -81,7 +81,6 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("addSlot", NapiAddSlot),
         DECLARE_NAPI_FUNCTION("addSlots", NapiAddSlots),
         DECLARE_NAPI_FUNCTION("getSlot", NapiGetSlot),
-        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", NapiGetSlotNumByBundle),
         DECLARE_NAPI_FUNCTION("getSlots", NapiGetSlots),
         DECLARE_NAPI_FUNCTION("removeSlot", NapiRemoveSlot),
         DECLARE_NAPI_FUNCTION("removeAllSlots", NapiRemoveAllSlots),
@@ -163,6 +162,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", NapiSetSlotFlagsByBundle),
         DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", NapiGetSlotFlagsByBundle),
         DECLARE_NAPI_FUNCTION("getSlotByBundle", NapiGetSlotByBundle),
+        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", NapiGetSlotNumByBundle),
 #else
         DECLARE_NAPI_FUNCTION("setSlotByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("getSlotsByBundle", Common::NapiReturnCapErrCb),
@@ -171,6 +171,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSlotFlagsByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("getSlotFlagsByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("getSlotByBundle", Common::NapiReturnCapErrCb),
+        DECLARE_NAPI_FUNCTION("getSlotNumByBundle", Common::NapiReturnCapErrCb),
 #endif
 
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW

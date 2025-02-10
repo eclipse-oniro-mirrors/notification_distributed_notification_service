@@ -398,7 +398,7 @@ napi_value Common::NapiReturnFalseCb(napi_env env, napi_callback_info info)
         NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
         if (valuetype == napi_function) {
             napi_create_reference(env, argv[PARAM0], 1, &callback);
-            SetCallback(env, callback, 0, result, false);
+            SetCallback(env, callback, 0, result, true);
             napi_delete_reference(env, callback);
             return NapiGetNull(env);
         }
