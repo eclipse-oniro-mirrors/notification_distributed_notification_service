@@ -367,10 +367,6 @@ ErrCode AnsManagerProxy::GetAllActiveNotifications(std::vector<sptr<Notification
     }
 
     MessageParcel reply;
-    if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
-        ANS_LOGE("[GetAllActiveNotifications] fail:: set max capacity");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_ACTIVE_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {

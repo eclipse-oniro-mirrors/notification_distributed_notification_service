@@ -785,6 +785,10 @@ ErrCode AnsManagerStub::HandleGetActiveNotifications(MessageParcel &data, Messag
     }
     std::vector<sptr<NotificationRequest>> notifications;
     ErrCode result = GetActiveNotifications(notifications, appInstanceKey);
+    if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        ANS_LOGE("[HandleGetActiveNotifications] fail:: set max capacity");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     if (!WriteParcelableVector(notifications, reply, result)) {
         ANS_LOGE("[HandleGetActiveNotifications] fail: write notifications failed");
         return ERR_ANS_PARCELABLE_FAILED;
@@ -814,6 +818,7 @@ ErrCode AnsManagerStub::HandleGetAllActiveNotifications(MessageParcel &data, Mes
     ErrCode result = GetAllActiveNotifications(notifications);
     
     if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        ANS_LOGE("[HandleGetAllActiveNotifications] fail:: set max capacity");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     if (!WriteParcelableVector(notifications, reply, result)) {
@@ -833,6 +838,10 @@ ErrCode AnsManagerStub::HandleGetSpecialActiveNotifications(MessageParcel &data,
 
     std::vector<sptr<Notification>> notifications;
     ErrCode result = GetSpecialActiveNotifications(key, notifications);
+    if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        ANS_LOGE("[HandleGetSpecialActiveNotifications] fail:: set max capacity");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
     if (!WriteParcelableVector(notifications, reply, result)) {
         ANS_LOGE("[HandleGetSpecialActiveNotifications] fail: write notifications failed");
         return ERR_ANS_PARCELABLE_FAILED;
