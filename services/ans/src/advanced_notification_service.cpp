@@ -96,9 +96,12 @@ constexpr int32_t RSS_UID = 3051;
 constexpr int32_t RESSCHED_UID = 1096;
 constexpr int32_t TYPE_CODE_VOIP = 0;
 constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 14;
+constexpr int32_t CONTROL_BY_INTELLIGENT_EXPERIENCE = 1 << 31;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
+const std::string INTELLIGENT_EXPERIENCE = "1";
 const std::string ANS_VOIP = "ANS_VOIP";
+const std::string ANS_VERIFICATION_CODE = "ANS_VERIFICATION_CODE";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
 
@@ -754,6 +757,25 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
     }
 }
 
+void AdvancedNotificationService::QueryIntelligentExperienceEnable(const int32_t &userId, std::string &enable)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    if (datashareHelper == nullptr) {
+        ANS_LOGE("The data share helper is nullptr.");
+        return;
+    }
+    Uri enableUri(datashareHelper->GetIntelligentExperienceUri(userId));
+    bool ret = datashareHelper->Query(enableUri, KEY_INTELLIGENT_EXPERIENCE, enable);
+    if (!ret) {
+        ANS_LOGE("Query intelligent experience enable fail.");
+        return;
+    }
+    if (enable == INTELLIGENT_EXPERIENCE) {
+        ANS_LOGI("Currently is intelligent experience.");
+        return;
+    }
+}
+
 void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable)
 {
     std::lock_guard<std::mutex> lock(doNotDisturbMutex_);
@@ -800,6 +822,15 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     std::string bundleName = record->bundleOption->GetBundleName();
     ANS_LOGI("The disturbMode is on, userId:%{public}d, bundle:%{public}s, profileId:%{public}s",
         userId, bundleName.c_str(), profileId.c_str());
+    if (record->request->IsCommonLiveView() || record->request->GetClassification() == ANS_VERIFICATION_CODE) {
+        std::string intelligentExperience;
+        QueryIntelligentExperienceEnable(userId, intelligentExperience);
+        if (intelligentExperience == INTELLIGENT_EXPERIENCE) {
+            notificationControlFlags = record->request->GetNotificationControlFlags();
+            record->request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_INTELLIGENT_EXPERIENCE);
+            return;
+        }
+    }
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
         ERR_OK) {
@@ -2405,6 +2436,9 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
 
 void AdvancedNotificationService::SetClassificationWithVoip(const sptr<NotificationRequest> &request)
 {
+    if (!request->GetClassification().empty() && request->GetClassification() != ANS_VOIP) {
+        return;
+    }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         ANS_LOGI("set classification empty");
         request->SetClassification("");

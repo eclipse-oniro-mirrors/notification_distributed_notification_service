@@ -33,6 +33,10 @@ const std::string EVENT_PARAM_CONTENT_TYPE = "CONTENT_TYPE";
 const std::string EVENT_PARAM_OPERATE_FLAG = "OPERATE_FLAG";
 const std::string EVENT_MESSAGE_TYPE = "MESSAGE_TYPE";
 const std::string EVENT_REASON = "REASON";
+const std::string EVENT_PARAM_REASON = "REASON";
+const std::string EVENT_PARAM_CLASS = "CLASS";
+const std::string EVENT_PARAM_REMINDERFLAGS = "REMINDERFLAGS";
+const std::string EVENT_PARAM_CONTROLFLAGS = "CONTROLFLAGS";
 } // namespace
 
 void EventReport::SendHiSysEvent(const std::string &eventName, const EventInfo &eventInfo)
@@ -224,7 +228,11 @@ void EventReport::InnerSendPublishEvent(const EventInfo &eventInfo)
         EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
         EVENT_PARAM_CONTENT_TYPE, eventInfo.contentType,
         EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_PARAM_USER_ID, eventInfo.userId);
+        EVENT_PARAM_USER_ID, eventInfo.userId,
+        EVENT_PARAM_SLOT_TYPE, eventInfo.slotType,
+        EVENT_PARAM_CLASS, eventInfo.classification,
+        EVENT_PARAM_CONTROLFLAGS, eventInfo.notificationControlFlags,
+        EVENT_PARAM_REMINDERFLAGS, eventInfo.reminderFlags);
 }
 
 void EventReport::InnerSendCancelEvent(const EventInfo &eventInfo)
