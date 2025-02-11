@@ -1968,42 +1968,51 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    bool isThirdParty = true;
-    sptr<Notification> notification = nullptr;
-    sptr<NotificationRequest> notificationRequest = nullptr;
-
-    for (std::list<std::shared_ptr<NotificationRecord>>::iterator it = notificationList_.begin();
-        it != notificationList_.end();) {
-        if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-            ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
-            ((*it)->request->GetSlotType() == slot->GetType())) {
-            if (((*it)->request->GetAgentBundle() != nullptr && (*it)->request->IsSystemLiveView())) {
-                ANS_LOGI("Agent systemliveview no need remove.");
-                it++;
-                continue;
-            }
-            isThirdParty = (*it)->isThirdparty;
-            notification = (*it)->notification;
-            notificationRequest = (*it)->request;
-
-            ProcForDeleteLiveView(*it);
-            it = notificationList_.erase(it);
-
-            if (notification != nullptr) {
-                UpdateRecentNotification(notification, true, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
-                CancelTimer(notification->GetAutoDeletedTimer());
-                NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr,
-                    NotificationConstant::DISABLE_SLOT_REASON_DELETE);
-            }
-
-            TriggerRemoveWantAgent(notificationRequest, reason, isThirdParty);
-            result = ERR_OK;
-        } else {
-            it++;
+    std::vector<std::shared_ptr<NotificationRecord>> removeList;
+    for (auto record : notificationList_) {
+        if (record == nullptr) {
+            ANS_LOGE("record is nullptr");
+            continue;
+        }
+        if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+            (record->bundleOption->GetUid() == bundle->GetUid()) &&
+            (record->request->GetSlotType() == slot->GetType())) {
+                if ((record->request->GetAgentBundle() != nullptr && record->request->IsSystemLiveView())) {
+                    ANS_LOGW("Agent systemliveview no need remove.");
+                    continue;
+                }
+                ProcForDeleteLiveView(record);
+                removeList.push_back(record);
         }
     }
+
+    std::vector<sptr<Notification>> notifications;
+    std::vector<uint64_t> timerIds;
+    for (auto record : removeList) {
+        if (record == nullptr) {
+            ANS_LOGE("record is nullptr");
+            continue;
+        }
+        notificationList_.remove(record);
+        if (record->notification != nullptr) {
+            ANS_LOGD("record->notification is not nullptr.");
+            UpdateRecentNotification(record->notification, true, reason);
+            notifications.emplace_back(record->notification);
+            timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
+        }
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            SendNotificationsOnCanceled(notifications, nullptr, reason);
+        }
+
+        TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
+        result = ERR_OK;
+    }
+
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
+    }
+    BatchCancelTimer(timerIds);
     return result;
 }
 
