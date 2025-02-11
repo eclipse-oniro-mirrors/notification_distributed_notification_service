@@ -400,6 +400,23 @@ public:
     bool DelBatchCloneProfileInfo(const int32_t &userId,
         const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
 
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const int32_t uid, const uint32_t type);
+
+    /**
+     * @brief get rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @return  generate hashCode type.
+     */
+    uint32_t GetHashCodeRule(const int32_t uid);
+
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;

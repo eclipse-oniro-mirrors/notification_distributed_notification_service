@@ -734,6 +734,16 @@ int32_t NotificationRequest::GetOwnerUserId() const
     return ownerUserId_;
 }
 
+void NotificationRequest::SetHashCodeGenerateType(uint32_t type)
+{
+    hashCodeGenerateType_ = type;
+}
+
+uint32_t NotificationRequest::GetHashCodeGenerateType() const
+{
+    return hashCodeGenerateType_;
+}
+
 std::string NotificationRequest::Dump()
 {
     return "NotificationRequest{ "
@@ -835,6 +845,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
+    jsonObject["hashCodeGenerateType"]    = hashCodeGenerateType_;
 
     if (!ConvertObjectsToJson(jsonObject)) {
         ANS_LOGE("Cannot convert objects to JSON");
@@ -1010,6 +1021,16 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteUint32(publishDelayTime_)) {
         ANS_LOGE("Failed to write publish delay time");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(hashCodeGenerateType_)) {
+        ANS_LOGE("Failed to write hash code generatetype");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(hashCodeGenerateType_)) {
+        ANS_LOGE("Failed to write hash code generatetype");
         return false;
     }
 
@@ -1456,6 +1477,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     creatorInstanceKey_ = parcel.ReadInt32();
     notificationControlFlags_ = parcel.ReadUint32();
     publishDelayTime_ = parcel.ReadUint32();
+    hashCodeGenerateType_ = parcel.ReadUint32();
 
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
@@ -1886,6 +1908,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->visiblenessType_ = other.visiblenessType_;
     this->badgeStyle_ = other.badgeStyle_;
     this->notificationContentType_ = other.notificationContentType_;
+    this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
 }
 
 void NotificationRequest::CopyOther(const NotificationRequest &other)
@@ -2078,6 +2101,10 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
 
     if (jsonObject.find("badgeNumber") != jsonEnd && jsonObject.at("badgeNumber").is_number_integer()) {
         target->badgeNumber_ = jsonObject.at("badgeNumber").get<uint32_t>();
+    }
+    if (jsonObject.find("hashCodeGenerateType") != jsonEnd &&
+        jsonObject.at("hashCodeGenerateType").is_number_integer()) {
+        target->hashCodeGenerateType_ = jsonObject.at("hashCodeGenerateType").get<uint32_t>();
     }
 
     ConvertJsonToNumExt(target, jsonObject);
@@ -2528,10 +2555,17 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
     const char *keySpliter = "_";
 
     std::stringstream stream;
+    uint32_t hashCodeGeneratetype = GetHashCodeGenerateType();
     if (IsAgentNotification()) {
-        stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
-            ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+        if (hashCodeGeneratetype ==  1) {
+            stream << deviceId << keySpliter <<
+                creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
+                ownerUserId_ << keySpliter << label_ << keySpliter << notificationId_;
+        } else {
+            stream << deviceId << keySpliter <<
+                ownerUserId_ << keySpliter << ownerUid_ << keySpliter <<
+                ownerBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
+        }
     } else {
         stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
             creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<

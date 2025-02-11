@@ -1126,6 +1126,14 @@ public:
      * @return Returns Update result.
      */
     static ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetHashCodeRule(const uint32_t type);
 };
 }  // namespace Notification
 }  // namespace OHOS

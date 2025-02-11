@@ -983,6 +983,14 @@ public:
      * @return Returns Update result.
      */
     virtual ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) = 0;
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetHashCodeRule(const uint32_t type) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

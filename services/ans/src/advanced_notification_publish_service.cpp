@@ -62,6 +62,7 @@ const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUS
 constexpr int32_t RSS_PID = 3051;
 constexpr int32_t ANS_UID = 5523;
 constexpr int32_t BROKER_UID = 5557;
+constexpr int32_t AVSEESAION_PID = 6700;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
@@ -2393,6 +2394,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         ANS_LOGE("Failed to create bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
+    int32_t ipcUid = IPCSkeleton::GetCallingUid();
+    uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(ipcUid);
+    request->SetHashCodeGenerateType(hashCodeGeneratetype);
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
@@ -2409,7 +2413,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     EXTENTION_WRAPPER->GetUnifiedGroupInfo(request);
 #endif
 
-    const int32_t ipcUid = IPCSkeleton::GetCallingUid();
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
         if (!bundleOption->GetBundleName().empty()) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
@@ -2836,6 +2839,33 @@ void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string loca
         }
         aggregateLocalSwitch_ = status;
     });
+}
+
+ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type)
+{
+    ANS_LOGI("%{public}s", __FUNCTION__);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_8);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append("Not SystemApp");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    if (uid != AVSEESAION_PID) {
+        ANS_LOGE("Permission Denied.");
+        message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append("No permission");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    ErrCode result = NotificationPreferences::GetInstance()->SetHashCodeRule(uid, type);
+    ANS_LOGI("SetHashCodeRule uid = %{public}d type =  %{public}d, result  %{public}d", uid, type, result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -973,6 +973,14 @@ public:
      */
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const uint32_t type) override;
+    
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);

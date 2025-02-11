@@ -1408,6 +1408,10 @@ public:
     
     const std::map<std::string, std::string> GetdeviceStatus() const;
 
+    void SetHashCodeGenerateType(uint32_t type);
+
+    uint32_t GetHashCodeGenerateType() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1491,6 +1495,7 @@ private:
     int32_t ownerUserId_ {SUBSCRIBE_USER_INIT};
     int32_t receiverUserId_ {SUBSCRIBE_USER_INIT};
     int32_t creatorInstanceKey_ {DEFAULT_UID};
+    uint32_t hashCodeGenerateType_ {0};
 
     std::string settingsText_ {};
     std::string creatorBundleName_ {};

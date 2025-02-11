@@ -974,6 +974,15 @@ public:
      * @return Returns Update result.
      */
     virtual ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetHashCodeRule(const uint32_t type) override;
+    
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
@@ -1082,6 +1091,7 @@ private:
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif
     ErrCode HandleUpdateNotificationTimerByUid(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply);
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {
