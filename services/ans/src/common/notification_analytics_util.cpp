@@ -330,7 +330,7 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const sptr<NotificationReque
     ansData["ControlFlags"] = SetControlFlags(tempFlags, controlFlags);
     ansData["class"] = request->GetClassification();
     ansData["deviceStatus"] = GetDeviceStatus(request);
-    ANS_LOGI("Report success, the controlFlags is %{public}d, deviceStatus is %{public}s",
+    ANS_LOGI("Ansdata built, the controlFlags is %{public}d, deviceStatus is %{public}s",
         controlFlags, GetDeviceStatus(request).c_str());
     return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
@@ -345,7 +345,7 @@ std::string NotificationAnalyticsUtil::GetDeviceStatus(const sptr<NotificationRe
     return deviceStatusJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 uint32_t NotificationAnalyticsUtil::SetControlFlags(const std::shared_ptr<NotificationFlags> &flags,
-    uint32_t controlFlags)
+    uint32_t &controlFlags)
 {
     if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
         controlFlags |= SOUND_FLAG;
@@ -744,7 +744,7 @@ ReportCache NotificationAnalyticsUtil::Aggregate()
 
     std::string ansData = reportCachetemp.want.GetStringParam("ansData");
     successReportCacheList.pop_front();
-    int32_t aggreCount = MAX_NUMBER_EVERY_REPORT;
+    int32_t aggreCount = MAX_NUMBER_EVERY_REPORT - 1;
     while (aggreCount > 0) {
         if (successReportCacheList.empty()) {
             break;

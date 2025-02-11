@@ -152,7 +152,7 @@ private:
 
     static ReportCache Aggregate();
 
-    static uint32_t SetControlFlags(const std::shared_ptr<NotificationFlags> &flags, uint32_t controlFlags);
+    static uint32_t SetControlFlags(const std::shared_ptr<NotificationFlags> &flags, uint32_t &controlFlags);
 
     static std::string GetDeviceStatus(const sptr<NotificationRequest>& request);
 
