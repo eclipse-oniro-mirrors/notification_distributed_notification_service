@@ -58,6 +58,9 @@ struct EventInfo {
     int32_t operateFlag;
     int32_t messageType;
     std::string reason;
+    uint32_t reminderFlags = 0;
+    uint32_t notificationControlFlags = 0;
+    std::string classification;
 };
 
 class EventReport {

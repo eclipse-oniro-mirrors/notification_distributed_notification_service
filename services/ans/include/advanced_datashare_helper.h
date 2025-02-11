@@ -27,6 +27,7 @@ namespace Notification {
 namespace {
 constexpr const char *KEY_FOCUS_MODE_ENABLE = "focus_mode_enable";
 constexpr const char *KEY_FOCUS_MODE_PROFILE = "focus_mode_profile";
+constexpr const char *KEY_INTELLIGENT_EXPERIENCE = "intelligent_experience";
 constexpr const char *KEY_FOCUS_MODE_CALL_MESSAGE_POLICY = "focus_mode_call_message_policy";
 constexpr const char *KEY_FOCUS_MODE_REPEAT_CALLERS_ENABLE = "focus_mode_repeate_callers_enable";
 constexpr const char *KEY_INTELLIGENT_SCENE_DATA = "intelligent_scene_data";
@@ -43,6 +44,7 @@ public:
         const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
     std::string GetFocusModeEnableUri(const int32_t &userId) const;
     std::string GetFocusModeProfileUri(const int32_t &userId) const;
+    std::string GetIntelligentExperienceUri(const int32_t &userId) const;
     std::string GetFocusModeCallPolicyUri(const int32_t &userId) const;
     std::string GetFocusModeRepeatCallUri(const int32_t &userId) const;
     std::string GetIntelligentUri();
