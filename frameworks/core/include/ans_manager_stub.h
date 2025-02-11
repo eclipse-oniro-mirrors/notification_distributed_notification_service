@@ -997,6 +997,14 @@ public:
     virtual ErrCode GetNotificationRequestByHashCode(
         const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override;
 
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetHashCodeRule(const uint32_t type) override;
+
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
@@ -1106,6 +1114,7 @@ private:
     ErrCode HandleUpdateNotificationTimerByUid(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDisableNotificationFeature(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetNotificationRequest(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)

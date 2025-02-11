@@ -137,7 +137,7 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns set channel switch result.
      */
-    ErrCode SetDistributedEnabledBySlot(
+    bool SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
 
     /**
@@ -149,7 +149,7 @@ public:
      * @param enabled Indicates slot switch status.
      * @return Returns channel switch result.
      */
-    ErrCode IsDistributedEnabledBySlot(
+    bool IsDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
 
     /**
@@ -292,6 +292,22 @@ public:
         const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo);
     bool GetAllDistribuedEnabledBundles(int32_t userId,
         const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @param type generate hashCode.
+     * @return result true:success.
+     */
+    bool SetHashCodeRule(const int32_t uid, const uint32_t type);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @return type generate hashCode.
+     */
+    uint32_t GetHashCodeRule(const int32_t uid);
 
 private:
     bool CheckRdbStore();
@@ -391,6 +407,7 @@ private:
     void GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled);
     bool isCachedSmartReminderEnableList_ = false;
     std::vector<std::string> smartReminderEnableList_ = {};
+    std::string GenerateHashCodeGenerate(int32_t uid);
 };
 } // namespace Notification
 } // namespace OHOS

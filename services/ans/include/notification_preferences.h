@@ -432,6 +432,22 @@ public:
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
     ErrCode SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const int32_t uid, const uint32_t type);
+
+    /**
+     * @brief get rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @return  generate hashCode type.
+     */
+    uint32_t GetHashCodeRule(const int32_t uid);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,

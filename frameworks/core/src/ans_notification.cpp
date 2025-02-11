@@ -2081,5 +2081,20 @@ ErrCode AnsNotification::GetNotificationRequestByHashCode(
     }
     return proxy->GetNotificationRequestByHashCode(hashCode, notificationRequest);
 }
+
+ErrCode AnsNotification::SetHashCodeRule(
+    const uint32_t type)
+{
+    ANS_LOGI("SetHashCodeRule type = %{public}d", type);
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetHashCodeRule(type);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

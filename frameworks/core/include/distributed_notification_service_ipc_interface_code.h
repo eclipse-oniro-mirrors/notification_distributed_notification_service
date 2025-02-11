@@ -157,6 +157,7 @@ namespace Notification {
         GET_TARGET_DEVICE_STATUS,
         ON_RESPONSE_LISTENER,
         GET_NOTIFICATION_REQUEST_BY_HASHCODE,
+        Set_HASH_CODE_RULE,
     };
 }
 }

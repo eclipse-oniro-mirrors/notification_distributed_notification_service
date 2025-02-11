@@ -639,5 +639,10 @@ ErrCode NotificationHelper::DisableNotificationFeature(const NotificationDisable
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(notificationDisable);
 }
+
+ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetHashCodeRule(type);
+}
 }  // namespace Notification
 }  // namespace OHOS

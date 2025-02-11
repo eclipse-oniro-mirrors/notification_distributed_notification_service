@@ -1197,6 +1197,14 @@ public:
      */
     static ErrCode GetNotificationRequestByHashCode(
         const std::string& hashCode, sptr<NotificationRequest>& notificationRequest);
+    
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetHashCodeRule(const uint32_t type);
 };
 }  // namespace Notification
 }  // namespace OHOS
