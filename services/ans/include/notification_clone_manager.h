@@ -21,6 +21,7 @@
 
 #include "unique_fd.h"
 #include "iremote_proxy.h"
+#include "common_event_data.h"
 #include "notification_clone_template.h"
 namespace OHOS {
 namespace Notification {
@@ -32,6 +33,7 @@ public:
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
     int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
     void OnUserSwitch(int32_t userId);
+    void OnRestoreStart(EventFwk::Want want);
 
 private:
     NotificationCloneManager();

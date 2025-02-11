@@ -386,6 +386,19 @@ public:
     void GetAllCLoneBundlesInfo(int32_t userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
     bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
+    bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);
+    bool UpdateBatchCloneProfileInfo(const int32_t &userId,
+        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
+    void GetAllCloneProfileInfo(const int32_t &userId,
+        std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo);
+    void GetAllCloneBundleInfo(const int32_t &userId, std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool UpdateBatchCloneBundleInfo(const int32_t &userId,
+        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool DelCloneBundleInfo(const int32_t &userId, const NotificationCloneBundleInfo& cloneBundleInfo);
+    bool DelBatchCloneBundleInfo(const int32_t &userId,
+        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool DelBatchCloneProfileInfo(const int32_t &userId,
+        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
