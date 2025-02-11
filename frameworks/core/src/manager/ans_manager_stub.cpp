@@ -461,6 +461,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetNotificationRequest(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::Set_HASH_CODE_RULE): {
+            result = HandleSetHashCodeRule(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -2709,6 +2713,22 @@ ErrCode AnsManagerStub::HandleGetDeviceStatus(MessageParcel &data, MessageParcel
     }
     if (!reply.WriteInt32(status)) {
         ANS_LOGE("[HandleGetDeviceStatus] fail: write slot failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        ANS_LOGE("[HandleSetHashCodeRule] fail: read type failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+ 
+    ErrCode result = SetHashCodeRule(type);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetHashCodeRule] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

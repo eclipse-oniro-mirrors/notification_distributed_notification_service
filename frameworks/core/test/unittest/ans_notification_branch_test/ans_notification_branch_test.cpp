@@ -609,6 +609,11 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode SetHashCodeRule(const uint32_t type)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

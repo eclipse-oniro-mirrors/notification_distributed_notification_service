@@ -1074,5 +1074,35 @@ ErrCode AnsManagerProxy::GetNotificationRequestByHashCode(
     }
     return result;
 }
+
+ErrCode AnsManagerProxy::SetHashCodeRule(const uint32_t type)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(type)) {
+        ANS_LOGE("write type failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result =
+        InnerTransact(NotificationInterfaceCode::Set_HASH_CODE_RULE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return result;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

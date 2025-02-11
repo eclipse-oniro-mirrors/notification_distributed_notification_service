@@ -688,5 +688,11 @@ ErrCode AnsManagerStub::DisableNotificationFeature(const sptr<NotificationDisabl
     ANS_LOGE("DisableNotificationFeature called!");
     return ERR_INVALID_OPERATION;
 }
+
+ErrCode AnsManagerStub::SetHashCodeRule(const uint32_t type)
+{
+    ANS_LOGE("SetHashCodeRule called!");
+    return ERR_INVALID_OPERATION;
+}
 }  // namespace Notification
 }  // namespace OHOS

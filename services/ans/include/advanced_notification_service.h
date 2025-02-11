@@ -1198,6 +1198,14 @@ public:
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
 
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const uint32_t type) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
