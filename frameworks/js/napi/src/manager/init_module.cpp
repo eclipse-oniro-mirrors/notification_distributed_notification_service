@@ -124,7 +124,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", NapiIsSmartReminderEnabled),
 #else
-        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCb),
+        DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCbNewType),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setDistributedEnableByBundle", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("enableDistributedSelf", Common::NapiReturnCapErrCb),

@@ -1823,6 +1823,7 @@ public:
     static napi_value NapiReturnCapErrCb(napi_env env, napi_callback_info info);
     static napi_value NapiReturnCapErr(napi_env env, napi_callback_info info);
     static napi_value NapiReturnFalseCb(napi_env env, napi_callback_info info);
+    static napi_value NapiReturnFalseCbNewType(napi_env env, napi_callback_info info);
     static int32_t ErrorToExternal(uint32_t errCode);
     static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);
     static napi_value GetLockScreenPicture(
@@ -1847,6 +1848,7 @@ private:
     static std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgent_;
     static std::mutex mutex_;
     static const char *GetPropertyNameByContentType(ContentType type);
+    static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

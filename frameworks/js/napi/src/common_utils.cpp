@@ -386,6 +386,16 @@ napi_value Common::NapiReturnCapErr(napi_env env, napi_callback_info info)
 
 napi_value Common::NapiReturnFalseCb(napi_env env, napi_callback_info info)
 {
+    return Common::NapiReturnFalseCbInner(env, info, false);
+}
+
+napi_value Common::NapiReturnFalseCbNewType(napi_env env, napi_callback_info info)
+{
+    return Common::NapiReturnFalseCbInner(env, info, true);
+}
+
+napi_value Common::NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType)
+{
     size_t argc = ONLY_CALLBACK_MAX_PARA;
     napi_value argv[ONLY_CALLBACK_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
