@@ -873,7 +873,6 @@ void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::sha
     flags->SetLightScreenEnabled(false);
     flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
     record->notification->SetEnableVibration(false);
-    flags->SetStatusIconEnabled(false);
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
