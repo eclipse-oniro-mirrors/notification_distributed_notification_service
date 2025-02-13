@@ -57,6 +57,10 @@ namespace OHOS {
         // test OnEnabledNotificationChanged function
         sptr<Notification::EnabledNotificationCallbackData> callbackData = new Notification::EnabledNotificationCallbackData();
         ansSubscriberProxy.OnEnabledNotificationChanged(callbackData);
+        // test OnApplicationInfoNeedChanged function
+        ansSubscriberProxy.OnApplicationInfoNeedChanged("com.test.demo");
+        // test OnResponse function
+        ansSubscriberProxy.OnResponse(notification);
         return true;
     }
 }

@@ -893,7 +893,7 @@ public:
      */
     ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Query the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
@@ -1106,7 +1106,7 @@ private:
     ErrCode HandleAllowUseReminder(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllLiveViewEnabledBundles(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetAllDistribuedEnabledBundles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetAllDistributedEnabledBundles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetDeviceStatus(MessageParcel &data, MessageParcel &reply);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);

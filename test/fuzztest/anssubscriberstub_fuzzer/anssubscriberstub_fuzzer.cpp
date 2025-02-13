@@ -49,6 +49,10 @@ namespace OHOS {
         ansSubscriberStub.HandleOnDoNotDisturbDateChange(datas, reply);
         // test HandleOnEnabledNotificationChanged function
         ansSubscriberStub.HandleOnEnabledNotificationChanged(datas, reply);
+        // test HandleOnApplicationInfoNeedChanged function
+        ansSubscriberStub.HandleOnApplicationInfoNeedChanged(datas, reply);
+        // test HandleOnResponse function
+        ansSubscriberStub.HandleOnResponse(datas, reply);
         // test OnConnected function
         ansSubscriberStub.OnConnected();
         // test OnDisconnected function
@@ -60,6 +64,8 @@ namespace OHOS {
         // test OnCanceled function
         int32_t deleteReason = 1;
         ansSubscriberStub.OnCanceled(notification, notificationMap, deleteReason);
+        ansSubscriberStub.OnApplicationInfoNeedChanged("com.test.demo");
+        ansSubscriberStub.OnResponse(notification);
         // test OnUpdated function
         ansSubscriberStub.OnUpdated(notificationMap);
         // test OnDoNotDisturbDateChange function
