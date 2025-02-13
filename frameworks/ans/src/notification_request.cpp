@@ -1029,11 +1029,6 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteUint32(hashCodeGenerateType_)) {
-        ANS_LOGE("Failed to write hash code generatetype");
-        return false;
-    }
-
     // write std::string
     if (!parcel.WriteString(settingsText_)) {
         ANS_LOGE("Failed to write settings text");
