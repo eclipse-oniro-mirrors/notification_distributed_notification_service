@@ -44,15 +44,6 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
         OperationService::GetInstance().HandleScreenEvent();
         return;
     }
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-        int32_t userId = data.GetCode();
-        if (userId <= SUBSCRIBE_USER_INIT) {
-            ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
-            return;
-        }
-        DistributedService::GetInstance().SetCurrentUserId(userId);
-        return;
-    }
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
         action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
         OHOS::AppExecFwk::ElementName ele = want.GetElement();
@@ -75,7 +66,6 @@ OberverService& OberverService::GetInstance()
 void OberverService::Init(uint16_t deviceType)
 {
     EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     if (deviceType != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);

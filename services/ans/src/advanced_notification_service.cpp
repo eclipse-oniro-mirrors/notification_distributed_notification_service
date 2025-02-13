@@ -1069,10 +1069,28 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
 ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
     const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
 {
-    auto record = GetFromNotificationList(hashCode);
-    if (record != nullptr) {
-        notificationRequest = record->request;
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
     }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("Check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        auto record = GetFromNotificationList(hashCode);
+        if (record != nullptr) {
+            notificationRequest = record->request;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
     return ERR_OK;
 }
 
