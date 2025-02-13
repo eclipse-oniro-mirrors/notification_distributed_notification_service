@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace Notification {
-constexpr int32_t MAX_SLOT_SIZE = 1000;
+constexpr uint32_t MAX_SLOT_SIZE = 1000;
 NotificationSubscribeInfo::NotificationSubscribeInfo()
 {}
 
@@ -93,7 +93,7 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         return false;
     }
      //write slotTypes_
-    if (!parcel.WriteInt32(slotTypes_.size())) {
+    if (!parcel.WriteUint32(slotTypes_.size())) {
         ANS_LOGE("Failed to write slotTypes_ size.");
         return false;
     }
@@ -152,8 +152,8 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         return false;
     }
     //read slotTypes_
-    int32_t size = 0;
-    if (!parcel.ReadInt32(size)) {
+    uint32_t size = 0;
+    if (!parcel.ReadUint32(size)) {
         ANS_LOGE("read slotType_ size failed.");
         return false;
     }
@@ -161,7 +161,7 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("slotType_ size over 1000.");
         return false;
     }
-    for (int32_t index = 0; index < size; index++) {
+    for (uint32_t index = 0; index < size; index++) {
         int32_t slotType = -1;
         if (!parcel.ReadInt32(slotType)) {
             ANS_LOGE("read Parcelable slotType failed.");
