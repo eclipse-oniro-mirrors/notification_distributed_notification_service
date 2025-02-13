@@ -31,7 +31,6 @@ namespace {
 constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
 constexpr int64_t DURATION_DELAY_TASK = 1 * 1000 * 1000;  // 1s, microsecond
 constexpr int64_t CYCLE_DATASHARE_TASK = 1;  // 1s
-constexpr int64_t DURATION_ONE_MINUTE = 60 * 1000;  // 1min, millisecond
 constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
 }
 
@@ -129,9 +128,9 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
     predicates.EndWrap();
     predicates.Or();
     predicates.BeginWrap();
-    predicates.GreaterThanOrEqualTo(ReminderCalendarShareTable::BEGIN, timestamp);
+    predicates.GreaterThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, timestamp);
     predicates.And();
-    predicates.LessThanOrEqualTo(ReminderCalendarShareTable::BEGIN, targetTimestamp);
+    predicates.LessThanOrEqualTo(ReminderCalendarShareTable::ALARM_TIME, targetTimestamp);
     predicates.EndWrap();
     predicates.EndWrap();
     auto resultSet = helper->Query(uri, predicates, columns);
@@ -304,9 +303,8 @@ std::vector<std::string> ReminderDataShareHelper::GetColumns() const
 {
     return std::vector<std::string> {
         ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
-        ReminderCalendarShareTable::BEGIN, ReminderCalendarShareTable::END,
-        ReminderCalendarShareTable::ALARM_TIME, ReminderCalendarShareTable::STATE,
-        ReminderCalendarShareTable::MINUTES, ReminderCalendarShareTable::TITLE,
+        ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
+        ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::TITLE,
         ReminderCalendarShareTable::CONTENT, ReminderCalendarShareTable::WANT_AGENT,
         ReminderCalendarShareTable::BUTTONS, ReminderCalendarShareTable::SLOT_TYPE,
         ReminderCalendarShareTable::IDENTIFIER
@@ -344,21 +342,15 @@ sptr<ReminderRequest> ReminderDataShareHelper::CreateReminder(
     reminder->DeserializeWantAgent(strValue, 0);
     GetRdbValue<std::string>(result, ReminderCalendarShareTable::IDENTIFIER, strValue);
     reminder->SetIdentifier(strValue);
-    uint64_t minutes = 0;
-    GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::MINUTES, minutes);
-    minutes = minutes * DURATION_ONE_MINUTE;
     uint64_t endDateTime = 0;
     GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::END, endDateTime);
     reminder->SetAutoDeletedTime(endDateTime);
 
     ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
-    uint64_t dateTime = 0;
-    GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::BEGIN, dateTime);
-    dateTime -= minutes;
-    calendar->SetDateTime(dateTime);
+    calendar->SetDateTime(triggerTime);
     calendar->SetEndDateTime(endDateTime);
 
-    time_t now = static_cast<time_t>(dateTime / DURATION_ONE_SECOND);
+    time_t now = static_cast<time_t>(triggerTime / DURATION_ONE_SECOND);
     struct tm nowTime;
     (void)localtime_r(&now, &nowTime);
     calendar->SetFirstDesignateYear(static_cast<uint16_t>(ReminderRequest::GetActualTime(
@@ -376,12 +368,13 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::CreateRemi
     for (auto& values : info.valueBuckets_) {
         sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
         InitNormalInfo(reminder);
-        InitBaseInfo(values, reminder);
-        uint64_t minutes = 0;
-        auto iter = values.find(ReminderCalendarShareTable::MINUTES);
+        uint64_t triggerTime = 0;
+        auto iter = values.find(ReminderCalendarShareTable::ALARM_TIME);
         if (iter != values.end()) {
-            minutes = static_cast<uint64_t>(std::get<double>(iter->second)) * DURATION_ONE_MINUTE;
+            triggerTime = static_cast<uint64_t>(std::get<double>(iter->second));
+            reminder->SetTriggerTimeInMilli(triggerTime);
         }
+        InitBaseInfo(values, reminder);
         uint64_t endDateTime = 0;
         iter = values.find(ReminderCalendarShareTable::END);
         if (iter != values.end()) {
@@ -390,10 +383,7 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::CreateRemi
         }
 
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
-        iter = values.find(ReminderCalendarShareTable::BEGIN);
-        if (iter != values.end()) {
-            calendar->SetDateTime(static_cast<uint64_t>(std::get<double>(iter->second)) - minutes);
-        }
+        calendar->SetDateTime(triggerTime);
         calendar->SetEndDateTime(endDateTime);
 
         time_t now = static_cast<time_t>(calendar->GetDateTime() / DURATION_ONE_SECOND);
@@ -425,11 +415,7 @@ void ReminderDataShareHelper::InitNormalInfo(sptr<ReminderRequest>& reminder)
 void ReminderDataShareHelper::InitBaseInfo(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
     sptr<ReminderRequest>& reminder)
 {
-    auto iter = info.find(ReminderCalendarShareTable::ALARM_TIME);
-    if (iter != info.end()) {
-        reminder->SetTriggerTimeInMilli(static_cast<uint64_t>(std::get<double>(iter->second)));
-    }
-    iter = info.find(ReminderCalendarShareTable::ID);
+    auto iter = info.find(ReminderCalendarShareTable::ID);
     if (iter != info.end()) {
         reminder->SetReminderId(static_cast<int32_t>(std::get<double>(iter->second)));
     }

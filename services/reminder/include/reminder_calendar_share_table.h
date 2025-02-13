@@ -23,23 +23,21 @@ class ReminderCalendarShareTable {
 public:
     static constexpr const char* ID = "_id";
     static constexpr const char* EVENT_ID = "event_id";
-    static constexpr const char* BEGIN = "begin";
     static constexpr const char* END = "end";
     static constexpr const char* ALARM_TIME = "alarmTime";
     static constexpr const char* STATE = "state";
-    static constexpr const char* MINUTES = "minutes";
     static constexpr const char* TITLE = "title";
     static constexpr const char* CONTENT = "content";
     static constexpr const char* WANT_AGENT = "wantAgent";
     static constexpr const char* BUTTONS = "buttons";
     static constexpr const char* SLOT_TYPE = "slotType";
     static constexpr const char* KEEP_HEADSUP = "keepHeadsUp";
+    static constexpr const char* IDENTIFIER = "identifier";
 
     static constexpr const char* PROXY = "datashareproxy://com.ohos.calendardata/CalendarAlerts";
     static constexpr const char* NAME = "com.ohos.calendar";
     static constexpr const char* DATA_NAME = "com.ohos.calendardata";
     static constexpr const char* ENTRY = "ReminderCallbackExtAbility";
-    static constexpr const char* IDENTIFIER = "identifier";
 
     static constexpr const char* PARAM_CALLBACK_TYPE = "CallbackType";
 

@@ -1186,14 +1186,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_025, Level1)
     info.valueBuckets_[0][ReminderCalendarShareTable::IDENTIFIER] = identifier;
     ReminderDataShareHelper::GetInstance().CreateReminder(info);
 
-    DataShare::DataShareObserver::ChangeInfo::Value minutes = static_cast<double>(1);
-    info.valueBuckets_[0][ReminderCalendarShareTable::MINUTES] = minutes;
-    ReminderDataShareHelper::GetInstance().CreateReminder(info);
-
-    DataShare::DataShareObserver::ChangeInfo::Value begin = static_cast<double>(1737861639000);
-    info.valueBuckets_[0][ReminderCalendarShareTable::BEGIN] = begin;
-    ReminderDataShareHelper::GetInstance().CreateReminder(info);
-
     DataShare::DataShareObserver::ChangeInfo::Value ends = static_cast<double>(1737948039000);
     info.valueBuckets_[0][ReminderCalendarShareTable::END] = ends;
     ReminderDataShareHelper::GetInstance().CreateReminder(info);
