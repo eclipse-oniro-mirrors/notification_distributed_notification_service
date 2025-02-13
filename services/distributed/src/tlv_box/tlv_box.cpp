@@ -207,6 +207,7 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
     unsigned char* cached = new unsigned char[buffersize];
     errno_t err = memcpy_s(cached, buffersize, buffer, buffersize);
     if (err != EOK) {
+        free(cached);
         return false;
     }
 
@@ -221,6 +222,7 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
     }
 
     bytesLength_ = buffersize;
+    free(cached);
     return true;
 }
 

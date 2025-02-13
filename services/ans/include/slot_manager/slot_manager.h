@@ -45,7 +45,8 @@ public:
 private:
     ErrCode AddSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &slots);
-    ErrCode AddSlotsInner(const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption);
+    ErrCode AddSlotsInner(
+        const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption);
 
     ErrCode SetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode SetEnabledForBundleSlotSyncQue(

@@ -75,7 +75,7 @@ void DistributedService::InitDeviceState(const DistributedDeviceInfo device)
 {
     if (device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE &&
         localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        uint32_t state = OberverService::GetInstance().IsScreenLocked();
+        int32_t state = OberverService::GetInstance().IsScreenLocked();
         SyncDeviceState(state);
     }
 }

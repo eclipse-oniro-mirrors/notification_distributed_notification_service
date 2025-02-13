@@ -230,7 +230,7 @@ struct PermissionDialog {
         }
       });
       let avoidArea = this.dialog?.extensionWindow.getWindowAvoidArea(type);
-      if (avoidArea != undefined){
+      if (avoidArea != undefined) {
         console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
         this.naviHeight = avoidArea.bottomRect.height;
       }

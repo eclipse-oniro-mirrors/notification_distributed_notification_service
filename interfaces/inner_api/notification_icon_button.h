@@ -36,6 +36,8 @@ class NotificationIconButton : public Parcelable, public NotificationJsonConvert
 public:
     NotificationIconButton() = default;
     ~NotificationIconButton() = default;
+
+    NotificationIconButton(const NotificationIconButton &other);
     /**
      * @brief Obtains the icon of the notification capsule.
      *

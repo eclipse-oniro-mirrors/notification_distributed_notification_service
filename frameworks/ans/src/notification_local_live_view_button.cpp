@@ -136,7 +136,7 @@ bool NotificationLocalLiveViewButton::ResourceFromJson(const nlohmann::json &res
     }
     if (resource.find("id") != jsonEnd && resource.at("id").is_number_integer()) {
         resourceCount--;
-        resourceObj->id = resource.at("id").get<int32_t>();
+        resourceObj->id = static_cast<uint32_t>(resource.at("id").get<int32_t>());
     }
     if (resourceCount == 0) {
         return true;

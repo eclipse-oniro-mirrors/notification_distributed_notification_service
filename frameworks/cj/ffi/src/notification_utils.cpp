@@ -1517,6 +1517,7 @@ namespace Notification {
                 break;
             case ContentType::NOTIFICATION_CONTENT_LIVE_VIEW: // liveView?: NotificationLiveViewContent
                 LOGE("ContentType::NOTIFICATION_CONTENT_LIVE_VIEW is not support");
+                break;
             default:
                 LOGE("ContentType is does not exist");
                 return ret;

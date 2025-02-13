@@ -169,6 +169,7 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
                 break;
             case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
                 HandleResponseSync(box);
+                break;
             default:
                 ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);
                 break;

@@ -240,7 +240,8 @@ bool NotificationCapsule::ReadFromParcel(Parcel &parcel)
     }
 
     auto vsize = parcel.ReadInt32();
-    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
+    int32_t maxSize = static_cast<int32_t>(BUTTON_MAX_SIZE);
+    vsize = (vsize < maxSize) ? vsize : maxSize;
     capsuleButton_.clear();
     for (int i = 0; i < vsize; ++i) {
         auto btn = parcel.ReadParcelable<NotificationIconButton>();
