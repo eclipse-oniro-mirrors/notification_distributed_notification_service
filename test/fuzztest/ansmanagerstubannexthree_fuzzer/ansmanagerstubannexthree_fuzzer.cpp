@@ -80,6 +80,8 @@ namespace OHOS {
         datas.WriteString(stringData);
         datas.WriteParcelable(notification);
         ansManagerStub.HandlePublish(datas, reply);
+        datas.WriteParcelable(notification);
+        ansManagerStub.HandlePublishNotificationForIndirectProxy(datas, reply);
         datas.WriteInt32(intData);
         datas.WriteString(stringData);
         datas.WriteInt32(intData);
@@ -218,6 +220,7 @@ namespace OHOS {
         ansManagerStub.HandleIsAllowedNotifySelf(datas, reply);
         datas.WriteRemoteObject(subscriber);
         ansManagerStub.HandleCanPopEnableNotificationDialog(datas, reply);
+        ansManagerStub.HandleRemoveEnableNotificationDialog(datas, reply);
         datas.WriteParcelable(bundleOption);
         ansManagerStub.HandleIsSpecialBundleAllowedNotify(datas, reply);
         datas.WriteString(stringData);
@@ -256,6 +259,8 @@ namespace OHOS {
         ansManagerStub.HandleSetDoNotDisturbDateByUser(datas, reply);
         datas.WriteInt32(intData);
         ansManagerStub.HandleGetDoNotDisturbDateByUser(datas, reply);
+        datas.WriteInt32(intData);
+        ansManagerStub.HandleGetDoNotDisturbProfile(datas, reply);
         datas.WriteParcelable(bundleOption);
         datas.WriteInt32(type);
         datas.WriteBool(boolData);
@@ -281,6 +286,17 @@ namespace OHOS {
         ansManagerStub.HandleRegisterPushCallback(datas, reply);
         ansManagerStub.HandleUnregisterPushCallback(datas, reply);
         ansManagerStub.HandleAddDoNotDisturbProfiles(datas, reply);
+        datas.WriteString(stringData);
+        datas.WriteBool(boolData);
+        ansManagerStub.HandleSetDistributedEnabledBySlot(datas, reply);
+        datas.WriteString(stringData);
+        ansManagerStub.HandleGetAllDistributedEnabledBundles(datas, reply);
+        datas.WriteString(stringData);
+        ansManagerStub.HandleAllowUseReminder(datas, reply);
+        datas.WriteString(stringData);
+        datas.WriteInt32(intData);
+        datas.WriteInt32(intData);
+        ansManagerStub.HandleSetDeviceStatus(datas, reply);
         datas.WriteParcelable(bundleOption);
         datas.WriteString(stringData);
         datas.WriteBool(boolData);
@@ -303,6 +319,8 @@ namespace OHOS {
         datas.WriteString(stringData);
         datas.WriteInt32(intData);
         ansManagerStub.HandleSetTargetDeviceStatus(datas, reply);
+        datas.WriteString(stringData);
+        ansManagerStub.HandleGetDeviceStatus(datas, reply);
         sptr<Notification::NotificationRequest> notification2 = new Notification::NotificationRequest();
         notification2->SetOwnerUid(fuzzData->ConsumeIntegral<int32_t>());
         notification2->SetCreatorUid(fuzzData->ConsumeIntegral<int32_t>());

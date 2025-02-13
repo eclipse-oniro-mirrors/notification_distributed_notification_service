@@ -2370,6 +2370,42 @@ ErrCode AnsManagerStub::HandleRemoveDoNotDisturbProfiles(MessageParcel &data, Me
     return ERR_OK;
 }
 
+ErrCode AnsManagerStub::HandleGetAllDistributedEnabledBundles(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleGetAllDistribuedEnabledBundles] fail: read deviceType failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllDistribuedEnabledBundles(deviceType, bundleOption);
+    int32_t vectorSize = bundleOption.size();
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle bundleOption vector is over size.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(vectorSize)) {
+        ANS_LOGE("Write bundleOption size failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto &item : bundleOption) {
+        if (!reply.WriteParcelable(&item)) {
+            ANS_LOGE("Write bundleOption failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    return ERR_OK;
+}
+
 ErrCode AnsManagerStub::HandleIsDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply)
 {
     ANS_LOGD("enter");
