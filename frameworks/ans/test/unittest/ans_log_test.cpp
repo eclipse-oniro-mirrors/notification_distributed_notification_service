@@ -359,7 +359,8 @@ HWTEST_F(AnsLogTest, AnsConvertTest_008, TestSize.Level1)
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::RECOVER_LIVE_VIEW_DELETE));
     inType = NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
-    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE));
+    EXPECT_EQ(outType,
+        static_cast<int32_t>(NotificationNapi::RemoveReason::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE));
     inType = NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_COLLABORATIVE_DELETE));
