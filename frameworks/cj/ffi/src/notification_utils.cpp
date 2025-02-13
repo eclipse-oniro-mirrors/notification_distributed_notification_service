@@ -1510,8 +1510,7 @@ namespace Notification {
                 ret = SetNotificationMultiLineContent(basicContent.get(), notificationContent.multiLine);
                 break;
             case ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW: // systemLiveView?: NotificationLocalLiveViewContent
-                notificationContent.systemLiveView =
-                    static_cast<CNotificationSystemLiveViewContent *>(
+                notificationContent.systemLiveView = static_cast<CNotificationSystemLiveViewContent *>(
                             malloc(sizeof(CNotificationSystemLiveViewContent)));
                 ret = SetNotificationLocalLiveViewContent(basicContent.get(), notificationContent.systemLiveView);
                 break;
