@@ -239,11 +239,10 @@ bool NotificationCapsule::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    auto vsize = parcel.ReadInt32();
-    int32_t maxSize = static_cast<int32_t>(BUTTON_MAX_SIZE);
-    vsize = (vsize < maxSize) ? vsize : maxSize;
+    auto vsize = static_cast<uint32_t>(parcel.ReadInt32());
+    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
     capsuleButton_.clear();
-    for (int i = 0; i < vsize; ++i) {
+    for (uint32_t i = 0; i < vsize; ++i) {
         auto btn = parcel.ReadParcelable<NotificationIconButton>();
         if (btn == nullptr) {
             ANS_LOGE("Failed to read card button");
