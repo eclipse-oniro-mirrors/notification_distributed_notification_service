@@ -168,7 +168,7 @@ sptr<AnsManagerInterface> ReminderRequestClient::GetAnsManagerProxy()
 sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
 {
     {
-        std::lock_guard<std::mutex> lock(serviceLock_);
+        std::lock_guard<ffrt::mutex> lock(serviceLock_);
         if (proxy_ != nullptr) {
             return proxy_;
         }
@@ -187,7 +187,7 @@ sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
 
     ANS_LOGE("object is null");
     if (LoadReminderService()) {
-        std::lock_guard<std::mutex> lock(serviceLock_);
+        std::lock_guard<ffrt::mutex> lock(serviceLock_);
         if (proxy_ != nullptr) {
             return proxy_;
         } else {
@@ -201,7 +201,7 @@ sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
 
 bool ReminderRequestClient::LoadReminderService()
 {
-    std::unique_lock<std::mutex> lock(serviceLock_);
+    std::unique_lock<ffrt::mutex> lock(serviceLock_);
     sptr<ReminderServiceCallback> loadCallback = sptr<ReminderServiceCallback>(new ReminderServiceCallback());
     if (loadCallback == nullptr) {
         ANS_LOGE("loadCallback is nullptr.");
@@ -232,7 +232,7 @@ bool ReminderRequestClient::LoadReminderService()
 void ReminderRequestClient::LoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject)
 {
     ANS_LOGI("ReminderRequestClient FinishStartSA");
-    std::lock_guard<std::mutex> lock(serviceLock_);
+    std::lock_guard<ffrt::mutex> lock(serviceLock_);
     if (remoteObject != nullptr) {
         proxy_ = iface_cast<IReminderAgentService>(remoteObject);
         proxyConVar_.notify_one();
@@ -241,7 +241,7 @@ void ReminderRequestClient::LoadSystemAbilitySuccess(const sptr<IRemoteObject> &
 
 void ReminderRequestClient::LoadSystemAbilityFail()
 {
-    std::lock_guard<std::mutex> lock(serviceLock_);
+    std::lock_guard<ffrt::mutex> lock(serviceLock_);
     proxy_ = nullptr;
 }
 

@@ -132,9 +132,9 @@ private:
 
     bool LoadReminderService();
 
-    std::mutex serviceLock_;
+    ffrt::mutex serviceLock_;
 
-    std::condition_variable proxyConVar_;
+    ffrt::condition_variable proxyConVar_;
 
     sptr<IReminderAgentService> proxy_;
 };
