@@ -249,6 +249,7 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE: {
             SetFinishTimer(record);
             SetUpdateTimer(record);
+            CancelArchiveTimer(record);
             return;
         }
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
@@ -260,6 +261,7 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
             }
             CancelUpdateTimer(record);
             SetUpdateTimer(record);
+            CancelArchiveTimer(record);
             return;
         }
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:
@@ -2091,7 +2093,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
     const std::string &paramName = "const.intelligentscene.enable";
     std::string isSupportIntelligentScene = "false";
     const std::string defaultValue = "false";
- 
+
     auto res = GetParameter(paramName.c_str(), defaultValue.c_str(), buf, sizeof(buf));
     if (res <= 0) {
         ANS_LOGD("isSupportIntelligentScene GetParameter is false");
@@ -2099,13 +2101,13 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         isSupportIntelligentScene = buf;
     }
     ANS_LOGI("isSupportIntelligentScene is %{public}s", isSupportIntelligentScene.c_str());
- 
+
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return -1;
     }
- 
+
     std::string uri = CONTACT_DATA;
     if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
         (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
@@ -2113,7 +2115,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         uri = datashareHelper->GetIntelligentUri();
     }
     ANS_LOGI("QueryContactByProfileId uri is %{public}s", uri.c_str());
-    
+
     std::string profileId;
     Uri profileIdUri(datashareHelper->GetFocusModeProfileUri(userId));
     bool profile_ret = datashareHelper->Query(profileIdUri, KEY_FOCUS_MODE_PROFILE, profileId);
@@ -2121,7 +2123,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         ANS_LOGE("Query profile id fail.");
         return -1;
     }
- 
+
     Uri contactUri(uri);
     return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId, isSupportIntelligentScene);
 }

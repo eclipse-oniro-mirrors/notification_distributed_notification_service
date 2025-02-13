@@ -50,27 +50,6 @@ namespace {
 constexpr uint32_t DEFAULT_LOCK_SCREEN_FLAG = 2;
 }
 
-void DistributedService::SetCurrentUserId(int32_t userId)
-{
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    std::function<void()> task = std::bind([&, userId]() {
-        userId_ = userId;
-        for (auto& subscriberItem : subscriberMap_) {
-            sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
-            subscribeInfo->AddAppUserId(userId_);
-            int result = NotificationHelper::SubscribeNotification(subscriberItem.second, subscribeInfo);
-            if (result != 0) {
-                ANS_LOGW("Dans subscribe failed %{public}d %{public}s", result, subscriberItem.first.c_str());
-            }
-        }
-        ANS_LOGI("Dans set current userId %{public}d %{public}u", userId_, subscriberMap_.size());
-    });
-    serviceQueue_->submit(task);
-}
-
 void DistributedService::InitDeviceState(const DistributedDeviceInfo device)
 {
     if (device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE &&

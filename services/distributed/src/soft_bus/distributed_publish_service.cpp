@@ -310,8 +310,8 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
     ANS_LOGI("handle response, hashCode: %{public}s.", hashCode.c_str());
 
     sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
-    IN_PROCESS_CALL(NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest));
-    if (notificationRequest == nullptr) {
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");
         return;
     }
@@ -337,7 +337,11 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     ANS_LOGI("isScreenOn: %{public}d", isScreenOn);
     if (!isScreenOn) {
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        auto ret = PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        if (ret != PowerMgr::PowerErrors::ERR_OK) {
+            ANS_LOGW("Wake up device %{public}d", ret);
+            return;
+        }
     }
 
     bool isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
@@ -347,13 +351,13 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
         info.type = OperationType::OPERATION_CLICK_JUMP;
         info.eventId = std::to_string(GetCurrentTime());
         sptr<UnlockScreenCallback> listener = new (std::nothrow) UnlockScreenCallback(info.eventId);
-        int32_t unlockResult = IN_PROCESS_CALL(
-            ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener));
+        int32_t unlockResult =
+            ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener);
         ANS_LOGI("unlock result:%{public}d", unlockResult);
         info.want = *wantPtr;
         OperationService::GetInstance().AddOperation(info);
     } else {
-        auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
         ANS_LOGI("StartAbility result:%{public}d", ret);
     }
 }

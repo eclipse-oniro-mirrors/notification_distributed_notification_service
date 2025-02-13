@@ -45,7 +45,6 @@ public:
         const DistributedDeviceInfo& peerDevice);
     void InitDeviceState(const DistributedDeviceInfo device);
     void SyncDeviceState(int32_t state);
-    void SetCurrentUserId(int32_t userId);
     void SyncConnectedDevice(DistributedDeviceInfo device);
     int32_t SyncDeviceMatch(const DistributedDeviceInfo device, MatchType type);
     void AddDevice(DistributedDeviceInfo device);
