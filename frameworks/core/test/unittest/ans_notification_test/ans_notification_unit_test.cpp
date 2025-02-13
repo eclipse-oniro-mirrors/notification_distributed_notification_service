@@ -1600,5 +1600,25 @@ HWTEST_F(AnsNotificationUnitTest, DisableNotificationFeature_0100, Function | Me
     ErrCode res = ans_->DisableNotificationFeature(notificationDisable);
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0100
+ * @tc.desc: test PublishNotificationForIndirectProxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_FALSE(ret);
+
+    NotificationRequest request;
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

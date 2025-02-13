@@ -115,6 +115,8 @@ HWTEST_F(NotificationButtonOptionTest, Unmarshalling_00001, Function | SmallTest
 HWTEST_F(NotificationButtonOptionTest, ToJson_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<NotificationButtonOption>();
+    std::string buttonName = "testbuttonName";
+    rrc->SetButtonName(buttonName);
     nlohmann::json jsonObject;
     jsonObject["buttonName"] = "testButtonName";
     EXPECT_EQ(jsonObject.is_object(), true);

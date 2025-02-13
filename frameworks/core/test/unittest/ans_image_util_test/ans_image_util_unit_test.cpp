@@ -656,3 +656,154 @@ HWTEST_F(AnsImageUtilUnitTest, HexToBinTest_0400, Function | MediumTest | Level1
     std::string res = imageUtil->HexToBin(strHex);
     EXPECT_EQ("", res);
 }
+
+/*
+ * @tc.name: ImageScale_0100
+ * @tc.desc: test if AnsImageUtil's ImageScale function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, ImageScale_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, ImageScale_0100, TestSize.Level1";
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    bool res = imageUtil->ImageScale(nullptr, 0, 0);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * @tc.name: ImageScale_0200
+ * @tc.desc: test if AnsImageUtil's ImageScale function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, ImageScale_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, ImageScale_0200, TestSize.Level1";
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    ASSERT_NE(nullptr, pixelMap);
+    bool res = imageUtil->ImageScale(pixelMap, 60, 60);
+    EXPECT_FALSE(res);
+}
+
+/*
+ * @tc.name: CreatePixelMapByString_0100
+ * @tc.desc: test if AnsImageUtil's CreatePixelMapByString function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapByString_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, CreatePixelMapByString_0100, TestSize.Level1";
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::string path = "";
+    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMapByString(path);
+    EXPECT_EQ(nullptr, res);
+}
+
+/*
+ * @tc.name: CreatePixelMapByString_0200
+ * @tc.desc: test if AnsImageUtil's CreatePixelMapByString function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapByString_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, CreatePixelMapByString_0200, TestSize.Level1";
+    MockImageSourceCreateImageSource(false, 0);
+    MockImageSourceCreatePixelMap(true, 0);
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::string path = "123";
+    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMapByString(path);
+    EXPECT_EQ(nullptr, res);
+    MockResetImageSourceState();
+}
+
+/*
+ * @tc.name: CreatePixelMapByString_0300
+ * @tc.desc: test if AnsImageUtil's CreatePixelMapByString function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapByString_0300, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, CreatePixelMapByString_0300, TestSize.Level1";
+    MockImageSourceCreateImageSource(true, 1);
+    MockImageSourceCreatePixelMap(true, 0);
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::string path = "123";
+    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMapByString(path);
+    EXPECT_EQ(nullptr, res);
+    MockResetImageSourceState();
+}
+
+/*
+ * @tc.name: CreatePixelMapByString_0400
+ * @tc.desc: test if AnsImageUtil's CreatePixelMapByString function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapByString_0400, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, CreatePixelMapByString_0400, TestSize.Level1";
+    MockImageSourceCreateImageSource(true, 0);
+    MockImageSourceCreatePixelMap(false, 0);
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::string path = "123";
+    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMapByString(path);
+    EXPECT_EQ(nullptr, res);
+    MockResetImageSourceState();
+}
+
+/*
+ * @tc.name: CreatePixelMapByString_0500
+ * @tc.desc: test if AnsImageUtil's CreatePixelMapByString function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapByString_0500, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, CreatePixelMapByString_0500, TestSize.Level1";
+    MockImageSourceCreateImageSource(true, 0);
+    MockImageSourceCreatePixelMap(true, 1);
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::string path = "123";
+    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMapByString(path);
+    EXPECT_EQ(nullptr, res);
+    MockResetImageSourceState();
+}
+
+/*
+ * @tc.name: CreatePixelMapByString_0600
+ * @tc.desc: test CreatePixelMapByString function.
+ * @tc.type: FUNC
+ * @tc.require: #I5SJ62
+ */
+HWTEST_F(AnsImageUtilUnitTest, CreatePixelMapByString_0600, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "AnsImageUtilUnitTest, CreatePixelMapByString_0600, TestSize.Level1";
+    MockImageSourceCreateImageSource(true, 0);
+    MockImageSourceCreatePixelMap(true, 0);
+    std::shared_ptr<AnsImageUtil> imageUtil = std::make_shared<AnsImageUtil>();
+    ASSERT_NE(nullptr, imageUtil);
+    std::string path = "123";
+    std::shared_ptr<Media::PixelMap> res = imageUtil->CreatePixelMapByString(path);
+    EXPECT_NE(nullptr, res);
+    MockResetImageSourceState();
+}
