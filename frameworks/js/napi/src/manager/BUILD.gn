@@ -110,6 +110,7 @@ ohos_shared_library("notificationmanager") {
     "ability_runtime:app_context",
     "ability_runtime:napi_base_context",
     "ability_runtime:napi_common",
+    "ability_runtime:napi_wantagent_common",
     "ability_runtime:runtime",
     "ability_runtime:ui_extension",
     "ability_runtime:wantagent_innerkits",

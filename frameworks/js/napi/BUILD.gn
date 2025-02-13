@@ -131,6 +131,7 @@ ohos_shared_library("notification") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
     "ability_runtime:napi_common",
+    "ability_runtime:napi_wantagent_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
