@@ -27,6 +27,7 @@
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
+#include "napi_common_want_agent.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -1225,26 +1226,8 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
         std::lock_guard<std::mutex> lock(mutex_);
         wantAgent_.insert(agent);
     }
-    napi_value wantAgent = nullptr;
-    napi_value wantAgentClass = nullptr;
-    napi_define_class(env,
-        "wantAgentClass",
-        NAPI_AUTO_LENGTH,
-        [](napi_env env, napi_callback_info info) -> napi_value {
-            napi_value thisVar = nullptr;
-            napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-            return thisVar;
-        },
-        nullptr,
-        0,
-        nullptr,
-        &wantAgentClass);
-    napi_new_instance(env, wantAgentClass, 0, nullptr, &wantAgent);
-    napi_wrap(env,
-        wantAgent,
-        (void *)agent.get(),
-        [](napi_env env, void *data, void *hint) {
-            AbilityRuntime::WantAgent::WantAgent *objectInfo =
+    napi_finalize finalize = [](napi_env env, void *data, void *hint) {
+        AbilityRuntime::WantAgent::WantAgent *objectInfo =
                 static_cast<AbilityRuntime::WantAgent::WantAgent *>(data);
             if (objectInfo) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -1255,11 +1238,8 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
                     }
                 }
             }
-        },
-        nullptr,
-        nullptr);
-
-    return wantAgent;
+    };
+    return AppExecFwk::WrapWantAgent(env, agent.get(), finalize);
 }
 
 napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value &value, NotificationRequest &request)
