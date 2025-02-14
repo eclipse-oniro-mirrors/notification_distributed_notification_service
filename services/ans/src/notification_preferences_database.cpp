@@ -224,6 +224,12 @@ constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
 constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
 const static std::string KEY_CLONE_LABEL = "label_ans_clone_";
+
+/**
+ * Indicates hashCode rule.
+ */
+const static std::string KEY_HASH_CODE_RULE = "hashCodeRule";
+
 const static std::string CLONE_BUNDLE = "bundle_";
 const static std::string CLONE_PROFILE = "profile_";
 
@@ -2280,6 +2286,57 @@ bool NotificationPreferencesDatabase::UpdateCloneToDisturbeDB(const int32_t &use
 
     int32_t result = rdbDataManager_->InsertBatchData(values, userId);
     return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::SetHashCodeRule(const int32_t uid, const uint32_t type)
+{
+    ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, type);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    ANS_LOGI("SetHashCodeRule userId = %{public}d", userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateHashCodeGenerate(uid);
+    ANS_LOGD("%{public}s, key:%{public}s,type = %{public}d", __FUNCTION__, key.c_str(), type);
+    int32_t result = PutDataToDB(key, type, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
+{
+    ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, uid);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return 0;
+    }
+
+    std::string key = GenerateHashCodeGenerate(uid);
+    ANS_LOGD("%{public}s, key:%{public}s", __FUNCTION__, key.c_str());
+    uint32_t result = 0;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = StringToInt(value);
+                break;
+            }
+            default:
+                break;
+        }
+    });
+    return result;
+}
+
+std::string NotificationPreferencesDatabase::GenerateHashCodeGenerate(const int32_t uid)
+{
+    return std::string(KEY_HASH_CODE_RULE).append(KEY_MIDDLE_LINE).append(std::to_string(uid));
 }
 }  // namespace Notification
 }  // namespace OHOS

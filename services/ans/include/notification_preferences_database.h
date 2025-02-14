@@ -261,6 +261,23 @@ public:
     bool DelBatchCloneBundleInfo(const int32_t &userId,
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
 
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @param type generate hashCode.
+     * @return result true:success.
+     */
+    bool SetHashCodeRule(const int32_t uid, const uint32_t type);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @return type generate hashCode.
+     */
+    uint32_t GetHashCodeRule(const int32_t uid);
+
 private:
     bool CheckRdbStore();
 
@@ -351,6 +368,7 @@ private:
         const std::string &findString, const int32_t &userId);
     bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
+    std::string GenerateHashCodeGenerate(int32_t uid);
 };
 } // namespace Notification
 } // namespace OHOS

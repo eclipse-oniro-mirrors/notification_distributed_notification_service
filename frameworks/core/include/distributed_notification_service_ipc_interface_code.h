@@ -152,6 +152,7 @@ namespace Notification {
         GET_EXCLUDE_DATES_REMINDER,
         GET_DONOTDISTURB_PROFILE,
         UPDATE_NOTIFICATION_TIMER,
+        Set_HASH_CODE_RULE,
     };
 }
 }

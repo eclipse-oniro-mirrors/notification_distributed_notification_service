@@ -597,5 +597,10 @@ ErrCode NotificationHelper::UpdateNotificationTimerByUid(const int32_t uid, cons
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationTimerByUid(uid, isPaused);
 }
+
+ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetHashCodeRule(type);
+}
 }  // namespace Notification
 }  // namespace OHOS

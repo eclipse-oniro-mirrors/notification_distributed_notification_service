@@ -1333,5 +1333,25 @@ bool NotificationPreferences::DelBatchCloneBundleInfo(const int32_t &userId,
     }
     return preferncesDB_->DelBatchCloneBundleInfo(userId, cloneBundleInfo);
 }
+
+ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32_t type)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+   
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetHashCodeRule(uid, type);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    uint32_t result = 0;
+    result = preferncesDB_->GetHashCodeRule(uid);
+    ANS_LOGI("GetHashCodeRule uid = %{public}d result = %{public}d", uid, result);
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS

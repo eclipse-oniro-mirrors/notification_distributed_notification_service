@@ -1166,6 +1166,7 @@ public:
     void ResetDistributedEnabled();
 
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+
     /**
      * @brief Update notification timer by uid
      *
@@ -1174,6 +1175,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const uint32_t type) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

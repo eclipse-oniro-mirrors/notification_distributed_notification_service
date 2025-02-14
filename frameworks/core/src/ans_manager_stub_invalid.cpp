@@ -677,5 +677,11 @@ ErrCode AnsManagerStub::UpdateNotificationTimerByUid(const int32_t uid, const bo
     ANS_LOGE("UpdateNotificationTimerByUid called!");
     return ERR_INVALID_OPERATION;
 }
+
+ErrCode AnsManagerStub::SetHashCodeRule(const uint32_t type)
+{
+    ANS_LOGE("SetHashCodeRule called!");
+    return ERR_INVALID_OPERATION;
+}
 }  // namespace Notification
 }  // namespace OHOS
