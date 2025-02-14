@@ -2000,7 +2000,6 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->visiblenessType_ = other.visiblenessType_;
     this->badgeStyle_ = other.badgeStyle_;
     this->notificationContentType_ = other.notificationContentType_;
-    this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
 }
 
 void NotificationRequest::CopyOther(const NotificationRequest &other)
@@ -2041,6 +2040,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->publishDelayTime_ = other.publishDelayTime_;
+    this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
