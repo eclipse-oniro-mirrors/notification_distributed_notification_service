@@ -100,7 +100,7 @@ ErrCode DisturbManager::SetDoNotDisturbDateByUser(const int32_t &userId,
         return ERR_NO_MEMORY;
     }
 
-    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();;
+    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Generate invalid bundle option!");
         return ERR_ANS_INVALID_BUNDLE;

@@ -1678,31 +1678,29 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
         ANS_LOGD("ffrt enter!");
         sptr<NotificationDoNotDisturbDate> currentConfig = nullptr;
         result = NotificationPreferences::GetInstance()->GetDoNotDisturbDate(userId, currentConfig);
-        if (result == ERR_OK) {
-            int64_t now = GetCurrentTime();
-            switch (currentConfig->GetDoNotDisturbType()) {
-                case NotificationConstant::DoNotDisturbType::CLEARLY:
-                case NotificationConstant::DoNotDisturbType::ONCE:
-                    if (now >= currentConfig->GetEndDate()) {
-                        date = new (std::nothrow) NotificationDoNotDisturbDate(
-                            NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+        if (result != ERR_OK) {
+            return;
+        }
+        int64_t now = GetCurrentTime();
+        switch (currentConfig->GetDoNotDisturbType()) {
+            case NotificationConstant::DoNotDisturbType::CLEARLY:
+            case NotificationConstant::DoNotDisturbType::ONCE:
+                if (now >= currentConfig->GetEndDate()) {
+                    date = new (std::nothrow) NotificationDoNotDisturbDate(
+                        NotificationConstant::DoNotDisturbType::NONE, 0, 0);
                         if (date == nullptr) {
-                            ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
-                            return;
-                        }
-                        NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, date);
-                    } else {
-                        date = currentConfig;
+                        ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                        return;
                     }
-                    break;
-                default:
                     date = currentConfig;
-                    break;
-            }
+                }
+                break;
+            default:
+                date = currentConfig;
+                break;
         }
     }));
     notificationSvrQueue_->wait(handler);
-
     return ERR_OK;
 }
 

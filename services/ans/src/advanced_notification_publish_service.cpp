@@ -2580,7 +2580,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 ErrCode AdvancedNotificationService::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    uint32_t status_ = status;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
         ANS_LOGD("isSubsystem is bogus.");

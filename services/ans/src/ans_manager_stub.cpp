@@ -230,7 +230,7 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleIsSpecialBundleAllowedNotify(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE): 
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE):
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE): {
             result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;

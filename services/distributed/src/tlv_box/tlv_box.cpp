@@ -223,6 +223,7 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
 
     delete[] cached;
     bytesLength_ = buffersize;
+    delete[] cached;
     return true;
 }
 

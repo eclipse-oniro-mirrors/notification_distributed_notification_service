@@ -146,9 +146,7 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         } else {
             button->SetIconImage(pIcon);
         }
-    }
-
-    if (jsonObject.find("iconImage") != jsonEnd) {
+    } else if (jsonObject.find("iconImage") != jsonEnd) {
         auto resources = jsonObject.at("iconImage");
         auto pIcon = AnsImageUtil::UnPackImage(resources);
         if (pIcon == nullptr) {
@@ -176,7 +174,7 @@ bool NotificationIconButton::ResourceFromJson(const nlohmann::json &resource,
     }
     if (resource.find("id") != jsonEnd && resource.at("id").is_number_integer()) {
         resourceCount--;
-        resourceObj->id = resource.at("id").get<int32_t>();
+        resourceObj->id = static_cast<uint32_t>(resource.at("id").get<int32_t>());
     }
     if (resourceCount == 0) {
         return true;

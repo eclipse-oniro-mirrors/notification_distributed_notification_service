@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Notification {
+constexpr uint32_t MAX_SLOT_SIZE = 1000;
 NotificationSubscribeInfo::NotificationSubscribeInfo()
 {}
 
@@ -92,7 +93,7 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         return false;
     }
      //write slotTypes_
-    if (!parcel.WriteInt32(slotTypes_.size())) {
+    if (!parcel.WriteUint32(slotTypes_.size())) {
         ANS_LOGE("Failed to write slotTypes_ size.");
         return false;
     }
@@ -103,7 +104,7 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         }
     }
     // write filterType_
-    if (!parcel.WriteInt32(filterType_)) {
+    if (!parcel.WriteUint32(filterType_)) {
         ANS_LOGE("Can't write filterType_");
         return false;
     }
@@ -151,12 +152,16 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         return false;
     }
     //read slotTypes_
-    int32_t size = 0;
-    if (!parcel.ReadInt32(size)) {
+    uint32_t size = 0;
+    if (!parcel.ReadUint32(size)) {
         ANS_LOGE("read slotType_ size failed.");
         return false;
     }
-    for (int32_t index = 0; index < size; index++) {
+    if (size > MAX_SLOT_SIZE) {
+        ANS_LOGE("slotType_ size over 1000.");
+        return false;
+    }
+    for (uint32_t index = 0; index < size; index++) {
         int32_t slotType = -1;
         if (!parcel.ReadInt32(slotType)) {
             ANS_LOGE("read Parcelable slotType failed.");
@@ -165,7 +170,7 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
         }
     // read filterType_
-    if (!parcel.ReadInt32(filterType_)) {
+    if (!parcel.ReadUint32(filterType_)) {
         ANS_LOGE("Can't read filterType_");
         return false;
     }
@@ -220,12 +225,12 @@ std::vector<NotificationConstant::SlotType> NotificationSubscribeInfo::GetSlotTy
     return slotTypes_;
 }
 
-void NotificationSubscribeInfo::SetFilterType(const int32_t filterType)
+void NotificationSubscribeInfo::SetFilterType(const uint32_t filterType)
 {
     filterType_ = filterType;
 }
 
-int32_t NotificationSubscribeInfo::GetFilterType() const
+uint32_t NotificationSubscribeInfo::GetFilterType() const
 {
     return filterType_;
 }

@@ -47,7 +47,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     int32_t subscriberUid {DEFAULT_UID};
     bool needNotifyApplicationChanged = false;
     bool needNotifyResponse = false;
-    int32_t filterType {0};
+    uint32_t filterType {0};
     std::set<NotificationConstant::SlotType> slotTypes {};
 };
 
@@ -633,7 +633,7 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
 {
     NotificationRequest request = notification->GetNotificationRequest();
     // filterType
-    ANS_LOGI("filterType = %{public}d", record->filterType);
+    ANS_LOGI("filterType = %{public}u", record->filterType);
     if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == request.GetSlotType()) {
         bool isQuickReply = request.HasUserInputButton();
         if (isQuickReply && (record->filterType & FILTETYPE_QUICK_REPLY_IM) > 0) {
