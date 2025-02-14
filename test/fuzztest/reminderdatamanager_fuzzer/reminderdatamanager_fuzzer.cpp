@@ -123,6 +123,28 @@ namespace OHOS {
         return true;
     }
 
+    bool DoSomethingInteresting(FuzzedDataProvider* fdp)
+    {
+        auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->OnUnlockScreen();
+        manager->OnLoadReminderEvent();
+        manager->OnLoadReminderInFfrt();
+        manager->OnDataShareInsertOrDelete();
+        std::map<std::string, sptr<ReminderRequest>> reminderMap;
+        manager->OnDataShareUpdate(reminderMap);
+        int32_t notificationId = fdp->ConsumeIntegral<int32_t>();
+        int32_t uid = fdp->ConsumeIntegral<int32_t>();
+        int64_t autoDeletedTime = fdp->ConsumeIntegral<int64_t>();
+        manager->HandleAutoDeleteReminder(notificationId, uid, autoDeletedTime);
+        std::vector<sptr<ReminderRequest>> reminders;
+        manager->UpdateReminderLanguageLocked(uid, reminders);
+        manager->IsSystemReady();
+        manager->QueryActiveReminderCount();
+        manager->StartLoadTimer();
+        manager->InitShareReminders();
+        return true;
+    }
+
     bool Clear()
     {
         auto manager = Notification::ReminderDataManager::GetInstance();
@@ -139,7 +161,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
+    constexpr int32_t TIME = 2;
     OHOS::DoSomethingInterestingWithManager(&fdp);
     OHOS::DoSomethingInterestingWithReminder(&fdp);
+    OHOS::DoSomethingInteresting(&fdp);
+    sleep(TIME);
     return 0;
 }
