@@ -53,6 +53,7 @@
 #include "notification_helper.h"
 #include "reminder_datashare_helper.h"
 #include "reminder_calendar_share_table.h"
+#include "reminder_service_check.h"
 
 namespace OHOS {
 namespace Notification {
@@ -475,6 +476,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
         case (TimerType::TRIGGER_TIMER): {
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
             sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+            sharedTimerInfo->SetName("reminderTriggerTimer");
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, activeReminderId_);
             want->SetParam(ReminderRequest::PARAM_REMINDER_SHARE, reminderRequest->IsShare());
             break;
@@ -486,6 +488,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
             }
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
             sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+            sharedTimerInfo->SetName("reminderAlertingTimer");
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, alertingReminderId_);
             want->SetParam(ReminderRequest::PARAM_REMINDER_SHARE, reminderRequest->IsShare());
             break;
@@ -660,6 +663,7 @@ uint64_t ReminderDataManager::CreateTimer(const sptr<MiscServices::TimeServiceCl
     int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
     timerInfo->SetType(timerType);
     timerInfo->SetReminderTimerType(ReminderTimerInfo::ReminderTimerType::REMINDER_TIMER_LOAD);
+    timerInfo->SetName("reminderLoadTimer");
     return timer->CreateTimer(timerInfo);
 }
 
@@ -1403,6 +1407,7 @@ void ReminderDataManager::Init()
     if (IsReminderAgentReady()) {
         return;
     }
+    ReminderServiceCheck::GetInstance().StopListen();
     // Register config observer for language change
     if (!RegisterConfigurationObserver()) {
         ANSR_LOGW("Register configuration observer failed.");
