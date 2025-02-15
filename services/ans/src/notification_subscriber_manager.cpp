@@ -857,21 +857,21 @@ void NotificationSubscriberManager::TrackCodeLog(
     bool isLiveViewType = (slotType == NotificationConstant::SlotType::LIVE_VIEW);
     if (wearableFlag && headsetFlag) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
-                                    .syncWatchHeadSet(isLiveViewType)
-                                    .keyNode(keyNodeFlag)
+                                    .SyncWatchHeadSet(isLiveViewType)
+                                    .KeyNode(keyNodeFlag)
                                     .SlotType(slotType);
         NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
     } else {
         if (headsetFlag) {
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
-                                        .syncHeadSet(isLiveViewType)
-                                        .keyNode(keyNodeFlag)
+                                        .SyncHeadSet(isLiveViewType)
+                                        .KeyNode(keyNodeFlag)
                                         .SlotType(slotType);
             NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
         } else if (wearableFlag) {
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
-                                        .syncWatch(isLiveViewType)
-                                        .keyNode(keyNodeFlag)
+                                        .SyncWatch(isLiveViewType)
+                                        .KeyNode(keyNodeFlag)
                                         .SlotType(slotType);
             NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
         }

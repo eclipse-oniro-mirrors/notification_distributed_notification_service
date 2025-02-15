@@ -50,9 +50,9 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
     for (auto& socketItem : socketsId_) {
         if (socketItem.second == socket) {
             socketItem.second = -1;
-            std::string message = "socketID: " + std::to_string(socket) + "ShutdownReason: " +
+            std::string message = "socketID: " + std::to_string(socket) + " ; ShutdownReason: " +
                                   ShutdownReasonToString(reason);
-            DistributedService::GetInstance().SendHaReport(0, BRANCH4_ID, message);
+            DistributedService::GetInstance().SendHaReport(0, BRANCH4_ID, message, PUBLISH_ERROR_EVENT_CODE);
         }
     }
 }

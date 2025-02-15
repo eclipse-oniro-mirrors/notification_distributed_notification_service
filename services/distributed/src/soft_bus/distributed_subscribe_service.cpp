@@ -38,6 +38,7 @@ const std::string DISTRIBUTED_LABEL = "ans_distributed";
 const int32_t DEFAULT_FILTER_TYPE = 1;
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
+constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t BRANCH3_ID = 3;
 
 std::string SubscribeTransDeviceType(uint16_t deviceType)
@@ -83,10 +84,10 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
         }
         subscriberMap_[peerDevice.deviceId_] = subscriber;
         peerDevice_[peerDevice.deviceId_].peerState_ = DeviceState::STATE_ONLINE;
-        if (DistributedService::GetInstance().haCallback_ != nullptr) {
+        if (haCallback_ != nullptr) {
             std::string reason = "deviceType: " + std::to_string(localDevice_.deviceType_) +
-                                 "deviceId: " + AnonymousProcessing(localDevice_.deviceId_);
-            DistributedService::GetInstance().haCallback_(PUBLISH_ERROR_EVENT_CODE, 0, BRANCH3_ID, reason);
+                                 " ; deviceId: " + AnonymousProcessing(localDevice_.deviceId_);
+            haCallback_(PUBLISH_ERROR_EVENT_CODE, 0, BRANCH3_ID, reason);
         }
     }
     ANS_LOGI("Subscribe notification %{public}s %{public}d %{public}d %{public}d.",
@@ -289,6 +290,7 @@ std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notific
 ErrCode DistributedService::OnResponse(
     const std::shared_ptr<Notification>& notification, const DistributedDeviceInfo& device)
 {
+    this->code_ = MODIFY_ERROR_EVENT_CODE;
     NotificationResponseBox responseBox;
     ANS_LOGI("dans OnResponse %{public}s", notification->Dump().c_str());
     if (notification == nullptr) {
