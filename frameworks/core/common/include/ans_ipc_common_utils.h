@@ -55,10 +55,6 @@ public:
         parcelableInfos.clear();
         for (int32_t index = 0; index < infoSize; index++) {
             std::shared_ptr<T> info = std::shared_ptr<T>(data.ReadParcelable<T>());
-            if (info == nullptr) {
-                ANS_LOGE("Failed to read Parcelable infos.");
-                return false;
-            }
             parcelableInfos.emplace_back(info);
         }
 
