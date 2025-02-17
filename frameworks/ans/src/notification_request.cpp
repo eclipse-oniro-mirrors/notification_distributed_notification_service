@@ -24,6 +24,7 @@
 #include "refbase.h"
 #include "want_agent_helper.h"
 #include "want_params_wrapper.h"
+#include "notification_action_button.h"
 #include <memory>
 
 namespace OHOS {
@@ -2280,13 +2281,18 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
         ANS_LOGE("Invalid input parameter");
         return false;
     }
+    int32_t targetUid = -1;
+    if (target->GetOwnerUid() != DEFAULT_UID) {
+        targetUid = target->GetOwnerUid();
+    }
+    ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
 
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("actionButtons") != jsonEnd) {
         auto buttonArr = jsonObject.at("actionButtons");
         for (auto &btnObj : buttonArr) {
-            auto pBtn = NotificationJsonConverter::ConvertFromJson<NotificationActionButton>(btnObj);
+            auto pBtn = NotificationActionButton::ConvertNotificationActionButton(targetUid, btnObj);
             if (pBtn == nullptr) {
                 ANS_LOGE("Failed to parse actionButton!");
                 return false;
