@@ -187,53 +187,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
 void AdvancedNotificationService::SetCollaborateReminderFlag(const sptr<NotificationRequest> &request)
 {
-    NotificationConstant::SlotType slotType = request->GetSlotType();
-    uint32_t slotFlags =
-        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slotType);
-    ANS_LOGI("Before %{public}s flags = %{public}d %{public}d", request->GetKey().c_str(), slotType, slotFlags);
+    ANS_LOGI("Before %{public}s", request->GetKey().c_str());
     auto flags = std::make_shared<NotificationFlags>();
-    if ((slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-        flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    }
-
-    if ((slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-        flags->SetLockScreenVisblenessEnabled(true);
-    }
-
-    if ((slotFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-        flags->SetLightScreenEnabled(true);
-    }
-
-    if ((slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-        flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    }
-
-    uint32_t controlFlags = request->GetNotificationControlFlags();
-    if (controlFlags != 0) {
-        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN &&
-            (controlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-        }
-
-        if (flags->IsLockScreenVisblenessEnabled() &&
-            (controlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-            flags->SetLockScreenVisblenessEnabled(false);
-        }
-
-        if (flags->IsLightScreenEnabled() &&
-            (controlFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-            flags->SetLightScreenEnabled(false);
-        }
-
-        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
-            (controlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-        }
-    }
-
+    flags->SetReminderFlags(request->GetCollaboratedReminderFlag());
     request->SetFlags(flags);
-    ANS_LOGI("SetFlags Key = %{public}s flags = %{public}d %{public}d", request->GetKey().c_str(),
-        controlFlags, flags->GetReminderFlags());
+    ANS_LOGI("SetFlags %{public}d %{public}d", flags->GetReminderFlags(),
+        request->GetCollaboratedReminderFlag());
 }
 
 void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -295,6 +254,9 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     request->SetCreatorUserId(userId);
     request->SetCreateTime(GetCurrentTime());
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->notification = new (std::nothrow) Notification(request);

@@ -171,14 +171,7 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
         request->SetSlotType(static_cast<NotificationConstant::SlotType>(type));
     }
     if (box.GetReminderFlag(type)) {
-        uint32_t controlFlags = 0;
-        if (!(type & NotificationConstant::ReminderFlag::SOUND_FLAG)) {
-            controlFlags |= NotificationConstant::ReminderFlag::SOUND_FLAG;
-        }
-        if (!(type & NotificationConstant::ReminderFlag::VIBRATION_FLAG)) {
-            controlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
-        }
-        request->SetNotificationControlFlags(controlFlags);
+        request->SetCollaboratedReminderFlag(static_cast<uint32_t>(type));
     }
     if (box.GetCreatorBundleName(context)) {
         request->SetOwnerBundleName(context);

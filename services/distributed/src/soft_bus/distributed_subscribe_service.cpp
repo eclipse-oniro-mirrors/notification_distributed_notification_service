@@ -101,6 +101,12 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
         return;
     }
     std::function<void()> subscribeTask = std::bind([&, deviceId, deviceType]() {
+        auto deviceIter = peerDevice_.find(deviceId);
+        if (deviceIter != peerDevice_.end()) {
+            ANS_LOGI("UnSubscribe device %{public}s %{public}d.", deviceId.c_str(), deviceType);
+            peerDevice_.erase(deviceId);
+        }
+
         auto iter = subscriberMap_.find(deviceId);
         if (iter == subscriberMap_.end()) {
             ANS_LOGI("UnSubscribe invalid %{public}s %{public}d.", deviceId.c_str(), deviceType);
@@ -109,7 +115,6 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
 
         if (NotificationHelper::UnSubscribeNotification(iter->second) == 0) {
             subscriberMap_.erase(deviceId);
-            peerDevice_.erase(deviceId);
         }
         ANS_LOGI("UnSubscribe notification %{public}s %{public}d.", deviceId.c_str(), deviceType);
     });
