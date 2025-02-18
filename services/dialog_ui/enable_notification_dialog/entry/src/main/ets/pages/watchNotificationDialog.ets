@@ -139,7 +139,7 @@ struct PermissionDialog {
               Flex({ justifyContent: FlexAlign.Center }) {
                 Button() {
                   Text($r('app.string.BAN'))
-                  .fontColor('#FFFFFF')
+                  .fontColor('#5EA1FF')
                   .fontWeight(500)
                   .minFontSize('27px')
                   .maxFontSize('30px')
