@@ -59,6 +59,22 @@ uint32_t NotificationFlags::GetReminderFlags()
     return reminderFlags_;
 }
 
+void NotificationFlags::SetReminderFlags(const uint32_t reminderFlag)
+{
+    reminderFlags_ = reminderFlag;
+    if (reminderFlags_ & NotificationConstant::ReminderFlag::VIBRATION_FLAG) {
+        vibrationEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        vibrationEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+
+    if (reminderFlags_ & NotificationConstant::ReminderFlag::SOUND_FLAG) {
+        soundEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        soundEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+}
+
 void NotificationFlags::SetLockScreenVisblenessEnabled(bool visblenessEnabled)
 {
     if (visblenessEnabled) {
