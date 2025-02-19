@@ -40,7 +40,7 @@ ErrCode AnsManagerProxy::Publish(const std::string &label, const sptr<Notificati
         ANS_LOGE("[Publish] fail: notification is null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-
+    ANS_LOGD("Publish instanceKey: %{public}s", notification->GetAppInstanceKey().c_str());
     MessageParcel data;
     if (notification->IsCommonLiveView()) {
         if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
@@ -84,7 +84,7 @@ ErrCode AnsManagerProxy::PublishNotificationForIndirectProxy(const sptr<Notifica
         ANS_LOGE("[PublishNotificationForIndirectProxy] fail: notification is null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-
+    ANS_LOGD("PublishNotificationForIndirectProxy instanceKey: %{public}s", notification->GetAppInstanceKey().c_str());
     MessageParcel data;
     if (notification->IsCommonLiveView()) {
         if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
@@ -117,7 +117,7 @@ ErrCode AnsManagerProxy::PublishNotificationForIndirectProxy(const sptr<Notifica
     return result;
 }
 
-ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey)
+ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -135,11 +135,11 @@ ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(instanceKey)) {
+    if (!data.WriteString(instanceKey)) {
         ANS_LOGE("[Cancel] fail: write instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    ANS_LOGD("Cancel instanceKey: %{public}s", instanceKey.c_str());
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_NOTIFICATION, option, data, reply);
@@ -156,7 +156,7 @@ ErrCode AnsManagerProxy::Cancel(int32_t notificationId, const std::string &label
     return result;
 }
 
-ErrCode AnsManagerProxy::CancelAll(int32_t instanceKey)
+ErrCode AnsManagerProxy::CancelAll(const std::string &instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -164,11 +164,11 @@ ErrCode AnsManagerProxy::CancelAll(int32_t instanceKey)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(instanceKey)) {
+    if (!data.WriteString(instanceKey)) {
         ANS_LOGE("[CancelAll] fail: write instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    ANS_LOGD("CancelAll instanceKey: %{public}s", instanceKey.c_str());
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_ALL_NOTIFICATIONS, option, data, reply);
@@ -300,7 +300,7 @@ ErrCode AnsManagerProxy::CancelAsBundle(
 }
 
 ErrCode AnsManagerProxy::GetActiveNotifications(
-    std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey)
+    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -308,11 +308,11 @@ ErrCode AnsManagerProxy::GetActiveNotifications(
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(instanceKey)) {
+    if (!data.WriteString(instanceKey)) {
         ANS_LOGE("[GetActiveNotifications] fail: write instanceKey failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    ANS_LOGD("GetActiveNotifications instanceKey: %{public}s", instanceKey.c_str());
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ACTIVE_NOTIFICATIONS, option, data, reply);
@@ -1420,7 +1420,7 @@ ErrCode AnsManagerProxy::IsSpecialBundleAllowedNotify(const sptr<NotificationBun
     return result;
 }
 
-ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName, int32_t instanceKey)
+ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName, const std::string &instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -1433,11 +1433,11 @@ ErrCode AnsManagerProxy::CancelGroup(const std::string &groupName, int32_t insta
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(instanceKey)) {
+    if (!data.WriteString(instanceKey)) {
         ANS_LOGE("[CancelGroup] fail: write instanceKey failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-
+    ANS_LOGD("CancelGroup instanceKey: %{public}s", instanceKey.c_str());
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::CANCEL_GROUP, option, data, reply);
@@ -1957,7 +1957,7 @@ ErrCode AnsManagerProxy::GetSyncNotificationEnabledWithoutApp(const int32_t user
     return result;
 }
 
-ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey)
+ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -1970,7 +1970,7 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(instanceKey)) {
+    if (!data.WriteString(instanceKey)) {
         ANS_LOGE("[SetBadgeNumber] fail:: write instancekey failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }

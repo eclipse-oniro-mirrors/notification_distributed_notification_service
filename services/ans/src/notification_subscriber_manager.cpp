@@ -669,6 +669,7 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
         for (auto record : subscriberRecordList_) {
             if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
                 IsSystemUser(userId) || record->userId == userId) {
+                ANS_LOGD("SetBadgeNumber instanceKey: %{public}s", badgeData->GetAppInstanceKey().c_str());
                 record->subscriber->OnBadgeChanged(badgeData);
             }
         }

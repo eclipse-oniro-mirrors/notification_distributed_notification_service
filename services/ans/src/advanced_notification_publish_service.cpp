@@ -197,7 +197,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
-    record->bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
@@ -294,7 +294,8 @@ bool AdvancedNotificationService::InitPublishProcess()
     return true;
 }
 
-ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey)
+ErrCode AdvancedNotificationService::Cancel(int32_t notificationId,
+    const std::string &label, const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -308,12 +309,12 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId, const std::s
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
-    bundleOption->SetInstanceKey(instanceKey);
+    bundleOption->SetAppInstanceKey(instanceKey);
     return CancelPreparedNotification(notificationId, label, bundleOption,
         NotificationConstant::APP_CANCEL_REASON_DELETE);
 }
 
-ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
+ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
@@ -321,7 +322,7 @@ ErrCode AdvancedNotificationService::CancelAll(int32_t instanceKey)
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
-    bundleOption->SetInstanceKey(instanceKey);
+    bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidated.");
@@ -339,7 +340,7 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
         ANS_LOGD("ffrt enter!");
         sptr<Notification> notification = nullptr;
 
-        std::vector<std::string> keys = GetNotificationKeys(bundleOption);
+        std::vector<std::string> keys = GetNotificationKeysByBundle(bundleOption);
         std::vector<sptr<Notification>> notifications;
         std::vector<uint64_t> timerIds;
         for (auto key : keys) {
@@ -1907,7 +1908,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     return isNeedSilent;
 }
 
-ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, int32_t instanceKey)
+ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1930,7 +1931,7 @@ ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, i
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_BUNDLE;
     }
-    bundleOption->SetInstanceKey(instanceKey);
+    bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
         std::string message = "Serial queue is invalid.";
@@ -1950,8 +1951,11 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
         ANS_LOGD("ffrt enter!");
         std::vector<std::shared_ptr<NotificationRecord>> removeList;
         for (auto record : notificationList_) {
+            ANS_LOGD("ExcuteCancelGroupCancel instanceKey(%{public}s, %{public}s).",
+                record->notification->GetInstanceKey().c_str(), bundleOption->GetAppInstanceKey().c_str());
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
                 record->deviceId.empty() &&
 #endif
@@ -2388,7 +2392,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     } else {
         record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     }
-    record->bundleOption->SetInstanceKey(request->GetCreatorInstanceKey());
+    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
@@ -2456,7 +2460,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey)
+ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (notificationSvrQueue_ == nullptr) {
@@ -2465,8 +2469,9 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, int32_t
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     std::string bundleName = GetClientBundleName();
+    ANS_LOGD("SetBadgeNumber receive instanceKey:%{public}s", instanceKey.c_str());
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
-        bundleName, callingUid, badgeNumber, instanceKey);
+        bundleName, instanceKey, callingUid, badgeNumber);
     if (badgeData == nullptr) {
         ANS_LOGE("Failed to create BadgeNumberCallbackData.");
         return ERR_ANS_NO_MEMORY;

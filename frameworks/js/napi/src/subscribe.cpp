@@ -231,7 +231,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
     }
     ANS_LOGI("OnCanceled NotificationKey = %{public}s. sortingMap size = %{public}zu. deleteReason = %{public}d",
         request->GetKey().c_str(), sortingMap->GetKey().size(), deleteReason);
-
+    ANS_LOGD("SubscriberInstance::OnCanceled instanceKey: %{public}s", request->GetInstanceKey().c_str());
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("DataWorker is nullptr.");
@@ -403,6 +403,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         request->GetKey().c_str(), sortingMap->GetKey().size(),
         notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
     ANS_LOGD("OnConsumed Notification info is %{public}s", request->GetNotificationRequest().Dump().c_str());
+    ANS_LOGD("OnConsumed instanceKey: %{public}s", request->GetInstanceKey().c_str());
     
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
@@ -839,7 +840,7 @@ void SubscriberInstance::OnBadgeChanged(
         ANS_LOGE("new dataWorker failed");
         return;
     }
-
+    ANS_LOGD("SubscriberInstance::OnBadgeChanged instanceKey:%{public}s", badgeData->GetAppInstanceKey().c_str());
     dataWorker->badge = *badgeData;
     dataWorker->env = setBadgeCallbackInfo_.env;
     dataWorker->ref = setBadgeCallbackInfo_.ref;

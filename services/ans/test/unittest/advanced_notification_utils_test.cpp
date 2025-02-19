@@ -75,7 +75,7 @@ void AnsUtilsTest::SetUp()
 
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
-    advancedNotificationService_->CancelAll(0);
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";

@@ -724,6 +724,16 @@ int32_t NotificationRequest::GetCreatorInstanceKey() const
     return creatorInstanceKey_;
 }
 
+void NotificationRequest::SetAppInstanceKey(const std::string &key)
+{
+    appInstanceKey_ = key;
+}
+ 
+std::string NotificationRequest::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
+}
+
 void NotificationRequest::SetOwnerUserId(int32_t userId)
 {
     ownerUserId_ = userId;
@@ -842,6 +852,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["ownerUid"]          = ownerUid_;
     jsonObject["receiverUserId"]    = receiverUserId_;
     jsonObject["creatorInstanceKey"]    = creatorInstanceKey_;
+    jsonObject["appInstanceKey"]    = appInstanceKey_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
@@ -1030,6 +1041,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     // write std::string
+    if (!parcel.WriteString(appInstanceKey_)) {
+        ANS_LOGE("Failed to write instance key");
+        return false;
+    }
+
     if (!parcel.WriteString(settingsText_)) {
         ANS_LOGE("Failed to write settings text");
         return false;
@@ -1474,6 +1490,11 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     publishDelayTime_ = parcel.ReadUint32();
     hashCodeGenerateType_ = parcel.ReadUint32();
 
+    if (!parcel.ReadString(appInstanceKey_)) {
+        ANS_LOGE("Failed to read Instance key");
+        return false;
+    }
+
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
         return false;
@@ -1881,6 +1902,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->ownerUserId_ = other.ownerUserId_;
     this->receiverUserId_ = other.receiverUserId_;
     this->creatorInstanceKey_ = other.creatorInstanceKey_;
+    this->appInstanceKey_ = other.appInstanceKey_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
@@ -2113,6 +2135,10 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
     }
 
     const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("appInstanceKey") != jsonEnd && jsonObject.at("appInstanceKey").is_string()) {
+        target->appInstanceKey_ = jsonObject.at("appInstanceKey").get<std::string>();
+    }
 
     if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
@@ -2553,18 +2579,18 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
     uint32_t hashCodeGeneratetype = GetHashCodeGenerateType();
     if (IsAgentNotification()) {
         if (hashCodeGeneratetype ==  1) {
-            stream << deviceId << keySpliter <<
+            stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
                 creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
                 ownerUserId_ << keySpliter << label_ << keySpliter << notificationId_;
         } else {
-            stream << deviceId << keySpliter <<
+            stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
                 ownerUserId_ << keySpliter << ownerUid_ << keySpliter <<
                 ownerBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
         }
     } else {
-        stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
-            creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+        stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
+            creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
+            creatorBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
     }
     return stream.str();
 }

@@ -92,7 +92,7 @@ void AdvancedNotificationServiceTest::SetUp()
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    advancedNotificationService_->CancelAll(0);
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
@@ -280,7 +280,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02800,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02900, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationRequest>> notifications;
-    ASSERT_EQ((int)advancedNotificationService_->GetActiveNotifications(notifications, 0), (int)ERR_OK);
+    ASSERT_EQ((int)advancedNotificationService_->GetActiveNotifications(notifications, ""), (int)ERR_OK);
 }
 
 /**
@@ -611,7 +611,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06900,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_07000, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationRequest>> notifications;
-    ASSERT_EQ((int)advancedNotificationService_->GetActiveNotifications(notifications, 0), (int)ERR_OK);
+    ASSERT_EQ((int)advancedNotificationService_->GetActiveNotifications(notifications, ""), (int)ERR_OK);
 }
 
 /**
@@ -1407,7 +1407,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     MockIsNonBundleName(true);
     MockSystemApp();
     std::vector<sptr<NotificationRequest>> notifications;
-    ASSERT_EQ(advancedNotificationService_->GetActiveNotifications(notifications, 0), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotifications(notifications, ""), ERR_ANS_INVALID_BUNDLE);
     uint64_t num = 1;
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INVALID_BUNDLE);
     ASSERT_EQ(advancedNotificationService_->SetNotificationBadgeNum(num), ERR_ANS_INVALID_BUNDLE);
@@ -1442,7 +1442,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
         ERR_ANS_INVALID_BUNDLE);
 
     std::string groupName = "name";
-    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, 0), ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INVALID_BUNDLE);
 
     bool enabled = true;
     ASSERT_EQ(advancedNotificationService_->EnableDistributedSelf(enabled), ERR_ANS_INVALID_BUNDLE);
@@ -1821,7 +1821,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_18900,
     GTEST_LOG_(INFO) << "CancelGroup_1000 test start";
 
     std::string groupName = "";
-    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, 0), ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->CancelGroup(groupName, ""), ERR_ANS_INVALID_PARAM);
 
     GTEST_LOG_(INFO) << "CancelGroup_1000 test end";
 }
@@ -2509,7 +2509,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00004,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00004 test start";
     int32_t badgeNumber = 1;
-    ASSERT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber, 0), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber, ""), ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00004 test end";
 }
 
@@ -2526,7 +2526,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00005,
     advancedNotificationService_->runner_ = OHOS::AppExecFwk::EventRunner::Create("NotificationSvrMain");
     advancedNotificationService_->handler_ =
         std::make_shared<OHOS::AppExecFwk::EventHandler>(advancedNotificationService_->runner_);
-    ASSERT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber, 0), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetBadgeNumber(badgeNumber, ""), ERR_OK);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00005 test end";
 }
 
@@ -3279,7 +3279,7 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     std::vector<sptr<NotificationRequest>> requests;
-    ret = advancedNotificationService_->GetActiveNotifications(requests, 0);
+    ret = advancedNotificationService_->GetActiveNotifications(requests, "");
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 
     uint64_t num = 0;

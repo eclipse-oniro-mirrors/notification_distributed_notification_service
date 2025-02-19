@@ -681,7 +681,7 @@ ErrCode AnsManagerProxy::GetSyncNotificationEnabledWithoutApp(const int32_t user
     return result;
 }
 
-ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey)
+ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -694,7 +694,7 @@ ErrCode AnsManagerProxy::SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(instanceKey)) {
+    if (!data.WriteString(instanceKey)) {
         ANS_LOGE("[SetBadgeNumber] fail:: write instancekey failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
