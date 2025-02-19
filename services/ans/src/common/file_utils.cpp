@@ -63,13 +63,13 @@ bool FileUtils::GetJsonFromFile(const char *path, nlohmann::json &root)
 {
     std::ifstream file(path);
     if (!file.good()) {
-        EVENT_LOGE("Failed to open file %{public}s.", path);
+        ANS_LOGE("Failed to open file %{public}s.", path);
         return false;
     }
     root = nlohmann::json::parse(file, nullptr, false);
     file.close();
     if (root.is_discarded() || !root.is_structured()) {
-        EVENT_LOGE("Failed to parse json from file %{public}s.", path);
+        ANS_LOGE("Failed to parse json from file %{public}s.", path);
         return false;
     }
     if (root.is_null() || root.empty() || !root.is_object()) {
