@@ -216,7 +216,7 @@ HWTEST_F(NotificationTest, GenerateNotificationKey_00001, Function | SmallTest |
     request->SetNotificationId(id);
     request->SetCreatorBundleName("come.test");
     auto rrc = std::make_shared<Notification>(request);
-    std::string result = "_10_20_come.test_Lable_30";
+    std::string result = "__10_20_come.test_Lable_30";
     EXPECT_EQ(rrc->GetKey(), result);
 }
 
@@ -242,7 +242,7 @@ HWTEST_F(NotificationTest, GenerateNotificationKey_00002, Function | SmallTest |
     request->SetCreatorBundleName("come.push");
     request->SetOwnerBundleName("come.test");
     auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string result = "DeviceId_10_20_come.test_Lable_30";
+    std::string result = "_DeviceId_10_20_come.test_Lable_30";
     EXPECT_EQ(rrc->GetKey(), result);
 }
 
@@ -301,7 +301,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     std::string deviceId = "DeviceId";
     sptr<NotificationRequest> request = new NotificationRequest();
     auto rrc = std::make_shared<Notification>(deviceId, request);
-    std::string ret =  "Notification{ key = DeviceId_-1_0___0, ledLightColor = 0, "
+    std::string ret =  "Notification{ key = _DeviceId_-1_0___0, ledLightColor = 0, "
     "lockscreenVisbleness = 0, remindType = -1, isRemoveAllowed = true, sourceType = 0, "
     "deviceId = DeviceId, request = NotificationRequest{ notificationId = 0, slotType = 3, "
     "createTime = 0, deliveryTime = 0, autoDeletedTime = -1, settingsText = , "
