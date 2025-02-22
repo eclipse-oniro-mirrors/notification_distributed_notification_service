@@ -141,13 +141,7 @@ public:
 
     bool MarshallingPictureMap(Parcel &parcel) const;
 
-    void FillPictureMarshallingMap();
-
-    void ClearPictureMarshallingMap();
-
     void ClearPictureMap();
-
-    PictureMarshallingMap GetPictureMarshallingMap() const;
 
     void SetIsOnlyLocalUpdate(const bool &isOnlyLocalUpdate);
 
@@ -168,7 +162,6 @@ private:
     uint32_t version_ {MAX_VERSION};
     std::shared_ptr<AAFwk::WantParams> extraInfo_ {};
     PictureMap pictureMap_ {};
-    PictureMarshallingMap pictureMarshallingMap_ {};
     bool isOnlyLocalUpdate_ = false;
 };
 }  // namespace Notification
