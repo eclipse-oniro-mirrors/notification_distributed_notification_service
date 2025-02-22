@@ -287,8 +287,6 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00002, Function 
     PictureMap pictureMap;
     auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
     liveViewContent->SetPicture(pictureMap);
-    bool isEmptyMarshallingMap = liveViewContent->GetPictureMarshallingMap().empty();
-    EXPECT_EQ(isEmptyMarshallingMap, true);
 
     Parcel parcel;
     bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);
@@ -306,9 +304,6 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00003, Function 
     PictureMap pictureMap;
     auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
     liveViewContent->SetPicture(pictureMap);
-    liveViewContent->FillPictureMarshallingMap();
-    bool isEmptyMarshallingMap = liveViewContent->GetPictureMarshallingMap().empty();
-    EXPECT_EQ(isEmptyMarshallingMap, true);
 
     Parcel parcel;
     bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);

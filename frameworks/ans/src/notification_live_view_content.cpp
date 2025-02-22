@@ -288,67 +288,23 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
 
 bool NotificationLiveViewContent::MarshallingPictureMap(Parcel &parcel) const
 {
-    if (!pictureMarshallingMap_.empty()) {
-        ANS_LOGD("Write pictureMap by pictureMarshallingMap.");
-        for (const auto &picture : pictureMarshallingMap_) {
-            if (!parcel.WriteString(picture.first)) {
-                ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
-                return false;
-            }
-
-            if (!parcel.WriteStringVector(picture.second)) {
-                ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
-                return false;
-            }
+    for (const auto &picture : pictureMap_) {
+        if (!parcel.WriteString(picture.first)) {
+            ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
+            return false;
         }
-        return true;
-    }
-
-    if (!pictureMap_.empty()) {
-        for (const auto &picture : pictureMap_) {
-            if (!parcel.WriteString(picture.first)) {
-                ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
-                return false;
-            }
-            
-            if (!AnsIpcCommonUtils::WriteParcelableVector(picture.second, parcel)) {
-                ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
-                return false;
-            }
+        
+        if (!AnsIpcCommonUtils::WriteParcelableVector(picture.second, parcel)) {
+            ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
+            return false;
         }
     }
-
     return true;
-}
-
-void NotificationLiveViewContent::FillPictureMarshallingMap()
-{
-    pictureMarshallingMap_.clear();
-    if (!pictureMap_.empty()) {
-        for (const auto &picture : pictureMap_) {
-            std::vector<std::string> pixelVec;
-            pixelVec.reserve(picture.second.size());
-            for (const auto &pixel : picture.second) {
-                pixelVec.emplace_back(AnsImageUtil::PackImage(pixel));
-            }
-            pictureMarshallingMap_[picture.first] = pixelVec;
-        }
-    }
-}
-
-void NotificationLiveViewContent::ClearPictureMarshallingMap()
-{
-    pictureMarshallingMap_.clear();
 }
 
 void NotificationLiveViewContent::ClearPictureMap()
 {
     return pictureMap_.clear();
-}
-
-PictureMarshallingMap NotificationLiveViewContent::GetPictureMarshallingMap() const
-{
-    return pictureMarshallingMap_;
 }
 
 }  // namespace Notification

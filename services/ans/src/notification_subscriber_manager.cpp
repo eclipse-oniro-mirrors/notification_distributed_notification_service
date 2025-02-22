@@ -505,7 +505,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     if (isCommonLiveView) {
         liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
             notification->GetNotificationRequest().GetContent()->GetNotificationContent());
-        liveViewContent->FillPictureMarshallingMap();
     }
 
     ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
@@ -514,10 +513,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         if (IsSubscribedBysubscriber(record, notification)) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
         }
-    }
-
-    if (isCommonLiveView && liveViewContent != nullptr) {
-        liveViewContent->ClearPictureMarshallingMap();
     }
 }
 
@@ -584,7 +579,6 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
                 auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
                     requestContent->GetNotificationContent());
                 liveViewContent->ClearPictureMap();
-                liveViewContent->ClearPictureMarshallingMap();
                 ANS_LOGD("live view batch delete clear picture");
             }
             if (notification->GetNotificationRequest().IsSystemLiveView() &&
