@@ -134,8 +134,8 @@ void DistributedService::HandleBundleRemoved(const std::string& bundleName)
                 iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
                 device.second.deviceId_, device.second.deviceType_);
             ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d %{public}s %{public}d.",
-                device.second.deviceId_.c_str(), device.second.deviceType_, localDevice_.deviceId_.c_str(),
-                localDevice_.deviceType_);
+                StringAnonymous(device.second.deviceId_).c_str(), device.second.deviceType_,
+                StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
         }
     });
     serviceQueue_->submit(task);

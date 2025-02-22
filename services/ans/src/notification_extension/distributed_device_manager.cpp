@@ -33,28 +33,32 @@ void DmsInitCallback::OnRemoteDied()
 void DmsStateCallback::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
 {
     ANS_LOGI("AnsDevice online %{public}d, %{public}d, %{public}s, %{public}s", deviceInfo.deviceTypeId,
-        deviceInfo.networkType, deviceInfo.deviceId, deviceInfo.networkId);
+        deviceInfo.networkType, StringAnonymous(deviceInfo.deviceId).c_str(),
+        StringAnonymous(deviceInfo.networkId).c_str());
     DistributedExtensionService::GetInstance().OnDeviceOnline(deviceInfo);
 }
 
 void DmsStateCallback::OnDeviceOffline(const DmDeviceInfo &deviceInfo)
 {
     ANS_LOGI("AnsDevice offline %{public}d, %{public}d, %{public}s, %{public}s", deviceInfo.deviceTypeId,
-        deviceInfo.networkType, deviceInfo.deviceId, deviceInfo.networkId);
+        deviceInfo.networkType, StringAnonymous(deviceInfo.deviceId).c_str(),
+        StringAnonymous(deviceInfo.networkId).c_str());
     DistributedExtensionService::GetInstance().OnDeviceOffline(deviceInfo);
 }
 
 void DmsStateCallback::OnDeviceChanged(const DmDeviceInfo &deviceInfo)
 {
     ANS_LOGI("AnsDevice change %{public}d, %{public}d, %{public}s, %{public}s", deviceInfo.deviceTypeId,
-        deviceInfo.networkType, deviceInfo.deviceId, deviceInfo.networkId);
+        deviceInfo.networkType, StringAnonymous(deviceInfo.deviceId).c_str(),
+        StringAnonymous(deviceInfo.networkId).c_str());
     DistributedExtensionService::GetInstance().OnDeviceChanged(deviceInfo);
 }
 
 void DmsStateCallback::OnDeviceReady(const DmDeviceInfo &deviceInfo)
 {
     ANS_LOGI("AnsDevice ready %{public}d, %{public}d, %{public}s, %{public}s", deviceInfo.deviceTypeId,
-        deviceInfo.networkType, deviceInfo.deviceId, deviceInfo.networkId);
+        deviceInfo.networkType, StringAnonymous(deviceInfo.deviceId).c_str(),
+        StringAnonymous(deviceInfo.networkId).c_str());
 }
 
 DistributedDeviceManager& DistributedDeviceManager::GetInstance()
@@ -77,7 +81,8 @@ void DistributedDeviceManager::InitTrustList()
     }
     for (auto& deviceInfo : deviceInfoList) {
         ANS_LOGI("AnsDevice trustlist %{public}d, %{public}d, %{public}s, %{public}s", deviceInfo.deviceTypeId,
-            deviceInfo.networkType, deviceInfo.deviceId, deviceInfo.networkId);
+            deviceInfo.networkType, StringAnonymous(deviceInfo.deviceId).c_str(),
+            StringAnonymous(deviceInfo.networkId).c_str());
         DistributedExtensionService::GetInstance().OnDeviceOnline(deviceInfo);
     }
 }

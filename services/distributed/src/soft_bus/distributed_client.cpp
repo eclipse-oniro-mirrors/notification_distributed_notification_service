@@ -60,8 +60,8 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
 void DistributedClient::AddDevice(DistributedDeviceInfo peerDevice)
 {
     std::lock_guard<std::mutex> lock(clientLock_);
-    ANS_LOGI("Distributed client AddDevice %{public}s %{public}s", peerDevice.deviceId_.c_str(),
-        peerDevice.networkId_.c_str());
+    ANS_LOGI("Distributed client AddDevice %{public}s %{public}s", StringAnonymous(peerDevice.deviceId_).c_str(),
+        StringAnonymous(peerDevice.networkId_).c_str());
     networksId_[peerDevice.deviceId_] = peerDevice.networkId_;
 }
 
@@ -89,8 +89,8 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
     ReleaseDevice(deviceId, deviceType);
     std::lock_guard<std::mutex> lock(clientLock_);
     networksId_[deviceId] = networkId;
-    ANS_LOGI("Distributed refresh device %{public}s %{public}s", deviceId.c_str(),
-        networkId.c_str());
+    ANS_LOGI("Distributed refresh device %{public}s %{public}s", StringAnonymous(deviceId).c_str(),
+        StringAnonymous(networkId).c_str());
 }
 
 int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
@@ -114,8 +114,8 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
     std::string name = (dataType == TransDataType::DATA_TYPE_MESSAGE) ? ANS_SOCKET_CMD : ANS_SOCKET_MSG;
     int32_t result = ClientBind(name, ANS_SOCKET_PKG, networkId, dataType, socketId);
     if (result != ERR_OK) {
-        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", deviceId.c_str(),
-            networkId.c_str(), deviceType, dataType);
+        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
+            StringAnonymous(networkId).c_str(), deviceType, dataType);
         return result;
     }
     {
@@ -133,7 +133,8 @@ int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDa
     DistributedServer::GetInstance().CheckServer();
     int32_t result = GetSocketId(deviceId, deviceType, dataType, socketId);
     if (result != ERR_OK) {
-        ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", deviceId.c_str(), deviceType, dataType);
+        ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
+            deviceType, dataType);
         int32_t messageType = 0;
         std::string errorReason = "Bind server failed,";
         errorReason.append("dataType: " + std::to_string(dataType));

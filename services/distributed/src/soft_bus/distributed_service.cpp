@@ -120,8 +120,8 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
     }
     serviceQueue_->submit_h([&, device]() {
         ANS_LOGI("Dans AddDevice %{public}s %{public}d %{public}s %{public}d.",
-            device.deviceId_.c_str(), device.deviceType_, localDevice_.deviceId_.c_str(),
-            localDevice_.deviceType_);
+            StringAnonymous(device.deviceId_).c_str(), device.deviceType_,
+            StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         peerDevice_[deviceItem.deviceId_] = deviceItem;

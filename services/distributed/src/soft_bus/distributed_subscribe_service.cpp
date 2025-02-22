@@ -58,7 +58,7 @@ std::string SubscribeTransDeviceType(uint16_t deviceType)
 void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerDevice)
 {
     if (peerDevice_.find(peerDevice.deviceId_) == peerDevice_.end()) {
-        ANS_LOGI("Local device no %{public}s %{public}d.", peerDevice.deviceId_.c_str(),
+        ANS_LOGI("Local device no %{public}s %{public}d.", StringAnonymous(peerDevice.deviceId_).c_str(),
             peerDevice.deviceType_);
         return;
     }
@@ -91,7 +91,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
         }
     }
     ANS_LOGI("Subscribe notification %{public}s %{public}d %{public}d %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, userId_, result);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId_, result);
 }
 
 void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, uint16_t deviceType)
@@ -103,20 +103,20 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
     std::function<void()> subscribeTask = std::bind([&, deviceId, deviceType]() {
         auto deviceIter = peerDevice_.find(deviceId);
         if (deviceIter != peerDevice_.end()) {
-            ANS_LOGI("UnSubscribe device %{public}s %{public}d.", deviceId.c_str(), deviceType);
+            ANS_LOGI("UnSubscribe device %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), deviceType);
             peerDevice_.erase(deviceId);
         }
 
         auto iter = subscriberMap_.find(deviceId);
         if (iter == subscriberMap_.end()) {
-            ANS_LOGI("UnSubscribe invalid %{public}s %{public}d.", deviceId.c_str(), deviceType);
+            ANS_LOGI("UnSubscribe invalid %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), deviceType);
             return;
         }
 
         if (NotificationHelper::UnSubscribeNotification(iter->second) == 0) {
             subscriberMap_.erase(deviceId);
         }
-        ANS_LOGI("UnSubscribe notification %{public}s %{public}d.", deviceId.c_str(), deviceType);
+        ANS_LOGI("UnSubscribe notification %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), deviceType);
     });
     serviceQueue_->submit(subscribeTask);
 }
