@@ -2489,7 +2489,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
-        if (!bundleOption->GetBundleName().empty()) {
+        if (!bundleOption->GetBundleName().empty() &&
+            !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && request->IsAgentNotification())) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
                 ANS_LOGE("PublishNotificationBySA Can not assign valid slot!");
