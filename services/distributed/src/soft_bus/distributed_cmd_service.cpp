@@ -117,8 +117,8 @@ int32_t DistributedService::SyncDeviceMatch(const DistributedDeviceInfo peerDevi
         matchBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d %{public}s %{public}d %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_, type);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_, type);
     return result;
 }
 
@@ -162,7 +162,7 @@ bool DistributedService::CheckPeerDevice(const BundleIconBox& boxMessage, Distri
     }
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
-        ANS_LOGI("Dans get deviceId unknonw %{public}s.", deviceId.c_str());
+        ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(deviceId).c_str());
         return false;
     }
     device = iter->second;
@@ -189,8 +189,8 @@ void DistributedService::ReportBundleIconList(const DistributedDeviceInfo peerDe
         iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d %{public}s %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::RequestBundlesIcon(const DistributedDeviceInfo peerDevice)
@@ -210,8 +210,8 @@ void DistributedService::RequestBundlesIcon(const DistributedDeviceInfo peerDevi
         iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans RequestBundlesIcon %{public}s %{public}d %{public}s %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
@@ -229,8 +229,8 @@ void DistributedService::UpdateBundlesIcon(const std::unordered_map<std::string,
         iconBox.GetByteLength(), TransDataType::DATA_TYPE_BYTES,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans UpdateBundlesIcon %{public}s %{public}d %{public}s %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::GenerateBundleIconSync(const DistributedDeviceInfo& device)

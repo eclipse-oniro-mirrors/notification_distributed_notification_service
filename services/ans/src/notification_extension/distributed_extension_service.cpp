@@ -186,8 +186,9 @@ int32_t DistributedExtensionService::InitDans()
         return -1;
     }
 
-    ANS_LOGI("Dans get local device %{public}s, %{public}d, %{public}d, %{public}d.", deviceInfo.deviceId,
-        deviceInfo.deviceTypeId, deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength);
+    ANS_LOGI("Dans get local device %{public}s, %{public}d, %{public}d, %{public}d.",
+        StringAnonymous(deviceInfo.deviceId).c_str(), deviceInfo.deviceTypeId,
+        deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength);
     if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceConfig_) != 0) {
         dansRunning_.store(false);
         return -1;
@@ -322,7 +323,7 @@ void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo
     std::function<void()> offlineTask = std::bind([&, deviceInfo]() {
         std::lock_guard<std::mutex> lock(mapLock_);
         if (deviceMap_.count(deviceInfo.deviceId) == 0) {
-            ANS_LOGI("Not target device %{public}s", deviceInfo.deviceId);
+            ANS_LOGI("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
             return;
         }
         if (!dansRunning_.load() || dansHandler_ == nullptr || !dansHandler_->IsValid()) {
@@ -351,7 +352,7 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
     std::function<void()> changeTask = std::bind([&, deviceInfo]() {
         std::lock_guard<std::mutex> lock(mapLock_);
         if (deviceMap_.count(deviceInfo.deviceId) == 0) {
-            ANS_LOGI("Not target device %{public}s", deviceInfo.deviceId);
+            ANS_LOGI("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
             return;
         }
         if (!dansRunning_.load() || dansHandler_ == nullptr || !dansHandler_->IsValid()) {
@@ -364,7 +365,8 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
             return;
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
-        ANS_LOGI("Dans refresh %{public}s %{public}s.", deviceInfo.deviceId, deviceInfo.networkId);
+        ANS_LOGI("Dans refresh %{public}s %{public}s.", StringAnonymous(deviceInfo.deviceId).c_str(),
+            StringAnonymous(deviceInfo.networkId).c_str());
     });
     distributedQueue_->submit(changeTask);
 }

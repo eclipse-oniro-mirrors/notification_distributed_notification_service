@@ -26,6 +26,7 @@
 #include <functional>
 #include "bundle_icon_box.h"
 #include <unordered_set>
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
