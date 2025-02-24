@@ -208,6 +208,16 @@ public:
     virtual ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) = 0;
 
     /**
+     * @brief Obtains all active notifications by slottype in the current system. The caller must have system
+     * permissions to call this method.
+     *
+     * @param notifications Indicates all active notifications of this application.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType) = 0;
+
+    /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
      * to obtain particular active notifications, you must have received the notifications and obtained the key
      * via {Notification::GetKey()}.
@@ -617,7 +627,7 @@ public:
      */
     virtual ErrCode IsDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled) = 0;
-    
+
     /**
      * @brief Sets distributed notification enabled or disabled.
      *

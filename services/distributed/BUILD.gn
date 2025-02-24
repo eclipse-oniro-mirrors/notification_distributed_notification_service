@@ -118,6 +118,7 @@ ohos_shared_library("libdans") {
     "src/tlv_box/box_base.cpp",
     "src/tlv_box/bundle_icon_box.cpp",
     "src/tlv_box/match_box.cpp",
+    "src/tlv_box/notification_sync_box.cpp",
     "src/tlv_box/remove_box.cpp",
     "src/tlv_box/request_box.cpp",
     "src/tlv_box/response_box.cpp",

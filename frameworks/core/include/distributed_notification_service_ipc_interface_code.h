@@ -158,6 +158,7 @@ namespace Notification {
         ON_RESPONSE_LISTENER,
         GET_NOTIFICATION_REQUEST_BY_HASHCODE,
         Set_HASH_CODE_RULE,
+        GET_ALL_NOTIFICATIONS_BY_SLOTTYPE,
     };
 }
 }

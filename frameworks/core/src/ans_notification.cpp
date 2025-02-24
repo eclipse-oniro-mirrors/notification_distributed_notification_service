@@ -2096,5 +2096,16 @@ ErrCode AnsNotification::SetHashCodeRule(
     return proxy->SetHashCodeRule(type);
 }
 
+ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType)
+{
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetAllNotificationsBySlotType(notifications, slotType);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

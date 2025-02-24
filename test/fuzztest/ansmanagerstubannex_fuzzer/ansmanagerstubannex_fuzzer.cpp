@@ -299,6 +299,8 @@ namespace OHOS {
         ansManagerStub.HandleSetDistributedEnabledBySlot(datas, reply);
         datas.WriteString(stringData);
         ansManagerStub.HandleGetAllDistributedEnabledBundles(datas, reply);
+        datas.WriteInt32(intData);
+        ansManagerStub.HandleGetAllNotificationsBySlotType(datas, reply);
         datas.WriteString(stringData);
         ansManagerStub.HandleAllowUseReminder(datas, reply);
         datas.WriteString(stringData);

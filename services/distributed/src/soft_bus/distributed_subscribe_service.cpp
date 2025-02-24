@@ -155,6 +155,56 @@ void DistributedService::SetNotificationContent(const std::shared_ptr<Notificati
     requestBox.SetNotificationText(text);
 }
 
+void DistributedService::SendNotifictionRequest(const std::shared_ptr<Notification> request,
+    const DistributedDeviceInfo& peerDevice, bool isSyncNotification)
+{
+    NotifticationRequestBox requestBox;
+    if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
+        return;
+    }
+
+    auto requestPoint = request->GetNotificationRequestPoint();
+    ANS_LOGI("Dans OnConsumed %{public}s", requestPoint->Dump().c_str());
+    requestBox.SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
+    requestBox.SetFinishTime(requestPoint->GetFinishDeadLine());
+    requestBox.SetNotificationHashCode(request->GetKey());
+    requestBox.SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
+    requestBox.SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
+    if (isSyncNotification) {
+        requestBox.SetReminderFlag(0);
+    } else {
+        requestBox.SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
+    }
+    if (request->GetBundleName().empty()) {
+        requestBox.SetCreatorBundleName(request->GetCreateBundle());
+    } else {
+        requestBox.SetCreatorBundleName(request->GetBundleName());
+    }
+    if (requestPoint->GetBigIcon() != nullptr) {
+        requestBox.SetBigIcon(requestPoint->GetBigIcon());
+    }
+    if (requestPoint->GetOverlayIcon() != nullptr) {
+        requestBox.SetOverlayIcon(requestPoint->GetOverlayIcon());
+    }
+    if (requestPoint->IsCommonLiveView()) {
+        std::vector<uint8_t> buffer;
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
+        requestBox.SetCommonLiveView(buffer);
+    }
+    SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
+        requestPoint->GetNotificationType(), requestBox);
+    if (!requestBox.Serialize()) {
+        ANS_LOGW("Dans OnConsumed serialize failed.");
+        if (haCallback_ != nullptr) {
+            haCallback_(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID, "serialization failed");
+        }
+        return;
+    }
+    this->code_ = PUBLISH_ERROR_EVENT_CODE;
+    DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
+        TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
+}
+
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
 {
@@ -163,46 +213,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         return;
     }
     std::function<void()> task = std::bind([&, peerDevice, request]() {
-        NotifticationRequestBox requestBox;
-        if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
-            return;
-        }
-        auto requestPoint = request->GetNotificationRequestPoint();
-        ANS_LOGI("Dans OnConsumed %{public}s", requestPoint->Dump().c_str());
-        requestBox.SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
-        requestBox.SetFinishTime(requestPoint->GetFinishDeadLine());
-        requestBox.SetNotificationHashCode(request->GetKey());
-        requestBox.SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
-        requestBox.SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
-        requestBox.SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
-        if (request->GetBundleName().empty()) {
-            requestBox.SetCreatorBundleName(request->GetCreateBundle());
-        } else {
-            requestBox.SetCreatorBundleName(request->GetBundleName());
-        }
-        if (requestPoint->GetBigIcon() != nullptr) {
-            requestBox.SetBigIcon(requestPoint->GetBigIcon());
-        }
-        if (requestPoint->GetOverlayIcon() != nullptr) {
-            requestBox.SetOverlayIcon(requestPoint->GetOverlayIcon());
-        }
-        if (requestPoint->IsCommonLiveView()) {
-            std::vector<uint8_t> buffer;
-            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
-            requestBox.SetCommonLiveView(buffer);
-        }
-        SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
-            requestPoint->GetNotificationType(), requestBox);
-        if (!requestBox.Serialize()) {
-            ANS_LOGW("Dans OnConsumed serialize failed.");
-            if (haCallback_ != nullptr) {
-                haCallback_(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID, "serialization failed");
-            }
-            return;
-        }
-        this->code_ = PUBLISH_ERROR_EVENT_CODE;
-        DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
-            TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
+        SendNotifictionRequest(request, peerDevice);
     });
     serviceQueue_->submit(task);
 }

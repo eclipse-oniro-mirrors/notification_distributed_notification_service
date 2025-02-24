@@ -358,7 +358,7 @@ public:
      */
     static ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
         bool &canPop, std::string &bundleName);
-    
+
     /**
      * @brief remove enable notification dialog.
      *
@@ -644,6 +644,16 @@ public:
      * @return Returns get all active notifications
      */
     static ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notification);
+
+    /**
+     * @brief Obtains all active notifications by slot type in the current system. The caller must have system
+     * permissions to call this method.
+     *
+     * @param notification Indicates all active notifications of this application.
+     * @return Returns get all active notifications
+     */
+    static ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType);
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
@@ -1197,7 +1207,7 @@ public:
      */
     static ErrCode GetNotificationRequestByHashCode(
         const std::string& hashCode, sptr<NotificationRequest>& notificationRequest);
-    
+
     /**
      * @brief set rule of generate hashCode.
      *

@@ -453,6 +453,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleSetHashCodeRule(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_NOTIFICATIONS_BY_SLOTTYPE): {
+            result = HandleGetAllNotificationsBySlotType(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -804,7 +808,7 @@ ErrCode AnsManagerStub::HandleGetAllActiveNotifications(MessageParcel &data, Mes
 {
     std::vector<sptr<Notification>> notifications;
     ErrCode result = GetAllActiveNotifications(notifications);
-    
+
     if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
         return ERR_ANS_PARCELABLE_FAILED;
     }
@@ -2064,7 +2068,7 @@ ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel 
         ANSR_LOGE("Read instance key failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
- 
+
     ErrCode result = SetBadgeNumber(badgeNumber, appInstanceKey);
     if (!reply.WriteInt32(result)) {
         ANSR_LOGE("Write badge number failed");
@@ -2377,7 +2381,7 @@ ErrCode AnsManagerStub::HandleSetDistributedEnabledBySlot(MessageParcel &data, M
 {
     ANS_LOGD("enter");
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
-    
+
     std::string deviceType;
     if (!data.ReadString(deviceType)) {
         ANS_LOGE("[HandleSetDistributedEnabledBySlot] fail: read deviceId failed.");
@@ -2433,7 +2437,7 @@ ErrCode AnsManagerStub::HandleIsDistributedEnabledBySlot(MessageParcel &data, Me
 {
     ANS_LOGD("enter");
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
-    
+
     std::string deviceType;
     if (!data.ReadString(deviceType)) {
         ANS_LOGE("[HandleIsDistributedEnabledBySlot] fail: read deviceId failed.");
@@ -2605,6 +2609,23 @@ ErrCode AnsManagerStub::HandleSetHashCodeRule(MessageParcel &data, MessageParcel
     ErrCode result = SetHashCodeRule(type);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetHashCodeRule] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetAllNotificationsBySlotType(MessageParcel &data, MessageParcel &reply)
+{
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(data.ReadInt32());
+    std::vector<sptr<Notification>> notifications;
+    ErrCode result = GetAllNotificationsBySlotType(notifications, slotType);
+
+    if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        ANS_LOGE("[HandleGetAllActiveNotifications] fail:: set max capacity");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!WriteParcelableVector(notifications, reply, result)) {
+        ANS_LOGE("[HandleGetAllActiveNotifications] fail: write notifications failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

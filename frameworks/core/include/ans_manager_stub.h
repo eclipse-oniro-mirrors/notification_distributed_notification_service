@@ -207,6 +207,9 @@ public:
      */
     virtual ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override;
 
+    virtual ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType) override;
+
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
      * to obtain particular active notifications, you must have received the notifications and obtained the key
@@ -1115,6 +1118,7 @@ private:
     ErrCode HandleDisableNotificationFeature(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetNotificationRequest(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetAllNotificationsBySlotType(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)

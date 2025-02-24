@@ -1529,6 +1529,39 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("AccessTokenHelper::CheckPermission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if (record->notification != nullptr && record->notification->request_ != nullptr &&
+                record->notification->request_->GetSlotType() == slotType) {
+                notifications.push_back(record->notification);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
 inline bool IsContained(const std::vector<std::string> &vec, const std::string &target)
 {
     bool isContained = false;
