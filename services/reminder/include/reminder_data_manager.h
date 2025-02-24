@@ -681,11 +681,6 @@ private:
     bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
         sptr<ReminderRequest>& reminder);
 
-    /**
-     * @brief Collapse the notification panel, send event to sceneboard.
-     */
-    void CollapseNotificationPanel();
-
    /**
     * Single instance.
     */
