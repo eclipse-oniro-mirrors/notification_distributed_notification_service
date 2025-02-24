@@ -46,10 +46,7 @@ ohos_source_set("reminder_service_sources") {
     "-fdata-sections",
   ]
 
-  include_dirs = [
-    "${services_path}/ans/include",
-    "${services_path}/reminder/include",
-  ]
+  include_dirs = [ "${services_path}/reminder/include" ]
 
   defines = []
 
@@ -69,7 +66,6 @@ ohos_source_set("reminder_service_sources") {
     "src/reminder_table.cpp",
     "src/reminder_table_old.cpp",
     "src/reminder_timer_info.cpp",
-    "${services_path}/ans/src/reminder_service_check.cpp",
   ]
 
   deps = [

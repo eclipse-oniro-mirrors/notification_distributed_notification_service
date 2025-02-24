@@ -53,7 +53,6 @@
 #include "notification_helper.h"
 #include "reminder_datashare_helper.h"
 #include "reminder_calendar_share_table.h"
-#include "reminder_service_check.h"
 
 namespace OHOS {
 namespace Notification {
@@ -395,7 +394,6 @@ void ReminderDataManager::AddToShowedReminders(const sptr<ReminderRequest> &remi
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
         if (reminder->GetReminderId() == (*it)->GetReminderId() &&
             reminder->IsShare() == (*it)->IsShare()) {
-            ANSR_LOGD("Showed reminder is already exist");
             return;
         }
     }
@@ -462,7 +460,6 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
 {
     auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
     if ((sharedTimerInfo->TIMER_TYPE_WAKEUP > UINT8_MAX) || (sharedTimerInfo->TIMER_TYPE_EXACT > UINT8_MAX)) {
-        ANSR_LOGE("Failed to set timer type.");
         return nullptr;
     }
     InitTimerInfo(sharedTimerInfo, reminderRequest, type);
@@ -521,7 +518,6 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(const int32
             return *it;
         }
     }
-    ANSR_LOGD("Not find the reminder");
     return nullptr;
 }
 
@@ -564,7 +560,6 @@ void ReminderDataManager::CloseRemindersByGroupId(const int32_t &oldReminderId, 
     for (auto vit = reminderVector_.begin(); vit != reminderVector_.end(); vit++) {
         sptr<ReminderRequest> reminder = *vit;
         if (reminder == nullptr) {
-            ANSR_LOGD("reminder is null");
             continue;
         }
         int32_t reminderId = reminder->GetReminderId();
@@ -837,10 +832,11 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     LoadReminderFromDb();
     int64_t now = GetCurrentTime();
     LoadShareReminders();
-    if (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME) {
+    if ((type == DATE_TIME_CHANGE) && (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME)) {
         lastStartTime_ = now;
-        ReminderDataShareHelper::GetInstance().StartDataExtension(type == TIME_ZONE_CHANGE ?
-            ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE : ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+        ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+    } else if (type == TIME_ZONE_CHANGE) {
+        ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE);
     }
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
@@ -1407,7 +1403,6 @@ void ReminderDataManager::Init()
     if (IsReminderAgentReady()) {
         return;
     }
-    ReminderServiceCheck::GetInstance().StopListen();
     // Register config observer for language change
     if (!RegisterConfigurationObserver()) {
         ANSR_LOGW("Register configuration observer failed.");
