@@ -91,6 +91,19 @@ public:
      */
     std::shared_ptr<ffrt::queue> GetNotificationSvrQueue();
 
+    /**
+     * @brief Submit an async task into notification_svr_queue.
+     *
+     * @param func Indicates the function.
+     */
+    void SubmitAsyncTask(const std::function<void()>& func);
+    /**
+     * @brief Submit a sync task into notification_svr_queue.
+     *
+     * @param func Indicates the function.
+     */
+    void SubmitSyncTask(const std::function<void()>& func);
+
     // AnsManagerStub
 
     /**
@@ -546,7 +559,7 @@ public:
      */
     ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
-    
+
     /**
      * @brief remove enable notification dialog.
      *
@@ -564,46 +577,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed) override;
-
-    /**
-     * @brief Set do not disturb date.
-     *
-     * @param date Indicates the NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetDoNotDisturbDate(const sptr<NotificationDoNotDisturbDate> &date) override;
-
-    /**
-     * @brief Get do not disturb date.
-     *
-     * @param date Indicates the NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
-
-    /**
-     * @brief Add Do Not Disturb profiles.
-     *
-     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
-
-    /**
-     * @brief Remove Do Not Disturb profiles.
-     *
-     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to remove.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
-
-    /**
-     * @brief Get whether Do Not Disturb mode is supported.
-     *
-     * @param doesSupport Indicates the flag that supports DND mode.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override;
 
     /**
      * @brief Is coming call need silent in do not disturb mode.
@@ -743,23 +716,6 @@ public:
      */
     ErrCode DeleteAllByUser(const int32_t &userId) override;
 
-    /**
-     * @brief Set do not disturb date by user.
-     *
-     * @param userId Indicates the user id.
-     * @param date Indicates NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetDoNotDisturbDate(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date) override;
-
-    /**
-     * @brief Get the do not disturb date by user.
-     *
-     * @param userId Indicates the user id.
-     * @param date Indicates the NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -1011,7 +967,7 @@ public:
      */
     ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Query the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
@@ -1148,13 +1104,22 @@ public:
     ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
 
     /**
-     * @brief Get do not disturb profile by id.
+     * @brief Distribution operation based on hashCode.
      *
-     * @param id Profile id.
-     * @param status Indicates the NotificationDoNotDisturbProfile object.
+     * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
+    ErrCode DistributeOperation(const std::string &hashCode) override;
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override;
 
     int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
 
@@ -1179,6 +1144,14 @@ public:
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const uint32_t type) override;
 
 protected:
     /**
@@ -1224,6 +1197,7 @@ private:
         ALLOW_EXISTING_CONTACTS = 3,
         ALLOW_FAVORITE_CONTACTS = 4,
         ALLOW_SPECIFIED_CONTACTS = 5,
+        FORBID_SPECIFIED_CONTACTS = 6,
     };
 
     AdvancedNotificationService();
@@ -1239,8 +1213,9 @@ private:
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
-        int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
+    ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason,
+        bool isCancel = false);
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
@@ -1251,6 +1226,7 @@ private:
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
+    std::vector<std::string> GetNotificationKeysByBundle(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
     void SortNotificationList();
     static bool NotificationCompare(
@@ -1277,7 +1253,7 @@ private:
     ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
 
-    void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
+    void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request, int32_t removeReason, bool isThirdParty);
 
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 
@@ -1303,8 +1279,6 @@ private:
     void InitDistributeCallBack();
 #endif
 
-    ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
     static ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);
@@ -1350,7 +1324,6 @@ private:
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
-    void OnSubscriberAddInffrt(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
@@ -1377,6 +1350,7 @@ private:
     ErrCode StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
     void QueryDoNotDisturbProfile(const int32_t &userId, std::string &enable, std::string &profileId);
+    void QueryIntelligentExperienceEnable(const int32_t &userId, std::string &enable);
     void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
     void ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable);
     void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
@@ -1435,6 +1409,7 @@ private:
     ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
     ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
     ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
+    ErrCode QueryContactByProfileId(const std::string &phoneNumber, const std::string &policy, int32_t userId);
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
     bool IsSystemUser(int32_t userId);
     ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
@@ -1452,6 +1427,7 @@ private:
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
+    void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

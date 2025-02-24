@@ -200,6 +200,13 @@ struct AsyncCallbackInfoSubscribe {
     CallbackPromiseInfo info;
 };
 
+struct AsyncCallbackInfoDistributeOperation {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::string hashCode;
+    CallbackPromiseInfo info;
+};
+
 static std::mutex mutex_;
 static thread_local std::vector<SubscriberInstancesInfo> subscriberInstances_;
 
@@ -217,6 +224,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_SUBSCRIBE_H

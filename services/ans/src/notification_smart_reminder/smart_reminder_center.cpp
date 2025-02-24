@@ -28,9 +28,9 @@
 namespace OHOS {
 namespace Notification {
 using namespace std;
+constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 15;
 namespace {
     const std::string ANS_VOIP = "ANS_VOIP";
-    const std::string ANS_CALL = "ANS_CALL";
 }
 SmartReminderCenter::SmartReminderCenter()
 {
@@ -279,11 +279,13 @@ void SmartReminderCenter::InitValidDevices(
     set<string> &validDevices,
     const sptr<NotificationRequest> &request) const
 {
+    auto notificationControlFlags = request->GetNotificationControlFlags();
     validDevices.insert(NotificationConstant::CURRENT_DEVICE_TYPE);
     for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
         if (IsNeedSynergy(request->GetSlotType(), deviceType, request->GetOwnerBundleName(), request->GetOwnerUid()) &&
             NotificationSubscriberManager::GetInstance()->IsDeviceTypeSubscriberd(deviceType)) {
             validDevices.insert(deviceType);
+            request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
             ANS_LOGI("InitValidDevices- %{public}s", deviceType.c_str());
         }
     }
@@ -297,8 +299,9 @@ void SmartReminderCenter::HandleReminderMethods(
     set<string> &validDevices,
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
 {
+    std::string classfication = request->GetClassification();
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
-        (request->GetClassification() == ANS_VOIP || request->GetClassification() == ANS_CALL)) {
+        classfication == ANS_VOIP) {
         ANS_LOGI("VOIP or CALL is not affected with SmartReminder");
         return;
     }
@@ -309,23 +312,9 @@ void SmartReminderCenter::HandleReminderMethods(
     }
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
-
-    // filter
-    NotificationConstant::SlotType slotType = request->GetSlotType();
-    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
-      CompareStatus(STATUS_UNUSED, bitStatus)) {
-        bool wearEnabled = false;
-        NotificationPreferences::GetInstance()->IsSmartReminderEnabled(
-            NotificationConstant::LITEWEARABLE_DEVICE_TYPE, wearEnabled);
-        if (wearEnabled) {
-            if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
-              NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
-              NotificationConstant::SlotType::CUSTOMER_SERVICE == slotType
-            ) {
-                ANS_LOGI("wearable switch is open and unused and  slotType in [social|service|customer], not notify");
-                return;
-            }
-        }
+    request->AdddeviceStatu(deviceType, bitStatus.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
+    if (!HandleReminderFilter(deviceType, request, bitStatus)) {
+        return;
     }
 
     bool enabledAffectedBy = true;
@@ -349,6 +338,44 @@ void SmartReminderCenter::HandleReminderMethods(
             break;
         }
     }
+}
+
+bool SmartReminderCenter::HandleReminderFilter(
+    const string &deviceType,
+    const sptr<NotificationRequest> &request,
+    const bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus) const
+{
+    // filter
+    NotificationConstant::SlotType slotType = request->GetSlotType();
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
+      CompareStatus(STATUS_UNUSED, bitStatus)) {
+        bool wearEnabled = false;
+        NotificationPreferences::GetInstance()->IsSmartReminderEnabled(
+            NotificationConstant::LITEWEARABLE_DEVICE_TYPE, wearEnabled);
+        if (wearEnabled) {
+            if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
+              NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
+              NotificationConstant::SlotType::CUSTOMER_SERVICE == slotType
+            ) {
+                ANS_LOGI("wearable switch is open and unused and  slotType in [social|service|customer], not notify");
+                return false;
+            }
+        }
+    }
+
+    bitset<DistributedDeviceStatus::STATUS_SIZE> currentStatus;
+    GetDeviceStatusByType(NotificationConstant::CURRENT_DEVICE_TYPE, currentStatus);
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
+      CompareStatus(STATUS_UNLOCK_OWNER, currentStatus)) {
+        if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
+            NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
+            NotificationConstant::SlotType::CUSTOMER_SERVICE == slotType
+        ) {
+            ANS_LOGI("current is unlocked and owner user, wearable not notify");
+            return false;
+        }
+    }
+    return true;
 }
 
 bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &slotType,

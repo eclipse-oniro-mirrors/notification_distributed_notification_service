@@ -349,44 +349,48 @@ std::unordered_set<std::string> NotificationConfigParse::GetCollaborativeDeleteT
     return collaborativeDeleteTypeSet;
 }
 
-void NotificationConfigParse::GetCollaborationFilter()
+bool NotificationConfigParse::GetFilterUidAndBundleName(const std::string &key)
 {
     nlohmann::json root;
     std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(COLLABORATION_FILTER);
+    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE).append("/").append(COLLABORATION_FILTER).append("/").append(key);
     if (!GetConfigJson(jsonPoint, root)) {
         ANS_LOGE("Failed to get jsonPoint CCM config file.");
-        return;
+        return false;
     }
 
     if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
         !root[CFG_KEY_NOTIFICATION_SERVICE].contains(COLLABORATION_FILTER)) {
         ANS_LOGE("Not found jsonKey collaborationFilter.");
-        return;
+        return false;
     }
+
     nlohmann::json collaborationFilter = root[CFG_KEY_NOTIFICATION_SERVICE][COLLABORATION_FILTER];
     if (collaborationFilter.is_null() || collaborationFilter.empty()) {
         ANS_LOGE("GetCollaborationFilter failed as invalid ccmCollaborationFilter json.");
-        return;
+        return false;
     }
-    if (collaborationFilter.contains(COLLABORATION_FILTER_KEY_UID) &&
-        collaborationFilter[COLLABORATION_FILTER_KEY_UID].is_array()) {
-        for (const auto& item : collaborationFilter[COLLABORATION_FILTER_KEY_UID]) {
+    if (collaborationFilter.contains(key) && collaborationFilter[key].is_array()) {
+        for (const auto& item : collaborationFilter[key]) {
             if (item.is_number_integer()) {
                 uidList_.push_back(item.get<int32_t>());
             }
-        }
-    }
-
-    if (collaborationFilter.contains(COLLABORATION_FILTER_KEY_NAME) &&
-        collaborationFilter[COLLABORATION_FILTER_KEY_NAME].is_array()) {
-        for (const auto& item : collaborationFilter[COLLABORATION_FILTER_KEY_NAME]) {
             if (item.is_string()) {
                 bundleNameList_.push_back(item.get<std::string>());
             }
         }
+        return true;
+    }
+    return false;
+}
+
+void NotificationConfigParse::GetCollaborationFilter()
+{
+    if (!GetFilterUidAndBundleName(COLLABORATION_FILTER_KEY_UID)) {
+        ANS_LOGW("Failed to get filterUid.");
+    }
+    if (!GetFilterUidAndBundleName(COLLABORATION_FILTER_KEY_NAME)) {
+        ANS_LOGW("Failed to get filterBundleName.");
     }
 }
 
@@ -410,5 +414,63 @@ bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleN
     ANS_LOGI("Uid <%{public}d> and BundleName <%{public}s> not in CollaborationFilter.", uid, bundleName.c_str());
     return false;
 }
+
+uint32_t NotificationConfigParse::GetStartAbilityTimeout()
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    if (!GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file");
+        return 0;
+    }
+    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
+        ANS_LOGW("GetStartAbilityTimeout not found jsonKey");
+        return 0;
+    }
+    nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
+    if (affects.is_null() || affects.empty()) {
+        ANS_LOGE("GetStartAbilityTimeout failed as invalid ccmFlowCtrlConfig json");
+        return 0;
+    }
+    if (affects.contains(CFG_KEY_START_ABILITY_TIMEOUT)) {
+        return affects[CFG_KEY_START_ABILITY_TIMEOUT];
+    }
+
+    return 0;
+}
+
+void NotificationConfigParse::GetReportTrustListConfig()
+{
+    nlohmann::json root;
+    std::string reportJsonPoint = "/";
+    reportJsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    reportJsonPoint.append("/");
+    reportJsonPoint.append(CFG_KEY_DFX_NORMAL_EVENT);
+    if (!GetConfigJson(reportJsonPoint, root)) {
+        return;
+    }
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file");
+        return;
+    }
+
+    nlohmann::json reportTrustList = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DFX_NORMAL_EVENT];
+    if (reportTrustList.is_null() || reportTrustList.empty() || !reportTrustList.is_array()) {
+        ANS_LOGE("GetReportTrustListConfig failed as invalid dfx_normal_events json.");
+        return;
+    }
+    for (auto &reportTrust : reportTrustList) {
+        reporteTrustSet_.emplace(reportTrust);
+    }
+    return;
+}
+
+
+bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
+{
+    return reporteTrustSet_.count(bundleName);
+}
+
 } // namespace Notification
 } // namespace OHOS

@@ -34,6 +34,10 @@ enum EventSceneId {
     SCENE_7 = 7,
     SCENE_8 = 8,
     SCENE_9 = 9,
+    SCENE_10 = 10,
+    SCENE_11 = 11,
+    SCENE_20 = 20,
+    SCENE_21 = 21,
 };
 
 enum EventBranchId {
@@ -45,6 +49,7 @@ enum EventBranchId {
     BRANCH_5 = 5,
     BRANCH_6 = 6,
     BRANCH_7 = 7,
+    BRANCH_8 = 8,
 };
 class HaMetaMessage {
 public:
@@ -63,6 +68,13 @@ public:
     HaMetaMessage& TypeCode(int32_t typeCode);
     HaMetaMessage& NotificationId(int32_t notificationId);
     HaMetaMessage& SlotType(int32_t slotType);
+    HaMetaMessage& SyncWatch(bool isLiveView);
+    HaMetaMessage& SyncHeadSet(bool isLiveView);
+    HaMetaMessage& SyncWatchHeadSet(bool isLiveView);
+    HaMetaMessage& KeyNode(bool isKeyNode);
+    HaMetaMessage& DelByWatch(bool isLiveView);
+    HaMetaMessage& DeleteReason(int32_t deleteReason);
+    HaMetaMessage& ClickByWatch();
     std::string GetMessage() const;
     HaMetaMessage& Checkfailed(bool checkfailed);
     bool NeedReport() const;
@@ -79,8 +91,20 @@ public:
     uint32_t errorCode_ = ERR_OK;
     std::string message_;
     bool checkfailed_ = true;
+    int32_t deleteReason_ = -1;
+    static int32_t syncWatch_;
+    static int32_t syncHeadSet_;
+    static int32_t syncWatchHeadSet_;
+    static int32_t delByWatch_;
+    static int32_t clickByWatch_;
+    static int32_t keyNode_;
+    static int64_t time_;
+    static int32_t syncLiveViewWatch_;
+    static int32_t syncLiveViewHeadSet_;
+    static int32_t syncLiveViewWatchHeadSet_;
+    static int64_t liveViewTime_;
+    static int32_t liveViewDelByWatch_;
 };
-
 
 struct FlowControllerOption {
     int32_t count;
@@ -98,6 +122,8 @@ public:
 
     static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, HaMetaMessage& message);
 
+    static void ReportPublishSuccessEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
     static void ReportModifyEvent(const HaMetaMessage& message);
 
     static void ReportDeleteFailedEvent(const HaMetaMessage& message);
@@ -106,6 +132,13 @@ public:
         const std::chrono::system_clock::time_point &now, int32_t time = 1);
 
     static int64_t GetCurrentTime();
+
+    static void ReportOperationsDotEvent(const HaMetaMessage& message);
+
+    static void ReportPublishFailedEvent(const HaMetaMessage& message);
+
+    static void ReportSkipFailedEvent(const HaMetaMessage& message);
+
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
@@ -117,6 +150,16 @@ private:
     static void ReportNotificationEvent(EventFwk::Want want, int32_t eventCode, const std::string& reason);
 
     static bool ReportFlowControl(const int32_t reportType);
+
+    static bool IsAllowedBundle(const sptr<NotificationRequest>& request);
+
+    static std::string BuildAnsData(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
+    static ReportCache Aggregate();
+
+    static uint32_t SetControlFlags(const std::shared_ptr<NotificationFlags> &flags, uint32_t &controlFlags);
+
+    static std::string GetDeviceStatus(const sptr<NotificationRequest>& request);
 
     static std::list<std::chrono::system_clock::time_point> GetFlowListByType(const int32_t reportType);
 
@@ -134,9 +177,17 @@ private:
     
     static void AddListCache(EventFwk::Want& want, int32_t eventCode);
 
+    static void AddSuccessListCache(EventFwk::Want& want, int32_t eventCode);
+
     static void ExecuteCacheList();
+
+    static void ExecuteSuccessCacheList();
     
     static void ReportCommonEvent(const ReportCache& reportCache);
+
+    static bool DetermineWhetherToSend(uint32_t slotType);
+
+    static std::string BuildAnsData(const HaMetaMessage& message);
 };
 } // namespace Notification
 } // namespace OHOS

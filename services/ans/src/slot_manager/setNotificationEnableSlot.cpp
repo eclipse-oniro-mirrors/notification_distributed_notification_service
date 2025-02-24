@@ -78,7 +78,6 @@ ErrCode SlotManager::SetEnabledForBundleSlot(MessageParcel &data, MessageParcel 
         " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
 
     ErrCode result = SetEnabledForBundleSlotSyncQue(bundleOption, slotType, enabled, isForceControl);
-
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetEnabledForBundleSlot] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -190,10 +189,12 @@ ErrCode SlotManager::AddSlotThenPublishEvent(
     }
 
     if (!slot->GetEnable()) {
-        AdvancedNotificationService::GetInstance()->RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
+        AdvancedNotificationService::GetInstance()->RemoveNotificationBySlot(
+            bundle, slot, NotificationConstant::DISABLE_SLOT_REASON_DELETE);
     } else {
         if (!slot->GetForceControl() && !allowed) {
-            AdvancedNotificationService::GetInstance()->RemoveNotificationBySlot(bundle, slot, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
+            AdvancedNotificationService::GetInstance()->RemoveNotificationBySlot(
+                bundle, slot, NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE);
         }
     }
 

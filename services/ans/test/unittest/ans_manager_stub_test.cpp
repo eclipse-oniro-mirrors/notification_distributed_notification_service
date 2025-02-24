@@ -3432,7 +3432,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
     data.WriteBool(isForceControl);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -3615,7 +3615,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber03, Function | SmallTest | Leve
     data.WriteInt32(type);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -4925,19 +4925,6 @@ HWTEST_F(AnsManagerStubTest, HandleAddDoNotDisturbProfiles_0200, TestSize.Level1
 }
 
 /**
- * @tc.name: HandleRemoveDoNotDisturbProfiles_0100
- * @tc.desc: test HandleRemoveDoNotDisturbProfiles when ReadParcelableVector return false.
- * @tc.type: FUNC
- */
-HWTEST_F(AnsManagerStubTest, HandleRemoveDoNotDisturbProfiles_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode ret = ansManagerStub_->HandleRemoveDoNotDisturbProfiles(data, reply);
-    EXPECT_EQ(ret, ERR_ANS_PARCELABLE_FAILED);
-}
-
-/**
  * @tc.name: HandleRemoveDoNotDisturbProfiles_0200
  * @tc.desc: test HandleRemoveDoNotDisturbProfiles success.
  * @tc.type: FUNC
@@ -5040,6 +5027,26 @@ HWTEST_F(AnsManagerStubTest, UpdateNotificationTimerByUid_01, Function | SmallTe
     bool isPaused = true;
     ErrCode result = ansManagerStub_->UpdateNotificationTimerByUid(uid, isPaused);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: HandleDisableNotificationFeature_01
+ * @tc.desc: Test HandleDisableNotificationFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsManagerStubTest, HandleDisableNotificationFeature_01, Function | SmallTest | Level1)
+{
+    uint32_t code = static_cast<uint32_t>(NotificationInterfaceCode::DISABLE_NOTIFICATION_FEATURE);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    sptr<NotificationDisable> testNotificationDisable = new (std::nothrow) NotificationDisable();
+
+    data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
+    data.WriteParcelable(testNotificationDisable);
+
+    ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }
 }

@@ -3,7 +3,7 @@
   "version": "",
   "description": "为应用程序提供发布通知的能力",
   "homePage": "https://gitee.com/openharmony",
-  "license": "Apache V2",
+  "license": "Apache-2.0",
   "repository": "https://gitee.com/openharmony/notification_ans_standard",
   "domain": "os",
   "language": "",
@@ -48,7 +48,14 @@
       "distributed_notification_service_feature_additional_control",
       "distributed_notification_service_feature_disable_fa_model",
       "distributed_notification_service_feature_privileged_message",
-      "distributed_notification_service_disable_control"
+      "distributed_notification_service_disable_control",
+      "distributed_notification_service_feature_badge_manager",
+      "distributed_notification_service_feature_local_liveview",
+      "distributed_notification_service_feature_distributed_db",
+      "distributed_notification_service_feature_disturb_manager",
+      "distributed_notification_service_feature_slot_manager",
+      "distributed_notification_service_feature_additional_config",
+      "distributed_notification_service_feature_open_notification_settings"
     ],
     "adapted_system_type": [
       "standard"
@@ -93,6 +100,7 @@
         "screenlock_mgr",
         "ace_engine",
         "openssl",
+        "power_manager",
         "dsoftbus",
         "zlib"
       ],
@@ -117,6 +125,7 @@
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
           "//base/notification/distributed_notification_service/services:ans_service",
+          "//base/notification/distributed_notification_service/services/dialog_ui/enable_notification_dialog:dialog_hap",
           "//base/notification/distributed_notification_service/services/reminder/sa_profile:reminder_sa_profile",
           "//base/notification/distributed_notification_service/services/reminder:reminder_service",
           "//base/notification/distributed_notification_service/tools:tools_shell"

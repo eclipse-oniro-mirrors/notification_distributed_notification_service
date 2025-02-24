@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_OBSERVER_SERVICE_H
 
 #include "common_event_subscriber.h"
+#include "screenlock_manager.h"
 
 #include <memory>
 
@@ -39,6 +40,7 @@ public:
     static OberverService& GetInstance();
     int32_t IsScreenLocked();
     void Destory();
+    int32_t Unlock(const ScreenLock::Action &action, const sptr<ScreenLock::ScreenLockCallbackInterface> &listener);
     void Init(uint16_t deviceType);
 private:
     OberverService() = default;

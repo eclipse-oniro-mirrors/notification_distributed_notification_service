@@ -678,7 +678,10 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
 {
     ANS_LOGI("Event bundle update %{public}s.", cloneBundleInfo.Dump().c_str());
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    if (bundleOption == nullptr) {
+        return;
+    }
     bundleOption->SetBundleName(cloneBundleInfo.GetBundleName());
     bundleOption->SetUid(cloneBundleInfo.GetUid());
     std::lock_guard<std::mutex> lock(preferenceMutex_);
@@ -708,6 +711,9 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     std::vector<sptr<NotificationSlot>> slots;
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
+        if (slotInfo == nullptr) {
+            return;
+        }
         uint32_t slotFlags = bundleInfo.GetSlotFlags();
         auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
             GetConfigSlotReminderModeByType(slotInfo->GetType());
@@ -1485,6 +1491,26 @@ void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationP
             preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, true);
         }
     }
+}
+
+ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32_t type)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+   
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetHashCodeRule(uid, type);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    uint32_t result = 0;
+    result = preferncesDB_->GetHashCodeRule(uid);
+    ANS_LOGI("GetHashCodeRule uid = %{public}d result = %{public}d", uid, result);
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

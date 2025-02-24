@@ -42,8 +42,38 @@ bool DistributedService::GetBundleResourceInfo(const std::string bundleName, std
         return false;
     }
     icon = AnsImageUtil::PackImage(iconPixelmap);
-    ANS_LOGI("Dans get bundle icon bundle %{public}s %{public}lu.", bundleName.c_str(), resourceInfo.icon.size());
+    ANS_LOGI("Dans get bundle icon bundle %{public}s %{public}u.", bundleName.c_str(), resourceInfo.icon.size());
     return true;
+}
+
+void DistributedService::GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
+    std::vector<DistributedDeviceInfo>& updateDeviceList)
+{
+    for (auto& device : peerDevice_) {
+        if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+            continue;
+        }
+        auto iter = bundleIconCache_.find(device.first);
+        if (updatedExit) {
+            if (iter == bundleIconCache_.end() ||
+                iter->second.find(bundleName) == iter->second.end()) {
+                continue;
+            }
+            updateDeviceList.push_back(device.second);
+        } else {
+            if (iter != bundleIconCache_.end() &&
+                iter->second.find(bundleName) != iter->second.end()) {
+                continue;
+            }
+            if (iter == bundleIconCache_.end()) {
+                std::set<std::string> cachedIcons = { bundleName };
+                bundleIconCache_.insert(std::make_pair(device.first, cachedIcons));
+            } else {
+                iter->second.insert(bundleName);
+            }
+            updateDeviceList.push_back(device.second);
+        }
+    }
 }
 
 void DistributedService::HandleBundleChanged(const std::string& bundleName, bool updatedExit)
@@ -54,12 +84,9 @@ void DistributedService::HandleBundleChanged(const std::string& bundleName, bool
     }
 
     std::function<void()> task = std::bind([&, bundleName, updatedExit]() {
-        bool notSaved = (bundleIconCache_.find(bundleName) == bundleIconCache_.end());
-        if (updatedExit && notSaved) {
-            ANS_LOGI("No need update %{public}s.", bundleName.c_str());
-            return;
-        }
-        if (!updatedExit && !notSaved) {
+        std::vector<DistributedDeviceInfo> updateDeviceList;
+        GetNeedUpdateDevice(updatedExit, bundleName, updateDeviceList);
+        if (updateDeviceList.empty()) {
             ANS_LOGI("No need update %{public}s.", bundleName.c_str());
             return;
         }
@@ -69,11 +96,8 @@ void DistributedService::HandleBundleChanged(const std::string& bundleName, bool
         }
         std::unordered_map<std::string, std::string> icons;
         icons.insert(std::make_pair(bundleName, icon));
-        for (auto& device : peerDevice_) {
-            if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-                continue;
-            }
-            UpdateBundlesIcon(icons, device.second);
+        for (auto& device : updateDeviceList) {
+            UpdateBundlesIcon(icons, device);
         }
     });
     serviceQueue_->submit(task);
@@ -87,11 +111,13 @@ void DistributedService::HandleBundleRemoved(const std::string& bundleName)
     }
 
     std::function<void()> task = std::bind([&, bundleName]() {
-        if (bundleIconCache_.find(bundleName) == bundleIconCache_.end()) {
-            return;
-        }
-        bundleIconCache_.erase(bundleName);
         for (auto& device : peerDevice_) {
+            auto iter = bundleIconCache_.find(device.first);
+            if (iter == bundleIconCache_.end() ||
+                iter->second.find(bundleName) == iter->second.end()) {
+                continue;
+            }
+            iter->second.erase(bundleName);
             if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
                 continue;
             }
@@ -108,8 +134,8 @@ void DistributedService::HandleBundleRemoved(const std::string& bundleName)
                 iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
                 device.second.deviceId_, device.second.deviceType_);
             ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d %{public}s %{public}d.",
-                device.second.deviceId_.c_str(), device.second.deviceType_, localDevice_.deviceId_.c_str(),
-                localDevice_.deviceType_);
+                StringAnonymous(device.second.deviceId_).c_str(), device.second.deviceType_,
+                StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
         }
     });
     serviceQueue_->submit(task);

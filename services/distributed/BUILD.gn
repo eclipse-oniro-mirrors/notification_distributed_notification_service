@@ -72,7 +72,7 @@ ohos_shared_library("libans_distributed") {
   part_name = "${component_name}"
 }
 
-ohos_shared_library("libans_softbus_distributed") {
+ohos_shared_library("libdans") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -83,10 +83,19 @@ ohos_shared_library("libans_softbus_distributed") {
   }
   branch_protector_ret = "pac_ret"
 
+  version_script = "libdans.map"
+  cflags = [
+    "-fno-math-errno",
+    "-fno-unroll-loops",
+    "-fmerge-all-constants",
+    "-fno-ident",
+    "-Oz",
+    "-flto",
+    "-ffunction-sections",
+    "-fdata-sections",
+  ]
+
   sources = [
-    "${services_path}/ans/src/common/file_utils.cpp",
-    "${services_path}/ans/src/common/notification_app_privileges.cpp",
-    "${services_path}/ans/src/common/notification_config_parse.cpp",
     "src/helper/bundle_resource_helper.cpp",
     "src/helper/distributed_preference.cpp",
     "src/helper/distributed_rdb_helper.cpp",
@@ -97,6 +106,7 @@ ohos_shared_library("libans_softbus_distributed") {
     "src/soft_bus/distributed_local_config.cpp",
     "src/soft_bus/distributed_manager.cpp",
     "src/soft_bus/distributed_observer_service.cpp",
+    "src/soft_bus/distributed_operation_service.cpp",
     "src/soft_bus/distributed_publish_service.cpp",
     "src/soft_bus/distributed_server.cpp",
     "src/soft_bus/distributed_service.cpp",
@@ -104,13 +114,13 @@ ohos_shared_library("libans_softbus_distributed") {
     "src/soft_bus/distributed_socket.cpp",
     "src/soft_bus/distributed_subscribe_service.cpp",
     "src/soft_bus/distributed_subscriber.cpp",
-    "src/soft_bus/distributed_timer_service.cpp",
     "src/tlv_box/batch_remove_box.cpp",
     "src/tlv_box/box_base.cpp",
     "src/tlv_box/bundle_icon_box.cpp",
     "src/tlv_box/match_box.cpp",
     "src/tlv_box/remove_box.cpp",
     "src/tlv_box/request_box.cpp",
+    "src/tlv_box/response_box.cpp",
     "src/tlv_box/state_box.cpp",
     "src/tlv_box/tlv_box.cpp",
   ]
@@ -129,6 +139,7 @@ ohos_shared_library("libans_softbus_distributed") {
 
   external_deps = [
     "ability_base:zuri",
+    "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "ability_runtime:uri_permission_mgr",
     "bundle_framework:appexecfwk_base",
@@ -141,6 +152,7 @@ ohos_shared_library("libans_softbus_distributed") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
+    "power_manager:powermgr_client",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",
     "screenlock_mgr:screenlock_client",

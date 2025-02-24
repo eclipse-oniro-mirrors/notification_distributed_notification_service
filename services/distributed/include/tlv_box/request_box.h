@@ -39,6 +39,8 @@ public:
     bool SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon);
     bool SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon);
     bool SetCommonLiveView(const std::vector<uint8_t>& byteSequence);
+    bool SetFinishTime(int64_t time);
+    bool SetAutoDeleteTime(int64_t time);
 
     bool GetNotificationHashCode(std::string& hasdCode) const;
     bool GetSlotType(int32_t& type) const;
@@ -50,6 +52,8 @@ public:
     bool GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const;
     bool GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const;
     bool GetCommonLiveView(std::vector<uint8_t>& byteSequence) const;
+    bool GetFinishTime(int64_t& time) const;
+    bool GetAutoDeleteTime(int64_t& time) const;
 };
 }  // namespace Notification
 }  // namespace OHOS

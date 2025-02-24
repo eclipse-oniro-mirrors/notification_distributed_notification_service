@@ -32,6 +32,13 @@ ErrCode AnsManagerStub::Publish(const std::string &label, const sptr<Notificatio
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    ANS_LOGE("AnsManagerStub::Publish called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification)
 {
     ANS_LOGE("AnsManagerStub::PublishNotificationForIndirectProxy called!");
@@ -573,6 +580,12 @@ ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::DistributeOperation(const std::string &hashCode)
+{
+    ANS_LOGE("DistributeOperation called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGE("AnsManagerStub::GetAllLiveViewEnabledBundles called!");
@@ -673,6 +686,12 @@ ErrCode AnsManagerStub::UpdateNotificationTimerByUid(const int32_t uid, const bo
 ErrCode AnsManagerStub::DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable)
 {
     ANS_LOGE("DisableNotificationFeature called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::SetHashCodeRule(const uint32_t type)
+{
+    ANS_LOGE("SetHashCodeRule called!");
     return ERR_INVALID_OPERATION;
 }
 }  // namespace Notification

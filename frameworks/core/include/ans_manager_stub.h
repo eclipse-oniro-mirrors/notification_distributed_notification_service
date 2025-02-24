@@ -893,7 +893,7 @@ public:
      */
     ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Query the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
@@ -978,6 +978,33 @@ public:
      * @return Returns set result.
      */
     virtual ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
+
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode DistributeOperation(const std::string& hashCode) override;
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override;
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetHashCodeRule(const uint32_t type) override;
+
 private:
 
     ErrCode HandlePublish(MessageParcel &data, MessageParcel &reply);
@@ -1057,6 +1084,7 @@ private:
     ErrCode HandleSetBadgeNumberByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRegisterPushCallback(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUnregisterPushCallback(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleDistributeOperation(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribeLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleTriggerLocalLiveView(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSubscribeSelf(MessageParcel &data, MessageParcel &reply);
@@ -1078,13 +1106,16 @@ private:
     ErrCode HandleAllowUseReminder(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetDeviceStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllLiveViewEnabledBundles(MessageParcel &data, MessageParcel &reply);
-    ErrCode HandleGetAllDistribuedEnabledBundles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetAllDistributedEnabledBundles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetDeviceStatus(MessageParcel &data, MessageParcel &reply);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     ErrCode HandleRegisterSwingCallback(MessageParcel &data, MessageParcel &reply);
 #endif
     ErrCode HandleUpdateNotificationTimerByUid(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleDisableNotificationFeature(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetNotificationRequest(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply);
+
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)
     {

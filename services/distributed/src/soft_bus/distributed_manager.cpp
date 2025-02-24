@@ -38,22 +38,23 @@ DistributedManager& DistributedManager::GetInstance()
 
 void DistributedManager::ReleaseLocalDevice()
 {
-    DistributedServer::GetInstance().ReleaseServer();
+    DistributedService::GetInstance().DestoryService();
 }
 
 int32_t DistributedManager::InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    int32_t titleLength, int32_t contentLength, std::function<bool(std::string, int32_t, bool)> callback)
+    const DistributedDeviceConfig config)
 {
-    ANS_LOGI("InitLocalDevice %{public}s %{public}u.", deviceId.c_str(), deviceType);
+    ANS_LOGI("InitLocalDevice %{public}s %{public}u.", StringAnonymous(deviceId).c_str(), deviceType);
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
-    DistributedLocalConfig::GetInstance().SetLocalDevice(deviceId, deviceType, titleLength, contentLength);
-    return DistributedService::GetInstance().InitService(deviceId, deviceType, callback);
+    DistributedLocalConfig::GetInstance().SetLocalDevice(config);
+    return DistributedService::GetInstance().InitService(deviceId, deviceType);
 }
 
 void DistributedManager::AddDevice(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId)
 {
-    ANS_LOGI("InitLocalDevice %{public}s %{public}u %{public}s.", deviceId.c_str(), deviceType, networkId.c_str());
+    ANS_LOGI("InitLocalDevice %{public}s %{public}u %{public}s.", StringAnonymous(deviceId).c_str(), deviceType,
+        StringAnonymous(networkId).c_str());
     DistributedDeviceInfo peerDevice = DistributedDeviceInfo(deviceType, deviceId, networkId);
     DistributedClient::GetInstance().AddDevice(peerDevice);
     DistributedService::GetInstance().AddDevice(peerDevice);
@@ -61,7 +62,7 @@ void DistributedManager::AddDevice(const std::string &deviceId, uint16_t deviceT
 
 void DistributedManager::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
 {
-    ANS_LOGI("ReleaseDevice %{public}s %{public}u.", deviceId.c_str(), deviceType);
+    ANS_LOGI("ReleaseDevice %{public}s %{public}u.", StringAnonymous(deviceId).c_str(), deviceType);
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->CloseExtentionWrapper();
     DistributedClient::GetInstance().ReleaseDevice(deviceId, deviceType);
     DistributedService::GetInstance().UnSubscribeNotifictaion(deviceId, deviceType);
@@ -70,8 +71,19 @@ void DistributedManager::ReleaseDevice(const std::string &deviceId, uint16_t dev
 void DistributedManager::RefreshDevice(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId)
 {
-    ANS_LOGI("RefreshDevice %{public}s %{public}u %{public}s.", deviceId.c_str(), deviceType, networkId.c_str());
+    ANS_LOGI("RefreshDevice %{public}s %{public}u %{public}s.", StringAnonymous(deviceId).c_str(),
+        deviceType, StringAnonymous(networkId).c_str());
     DistributedClient::GetInstance().RefreshDevice(deviceId, deviceType, networkId);
+}
+
+void DistributedManager::InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
+{
+    DistributedService::GetInstance().InitHACallBack(callback);
+}
+
+void DistributedManager::InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback)
+{
+    DistributedService::GetInstance().InitSendReportCallBack(callback);
 }
 
 }

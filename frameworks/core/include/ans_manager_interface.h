@@ -988,6 +988,32 @@ public:
      * @return Returns set result.
      */
     virtual ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) = 0;
+
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode DistributeOperation(const std::string& hashCode) = 0;
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) = 0;
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode SetHashCodeRule(const uint32_t type) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

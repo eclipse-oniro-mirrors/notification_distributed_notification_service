@@ -48,9 +48,13 @@ void ReminderStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
     values.PutInt(ReminderBaseTable::SNOOZE_SLOT_ID, reminder->GetSnoozeSlotType());
     values.PutInt(ReminderBaseTable::NOTIFICATION_ID, reminder->GetNotificationId());
     values.PutString(ReminderBaseTable::TITLE, reminder->GetTitle());
+    values.PutInt(ReminderBaseTable::TITLE_RESOURCE_ID, reminder->GetTitleResourceId());
     values.PutString(ReminderBaseTable::CONTENT, reminder->GetContent());
+    values.PutInt(ReminderBaseTable::CONTENT_RESOURCE_ID, reminder->GetContentResourceId());
     values.PutString(ReminderBaseTable::SNOOZE_CONTENT, reminder->GetSnoozeContent());
+    values.PutInt(ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, reminder->GetSnoozeContentResourceId());
     values.PutString(ReminderBaseTable::EXPIRED_CONTENT, reminder->GetExpiredContent());
+    values.PutInt(ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, reminder->GetExpiredContentResourceId());
 
     if (oldVersion) {
         values.PutString(ReminderBaseTable::WANT_AGENT, reminder->GetWantAgentStr());
@@ -290,6 +294,24 @@ void ReminderStrategy::RecoverIdFromDb(sptr<ReminderRequest>& reminder,
     int32_t creatorUid;
     ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::CREATOR_UID, creatorUid);
     reminder->InitCreatorUid(creatorUid);
+
+    int32_t titleResourceId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::TITLE_RESOURCE_ID, titleResourceId);
+    reminder->SetTitleResourceId(titleResourceId);
+
+    int32_t contentResourceId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::CONTENT_RESOURCE_ID, contentResourceId);
+    reminder->SetContentResourceId(contentResourceId);
+
+    int32_t snoozeContentResourceId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID,
+        snoozeContentResourceId);
+    reminder->SetSnoozeContentResourceId(snoozeContentResourceId);
+
+    int32_t expiredContentResourceId = 0;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID,
+        expiredContentResourceId);
+    reminder->SetExpiredContentResourceId(expiredContentResourceId);
 }
 
 void ReminderStrategy::RecoverContextFromDb(sptr<ReminderRequest>& reminder,

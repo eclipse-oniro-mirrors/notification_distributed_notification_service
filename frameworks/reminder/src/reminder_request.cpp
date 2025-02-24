@@ -70,7 +70,6 @@ const std::string ReminderRequest::REMINDER_EVENT_CLICK_ALERT = "ohos.event.noti
 const std::string ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT = "ohos.event.notification.reminder.ALERT_TIMEOUT";
 const std::string ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION =
     "ohos.event.notification.reminder.REMOVE_NOTIFICATION";
-const std::string ReminderRequest::REMINDER_EVENT_LOAD_REMINDER = "ohos.event.notification.reminder.LOAD_REMINDER";
 const std::string ReminderRequest::PARAM_REMINDER_ID = "REMINDER_ID";
 const std::string ReminderRequest::PARAM_REMINDER_SHARE = "REMINDER_SHARE_FLAG";
 const std::string ReminderRequest::SEP_BUTTON_SINGLE = "<SEP,/>";
@@ -151,6 +150,10 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->groupId_ = other.groupId_;
     this->customRingUri_ = other.customRingUri_;
     this->creatorBundleName_ = other.creatorBundleName_;
+    this->titleResourceId_ = other.titleResourceId_;
+    this->contentResourceId_ = other.contentResourceId_;
+    this->expiredContentResourceId_ = other.expiredContentResourceId_;
+    this->snoozeContentResourceId_ = other.snoozeContentResourceId_;
 }
 
 ReminderRequest::ReminderRequest(int32_t reminderId)
@@ -1212,6 +1215,10 @@ bool ReminderRequest::WriteParcel(Parcel &parcel) const
 
     int32_t snoozeSlotType = static_cast<int32_t>(snoozeSlotType_);
     WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
 
     if (!MarshallingActionButton(parcel)) {
         return false;
@@ -1346,7 +1353,10 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     int32_t snoozeSlotType = static_cast<int32_t>(NotificationConstant::SlotType::OTHER);
     READ_INT32_RETURN_FALSE_LOG(parcel, snoozeSlotType, "snoozeSlotType");
     snoozeSlotType_ = static_cast<NotificationConstant::SlotType>(snoozeSlotType);
-
+    READ_INT32_RETURN_FALSE_LOG(parcel, titleResourceId_, "titleResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
+    READ_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
     if (!ReadActionButtonFromParcel(parcel)) {
         return false;
     }
@@ -1930,7 +1940,7 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
     if (resMgr == nullptr) {
         return;
     }
-    // update title
+    // update action title
     for (auto &button : actionButtonMap_) {
         if (button.second.resource.empty()) {
             continue;
@@ -1941,6 +1951,38 @@ void ReminderRequest::OnLanguageChange(const std::shared_ptr<Global::Resource::R
             continue;
         }
         button.second.title = title;
+    }
+    // update title
+    if (titleResourceId_ != 0) {
+        std::string title;
+        resMgr->GetStringById(titleResourceId_, title);
+        if (!title.empty()) {
+            title_ = title;
+        }
+    }
+    // update content
+    if (contentResourceId_ != 0) {
+        std::string content;
+        resMgr->GetStringById(contentResourceId_, content);
+        if (!content.empty()) {
+            content_ = content;
+        }
+    }
+    // update expiredContent
+    if (expiredContentResourceId_ != 0) {
+        std::string expiredContent;
+        resMgr->GetStringById(expiredContentResourceId_, expiredContent);
+        if (!expiredContent.empty()) {
+            expiredContent_ = expiredContent;
+        }
+    }
+    // update snoozeContent
+    if (snoozeContentResourceId_ != 0) {
+        std::string snoozeContent;
+        resMgr->GetStringById(snoozeContentResourceId_, snoozeContent);
+        if (!snoozeContent.empty()) {
+            snoozeContent_ = snoozeContent;
+        }
     }
 }
 }

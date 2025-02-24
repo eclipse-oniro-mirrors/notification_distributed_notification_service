@@ -19,6 +19,7 @@
 #include "session.h"
 #include "distributed_server.h"
 #include "distributed_client.h"
+#include "distributed_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -26,6 +27,7 @@ namespace Notification {
 static const int32_t BIND_SERVICE_MAX_RETRY_TIMES = 1;
 static const int32_t BIND_SERVICE_SLEEP_TIMES_MS = 10000;  // 0.1s
 static const uint32_t SOCKET_NAME_MAX_LEN = 256;
+static const int32_t QOS_NUM = 5;
 
 static void OnServerBind(int32_t socket, PeerSocketInfo info)
 {
@@ -96,6 +98,7 @@ static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t q
 
 void CloseSocket(int32_t socketId)
 {
+    ANS_LOGI("Close socket id %{public}d", socketId);
     ::Shutdown(socketId);
 }
 
@@ -110,23 +113,23 @@ bool CheckAndCopyStr(char* dest, uint32_t destLen, const std::string& src)
     return true;
 }
 
-int32_t ServiceListen(const std::string& name, const std::string& pkgName, TransDataType dataType)
+int32_t ServiceListen(const std::string& name, const std::string& pkgName, TransDataType dataType, int32_t& socketId)
 {
     char nameStr[SOCKET_NAME_MAX_LEN + 1];
     if (!CheckAndCopyStr(nameStr, SOCKET_NAME_MAX_LEN, name)) {
-        return -1;
+        return DISRTIBUED_ERR;
     }
 
     char pkgNameStr[SOCKET_NAME_MAX_LEN + 1];
     if (!CheckAndCopyStr(pkgNameStr, SOCKET_NAME_MAX_LEN, pkgName)) {
-        return -1;
+        return DISRTIBUED_ERR;
     }
 
     SocketInfo info = { .name = nameStr, .pkgName = pkgNameStr, .dataType = dataType };
-    int32_t socketId = ::Socket(info); // create service socket id
+    socketId = ::Socket(info); // create service socket id
     if (socketId <= 0) {
         ANS_LOGW("Create socket faild, %{public}s %{public}s %{public}d.", nameStr, pkgNameStr, socketId);
-        return -1;
+        return DISRTIBUED_SOCKET_CREATE_ERR;
     }
 
     QosTV serverQos[] = {
@@ -144,33 +147,33 @@ int32_t ServiceListen(const std::string& name, const std::string& pkgName, Trans
     if (ret != ERR_OK) {
         ::Shutdown(socketId);
         ANS_LOGW("Create listener failed, ret is %{public}d.", ret);
-        return -1;
+        return ret;
     }
     ANS_LOGI("Service listen %{public}s %{public}d %{public}d.", name.c_str(), dataType, socketId);
-    return socketId;
+    return ERR_OK;
 }
 
-int32_t ClientBind(const std::string& name, const std::string& pkgName, const std::string& peerName,
-    const std::string& peerNetWorkId, TransDataType dataType)
+int32_t ClientBind(const std::string& name, const std::string& pkgName,
+    const std::string& peerNetWorkId, TransDataType dataType, int32_t& socketId)
 {
     char nameStr[SOCKET_NAME_MAX_LEN + 1];
     char peerNetWorkIdStr[SOCKET_NAME_MAX_LEN + 1];
     if (!CheckAndCopyStr(nameStr, SOCKET_NAME_MAX_LEN, name) ||
         !CheckAndCopyStr(peerNetWorkIdStr, SOCKET_NAME_MAX_LEN, peerNetWorkId)) {
-        return -1;
+        return DISRTIBUED_ERR;
     }
     char pkgNameStr[SOCKET_NAME_MAX_LEN + 1];
     char peerNameStr[SOCKET_NAME_MAX_LEN + 1];
     if (!CheckAndCopyStr(pkgNameStr, SOCKET_NAME_MAX_LEN, pkgName) ||
-        !CheckAndCopyStr(peerNameStr, SOCKET_NAME_MAX_LEN, peerName)) {
-        return -1;
+        !CheckAndCopyStr(peerNameStr, SOCKET_NAME_MAX_LEN, name)) {
+        return DISRTIBUED_ERR;
     }
     SocketInfo info = { .name = nameStr, .peerName = peerNameStr, .peerNetworkId = peerNetWorkIdStr,
         .pkgName = pkgNameStr, .dataType = dataType };
-    int32_t socketId = ::Socket(info); // create client socket id
+    socketId = ::Socket(info); // create client socket id
     if (socketId <= 0) {
         ANS_LOGW("Create client socket faild, ret is %{public}d.", socketId);
-        return -1;
+        return DISRTIBUED_SOCKET_CREATE_ERR;
     }
 
     QosTV clientQos[] = {
@@ -184,27 +187,27 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName, const st
     listener.OnBytes = OnClientBytes;
 
     // retry 10 times or bind success
+    int32_t result = 0;
     int32_t retryTimes = 0;
     auto sleepTime = std::chrono::milliseconds(BIND_SERVICE_SLEEP_TIMES_MS);
     bool bindSuccess = false;
     while (retryTimes < BIND_SERVICE_MAX_RETRY_TIMES) {
-        int32_t res = ::Bind(socketId, clientQos, 5, &listener);
-        if (res != 0) {
-            ANS_LOGE("Bind Server failed, ret is %{public}d.", res);
+        result = ::Bind(socketId, clientQos, QOS_NUM, &listener);
+        if (result != 0) {
+            ANS_LOGE("Bind Server failed, ret is %{public}d.", result);
             std::this_thread::sleep_for(sleepTime);
             retryTimes++;
             continue;
         }
         bindSuccess = true;
-        ANS_LOGI("Bind Server success.");
         break;
     }
 
     if (!bindSuccess) {
         ::Shutdown(socketId); // close client.
-        return -1;
+        return result;
     }
-    return socketId;
+    return ERR_OK;
 }
 
 int32_t ClientSendMsg(int32_t socketId, const void* data, int32_t length, TransDataType type)

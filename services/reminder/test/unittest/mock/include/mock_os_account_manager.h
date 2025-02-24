@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_MOCK_OS_ACCOUNT_MANAGER_H
-#define BASE_NOTIFICATION_MOCK_OS_ACCOUNT_MANAGER_H
+#ifndef BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
+#define BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H
 
-#include "accesstoken_kit.h"
-#include "iremote_object.h"
+#include <cstdint>
 
-namespace OHOS {
+namespace OHOS::Notification {
 class MockOsAccountManager {
 public:
-    static void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
-    static void MockIsOsAccountExists(bool mockRet);
-    static void ResetAccountMock();
-    static void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
+    static void MockGetForegroundOsAccountLocalId(const int32_t ret);
 };
-}  // namespace OHOS
-#endif  // BASE_NOTIFICATION_MOCK_OS_ACCOUNT_MANAGER_H
+}  // namespace OHOS::Notification
+
+#endif  // BASE_NOTIFICATION_REMINDER_MOCK_OS_ACCOUNT_MANAGER_H

@@ -175,5 +175,69 @@ HWTEST_F(NotificationPreferencesInfoTest, RemoveBundleInfo_0100, TestSize.Level1
     auto res = preferencesInfo->RemoveBundleInfo(bundleInfo);
     ASSERT_EQ(res, false);
 }
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0100
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    NotificationDisable notificationDisable;
+    EXPECT_FALSE(preferencesInfo->GetDisableNotificationInfo(notificationDisable));
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0200
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({});
+    preferencesInfo->SetDisableNotificationInfo(notificationDisable);
+
+    NotificationDisable disable;
+    bool ret = preferencesInfo->GetDisableNotificationInfo(disable);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0300
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0300, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(false);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    preferencesInfo->SetDisableNotificationInfo(notificationDisable);
+
+    NotificationDisable disable;
+    EXPECT_TRUE(preferencesInfo->GetDisableNotificationInfo(disable));
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0400
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0400, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    preferencesInfo->SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    bool ret = preferencesInfo->GetDisableNotificationInfo(disable);
+    EXPECT_TRUE(ret);
+}
 }
 }

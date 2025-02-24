@@ -22,6 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
+const int32_t DISTRIBUTE_OPERATION_PARA = 1;
 const std::string CONSUME = "onConsume";
 const std::string CANCEL = "onCancel";
 const std::string UPDATE = "onUpdate";
@@ -79,7 +80,7 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     }
 
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGD("sortingMap is null");
         return Common::NapiGetBoolean(env, false);
     }
 
@@ -292,7 +293,6 @@ void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context,
 void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS::Notification::Notification>>
     &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
-    ANS_LOGI("OnBatchCancel");
     if (batchCancelCallbackInfo_.ref == nullptr || batchCancelCallbackInfo_.env == nullptr) {
         ANS_LOGI("batchCancelCallbackInfo_ callback or env unset");
         return;
@@ -305,8 +305,8 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
         ANS_LOGE("sortingMap is null");
         return;
     }
-    ANS_LOGI("OnBatchCancel sortingMap size = %{public}zu", sortingMap->GetKey().size());
-    ANS_LOGI("OnBatchCancel deleteReason = %{public}d", deleteReason);
+    ANS_LOGI("OnBatchCancel deleteReason = %{public}d, sortingMap size = %{public}zu",
+        deleteReason, sortingMap->GetKey().size());
     std::string notificationKeys = "";
     for (auto notification : requestList) {
         notificationKeys.append(notification->GetKey()).append("-");
@@ -1468,15 +1468,21 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
                     ANS_LOGD("Subscribe with NotificationSubscribeInfo excute.");
-                    OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
-                    subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
-                    subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    sptr<OHOS::Notification::NotificationSubscribeInfo> subscribeInfo =
+                        new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
+                    if (subscribeInfo == nullptr) {
+                        ANS_LOGE("Invalid subscribeInfo!");
+                        asynccallbackinfo->info.errorCode = OHOS::Notification::ErrorCode::ERR_ANS_NO_MEMORY;
+                        return;
+                    }
+                    subscribeInfo->AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
+                    subscribeInfo->AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
                     ANS_LOGD("SubscribeNotification execute.");
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo);
                 }
             }
         },
@@ -1531,6 +1537,37 @@ void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
     if (iter != DeletingSubscriber.end()) {
         DeletingSubscriber.erase(iter);
     }
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode)
+{
+    ANS_LOGD("enter");
+
+    size_t argc = DISTRIBUTE_OPERATION_PARA;
+    napi_value argv[DISTRIBUTE_OPERATION_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < DISTRIBUTE_OPERATION_PARA) {
+        ANS_LOGE("Wrong number of arguments");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype == napi_string) {
+        size_t strLen = 0;
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
+        hashCode = str;
+    } else {
+        ANS_LOGE("Wrong argument type for arg0. string expected.");
+        std::string msg = "Incorrect parameter type.The type of param must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    return Common::NapiGetNull(env);
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

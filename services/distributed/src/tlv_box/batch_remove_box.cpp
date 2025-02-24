@@ -18,7 +18,7 @@
 namespace OHOS {
 namespace Notification {
 
-BatchRemoveNotifticationBox::BatchRemoveNotifticationBox()
+BatchRemoveNotificationBox::BatchRemoveNotificationBox()
 {
     if (box_ == nullptr) {
         return;
@@ -26,26 +26,26 @@ BatchRemoveNotifticationBox::BatchRemoveNotifticationBox()
     box_->SetMessageType(REMOVE_ALL_NOTIFICATIONS);
 }
 
-BatchRemoveNotifticationBox::~BatchRemoveNotifticationBox()
+BatchRemoveNotificationBox::~BatchRemoveNotificationBox()
 {}
 
-BatchRemoveNotifticationBox::BatchRemoveNotifticationBox(std::shared_ptr<TlvBox> box) : BoxBase(box)
+BatchRemoveNotificationBox::BatchRemoveNotificationBox(std::shared_ptr<TlvBox> box) : BoxBase(box)
 {}
 
-bool BatchRemoveNotifticationBox::SetNotificationKeys(const std::vector<std::string>& keys)
+bool BatchRemoveNotificationBox::SetNotificationHashCode(const std::string& hashCode)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(BATCH_REMOVE_NOTIFICATIONS, keys));
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
 }
 
-bool BatchRemoveNotifticationBox::SetNotificationHashCode(const std::string& hasdCode)
+bool BatchRemoveNotificationBox::SetNotificationSlotTypes(const std::string &slotTypes)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hasdCode));
+    return box_->PutValue(std::make_shared<TlvItem>(BATCH_REMOVE_SLOT_TYPE, slotTypes));
 }
 }
 }

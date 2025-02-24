@@ -19,6 +19,7 @@
 #include <string>
 #include "ans_log_wrapper.h"
 #include "distributed_device_data.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -28,17 +29,15 @@ public:
     DistributedLocalConfig() = default;
     ~DistributedLocalConfig() = default;
     static DistributedLocalConfig& GetInstance();
-    void SetLocalDevice(const std::string &deviceId, uint16_t deviceType,
-        int32_t titleLength, int32_t contentLength);
-    const DistributedDeviceInfo& GetLocalDevice() const;
+    void SetLocalDevice(DistributedDeviceConfig config);
     int32_t GetTitleLength() const;
     int32_t GetContentLength() const;
+    uint32_t GetStartAbilityTimeout() const;
+    std::unordered_set<std::string> GetCollaborativeDeleteTypes() const;
 private:
-    int32_t maxTitleLength_;
-    int32_t maxContentLength_;
-    DistributedDeviceInfo localDevice_;
+    DistributedDeviceConfig localConfig_;
 };
 
 }
 }
-#endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_DEVICE_DATA_H
+#endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_LOCAL_CONFIG_H

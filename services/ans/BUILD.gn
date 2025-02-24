@@ -37,6 +37,7 @@ ohos_source_set("ans_service_sources") {
     cfi_cross_dso = true
     debug = false
   }
+  branch_protector_ret = "pac_ret"
 
   cflags = [
     "-fno-math-errno",
@@ -51,6 +52,7 @@ ohos_source_set("ans_service_sources") {
 
   include_dirs = [
     "${services_path}/ans/include",
+    "${services_path}/ans/include/disturb_manager",
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/include/utils",
     "${services_path}/ans/include/slot_manager",
@@ -93,6 +95,13 @@ ohos_source_set("ans_service_sources") {
     "src/common/notification_app_privileges.cpp",
     "src/common/notification_config_parse.cpp",
     "src/distributed_device_status.cpp",
+    "src/disturb_manager/add_do_not_disturb_profiles.cpp",
+    "src/disturb_manager/disturb_manager.cpp",
+    "src/disturb_manager/does_support_do_not_disturb_mode.cpp",
+    "src/disturb_manager/get_do_not_disturb_date.cpp",
+    "src/disturb_manager/get_do_not_disturb_profile.cpp",
+    "src/disturb_manager/remove_do_not_disturb_profiles.cpp",
+    "src/disturb_manager/set_do_not_disturb_date.cpp",
     "src/event_report.cpp",
     "src/liveview_all_scenarios_extension_wrapper.cpp",
     "src/notification_dialog.cpp",
@@ -132,6 +141,7 @@ ohos_source_set("ans_service_sources") {
     "${frameworks_module_reminder_path}:reminder_innerkits",
     "../ans:ans.para",
     "../ans:ans.para.dac",
+    "../ans:external.json",
   ]
 
   if (is_double_framework) {
@@ -285,6 +295,7 @@ ohos_shared_library("libans") {
     "${services_path}/ans:ans_service_sources",
     "../ans:ans.para",
     "../ans:ans.para.dac",
+    "../ans:external.json",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/libxml2:libxml2",
   ]
@@ -368,6 +379,13 @@ ohos_prebuilt_etc("ans.para") {
 ohos_prebuilt_etc("ans.para.dac") {
   source = "etc/ans.para.dac"
   relative_install_dir = "param"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_prebuilt_etc("external.json") {
+  source = "etc/external.json"
+  relative_install_dir = "notification_template"
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

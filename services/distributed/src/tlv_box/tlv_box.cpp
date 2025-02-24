@@ -24,6 +24,17 @@ namespace Notification {
 
 namespace {
 constexpr int32_t MAX_BUFFER_LENGTH = 1024 * 4 * 1024;
+constexpr int32_t INT_LENGTH = 32;
+}
+
+uint64_t Htonll(uint64_t value)
+{
+    return ((static_cast<uint64_t>(htonl(value))) << INT_LENGTH) + htonl(value >> INT_LENGTH);
+}
+
+uint64_t Ntohll(uint64_t value)
+{
+    return ((static_cast<uint64_t>(ntohl(value))) << INT_LENGTH) + ntohl(value >> INT_LENGTH);
 }
 
 int32_t TlvItem::GetType() const
@@ -74,14 +85,15 @@ TlvItem::TlvItem(int32_t type, int32_t value) : type_(type)
     Initialize(&newValue, sizeof(int32_t));
 }
 
+TlvItem::TlvItem(int32_t type, int64_t value) : type_(type)
+{
+    uint64_t newValue = Htonll(static_cast<uint64_t>(value));
+    Initialize(&newValue, sizeof(uint64_t));
+}
+
 TlvItem::TlvItem(int32_t type, std::string value) : type_(type)
 {
     Initialize(value.c_str(), value.size() + 1);
-}
-
-TlvItem::TlvItem(int32_t type, std::vector<std::string> value) : type_(type)
-{
-    Initialize(&value, value.size());
 }
 
 TlvItem::TlvItem(int32_t type, const TlvItem& value) : type_(type)
@@ -153,21 +165,21 @@ bool TlvBox::GetStringValue(int32_t type, std::string& value)
     return false;
 }
 
-bool TlvBox::GetVectorValue(int32_t type, std::vector<std::string>& value)
-{
-    auto iter = TlvMap_.find(type);
-    if (iter != TlvMap_.end()) {
-        value = *reinterpret_cast<std::vector<std::string> *>(iter->second->GetValue());
-        return true;
-    }
-    return false;
-}
-
 bool TlvBox::GetInt32Value(int32_t type, int32_t& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
         value = ntohl((*(int32_t*)(iter->second->GetValue())));
+        return true;
+    }
+    return false;
+}
+
+bool TlvBox::GetInt64Value(int32_t type, int64_t& value)
+{
+    auto iter = TlvMap_.find(type);
+    if (iter != TlvMap_.end()) {
+        value = static_cast<int64_t>(Ntohll((*(uint64_t*)(iter->second->GetValue()))));
         return true;
     }
     return false;
@@ -195,6 +207,7 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
     unsigned char* cached = new unsigned char[buffersize];
     errno_t err = memcpy_s(cached, buffersize, buffer, buffersize);
     if (err != EOK) {
+        delete[] cached;
         return false;
     }
 
@@ -208,7 +221,9 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
         offset += length;
     }
 
+    delete[] cached;
     bytesLength_ = buffersize;
+    delete[] cached;
     return true;
 }
 
@@ -257,7 +272,7 @@ bool TlvBox::Serialize(bool addCheck)
         uint32_t calCrc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)byteBuffer_, offset);
         uint32_t calValue = htonl(calCrc);
         (void)memcpy_s(byteBuffer_ + offset, sizeof(uint32_t), &calValue, sizeof(uint32_t));
-        ANS_LOGI("Box Serialize crc32 %{public}lu %{public}u.", offset + sizeof(uint32_t), calCrc);
+        ANS_LOGI("Box Serialize crc32 %{public}u %{public}u.", offset + sizeof(uint32_t), calCrc);
     } else {
         ANS_LOGI("Box Serialize crc32 %{public}d.", offset);
     }
@@ -272,13 +287,14 @@ bool TlvBox::SetMessageType(int32_t messageType)
 bool TlvBox::CheckMessageCRC(const unsigned char*data, uint32_t dataLen)
 {
     uint32_t calcSize = sizeof(uint32_t);
-    if (dataLen <= calcSize) {
+    if (dataLen <= calcSize || dataLen > MAX_BUFFER_LENGTH) {
+        ANS_LOGW("Box check length failed %{public}u.", dataLen);
         return false;
     }
     uint32_t recv = ntohl((*(uint32_t*)(data + dataLen - calcSize)));
     uint32_t calc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)data, dataLen - calcSize);
     if (calc != recv) {
-        ANS_LOGW("Box check crc32 failed %{public}d %{public}d.", recv, calc);
+        ANS_LOGW("Box check crc32 failed %{public}u %{public}u.", recv, calc);
         return false;
     }
     return true;

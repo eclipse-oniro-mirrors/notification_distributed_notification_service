@@ -116,7 +116,7 @@ bool NotificationCapsule::ToJson(nlohmann::json &jsonObject) const
         }
         capsuleBtnArr.emplace_back(capsuleBtnObj);
     }
-    jsonObject["capsuleButton"] = capsuleBtnArr;
+    jsonObject["capsuleButtons"] = capsuleBtnArr;
 
     return true;
 }
@@ -156,9 +156,9 @@ NotificationCapsule *NotificationCapsule::FromJson(const nlohmann::json &jsonObj
         capsule->time_ = jsonObject.at("time").get<int32_t>();
     }
 
-    if (jsonObject.find("capsuleButton") != jsonEnd && jsonObject.at("capsuleButton").is_array()) {
+    if (jsonObject.find("capsuleButtons") != jsonEnd && jsonObject.at("capsuleButtons").is_array()) {
         std::vector<NotificationIconButton> cardButtons;
-        for (auto &item : jsonObject.at("capsuleButton").items()) {
+        for (auto &item : jsonObject.at("capsuleButtons").items()) {
             nlohmann::json cardBtnObject = item.value();
             auto pButton = NotificationJsonConverter::ConvertFromJson<NotificationIconButton>(cardBtnObject);
             if (pButton != nullptr) {
@@ -239,10 +239,10 @@ bool NotificationCapsule::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    auto vsize = parcel.ReadInt32();
+    auto vsize = static_cast<uint32_t>(parcel.ReadInt32());
     vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
     capsuleButton_.clear();
-    for (int i = 0; i < vsize; ++i) {
+    for (uint32_t i = 0; i < vsize; ++i) {
         auto btn = parcel.ReadParcelable<NotificationIconButton>();
         if (btn == nullptr) {
             ANS_LOGE("Failed to read card button");

@@ -33,13 +33,16 @@ public:
     void RefreshDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
     void initClient(const std::string &deviceId, uint16_t deviceType);
-    int32_t GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType);
+    int32_t GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
+        int32_t& socketId);
     int32_t SendMessage(const void* data, int32_t length, TransDataType dataType,
         const std::string &deviceId, uint16_t deviceType);
+    void ReleaseClient();
 private:
     DistributedClient() = default;
     ~DistributedClient() = default;
 
+    std::string ShutdownReasonToString(ShutdownReason reason);
     std::mutex clientLock_;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, int32_t> socketsId_;

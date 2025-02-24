@@ -69,32 +69,37 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
+  @State buttonWidthAllow: number = 0;
+  @State buttonWidthDeny: number = 0;
+  @State buttonWidth: string | number = 'auto';
 
   build() {
     Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {   
       Column() {
-        Image(permission.icon)
-        .width('92px')
-        .height('92px')
-        .margin({
-            top: '2%'
-        })
-
         Scroll() {
           Column() {
+            Row() {
+              Image(permission.icon)
+                .width('92px')
+                .height('92px')
+                .margin({
+                  top: 8
+                })
+            }
+
             Row() {
               Flex({ justifyContent: FlexAlign.Center }) {
                 Text() {
                   Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
                 }
-                .fontSize('38px')
+                .fontSize('36px')
                 .fontColor('#FFFFFF')
                 .fontWeight(500)
-                .lineHeight('45px')
+                .lineHeight('Auto')
                 .margin({
-                  top: '4.1%',
-                  left: '11.2%',
-                  right: '11.2%'
+                  top: 12,
+                  left: 26,
+                  right: 26
                 })
                 .textAlign(TextAlign.Center)
               }
@@ -102,38 +107,67 @@ struct PermissionDialog {
 
             Row() {
               Flex({ justifyContent: FlexAlign.Center }) {
-                Button($r('app.string.ALLOW'))
+                Button() {
+                  Text($r('app.string.ALLOW'))
+                  .fontColor('#FFFFFF')
+                  .fontWeight(500)
+                  .minFontSize('27px')
+                  .maxFontSize('30px')
+                  .maxLines(1)
+                  .textOverflow({overflow: TextOverflow.MARQUEE})
+                }
                 .onClick(async (): Promise<void> => {
                   await this.enableNotification(true);
                 })
-                .backgroundColor('#1F71FF')
-                .width('232px')
+                .backgroundColor('#FF1F71FF')
+                .width(this.buttonWidth)
                 .height('80px')  
-                .fontColor('#FFFFFF')
-                .fontSize('30px')
-                .fontWeight(500)
+                .constraintSize({ 
+                    minWidth: '232px',
+                    maxWidth: '362px'
+                })
+                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                  console.info(`onSizeChange-allow, newValue=${newValue?.width}.`)
+                  this.buttonWidthAllow = newValue?.width as number;
+                  this.updateButtonWidth();
+                })
               }
-              .margin({top:'4.1%'})
+              .margin({top:16})
             }
 
             Row() {
               Flex({ justifyContent: FlexAlign.Center }) {
-                Button($r('app.string.BAN'))
+                Button() {
+                  Text($r('app.string.BAN'))
+                  .fontColor('#5EA1FF')
+                  .fontWeight(500)
+                  .minFontSize('27px')
+                  .maxFontSize('30px')
+                  .maxLines(1)
+                  .textOverflow({overflow: TextOverflow.MARQUEE})
+                }
                 .onClick(async (): Promise<void> => {
                   await this.enableNotification(false);
                 })
-                .backgroundColor('#255EA1FF')
-                .width('232px')
+                .backgroundColor('#405ea1ff')
+                .width(this.buttonWidth)
                 .height('80px')  
-                .fontColor('#5EA1FF')
-                .fontSize('30px')
-                .fontWeight(500)
+                .constraintSize({ 
+                    minWidth: '232px',
+                    maxWidth: '362px'
+                })
+                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                  console.info(TAG, `onSizeChange-deny, newValue=${newValue?.width}.`)
+                  this.buttonWidthDeny = newValue?.width as number;
+                  this.updateButtonWidth();
+                })
               }
-              .margin({top:'4.1%'})
+              .margin({
+                top:12,
+                bottom:36})
             }
           }
-        } 
-        .scrollable(ScrollDirection.Vertical)
+        }
         .scrollBar(BarState.Off)
       } 
     }
@@ -145,15 +179,7 @@ struct PermissionDialog {
     })
     .width('100%')
     .height('100%')
-    .backgroundColor('#35000000')
-    .backgroundEffect({
-      radius: 20,
-      saturation: 50,
-      adaptiveColor: AdaptiveColor.AVERAGE,
-      blurOptions: {
-        grayscale: [35, 35]
-      }
-    })
+    .backgroundColor('#ff000000')
     
   }
 
@@ -251,6 +277,17 @@ struct PermissionDialog {
     } finally {
       await this.dialog?.subWindow?.destroyWindow();
       this.session?.terminateSelf();
+    }
+  }
+
+  async updateButtonWidth(): Promise<void> {
+    if(this.buttonWidthAllow > 0 && this.buttonWidthDeny > 0) {
+      console.info(TAG, 'updateButtonWidth');
+      if (this.buttonWidthAllow > this.buttonWidthDeny) {
+        this.buttonWidth = this.buttonWidthAllow;
+      } else {
+        this.buttonWidth = this.buttonWidthDeny;
+      }
     }
   }
 }

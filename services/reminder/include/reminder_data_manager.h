@@ -230,7 +230,12 @@ public:
     /**
      * @brief Load reminder event.
      */
-    void OnLoadReminderEvent(const EventFwk::Want& want);
+    void OnLoadReminderEvent();
+
+    /**
+     * @brief Load reminder event for ffrt.
+     */
+    void OnLoadReminderInFfrt();
 
     /**
      * @brief datashare notify, share reminder insert or delete.
@@ -362,14 +367,6 @@ private:
      * @param uri Database address.
      */
     void GenDstBundleName(std::string &dstBundleName, const std::string &uri) const;
-
-    /**
-     * @brief get custom ring uri.
-     *
-     * @param reminder Indicates the reminder.
-     * @return Returns the uri of ring tone.
-     */
-    std::string GetCustomRingUri(const sptr<ReminderRequest> &reminder);
 
     /**
      * @brief Cancels all the reminders of the target bundle or user.

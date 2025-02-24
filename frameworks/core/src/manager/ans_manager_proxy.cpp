@@ -367,10 +367,6 @@ ErrCode AnsManagerProxy::GetAllActiveNotifications(std::vector<sptr<Notification
     }
 
     MessageParcel reply;
-    if (!reply.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
-        ANS_LOGE("[GetAllActiveNotifications] fail:: set max capacity");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_ACTIVE_NOTIFICATIONS, option, data, reply);
     if (result != ERR_OK) {
@@ -1009,6 +1005,100 @@ ErrCode AnsManagerProxy::DisableNotificationFeature(const sptr<NotificationDisab
 
     if (!reply.ReadInt32(result)) {
         ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::DistributeOperation(const std::string& hashCode)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(hashCode)) {
+        ANS_LOGE("write hashCode failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::DISTRIBUTE_OPERATION, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
+ErrCode AnsManagerProxy::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(hashCode)) {
+        ANS_LOGE("write hashCode failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result =
+        InnerTransact(NotificationInterfaceCode::GET_NOTIFICATION_REQUEST_BY_HASHCODE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return result;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    notificationRequest = reply.ReadParcelable<NotificationRequest>();
+    if (notificationRequest == nullptr) {
+        ANS_LOGE("read request is nullptr.");
+    }
+    return result;
+}
+
+ErrCode AnsManagerProxy::SetHashCodeRule(const uint32_t type)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(type)) {
+        ANS_LOGE("write type failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result =
+        InnerTransact(NotificationInterfaceCode::Set_HASH_CODE_RULE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", result);
+        return result;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("read result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

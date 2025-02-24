@@ -108,6 +108,13 @@ public:
     virtual void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) = 0;
 
     virtual void OnApplicationInfoNeedChanged(const std::string& bundleName) = 0;
+
+    /**
+     * @brief The callback function on the response.
+     *
+     * @param notification Indicates the received Notification object.
+     */
+    virtual ErrCode OnResponse(const sptr<Notification> &notification) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

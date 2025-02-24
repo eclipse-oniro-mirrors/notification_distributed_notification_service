@@ -16,6 +16,8 @@
 
 #include <dlfcn.h>
 #include <cstdint>
+#include <unordered_set>
+#include <utility>
 
 #define SYMBOL_EXPORT __attribute__ ((visibility("default")))
 namespace OHOS {
@@ -25,10 +27,9 @@ extern "C" {
 #endif
 
 SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    int32_t titleLength, int32_t contentLength, std::function<bool(std::string, int32_t, bool)> callback)
+    DistributedDeviceConfig config)
 {
-    return DistributedManager::GetInstance().InitLocalDevice(deviceId, deviceType,
-        titleLength, contentLength, callback);
+    return DistributedManager::GetInstance().InitLocalDevice(deviceId, deviceType, config);
 }
 
 SYMBOL_EXPORT void AddDevice(const std::string &deviceId, uint16_t deviceType,
@@ -51,6 +52,18 @@ SYMBOL_EXPORT void RefreshDevice(const std::string &deviceId, uint16_t deviceTyp
 SYMBOL_EXPORT void ReleaseLocalDevice()
 {
     DistributedManager::GetInstance().ReleaseLocalDevice();
+}
+
+SYMBOL_EXPORT void InitHACallBack(
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
+{
+    DistributedManager::GetInstance().InitHACallBack(callback);
+}
+
+SYMBOL_EXPORT void InitSendReportCallBack(
+    std::function<void(int32_t, int32_t, std::string)> callback)
+{
+    DistributedManager::GetInstance().InitSendReportCallBack(callback);
 }
 
 #ifdef __cplusplus

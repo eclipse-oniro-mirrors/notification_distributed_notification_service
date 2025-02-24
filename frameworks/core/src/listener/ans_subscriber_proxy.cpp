@@ -248,6 +248,9 @@ void AnsSubscriberProxy::OnCanceledList(const std::vector<sptr<Notification>> &n
         notification->GetNotificationRequestPoint()->SetLittleIcon(nullptr);
         notification->GetNotificationRequestPoint()->SetOverlayIcon(nullptr);
     }
+    if (!data.SetMaxCapacity(NotificationConstant::NOTIFICATION_MAX_LIVE_VIEW_SIZE)) {
+        ANS_LOGE("[OnConsumedList] fail: set max capacity failed.");
+    }
     if (!WriteParcelableVector(notifications, data)) {
         ANS_LOGE("Write notifications failed");
         return;
@@ -419,6 +422,33 @@ void AnsSubscriberProxy::OnApplicationInfoNeedChanged(const std::string& bundleN
         ANS_LOGE("Transact error code is: %{public}d.", result);
         return;
     }
+}
+
+ErrCode AnsSubscriberProxy::OnResponse(const sptr<Notification> &notification)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(notification)) {
+        ANS_LOGE("Write notification failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::ON_RESPONSE_LISTENER, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact error code is: %{public}d.", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("AnsSubscriberProxy onresponse fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -18,6 +18,10 @@
 
 #include "distributed_device_data.h"
 
+#include <unordered_set>
+#include <utility>
+#include "distributed_data_define.h"
+
 namespace OHOS {
 namespace Notification {
 class DistributedManager {
@@ -26,14 +30,14 @@ public:
     ~DistributedManager() = default;
     static DistributedManager& GetInstance();
     void ReleaseLocalDevice();
-    int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-        int32_t titleLength, int32_t contentLength,
-        std::function<bool(std::string, int32_t, bool)> callback);
+    int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType, DistributedDeviceConfig config);
     void AddDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
     void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);
     void RefreshDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
+    void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
+    void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
 };
 }
 }

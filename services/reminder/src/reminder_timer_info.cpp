@@ -16,8 +16,7 @@
 #include "reminder_timer_info.h"
 
 #include "ans_log_wrapper.h"
-#include "common_event_manager.h"
-#include "reminder_request.h"
+#include "reminder_data_manager.h"
 
 using namespace OHOS::EventFwk;
 using namespace OHOS::HiviewDFX;
@@ -45,7 +44,21 @@ void ReminderTimerInfo::SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantA
 
 void ReminderTimerInfo::OnTrigger()
 {
-    ANSR_LOGI("Timing is arrivelled.");
+    ANSR_LOGI("Timing is arrivelled[%{public}d].", static_cast<int32_t>(reminderTimerType_));
+    switch (reminderTimerType_) {
+        case ReminderTimerType::REMINDER_TIMER_LOAD: {
+            auto manager = ReminderDataManager::GetInstance();
+            if (manager == nullptr) {
+                return;
+            }
+            manager->OnLoadReminderEvent();
+            break;
+        }
+        case ReminderTimerType::REMINDER_TIMER_UNKNOWN:
+            break;
+        default:
+            break;
+    }
 }
 }
 }

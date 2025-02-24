@@ -19,6 +19,7 @@
 #include "distributed_service.h"
 #include "notification_config_parse.h"
 #include "distributed_preferences.h"
+#include "distributed_local_config.h"
 
 namespace OHOS {
 namespace Notification {
@@ -30,34 +31,35 @@ DistribuedSubscriber::~DistribuedSubscriber()
 void DistribuedSubscriber::OnDied()
 {
     ANS_LOGW("Subscriber on died %{public}d %{public}s %{public}d %{public}s.",
-        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
-        localDevice_.deviceId_.c_str());
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
 }
 
 void DistribuedSubscriber::OnConnected()
 {
     ANS_LOGI("Subscriber on connected %{public}d %{public}s %{public}d %{public}s.",
-        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
-        localDevice_.deviceId_.c_str());
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
 }
 
 void DistribuedSubscriber::OnDisconnected()
 {
     ANS_LOGI("Subscriber on disconnected %{public}d %{public}s %{public}d %{public}s.",
-        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
-        localDevice_.deviceId_.c_str());
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
 }
 
 void DistribuedSubscriber::OnCanceled(const std::shared_ptr<Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
     ANS_LOGI("Subscriber on canceled %{public}d %{public}s %{public}d %{public}s.",
-        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
-        localDevice_.deviceId_.c_str());
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
     if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE) {
         ANS_LOGD("is cross device deletion");
         return;
     }
+
     if (CheckNeedCollaboration(request)) {
         DistributedService::GetInstance().OnCanceled(request, peerDevice_);
     }
@@ -67,11 +69,11 @@ void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &reque
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
     ANS_LOGI("Subscriber on consumed %{public}d %{public}s %{public}d %{public}s.",
-        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
-        localDevice_.deviceId_.c_str());
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         ANS_LOGI("No need consumed notification %{public}d %{public}s.",
-            localDevice_.deviceType_, localDevice_.deviceId_.c_str());
+            localDevice_.deviceType_, StringAnonymous(localDevice_.deviceId_).c_str());
         return;
     }
     DistributedService::GetInstance().OnConsumed(request, peerDevice_);
@@ -103,8 +105,8 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
     ANS_LOGI("Subscriber on batch canceled %{public}d %{public}s %{public}d %{public}s.",
-        peerDevice_.deviceType_, peerDevice_.deviceId_.c_str(), localDevice_.deviceType_,
-        localDevice_.deviceId_.c_str());
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
     if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE) {
         ANS_LOGD("is cross device deletion");
         return;
@@ -118,6 +120,14 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     if (!notifications.empty()) {
         DistributedService::GetInstance().OnBatchCanceled(notifications, peerDevice_);
     }
+}
+
+ErrCode DistribuedSubscriber::OnResponse(const std::shared_ptr<Notification> &notification)
+{
+    ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s.",
+        peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str());
+    return DistributedService::GetInstance().OnResponse(notification, peerDevice_);
 }
 
 void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
@@ -137,6 +147,19 @@ void DistribuedSubscriber::SetLocalDevice(DistributedDeviceInfo localDevice)
 void DistribuedSubscriber::SetPeerDevice(DistributedDeviceInfo peerDevice)
 {
     peerDevice_ = peerDevice;
+}
+
+bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notification>& notification)
+{
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("notification or request is nullptr");
+        return false;
+    }
+    if (!CheckCollaborativeRemoveType(notification->GetNotificationRequestPoint()->GetSlotType())) {
+        ANS_LOGE("CheckCollaborativeRemoveType failed");
+        return false;
+    }
+    return true;
 }
 
 bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConstant::SlotType& slotType)
@@ -173,21 +196,9 @@ bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConsta
         default:
             return false;
     }
-    auto collaboratives = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
-    return collaboratives.find(type) != collaboratives.end();
+    auto collaborativeDeleteTypes = DistributedLocalConfig::GetInstance().GetCollaborativeDeleteTypes();
+    return collaborativeDeleteTypes.find(type) != collaborativeDeleteTypes.end();
 }
 
-bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notification>& notification)
-{
-    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-        ANS_LOGE("notification or request is nullptr");
-        return false;
-    }
-    if (!CheckCollaborativeRemoveType(notification->GetNotificationRequestPoint()->GetSlotType())) {
-        ANS_LOGE("CheckCollaborativeRemoveType failed");
-        return false;
-    }
-    return true;
-}
 }
 }

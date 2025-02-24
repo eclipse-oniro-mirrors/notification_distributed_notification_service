@@ -39,6 +39,11 @@ void DistributedServer::ReleaseServer()
         CloseSocket(item.second);
     }
     serverSocket_.clear();
+    std::lock_guard<std::mutex> lock(serverLock_);
+    for (auto& item : peerSockets_) {
+        CloseSocket(item->socketId_);
+    }
+    peerSockets_.clear();
     init.store(false);
 }
 
@@ -50,33 +55,34 @@ void DistributedServer::CheckServer()
 int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t deviceType)
 {
     if (init.load()) {
-        ANS_LOGI("Server has inited %{public}lu.", serverSocket_.size());
+        ANS_LOGI("Server has inited %{public}u.", serverSocket_.size());
         return 0;
     }
+    int32_t socketId = 0;
     localDevice_.deviceId_ = deviceId;
     localDevice_.deviceType_ = deviceType;
-    int32_t socketId = ServiceListen(ANS_SOCKET_CMD, ANS_SOCKET_PKG, TransDataType::DATA_TYPE_MESSAGE);
-    if (socketId == -1) {
-        return -1;
+    int32_t ret = ServiceListen(ANS_SOCKET_CMD, ANS_SOCKET_PKG, TransDataType::DATA_TYPE_MESSAGE, socketId);
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     std::string key = std::to_string(TransDataType::DATA_TYPE_MESSAGE) + "_" + std::to_string(deviceType);
-    serverSocket_.insert(std::make_pair(key, socketId));
+    serverSocket_[key] = socketId;
     // Not phone, create msg socket for receive notification
     if (deviceType != DmDeviceType::DEVICE_TYPE_PHONE) {
-        socketId = ServiceListen(ANS_SOCKET_MSG, ANS_SOCKET_PKG, TransDataType::DATA_TYPE_BYTES);
-        if (socketId == -1) {
-            return -1;
+        ret = ServiceListen(ANS_SOCKET_MSG, ANS_SOCKET_PKG, TransDataType::DATA_TYPE_BYTES, socketId);
+        if (ret != ERR_OK) {
+            return ret;
         }
         std::string key = std::to_string(TransDataType::DATA_TYPE_BYTES) + "_" + std::to_string(deviceType);
-        serverSocket_.insert(std::make_pair(key, socketId));
+        serverSocket_[key] = socketId;
     }
     for (auto& item : serverSocket_) {
-        ANS_LOGI("InitServer %{public}s %{public}s %{public}d", deviceId.c_str(),
+        ANS_LOGI("InitServer %{public}s %{public}s %{public}d", StringAnonymous(deviceId).c_str(),
             item.first.c_str(), item.second);
     }
     init.store(true);
-    return 0;
+    return ERR_OK;
 }
 
 void DistributedServer::OnBind(int32_t socket, PeerSocketInfo info)

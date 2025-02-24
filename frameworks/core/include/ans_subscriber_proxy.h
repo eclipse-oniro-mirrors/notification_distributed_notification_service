@@ -99,6 +99,14 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
+
+    /**
+     * @brief The callback function on the response.
+     *
+     * @param notification Indicates the received Notification object.
+     */
+    ErrCode OnResponse(const sptr<Notification> &notification) override;
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,65 +15,44 @@
 
 #include "mock_accesstoken_kit.h"
 
-using namespace OHOS::Security::AccessToken;
-namespace OHOS {
-namespace Notification {
+#include "tokenid_kit.h"
+#include "accesstoken_kit.h"
+
+namespace OHOS::Notification {
 namespace {
-ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_INVALID;
-DlpType g_mockDlpType = DlpType::DLP_COMMON;
-ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
-bool g_isSystemApp = true;
+int32_t g_mockTokenTypeFlag = static_cast<int32_t>(Security::AccessToken::ATokenTypeEnum::TOKEN_INVALID);
 bool g_mockVerfyPermisson = true;
+bool g_isSystemApp = true;
 }
 
-void MockAccesstokenKit::MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
+void MockAccesstokenKit::MockGetTokenTypeFlag(const int32_t flag)
 {
-    g_mockGetTokenTypeFlagRet = mockRet;
-}
-void MockAccesstokenKit::MockDlpType(DlpType mockRet)
-{
-    g_mockDlpType = mockRet;
-}
-void MockAccesstokenKit::MockApl(ATokenAplEnum mockRet)
-{
-    g_mockApl = mockRet;
+    g_mockTokenTypeFlag = flag;
 }
 
-void MockAccesstokenKit::MockIsVerfyPermisson(bool isVerify)
+void MockAccesstokenKit::MockIsVerifyPermisson(const bool isVerify)
 {
     g_mockVerfyPermisson = isVerify;
 }
-void MockAccesstokenKit::MockIsSystemApp(bool isSystemApp)
+void MockAccesstokenKit::MockIsSystemApp(const bool isSystemApp)
 {
     g_isSystemApp = isSystemApp;
 }
 }
-}
-namespace OHOS {
-namespace Security {
-namespace AccessToken {
+
+namespace OHOS::Security::AccessToken {
 int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& permissionName)
 {
-    if (!Notification::g_mockVerfyPermisson) {
-        return PERMISSION_DENIED;
-    }
-
-    if (tokenID == Notification::NON_NATIVE_TOKEN) {
-        return PERMISSION_DENIED;
-    }
-    return PERMISSION_GRANTED;
+    return Notification::g_mockVerfyPermisson ? PERMISSION_GRANTED : PERMISSION_DENIED;
 }
 
 ATokenTypeEnum AccessTokenKit::GetTokenTypeFlag(AccessTokenID tokenID)
 {
-    return Notification::g_mockGetTokenTypeFlagRet;
+    return static_cast<ATokenTypeEnum>(Notification::g_mockTokenTypeFlag);
 }
 
-int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo& info)
+bool TokenIdKit::IsSystemAppByFullTokenID(uint64_t tokenId)
 {
-    info.dlpType = Notification::g_mockDlpType;
-    return 0;
+    return Notification::g_isSystemApp;
 }
-} // namespace AccessToken
-} // namespace Security
-} // namespace OHOS
+} // namespace OHOS::Security::AccessToken

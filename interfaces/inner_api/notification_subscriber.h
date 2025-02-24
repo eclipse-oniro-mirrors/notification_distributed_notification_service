@@ -109,6 +109,16 @@ public:
     virtual void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) = 0;
 
+    /**
+     * @brief The callback function on the response.
+     *
+     * @param notification Indicates the received Notification object.
+     */
+    virtual ErrCode OnResponse(const std::shared_ptr<Notification> &notification)
+    {
+        return 0;
+    }
+
     virtual bool HasOnBatchCancelCallback()
     {
         return false;
@@ -175,6 +185,8 @@ private:
         void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
         void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
+
+        ErrCode OnResponse(const sptr<Notification> &notification) override;
 
         sptr<AnsManagerInterface> GetAnsManagerProxy();
 

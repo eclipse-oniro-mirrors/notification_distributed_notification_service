@@ -89,7 +89,6 @@ namespace OHOS {
         manager->CancelAllReminders(userId);
         manager->CheckUpdateConditions(reminder, Notification::ReminderRequest::ActionButtonType::INVALID,
             reminder->GetActionButtons());
-        manager->GetCustomRingUri(reminder);
         manager->CancelRemindersImplLocked(bundleName, userId, uid, value);
         manager->CloseRemindersByGroupId(reminderId, bundleName, bundleName);
         manager->CancelNotification(reminder);

@@ -18,6 +18,7 @@
 #include "system_event_observer.h"
 #include "common_event_manager.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
+#include "distributed_device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -42,11 +43,12 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
 
     service_ = AdvancedNotificationService::GetInstance();
+    service_->CreateDialogManager();
+    service_->InitPublishProcess();
+    
     if (!Publish(service_)) {
         return;
     }
-    service_->CreateDialogManager();
-    service_->InitPublishProcess();
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
@@ -62,6 +64,7 @@ void AdvancedNotificationServiceAbility::OnStart()
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
 #endif
+    AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
     LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
 }
 
@@ -104,6 +107,9 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
             return;
         }
         notificationService->ResetDistributedEnabled();
+    } else if (systemAbilityId == DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) {
+        ANS_LOGW("DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID");
+        DistributedDeviceManager::GetInstance().RegisterDms(true);
     }
 }
 

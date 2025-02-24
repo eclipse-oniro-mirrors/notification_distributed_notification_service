@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_MOCK_ACCESSTOKEN_KIT_H
-#define BASE_NOTIFICATION_MOCK_ACCESSTOKEN_KIT_H
+#ifndef BASE_NOTIFICATION_REMINDER_MOCK_ACCESSTOKEN_KIT_H
+#define BASE_NOTIFICATION_REMINDER_MOCK_ACCESSTOKEN_KIT_H
 
-#include "accesstoken_kit.h"
-#include "ans_log_wrapper.h"
-#include "reminder_ut_constant.h"
-#include "ipc_skeleton.h"
+#include <cstdint>
 
-namespace OHOS {
-namespace Notification {
+namespace OHOS::Notification {
 class MockAccesstokenKit {
 public:
-    static void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
-    static void MockDlpType(Security::AccessToken::DlpType mockRet);
-    static void MockApl(Security::AccessToken::ATokenAplEnum mockRet);
-    static void MockIsVerfyPermisson(bool isVerify);
-    static void MockIsSystemApp(bool isSystemApp);
+    static void MockGetTokenTypeFlag(const int32_t flag);
+    static void MockIsVerifyPermisson(const bool isVerify);
+    static void MockIsSystemApp(const bool isSystemApp);
 };
-}  // namespace AppExecFwk
-}  // namespace OHOS
+}  // namespace OHOS::Notification
 
-#endif  // BASE_NOTIFICATION_MOCK_ACCESSTOKEN_KIT_H
+#endif  // BASE_NOTIFICATION_REMINDER_MOCK_ACCESSTOKEN_KIT_H

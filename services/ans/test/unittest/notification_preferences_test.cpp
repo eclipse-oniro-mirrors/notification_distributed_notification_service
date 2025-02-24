@@ -1534,5 +1534,150 @@ HWTEST_F(NotificationPreferencesTest, GetBundleSoundPermission_0100, TestSize.Le
     auto res = NotificationPreferences::GetInstance()->GetBundleSoundPermission(allPackage, bundleNames);
     ASSERT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0100
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    auto res = NotificationPreferences::GetInstance()->SetDisableNotificationInfo(notificationDisable);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0200
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    auto res = NotificationPreferences::GetInstance()->SetDisableNotificationInfo(nullptr);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0100
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    NotificationDisable notificationDisable;
+    auto res = notificationPreferences.GetDisableNotificationInfo(notificationDisable);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0200
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationPreferences.SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    auto res = notificationPreferences.GetDisableNotificationInfo(disable);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: SetSubscriberExistFlag_0100
+ * @tc.desc: test SetSubscriberExistFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetSubscriberExistFlag_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetSubscriberExistFlag_0100
+ * @tc.desc: test GetSubscriberExistFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetSubscriberExistFlag_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    auto ret = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
+    ASSERT_EQ(ret, ERR_OK);
+    bool existFlag = false;
+    ret = notificationPreferences.GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, existFlag);
+    ASSERT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(existFlag);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledForBundle_0100
+ * @tc.desc: test SetDistributedEnabledForBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0100, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
+    notificationPreferences.isCachedMirrorNotificationEnabledStatus_ = true;
+    notificationPreferences.mirrorNotificationEnabledStatus_.clear();
+    notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
+    EXPECT_EQ(notificationPreferences.mirrorNotificationEnabledStatus_.size(), 0);
+    notificationPreferences.mirrorNotificationEnabledStatus_.push_back("testType");
+    notificationPreferences.preferncesDB_ = nullptr;
+    notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
+    EXPECT_EQ(notificationPreferences.mirrorNotificationEnabledStatus_.size(), 1);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledForBundle_0200
+ * @tc.desc: test SetDistributedEnabledForBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0200, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    notificationPreferences.isCachedMirrorNotificationEnabledStatus_ = true;
+    std::string deviceType = "testType";
+    notificationPreferences.mirrorNotificationEnabledStatus_.push_back(deviceType);
+    notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
+    bool isDistributedEnabled = false;
+    auto ret = notificationPreferences.preferncesDB_->GetDistributedEnabledForBundle(
+        deviceType, bundleInfo, isDistributedEnabled);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(isDistributedEnabled, false);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledForBundle_0300
+ * @tc.desc: test SetDistributedEnabledForBundle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0300, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("testBundleName");
+    bundleInfo.SetBundleUid(1000);
+    notificationPreferences.isCachedMirrorNotificationEnabledStatus_ = true;
+    std::string deviceType = "testType";
+    notificationPreferences.mirrorNotificationEnabledStatus_.push_back(deviceType);
+    notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
+    bool isDistributedEnabled = false;
+    auto ret = notificationPreferences.preferncesDB_->GetDistributedEnabledForBundle(
+        deviceType, bundleInfo, isDistributedEnabled);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(isDistributedEnabled, true);
+}
 }  // namespace Notification
 }  // namespace OHOS

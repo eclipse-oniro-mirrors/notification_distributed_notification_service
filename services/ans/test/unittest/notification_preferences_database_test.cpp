@@ -1081,5 +1081,139 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfile_0100, TestS
     auto infos = new (std::nothrow) NotificationPreferencesInfo();
     ASSERT_EQ(res, false);
 }
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0100
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    EXPECT_FALSE(notificationPreferencesDatabase->SetDisableNotificationInfo(nullptr));
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0200
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    EXPECT_FALSE(notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable));
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0300
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0300, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    EXPECT_TRUE(notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable));
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0100
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    EXPECT_TRUE(notificationPreferencesDatabase->GetDisableNotificationInfo(disable));
+}
+
+/**
+ * @tc.name: IsDistributedEnabledEmptyForBundle_0100
+ * @tc.desc: test IsDistributedEnabledEmptyForBundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsDistributedEnabledEmptyForBundle_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("testBundleName");
+    bundleInfo.SetBundleUid(1000);
+    std::string deviceType = "testType";
+    bool ret = preferncesDB_->IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetSmartReminderEnableFromCCM_0100
+ * @tc.desc: test GetSmartReminderEnableFromCCM
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetSmartReminderEnableFromCCM_0100, TestSize.Level1)
+{
+    std::string deviceType = "testType";
+    bool enabled = false;
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_FALSE(enabled);
+    preferncesDB_->isCachedSmartReminderEnableList_ = true;
+    preferncesDB_->smartReminderEnableList_.clear();
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_FALSE(enabled);
+    preferncesDB_->smartReminderEnableList_.push_back("test");
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_FALSE(enabled);
+    preferncesDB_->smartReminderEnableList_.push_back(deviceType);
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_TRUE(enabled);
+}
+
+/**
+ * @tc.name: GenerateSubscriberExistFlagKey_0100
+ * @tc.desc: test GenerateSubscriberExistFlagKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GenerateSubscriberExistFlagKey_0100, TestSize.Level1)
+{
+    std::string deviceType = "testType";
+    int32_t userId = 0;
+    auto ret = preferncesDB_->GenerateSubscriberExistFlagKey(deviceType, userId);
+    EXPECT_FALSE(ret.empty());
+}
+
+/**
+ * @tc.name: SetSubscriberExistFlag_0100
+ * @tc.desc: test SetSubscriberExistFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0100, TestSize.Level1)
+{
+    std::string deviceType = "testType";
+    bool enabled = false;
+    auto ret = preferncesDB_->SetSubscriberExistFlag(deviceType, enabled);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetSubscriberExistFlag_0100
+ * @tc.desc: test GetSubscriberExistFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetSubscriberExistFlag_0100, TestSize.Level1)
+{
+    std::string deviceType = "testType";
+    bool enabled = false;
+    auto ret = preferncesDB_->GetSubscriberExistFlag(deviceType, enabled);
+    EXPECT_TRUE(ret);
+}
 }  // namespace Notification
 }  // namespace OHOS

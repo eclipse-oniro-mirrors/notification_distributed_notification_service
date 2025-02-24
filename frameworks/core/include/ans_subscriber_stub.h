@@ -110,6 +110,14 @@ public:
     void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
+
+    /**
+     * @brief The callback function on the response.
+     *
+     * @param notification Indicates the received Notification object.
+     */
+    ErrCode OnResponse(const sptr<Notification> &notification) override;
+
 private:
 
     ErrCode HandleOnConnected(MessageParcel &data, MessageParcel &reply);
@@ -124,6 +132,8 @@ private:
     ErrCode HandleOnBadgeChanged(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnBadgeEnabledChanged(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleOnApplicationInfoNeedChanged(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleOnResponse(MessageParcel &data, MessageParcel &reply);
+
     template<typename T>
     bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data);
 };

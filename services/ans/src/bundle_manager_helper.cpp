@@ -22,6 +22,7 @@
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {

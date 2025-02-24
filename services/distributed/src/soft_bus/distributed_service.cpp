@@ -23,13 +23,15 @@
 #include "os_account_manager.h"
 #include "distributed_server.h"
 #include "distributed_device_data.h"
-#include "distributed_timer_service.h"
 
 namespace OHOS {
 namespace Notification {
 
 namespace {
 static const int32_t MAX_CONNECTED_TYR = 5;
+static const uint64_t SYNC_TASK_DELAY = 7 * 1000 * 1000;
+static const int32_t MAX_DATA_LENGTH = 7;
+static const int32_t START_ANONYMOUS_INDEX = 5;
 }
 
 DistributedService& DistributedService::GetInstance()
@@ -48,8 +50,7 @@ DistributedService::DistributedService()
     ANS_LOGI("Distributed service init successfully.");
 }
 
-int32_t DistributedService::InitService(const std::string &deviceId, uint16_t deviceType,
-    std::function<bool(std::string, int32_t, bool)> callback)
+int32_t DistributedService::InitService(const std::string &deviceId, uint16_t deviceType)
 {
     int32_t userId;
     localDevice_.deviceId_ = deviceId;
@@ -62,11 +63,6 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
     if (OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId) == 0) {
         userId_ = userId;
     }
-    if (callback == nullptr) {
-        ANS_LOGI("Distributed service callback is null.");
-        return -1;
-    }
-    callBack_ = callback;
     OberverService::GetInstance().Init(deviceType);
     return 0;
 }
@@ -79,6 +75,7 @@ void DistributedService::DestoryService()
     }
     ffrt::task_handle handler = serviceQueue_->submit_h([&]() {
         ANS_LOGI("Start destory service.");
+        DistributedClient::GetInstance().ReleaseClient();
         DistributedServer::GetInstance().ReleaseServer();
         OberverService::GetInstance().Destory();
         for (auto& subscriberInfo : subscriberMap_) {
@@ -108,9 +105,8 @@ void DistributedService::SyncConnectedDevice(DistributedDeviceInfo device)
             ANS_LOGE("Check handler is null.");
             return;
         }
-        serviceQueue_->submit_h([&, device]() {
-            SyncConnectedDevice(device);
-        });
+        serviceQueue_->submit_h([&, device]() { SyncConnectedDevice(device); },
+            ffrt::task_attr().name("sync").delay(SYNC_TASK_DELAY));
     } else {
         iter->second.connectedTry_ = 0;
     }
@@ -124,42 +120,12 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
     }
     serviceQueue_->submit_h([&, device]() {
         ANS_LOGI("Dans AddDevice %{public}s %{public}d %{public}s %{public}d.",
-            device.deviceId_.c_str(), device.deviceType_, localDevice_.deviceId_.c_str(),
-            localDevice_.deviceType_);
+            StringAnonymous(device.deviceId_).c_str(), device.deviceType_,
+            StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
-        peerDevice_.insert(std::make_pair(deviceItem.deviceId_, deviceItem));
-        DistributedTimerService::GetInstance().CancelTimer(localDevice_.deviceId_);
-        if (callBack_ == nullptr) {
-            ANS_LOGW("Dans status callback is null.");
-        } else {
-            callBack_(device.deviceId_, DeviceState::STATE_SYNC, false);
-        }
-        DistributedTimerService::GetInstance().StartTimer(device.deviceId_,
-            GetCurrentTime() + TEN_SECEND);
+        peerDevice_[deviceItem.deviceId_] = deviceItem;
         SyncConnectedDevice(device);
-    });
-}
-
-void DistributedService::ReportDeviceStatus(std::string deviceId)
-{
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    serviceQueue_->submit_h([&, deviceId]() {
-        ANS_LOGI("Report device status %{public}s.", deviceId.c_str());
-        auto iter = peerDevice_.find(deviceId);
-        if (iter != peerDevice_.end() &&
-            iter->second.peerState_ == DeviceState::STATE_ONLINE) {
-            return;
-        }
-        if (callBack_ == nullptr) {
-            ANS_LOGE("Report device status callback is null.");
-            return;
-        }
-        callBack_(deviceId, 0, true);
-        return;
     });
 }
 
@@ -195,13 +161,16 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
                 HandleMatchSync(box);
                 break;
             case NotificationEventType::REMOVE_NOTIFICATION:
-                RemoveNotifictaion(box);
+                RemoveNotification(box);
                 break;
             case NotificationEventType::REMOVE_ALL_NOTIFICATIONS:
-                RemoveNotifictaions(box);
+                RemoveNotifications(box);
                 break;
             case NotificationEventType::BUNDLE_ICON_SYNC:
                 HandleBundleIconSync(box);
+                break;
+            case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
+                HandleResponseSync(box);
                 break;
             default:
                 ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);
@@ -216,6 +185,49 @@ int64_t DistributedService::GetCurrentTime()
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
+}
+
+void DistributedService::SendEventReport(
+    int32_t messageType, int32_t errCode, const std::string& errorReason)
+{
+    if (sendReportCallback_ != nullptr ||
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        sendReportCallback_(messageType, errCode, errorReason);
+    }
+}
+
+void DistributedService::InitHACallBack(
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
+{
+    haCallback_ = callback;
+}
+
+void DistributedService::InitSendReportCallBack(
+    std::function<void(int32_t, int32_t, std::string)> callback)
+{
+    sendReportCallback_ = callback;
+}
+
+std::string DistributedService::AnonymousProcessing(std::string data)
+{
+    int32_t length = data.length();
+    if (length >= MAX_DATA_LENGTH) {
+        data.replace(START_ANONYMOUS_INDEX, length - 1, "**");
+    }
+    return data;
+}
+
+void DistributedService::SendHaReport(
+    int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code)
+{
+    if (haCallback_ == nullptr || localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+    if (code == -1) {
+        haCallback_(code_, errorCode, branchId, errorReason);
+    } else {
+        haCallback_(code, errorCode, branchId, errorReason);
+    }
 }
 
 }

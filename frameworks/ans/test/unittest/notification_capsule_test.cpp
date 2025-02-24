@@ -72,7 +72,7 @@ HWTEST_F(NotificationCapsuleTest, Dump_00001, Function | SmallTest | Level1)
     std::string backgroundColor = "testBackgroundColor";
     rrc->SetBackgroundColor(backgroundColor);
     EXPECT_EQ(rrc->Dump(), "Capsule{ title = " + title + ", backgroundColor = " + backgroundColor +
-        ", content = , icon = null }");
+        ", content = , icon = null, time = 0 }");
 }
 
 /**

@@ -102,6 +102,28 @@ ohos_shared_library("notification") {
     "${frameworks_module_reminder_path}:reminder_innerkits",
   ]
 
+  defines = []
+
+  if (distributed_notification_service_feature_badge_manager) {
+    defines += [ "ANS_FEATURE_BADGE_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_local_liveview) {
+    defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
+  }
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "ANS_FEATURE_DISTRIBUTED_DB" ]
+  }
+
+  if (distributed_notification_service_feature_disturb_manager) {
+    defines += [ "ANS_FEATURE_DISTURB_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_slot_manager) {
+    defines += [ "ANS_FEATURE_SLOT_MANAGER" ]
+  }
+
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
@@ -109,6 +131,7 @@ ohos_shared_library("notification") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
     "ability_runtime:napi_common",
+    "ability_runtime:napi_wantagent_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",

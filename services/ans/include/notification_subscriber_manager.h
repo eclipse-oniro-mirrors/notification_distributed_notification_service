@@ -129,11 +129,24 @@ public:
      */
     void ResetFfrtQueue();
 
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param notification Indicates the Notification object.
+     */
+    ErrCode DistributeOperation(const sptr<Notification> &notification);
+
     void RegisterOnSubscriberAddCallback(std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback);
 
     void UnRegisterOnSubscriberAddCallback();
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
+
+    void IsDeviceFlag(const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification,
+        bool &wearableFlag, bool &headsetFlag, bool &keyNodeFlag);
+
+    void TrackCodeLog(const sptr<Notification> &notification, const bool &wearableFlag, const bool &headsetFlag,
+        const bool &keyNodeFlag);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();

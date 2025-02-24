@@ -27,6 +27,7 @@
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
+#include "napi_common_want_agent.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -44,11 +45,11 @@ napi_value Common::SetNotificationSortingMap(
 {
     ANS_LOGD("enter");
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGD("sortingMap is null");
         return NapiGetBoolean(env, false);
     }
     if (sortingMap->GetKey().size() == 0) {
-        ANS_LOGE("sortingMap GetKey().size is empty");
+        ANS_LOGD("sortingMap GetKey().size is empty");
         return NapiGetBoolean(env, false);
     }
 
@@ -371,16 +372,16 @@ napi_value Common::GetNotificationSubscriberInfo(
     }
 
     // filterType?: number
-    NAPI_CALL(env, napi_has_named_property(env, value, "filterType", &hasProperty));
+    NAPI_CALL(env, napi_has_named_property(env, value, "filterLimit", &hasProperty));
     if (hasProperty) {
         napi_value nFilterType = nullptr;
-        napi_get_named_property(env, value, "filterType", &nFilterType);
+        napi_get_named_property(env, value, "filterLimit", &nFilterType);
         NAPI_CALL(env, napi_typeof(env, nFilterType, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
             return nullptr;
         }
-        NAPI_CALL(env, napi_get_value_int32(env, nFilterType, &subscriberInfo.filterType));
+        NAPI_CALL(env, napi_get_value_uint32(env, nFilterType, &subscriberInfo.filterType));
         subscriberInfo.hasSubscribeInfo = true;
     }
 
@@ -502,7 +503,6 @@ napi_value Common::GetNotificationUserInputByTag(
     size_t strLen = 0;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
     // tag: string
@@ -537,7 +537,6 @@ napi_value Common::GetNotificationUserInputByOptions(
     bool isArray = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -590,7 +589,6 @@ napi_value Common::GetNotificationUserInputByPermitMimeTypes(
     bool isArray = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -634,7 +632,6 @@ napi_value Common::GetNotificationUserInputByPermitFreeFormInput(
     bool hasProperty = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -666,7 +663,6 @@ napi_value Common::GetNotificationUserInputByEditType(
     int32_t editType = 0;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -697,7 +693,6 @@ napi_value Common::GetNotificationUserInputByAdditionalData(
     bool hasProperty = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -1231,26 +1226,8 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
         std::lock_guard<std::mutex> lock(mutex_);
         wantAgent_.insert(agent);
     }
-    napi_value wantAgent = nullptr;
-    napi_value wantAgentClass = nullptr;
-    napi_define_class(env,
-        "wantAgentClass",
-        NAPI_AUTO_LENGTH,
-        [](napi_env env, napi_callback_info info) -> napi_value {
-            napi_value thisVar = nullptr;
-            napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-            return thisVar;
-        },
-        nullptr,
-        0,
-        nullptr,
-        &wantAgentClass);
-    napi_new_instance(env, wantAgentClass, 0, nullptr, &wantAgent);
-    napi_wrap(env,
-        wantAgent,
-        (void *)agent.get(),
-        [](napi_env env, void *data, void *hint) {
-            AbilityRuntime::WantAgent::WantAgent *objectInfo =
+    napi_finalize finalize = [](napi_env env, void *data, void *hint) {
+        AbilityRuntime::WantAgent::WantAgent *objectInfo =
                 static_cast<AbilityRuntime::WantAgent::WantAgent *>(data);
             if (objectInfo) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -1261,11 +1238,8 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
                     }
                 }
             }
-        },
-        nullptr,
-        nullptr);
-
-    return wantAgent;
+    };
+    return AppExecFwk::WrapWantAgent(env, agent.get(), finalize);
 }
 
 napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value &value, NotificationRequest &request)

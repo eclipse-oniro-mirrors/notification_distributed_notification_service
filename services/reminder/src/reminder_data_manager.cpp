@@ -65,12 +65,11 @@ const int REASON_APP_API = 1;
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
-const int64_t ONE_MIN_TIME = 60 * 1000;
-const int64_t NEXT_LOAD_TIME = 20 * ONE_MIN_TIME;
 constexpr int8_t NORMAL_CALLBACK = 0;  // timer callback
 constexpr int8_t REISSUE_CALLBACK = 1;  // time change, boot complte callback
-constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
 constexpr int32_t FIRST_QUERY_DELAY = 5 * 1000 * 1000;  // 5s, ut: microsecond
+constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
+constexpr uint64_t NEXT_LOAD_TIME = 8 * 60 * 60 * 1000;  // 8h, ut: millisecond
 
 inline int64_t TimeDistance(int64_t first, int64_t last)
 {
@@ -135,12 +134,14 @@ ErrCode ReminderDataManager::CancelReminder(
         return ERR_REMINDER_NOT_EXIST;
     }
     if (activeReminderId_ == reminderId) {
-        ANSR_LOGD("Cancel active reminder, id=%{public}d", reminderId);
         {
             std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
             activeReminder_->OnStop();
         }
-        StopTimerLocked(TimerType::TRIGGER_TIMER);
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+            StopTimerLocked(TimerType::TRIGGER_TIMER);
+        }
     }
     if (alertingReminderId_ == reminderId) {
         StopSoundAndVibrationLocked(reminder);
@@ -156,7 +157,6 @@ ErrCode ReminderDataManager::CancelAllReminders(const std::string& bundleName,
     const int32_t userId, const int32_t callingUid)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
     CancelRemindersImplLocked(bundleName, userId, callingUid);
     return ERR_OK;
 }
@@ -252,7 +252,6 @@ void ReminderDataManager::GetValidReminders(
 
 void ReminderDataManager::CancelAllReminders(const int32_t userId)
 {
-    ANSR_LOGD("CancelAllReminders, userId=%{private}d", userId);
     CancelRemindersImplLocked(ALL_PACKAGES, userId, -1, true);
 }
 
@@ -370,6 +369,10 @@ bool ReminderDataManager::CheckReminderLimitExceededLocked(const int32_t calling
 
 void ReminderDataManager::OnUnlockScreen()
 {
+    if (!IsReminderAgentReady() || queue_ == nullptr) {
+        ANSR_LOGE("Reminder service not ready.");
+        return;
+    }
     bool expected = false;
     if (isScreenUnLocked_.compare_exchange_strong(expected, true)) {
         ffrt::task_attr taskAttr;
@@ -377,7 +380,6 @@ void ReminderDataManager::OnUnlockScreen()
         auto callback = []() {
             auto manager = ReminderDataManager::GetInstance();
             if (manager == nullptr) {
-                ANSR_LOGE("ReminderDataManager is nullptr.");
                 return;
             }
             manager->InitShareReminders();
@@ -410,7 +412,6 @@ void ReminderDataManager::OnUserRemove(const int32_t& userId)
 
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 {
-    ANSR_LOGD("Switch user id from %{private}d to %{private}d", currentUserId_, userId);
     currentUserId_ = userId;
     ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
@@ -631,13 +632,14 @@ void ReminderDataManager::StartLoadTimer()
         reminderLoadtimerId_ = CreateTimer(timer);
     }
     timer->StopTimer(reminderLoadtimerId_);
-    uint64_t nowMilli = GetCurrentTime() + NEXT_LOAD_TIME;
+    uint64_t nowMilli = static_cast<uint64_t>(GetCurrentTime()) + NEXT_LOAD_TIME;
     timer->StartTimer(reminderLoadtimerId_, nowMilli);
 }
 
 void ReminderDataManager::InitShareReminders()
 {
     ANSR_LOGD("Call.");
+    ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     ReminderDataShareHelper::GetInstance().UpdateCalendarUid();
     ReminderDataShareHelper::GetInstance().RegisterObserver();
     LoadShareReminders();
@@ -650,34 +652,15 @@ void ReminderDataManager::InitShareReminders()
 
 uint64_t ReminderDataManager::CreateTimer(const sptr<MiscServices::TimeServiceClient>& timer)
 {
-    auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
-    sharedTimerInfo->SetRepeat(true);
-    sharedTimerInfo->SetInterval(NEXT_LOAD_TIME);
-    uint8_t timerTypeWakeup = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_WAKEUP);
-    uint8_t timerTypeExact = static_cast<uint8_t>(sharedTimerInfo->TIMER_TYPE_EXACT);
+    auto timerInfo = std::make_shared<ReminderTimerInfo>();
+    timerInfo->SetRepeat(false);
+    timerInfo->SetInterval(0);
+    uint8_t timerTypeWakeup = static_cast<uint8_t>(timerInfo->TIMER_TYPE_WAKEUP);
+    uint8_t timerTypeExact = static_cast<uint8_t>(timerInfo->TIMER_TYPE_EXACT);
     int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
-    sharedTimerInfo->SetType(timerType);
-
-    int32_t requestCode = 10;
-    std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
-    flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
-
-    auto want = std::make_shared<OHOS::AAFwk::Want>();
-    want->SetAction(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
-    std::vector<std::shared_ptr<AAFwk::Want>> wants;
-    wants.push_back(want);
-    AbilityRuntime::WantAgent::WantAgentInfo wantAgentInfo(
-        requestCode,
-        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
-        flags, wants, nullptr);
-
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
-        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantAgentInfo, 0);
-    IPCSkeleton::SetCallingIdentity(identity);
-
-    sharedTimerInfo->SetWantAgent(wantAgent);
-    return timer->CreateTimer(sharedTimerInfo);
+    timerInfo->SetType(timerType);
+    timerInfo->SetReminderTimerType(ReminderTimerInfo::ReminderTimerType::REMINDER_TIMER_LOAD);
+    return timer->CreateTimer(timerInfo);
 }
 
 bool ReminderDataManager::CheckUpdateConditions(const sptr<ReminderRequest> &reminder,
@@ -861,6 +844,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     HandleImmediatelyShow(showImmediately, true);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
+    StartLoadTimer();
 }
 
 void ReminderDataManager::TerminateAlerting(const OHOS::EventFwk::Want &want)
@@ -1315,7 +1299,6 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
             continue;
         }
         int32_t reminderId = (*it)->GetReminderId();
-        ANSR_LOGD("Containers(vector) remove. reminderId=%{public}d", reminderId);
         if (!(*it)->IsShare()) {
             totalCount_--;
             store_->Delete(reminderId);
@@ -1576,8 +1559,31 @@ bool ReminderDataManager::IsBelongToSameApp(const int32_t uidSrc,
     return result;
 }
 
-void ReminderDataManager::OnLoadReminderEvent(const EventFwk::Want& want)
+void ReminderDataManager::OnLoadReminderEvent()
 {
+    if (!IsReminderAgentReady() || queue_ == nullptr) {
+        ANSR_LOGE("Reminder service not ready.");
+        return;
+    }
+    auto callback = []() {
+        auto manager = ReminderDataManager::GetInstance();
+        if (manager == nullptr) {
+            return;
+        }
+        manager->OnLoadReminderInFfrt();
+    };
+    queue_->submit(callback);
+}
+
+void ReminderDataManager::OnLoadReminderInFfrt()
+{
+    if (activeReminderId_ != -1) {
+        {
+            std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
+            activeReminder_->OnStop();
+        }
+        StopTimerLocked(TimerType::TRIGGER_TIMER);
+    }
     LoadReminderFromDb();
     LoadShareReminders();
     int64_t now = GetCurrentTime();
@@ -1602,14 +1608,6 @@ void ReminderDataManager::PlaySoundAndVibrationLocked(const sptr<ReminderRequest
 {
     std::lock_guard<std::mutex> lock(ReminderDataManager::ALERT_MUTEX);
     PlaySoundAndVibration(reminder);
-}
-
-std::string ReminderDataManager::GetCustomRingUri(const sptr<ReminderRequest> &reminder)
-{
-    if (reminder == nullptr) {
-        return "";
-    }
-    return reminder->GetCustomRingUri();
 }
 
 std::string ReminderDataManager::GetFullPath(const std::string& oriPath)
@@ -1746,7 +1744,6 @@ void ReminderDataManager::RemoveReminderLocked(const int32_t reminderId, bool is
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     for (auto it = reminderVector_.begin(); it != reminderVector_.end();) {
         if (reminderId == (*it)->GetReminderId() && isShare == (*it)->IsShare()) {
-            ANSR_LOGD("Containers(vector) remove. reminderId=%{public}d", reminderId);
             it = reminderVector_.erase(it);
             if (!isShare) {
                 totalCount_--;

@@ -18,6 +18,7 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_subscriber_local_live_view_interface.h"
+#include "disturb_manager.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "notification_bundle_option.h"
@@ -42,6 +43,7 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
         ANS_LOGE("[OnRemoteRequest] fail: invalid interface token!");
         return OBJECT_NULL;
     }
+    ANS_LOGE("[OnRemoteRequest] called");
     ErrCode result = NO_ERROR;
     switch (code) {
         case static_cast<uint32_t>(NotificationInterfaceCode::PUBLISH_NOTIFICATION): {
@@ -229,16 +231,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleIsSpecialBundleAllowedNotify(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE): {
-            result = HandleSetDoNotDisturbDate(data, reply);
-            break;
-        }
-        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE): {
-            result = HandleGetDoNotDisturbDate(data, reply);
-            break;
-        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE):
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE):
         case static_cast<uint32_t>(NotificationInterfaceCode::DOES_SUPPORT_DO_NOT_DISTURB_MODE): {
-            result = HandleDoesSupportDoNotDisturbMode(data, reply);
+            result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::IS_NEED_SILENT_IN_DO_NOT_DISTURB_MODE): {
@@ -305,12 +301,9 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleDeleteAllByUser(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER): {
-            result = HandleSetDoNotDisturbDateByUser(data, reply);
-            break;
-        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_DO_NOT_DISTURB_DATE_BY_USER):
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_DO_NOT_DISTURB_DATE_BY_USER): {
-            result = HandleGetDoNotDisturbDateByUser(data, reply);
+            result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_ENABLED_FOR_BUNDLE_SLOT): {
@@ -365,6 +358,14 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetAllNotificationEnableStatus(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_LIVEVIEW_ENABLE_STATUS): {
+            result = HandleGetAllLiveViewEnabledBundles(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_DISTRIBUTED_ENABLE_STATUS): {
+            result = HandleGetAllDistributedEnabledBundles(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::REGISTER_PUSH_CALLBACK): {
             result = HandleRegisterPushCallback(data, reply);
             break;
@@ -405,12 +406,9 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetSlotByBundle(data, reply);
             break;
         }
-        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES): {
-            result = HandleAddDoNotDisturbProfiles(data, reply);
-            break;
-        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::ADD_DO_NOTDISTURB_PROFILES):
         case static_cast<uint32_t>(NotificationInterfaceCode::REMOVE_DO_NOT_DISTURB_PROFILES): {
-            result = HandleRemoveDoNotDisturbProfiles(data, reply);
+            result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS): {
@@ -428,7 +426,7 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
         }
 #endif
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_DONOTDISTURB_PROFILE): {
-            result = HandleGetDoNotDisturbProfile(data, reply);
+            result = DelayedSingleton<DisturbManager>::GetInstance()->OnRemoteRequest(code, data, reply);
             break;
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::UPDATE_NOTIFICATION_TIMER): {
@@ -445,6 +443,14 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
         }
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_TARGET_DEVICE_STATUS): {
             result = HandleGetDeviceStatus(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_REQUEST_BY_HASHCODE): {
+            result = HandleGetNotificationRequest(data, reply);
+            break;
+        }
+        case static_cast<uint32_t>(NotificationInterfaceCode::Set_HASH_CODE_RULE): {
+            result = HandleSetHashCodeRule(data, reply);
             break;
         }
         default: {
@@ -945,56 +951,16 @@ ErrCode AnsManagerStub::HandleGetBundleImportance(MessageParcel &data, MessagePa
 
 ErrCode AnsManagerStub::HandleSetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<NotificationDoNotDisturbDate> date = data.ReadParcelable<NotificationDoNotDisturbDate>();
-    if (date == nullptr) {
-        ANS_LOGE("[HandleSetDoNotDisturbDate] fail: read date failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = SetDoNotDisturbDate(date);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleSetDoNotDisturbDate] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
     return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleGetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    ErrCode result = GetDoNotDisturbDate(date);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleSetDoNotDisturbDate] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (result == ERR_OK) {
-        if (!reply.WriteParcelable(date)) {
-            ANS_LOGE("[HandleSetDoNotDisturbDate] fail: write date failed.");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-    }
-
     return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleDoesSupportDoNotDisturbMode(MessageParcel &data, MessageParcel &reply)
 {
-    bool support = false;
-
-    ErrCode result = DoesSupportDoNotDisturbMode(support);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleDoesSupportDoNotDisturbMode] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!reply.WriteBool(support)) {
-        ANS_LOGE("[HandleDoesSupportDoNotDisturbMode] fail: write doesSupport failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
     return ERR_OK;
 }
 
@@ -1823,27 +1789,6 @@ ErrCode AnsManagerStub::HandleGetDeviceRemindType(MessageParcel &data, MessagePa
     return ERR_OK;
 }
 
-ErrCode AnsManagerStub::HandleGetDeviceStatus(MessageParcel &data, MessageParcel &reply)
-{
-    std::string deviceType;
-    if (!data.ReadString(deviceType)) {
-        ANS_LOGE("[HandleGetDeviceStatus] fail: read deviceType failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    int32_t status = 0;
-    ErrCode result = GetTargetDeviceStatus(deviceType, status);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleGetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    if (!reply.WriteInt32(status)) {
-        ANS_LOGE("[HandleGetDeviceStatus] fail: write slot failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-    return ERR_OK;
-}
-
 ErrCode AnsManagerStub::HandleShellDump(MessageParcel &data, MessageParcel &reply)
 {
     std::string cmd;
@@ -1962,49 +1907,11 @@ ErrCode AnsManagerStub::HandleDeleteAllByUser(MessageParcel &data, MessageParcel
 
 ErrCode AnsManagerStub::HandleSetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!data.ReadInt32(userId)) {
-        ANS_LOGE("[HandleSetDoNotDisturbDateByUser] fail: read userId failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    sptr<NotificationDoNotDisturbDate> date = data.ReadParcelable<NotificationDoNotDisturbDate>();
-    if (date == nullptr) {
-        ANS_LOGE("[HandleSetDoNotDisturbDateByUser] fail: read date failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = SetDoNotDisturbDate(userId, date);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleSetDoNotDisturbDateByUser] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
     return ERR_OK;
 }
 
 ErrCode AnsManagerStub::HandleGetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    if (!data.ReadInt32(userId)) {
-        ANS_LOGE("[HandleGetDoNotDisturbDateByUser] fail: read userId failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    ErrCode result = GetDoNotDisturbDate(userId, date);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("[HandleGetDoNotDisturbDateByUser] fail: write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (result == ERR_OK) {
-        if (!reply.WriteParcelable(date)) {
-            ANS_LOGE("[HandleGetDoNotDisturbDateByUser] fail: write date failed.");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-    }
-
     return ERR_OK;
 }
 
@@ -2146,7 +2053,6 @@ ErrCode AnsManagerStub::HandleDistributedGetEnabledWithoutApp(MessageParcel &dat
 
 ErrCode AnsManagerStub::HandleSetBadgeNumber(MessageParcel &data, MessageParcel &reply)
 {
-    ANSR_LOGI("HandleSetBadgeNumber");
     int32_t badgeNumber = -1;
     if (!data.ReadInt32(badgeNumber)) {
         ANSR_LOGE("Read badge number failed.");
@@ -2250,25 +2156,30 @@ ErrCode AnsManagerStub::HandleUnregisterPushCallback(MessageParcel &data, Messag
     }
     return result;
 }
+ErrCode AnsManagerStub::HandleGetNotificationRequest(MessageParcel &data, MessageParcel &reply)
+{
+    std::string hashCode;
+    if (!data.ReadString(hashCode)) {
+        ANS_LOGE("read hashCode failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    sptr<NotificationRequest> request;
+    ErrCode result = GetNotificationRequestByHashCode(hashCode, request);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteParcelable(request)) {
+        ANS_LOGE("get request failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
 
 ErrCode AnsManagerStub::HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    if (!ReadParcelableVector(profiles, data)) {
-        ANS_LOGE("Read profiles failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
-        ANS_LOGE("The profiles is exceeds limit.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode result = AddDoNotDisturbProfiles(profiles);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("Write result failed, ErrCode is %{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
     return ERR_OK;
 }
 
@@ -2304,22 +2215,42 @@ ErrCode AnsManagerStub::HandleSetDistributedEnabledByBundle(MessageParcel &data,
 
 ErrCode AnsManagerStub::HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    if (!ReadParcelableVector(profiles, data)) {
-        ANS_LOGE("Read profiles failed.");
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetAllDistributedEnabledBundles(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleGetAllDistributedEnabledBundles] fail: read deviceType failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (profiles.size() > MAX_STATUS_VECTOR_NUM) {
-        ANS_LOGE("The profiles is exceeds limit.");
-        return ERR_ANS_INVALID_PARAM;
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllDistribuedEnabledBundles(deviceType, bundleOption);
+    int32_t vectorSize = bundleOption.size();
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle bundleOption vector is over size.");
+        return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = RemoveDoNotDisturbProfiles(profiles);
     if (!reply.WriteInt32(result)) {
-        ANS_LOGE("Write result failed, ErrCode is %{public}d", result);
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
+
+    if (!reply.WriteInt32(vectorSize)) {
+        ANS_LOGE("Write bundleOption size failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto &item : bundleOption) {
+        if (!reply.WriteParcelable(&item)) {
+            ANS_LOGE("Write bundleOption failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
     return ERR_OK;
 }
 
@@ -2468,6 +2399,36 @@ ErrCode AnsManagerStub::HandleSetDistributedEnabledBySlot(MessageParcel &data, M
     return ERR_OK;
 }
 
+ErrCode AnsManagerStub::HandleGetAllLiveViewEnabledBundles(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    ErrCode result = GetAllLiveViewEnabledBundles(bundleOption);
+    int32_t vectorSize = bundleOption.size();
+    if (vectorSize > MAX_STATUS_VECTOR_NUM) {
+        ANS_LOGE("Bundle bundleOption vector is over size.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteInt32(vectorSize)) {
+        ANS_LOGE("Write bundleOption size failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    for (const auto &item : bundleOption) {
+        if (!reply.WriteParcelable(&item)) {
+            ANS_LOGE("Write bundleOption failed");
+            return ERR_ANS_PARCELABLE_FAILED;
+        }
+    }
+
+    return ERR_OK;
+}
+
 ErrCode AnsManagerStub::HandleIsDistributedEnabledBySlot(MessageParcel &data, MessageParcel &reply)
 {
     ANS_LOGD("enter");
@@ -2517,20 +2478,6 @@ ErrCode AnsManagerStub::HandleSetTargetDeviceStatus(MessageParcel &data, Message
 
 ErrCode AnsManagerStub::HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t profileId = data.ReadInt32();
-    sptr<NotificationDoNotDisturbProfile> profile = nullptr;
-    ErrCode result = GetDoNotDisturbProfile(profileId, profile);
-    if (!reply.WriteInt32(result)) {
-        ANS_LOGE("HandleGetDoNotDisturbProfile write result failed, ErrCode=%{public}d", result);
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (result == ERR_OK) {
-        if (!reply.WriteParcelable(profile)) {
-            ANS_LOGE("HandleGetDoNotDisturbProfile write slot failed.");
-            return ERR_ANS_PARCELABLE_FAILED;
-        }
-    }
     return ERR_OK;
 }
 
@@ -2621,6 +2568,43 @@ ErrCode AnsManagerStub::HandleSetDeviceStatus(MessageParcel &data, MessageParcel
     ErrCode result = SetTargetDeviceStatus(deviceType, status, controlFlag);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetDeviceStatus(MessageParcel &data, MessageParcel &reply)
+{
+    std::string deviceType;
+    if (!data.ReadString(deviceType)) {
+        ANS_LOGE("[HandleGetDeviceStatus] fail: read deviceType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t status = 0;
+    ErrCode result = GetTargetDeviceStatus(deviceType, status);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!reply.WriteInt32(status)) {
+        ANS_LOGE("[HandleGetDeviceStatus] fail: write slot failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        ANS_LOGE("[HandleSetHashCodeRule] fail: read type failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetHashCodeRule(type);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetHashCodeRule] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

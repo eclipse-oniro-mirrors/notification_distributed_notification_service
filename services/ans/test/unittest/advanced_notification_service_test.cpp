@@ -367,19 +367,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03500,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_03600
- * @tc.name      : ANS_AddDoNotDisturbProfiles_0100
- * @tc.desc      : Test AddDoNotDisturbProfiles function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03600, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbProfile> date = nullptr;
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
-    auto ret = advancedNotificationService_->AddDoNotDisturbProfiles(profiles);
-    ASSERT_EQ(ret, (int)ERR_OK);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_03700
  * @tc.name      : ANS_Delete_0100
  * @tc.desc      : Test Delete function
@@ -426,20 +413,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04000,
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots),
         ERR_OK);
     ASSERT_EQ(slots.size(), (size_t)1);
-}
-
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_04200
- * @tc.name      : ANS_AddDoNotDisturbProfiles_0100
- * @tc.desc      : Test AddDoNotDisturbProfiles function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04200, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbProfile> date = nullptr;
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
-    auto ret = advancedNotificationService_->RemoveDoNotDisturbProfiles(profiles);
-    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -804,150 +777,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09900,
         (int)ERR_OK);
 }
 
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_10500
- * @tc.name      : ANS_SetDisturbMode_10500
- * @tc.desc      : Test SetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10500, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
-    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t endDate = endDuration.count();
-    date = new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    timePoint = std::chrono::system_clock::now();
-    beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    endDate = endDuration.count();
-    date = new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::DAILY, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    timePoint = std::chrono::system_clock::now();
-    beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    endDate = endDuration.count();
-    date = new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::CLEARLY, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_10600
- * @tc.name      : ANS_GetDisturbMode_10600
- * @tc.desc      : Test GetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10600, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    sptr<NotificationDoNotDisturbDate> result = nullptr;
-    ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
-    ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::NONE);
-    ASSERT_EQ(result->GetBeginDate(), 0);
-    ASSERT_EQ(result->GetEndDate(), 0);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_10700
- * @tc.name      : ANS_GetDisturbMode_10700
- * @tc.desc      : Test GetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10700, Function | SmallTest | Level1)
-{
-    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
-    timePoint = std::chrono::time_point_cast<std::chrono::minutes>(timePoint);
-    timePoint += std::chrono::hours(1);
-    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t endDate = endDuration.count();
-
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    sptr<NotificationDoNotDisturbDate> result = nullptr;
-    ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
-    ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::ONCE);
-    ASSERT_EQ(result->GetBeginDate(), beginDate);
-    ASSERT_EQ(result->GetEndDate(), endDate);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_10800
- * @tc.name      : ANS_GetDisturbMode_10800
- * @tc.desc      : Test GetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10800, Function | SmallTest | Level1)
-{
-    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
-    timePoint = std::chrono::time_point_cast<std::chrono::minutes>(timePoint);
-    timePoint += std::chrono::hours(1);
-    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t endDate = endDuration.count();
-
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::DAILY, beginDate, endDate);
-
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-    sptr<NotificationDoNotDisturbDate> result = nullptr;
-    ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
-    ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::DAILY);
-    ASSERT_EQ(result->GetBeginDate(), beginDate);
-    ASSERT_EQ(result->GetEndDate(), endDate);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_10900
- * @tc.name      : ANS_GetDisturbMode_10900
- * @tc.desc      : Test GetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10900, Function | SmallTest | Level1)
-{
-    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
-    timePoint = std::chrono::time_point_cast<std::chrono::minutes>(timePoint);
-    timePoint += std::chrono::hours(1);
-    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t endDate = endDuration.count();
-
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::CLEARLY, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    sptr<NotificationDoNotDisturbDate> result = nullptr;
-    ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
-    ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::CLEARLY);
-    ASSERT_EQ(result->GetBeginDate(), beginDate);
-    ASSERT_EQ(result->GetEndDate(), endDate);
-}
-
 /**
  * @tc.number    : AdvancedNotificationServiceTest_12900
  * @tc.name      : ANS_HasNotificationPolicyAccessPermission_0100
@@ -1047,20 +876,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13900,
     ASSERT_EQ(advancedNotificationService_->RemoveAllSlots(), (int)ERR_OK);
 }
 
-/**
- * @tc.number    : AdvancedNotificationServiceTest_14200
- * @tc.name      : ANS_DoesSupportDoNotDisturbMode_0100
- * @tc.desc      : Test DoesSupportDoNotDisturbMode function when the result is ERR_OK
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14200, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    sptr<NotificationRequest> req = new NotificationRequest();
-    EXPECT_NE(req, nullptr);
-    bool doesSupport = true;
-    ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), (int)ERR_OK);
-}
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_14300
@@ -1133,18 +948,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_14900,
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(userId, enabled), (int)ERR_OK);
 }
 
-/**
- * @tc.number    : AdvancedNotificationServiceTest_15000
- * @tc.name      : ANS_GetDoNotDisturbDate_0100
- * @tc.desc      : Test GetDoNotDisturbDate function when the result is ERR_OK
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15000, Function | SmallTest | Level1)
-{
-    int32_t userId = 3;
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), (int)ERR_OK);
-}
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_15200
@@ -1483,12 +1286,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     std::string groupName = "group";
     ASSERT_EQ(advancedNotificationService_->RemoveGroupByBundle(bundleOption, groupName), ERR_OK);
 
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_INVALID_PARAM);
-    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_OK);
-
-    ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(enable), ERR_OK);
-
     ASSERT_EQ(advancedNotificationService_->EnableDistributed(enable), ERR_OK);
 
     ASSERT_EQ(advancedNotificationService_->EnableDistributedByBundle(bundleOption, enable), ERR_OK);
@@ -1504,9 +1301,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(userId, enable), ERR_OK);
 
     ASSERT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_OK);
-
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
-    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_OK);
 
     ASSERT_EQ(advancedNotificationService_->SetEnabledForBundleSlot(bundleOption,
         NotificationConstant::SlotType::OTHER, enable, false), ERR_OK);
@@ -2062,29 +1856,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20400,
 
     request->SetRemovalWantAgent(wantAgent);
     ASSERT_NE(nullptr, advancedNotificationService_);
-    advancedNotificationService_->TriggerRemoveWantAgent(request);
+    advancedNotificationService_->TriggerRemoveWantAgent(request, 0, false);
 
     GTEST_LOG_(INFO) << "TriggerRemoveWantAgent_0100 test end";
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_20500
- * @tc.name      : DeleteAllByUser_0100
- * @tc.desc      : Test DeleteAllByUser function
- * @tc.require   : #I61RF2
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20500, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "DeleteAllByUser_0100 test start";
-
-    int32_t userId = -2;
-    ASSERT_EQ(advancedNotificationService_->DeleteAllByUser(userId), ERR_ANS_INVALID_PARAM);
-
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
-    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_INVALID_PARAM);
-    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDateByUser(userId, date), ERR_ANS_INVALID_PARAM);
-    GTEST_LOG_(INFO) << "DeleteAllByUser_0100 test end";
 }
 
 /**
@@ -3747,6 +3521,69 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishInNotificationList_00001, Funct
     record->notification = notification;
     advancedNotificationService_->PublishInNotificationList(record);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 100);
+}
+
+/**
+ * @tc.number    : DisableNotificationFeature_00001
+ * @tc.name      : Test DisableNotificationFeature
+ * @tc.desc      : Test DisableNotificationFeature
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationDisable> notificationDisable = nullptr;
+    ErrCode ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    notificationDisable = new (std::nothrow) NotificationDisable();
+    ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetAndPublishSubscriberExistFlag_0100
+ * @tc.desc: test SetAndPublishSubscriberExistFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetAndPublishSubscriberExistFlag_0100, TestSize.Level1)
+{
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag("", false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag("testType", false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->SetAndPublishSubscriberExistFlag(DEVICE_TYPE_WEARABLE, false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+}
+
+/**
+ * @tc.name: PublishSubscriberExistFlagEvent_0100
+ * @tc.desc: test PublishSubscriberExistFlagEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, PublishSubscriberExistFlagEvent_0100, TestSize.Level1)
+{
+    advancedNotificationService_->PublishSubscriberExistFlagEvent(false, false);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+}
+
+/**
+ * @tc.name: OnBundleRemoved_0100
+ * @tc.desc: test OnBundleRemoved.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnBundleRemoved_0100, Function | SmallTest | Level1)
+{
+    std::string bundleName = "testBundleName01";
+    advancedNotificationService_->notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, SYSTEM_APP_UID);
+    advancedNotificationService_->OnBundleRemoved(bundleOption);
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->isCachedAppAndDeviceRelationMap_ = true;
+    advancedNotificationService_->appAndDeviceRelationMap_.insert(std::make_pair(bundleName, "testType"));
+    advancedNotificationService_->OnBundleRemoved(bundleOption);
+    ASSERT_NE(advancedNotificationService_, nullptr);
 }
 }  // namespace Notification
 }  // namespace OHOS

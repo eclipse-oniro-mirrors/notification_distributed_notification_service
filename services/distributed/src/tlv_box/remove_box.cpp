@@ -33,20 +33,21 @@ NotificationRemoveBox::NotificationRemoveBox(std::shared_ptr<TlvBox> box) : BoxB
 {
 }
 
-bool NotificationRemoveBox::SetNotificationHashCode(const std::string& hasdCode)
+bool NotificationRemoveBox::SetNotificationHashCode(const std::string& hashCode)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hasdCode));
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
 }
 
-bool NotificationRemoveBox::SetDistributedCollaborate(bool distributedCollaborate)
+bool NotificationRemoveBox::setNotificationSlotType(int32_t slotType)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(COLLABORATIVE_NOTIFICATION, distributedCollaborate));
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_SLOT_TYPE, slotType));
 }
+
 }
 }

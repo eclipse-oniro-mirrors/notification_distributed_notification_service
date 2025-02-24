@@ -51,7 +51,6 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_REMOVE_NOTIFICATION);
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CUSTOM_ALERT);
     customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
-    customMatchingSkills.AddEvent(ReminderRequest::REMINDER_EVENT_LOAD_REMINDER);
     CommonEventSubscribeInfo customSubscriberInfo(customMatchingSkills);
     customSubscriberInfo.SetPermission("ohos.permission.GRANT_SENSITIVE_PERMISSIONS");
     customSubscriberInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
@@ -86,7 +85,7 @@ void ReminderEventManager::init(std::shared_ptr<ReminderDataManager> &reminderDa
     IPCSkeleton::SetCallingIdentity(identity);
 
     subscriber_ = std::make_shared<ReminderNotificationSubscriber>(reminderDataManager);
-    if (NotificationHelper::SubscribeNotificationSelf(*subscriber_) != ERR_OK) {
+    if (NotificationHelper::SubscribeNotification(*subscriber_) != ERR_OK) {
         ANSR_LOGD("SubscribeNotification failed");
     }
 
@@ -180,10 +179,6 @@ void ReminderEventManager::ReminderEventCustomSubscriber::OnReceiveEvent(const E
     }
     if (action == ReminderRequest::REMINDER_EVENT_CLICK_ALERT) {
         reminderDataManager_->ClickReminder(want);
-        return;
-    }
-    if (action == ReminderRequest::REMINDER_EVENT_LOAD_REMINDER) {
-        reminderDataManager_->OnLoadReminderEvent(want);
         return;
     }
 }

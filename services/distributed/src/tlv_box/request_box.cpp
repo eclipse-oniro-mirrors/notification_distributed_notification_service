@@ -116,7 +116,7 @@ bool NotifticationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>&
         return false;
     }
     std::string icon = AnsImageUtil::PackImage(copyPixelMap);
-    ANS_LOGI("SetBigIcon %{public}lu, %{public}lu", copyIcon.size(), icon.size());
+    ANS_LOGI("SetBigIcon %{public}u, %{public}u", copyIcon.size(), icon.size());
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
 }
 
@@ -131,7 +131,7 @@ bool NotifticationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelM
         return false;
     }
     std::string icon = AnsImageUtil::PackImage(copyPixelMap);
-    ANS_LOGI("SetOverlayIcon %{public}lu, %{public}lu", copyIcon.size(), icon.size());
+    ANS_LOGI("SetOverlayIcon %{public}u, %{public}u", copyIcon.size(), icon.size());
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
 }
 
@@ -143,6 +143,22 @@ bool NotifticationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byte
     const unsigned char* begin = byteSequence.data();
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_COMMON_LIVEVIEW,
         begin, byteSequence.size()));
+}
+
+bool NotifticationRequestBox::SetFinishTime(int64_t time)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(FINISH_DEADLINE_TIME, time));
+}
+
+bool NotifticationRequestBox::SetAutoDeleteTime(int64_t time)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
 }
 
 bool NotifticationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
@@ -210,7 +226,7 @@ bool NotifticationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIc
     if (!box_->GetStringValue(NOTIFICATION_BIG_ICON, bigIconContent)) {
         return false;
     }
-    ANS_LOGI("GetBigIcon %{public}lu", bigIconContent.size());
+    ANS_LOGI("GetBigIcon %{public}u", bigIconContent.size());
     bigIcon = AnsImageUtil::UnPackImage(bigIconContent);
     return true;
 }
@@ -224,7 +240,7 @@ bool NotifticationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& o
     if (!box_->GetStringValue(NOTIFICATION_OVERLAY_ICON, overlayContent)) {
         return false;
     }
-    ANS_LOGI("GetOverlayIcon %{public}lu", overlayContent.size());
+    ANS_LOGI("GetOverlayIcon %{public}u", overlayContent.size());
     overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
     return true;
 }
@@ -235,6 +251,22 @@ bool NotifticationRequestBox::GetCommonLiveView(std::vector<uint8_t>& byteSequen
         return false;
     }
     return box_->GetBytes(NOTIFICATION_COMMON_LIVEVIEW, byteSequence);
+}
+
+bool NotifticationRequestBox::GetFinishTime(int64_t& time) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt64Value(FINISH_DEADLINE_TIME, time);
+}
+
+bool NotifticationRequestBox::GetAutoDeleteTime(int64_t& time) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt64Value(AUTO_DELETE_TIME, time);
 }
 }
 }

@@ -22,6 +22,8 @@
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
 #include "reminder_helper.h"
+#include "reminder_store_strategy.h"
+#include "abs_shared_result_set.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -586,6 +588,9 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | Small
     uint64_t ts = t * 1000;  // ms
 
     sptr<ReminderRequest> reminder = new ReminderRequestCalendar();
+    reminder->SetShare(true);
+    reminderStore.UpdateOrInsert(reminder);
+    reminder->SetShare(false);
     reminder->reminderId_ = 999;
     reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
     reminder->repeatDaysOfWeek_ = 55;
@@ -616,6 +621,92 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00002, Function | Small
     reminderStore.Delete(reminder->reminderId_);
     EXPECT_EQ(succeed, true);
     ClearStore();
+}
+
+/**
+ * @tc.name: ReminderCalendarStrategyTest_00003
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | SmallTest | Level1)
+{
+    ReminderStrategy base;
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar();
+    calendar->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    sptr<ReminderRequest> alarm = new ReminderRequestAlarm();
+    alarm->reminderType_ = ReminderRequest::ReminderType::ALARM;
+    sptr<ReminderRequest> timer = new ReminderRequestTimer();
+    timer->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    NativeRdb::ValuesBucket values;
+    base.AppendValuesBucket(calendar, values, true);
+
+    std::shared_ptr<NativeRdb::ResultSet> result = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    sptr<ReminderRequest> nullReminder;
+    base.RecoverFromOldVersion(nullReminder, result);
+    base.RecoverFromOldVersion(calendar, nullptr);
+    base.RecoverFromOldVersion(calendar, result);
+
+    base.RecoverFromDb(nullReminder, result);
+    base.RecoverFromDb(calendar, nullptr);
+    base.RecoverFromDb(calendar, result);
+
+    ReminderTimerStrategy timerStrategy;
+    timerStrategy.RecoverFromOldVersion(nullReminder, result);
+    timerStrategy.RecoverFromOldVersion(calendar, nullptr);
+    timerStrategy.RecoverFromOldVersion(timer, result);
+
+    std::shared_ptr<NativeRdb::ResultSet> baseResult = std::make_shared<NativeRdb::AbsSharedResultSet>();
+
+    timerStrategy.RecoverFromDb(nullReminder, result, baseResult);
+    timerStrategy.RecoverFromDb(calendar, nullptr, baseResult);
+    timerStrategy.RecoverFromDb(calendar, result, nullptr);
+    timerStrategy.RecoverFromDb(timer, result, baseResult);
+
+    ReminderAlarmStrategy alarmStrategy;
+    alarmStrategy.RecoverFromOldVersion(nullReminder, result);
+    alarmStrategy.RecoverFromOldVersion(calendar, nullptr);
+    alarmStrategy.RecoverFromOldVersion(alarm, result);
+
+    alarmStrategy.RecoverFromDb(nullReminder, result, baseResult);
+    alarmStrategy.RecoverFromDb(calendar, nullptr, baseResult);
+    alarmStrategy.RecoverFromDb(calendar, result, nullptr);
+    alarmStrategy.RecoverFromDb(alarm, result, baseResult);
+
+    ReminderCalendarStrategy calendarStrategy;
+    calendarStrategy.RecoverFromOldVersion(nullReminder, result);
+    calendarStrategy.RecoverFromOldVersion(alarm, nullptr);
+    calendarStrategy.RecoverFromOldVersion(calendar, result);
+
+    calendarStrategy.RecoverFromDb(nullReminder, result, baseResult);
+    calendarStrategy.RecoverFromDb(alarm, nullptr, baseResult);
+    calendarStrategy.RecoverFromDb(alarm, result, nullptr);
+    calendarStrategy.RecoverFromDb(calendar, result, baseResult);
+    EXPECT_EQ(alarm->reminderId_, 0);
+}
+
+/**
+ * @tc.name: ReminderCalendarStrategyTest_00004
+ * @tc.desc: Test OnCreate parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00004, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NativeRdb::ResultSet> result = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    int32_t value = 0;
+    ReminderStore::GetInt32Val(result, "1", value);
+    int64_t val = 0;
+    ReminderStore::GetInt64Val(result, "1", val);
+    std::string str;
+    ReminderStore::GetStringVal(result, "1", str);
+
+    ReminderStore reminderStore;
+    reminderStore.QueryActiveReminderCount();
+    InitStore(reminderStore);
+    reminderStore.QueryActiveReminderCount();
+    ClearStore();
+    EXPECT_GE(value, 0);
 }
 }
 }

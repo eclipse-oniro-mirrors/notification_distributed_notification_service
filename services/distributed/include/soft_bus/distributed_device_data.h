@@ -20,6 +20,7 @@
 #include "socket.h"
 #include "ans_log_wrapper.h"
 #include "dm_device_info.h"
+#include <unordered_set>
 
 namespace OHOS {
 namespace Notification {
@@ -59,7 +60,6 @@ struct ConnectedSocketInfo {
     std::string peerName_;
     std::string pkgName_;
     TransDataType dataType_;
-    int32_t peerState_ = DeviceState::STATE_INIT;
 };
 }
 }

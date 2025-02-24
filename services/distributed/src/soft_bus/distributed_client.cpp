@@ -21,10 +21,27 @@
 namespace OHOS {
 namespace Notification {
 
+namespace {
+constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
+constexpr const int32_t BRANCH1_ID = 1;
+constexpr const int32_t BRANCH2_ID = 2;
+constexpr const int32_t BRANCH4_ID = 4;
+}
+
 DistributedClient& DistributedClient::GetInstance()
 {
     static DistributedClient distributedClient;
     return distributedClient;
+}
+
+void DistributedClient::ReleaseClient()
+{
+    std::lock_guard<std::mutex> lock(clientLock_);
+    ANS_LOGI("Release client socket %{public}u.", socketsId_.size());
+    for (auto& socketItem : socketsId_) {
+        CloseSocket(socketItem.second);
+    }
+    socketsId_.clear();
 }
 
 void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
@@ -33,6 +50,9 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
     for (auto& socketItem : socketsId_) {
         if (socketItem.second == socket) {
             socketItem.second = -1;
+            std::string message = "socketID: " + std::to_string(socket) + " ; ShutdownReason: " +
+                                  ShutdownReasonToString(reason);
+            DistributedService::GetInstance().SendHaReport(0, BRANCH4_ID, message, PUBLISH_ERROR_EVENT_CODE);
         }
     }
 }
@@ -40,8 +60,9 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
 void DistributedClient::AddDevice(DistributedDeviceInfo peerDevice)
 {
     std::lock_guard<std::mutex> lock(clientLock_);
-    ANS_LOGI("Distributed client AddDevice %{public}s", peerDevice.deviceId_.c_str());
-    networksId_.insert(std::make_pair(peerDevice.deviceId_, peerDevice.networkId_));
+    ANS_LOGI("Distributed client AddDevice %{public}s %{public}s", StringAnonymous(peerDevice.deviceId_).c_str(),
+        StringAnonymous(peerDevice.networkId_).c_str());
+    networksId_[peerDevice.deviceId_] = peerDevice.networkId_;
 }
 
 void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
@@ -59,6 +80,7 @@ void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t devi
         CloseSocket(socket->second);
         socketsId_.erase(socket);
     }
+    networksId_.erase(deviceId);
 }
 
 void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t deviceType,
@@ -66,22 +88,21 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
 {
     ReleaseDevice(deviceId, deviceType);
     std::lock_guard<std::mutex> lock(clientLock_);
-    auto networkIdItem = networksId_.find(deviceId);
-    if (networkIdItem != networksId_.end()) {
-        networkIdItem->second = networkId;
-        return;
-    }
-    networksId_.insert(std::make_pair(deviceId, networkId));
+    networksId_[deviceId] = networkId;
+    ANS_LOGI("Distributed refresh device %{public}s %{public}s", StringAnonymous(deviceId).c_str(),
+        StringAnonymous(networkId).c_str());
 }
 
-int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType)
+int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
+    int32_t& socketId)
 {
     std::string key = deviceId + '_' + std::to_string(dataType);
     {
         std::lock_guard<std::mutex> lock(clientLock_);
         auto socketItem = socketsId_.find(key);
         if (socketItem != socketsId_.end() && socketItem->second != -1) {
-            return socketItem->second;
+            socketId = socketItem->second;
+            return ERR_OK;
         }
     }
 
@@ -91,31 +112,73 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
         networkId = networkIdItem->second;
     }
     std::string name = (dataType == TransDataType::DATA_TYPE_MESSAGE) ? ANS_SOCKET_CMD : ANS_SOCKET_MSG;
-    int32_t socketId = ClientBind(name, ANS_SOCKET_PKG, name, networkId, dataType);
-    if (socketId == -1) {
-        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", deviceId.c_str(),
-            networkId.c_str(), deviceType, dataType);
-        return socketId;
+    int32_t result = ClientBind(name, ANS_SOCKET_PKG, networkId, dataType, socketId);
+    if (result != ERR_OK) {
+        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
+            StringAnonymous(networkId).c_str(), deviceType, dataType);
+        return result;
     }
     {
         std::lock_guard<std::mutex> lock(clientLock_);
-        socketsId_.insert(std::make_pair(key, socketId));
+        socketsId_[key] = socketId;
         ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
     }
-    return socketId;
+    return ERR_OK;
 }
 
 int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDataType dataType,
     const std::string &deviceId, uint16_t deviceType)
 {
+    int32_t socketId = 0;
     DistributedServer::GetInstance().CheckServer();
-    int32_t socketId = GetSocketId(deviceId, deviceType, dataType);
-    if (socketId == -1) {
-        ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", deviceId.c_str(), deviceType, dataType);
-        return -1;
+    int32_t result = GetSocketId(deviceId, deviceType, dataType, socketId);
+    if (result != ERR_OK) {
+        ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
+            deviceType, dataType);
+        int32_t messageType = 0;
+        std::string errorReason = "Bind server failed,";
+        errorReason.append("dataType: " + std::to_string(dataType));
+        DistributedService::GetInstance().SendEventReport(messageType, result, errorReason);
+        DistributedService::GetInstance().SendHaReport(result, BRANCH1_ID, errorReason);
+        return result;
     }
-    return ClientSendMsg(socketId, data, length, dataType);
+    result = ClientSendMsg(socketId, data, length, dataType);
+    if (result != ERR_OK) {
+        int32_t messageType = 0;
+        std::string errorReason = "send message failed,";
+        errorReason.append("dataType: " + std::to_string(dataType));
+        DistributedService::GetInstance().SendEventReport(messageType, result, errorReason);
+        DistributedService::GetInstance().SendHaReport(result, BRANCH2_ID, errorReason);
+    }
+    return result;
 }
+
+std::string DistributedClient::ShutdownReasonToString(ShutdownReason reason)
+{
+    switch (reason) {
+        case ShutdownReason::SHUTDOWN_REASON_UNKNOWN:
+            return "SHUTDOWN_REASON_UNKNOWN";
+        case ShutdownReason::SHUTDOWN_REASON_PEER:
+            return "SHUTDOWN_REASON_PEER";
+        case ShutdownReason::SHUTDOWN_REASON_LNN_CHANGED:
+            return "SHUTDOWN_REASON_LNN_CHANGED";
+        case ShutdownReason::SHUTDOWN_REASON_CONN_CHANGED:
+            return "SHUTDOWN_REASON_CONN_CHANGED";
+        case ShutdownReason::SHUTDOWN_REASON_TIMEOUT:
+            return "SHUTDOWN_REASON_TIMEOUT";
+        case ShutdownReason::SHUTDOWN_REASON_SEND_FILE_ERR:
+            return "SHUTDOWN_REASON_SEND_FILE_ERR";
+        case ShutdownReason::SHUTDOWN_REASON_RECV_FILE_ERR:
+            return "SHUTDOWN_REASON_RECV_FILE_ERR";
+        case ShutdownReason::SHUTDOWN_REASON_RECV_DATA_ERR:
+            return "SHUTDOWN_REASON_RECV_DATA_ERR";
+        case ShutdownReason::SHUTDOWN_REASON_UNEXPECTED:
+            return "SHUTDOWN_REASON_UNEXPECTED";
+        default:
+            return "unknown";
+    }
+}
+
 }
 }
 

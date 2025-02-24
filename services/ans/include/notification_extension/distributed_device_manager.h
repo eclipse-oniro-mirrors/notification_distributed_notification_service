@@ -37,9 +37,11 @@ public:
 
 class DistributedDeviceManager {
 public:
-    void Init();
+    void InitTrustList();
+    bool RegisterDms(bool forceInit);
     static DistributedDeviceManager& GetInstance();
 private:
+    std::atomic<bool> hasInit = false;
     std::shared_ptr<DmsInitCallback> initCallback_;
     std::shared_ptr<DmsStateCallback> stateCallback_;
 };

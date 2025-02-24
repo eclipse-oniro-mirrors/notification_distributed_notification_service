@@ -21,13 +21,14 @@
 
 #include "ans_manager_interface.h"
 #include "ans_subscriber_local_live_view_interface.h"
+#include "base_manager.h"
 #include "distributed_notification_service_ipc_interface_code.h"
 #include "iremote_stub.h"
 #include "singleton.h"
 
 namespace OHOS {
 namespace Notification {
-class SlotManager {
+class SlotManager final : protected BaseManager {
 public:
     DECLARE_DELAYED_SINGLETON(SlotManager);
 public:
@@ -44,7 +45,8 @@ public:
 private:
     ErrCode AddSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &slots);
-    ErrCode AddSlotsInner(const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption);
+    ErrCode AddSlotsInner(
+        const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption);
 
     ErrCode SetEnabledForBundleSlot(MessageParcel &data, MessageParcel &reply);
     ErrCode SetEnabledForBundleSlotSyncQue(
@@ -65,29 +67,6 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
-        
-    template<typename T>
-    bool ReadParcelableVector(std::vector<sptr<T>> &parcelableInfos, MessageParcel &data)
-    {
-        int32_t infoSize = 0;
-        if (!data.ReadInt32(infoSize)) {
-            ANS_LOGE("Failed to read Parcelable size.");
-            return false;
-        }
-
-        parcelableInfos.clear();
-        infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
-        for (int32_t index = 0; index < infoSize; index++) {
-            sptr<T> info = data.ReadStrongParcelable<T>();
-            if (info == nullptr) {
-                ANS_LOGE("Failed to read Parcelable infos.");
-                return false;
-            }
-            parcelableInfos.emplace_back(info);
-        }
-
-        return true;
-    }
 };
 }  // namespace Notification
 }  // namespace OHOS
