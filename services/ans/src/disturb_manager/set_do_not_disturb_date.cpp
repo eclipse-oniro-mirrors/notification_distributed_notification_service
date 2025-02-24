@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ namespace OHOS {
 namespace Notification {
 constexpr int32_t HOURS_IN_ONE_DAY = 24;
 
-ErrCode DisturbManager::SetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply)
+ErrCode DisturbManager::HandleSetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply)
 {
     sptr<NotificationDoNotDisturbDate> date = data.ReadParcelable<NotificationDoNotDisturbDate>();
     if (date == nullptr) {
@@ -37,7 +37,7 @@ ErrCode DisturbManager::SetDoNotDisturbDate(MessageParcel &data, MessageParcel &
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = SetDoNotDisturbDateInner(date);
+    ErrCode result = SetDoNotDisturbDate(date);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetDoNotDisturbDate] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -45,8 +45,30 @@ ErrCode DisturbManager::SetDoNotDisturbDate(MessageParcel &data, MessageParcel &
 
     return ERR_OK;
 }
+ErrCode DisturbManager::HandleSetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (!data.ReadInt32(userId)) {
+        ANS_LOGE("[HandleSetDoNotDisturbDateByUser] fail: read userId failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
 
-ErrCode DisturbManager::SetDoNotDisturbDateInner(const sptr<NotificationDoNotDisturbDate> &date)
+    sptr<NotificationDoNotDisturbDate> date = data.ReadParcelable<NotificationDoNotDisturbDate>();
+    if (date == nullptr) {
+        ANS_LOGE("[HandleSetDoNotDisturbDateByUser] fail: read date failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetDoNotDisturbDateByUserSyncQueue(userId, date);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleSetDoNotDisturbDateByUser] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode DisturbManager::SetDoNotDisturbDate(const sptr<NotificationDoNotDisturbDate> &date)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -56,20 +78,22 @@ ErrCode DisturbManager::SetDoNotDisturbDateInner(const sptr<NotificationDoNotDis
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 
-    return SetDoNotDisturbDateByUser(userId, date);
+    return SetDoNotDisturbDateByUserSyncQueue(userId, date);
 }
 
-ErrCode DisturbManager::SetDoNotDisturbDateByUser(const int32_t &userId,
+ErrCode DisturbManager::SetDoNotDisturbDateByUserSyncQueue(const int32_t &userId,
     const sptr<NotificationDoNotDisturbDate> &date)
 {
     ANS_LOGD("%{public}s enter, userId = %{public}d", __FUNCTION__, userId);
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Input userId is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     if (date == nullptr) {
         ANS_LOGE("Invalid date param");
         return ERR_ANS_INVALID_PARAM;
     }
-
-    ErrCode result = ERR_OK;
-
     int64_t beginDate = ResetSeconds(date->GetBeginDate());
     int64_t endDate = ResetSeconds(date->GetEndDate());
     switch (date->GetDoNotDisturbType()) {
@@ -91,35 +115,32 @@ ErrCode DisturbManager::SetDoNotDisturbDateByUser(const int32_t &userId,
     ANS_LOGD("Before set SetDoNotDisturbDate beginDate = %{public}" PRId64 ", endDate = %{public}" PRId64,
              beginDate, endDate);
     const sptr<NotificationDoNotDisturbDate> newConfig = new (std::nothrow) NotificationDoNotDisturbDate(
-        date->GetDoNotDisturbType(),
-        beginDate,
-        endDate
-    );
+        date->GetDoNotDisturbType(), beginDate, endDate);
     if (newConfig == nullptr) {
         ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
         return ERR_NO_MEMORY;
     }
 
-    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();;
+    sptr<NotificationBundleOption> bundleOption = AdvancedNotificationService::GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGE("Generate invalid bundle option!");
         return ERR_ANS_INVALID_BUNDLE;
     }
-
-    auto excuteQueue = AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
-    if (excuteQueue == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = excuteQueue->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, newConfig);
-        if (result == ERR_OK) {
-            NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(userId, newConfig);
-        }
+    AdvancedNotificationService::GetInstance()->SubmitSyncTask(std::bind([&]() {
+        SetDoNotDisturbDateByUserInner(userId, newConfig);
     }));
-    excuteQueue->wait(handler);
     return ERR_OK;
+}
+
+ErrCode DisturbManager::SetDoNotDisturbDateByUserInner(const int32_t &userId,
+    const sptr<NotificationDoNotDisturbDate> &date)
+{
+    ANS_LOGD("ffrt enter!");
+    ErrCode result = NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, date);
+    if (result == ERR_OK) {
+        NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(userId, date);
+    }
+    return result;
 }
 
 void DisturbManager::AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate)

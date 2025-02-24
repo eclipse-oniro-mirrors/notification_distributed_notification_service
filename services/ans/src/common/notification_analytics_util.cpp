@@ -77,6 +77,7 @@ int32_t HaMetaMessage::syncLiveViewWatchHeadSet_ = 0;
 int64_t HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
 int32_t HaMetaMessage::delByWatch_ = 0;
 int32_t HaMetaMessage::liveViewDelByWatch_ = 0;
+int32_t HaMetaMessage::clickByWatch_ = 0;
 static std::mutex reportCacheMutex_;
 static uint64_t reportTimerId = 0;
 static std::list<ReportCache> reportCacheList;
@@ -175,13 +176,13 @@ HaMetaMessage& HaMetaMessage::SlotType(int32_t slotType)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::deleteReason(int32_t deleteReason)
+HaMetaMessage& HaMetaMessage::DeleteReason(int32_t deleteReason)
 {
     deleteReason_ = deleteReason;
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::syncWatch(bool isLiveView)
+HaMetaMessage& HaMetaMessage::SyncWatch(bool isLiveView)
 {
     if (isLiveView) {
         HaMetaMessage::syncLiveViewWatch_++;
@@ -191,7 +192,7 @@ HaMetaMessage& HaMetaMessage::syncWatch(bool isLiveView)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::syncHeadSet(bool isLiveView)
+HaMetaMessage& HaMetaMessage::SyncHeadSet(bool isLiveView)
 {
     if (isLiveView) {
         HaMetaMessage::syncLiveViewHeadSet_++;
@@ -201,7 +202,7 @@ HaMetaMessage& HaMetaMessage::syncHeadSet(bool isLiveView)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::syncWatchHeadSet(bool isLiveView)
+HaMetaMessage& HaMetaMessage::SyncWatchHeadSet(bool isLiveView)
 {
     if (isLiveView) {
         HaMetaMessage::syncLiveViewWatchHeadSet_++;
@@ -211,7 +212,7 @@ HaMetaMessage& HaMetaMessage::syncWatchHeadSet(bool isLiveView)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::keyNode(bool isKeyNode)
+HaMetaMessage& HaMetaMessage::KeyNode(bool isKeyNode)
 {
     if (isKeyNode) {
         HaMetaMessage::keyNode_++;
@@ -219,13 +220,19 @@ HaMetaMessage& HaMetaMessage::keyNode(bool isKeyNode)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::delByWatch(bool isLiveView)
+HaMetaMessage& HaMetaMessage::DelByWatch(bool isLiveView)
 {
     if (isLiveView) {
         HaMetaMessage::liveViewDelByWatch_++;
     } else {
         HaMetaMessage::delByWatch_++;
     }
+    return *this;
+}
+
+HaMetaMessage& HaMetaMessage::ClickByWatch()
+{
+    HaMetaMessage::clickByWatch_++;
     return *this;
 }
 
@@ -880,7 +887,8 @@ bool NotificationAnalyticsUtil::DetermineWhetherToSend(uint32_t slotType)
         if ((NotificationAnalyticsUtil::GetCurrentTime() - HaMetaMessage::liveViewTime_) >= MAX_TIME) {
             return true;
         } else if (HaMetaMessage::syncLiveViewWatch_ + HaMetaMessage::syncLiveViewHeadSet_ +
-                       HaMetaMessage::syncLiveViewWatchHeadSet_ + HaMetaMessage::liveViewDelByWatch_ >=
+                       HaMetaMessage::syncLiveViewWatchHeadSet_ + HaMetaMessage::liveViewDelByWatch_ +
+                       HaMetaMessage::clickByWatch_ >=
                    NOTIFICATION_MAX_DATA) {
             return true;
         }
@@ -908,11 +916,13 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const HaMetaMessage& message
         data["syncWatchHeadSet"] = std::to_string(HaMetaMessage::syncLiveViewWatchHeadSet_);
         data["keyNode"] = std::to_string(HaMetaMessage::keyNode_);
         data["delByWatch"] = std::to_string(HaMetaMessage::liveViewDelByWatch_);
+        data["clickByWatch"] = std::to_string(HaMetaMessage::clickByWatch_);
         HaMetaMessage::syncLiveViewWatch_ = 0;
         HaMetaMessage::syncLiveViewHeadSet_ = 0;
         HaMetaMessage::syncLiveViewWatchHeadSet_ = 0;
         HaMetaMessage::keyNode_ = 0;
         HaMetaMessage::liveViewDelByWatch_ = 0;
+        HaMetaMessage::clickByWatch_ = 0;
         HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
     } else {
         data["syncWatch"] = std::to_string(HaMetaMessage::syncWatch_);
@@ -929,5 +939,17 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const HaMetaMessage& message
     return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
+void NotificationAnalyticsUtil::ReportSkipFailedEvent(const HaMetaMessage& message)
+{
+    if (!ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
+        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        return;
+    }
+    EventFwk::Want want;
+    std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message);
+    NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
+
+    IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, MODIFY_ERROR_EVENT_CODE));
+}
 } // namespace Notification
 } // namespace OHOS

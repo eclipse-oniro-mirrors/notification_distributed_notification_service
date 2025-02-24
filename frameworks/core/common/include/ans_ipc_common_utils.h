@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "ans_log_wrapper.h"
+#include "ans_const_define.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "notification_constant.h"
@@ -51,14 +52,10 @@ public:
             ANS_LOGE("Failed to read Parcelable size.");
             return false;
         }
-
+        infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
         parcelableInfos.clear();
         for (int32_t index = 0; index < infoSize; index++) {
             std::shared_ptr<T> info = std::shared_ptr<T>(data.ReadParcelable<T>());
-            if (info == nullptr) {
-                ANS_LOGE("Failed to read Parcelable infos.");
-                return false;
-            }
             parcelableInfos.emplace_back(info);
         }
 

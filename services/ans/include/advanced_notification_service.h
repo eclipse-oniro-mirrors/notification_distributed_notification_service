@@ -91,6 +91,19 @@ public:
      */
     std::shared_ptr<ffrt::queue> GetNotificationSvrQueue();
 
+    /**
+     * @brief Submit an async task into notification_svr_queue.
+     *
+     * @param func Indicates the function.
+     */
+    void SubmitAsyncTask(const std::function<void()>& func);
+    /**
+     * @brief Submit a sync task into notification_svr_queue.
+     *
+     * @param func Indicates the function.
+     */
+    void SubmitSyncTask(const std::function<void()>& func);
+
     // AnsManagerStub
 
     /**
@@ -566,46 +579,6 @@ public:
     ErrCode IsSpecialBundleAllowedNotify(const sptr<NotificationBundleOption> &bundleOption, bool &allowed) override;
 
     /**
-     * @brief Set do not disturb date.
-     *
-     * @param date Indicates the NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetDoNotDisturbDate(const sptr<NotificationDoNotDisturbDate> &date) override;
-
-    /**
-     * @brief Get do not disturb date.
-     *
-     * @param date Indicates the NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date) override;
-
-    /**
-     * @brief Add Do Not Disturb profiles.
-     *
-     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to add.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AddDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
-
-    /**
-     * @brief Remove Do Not Disturb profiles.
-     *
-     * @param profiles Indicates the list of NotificationDoNotDisturbProfile objects to remove.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode RemoveDoNotDisturbProfiles(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles) override;
-
-    /**
-     * @brief Get whether Do Not Disturb mode is supported.
-     *
-     * @param doesSupport Indicates the flag that supports DND mode.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override;
-
-    /**
      * @brief Is coming call need silent in do not disturb mode.
      *
      * @param phoneNumber the calling format number.
@@ -743,23 +716,6 @@ public:
      */
     ErrCode DeleteAllByUser(const int32_t &userId) override;
 
-    /**
-     * @brief Set do not disturb date by user.
-     *
-     * @param userId Indicates the user id.
-     * @param date Indicates NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetDoNotDisturbDate(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date) override;
-
-    /**
-     * @brief Get the do not disturb date by user.
-     *
-     * @param userId Indicates the user id.
-     * @param date Indicates the NotificationDoNotDisturbDate object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -1148,15 +1104,6 @@ public:
     ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
 
     /**
-     * @brief Get do not disturb profile by id.
-     *
-     * @param id Profile id.
-     * @param status Indicates the NotificationDoNotDisturbProfile object.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
-
-    /**
      * @brief Distribution operation based on hashCode.
      *
      * @param hashCode Unique ID of the notification.
@@ -1332,8 +1279,6 @@ private:
     void InitDistributeCallBack();
 #endif
 
-    ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
     static ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);

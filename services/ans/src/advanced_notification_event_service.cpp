@@ -92,7 +92,9 @@ void AdvancedNotificationService::SendPublishHiSysEvent(const sptr<NotificationR
     eventInfo.userId = request->GetCreatorUserId();
     eventInfo.slotType = request->GetSlotType();
     eventInfo.classification = request->GetClassification();
-    eventInfo.reminderFlags = request->GetFlags()->GetReminderFlags();
+    if (request->GetFlags() != nullptr) {
+        eventInfo.reminderFlags = request->GetFlags()->GetReminderFlags();
+    }
     eventInfo.notificationControlFlags = request->GetNotificationControlFlags();
     if (errCode != ERR_OK) {
         eventInfo.errCode = errCode;

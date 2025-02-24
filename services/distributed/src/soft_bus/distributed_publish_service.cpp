@@ -38,10 +38,13 @@ namespace Notification {
 namespace {
 constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t OPERATION_DELETE_BRANCH = 2;
 constexpr const int32_t BRANCH3_ID = 3;
 constexpr const int32_t BRANCH4_ID = 4;
+constexpr const int32_t BRANCH6_ID = 6;
+constexpr const int32_t BRANCH9_ID = 9;
 }
 
 int64_t GetCurrentTime()
@@ -168,14 +171,7 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
         request->SetSlotType(static_cast<NotificationConstant::SlotType>(type));
     }
     if (box.GetReminderFlag(type)) {
-        uint32_t controlFlags = 0;
-        if (!(type & NotificationConstant::ReminderFlag::SOUND_FLAG)) {
-            controlFlags |= NotificationConstant::ReminderFlag::SOUND_FLAG;
-        }
-        if (!(type & NotificationConstant::ReminderFlag::VIBRATION_FLAG)) {
-            controlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
-        }
-        request->SetNotificationControlFlags(controlFlags);
+        request->SetCollaboratedReminderFlag(static_cast<uint32_t>(type));
     }
     if (box.GetCreatorBundleName(context)) {
         request->SetOwnerBundleName(context);
@@ -283,6 +279,9 @@ void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxM
 
 void DistributedService::AbnormalReporting(int result, uint32_t branchId, const std::string &errorReason)
 {
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
     if (result != 0) {
         SendEventReport(0, result, errorReason);
     }
@@ -344,6 +343,7 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
         }
     }
 
+    code_ = MODIFY_ERROR_EVENT_CODE;
     bool isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     ANS_LOGI("Screen locked status, isScreenLocked: %{public}d.", isScreenLocked);
     if (isScreenLocked) {
@@ -354,11 +354,24 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
         int32_t unlockResult =
             ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener);
         ANS_LOGI("unlock result:%{public}d", unlockResult);
+        if (unlockResult != ERR_OK) {
+            std::string errorReason = "unlock failed";
+            AbnormalReporting(unlockResult, BRANCH6_ID, errorReason);
+        }
         info.want = *wantPtr;
         OperationService::GetInstance().AddOperation(info);
     } else {
         auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
         ANS_LOGI("StartAbility result:%{public}d", ret);
+        std::string errorReason = "pull up success";
+        if (ret == ERR_OK) {
+            OperationalReporting(BRANCH3_ID, NotificationConstant::SlotType::LIVE_VIEW);
+        } else {
+            errorReason = "pull up failed";
+            int32_t messageType = 0;
+            AbnormalReporting(messageType, ret, errorReason);
+        }
+        AbnormalReporting(ret, BRANCH9_ID, errorReason);
     }
 }
 }

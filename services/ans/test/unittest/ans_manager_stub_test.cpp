@@ -3432,7 +3432,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
     data.WriteBool(isForceControl);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**
@@ -4922,19 +4922,6 @@ HWTEST_F(AnsManagerStubTest, HandleAddDoNotDisturbProfiles_0200, TestSize.Level1
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_OK);
-}
-
-/**
- * @tc.name: HandleRemoveDoNotDisturbProfiles_0100
- * @tc.desc: test HandleRemoveDoNotDisturbProfiles when ReadParcelableVector return false.
- * @tc.type: FUNC
- */
-HWTEST_F(AnsManagerStubTest, HandleRemoveDoNotDisturbProfiles_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode ret = ansManagerStub_->HandleRemoveDoNotDisturbProfiles(data, reply);
-    EXPECT_EQ(ret, ERR_ANS_PARCELABLE_FAILED);
 }
 
 /**

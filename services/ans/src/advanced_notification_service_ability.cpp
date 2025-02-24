@@ -43,11 +43,12 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
 
     service_ = AdvancedNotificationService::GetInstance();
+    service_->CreateDialogManager();
+    service_->InitPublishProcess();
+    
     if (!Publish(service_)) {
         return;
     }
-    service_->CreateDialogManager();
-    service_->InitPublishProcess();
 
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();

@@ -27,7 +27,6 @@ ohos_shared_library("ans_core") {
   sources = [
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_manager_proxy.cpp",
-    "${core_path}/src/ans_manager_stub.cpp",
     "${core_path}/src/ans_notification.cpp",
     "${core_path}/src/ans_subscriber_proxy.cpp",
     "${core_path}/src/ans_subscriber_stub.cpp",

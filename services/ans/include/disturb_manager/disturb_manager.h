@@ -30,8 +30,9 @@ namespace OHOS {
 namespace Notification {
 class DisturbManager final : protected BaseManager, public DelayedSingleton<DisturbManager> {
 public:
-    DisturbManager() = default;
+    DisturbManager();
     ~DisturbManager() = default;
+    using ExecutionType = std::function<ErrCode(MessageParcel &data, MessageParcel &reply)>;
 public:
     /**
      * @brief Handle remote request.
@@ -43,18 +44,33 @@ public:
      */
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply);
 private:
-    ErrCode RemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
-    ErrCode SetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply);
-    ErrCode GetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleSetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetDoNotDisturbDate(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetDoNotDisturbDateByUser(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleDoesSupportDoNotDisturbMode(MessageParcel &data, MessageParcel &reply);
 
 private:
-    int32_t CheckInterfacePermission(uint32_t code);
-    ErrCode RemoveDoNotDisturbProfilesInner(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    ErrCode SetDoNotDisturbDateInner(const sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode GetDoNotDisturbDateInner(sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
+    int32_t CheckSystemAndControllerPermission();
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
+    ErrCode SetDoNotDisturbDate(const sptr<NotificationDoNotDisturbDate> &date);
+
+    ErrCode RemoveDoNotDisturbProfilesSyncQueue(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    ErrCode GetDoNotDisturbDateSyncQueue(sptr<NotificationDoNotDisturbDate> &date);
+    ErrCode GetDoNotDisturbDateByUserSyncQueue(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
+    ErrCode SetDoNotDisturbDateByUserSyncQueue(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
+    ErrCode AddDoNotDisturbProfilesSyncQueue(const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+
+    ErrCode SetDoNotDisturbDateByUserInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
+    ErrCode GetDoNotDisturbDateByUserInner(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
+    ErrCode GetDoNotDisturbProfileInner(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+    ErrCode DoesSupportDoNotDisturbModeInner(bool &doesSupport);
+private:
+    std::map<uint32_t, ExecutionType> codeAndExecuteFuncMap_;
+    std::map<uint32_t, std::function<ErrCode()>> codeAndPermissionFuncMap_;
 };
 }  // namespace Notification
 }  // namespace OHOS

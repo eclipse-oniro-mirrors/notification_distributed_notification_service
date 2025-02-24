@@ -902,81 +902,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 }
 
 /**
- * @tc.number  : AdvancedNotificationService_04400
- * @tc.name    : AdvancedNotificationService_04400
- * @tc.desc    : Test SetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04400, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04500
- * @tc.name    : AdvancedNotificationService_04500
- * @tc.desc    : Test SetDoNotDisturbDate function and GetActiveUserId is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04500, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    MockQueryForgroundOsAccountId(false, 1);
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_GET_ACTIVE_USER_FAILED);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04600
- * @tc.name    : AdvancedNotificationService_04600
- * @tc.desc    : Test GetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04600, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04700
- * @tc.name    : AdvancedNotificationService_04700
- * @tc.desc    : Test GetDoNotDisturbDate function and GetActiveUserId is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04700, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    MockQueryForgroundOsAccountId(false, 1);
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_GET_ACTIVE_USER_FAILED);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04800
- * @tc.name    : AdvancedNotificationService_04800
- * @tc.desc    : Test DoesSupportDoNotDisturbMode function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04800, Function | SmallTest | Level1)
-{
-    bool doesSupport = true;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
  * @tc.number  : AdvancedNotificationService_04900
  * @tc.name    : AdvancedNotificationService_04900
  * @tc.desc    : Test EnableDistributed function and CheckPermission is false
@@ -1102,38 +1027,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.SetNotificationsEnabledByUser(userId, allowed), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_05700
- * @tc.name    : AdvancedNotificationService_05700
- * @tc.desc    : Test SetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05700, Function | SmallTest | Level1)
-{
-    int32_t userId = 1;
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_05800
- * @tc.name    : AdvancedNotificationService_05800
- * @tc.desc    : Test GetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05800, Function | SmallTest | Level1)
-{
-    int32_t userId = 1;
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**

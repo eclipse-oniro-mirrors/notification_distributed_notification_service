@@ -73,8 +73,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         return nullptr;
     }
 
-    int32_t value = 0;
-    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &value));
+    uint32_t value = 0;
+    NAPI_CALL(env, napi_get_value_uint32(env, argv[PARAM1], &value));
     params.status = 0;
     params.status |= (value & (1 << USING_FLAG));
     params.status |= ((value & (1 << OWNER_FLAG)) << 1);
