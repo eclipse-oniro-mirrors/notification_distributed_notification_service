@@ -262,6 +262,16 @@ public:
     ErrCode GetActiveNotificationNums(uint64_t &num) override;
 
     /**
+     * @brief Obtains all active notifications by slot type in the current system. The caller must have system
+     * permissions to call this method.
+     *
+     * @param notification Indicates all active notifications of this application.
+     * @return Returns get all active notifications
+     */
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType) override;
+
+    /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
      * call this method.
      *

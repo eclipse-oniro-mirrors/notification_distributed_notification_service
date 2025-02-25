@@ -129,18 +129,9 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
     });
 }
 
-void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
+void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
 {
-    if (!TlvBox::CheckMessageCRC((const unsigned char*)data, dataLen)) {
-        ANS_LOGW("Dans check message crc failed.");
-        return;
-    }
-    std::shared_ptr<TlvBox> box = std::make_shared<TlvBox>();
-    if (!box->Parse((const unsigned char*)data, dataLen - sizeof(uint32_t))) {
-        ANS_LOGW("Dans parse message failed.");
-        return;
-    }
-    if (serviceQueue_ == nullptr) {
+    if (serviceQueue_ == nullptr || box == nullptr) {
         ANS_LOGE("Check handler is null.");
         return;
     }
@@ -150,6 +141,7 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
             ANS_LOGW("Dans invalid message type failed.");
             return;
         }
+        ANS_LOGI("Dans handle message type %{public}d.", type);
         switch (type) {
             case NotificationEventType::PUBLISH_NOTIFICATION:
                 PublishNotifictaion(box);
@@ -169,6 +161,9 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
             case NotificationEventType::BUNDLE_ICON_SYNC:
                 HandleBundleIconSync(box);
                 break;
+            case NotificationEventType::SYNC_NOTIFICATION:
+                HandleNotificationSync(box);
+                break;
             case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
                 HandleResponseSync(box);
                 break;
@@ -178,6 +173,20 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
         }
     });
     serviceQueue_->submit(task);
+}
+
+void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
+{
+    if (!TlvBox::CheckMessageCRC((const unsigned char*)data, dataLen)) {
+        ANS_LOGW("Dans check message crc failed.");
+        return;
+    }
+    std::shared_ptr<TlvBox> box = std::make_shared<TlvBox>();
+    if (!box->Parse((const unsigned char*)data, dataLen - sizeof(uint32_t))) {
+        ANS_LOGW("Dans parse message failed.");
+        return;
+    }
+    OnHandleMsg(box);
 }
 
 int64_t DistributedService::GetCurrentTime()

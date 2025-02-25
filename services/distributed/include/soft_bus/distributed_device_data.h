@@ -52,6 +52,7 @@ struct DistributedDeviceInfo {
     int32_t peerState_ = DeviceState::STATE_INIT;
     int32_t socketId_ = -1;
     int32_t connectedTry_ = 0;
+    bool isSync = false;
 };
 
 struct ConnectedSocketInfo {

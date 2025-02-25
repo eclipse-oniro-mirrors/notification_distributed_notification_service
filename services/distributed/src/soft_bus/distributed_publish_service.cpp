@@ -31,12 +31,13 @@
 #include "power_mgr_client.h"
 #include "distributed_local_config.h"
 #include "distributed_operation_service.h"
+#include "notification_sync_box.h"
 
 namespace OHOS {
 namespace Notification {
 
 namespace {
-constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
+const std::string DISTRIBUTED_LABEL = "ans_distributed";
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
@@ -299,6 +300,49 @@ void DistributedService::OperationalReporting(int branchId, int32_t slotType)
     }
     std::string reason;
     haCallback_(ANS_CUSTOMIZE_CODE, slotType, branchId, reason);
+}
+
+void DistributedService::HandleNotificationSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    std::unordered_set<std::string> notificationList;
+    NotificationSyncBox notificationSyncBox = NotificationSyncBox(boxMessage);
+    if (!notificationSyncBox.GetNotificationList(notificationList)) {
+        ANS_LOGW("Dans get sync notification failed.");
+        return;
+    }
+    std::vector<sptr<Notification>> notifications;
+    auto result = NotificationHelper::GetAllNotificationsBySlotType(notifications,
+        NotificationConstant::SlotType::LIVE_VIEW);
+    if (result != ERR_OK || notifications.empty() || notificationList.empty()) {
+        ANS_LOGI("Dans get all active %{public}d %{public}d.", result, notifications.empty());
+        return;
+    }
+
+    ANS_LOGI("Dans handle sync notification %{public}u %{public}u.", notificationList.size(),
+        notifications.size());
+    std::vector<std::string> removeList;
+    for (auto& notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
+            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            ANS_LOGI("Dans no need sync remove notification.");
+            continue;
+        }
+        std::string hashCode = notification->GetKey();
+        size_t pos = hashCode.find(DISTRIBUTED_LABEL);
+        if (pos != std::string::npos) {
+            hashCode.erase(pos, DISTRIBUTED_LABEL.length());
+        }
+        if (notificationList.find(hashCode) == notificationList.end()) {
+            removeList.push_back(notification->GetKey());
+            ANS_LOGI("Dans sync remove notification %{public}s.", notification->GetKey().c_str());
+        }
+    }
+    if (!removeList.empty()) {
+        int result = IN_PROCESS_CALL(
+            NotificationHelper::RemoveNotifications(removeList,
+            NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+        ANS_LOGI("Dans sync remove message %{public}d.", result);
+    }
 }
 
 void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage)

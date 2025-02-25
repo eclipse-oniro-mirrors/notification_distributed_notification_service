@@ -34,6 +34,7 @@ enum NotificationEventType : int32_t {
     BUNDLE_ICON_SYNC = 7,
     REMOVE_ALL_NOTIFICATIONS = 8,
     NOTIFICATION_RESPONSE_SYNC = 9,
+    SYNC_NOTIFICATION = 10,
 };
 
 enum TlvType : int32_t {

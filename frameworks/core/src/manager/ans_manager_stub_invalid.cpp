@@ -130,6 +130,13 @@ ErrCode AnsManagerStub::GetAllActiveNotifications(std::vector<sptr<Notification>
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType)
+{
+    ANS_LOGE("AnsManagerStub::GetAllNotificationsBySlotType called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::GetSpecialActiveNotifications(
     const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications)
 {
