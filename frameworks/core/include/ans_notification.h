@@ -1261,6 +1261,13 @@ private:
     bool CanPublishMediaContent(const NotificationRequest &request) const;
 
     /**
+     * @brief Resize whether the picture size exceeds the limit.
+     *
+     * @param request Indicates the specified request.
+     */
+    void ResizeIcon(const sptr<NotificationRequest> request);
+
+    /**
      * @brief Checks whether the picture size exceeds the limit.
      *
      * @param request Indicates the specified request.
