@@ -334,7 +334,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     InitDistributeCallBack();
-    DistributedDeviceManager::GetInstance().RegisterDms(true);
 #endif
 }
 
