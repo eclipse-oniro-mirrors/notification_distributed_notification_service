@@ -663,6 +663,10 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         isThirdparty = true;
     }
     auto record = MakeNotificationRecord(request, bundleOption);
+    if (record == nullptr) {
+        ANS_LOGE("Make notification record failed.");
+        return ERR_ANS_NO_MEMORY;
+    }
     record->isThirdparty = isThirdparty;
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
