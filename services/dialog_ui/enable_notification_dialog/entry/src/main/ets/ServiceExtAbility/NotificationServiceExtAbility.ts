@@ -21,7 +21,6 @@ import CommonEventManager from '@ohos.commonEventManager';
 import type Want from '@ohos.app.ability.Want';
 import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
-import uiExtension from '@ohos.arkui.uiExtension';
 import uiExtensionHost from '@ohos.uiExtensionHost';
 import StartOptions from '@ohos.app.ability.StartOptions';
 import configPolicy from '@ohos.configPolicy';
@@ -159,8 +158,8 @@ export class EnableNotificationDialog {
         if(isPcDevice) {
           let hasDisalogRectInfo = false;
           let waiteTimes = 0;
-          extensionWindow.on('rectChange', uiExtension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
-            console.info(TAG, `windowRectChange ts event ${data.rect?.left},${data.rect?.top}, ${data.rect?.width}, ${data.rect?.height}`);
+          extensionWindow.on('windowSizeChange', (data):void => {
+            console.info(TAG, `windowSizeChange ts event ${data?.width}, ${data?.height}`);
             hasDisalogRectInfo = true;
           });
           while(!hasDisalogRectInfo && waiteTimes < 10){
