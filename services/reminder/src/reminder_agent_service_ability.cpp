@@ -40,6 +40,9 @@ void ReminderAgentServiceAbility::OnStart()
     }
 
     service_ = ReminderAgentService::GetInstance();
+    if (service_ == nullptr) {
+        return;
+    }
     reminderDataManager_ = ReminderDataManager::InitInstance();
     reminderDataManager_->Init();
     if (!Publish(service_)) {
