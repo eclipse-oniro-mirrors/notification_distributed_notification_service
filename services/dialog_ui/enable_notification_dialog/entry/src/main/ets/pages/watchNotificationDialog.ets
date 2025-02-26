@@ -254,6 +254,7 @@ struct PermissionDialog {
     this.session = storage.get('session') as UIExtensionContentSession;
     try {
       await this.updateStatus();
+      await this.dialog?.dialogOpenEvent();
     } catch (err) {
       console.error(TAG, `aboutToAppear error : ${err?.code}`);
       await this.dialog?.destroyException();

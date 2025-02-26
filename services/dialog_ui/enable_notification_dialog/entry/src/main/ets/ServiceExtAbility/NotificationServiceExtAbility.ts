@@ -47,7 +47,9 @@ enum DialogStatus {
   ALLOW_CLICKED,
   DENY_CLICKED,
   DIALOG_CRASHED,
-  DIALOG_SERVICE_DESTROYED
+  DIALOG_SERVICE_DESTROYED,
+  REMOVE_BUNDLE,
+  DIALOG_OPEN
 };
 
 async function handleDialogQuitException(want: Want): Promise<void> {
@@ -228,6 +230,21 @@ export class EnableNotificationDialog {
     );
   }
 
+  async dialogOpenEvent(): Promise<void> {
+    CommonEventManager.publish(
+      COMMON_EVENT_NAME,
+      {
+        code: DialogStatus.DIALOG_OPEN,
+        data: this.want.parameters.bundleName.toString(),
+        parameters: {
+          bundleName: this.want.parameters.bundleName.toString(),
+          bundleUid: this.want.parameters.bundleUid.toString()
+        }
+      } as CommonEventManager.CommonEventPublishData,
+      () => { console.info(TAG, 'publish DIALOG OPEN event succeeded'); }
+    );
+  }
+  
   async destroyException(): Promise<void> {
     await handleDialogQuitException(this.want);
   }
