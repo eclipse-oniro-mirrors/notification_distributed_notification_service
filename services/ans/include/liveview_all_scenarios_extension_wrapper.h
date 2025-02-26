@@ -30,10 +30,13 @@ public:
     void CloseExtentionWrapper();
     typedef ErrCode (*UPDATE_LIVEVIEW_REMINDER_FLAGS)(const sptr<NotificationRequest> &request);
     ErrCode UpdateLiveviewReminderFlags(const sptr<NotificationRequest> &request);
+    typedef ErrCode (*UPDATE_LIVEVIEW_VOICE_CONTENT)(const sptr<NotificationRequest> &request);
+    ErrCode UpdateLiveviewVoiceContent(const sptr<NotificationRequest> &request);
 
 private:
     void* ExtensionHandle_ = nullptr;
     UPDATE_LIVEVIEW_REMINDER_FLAGS updateLiveviewReminderFlags_ = nullptr;
+    UPDATE_LIVEVIEW_VOICE_CONTENT updateLiveviewVoiceContent_ = nullptr;
 };
 
 #define LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER \

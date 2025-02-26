@@ -1100,7 +1100,7 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
         if ((*iter)->notification->GetKey() == record->notification->GetKey()) {
             record->request->FillMissingParameters((*iter)->request);
             if (record->request->IsCommonLiveView()) {
-                LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(record->request);
+                LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(record->request);
             }
             FillLockScreenPicture(record->request, (*iter)->request);
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
