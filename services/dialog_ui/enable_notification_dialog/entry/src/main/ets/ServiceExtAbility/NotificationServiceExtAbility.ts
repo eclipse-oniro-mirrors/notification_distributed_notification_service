@@ -90,6 +90,7 @@ export class EnableNotificationDialog {
   storage: LocalStorage;
   stageModel: boolean;
   subWindow: window.Window;
+  initSubWindowSize: boolean;
 
   constructor(id: number, want: Want, stageModel: boolean) {
     this.id = id;
@@ -97,6 +98,7 @@ export class EnableNotificationDialog {
     this.stageModel = stageModel;
     this.window = undefined;
     this.extensionWindow = undefined;
+    this.initSubWindowSize = false;
   }
 
 
@@ -113,6 +115,7 @@ export class EnableNotificationDialog {
 
       let path = EnableNotificationDialog.DIALOG_PATH;
       let hasConfig = true;
+      let isPcDevice = false;
       try {
         let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
         if (filePaths.length === 0) {
@@ -132,6 +135,7 @@ export class EnableNotificationDialog {
               }
               if (deviceInfo.isPc !== undefined) {
                 path = EnableNotificationDialog.PC_DIALOG_PATH;
+                isPcDevice = true;
                 console.info(TAG, 'pc request');
               }
             }
@@ -150,11 +154,38 @@ export class EnableNotificationDialog {
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
-        await this.sleep(200);
-        let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-        console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
-        await subWindow.moveWindowTo(windowRect?.left, windowRect?.top);
-        await subWindow.resize(windowRect?.width, windowRect?.height);
+        
+        if(isPcDevice) {
+          let hasDisalogRectInfo = false;
+          let waiteTimes = 0;
+          extensionWindow.on('windowSizeChange', (data):void => {
+            console.info(TAG, `windowSizeChange ts event ${data?.width}, ${data?.height}`);
+            hasDisalogRectInfo = true;
+          });
+          while(!hasDisalogRectInfo && waiteTimes < 10){
+            waiteTimes ++;
+            await this.sleep(200);
+          }
+          if(hasDisalogRectInfo) {
+            let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+            console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
+            await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
+            await subWindow.resize(windowRect?.width, windowRect?.height);
+            hasDisalogRectInfo = false;
+          } else {
+            console.info(TAG,'waite send windwow info fail');
+            throw new Error('Failed to create window');
+          }
+        } else {
+          let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+          console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
+          if (windowRect.width > 0 && windowRect.height > 0) {
+            console.log(TAG, `valid rect data`);
+            await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
+            await subWindow.resize(windowRect?.width, windowRect?.height);
+            this.initSubWindowSize = true;
+          }
+        }
         await subWindow.loadContent(path, this.storage);
         try {
           await subWindow.hideNonSystemFloatingWindows(true);
