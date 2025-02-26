@@ -19,6 +19,7 @@
 #include "common_event_manager.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_device_manager.h"
+#include "advanced_datashare_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -55,10 +56,8 @@ void AdvancedNotificationServiceAbility::OnStart()
 #else
     ANS_LOGI("Not enabled ans_ext");
 #endif
-#ifdef ENABLE_ANS_AGGREATION
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
-#endif
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
 
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
@@ -81,7 +80,9 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
             if (isDatashaReready_) {
                 return;
             }
+#ifdef ENABLE_ANS_AGGREATION
             EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+#endif
             isDatashaReready_ = true;
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
@@ -122,9 +123,12 @@ void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEv
     auto const &want = data.GetWant();
     std::string action = want.GetAction();
     if (action == "usual.event.DATA_SHARE_READY") {
+        AdvancedDatashareHelper::SetIsDataShareReady(true);
         isDatashaReready_ = true;
         ANS_LOGI("COMMON_EVENT_SERVICE_ID OnReceiveEvent ok!");
+#ifdef ENABLE_ANS_AGGREATION
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+#endif
     }
 }
 

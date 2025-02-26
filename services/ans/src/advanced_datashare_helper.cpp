@@ -29,6 +29,7 @@
 
 namespace OHOS {
 namespace Notification {
+bool AdvancedDatashareHelper::isDataShareReady_ = false;
 namespace {
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr const char *SETTINGS_DATASHARE_URI =
@@ -78,6 +79,10 @@ AdvancedDatashareHelper::AdvancedDatashareHelper()
 
 std::shared_ptr<DataShare::DataShareHelper> AdvancedDatashareHelper::CreateDataShareHelper()
 {
+    if (!isDataShareReady_) {
+        ANS_LOGE("dataShare is not ready");
+        return nullptr;
+    }
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (saManager == nullptr) {
         ANS_LOGE("The sa manager is nullptr.");
@@ -373,6 +378,11 @@ std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, 
 std::string AdvancedDatashareHelper::GetIntelligentUri()
 {
     return GetIntelligentData(INTELLIGENT_SCENE_DATA, KEY_INTELLIGENT_SCENE_DATA);
+}
+
+void AdvancedDatashareHelper::SetIsDataShareReady(bool isDataShareReady)
+{
+    isDataShareReady_ = isDataShareReady;
 }
 } // namespace Notification
 } // namespace OHOS

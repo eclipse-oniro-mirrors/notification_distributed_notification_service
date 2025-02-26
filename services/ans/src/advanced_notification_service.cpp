@@ -34,6 +34,7 @@
 #include "notification_bundle_option.h"
 #include "notification_record.h"
 #include "os_account_manager_helper.h"
+#include "os_account_manager.h"
 #ifdef DEVICE_USAGE_STATISTICS_ENABLE
 #include "bundle_active_client.h"
 #endif
@@ -97,6 +98,7 @@ constexpr int32_t RESSCHED_UID = 1096;
 constexpr int32_t TYPE_CODE_VOIP = 0;
 constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 14;
 constexpr int32_t CONTROL_BY_INTELLIGENT_EXPERIENCE = 1 << 31;
+constexpr int32_t FIRST_USERID = 0;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 const std::string INTELLIGENT_EXPERIENCE = "1";
@@ -807,6 +809,9 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         return;
     }
     int32_t userId = record->notification->GetRecvUserId();
+    if (userId == FIRST_USERID) {
+        OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    }
     std::string enable;
     std::string profileId;
     QueryDoNotDisturbProfile(userId, enable, profileId);
