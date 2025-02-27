@@ -47,7 +47,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     int32_t subscriberUid {DEFAULT_UID};
     bool needNotifyApplicationChanged = false;
     bool needNotifyResponse = false;
-    int32_t filterType {0};
+    uint32_t filterType {0};
     std::set<NotificationConstant::SlotType> slotTypes {};
 };
 
@@ -577,7 +577,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     if (isCommonLiveView) {
         liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
             notification->GetNotificationRequest().GetContent()->GetNotificationContent());
-        liveViewContent->FillPictureMarshallingMap();
     }
 
     ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
@@ -586,10 +585,6 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         if (IsSubscribedBysubscriber(record, notification)) {
             record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
         }
-    }
-
-    if (isCommonLiveView && liveViewContent != nullptr) {
-        liveViewContent->ClearPictureMarshallingMap();
     }
 }
 
@@ -633,7 +628,7 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
 {
     NotificationRequest request = notification->GetNotificationRequest();
     // filterType
-    ANS_LOGI("filterType = %{public}d", record->filterType);
+    ANS_LOGI("filterType = %{public}u", record->filterType);
     if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == request.GetSlotType()) {
         bool isQuickReply = request.HasUserInputButton();
         if (isQuickReply && (record->filterType & FILTETYPE_QUICK_REPLY_IM) > 0) {
@@ -679,7 +674,6 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
                 auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
                     requestContent->GetNotificationContent());
                 liveViewContent->ClearPictureMap();
-                liveViewContent->ClearPictureMarshallingMap();
                 ANS_LOGD("live view batch delete clear picture");
             }
             if (notification->GetNotificationRequest().IsSystemLiveView() &&
@@ -857,21 +851,21 @@ void NotificationSubscriberManager::TrackCodeLog(
     bool isLiveViewType = (slotType == NotificationConstant::SlotType::LIVE_VIEW);
     if (wearableFlag && headsetFlag) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
-                                    .syncWatchHeadSet(isLiveViewType)
-                                    .keyNode(keyNodeFlag)
+                                    .SyncWatchHeadSet(isLiveViewType)
+                                    .KeyNode(keyNodeFlag)
                                     .SlotType(slotType);
         NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
     } else {
         if (headsetFlag) {
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
-                                        .syncHeadSet(isLiveViewType)
-                                        .keyNode(keyNodeFlag)
+                                        .SyncHeadSet(isLiveViewType)
+                                        .KeyNode(keyNodeFlag)
                                         .SlotType(slotType);
             NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
         } else if (wearableFlag) {
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1)
-                                        .syncWatch(isLiveViewType)
-                                        .keyNode(keyNodeFlag)
+                                        .SyncWatch(isLiveViewType)
+                                        .KeyNode(keyNodeFlag)
                                         .SlotType(slotType);
             NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
         }

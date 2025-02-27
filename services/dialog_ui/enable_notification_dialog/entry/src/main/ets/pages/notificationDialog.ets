@@ -230,12 +230,29 @@ struct PermissionDialog {
         }
       });
       let avoidArea = this.dialog?.extensionWindow.getWindowAvoidArea(type);
-      if (avoidArea != undefined){
+      if (avoidArea != undefined) {
         console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
         this.naviHeight = avoidArea.bottomRect.height;
       }
     } catch (err) {
       console.error(TAG, `Failed to obtain the area. Cause: ${err?.code}`);
+    }
+  }
+
+  updateSubWindowSize(): void {
+    try {
+      this.dialog?.extensionWindow.on('windowSizeChange', (data):void => {
+        let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+        console.info(TAG, `windowSizeChange event, size = ${windowRect?.left}-${windowRect?.top}-${windowRect?.width}-${windowRect?.height}`);
+        if (!this.dialog?.initSubWindowSize && windowRect.width > 0 && windowRect.height > 0) {
+          console.info(TAG, `windowSizeChange first time update`);
+          this.dialog?.subWindow?.moveWindowToGlobal(windowRect?.left, windowRect?.top);
+          this.dialog?.subWindow?.resize(windowRect?.width, windowRect?.height);
+          this.dialog.initSubWindowSize = true;
+        }
+      });
+    } catch (err) {
+      console.error(TAG, `updateSubWindowSize error. Cause: ${err?.code}`);
     }
   }
 
@@ -295,8 +312,10 @@ struct PermissionDialog {
     this.dialog = storage.get('dialog') as EnableNotificationDialog;
     this.session = storage.get('session') as UIExtensionContentSession;
     this.updateAvoidWindow();
+    this.updateSubWindowSize();
     try {
       await this.updateStatus();
+      await this.dialog?.dialogOpenEvent();
     } catch (err) {
       console.error(TAG, `aboutToAppear error : ${err?.code}`);
       await this.dialog?.destroyException();

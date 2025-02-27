@@ -207,6 +207,7 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
     unsigned char* cached = new unsigned char[buffersize];
     errno_t err = memcpy_s(cached, buffersize, buffer, buffersize);
     if (err != EOK) {
+        delete[] cached;
         return false;
     }
 
@@ -220,7 +221,9 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
         offset += length;
     }
 
+    delete[] cached;
     bytesLength_ = buffersize;
+    delete[] cached;
     return true;
 }
 
@@ -284,13 +287,14 @@ bool TlvBox::SetMessageType(int32_t messageType)
 bool TlvBox::CheckMessageCRC(const unsigned char*data, uint32_t dataLen)
 {
     uint32_t calcSize = sizeof(uint32_t);
-    if (dataLen <= calcSize) {
+    if (dataLen <= calcSize || dataLen > MAX_BUFFER_LENGTH) {
+        ANS_LOGW("Box check length failed %{public}u.", dataLen);
         return false;
     }
     uint32_t recv = ntohl((*(uint32_t*)(data + dataLen - calcSize)));
     uint32_t calc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)data, dataLen - calcSize);
     if (calc != recv) {
-        ANS_LOGW("Box check crc32 failed %{public}d %{public}d.", recv, calc);
+        ANS_LOGW("Box check crc32 failed %{public}u %{public}u.", recv, calc);
         return false;
     }
     return true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace Notification {
-ErrCode DisturbManager::RemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)
+ErrCode DisturbManager::HandleRemoveDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     if (!ReadParcelableVector(profiles, data)) {
@@ -38,7 +38,7 @@ ErrCode DisturbManager::RemoveDoNotDisturbProfiles(MessageParcel &data, MessageP
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode result = RemoveDoNotDisturbProfilesInner(profiles);
+    ErrCode result = RemoveDoNotDisturbProfilesSyncQueue(profiles);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("Write result failed, ErrCode is %{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -46,7 +46,7 @@ ErrCode DisturbManager::RemoveDoNotDisturbProfiles(MessageParcel &data, MessageP
     return ERR_OK;
 }
 
-ErrCode DisturbManager::RemoveDoNotDisturbProfilesInner(
+ErrCode DisturbManager::RemoveDoNotDisturbProfilesSyncQueue(
     const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
     ANS_LOGD("Called.");
@@ -56,13 +56,11 @@ ErrCode DisturbManager::RemoveDoNotDisturbProfilesInner(
         ANS_LOGW("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
-    auto excuteQueue = AdvancedNotificationService::GetInstance()->GetNotificationSvrQueue();
-    ffrt::task_handle handler =
-        excuteQueue->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+    AdvancedNotificationService::GetInstance()->SubmitSyncTask(
+        std::bind([copyUserId = userId, copyProfiles = profiles]() {
             ANS_LOGD("The ffrt enter.");
             NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
         }));
-    excuteQueue->wait(handler);
     return ERR_OK;
 }
 }  // namespace Notification

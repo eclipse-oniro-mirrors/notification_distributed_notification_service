@@ -17,10 +17,17 @@
 
 #include "screenlock_common.h"
 #include "in_process_call_wrapper.h"
+#include "distributed_service.h"
 
 namespace OHOS {
 namespace Notification {
 
+namespace {
+constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+constexpr const int32_t BRANCH3_ID = 3;
+constexpr const int32_t BRANCH7_ID = 7;
+constexpr const int32_t BRANCH8_ID = 8;
+}
 UnlockScreenCallback::UnlockScreenCallback(const std::string& eventId) : eventId_(eventId) {}
 
 UnlockScreenCallback::~UnlockScreenCallback() {}
@@ -30,6 +37,11 @@ void UnlockScreenCallback::OnCallBack(int32_t screenLockResult)
     ANS_LOGI("Unlock Screen result: %{public}d", screenLockResult);
     if (screenLockResult == ScreenLock::ScreenChange::SCREEN_SUCC) {
         OperationService::GetInstance().TriggerOperation(eventId_);
+    } else {
+        std::string errorReason = "unlock screen failed";
+        int32_t messageType = 0;
+        DistributedService::GetInstance().SendEventReport(messageType, -1, errorReason);
+        DistributedService::GetInstance().SendHaReport(-1, BRANCH7_ID, errorReason);
     }
 }
 
@@ -72,6 +84,16 @@ void OperationService::TriggerOperation(std::string eventId)
     }
     if (iter->second.type == OperationType::OPERATION_CLICK_JUMP) {
         auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(iter->second.want));
+        std::string errorReason = "pull up success";
+        if (ret == ERR_OK) {
+            DistributedService::GetInstance().SendHaReport(
+                NotificationConstant::SlotType::LIVE_VIEW, BRANCH3_ID, errorReason, ANS_CUSTOMIZE_CODE);
+        } else {
+            errorReason = "pull up failed";
+            int32_t messageType = 0;
+            DistributedService::GetInstance().SendEventReport(messageType, ret, errorReason);
+        }
+        DistributedService::GetInstance().SendHaReport(ret, BRANCH8_ID, errorReason);
         operationInfoMaps_.erase(iter);
         ANS_LOGI("StartAbility result:%{public}s %{public}d", eventId.c_str(), ret);
         return;

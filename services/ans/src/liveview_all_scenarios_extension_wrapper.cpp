@@ -39,6 +39,14 @@ void LiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
+    updateLiveviewVoiceContent_ = (UPDATE_LIVEVIEW_VOICE_CONTENT)dlsym(ExtensionHandle_,
+        "UpdateLiveviewVoiceContent");
+    if (updateLiveviewVoiceContent_ == nullptr) {
+        ANS_LOGE("liveview all scenarios extension wrapper dlsym updateLiveviewVoiceContent_ failed, "
+            "error: %{public}s", dlerror());
+        return;
+    }
+
     ANS_LOGI("liveview all scenarios extension wrapper init success");
 }
 
@@ -57,5 +65,14 @@ ErrCode LiveviewAllScenariosExtensionWrapper::UpdateLiveviewReminderFlags(const 
         return 0;
     }
     return updateLiveviewReminderFlags_(request);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::UpdateLiveviewVoiceContent(const sptr<NotificationRequest> &request)
+{
+    if (updateLiveviewVoiceContent_ == nullptr) {
+        ANS_LOGE("UpdateLiveviewVoiceContent wrapper symbol failed");
+        return 0;
+    }
+    return updateLiveviewVoiceContent_(request);
 }
 }

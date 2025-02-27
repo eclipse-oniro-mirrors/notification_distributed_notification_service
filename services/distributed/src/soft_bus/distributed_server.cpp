@@ -78,7 +78,7 @@ int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t devi
         serverSocket_[key] = socketId;
     }
     for (auto& item : serverSocket_) {
-        ANS_LOGI("InitServer %{public}s %{public}s %{public}d", deviceId.c_str(),
+        ANS_LOGI("InitServer %{public}s %{public}s %{public}d", StringAnonymous(deviceId).c_str(),
             item.first.c_str(), item.second);
     }
     init.store(true);

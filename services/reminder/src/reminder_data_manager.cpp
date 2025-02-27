@@ -394,7 +394,6 @@ void ReminderDataManager::AddToShowedReminders(const sptr<ReminderRequest> &remi
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
         if (reminder->GetReminderId() == (*it)->GetReminderId() &&
             reminder->IsShare() == (*it)->IsShare()) {
-            ANSR_LOGD("Showed reminder is already exist");
             return;
         }
     }
@@ -461,7 +460,6 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
 {
     auto sharedTimerInfo = std::make_shared<ReminderTimerInfo>();
     if ((sharedTimerInfo->TIMER_TYPE_WAKEUP > UINT8_MAX) || (sharedTimerInfo->TIMER_TYPE_EXACT > UINT8_MAX)) {
-        ANSR_LOGE("Failed to set timer type.");
         return nullptr;
     }
     InitTimerInfo(sharedTimerInfo, reminderRequest, type);
@@ -475,6 +473,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
         case (TimerType::TRIGGER_TIMER): {
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
             sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
+            sharedTimerInfo->SetName("reminderTriggerTimer");
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, activeReminderId_);
             want->SetParam(ReminderRequest::PARAM_REMINDER_SHARE, reminderRequest->IsShare());
             break;
@@ -486,6 +485,7 @@ std::shared_ptr<ReminderTimerInfo> ReminderDataManager::CreateTimerInfo(TimerTyp
             }
             want->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
             sharedTimerInfo->SetAction(ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
+            sharedTimerInfo->SetName("reminderAlertingTimer");
             want->SetParam(ReminderRequest::PARAM_REMINDER_ID, alertingReminderId_);
             want->SetParam(ReminderRequest::PARAM_REMINDER_SHARE, reminderRequest->IsShare());
             break;
@@ -518,7 +518,6 @@ sptr<ReminderRequest> ReminderDataManager::FindReminderRequestLocked(const int32
             return *it;
         }
     }
-    ANSR_LOGD("Not find the reminder");
     return nullptr;
 }
 
@@ -561,7 +560,6 @@ void ReminderDataManager::CloseRemindersByGroupId(const int32_t &oldReminderId, 
     for (auto vit = reminderVector_.begin(); vit != reminderVector_.end(); vit++) {
         sptr<ReminderRequest> reminder = *vit;
         if (reminder == nullptr) {
-            ANSR_LOGD("reminder is null");
             continue;
         }
         int32_t reminderId = reminder->GetReminderId();
@@ -660,6 +658,7 @@ uint64_t ReminderDataManager::CreateTimer(const sptr<MiscServices::TimeServiceCl
     int32_t timerType = static_cast<int32_t>(timerTypeWakeup | timerTypeExact);
     timerInfo->SetType(timerType);
     timerInfo->SetReminderTimerType(ReminderTimerInfo::ReminderTimerType::REMINDER_TIMER_LOAD);
+    timerInfo->SetName("reminderLoadTimer");
     return timer->CreateTimer(timerInfo);
 }
 
@@ -833,10 +832,11 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     LoadReminderFromDb();
     int64_t now = GetCurrentTime();
     LoadShareReminders();
-    if (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME) {
+    if ((type == DATE_TIME_CHANGE) && (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME)) {
         lastStartTime_ = now;
-        ReminderDataShareHelper::GetInstance().StartDataExtension(type == TIME_ZONE_CHANGE ?
-            ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE : ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+        ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+    } else if (type == TIME_ZONE_CHANGE) {
+        ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE);
     }
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;

@@ -25,6 +25,7 @@
 #include "bundle_icon_box.h"
 #include "distributed_preference.h"
 #include "bundle_resource_helper.h"
+#include "notification_sync_box.h"
 
 namespace OHOS {
 namespace Notification {
@@ -50,32 +51,11 @@ namespace {
 constexpr uint32_t DEFAULT_LOCK_SCREEN_FLAG = 2;
 }
 
-void DistributedService::SetCurrentUserId(int32_t userId)
-{
-    if (serviceQueue_ == nullptr) {
-        ANS_LOGE("Check handler is null.");
-        return;
-    }
-    std::function<void()> task = std::bind([&, userId]() {
-        userId_ = userId;
-        for (auto& subscriberItem : subscriberMap_) {
-            sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
-            subscribeInfo->AddAppUserId(userId_);
-            int result = NotificationHelper::SubscribeNotification(subscriberItem.second, subscribeInfo);
-            if (result != 0) {
-                ANS_LOGW("Dans subscribe failed %{public}d %{public}s", result, subscriberItem.first.c_str());
-            }
-        }
-        ANS_LOGI("Dans set current userId %{public}d %{public}u", userId_, subscriberMap_.size());
-    });
-    serviceQueue_->submit(task);
-}
-
 void DistributedService::InitDeviceState(const DistributedDeviceInfo device)
 {
     if (device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE &&
         localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        uint32_t state = OberverService::GetInstance().IsScreenLocked();
+        int32_t state = OberverService::GetInstance().IsScreenLocked();
         SyncDeviceState(state);
     }
 }
@@ -138,9 +118,76 @@ int32_t DistributedService::SyncDeviceMatch(const DistributedDeviceInfo peerDevi
         matchBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d %{public}s %{public}d %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_, type);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_, type);
     return result;
+}
+
+void DistributedService::SyncAllLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce)
+{
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
+
+    auto iter = peerDevice_.find(peerDevice.deviceId_);
+    if (iter == peerDevice_.end() || (!isForce && iter->second.isSync)) {
+        ANS_LOGI("Dans %{public}s %{public}d %{public}d.", StringAnonymous(peerDevice.deviceId_).c_str(),
+            isForce, iter->second.isSync);
+        return;
+    }
+
+    std::vector<sptr<Notification>> notifications;
+    auto result = NotificationHelper::GetAllNotificationsBySlotType(notifications,
+        NotificationConstant::SlotType::LIVE_VIEW);
+    if (result != ERR_OK || notifications.empty()) {
+        ANS_LOGI("Dans get all active %{public}d %{public}d.", result, notifications.empty());
+        return;
+    }
+
+    std::vector<std::string> notificationList;
+    for (auto& notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
+            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            ANS_LOGI("Dans no need sync remove notification.");
+            continue;
+        }
+        notificationList.push_back(notification->GetKey());
+    }
+    SyncNotifictionList(peerDevice, notificationList);
+
+    for (auto& notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
+            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            ANS_LOGI("Dans no need sync notification.");
+            continue;
+        }
+        std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+        SendNotifictionRequest(sharedNotification, peerDevice, true);
+    }
+}
+
+void DistributedService::SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
+    const std::vector<std::string>& notificationList)
+{
+    if (notificationList.empty()) {
+        return;
+    }
+
+    ANS_LOGI("Dans sync notification %{public}u.", notificationList.size());
+    NotificationSyncBox notificationSyncBox;
+    notificationSyncBox.SetLocalDeviceId(peerDevice.deviceId_);
+    notificationSyncBox.SetNotificationList(notificationList);
+
+    if (!notificationSyncBox.Serialize()) {
+        ANS_LOGW("Dans SyncNotifictionList serialize failed.");
+        return;
+    }
+    int32_t result = DistributedClient::GetInstance().SendMessage(notificationSyncBox.GetByteBuffer(),
+        notificationSyncBox.GetByteLength(), TransDataType::DATA_TYPE_BYTES,
+        peerDevice.deviceId_, peerDevice.deviceType_);
+    ANS_LOGI("Dans SyncNotifictionList %{public}s %{public}d %{public}s %{public}d.",
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage)
@@ -166,12 +213,21 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
     ANS_LOGI("Dans handle match device type %{public}d.", matchType);
     if (matchType == MatchType::MATCH_SYN) {
         SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
+        SyncAllLiveViewNotification(peerDevice, true);
     } else if (matchType == MatchType::MATCH_ACK) {
         InitDeviceState(peerDevice);
         RequestBundlesIcon(peerDevice);
         ReportBundleIconList(peerDevice);
         SubscribeNotifictaion(peerDevice);
+        SyncAllLiveViewNotification(peerDevice, false);
     }
+
+    auto iter = peerDevice_.find(peerDevice.deviceId_);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGI("Dans get deviceId unknonw %{public}s.", peerDevice.deviceId_.c_str());
+        return;
+    }
+    iter->second.isSync = true;
 }
 
 bool DistributedService::CheckPeerDevice(const BundleIconBox& boxMessage, DistributedDeviceInfo& device)
@@ -183,7 +239,7 @@ bool DistributedService::CheckPeerDevice(const BundleIconBox& boxMessage, Distri
     }
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
-        ANS_LOGI("Dans get deviceId unknonw %{public}s.", deviceId.c_str());
+        ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(deviceId).c_str());
         return false;
     }
     device = iter->second;
@@ -210,8 +266,8 @@ void DistributedService::ReportBundleIconList(const DistributedDeviceInfo peerDe
         iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d %{public}s %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::RequestBundlesIcon(const DistributedDeviceInfo peerDevice)
@@ -231,8 +287,8 @@ void DistributedService::RequestBundlesIcon(const DistributedDeviceInfo peerDevi
         iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans RequestBundlesIcon %{public}s %{public}d %{public}s %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
@@ -250,8 +306,8 @@ void DistributedService::UpdateBundlesIcon(const std::unordered_map<std::string,
         iconBox.GetByteLength(), TransDataType::DATA_TYPE_BYTES,
         peerDevice.deviceId_, peerDevice.deviceType_);
     ANS_LOGI("Dans UpdateBundlesIcon %{public}s %{public}d %{public}s %{public}d.",
-        peerDevice.deviceId_.c_str(), peerDevice.deviceType_, localDevice_.deviceId_.c_str(),
-        localDevice_.deviceType_);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
+        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
 }
 
 void DistributedService::GenerateBundleIconSync(const DistributedDeviceInfo& device)

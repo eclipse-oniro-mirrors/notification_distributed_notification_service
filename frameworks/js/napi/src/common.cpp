@@ -381,7 +381,7 @@ napi_value Common::GetNotificationSubscriberInfo(
             ANS_LOGE("Wrong argument type. Number expected.");
             return nullptr;
         }
-        NAPI_CALL(env, napi_get_value_int32(env, nFilterType, &subscriberInfo.filterType));
+        NAPI_CALL(env, napi_get_value_uint32(env, nFilterType, &subscriberInfo.filterType));
         subscriberInfo.hasSubscribeInfo = true;
     }
 

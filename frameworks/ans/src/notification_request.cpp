@@ -24,6 +24,7 @@
 #include "refbase.h"
 #include "want_agent_helper.h"
 #include "want_params_wrapper.h"
+#include "notification_action_button.h"
 #include <memory>
 
 namespace OHOS {
@@ -754,6 +755,16 @@ uint32_t NotificationRequest::GetHashCodeGenerateType() const
     return hashCodeGenerateType_;
 }
 
+void NotificationRequest::SetCollaboratedReminderFlag(uint32_t reminderFlag)
+{
+    collaboratedReminderFlag_ = reminderFlag;
+}
+
+uint32_t NotificationRequest::GetCollaboratedReminderFlag() const
+{
+    return collaboratedReminderFlag_;
+}
+
 std::string NotificationRequest::Dump()
 {
     return "NotificationRequest{ "
@@ -813,7 +824,7 @@ std::string NotificationRequest::Dump()
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
             ", sound = " + sound_ + ", distributed = " + std::to_string(distributedCollaborate_) + ":" +
-            distributedHashCode_ + ", unifiedGroupInfo_ = " +
+            distributedHashCode_ + " flag: " + std::to_string(collaboratedReminderFlag_)  + ", unifiedGroupInfo_ = " +
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
 }
 
@@ -862,6 +873,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
     jsonObject["hashCodeGenerateType"]    = hashCodeGenerateType_;
+    jsonObject["collaboratedReminderFlag"]    = collaboratedReminderFlag_;
 
     if (!ConvertObjectsToJson(jsonObject)) {
         ANS_LOGE("Cannot convert objects to JSON");
@@ -1042,6 +1054,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteUint32(hashCodeGenerateType_)) {
         ANS_LOGE("Failed to write hash code generatetype");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(collaboratedReminderFlag_)) {
+        ANS_LOGE("Failed to write collaborated reminderflag");
         return false;
     }
 
@@ -1519,6 +1536,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     notificationControlFlags_ = parcel.ReadUint32();
     publishDelayTime_ = parcel.ReadUint32();
     hashCodeGenerateType_ = parcel.ReadUint32();
+    collaboratedReminderFlag_ = parcel.ReadUint32();
 
     if (!parcel.ReadString(appInstanceKey_)) {
         ANS_LOGE("Failed to read Instance key");
@@ -2000,7 +2018,6 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->visiblenessType_ = other.visiblenessType_;
     this->badgeStyle_ = other.badgeStyle_;
     this->notificationContentType_ = other.notificationContentType_;
-    this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
 }
 
 void NotificationRequest::CopyOther(const NotificationRequest &other)
@@ -2041,6 +2058,8 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->notificationBundleOption_ = other.notificationBundleOption_;
     this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->publishDelayTime_ = other.publishDelayTime_;
+    this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
+    this->collaboratedReminderFlag_ = other.collaboratedReminderFlag_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -2197,6 +2216,10 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
     if (jsonObject.find("hashCodeGenerateType") != jsonEnd &&
         jsonObject.at("hashCodeGenerateType").is_number_integer()) {
         target->hashCodeGenerateType_ = jsonObject.at("hashCodeGenerateType").get<uint32_t>();
+    }
+    if (jsonObject.find("collaboratedReminderFlag") != jsonEnd &&
+        jsonObject.at("collaboratedReminderFlag").is_number_integer()) {
+        target->collaboratedReminderFlag_ = jsonObject.at("collaboratedReminderFlag").get<uint32_t>();
     }
 
     ConvertJsonToNumExt(target, jsonObject);
@@ -2385,13 +2408,18 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
         ANS_LOGE("Invalid input parameter");
         return false;
     }
+    int32_t targetUid = -1;
+    if (target->GetOwnerUid() != DEFAULT_UID) {
+        targetUid = target->GetOwnerUid();
+    }
+    ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
 
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("actionButtons") != jsonEnd) {
         auto buttonArr = jsonObject.at("actionButtons");
         for (auto &btnObj : buttonArr) {
-            auto pBtn = NotificationJsonConverter::ConvertFromJson<NotificationActionButton>(btnObj);
+            auto pBtn = NotificationActionButton::ConvertNotificationActionButton(targetUid, btnObj);
             if (pBtn == nullptr) {
                 ANS_LOGE("Failed to parse actionButton!");
                 return false;

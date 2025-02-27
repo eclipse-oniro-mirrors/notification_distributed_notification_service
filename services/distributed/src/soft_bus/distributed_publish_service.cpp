@@ -31,17 +31,21 @@
 #include "power_mgr_client.h"
 #include "distributed_local_config.h"
 #include "distributed_operation_service.h"
+#include "notification_sync_box.h"
 
 namespace OHOS {
 namespace Notification {
 
 namespace {
-constexpr char const DISTRIBUTED_LABEL[] = "ans_distributed";
+const std::string DISTRIBUTED_LABEL = "ans_distributed";
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t OPERATION_DELETE_BRANCH = 2;
 constexpr const int32_t BRANCH3_ID = 3;
 constexpr const int32_t BRANCH4_ID = 4;
+constexpr const int32_t BRANCH6_ID = 6;
+constexpr const int32_t BRANCH9_ID = 9;
 }
 
 int64_t GetCurrentTime()
@@ -168,14 +172,7 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
         request->SetSlotType(static_cast<NotificationConstant::SlotType>(type));
     }
     if (box.GetReminderFlag(type)) {
-        uint32_t controlFlags = 0;
-        if (!(type & NotificationConstant::ReminderFlag::SOUND_FLAG)) {
-            controlFlags |= NotificationConstant::ReminderFlag::SOUND_FLAG;
-        }
-        if (!(type & NotificationConstant::ReminderFlag::VIBRATION_FLAG)) {
-            controlFlags |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
-        }
-        request->SetNotificationControlFlags(controlFlags);
+        request->SetCollaboratedReminderFlag(static_cast<uint32_t>(type));
     }
     if (box.GetCreatorBundleName(context)) {
         request->SetOwnerBundleName(context);
@@ -283,6 +280,9 @@ void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxM
 
 void DistributedService::AbnormalReporting(int result, uint32_t branchId, const std::string &errorReason)
 {
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        return;
+    }
     if (result != 0) {
         SendEventReport(0, result, errorReason);
     }
@@ -302,6 +302,49 @@ void DistributedService::OperationalReporting(int branchId, int32_t slotType)
     haCallback_(ANS_CUSTOMIZE_CODE, slotType, branchId, reason);
 }
 
+void DistributedService::HandleNotificationSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    std::unordered_set<std::string> notificationList;
+    NotificationSyncBox notificationSyncBox = NotificationSyncBox(boxMessage);
+    if (!notificationSyncBox.GetNotificationList(notificationList)) {
+        ANS_LOGW("Dans get sync notification failed.");
+        return;
+    }
+    std::vector<sptr<Notification>> notifications;
+    auto result = NotificationHelper::GetAllNotificationsBySlotType(notifications,
+        NotificationConstant::SlotType::LIVE_VIEW);
+    if (result != ERR_OK || notifications.empty() || notificationList.empty()) {
+        ANS_LOGI("Dans get all active %{public}d %{public}d.", result, notifications.empty());
+        return;
+    }
+
+    ANS_LOGI("Dans handle sync notification %{public}u %{public}u.", notificationList.size(),
+        notifications.size());
+    std::vector<std::string> removeList;
+    for (auto& notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
+            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            ANS_LOGI("Dans no need sync remove notification.");
+            continue;
+        }
+        std::string hashCode = notification->GetKey();
+        size_t pos = hashCode.find(DISTRIBUTED_LABEL);
+        if (pos != std::string::npos) {
+            hashCode.erase(pos, DISTRIBUTED_LABEL.length());
+        }
+        if (notificationList.find(hashCode) == notificationList.end()) {
+            removeList.push_back(notification->GetKey());
+            ANS_LOGI("Dans sync remove notification %{public}s.", notification->GetKey().c_str());
+        }
+    }
+    if (!removeList.empty()) {
+        int result = IN_PROCESS_CALL(
+            NotificationHelper::RemoveNotifications(removeList,
+            NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+        ANS_LOGI("Dans sync remove message %{public}d.", result);
+    }
+}
+
 void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage)
 {
     NotificationResponseBox responseBox = NotificationResponseBox(boxMessage);
@@ -310,8 +353,8 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
     ANS_LOGI("handle response, hashCode: %{public}s.", hashCode.c_str());
 
     sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
-    IN_PROCESS_CALL(NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest));
-    if (notificationRequest == nullptr) {
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");
         return;
     }
@@ -337,9 +380,14 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
     bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
     ANS_LOGI("isScreenOn: %{public}d", isScreenOn);
     if (!isScreenOn) {
-        PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        auto ret = PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+        if (ret != PowerMgr::PowerErrors::ERR_OK) {
+            ANS_LOGW("Wake up device %{public}d", ret);
+            return;
+        }
     }
 
+    code_ = MODIFY_ERROR_EVENT_CODE;
     bool isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     ANS_LOGI("Screen locked status, isScreenLocked: %{public}d.", isScreenLocked);
     if (isScreenLocked) {
@@ -347,14 +395,27 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
         info.type = OperationType::OPERATION_CLICK_JUMP;
         info.eventId = std::to_string(GetCurrentTime());
         sptr<UnlockScreenCallback> listener = new (std::nothrow) UnlockScreenCallback(info.eventId);
-        int32_t unlockResult = IN_PROCESS_CALL(
-            ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener));
+        int32_t unlockResult =
+            ScreenLock::ScreenLockManager::GetInstance()->Unlock(ScreenLock::Action::UNLOCKSCREEN, listener);
         ANS_LOGI("unlock result:%{public}d", unlockResult);
+        if (unlockResult != ERR_OK) {
+            std::string errorReason = "unlock failed";
+            AbnormalReporting(unlockResult, BRANCH6_ID, errorReason);
+        }
         info.want = *wantPtr;
         OperationService::GetInstance().AddOperation(info);
     } else {
-        auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr));
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
         ANS_LOGI("StartAbility result:%{public}d", ret);
+        std::string errorReason = "pull up success";
+        if (ret == ERR_OK) {
+            OperationalReporting(BRANCH3_ID, NotificationConstant::SlotType::LIVE_VIEW);
+        } else {
+            errorReason = "pull up failed";
+            int32_t messageType = 0;
+            AbnormalReporting(messageType, ret, errorReason);
+        }
+        AbnormalReporting(ret, BRANCH9_ID, errorReason);
     }
 }
 }

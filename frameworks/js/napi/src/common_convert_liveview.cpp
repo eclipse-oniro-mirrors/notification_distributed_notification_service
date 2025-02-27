@@ -663,7 +663,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
 }
 
 napi_value Common::GetNotificationIconButton(
-    const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen)
+    const napi_env &env, const napi_value &buttonResult,
+    std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen)
 {
     // cardButton_item?: NotificationIconButton;
     napi_value cardButton = nullptr;

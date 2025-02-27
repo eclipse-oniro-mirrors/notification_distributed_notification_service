@@ -477,6 +477,36 @@ ErrCode AnsManagerProxy::GetActiveNotificationByFilter(
     return result;
 }
 
+ErrCode AnsManagerProxy::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[GetAllNotificationsBySlotType] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(slotType)) {
+        ANS_LOGE("[GetAllNotificationsBySlotType] fail: write slotType failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_ALL_NOTIFICATIONS_BY_SLOTTYPE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[GetAllNotificationsBySlotType] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!ReadParcelableVector(notifications, reply, result)) {
+        ANS_LOGE("[GetAllNotificationsBySlotType] fail: read notifications failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)
 {
     if (representativeBundle.empty()) {

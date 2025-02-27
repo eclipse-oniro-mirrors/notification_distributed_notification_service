@@ -49,7 +49,6 @@ ErrCode SlotManager::AddSlots(MessageParcel &data, MessageParcel &reply)
     }
 
     ErrCode result = AddSlotsSyncQue(slots);
-
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleAddSlots] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -78,7 +77,8 @@ ErrCode SlotManager::AddSlotsSyncQue(const std::vector<sptr<NotificationSlot>> &
     return result;
 }
 
-ErrCode SlotManager::AddSlotsInner(const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption)
+ErrCode SlotManager::AddSlotsInner(
+    const std::vector<sptr<NotificationSlot>> &slots, sptr<NotificationBundleOption> bundleOption)
 {
     if (slots.size() == 0) {
         return ERR_ANS_INVALID_PARAM;

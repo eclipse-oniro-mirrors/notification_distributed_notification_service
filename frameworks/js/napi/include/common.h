@@ -89,7 +89,7 @@ struct NotificationSubscribeInfo {
     bool hasSubscribeInfo = false;
     std::string deviceType;
     std::vector<NotificationConstant::SlotType> slotTypes;
-    int32_t filterType = 0;
+    uint32_t filterType = 0;
 };
 
 struct CallbackPromiseInfo {
@@ -1385,7 +1385,8 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationIconButton(
-        const napi_env &env, const napi_value &buttonResult, std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen);
+        const napi_env &env, const napi_value &buttonResult,
+        std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen);
 
     /**
      * @brief Gets a time of NotificationLocalLiveViewContent object from specified js object

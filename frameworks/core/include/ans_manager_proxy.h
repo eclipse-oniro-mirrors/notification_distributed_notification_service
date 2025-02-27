@@ -193,6 +193,9 @@ public:
      */
     ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications) override;
 
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType) override;
+
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
      * to obtain particular active notifications, you must have received the notifications and obtained the key
@@ -883,7 +886,7 @@ public:
      */
     ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Query the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
@@ -1003,7 +1006,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetHashCodeRule(const uint32_t type) override;
-    
+
 private:
     ErrCode InnerTransact(NotificationInterfaceCode code, MessageOption &flags,
         MessageParcel &data, MessageParcel &reply);

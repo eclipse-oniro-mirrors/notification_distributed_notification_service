@@ -312,6 +312,12 @@ ErrCode NotificationHelper::GetAllActiveNotifications(std::vector<sptr<Notificat
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(notification);
 }
 
+ErrCode NotificationHelper::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationsBySlotType(notifications, slotType);
+}
+
 ErrCode NotificationHelper::GetAllActiveNotifications(
     const std::vector<std::string> key, std::vector<sptr<Notification>> &notification)
 {

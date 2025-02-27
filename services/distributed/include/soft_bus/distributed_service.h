@@ -26,6 +26,7 @@
 #include <functional>
 #include "bundle_icon_box.h"
 #include <unordered_set>
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -45,7 +46,6 @@ public:
         const DistributedDeviceInfo& peerDevice);
     void InitDeviceState(const DistributedDeviceInfo device);
     void SyncDeviceState(int32_t state);
-    void SetCurrentUserId(int32_t userId);
     void SyncConnectedDevice(DistributedDeviceInfo device);
     int32_t SyncDeviceMatch(const DistributedDeviceInfo device, MatchType type);
     void AddDevice(DistributedDeviceInfo device);
@@ -61,10 +61,16 @@ public:
     void SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason);
     void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
     void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
-    void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason);
+    void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code = -1);
     ErrCode OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
+    void SendNotifictionRequest(const std::shared_ptr<Notification> request,
+        const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
+    void SyncAllLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
+    void SyncNotifictionList(const DistributedDeviceInfo& peerDevice, const std::vector<std::string>& list);
+    void HandleNotificationSync(const std::shared_ptr<TlvBox>& boxMessage);
 
 private:
+    void OnHandleMsg(std::shared_ptr<TlvBox>& box);
     int64_t GetCurrentTime();
     void HandleBundleRemoved(const std::string& bundleName);
     bool GetBundleResourceInfo(const std::string bundleName, std::string& icon);

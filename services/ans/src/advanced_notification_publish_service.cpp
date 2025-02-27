@@ -187,53 +187,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
 void AdvancedNotificationService::SetCollaborateReminderFlag(const sptr<NotificationRequest> &request)
 {
-    NotificationConstant::SlotType slotType = request->GetSlotType();
-    uint32_t slotFlags =
-        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slotType);
-    ANS_LOGI("Before %{public}s flags = %{public}d %{public}d", request->GetKey().c_str(), slotType, slotFlags);
+    ANS_LOGI("Before %{public}s", request->GetKey().c_str());
     auto flags = std::make_shared<NotificationFlags>();
-    if ((slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-        flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
-    }
-
-    if ((slotFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-        flags->SetLockScreenVisblenessEnabled(true);
-    }
-
-    if ((slotFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-        flags->SetLightScreenEnabled(true);
-    }
-
-    if ((slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-        flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
-    }
-
-    uint32_t controlFlags = request->GetNotificationControlFlags();
-    if (controlFlags != 0) {
-        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN &&
-            (controlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-        }
-
-        if (flags->IsLockScreenVisblenessEnabled() &&
-            (controlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-            flags->SetLockScreenVisblenessEnabled(false);
-        }
-
-        if (flags->IsLightScreenEnabled() &&
-            (controlFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-            flags->SetLightScreenEnabled(false);
-        }
-
-        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
-            (controlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-        }
-    }
-
+    flags->SetReminderFlags(request->GetCollaboratedReminderFlag());
     request->SetFlags(flags);
-    ANS_LOGI("SetFlags Key = %{public}s flags = %{public}d %{public}d", request->GetKey().c_str(),
-        controlFlags, flags->GetReminderFlags());
+    ANS_LOGI("SetFlags %{public}d %{public}d", flags->GetReminderFlags(),
+        request->GetCollaboratedReminderFlag());
 }
 
 void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -249,6 +208,7 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE: {
             SetFinishTimer(record);
             SetUpdateTimer(record);
+            CancelArchiveTimer(record);
             return;
         }
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE:
@@ -260,6 +220,7 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
             }
             CancelUpdateTimer(record);
             SetUpdateTimer(record);
+            CancelArchiveTimer(record);
             return;
         }
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END:
@@ -293,6 +254,9 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     request->SetCreatorUserId(userId);
     request->SetCreateTime(GetCurrentTime());
+    if (request->GetDeliveryTime() <= 0) {
+        request->SetDeliveryTime(GetCurrentTime());
+    }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->notification = new (std::nothrow) Notification(request);
@@ -2091,7 +2055,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
     const std::string &paramName = "const.intelligentscene.enable";
     std::string isSupportIntelligentScene = "false";
     const std::string defaultValue = "false";
- 
+
     auto res = GetParameter(paramName.c_str(), defaultValue.c_str(), buf, sizeof(buf));
     if (res <= 0) {
         ANS_LOGD("isSupportIntelligentScene GetParameter is false");
@@ -2099,13 +2063,13 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         isSupportIntelligentScene = buf;
     }
     ANS_LOGI("isSupportIntelligentScene is %{public}s", isSupportIntelligentScene.c_str());
- 
+
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
         return -1;
     }
- 
+
     std::string uri = CONTACT_DATA;
     if (isSupportIntelligentScene == SUPPORT_INTEGELLIGENT_SCENE &&
         (atoi(policy.c_str()) == ContactPolicy::ALLOW_SPECIFIED_CONTACTS ||
@@ -2113,7 +2077,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         uri = datashareHelper->GetIntelligentUri();
     }
     ANS_LOGI("QueryContactByProfileId uri is %{public}s", uri.c_str());
-    
+
     std::string profileId;
     Uri profileIdUri(datashareHelper->GetFocusModeProfileUri(userId));
     bool profile_ret = datashareHelper->Query(profileIdUri, KEY_FOCUS_MODE_PROFILE, profileId);
@@ -2121,7 +2085,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
         ANS_LOGE("Query profile id fail.");
         return -1;
     }
- 
+
     Uri contactUri(uri);
     return datashareHelper->QueryContact(contactUri, phoneNumber, policy, profileId, isSupportIntelligentScene);
 }
@@ -2525,7 +2489,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
-        if (!bundleOption->GetBundleName().empty()) {
+        if (!bundleOption->GetBundleName().empty() &&
+            !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && request->IsAgentNotification())) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
                 ANS_LOGE("PublishNotificationBySA Can not assign valid slot!");
@@ -2538,8 +2503,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
                 }
             }
         }
-
-        CheckDoNotDisturbProfile(record);
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
@@ -2578,7 +2541,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 ErrCode AdvancedNotificationService::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    uint32_t status_ = status;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
         ANS_LOGD("isSubsystem is bogus.");

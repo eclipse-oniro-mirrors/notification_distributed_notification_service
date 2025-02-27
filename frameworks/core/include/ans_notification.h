@@ -422,7 +422,7 @@ public:
      */
     ErrCode SubscribeNotification(
         const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo);
-    
+
     /**
      * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
      * by applications with required system permissions.
@@ -611,6 +611,9 @@ public:
      * @return Returns get all active notifications
      */
     ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notification);
+
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType);
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
@@ -1119,7 +1122,7 @@ public:
      */
     ErrCode SetDistributedEnabledBySlot(
         const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
-    
+
     /**
      * @brief Query the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
@@ -1235,7 +1238,7 @@ public:
      */
     ErrCode GetNotificationRequestByHashCode(
         const std::string& hashCode, sptr<NotificationRequest>& notificationRequest);
-    
+
     /**
      * @brief set rule of generate hashCode.
      *
@@ -1259,6 +1262,13 @@ private:
      * @return Returns true if the MediaContent can be published; returns false otherwise.
      */
     bool CanPublishMediaContent(const NotificationRequest &request) const;
+
+    /**
+     * @brief Resize whether the picture size exceeds the limit.
+     *
+     * @param request Indicates the specified request.
+     */
+    void ResizeIcon(const sptr<NotificationRequest> request);
 
     /**
      * @brief Checks whether the picture size exceeds the limit.

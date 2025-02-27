@@ -62,7 +62,16 @@ bool FileUtils::GetJsonByFilePath(const char *filePath, std::vector<nlohmann::js
 bool FileUtils::GetJsonFromFile(const char *path, nlohmann::json &root)
 {
     std::ifstream file(path);
-    root = nlohmann::json::parse(file);
+    if (!file.good()) {
+        ANS_LOGE("Failed to open file %{public}s.", path);
+        return false;
+    }
+    root = nlohmann::json::parse(file, nullptr, false);
+    file.close();
+    if (root.is_discarded() || !root.is_structured()) {
+        ANS_LOGE("Failed to parse json from file %{public}s.", path);
+        return false;
+    }
     if (root.is_null() || root.empty() || !root.is_object()) {
         ANS_LOGE("GetJsonFromFile fail as invalid root.");
         return false;
