@@ -1347,6 +1347,17 @@ void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &noti
     for (auto it = actionButtons.begin(); it != actionButtons.end(); ++it) {
         CancelOnceWantAgent((*it)->GetWantAgent());
     }
+    auto content = notification->GetNotificationRequestPoint()->GetContent();
+    if (content != nullptr && content->GetContentType() == NotificationContent::Type::MULTILINE) {
+        auto multiLineContent =
+            std::static_pointer_cast<NotificationMultiLineContent>(content->GetNotificationContent());
+        if (multiLineContent != nullptr) {
+            auto lineWantAgents = multiLineContent->GetLineWantAgents();
+            for (auto it = lineWantAgents.begin(); it != lineWantAgents.end(); ++it) {
+                CancelOnceWantAgent(*it);
+            }
+        }
+    }
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,

@@ -330,6 +330,18 @@ napi_value Common::SetNotificationMultiLineContent(
     }
     napi_set_named_property(env, result, "lines", arr);
 
+    //lineWantAgents: Array<WantAgent>
+    auto lineWantAgents = multiLineContent->GetLineWantAgents();
+    if (lineWantAgents.size() > 0) {
+        napi_value lineWantAgentsArr = nullptr;
+        int lineWantAgentCount = 0;
+        for (auto item: lineWantAgents) {
+            value = CreateWantAgentByJS(env, item);
+            napi_set_element(env, lineWantAgentsArr, lineWantAgentCount++, value);
+        }
+        napi_set_named_property(env, result, "lineWantAgents", lineWantAgentsArr);
+    }
+
     return NapiGetBoolean(env, true);
 }
 
@@ -1424,6 +1436,14 @@ napi_value Common::GetNotificationMultiLineContent(
         return nullptr;
     }
 
+    // lineWantAgents: Array<WantAgent>
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "lineWantAgents", &hasProperty));
+    if (hasProperty) {
+        if (GetNotificationContentLineWantAgents(env, contentResult, multiLineContent) == nullptr) {
+            return nullptr;
+        }
+    }
+
     request.SetContent(std::make_shared<NotificationContent>(multiLineContent));
 
     ANS_LOGD("end");
@@ -1465,6 +1485,54 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
         NAPI_CALL(env, napi_get_value_string_utf8(env, line, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
         multiLineContent->AddSingleLine(shortStr);
         ANS_LOGI("multiLine: lines : addSingleLine = %{public}s", shortStr);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationContentLineWantAgents(const napi_env &env, const napi_value &result,
+    std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent)
+{
+    ANS_LOGD("GetNotificationContentLineWantAgents enter");
+
+    bool hasProperty;
+    bool isArray;
+    napi_value value = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents;
+    uint32_t length = 0;
+
+    NAPI_CALL(env, napi_has_named_property(env, result, "lineWantAgents", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, result, "lineWantAgents", &value);
+        NAPI_CALL(env, napi_typeof(env, value, &valuetype));
+        napi_is_array(env, value, &isArray);
+        if (!isArray) {
+            ANS_LOGE("lineWantAgents is expected to be an array.");
+            std::string msg = "Incorrect parameter types. The type of lineWantAgents must be array.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID);
+            return nullptr;
+        }
+        napi_get_array_length(env, value, &length);
+        for (size_t i = 0; i < length; i++) {
+            napi_value wantAgentValue;
+            napi_get_element(env, value, i, &wantAgentValue);
+            NAPI_CALL(env, napi_typeof(env, wantAgentValue, &valuetype));
+            if (valuetype != napi_object) {
+                ANS_LOGE("Wrong agrument type. Object expected.");
+                std::string msg = "Incorrect parameter types. The type of lineWantAgents item must be object.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID);
+                return nullptr;
+            }
+            AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
+            napi_unwrap(env, wantAgentValue, (void **)&wantAgent);
+            if (wantAgent == nullptr) {
+                ANS_LOGE("Invalid object lineWantAgents");
+                return nullptr;
+            }
+            lineWantAgents.push_back(std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgent));
+        }
+        multiLineContent->SetLineWantAgents(lineWantAgents);
     }
 
     return NapiGetNull(env);
