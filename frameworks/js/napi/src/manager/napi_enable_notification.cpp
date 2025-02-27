@@ -279,8 +279,10 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
         sptr<AnsDialogHostClient> client = nullptr;
-        if (!AnsDialogHostClient::CreateIfNullptr(client)) {
-            asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_IS_POPPING;
+        AnsDialogHostClient::CreateIfNullptr(client);
+        if (client == nullptr) {
+            ANS_LOGE("create client fail");
+            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
             return;
         }
 
@@ -314,14 +316,13 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     auto jsCb = [](napi_env env, napi_status status, void* data) {
         ANS_LOGD("enter");
         if (data == nullptr) {
-            AnsDialogHostClient::Destroy();
+            ANS_LOGE("data is nullptr");
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
         ErrCode errCode = asynccallbackinfo->info.errorCode;
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
             ANS_LOGE("error, code is %{public}d.", errCode);
-            AnsDialogHostClient::Destroy();
             NapiAsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));
             return;
         }
@@ -332,7 +333,6 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
         ) {
             ANS_LOGE("error");
             asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-            AnsDialogHostClient::Destroy();
             NapiAsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));
             return;
         }

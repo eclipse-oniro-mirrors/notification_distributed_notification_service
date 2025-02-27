@@ -23,6 +23,7 @@ bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
     if (instance_ != nullptr) {
+        result = instance_;
         return false;
     }
     AnsDialogHostClient::instance_ = new (std::nothrow) AnsDialogHostClient();
@@ -66,6 +67,5 @@ void AnsDialogHostClient::OnDialogStatusChanged(const DialogStatusData& statusDa
         return;
     }
     dialogCallbackInterface_->ProcessDialogStatusChanged(statusData);
-    AnsDialogHostClient::Destroy();
 }
 } // namespace OHOS::Notification
