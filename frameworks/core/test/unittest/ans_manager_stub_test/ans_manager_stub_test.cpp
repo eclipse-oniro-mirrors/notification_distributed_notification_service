@@ -3960,7 +3960,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber03, Function | SmallTest | Leve
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(type);
-    data.WriteInt32(type);
+    data.WriteString("");
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
