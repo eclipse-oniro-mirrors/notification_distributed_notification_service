@@ -44,7 +44,6 @@ void ReminderAgentServiceAbility::OnStart()
         return;
     }
     reminderDataManager_ = ReminderDataManager::InitInstance();
-    reminderDataManager_->Init();
     if (!Publish(service_)) {
         return;
     }
