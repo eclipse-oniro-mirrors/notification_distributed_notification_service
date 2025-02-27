@@ -49,6 +49,7 @@ public:
     std::string GetFocusModeRepeatCallUri(const int32_t &userId) const;
     std::string GetIntelligentUri();
     std::string GetUnifiedGroupEnableUri() const;
+    static void SetIsDataShareReady(bool isDataShareReady);
 
 private:
     enum ContactPolicy {
@@ -63,6 +64,8 @@ private:
         const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene);
     bool dealWithContactResult(std::shared_ptr<DataShare::DataShareResultSet> resultSet, const std::string &policy);
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
+private:
+    static bool isDataShareReady_;
 };
 } // namespace Notification
 } // namespace OHOS
