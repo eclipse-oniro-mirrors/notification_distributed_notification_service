@@ -22,10 +22,6 @@
 #include "common_event_manager.h"
 #include "reminder_request_calendar.h"
 #include "in_process_call_wrapper.h"
-#ifdef DEVICE_STANDBY_ENABLE
-#include "standby_service_client.h"
-#include "allow_type.h"
-#endif
 #include "ipc_skeleton.h"
 #include "notification_slot.h"
 #include "os_account_manager.h"

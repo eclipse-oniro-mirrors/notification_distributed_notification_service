@@ -22,10 +22,6 @@
 #include "common_event_manager.h"
 #include "reminder_request_calendar.h"
 #include "in_process_call_wrapper.h"
-#ifdef DEVICE_STANDBY_ENABLE
-#include "standby_service_client.h"
-#include "allow_type.h"
-#endif
 #include "ipc_skeleton.h"
 #include "notification_slot.h"
 #include "os_account_manager.h"
@@ -59,9 +55,6 @@ namespace Notification {
 namespace {
 const std::string ALL_PACKAGES = "allPackages";
 const int32_t MAIN_USER_ID = 100;
-#ifdef DEVICE_STANDBY_ENABLE
-const int REASON_APP_API = 1;
-#endif
 const int INDEX_KEY = 0;
 const int INDEX_TYPE = 1;
 const int INDEX_VALUE = 2;
@@ -613,6 +606,7 @@ std::shared_ptr<ReminderDataManager> ReminderDataManager::InitInstance()
 {
     if (REMINDER_DATA_MANAGER == nullptr) {
         REMINDER_DATA_MANAGER = std::make_shared<ReminderDataManager>();
+        REMINDER_DATA_MANAGER->Init();
         ReminderEventManager reminderEventManager(REMINDER_DATA_MANAGER);
     }
     return REMINDER_DATA_MANAGER;
@@ -1597,6 +1591,9 @@ void ReminderDataManager::OnLoadReminderInFfrt()
 
 void ReminderDataManager::LoadReminderFromDb()
 {
+    if (store_ == nullptr) {
+        return;
+    }
     std::vector<sptr<ReminderRequest>> existReminders = store_->GetHalfHourReminders();
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     reminderVector_ = existReminders;
