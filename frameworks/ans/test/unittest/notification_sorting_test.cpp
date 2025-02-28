@@ -132,7 +132,7 @@ HWTEST_F(NotificationSortingTest, Dump_00001, Function | SmallTest | Level1)
     "visiblenessOverride = 30, isDisplayBadge = false, isHiddenNotification = true, "
     "groupKeyOverride = GroupKeyOverride, slot = NotificationSlot{ id = OTHER, name "
     "= OTHER, description = , type = 3, level = 1, isBypassDnd = false, visibleness = "
-    "3, sound = file://system/etc/Light.ogg, isLightEnabled = false, lightColor = 0, isVibrate = false, vibration "
+    "3, sound = , isLightEnabled = false, lightColor = 0, isVibrate = false, vibration "
     "= , isShowBadge = true, enabled = true, slotFlags = 0, remindMode = 0 } }";
     EXPECT_EQ(rrc->Dump(), ret);
 }

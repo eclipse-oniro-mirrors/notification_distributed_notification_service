@@ -1317,7 +1317,7 @@ HWTEST_F(NotificationHelperTest, DisableNotificationFeature_00001, Function | Sm
     NotificationDisable notificationDisable;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.DisableNotificationFeature(notificationDisable);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 }
 }

@@ -129,6 +129,7 @@ HWTEST_F(NotificationCapsuleTest, Unmarshalling_00001, Function | SmallTest | Le
     Parcel parcel;
     std::shared_ptr<NotificationCapsule> result =
         std::make_shared<NotificationCapsule>();
+    result->Marshalling(parcel);
 
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {

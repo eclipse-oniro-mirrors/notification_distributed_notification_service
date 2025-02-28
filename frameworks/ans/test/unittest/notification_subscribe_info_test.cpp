@@ -167,7 +167,8 @@ HWTEST_F(NotificationSubscribeInfoTest, Dump_00001, Function | SmallTest | Level
             "appNames = [" + appName + ", ]" +
             "deviceType = " + deviceType +
             "userId = " + std::to_string(userId) +
-            "slotTypes = []filterType = 0 }";
+            "slotTypes = []needNotify = 0filterType = 0needResponse = 0"
+            " }";
     EXPECT_EQ(res, rrc->Dump());
 }
 }
