@@ -15,7 +15,8 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/moduletest"
+module_output_path =
+    "${component_name}/distributed_notification_service/moduletest"
 
 config("public_ans_config") {
   include_dirs = [

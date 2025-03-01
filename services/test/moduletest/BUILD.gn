@@ -16,7 +16,8 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "${component_name}/moduletest"
+module_output_path =
+    "${component_name}/distributed_notification_service/moduletest"
 
 ohos_moduletest("ans_module_test") {
   module_out_path = module_output_path

@@ -15,6 +15,9 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
+
 group("ans_unit_test") {
   testonly = true
   deps = []
@@ -36,7 +39,7 @@ group("ans_unit_test") {
 }
 
 ohos_unittest("ans_distributed_unit_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
@@ -92,7 +95,7 @@ ohos_unittest("ans_distributed_unit_test") {
 }
 
 ohos_unittest("distributed_preferences_database_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "${services_path}/distributed/test/unittest/mock",
@@ -137,7 +140,7 @@ ohos_unittest("distributed_preferences_database_test") {
 }
 
 ohos_unittest("distributed_screen_status_manager_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "${services_path}/distributed/test/unittest/mock",
@@ -183,7 +186,7 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
 }
 
 ohos_unittest("distributed_database_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "${services_path}/distributed/test/unittest/mock",
@@ -229,7 +232,7 @@ ohos_unittest("distributed_database_branch_test") {
 }
 
 ohos_unittest("distributed_preferences_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
@@ -269,7 +272,7 @@ ohos_unittest("distributed_preferences_branch_test") {
 }
 
 ohos_unittest("distributed_device_callback_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [ "distributed_device_callback_test.cpp" ]
@@ -306,7 +309,7 @@ ohos_unittest("distributed_device_callback_test") {
 }
 
 ohos_unittest("distributed_database_callback_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [ "distributed_database_callback_test.cpp" ]
@@ -342,7 +345,7 @@ ohos_unittest("distributed_database_callback_test") {
 }
 
 ohos_unittest("distributed_flow_control_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [ "distributed_flow_control_test.cpp" ]
@@ -378,7 +381,7 @@ ohos_unittest("distributed_flow_control_test") {
 }
 
 ohos_unittest("distributed_notification_manager_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
@@ -419,7 +422,7 @@ ohos_unittest("distributed_notification_manager_branch_test") {
 }
 
 ohos_unittest("distributed_service_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "/${services_path}/distributed/include/soft_bus",
@@ -507,7 +510,7 @@ ohos_unittest("distributed_service_test") {
   part_name = "${component_name}"
 }
 ohos_unittest("distributed_subscriber_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "/${services_path}/distributed/include/soft_bus",

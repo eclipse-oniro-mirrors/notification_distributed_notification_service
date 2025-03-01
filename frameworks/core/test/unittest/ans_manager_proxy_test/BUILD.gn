@@ -15,7 +15,8 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/unittest"
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
 
 ohos_unittest("ans_manager_proxy_test") {
   module_out_path = module_output_path
