@@ -2418,11 +2418,6 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 #endif
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        if (!bundle.empty() && IsDisableNotification(bundle)) {
-            ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
-            return;
-        }
         if (!bundleOption->GetBundleName().empty() &&
             !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && request->IsAgentNotification())) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
