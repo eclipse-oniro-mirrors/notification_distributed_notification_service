@@ -22,6 +22,7 @@
 #include <vector>
 #include <singleton.h>
 #include <unordered_set>
+#include <mutex>
 
 #ifdef CONFIG_POLICY_ENABLE
 #include "config_policy_utils.h"
@@ -43,6 +44,9 @@ public:
     bool GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const;
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
+    void SetCurrentSlotReminder(
+        std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder,
+        NotificationConstant::SlotType &slotType, std::shared_ptr<NotificationFlags> &reminderFlags);
     void GetReportTrustListConfig();
     bool IsReportTrustList(const std::string& bundleName) const;
     uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
@@ -64,6 +68,7 @@ private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
     std::mutex mutex_;
+    std::mutex slotReminderMutex_;
     std::vector<int32_t> uidList_;
     std::vector<std::string> bundleNameList_;
     std::set<std::string> reporteTrustSet_ {};
