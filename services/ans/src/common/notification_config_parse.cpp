@@ -97,6 +97,14 @@ bool NotificationConfigParse::GetConfigJson(const std::string &keyCheck, nlohman
     return ret;
 }
 
+void NotificationConfigParse::SetCurrentSlotReminder(
+    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder,
+    NotificationConstant::SlotType &slotType, std::shared_ptr<NotificationFlags> &reminderFlags)
+{
+    std::lock_guard<std::mutex> lock(slotReminderMutex_);
+    currentSlotReminder[slotType] = reminderFlags;
+}
+
 bool NotificationConfigParse::GetCurrentSlotReminder(
     std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
 {
@@ -135,7 +143,8 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
                 reminderFilterSlot[CFG_KEY_REMINDER_FLAGS].get<std::string>(), reminderFlags)) {
             continue;
         }
-        currentSlotReminder[slotType] = reminderFlags;
+        DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            SetCurrentSlotReminder(currentSlotReminder, slotType, reminderFlags);
     }
     if (currentSlotReminder.size() <= 0) {
         ANS_LOGE("GetCurrentSlotReminder failed as invalid currentSlotReminder size.");
