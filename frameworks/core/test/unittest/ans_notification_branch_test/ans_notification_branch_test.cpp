@@ -228,6 +228,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetNotificationsEnabledForBundle(const std::string &deviceId, bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
