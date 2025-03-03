@@ -98,11 +98,13 @@ bool NotificationIconButton::ToJson(nlohmann::json &jsonObject) const
     jsonObject["name"] = name_;
     jsonObject["hidePanel"] = hidePanel_;
 
-    nlohmann::json resourceObj;
-    resourceObj["id"] = iconResource_->id;
-    resourceObj["bundleName"] = iconResource_->bundleName;
-    resourceObj["moduleName"] = iconResource_->moduleName;
-    jsonObject["iconResource"] = resourceObj;
+    if (iconResource_ != nullptr) {
+        nlohmann::json resourceObj;
+        resourceObj["id"] = iconResource_->id;
+        resourceObj["bundleName"] = iconResource_->bundleName;
+        resourceObj["moduleName"] = iconResource_->moduleName;
+        jsonObject["iconResource"] = resourceObj;
+    }
     jsonObject["iconImage"] = AnsImageUtil::PackImage(iconImage_);
     return true;
 }
