@@ -454,6 +454,15 @@ public:
         const sptr<IRemoteObject> &callerToken) override;
 
     /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid) override;
+
+    /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.
      *
      * @param deviceId Indicates the device Id.
@@ -1438,6 +1447,11 @@ private:
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode CommonRequestEnableNotification(const std::string &deviceId,
+        const sptr<AnsDialogCallback> &callback,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<NotificationBundleOption> bundleOption,
+        const bool innerLake);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

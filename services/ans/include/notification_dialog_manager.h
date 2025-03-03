@@ -84,7 +84,8 @@ public:
     ErrCode RequestEnableNotificationDailog(
         const sptr<NotificationBundleOption>& bundle,
         const sptr<AnsDialogCallback>& callback,
-        const sptr<IRemoteObject>& callerToken
+        const sptr<IRemoteObject>& callerToken,
+        const bool innerLake
     );
 
     /*

@@ -397,6 +397,15 @@ public:
         const sptr<IRemoteObject> &callerToken) = 0;
 
     /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    virtual ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid) = 0;
+
+    /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.
      *
      * @param deviceId Indicates the device Id.

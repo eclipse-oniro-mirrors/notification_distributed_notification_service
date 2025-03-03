@@ -24,10 +24,13 @@
 #include "os_account_manager_helper.h"
 #include "system_dialog_connect_stb.h"
 #include "extension_manager_client.h"
+#include <thread>
+#include <chrono>
 
 namespace OHOS {
 namespace Notification {
 constexpr int32_t DEFAULT_VALUE = -1;
+const int32_t SLEEP_TIME = 200;
 
 int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
 {
@@ -41,15 +44,26 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const std::string &serviceAbilityName,
     int32_t uid,
     std::string appBundleName,
-    const sptr<IRemoteObject> &callerToken)
+    const sptr<IRemoteObject> &callerToken,
+    const bool innerLake)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
 
     auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
-    auto topUid = NotificationDialog::GetUidByBundleName(topBundleName);
     if (topBundleName != appBundleName) {
         ANS_LOGE("Current application isn't in foreground, top is %{public}s.", topBundleName.c_str());
-        return ERR_ANS_INVALID_BUNDLE;
+        if (!innerLake) {
+            return ERR_ANS_INVALID_BUNDLE;
+        } else {
+            ANS_LOGE("get top ability again");
+            std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+            topBundleName = IN_PROCESS_CALL(
+                AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+            if (topBundleName != appBundleName) {
+                ANS_LOGE("get top ability again failed");
+                return ERR_ANS_INVALID_BUNDLE;
+            }
+        }
     }
     
     AAFwk::Want want;
@@ -63,6 +77,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     root["bundleName"] = appBundleName;
     root["bundleUid"] = uid;
     root["ability.want.params.uiExtensionType"] = uiExtensionType;
+    root["innerLake"] = innerLake;
     std::string command  = root.dump();
     
     auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));

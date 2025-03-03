@@ -1005,13 +1005,27 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         ANS_LOGE("callback == nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
-
-    ErrCode result = ERR_OK;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        ANS_LOGE("bundleOption is nullptr.");
-        return ERR_ANS_INVALID_BUNDLE;
+    return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false);
+}
+
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string bundleName, const int32_t uid)
+{
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
     }
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true);
+}
+
+ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::string &deviceId,
+    const sptr<AnsDialogCallback> &callback,
+    const sptr<IRemoteObject> &callerToken,
+    const sptr<NotificationBundleOption> bundleOption,
+    const bool innerLake)
+{
+    ANS_LOGI("%{public}s", __FUNCTION__);
+    ErrCode result = ERR_OK;
     // To get the permission
     bool allowedNotify = false;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_5);
@@ -1054,7 +1068,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         return ERROR_INTERNAL_ERROR;
     }
 
-    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken);
+    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken, innerLake);
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }

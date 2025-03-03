@@ -34,7 +34,8 @@ public:
         const std::string &serviceAbilityName,
         int32_t uid,
         std::string appBundleName,
-        const sptr<IRemoteObject> &callerToken);
+        const sptr<IRemoteObject> &callerToken,
+        const bool innerLake);
 
     static int32_t GetUidByBundleName(const std::string &bundleName);
 };

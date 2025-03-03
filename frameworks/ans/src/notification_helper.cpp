@@ -181,7 +181,8 @@ ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId,
 
 ErrCode NotificationHelper::RequestEnableNotification(const std::string bundleName, const int32_t uid)
 {
-    return ERR_OK;
+    return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
+        bundleName, uid);
 }
 
 ErrCode NotificationHelper::HasNotificationPolicyAccessPermission(bool &hasPermission)
