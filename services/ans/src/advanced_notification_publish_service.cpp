@@ -2418,7 +2418,8 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
 #endif
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        if (!bundleOption->GetBundleName().empty()) {
+        if (!bundleOption->GetBundleName().empty() &&
+            !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && request->IsAgentNotification())) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
                 ANS_LOGE("Can not assign valid slot!");
