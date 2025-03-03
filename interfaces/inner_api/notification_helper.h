@@ -376,6 +376,15 @@ public:
     static ErrCode RequestEnableNotification(std::string &deviceId,
         sptr<AnsDialogHostClient> &hostClient,
         sptr<IRemoteObject> &callerToken);
+        
+    /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    static ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.
