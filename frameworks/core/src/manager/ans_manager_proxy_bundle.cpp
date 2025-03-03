@@ -183,7 +183,8 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string bundleName,
 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
-    ErrCode result = InnerTransact(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION_BY_BUNDLE, option, data, reply);
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION_BY_BUNDLE,
+        option, data, reply);
     if (result != ERR_OK) {
         ANS_LOGE("[RequestEnableNotification] fail: transact ErrCode=%{public}d", result);
         return ERR_ANS_TRANSACT_FAILED;
