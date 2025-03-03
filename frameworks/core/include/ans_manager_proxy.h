@@ -375,6 +375,15 @@ public:
     ErrCode RequestEnableNotification(const std::string &deviceId,
         const sptr<AnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
+    
+    /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid) override;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.

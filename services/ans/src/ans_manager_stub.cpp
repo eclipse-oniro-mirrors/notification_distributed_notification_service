@@ -179,6 +179,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleRequestEnableNotification(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION_BY_BUNDLE): {
+            result = HandleRequestEnableNotificationByBundle(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_ENABLED_FOR_BUNDLE): {
             result = HandleSetNotificationsEnabledForBundle(data, reply);
             break;
@@ -1291,6 +1295,29 @@ ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, Mes
     ErrCode result = RequestEnableNotification(deviceId, iface_cast<AnsDialogCallback>(callback), callerToken);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleRequestEnableNotificationByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("enter");
+    std::string bundleName;
+    if (!data.ReadString(bundleName)) {
+        ANS_LOGE("[HandleRequestEnableNotificationByBundle] fail: read bundleName failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t uid = 0;
+    if (!data.ReadInt32(uid)) {
+        ANS_LOGE("[HandleRequestEnableNotificationByBundle] fail: read uid failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = RequestEnableNotification(bundleName, uid);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleRequestEnableNotificationByBundle] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
     return ERR_OK;

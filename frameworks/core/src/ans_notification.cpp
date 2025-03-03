@@ -512,6 +512,17 @@ ErrCode AnsNotification::RequestEnableNotification(std::string &deviceId,
     return proxy->RequestEnableNotification(deviceId, hostClient, callerToken);
 }
 
+ErrCode AnsNotification::RequestEnableNotification(const std::string bundleName, const int32_t uid)
+{
+    ANS_LOGD("enter");
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->RequestEnableNotification(bundleName, uid);
+}
+
 ErrCode AnsNotification::HasNotificationPolicyAccessPermission(bool &hasPermission)
 {
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();

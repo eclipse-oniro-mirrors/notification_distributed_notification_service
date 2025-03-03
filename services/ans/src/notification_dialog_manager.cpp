@@ -88,11 +88,9 @@ bool NotificationDialogManager::Init()
 ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     const sptr<NotificationBundleOption>& bundle,
     const sptr<AnsDialogCallback>& callback,
-    const sptr<IRemoteObject>& callerToken)
+    const sptr<IRemoteObject>& callerToken,
+    const bool innerLake)
 {
-    if (bundle == nullptr || callback == nullptr) {
-        return ERROR_INTERNAL_ERROR;
-    }
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
         ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists. bundle = %{public}s",
             bundle->GetBundleName().c_str());
@@ -103,7 +101,8 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
         bundle->GetUid(),
         bundle->GetBundleName(),
-        callerToken);
+        callerToken,
+        innerLake);
     if (result != ERR_OK) {
         ANS_LOGE("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
         std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;

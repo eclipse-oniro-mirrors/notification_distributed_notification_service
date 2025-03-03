@@ -380,6 +380,15 @@ public:
         const sptr<IRemoteObject> &callerToken) override;
 
     /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid) override;
+
+    /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.
      *
      * @param deviceId Indicates the device Id.
@@ -1044,6 +1053,7 @@ private:
     ErrCode HandleGetSlotByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleUpdateSlots(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleRequestEnableNotification(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleRequestEnableNotificationByBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForAllBundles(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetNotificationsEnabledForSpecialBundle(MessageParcel &data, MessageParcel &reply);

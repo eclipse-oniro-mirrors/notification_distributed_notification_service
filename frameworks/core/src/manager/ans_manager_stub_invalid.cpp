@@ -269,6 +269,12 @@ ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId,
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::RequestEnableNotification(const std::string bundleName, const int32_t uid)
+{
+    ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::SetNotificationsEnabledForBundle(const std::string &bundle, bool enabled)
 {
     ANS_LOGE("AnsManagerStub::SetNotificationsEnabledForBundle called!");

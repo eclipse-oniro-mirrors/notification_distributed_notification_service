@@ -162,6 +162,40 @@ ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId,
     return result;
 }
 
+ErrCode AnsManagerProxy::RequestEnableNotification(const std::string bundleName, const int32_t uid)
+{
+    ANS_LOGD("enter");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[RequestEnableNotification] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        ANS_LOGE("[RequestEnableNotification] fail: write bundleName failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(uid)) {
+        ANS_LOGE("[RequestEnableNotification] fail: write uid failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::REQUEST_ENABLE_NOTIFICATION_BY_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("[RequestEnableNotification] fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("[RequestEnableNotification] fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
 ErrCode AnsManagerProxy::SetNotificationsEnabledForBundle(const std::string &deviceId, bool enabled)
 {
     MessageParcel data;
