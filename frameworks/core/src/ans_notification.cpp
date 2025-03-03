@@ -227,8 +227,6 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
         ANS_LOGE("Create notificationRequest ptr fail.");
         return ERR_ANS_NO_MEMORY;
     }
-
-    ResizeIcon(reqPtr);
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
@@ -280,8 +278,6 @@ ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationR
         ANS_LOGE("Create notificationRequest ptr fail.");
         return ERR_ANS_NO_MEMORY;
     }
-
-    ResizeIcon(reqPtr);
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
@@ -426,8 +422,6 @@ ErrCode AnsNotification::PublishNotificationAsBundle(
         ANS_LOGE("Failed to create NotificationRequest ptr");
         return ERR_ANS_NO_MEMORY;
     }
-
-    ResizeIcon(reqPtr);
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
@@ -1239,7 +1233,6 @@ ErrCode AnsNotification::PublishContinuousTaskNotification(const NotificationReq
     }
 
     sptr<NotificationRequest> sptrReq(pReq);
-    ResizeIcon(sptrReq);
     if (IsNonDistributedNotificationType(sptrReq->GetNotificationType())) {
         sptrReq->SetDistributed(false);
     }
@@ -1428,33 +1421,18 @@ bool AnsNotification::CanPublishLiveViewContent(const NotificationRequest &reque
     return true;
 }
 
-void AnsNotification::ResizeIcon(const sptr<NotificationRequest> request)
-{
-    auto littleIcon = request->GetLittleIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of little icon exceeds limit");
-        request->SetLittleIcon(nullptr);
-    }
-
-    auto overlayIcon = request->GetOverlayIcon();
-    if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of overlay icon exceeds limit");
-        request->SetOverlayIcon(nullptr);
-    }
-}
-
 ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
     if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of little icon exceeds limit");
-        return ERR_ANS_ICON_OVER_SIZE;
+        ANS_LOGW("The size of little icon exceeds limit");
+        request.ResetLittleIcon();
     }
 
     auto overlayIcon = request.GetOverlayIcon();
     if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
-        ANS_LOGE("The size of overlay icon exceeds limit");
-        return ERR_ANS_ICON_OVER_SIZE;
+        ANS_LOGW("The size of overlay icon exceeds limit");
+        request.ResetOverLayIcon();
     }
 
     ErrCode err = request.CheckImageSizeForContent();

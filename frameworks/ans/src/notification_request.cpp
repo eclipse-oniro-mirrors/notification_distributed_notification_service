@@ -765,6 +765,16 @@ uint32_t NotificationRequest::GetCollaboratedReminderFlag() const
     return collaboratedReminderFlag_;
 }
 
+void NotificationRequest::ResetLittleIcon() const
+{
+    littleIcon_ = nullptr;
+}
+
+void NotificationRequest::ResetOverLayIcon() const
+{
+    overlayIcon_ = nullptr;
+}
+
 std::string NotificationRequest::Dump()
 {
     return "NotificationRequest{ "
