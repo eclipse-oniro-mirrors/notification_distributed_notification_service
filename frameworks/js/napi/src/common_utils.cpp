@@ -60,6 +60,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
     {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION,
         "The application is not allowed to publish notifications due to permission control settings"},
+    {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
 };
 }
 
@@ -339,7 +340,8 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
         {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING},
         {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING},
         {ERR_ANS_NO_PROFILE_TEMPLATE, ERROR_NO_PROFILE_TEMPLATE},
-        {ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, ERROR_REJECTED_WITH_DISABLE_NOTIFICATION}
+        {ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, ERROR_REJECTED_WITH_DISABLE_NOTIFICATION},
+        {ERR_ANS_OPERATION_TIMEOUT, ERROR_DISTRIBUTED_OPERATION_TIMEOUT},
     };
 
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;

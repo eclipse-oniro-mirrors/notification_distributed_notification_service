@@ -375,7 +375,7 @@ public:
     ErrCode RequestEnableNotification(const std::string &deviceId,
         const sptr<AnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
-    
+
     /**
      * @brief Allow application to publish notifications.
      *
@@ -996,7 +996,17 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DistributeOperation(const std::string& hashCode) override;
+    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<OperationCallbackInterface> &callback) override;
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result) override;
 
     /**
      * @brief Get notificationRequest by hashCode.

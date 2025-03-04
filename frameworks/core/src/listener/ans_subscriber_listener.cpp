@@ -204,7 +204,7 @@ void SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleN
     subscriber->OnApplicationInfoNeedChanged(bundleName);
 }
 
-ErrCode SubscriberListener::OnResponse(const sptr<Notification> &notification)
+ErrCode SubscriberListener::OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
@@ -212,8 +212,9 @@ ErrCode SubscriberListener::OnResponse(const sptr<Notification> &notification)
         ANS_LOGW("Subscriber is nullptr");
         return ERR_OK;
     }
-    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
-    return subscriber->OnResponse(sharedNotification);
+    std::shared_ptr<NotificationOperationInfo> sharedNotification =
+        std::make_shared<NotificationOperationInfo>(*operationInfo);
+    return subscriber->OnOperationResponse(sharedNotification);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -116,7 +116,7 @@ public:
      *
      * @param notification Indicates the received Notification object.
      */
-    ErrCode OnResponse(const sptr<Notification> &notification) override;
+    ErrCode OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo) override;
 
 private:
 

@@ -625,9 +625,16 @@ ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::DistributeOperation(const std::string &hashCode)
+ErrCode AnsManagerStub::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<OperationCallbackInterface> &callback)
 {
     ANS_LOGE("DistributeOperation called!");
+    return ERR_INVALID_OPERATION;
+}
+
+ErrCode AnsManagerStub::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
+{
+    ANS_LOGE("ReplyDistributeOperation called!");
     return ERR_INVALID_OPERATION;
 }
 

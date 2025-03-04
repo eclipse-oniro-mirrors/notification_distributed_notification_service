@@ -461,6 +461,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetAllNotificationsBySlotType(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::REPLY_DISTRIBUTE_OPERATION): {
+            result = HandleReplyDistributeOperation(data, reply);
+            break;
+        }
         default: {
             ANS_LOGE("[OnRemoteRequest] fail: unknown code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, flags);
@@ -2638,6 +2642,58 @@ ErrCode AnsManagerStub::HandleSetHashCodeRule(MessageParcel &data, MessageParcel
         ANS_LOGE("[HandleSetHashCodeRule] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleDistributeOperation(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        ANS_LOGE("remote is nullptr");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<OperationCallbackInterface> callback = iface_cast<OperationCallbackInterface>(remote);
+    if (callback.GetRefPtr() == nullptr) {
+        ANS_LOGE("callback is null");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<NotificationOperationInfo> info = nullptr;
+    info = data.ReadParcelable<NotificationOperationInfo>();
+    if (info == nullptr) {
+        ANS_LOGE("[HandleSubscribe] fail: read info failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = DistributeOperation(info, callback);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleReplyDistributeOperation(MessageParcel &data, MessageParcel &reply)
+{
+    std::string hashCode;
+    if (!data.ReadString(hashCode)) {
+        ANS_LOGE("read hashCode failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    int32_t resultCode = 0;
+    if (!data.ReadInt32(resultCode)) {
+        ANS_LOGE("read hashCode failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = ReplyDistributeOperation(hashCode, resultCode);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
     return ERR_OK;
 }
 

@@ -134,7 +134,7 @@ public:
      *
      * @param notification Indicates the Notification object.
      */
-    ErrCode DistributeOperation(const sptr<Notification> &notification);
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo);
 
     void RegisterOnSubscriberAddCallback(std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback);
 

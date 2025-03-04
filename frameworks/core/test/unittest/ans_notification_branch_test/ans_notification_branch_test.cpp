@@ -604,7 +604,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode DistributeOperation(const std::string &hashCode) override
+    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<OperationCallbackInterface> &callback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
     {
         return ERR_ANS_INVALID_PARAM;
     }

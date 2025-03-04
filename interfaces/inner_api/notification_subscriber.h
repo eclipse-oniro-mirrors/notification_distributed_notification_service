@@ -21,6 +21,7 @@
 #include "notification_request.h"
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"
+#include "notification_operation_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -114,7 +115,7 @@ public:
      *
      * @param notification Indicates the received Notification object.
      */
-    virtual ErrCode OnResponse(const std::shared_ptr<Notification> &notification)
+    virtual ErrCode OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo)
     {
         return 0;
     }
@@ -186,7 +187,7 @@ private:
 
         void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 
-        ErrCode OnResponse(const sptr<Notification> &notification) override;
+        ErrCode OnOperationResponse(const sptr<NotificationOperationInfo> &operationInfo) override;
 
         sptr<AnsManagerInterface> GetAnsManagerProxy();
 

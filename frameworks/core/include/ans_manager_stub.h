@@ -997,7 +997,17 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode DistributeOperation(const std::string& hashCode) override;
+    virtual ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<OperationCallbackInterface> &callback) override;
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result) override;
 
     /**
      * @brief Get notificationRequest by hashCode.
@@ -1129,6 +1139,7 @@ private:
     ErrCode HandleGetNotificationRequest(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetHashCodeRule(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllNotificationsBySlotType(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleReplyDistributeOperation(MessageParcel &data, MessageParcel &reply);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &reply, ErrCode &result)

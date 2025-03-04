@@ -79,6 +79,7 @@
 #include "advanced_notification_flow_control_service.h"
 #include "distributed_device_manager.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
+#include "notification_operation_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1072,6 +1073,27 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
 {
     notificationList_.push_back(record);
     SortNotificationList();
+}
+
+ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("Check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (hashCode.empty()) {
+        ANS_LOGE("Hash code is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ANS_LOGI("Reply operation key %{public}s %{public}d.", hashCode.c_str(), result);
+    DistributedOperationService::GetInstance().ReplyOperationResponse(hashCode, result);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(

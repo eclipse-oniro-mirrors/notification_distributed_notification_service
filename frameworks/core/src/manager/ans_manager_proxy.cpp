@@ -1041,7 +1041,8 @@ ErrCode AnsManagerProxy::DisableNotificationFeature(const sptr<NotificationDisab
     return result;
 }
 
-ErrCode AnsManagerProxy::DistributeOperation(const std::string& hashCode)
+ErrCode AnsManagerProxy::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<OperationCallbackInterface> &callback)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -1049,8 +1050,13 @@ ErrCode AnsManagerProxy::DistributeOperation(const std::string& hashCode)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteString(hashCode)) {
-        ANS_LOGE("write hashCode failed");
+    if (!data.WriteRemoteObject(callback->AsObject().GetRefPtr())) {
+        ANS_LOGE("write parcel failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteParcelable(operationInfo)) {
+        ANS_LOGE("[Subscribe] fail: write operationInfo failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -1068,6 +1074,41 @@ ErrCode AnsManagerProxy::DistributeOperation(const std::string& hashCode)
     }
 
     return result;
+}
+
+ErrCode AnsManagerProxy::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(hashCode)) {
+        ANS_LOGE("write hashCode failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteInt32(result)) {
+        ANS_LOGE("write result failed");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode ret =
+        InnerTransact(NotificationInterfaceCode::REPLY_DISTRIBUTE_OPERATION, option, data, reply);
+    if (ret != ERR_OK) {
+        ANS_LOGE("transact ErrCode=%{public}d", ret);
+        return ret;
+    }
+
+    if (!reply.ReadInt32(ret)) {
+        ANS_LOGE("read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ret;
 }
 
 ErrCode AnsManagerProxy::GetNotificationRequestByHashCode(

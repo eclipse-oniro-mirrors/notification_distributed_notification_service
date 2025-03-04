@@ -29,6 +29,7 @@
 #include "notification_local_live_view_subscriber.h"
 #include "want_params.h"
 #include <memory>
+#include "ans_operation_callback_interface.h"
 
 namespace OHOS {
 namespace Notification {
@@ -376,7 +377,7 @@ public:
     static ErrCode RequestEnableNotification(std::string &deviceId,
         sptr<AnsDialogHostClient> &hostClient,
         sptr<IRemoteObject> &callerToken);
-        
+
     /**
      * @brief Allow application to publish notifications.
      *
@@ -1205,7 +1206,17 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    static ErrCode DistributeOperation(const std::string &hashCode);
+    static ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<OperationCallbackInterface> &callback);
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result);
 
     /**
      * @brief Get notificationRequest by hashCode.

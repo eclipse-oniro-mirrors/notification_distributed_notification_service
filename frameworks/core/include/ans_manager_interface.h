@@ -32,6 +32,7 @@
 #include "notification_slot.h"
 #include "notification_subscribe_info.h"
 #include "reminder_request.h"
+#include "ans_operation_callback_interface.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1014,7 +1015,17 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode DistributeOperation(const std::string& hashCode) = 0;
+    virtual ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<OperationCallbackInterface> &callback) = 0;
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result) = 0;
 
     /**
      * @brief Get notificationRequest by hashCode.

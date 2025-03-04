@@ -872,10 +872,10 @@ void NotificationSubscriberManager::TrackCodeLog(
     }
 }
 
-ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<Notification>& notification)
+ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (notificationSubQueue_ == nullptr) {
+    if (notificationSubQueue_ == nullptr || operationInfo == nullptr) {
         ANS_LOGE("queue is nullptr");
         return ERR_ANS_TASK_ERR;
     }
@@ -887,13 +887,14 @@ ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<Notificati
                 continue;
             }
             if (record->needNotifyResponse && record->subscriber != nullptr) {
-                result = record->subscriber->OnResponse(notification);
+                result = record->subscriber->OnOperationResponse(operationInfo);
                 return;
             }
             result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
         }
     }));
     notificationSubQueue_->wait(handler);
+    ANS_LOGI("Subscriber manager operation %{public}s %{public}d", operationInfo->GetHashCode().c_str(), result);
     return result;
 }
 }  // namespace Notification

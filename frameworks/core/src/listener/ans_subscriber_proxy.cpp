@@ -424,7 +424,7 @@ void AnsSubscriberProxy::OnApplicationInfoNeedChanged(const std::string& bundleN
     }
 }
 
-ErrCode AnsSubscriberProxy::OnResponse(const sptr<Notification> &notification)
+ErrCode AnsSubscriberProxy::OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsSubscriberProxy::GetDescriptor())) {
@@ -432,7 +432,7 @@ ErrCode AnsSubscriberProxy::OnResponse(const sptr<Notification> &notification)
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteParcelable(notification)) {
+    if (!data.WriteParcelable(operationInfo)) {
         ANS_LOGE("Write notification failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
