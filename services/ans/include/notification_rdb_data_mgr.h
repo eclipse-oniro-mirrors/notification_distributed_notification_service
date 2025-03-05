@@ -110,7 +110,7 @@ public:
      * @param userId Optional, Indicate which table to delete data.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId = -1);
+    int32_t DeleteBatchData(const std::vector<std::string> &keys, const int32_t &userId = -1);
 
     /**
      * @brief Query data from DB.

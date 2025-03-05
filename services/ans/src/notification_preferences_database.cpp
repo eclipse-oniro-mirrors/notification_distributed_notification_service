@@ -573,7 +573,7 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbProfiles(
             std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
         keys.push_back(key);
     }
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Delete do not disturb profiles failed.");
         return false;
@@ -796,7 +796,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(
 
     std::string bundleDBKey = KEY_BUNDLE_LABEL + KEY_BUNDLE_NAME + KEY_UNDER_LINE + bundleKey;
     keys.push_back(bundleDBKey);
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -833,7 +833,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
         keys.push_back(iter.first);
     }
 
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -982,7 +982,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(
         keys.push_back(iter.first);
     }
 
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     return (result == NativeRdb::E_OK);
 }
 
@@ -1740,7 +1740,7 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
         endDateKey
     };
 
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete DoNotDisturb date failed.");
         return false;
@@ -1797,7 +1797,7 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
         keys.push_back(iter.first);
     }
 
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -1929,7 +1929,7 @@ int32_t NotificationPreferencesDatabase::DeleteBatchKvFromDb(const std::vector<s
         return NativeRdb::E_ERROR;
     }
 
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Delete key-value failed, result %{public}d.", result);
         return NativeRdb::E_ERROR;
@@ -2295,7 +2295,7 @@ bool NotificationPreferencesDatabase::DelBatchCloneProfileInfo(const int32_t &us
         keys.emplace_back(key);
     }
 
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete clone bundle Info failed.");
         return false;
@@ -2373,7 +2373,7 @@ bool NotificationPreferencesDatabase::DelBatchCloneBundleInfo(const int32_t &use
             std::to_string(bundleInfo.GetAppIndex());
         keys.emplace_back(key);
     }
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete clone bundle Info failed.");
         return false;
