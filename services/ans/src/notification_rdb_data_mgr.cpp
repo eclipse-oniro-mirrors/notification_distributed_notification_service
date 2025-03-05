@@ -18,6 +18,7 @@
 #include "os_account_manager_helper.h"
 #include "rdb_errno.h"
 #include <algorithm>
+#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -30,6 +31,7 @@ const std::string NOTIFICATION_KEY = "KEY";
 const std::string NOTIFICATION_VALUE = "VALUE";
 const int32_t NOTIFICATION_KEY_INDEX = 0;
 const int32_t NOTIFICATION_VALUE_INDEX = 1;
+const std::ptrdiff_t MAX_SIZE_PER_BATCH = 100;
 } // namespace
 RdbStoreDataCallBackNotificationStorage::RdbStoreDataCallBackNotificationStorage(
     const NotificationRdbConfig &notificationRdbConfig): notificationRdbConfig_(notificationRdbConfig)
@@ -307,7 +309,7 @@ int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId)
+int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &keys, const int32_t &userId)
 {
     ANS_LOGD("Delete Bathch Data start");
     {
@@ -318,12 +320,27 @@ int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &ke
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
+        std::vector<std::vector<std::string>> batchKeys;
+        auto start = keys.cbegin(), next = keys.cbegin(), end = keys.cend();
+        while (next != end) {
+            next = end - next < MAX_SIZE_PER_BATCH ? end : next + MAX_SIZE_PER_BATCH;
+            batchKeys.push_back(std::vector<std::string>(start, next));
+            start = next;
+        }
+
         int32_t rowId = -1;
-        for (auto key : keys) {
-            for (auto tableName : operatedTables) {
-                int32_t ret = DeleteData(tableName, key, rowId);
+        for (auto tableName : operatedTables) {
+            NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+            for (const auto &batchKey : batchKeys) {
+                absRdbPredicates.In(NOTIFICATION_KEY, batchKey);
+                int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
+                if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+                    RestoreForMasterSlaver();
+                }
                 if (ret != NativeRdb::E_OK) {
-                    return ret;
+                    ANS_LOGW("Delete operation failed from %{public}s, result: %{public}d.",
+                        tableName.c_str(), ret);
+                    return NativeRdb::E_ERROR;
                 }
             }
         }

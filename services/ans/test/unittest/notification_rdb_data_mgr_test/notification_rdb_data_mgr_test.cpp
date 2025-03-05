@@ -508,7 +508,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01100
 /**
  * @tc.name      : RdbStoreDataCallBack_01200
  * @tc.number    :
- * @tc.desc      : test DeleteBathchData function and rdbStore_ == nullptr
+ * @tc.desc      : test DeleteBatchData function and rdbStore_ == nullptr
  */
 HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01200, Function | SmallTest | Level1)
 {
@@ -517,13 +517,13 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01200
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = nullptr;
     std::vector<std::string> keys;
-    ASSERT_EQ(notificationDataMgr->DeleteBathchData(keys, -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(notificationDataMgr->DeleteBatchData(keys, -1), NativeRdb::E_ERROR);
 }
 
 /**
  * @tc.name      : RdbStoreDataCallBack_01300
  * @tc.number    :
- * @tc.desc      : test DeleteBathchData function and ret != NativeRdb::E_OK
+ * @tc.desc      : test DeleteBatchData function and ret != NativeRdb::E_OK
  */
 HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01300, Function | SmallTest | Level1)
 {
@@ -534,7 +534,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01300
     std::vector<std::string> keys;
     std::string key = "<key>";
     keys.emplace_back(key);
-    ASSERT_EQ(notificationDataMgr->DeleteBathchData(keys, -1), NativeRdb::E_ERROR);
+    ASSERT_EQ(notificationDataMgr->DeleteBatchData(keys, -1), NativeRdb::E_ERROR);
 }
 
 /**

@@ -28,7 +28,7 @@ extern void MockQueryData(bool mockRet);
 extern void MockInsertData(bool mockRet);
 extern void MockInsertBatchData(bool mockRet);
 extern void MockQueryDataBeginWithKey(bool mockRet);
-extern void MockDeleteBathchData(bool mockRet);
+extern void MockDeleteBatchData(bool mockRet);
 extern void MockDeleteData(bool mockRet);
 extern void MockDropTable(bool mockRet);
 
@@ -444,7 +444,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0250
     // set result != NativeRdb::E_ERROR
     MockQueryDataBeginWithKey(true);
     // set result != NativeRdb::E_OK
-    MockDeleteBathchData(false);
+    MockDeleteBatchData(false);
     // test RemoveBundleFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     ASSERT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleKey, -1), false);
@@ -494,7 +494,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0280
     // set result != NativeRdb::E_ERROR
     MockQueryDataBeginWithKey(true);
     // set result != NativeRdb::E_OK
-    MockDeleteBathchData(false);
+    MockDeleteBatchData(false);
     // test RemoveSlotFromDisturbeDB function
     std::string bundleKey = "<bundleKey>";
     NotificationConstant::SlotType type = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -898,7 +898,7 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0540
     // set CheckRdbStore is true
     MockInit(true);
     // set result != NativeRdb::E_OK
-    MockDeleteBathchData(false);
+    MockDeleteBatchData(false);
     // test RemoveDoNotDisturbDate function
     int32_t userId = 1;
     ASSERT_EQ(preferncesDB_->RemoveDoNotDisturbDate(userId), false);
