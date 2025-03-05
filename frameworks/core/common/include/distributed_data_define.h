@@ -20,6 +20,7 @@
 #include <set>
 #include <mutex>
 #include <unordered_set>
+#include "notification_operation_info.h"
 
 namespace OHOS {
 namespace Notification {

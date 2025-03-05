@@ -20,6 +20,7 @@
 
 #include "device_manager.h"
 #include "distributed_device_data.h"
+#include "notification_operation_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -41,7 +42,7 @@ public:
     void OnBatchCanceled(const std::vector<std::shared_ptr<Notification>> &requestList,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
-    ErrCode OnResponse(const std::shared_ptr<Notification> &notification) override;
+    ErrCode OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo) override;
     void SetLocalDevice(DistributedDeviceInfo localDevice);
     void SetPeerDevice(DistributedDeviceInfo localDevice);
     bool CheckNeedCollaboration(const std::shared_ptr<Notification> &notification);

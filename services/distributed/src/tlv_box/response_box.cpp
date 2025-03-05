@@ -28,6 +28,14 @@ NotificationResponseBox::NotificationResponseBox()
 
 NotificationResponseBox::NotificationResponseBox(std::shared_ptr<TlvBox> box) : BoxBase(box) {}
 
+bool NotificationResponseBox::SetMessageType(int32_t messageType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->SetMessageType(messageType);
+}
+
 bool NotificationResponseBox::SetNotificationHashCode(const std::string& hashCode)
 {
     if (box_ == nullptr) {
@@ -36,12 +44,124 @@ bool NotificationResponseBox::SetNotificationHashCode(const std::string& hashCod
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
 }
 
+bool NotificationResponseBox::SetOperationEventId(const std::string& eventId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(OPERATION_EVENT_ID, eventId));
+}
+
+bool NotificationResponseBox::SetActionName(const std::string& actionName)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(ACTION_BUTTON_NAME, actionName));
+}
+
+bool NotificationResponseBox::SetUserInput(const std::string& userInput)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(ACTION_USER_INPUT, userInput));
+}
+
+bool NotificationResponseBox::SetOperationType(int32_t type)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(OPERATION_TYPE, type));
+}
+
+bool NotificationResponseBox::SetMatchType(int32_t type)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(MATCH_TYPE, type));
+}
+
+bool NotificationResponseBox::SetLocalDeviceId(const std::string& deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
+bool NotificationResponseBox::SetResponseResult(int32_t result)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(RESULT_CODE, result));
+}
+
 bool NotificationResponseBox::GetNotificationHashCode(std::string& hashCode) const
 {
     if (box_ == nullptr) {
         return false;
     }
     return box_->GetStringValue(NOTIFICATION_HASHCODE, hashCode);
+}
+
+bool NotificationResponseBox::GetOperationEventId(std::string& eventId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(OPERATION_EVENT_ID, eventId);
+}
+
+bool NotificationResponseBox::GetActionName(std::string& actionName) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(ACTION_BUTTON_NAME, actionName);
+}
+
+bool NotificationResponseBox::GetUserInput(std::string& userInput) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(ACTION_USER_INPUT, userInput);
+}
+
+bool NotificationResponseBox::GetOperationType(int32_t& type) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(OPERATION_TYPE, type);
+}
+
+bool NotificationResponseBox::GetMatchType(int32_t& type) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(MATCH_TYPE, type);
+}
+
+bool NotificationResponseBox::GetLocalDeviceId(std::string& deviceId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
+}
+
+bool NotificationResponseBox::GetResponseResult(int32_t& result) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(RESULT_CODE, result);
 }
 } // namespace Notification
 } // namespace OHOS

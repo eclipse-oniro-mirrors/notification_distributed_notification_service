@@ -82,7 +82,7 @@ void OperationService::TriggerOperation(std::string eventId)
         ANS_LOGW("Operation not exist %{public}s.", eventId.c_str());
         return;
     }
-    if (iter->second.type == OperationType::OPERATION_CLICK_JUMP) {
+    if (iter->second.type == OperationType::DISTRIBUTE_OPERATION_JUMP) {
         auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(iter->second.want));
         std::string errorReason = "pull up success";
         if (ret == ERR_OK) {

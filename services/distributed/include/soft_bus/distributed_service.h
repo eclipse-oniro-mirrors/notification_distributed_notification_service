@@ -27,6 +27,7 @@
 #include "bundle_icon_box.h"
 #include <unordered_set>
 #include "distributed_data_define.h"
+#include "response_box.h"
 
 namespace OHOS {
 namespace Notification {
@@ -62,7 +63,8 @@ public:
     void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
     void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
     void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code = -1);
-    ErrCode OnResponse(const std::shared_ptr<Notification> &notification, const DistributedDeviceInfo& device);
+    ErrCode OnResponse(const std::shared_ptr<NotificationOperationInfo>& operationInfo,
+        const DistributedDeviceInfo& device);
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
         const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
     void SyncAllLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
@@ -96,6 +98,17 @@ private:
     void AbnormalReporting(int result, uint32_t branchId, const std::string& errorReason);
     void OperationalReporting(int branchId, int32_t slotType);
     std::string AnonymousProcessing(std::string data);
+    void TriggerJumpApplication(const std::string& hashCode);
+    ErrCode TriggerReplyApplication(const std::string& hashCode, const NotificationResponseBox& responseBox);
+    void HandleOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox);
+    void ReplyOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox,
+        OperationType operationType, uint32_t result);
+    void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
+        NotificationConstant::SlotType slotType, NotifticationRequestBox &requestBox);
+    void MakeNotificationButtons(const NotifticationRequestBox& box, NotificationConstant::SlotType slotType,
+        sptr<NotificationRequest>& request);
+
+private:
     std::function<void(int32_t, int32_t, uint32_t, std::string)> haCallback_ = nullptr;
     std::function<void(int32_t, int32_t, std::string)> sendReportCallback_ = nullptr;
     std::map<std::string, std::set<std::string>> bundleIconCache_;

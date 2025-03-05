@@ -327,12 +327,12 @@ ErrCode AnsSubscriberStub::HandleOnApplicationInfoNeedChanged(MessageParcel &dat
 
 ErrCode AnsSubscriberStub::HandleOnResponse(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<Notification> notification = data.ReadParcelable<Notification>();
-    if (!notification) {
+    sptr<NotificationOperationInfo> operationInfo = data.ReadParcelable<NotificationOperationInfo>();
+    if (!operationInfo) {
         ANS_LOGW("notification ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
-    ErrCode result = OnResponse(notification);
+    ErrCode result = OnOperationResponse(operationInfo);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -372,6 +372,6 @@ void AnsSubscriberStub::OnBadgeEnabledChanged(const sptr<EnabledNotificationCall
 
 void AnsSubscriberStub::OnApplicationInfoNeedChanged(const std::string& bundleName) {}
 
-ErrCode AnsSubscriberStub::OnResponse(const sptr<Notification> &request) { return 0; }
+ErrCode AnsSubscriberStub::OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo) { return 0; }
 } // namespace Notification
 } // namespace OHOS

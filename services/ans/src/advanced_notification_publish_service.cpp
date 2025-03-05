@@ -56,6 +56,8 @@
 #include "datashare_predicates.h"
 #include "notification_config_parse.h"
 #include "advanced_notification_flow_control_service.h"
+#include "notification_operation_info.h"
+#include "notification_operation_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -3203,10 +3205,18 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::DistributeOperation(const std::string &hashCode)
+ErrCode AdvancedNotificationService::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<OperationCallbackInterface> &callback)
 {
-    if (hashCode.empty()) {
+    if (operationInfo == nullptr || operationInfo->GetHashCode().empty()) {
         ANS_LOGE("hashCode is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    OperationType operationType = operationInfo->GetOperationType();
+    if (operationType != OperationType::DISTRIBUTE_OPERATION_JUMP &&
+        operationType != OperationType::DISTRIBUTE_OPERATION_REPLY) {
+        ANS_LOGE("operation type is error.");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -3226,19 +3236,30 @@ ErrCode AdvancedNotificationService::DistributeOperation(const std::string &hash
         return ERR_ANS_INVALID_PARAM;
     }
 
+    if (operationType == OperationType::DISTRIBUTE_OPERATION_REPLY) {
+        operationInfo->SetEventId(std::to_string(GetCurrentTime()));
+        std::string key = operationInfo->GetHashCode() + operationInfo->GetEventId();
+        DistributedOperationService::GetInstance().AddOperation(key, callback);
+    }
+    ANS_LOGI("DistributeOperation trigger hashcode %{public}s.", operationInfo->GetHashCode().c_str());
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        std::string hashCode = operationInfo->GetHashCode();
         for (auto record : notificationList_) {
             if (record->notification->GetKey() != hashCode) {
                 continue;
             }
-            result = NotificationSubscriberManager::GetInstance()->DistributeOperation(record->notification);
+            result = NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo);
             return;
         }
         ANS_LOGI("DistributeOperation not exist hashcode.");
         result = ERR_ANS_INVALID_PARAM;
     }));
     notificationSvrQueue_->wait(handler);
+    if (result != ERR_OK && operationType == OperationType::DISTRIBUTE_OPERATION_REPLY) {
+        std::string key = operationInfo->GetHashCode() + operationInfo->GetEventId();
+        DistributedOperationService::GetInstance().RemoveOperationResponse(key);
+    }
     return result;
 }
 

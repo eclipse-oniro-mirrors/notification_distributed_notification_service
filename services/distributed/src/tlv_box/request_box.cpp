@@ -104,6 +104,64 @@ bool NotifticationRequestBox::SetNotificationText(const std::string& text)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT, text));
 }
 
+bool NotifticationRequestBox::SetNotificationAdditionalText(const std::string& text)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_ADDITIONAL_TEXT, text));
+}
+
+bool NotifticationRequestBox::SetNotificationBriefText(const std::string& text)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BRIEF_TEXT, text));
+}
+
+bool NotifticationRequestBox::SetNotificationExpandedTitle(const std::string& text)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_EXPANDED_TITLE, text));
+}
+
+bool NotifticationRequestBox::SetNotificationLongText(const std::string& text)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_LONG_TITLE, text));
+}
+
+bool NotifticationRequestBox::SetNotificationAllLines(const std::vector<std::string>& allLines)
+{
+    return true;
+}
+
+bool NotifticationRequestBox::SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture)
+{
+    return true;
+}
+
+bool NotifticationRequestBox::SetNotificationActionName(const std::string& actionName)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(ACTION_BUTTON_NAME, actionName));
+}
+
+bool NotifticationRequestBox::SetNotificationUserInput(const std::string& userInput)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(ACTION_USER_INPUT, userInput));
+}
+
 bool NotifticationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon)
 {
     if (box_ == nullptr) {
@@ -215,6 +273,64 @@ bool NotifticationRequestBox::GetNotificationText(std::string& text) const
         return false;
     }
     return box_->GetStringValue(NOTIFICATION_CONTENT, text);
+}
+
+bool NotifticationRequestBox::GetNotificationAdditionalText(std::string& text) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_ADDITIONAL_TEXT, text);
+}
+
+bool NotifticationRequestBox::GetNotificationBriefText(std::string& text) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_BRIEF_TEXT, text);
+}
+
+bool NotifticationRequestBox::GetNotificationExpandedTitle(std::string& text) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_EXPANDED_TITLE, text);
+}
+
+bool NotifticationRequestBox::GetNotificationLongText(std::string& text) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_LONG_TITLE, text);
+}
+
+bool NotifticationRequestBox::GetNotificationAllLines(std::vector<std::string>& allLines) const
+{
+    return true;
+}
+
+bool NotifticationRequestBox::GetNotificationBigPicture(std::shared_ptr<Media::PixelMap>& bigPicture) const
+{
+    return true;
+}
+
+bool NotifticationRequestBox::GetNotificationActionName(std::string& actionName) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(ACTION_BUTTON_NAME, actionName);
+}
+
+bool NotifticationRequestBox::GetNotificationUserInput(std::string& userInput) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(ACTION_USER_INPUT, userInput);
 }
 
 bool NotifticationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const

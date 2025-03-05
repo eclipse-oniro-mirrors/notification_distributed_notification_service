@@ -625,9 +625,10 @@ ErrCode NotificationHelper::GetDoNotDisturbProfile(int32_t id, sptr<Notification
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile);
 }
 
-ErrCode NotificationHelper::DistributeOperation(const std::string& hashCode)
+ErrCode NotificationHelper::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<OperationCallbackInterface> &callback)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(hashCode);
+    return DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(operationInfo, callback);
 }
 
 ErrCode NotificationHelper::GetNotificationRequestByHashCode(
@@ -635,6 +636,11 @@ ErrCode NotificationHelper::GetNotificationRequestByHashCode(
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationRequestByHashCode(
         hashCode, notificationRequest);
+}
+
+ErrCode NotificationHelper::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->ReplyDistributeOperation(hashCode, result);
 }
 
 ErrCode NotificationHelper::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)

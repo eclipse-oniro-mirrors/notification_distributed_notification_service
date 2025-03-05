@@ -2060,11 +2060,11 @@ ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &n
     return proxy->DisableNotificationFeature(reqPtr);
 }
 
-ErrCode AnsNotification::DistributeOperation(const std::string& hashCode)
+ErrCode AnsNotification::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<OperationCallbackInterface> &callback)
 {
-    ANS_LOGI("DistributeOperation, hashCode:%{public}s", hashCode.c_str());
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (hashCode.empty()) {
+    if (operationInfo == nullptr || callback == nullptr) {
         ANS_LOGE("Input hashCode is empty.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -2074,7 +2074,19 @@ ErrCode AnsNotification::DistributeOperation(const std::string& hashCode)
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->DistributeOperation(hashCode);
+    return proxy->DistributeOperation(operationInfo, callback);
+}
+
+ErrCode AnsNotification::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->ReplyDistributeOperation(hashCode, result);
 }
 
 ErrCode AnsNotification::GetNotificationRequestByHashCode(

@@ -60,7 +60,8 @@ namespace OHOS {
         // test OnApplicationInfoNeedChanged function
         ansSubscriberProxy.OnApplicationInfoNeedChanged("com.test.demo");
         // test OnResponse function
-        ansSubscriberProxy.OnResponse(notification);
+        sptr<Notification::NotificationOperationInfo> operationInfo = new Notification::NotificationOperationInfo();
+        ansSubscriberProxy.OnOperationResponse(operationInfo);
         return true;
     }
 }

@@ -165,6 +165,7 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
                 HandleNotificationSync(box);
                 break;
             case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
+            case NotificationEventType::NOTIFICATION_RESPONSE_REPLY_SYNC:
                 HandleResponseSync(box);
                 break;
             default:

@@ -160,6 +160,7 @@ namespace Notification {
         Set_HASH_CODE_RULE,
         GET_ALL_NOTIFICATIONS_BY_SLOTTYPE,
         REQUEST_ENABLE_NOTIFICATION_BY_BUNDLE,
+        REPLY_DISTRIBUTE_OPERATION,
     };
 }
 }

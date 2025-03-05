@@ -22,7 +22,8 @@ namespace OHOS {
 namespace NotificationNapi {
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
-const int32_t DISTRIBUTE_OPERATION_PARA = 1;
+const int32_t DISTRIBUTE_JUMP_PARA = 1;
+const int32_t DISTRIBUTE_REPLY_PARA = 2;
 const std::string CONSUME = "onConsume";
 const std::string CANCEL = "onCancel";
 const std::string UPDATE = "onUpdate";
@@ -312,7 +313,7 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
         notificationKeys.append(notification->GetKey()).append("-");
     }
     ANS_LOGI("OnBatchCancel. cancel keys = %{public}s", notificationKeys.c_str());
-    
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("DataWorker is nullptr.");
@@ -324,7 +325,7 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
     dataWorker->env = batchCancelCallbackInfo_.env;
     dataWorker->ref = batchCancelCallbackInfo_.ref;
     dataWorker->type = Type::BATCH_CANCEL;
-    
+
     napi_acquire_threadsafe_function(tsfn_);
     napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
     napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
@@ -402,7 +403,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
     ANS_LOGD("OnConsumed Notification info is %{public}s", request->GetNotificationRequest().Dump().c_str());
     ANS_LOGD("OnConsumed instanceKey: %{public}s", request->GetInstanceKey().c_str());
-    
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -506,7 +507,7 @@ void SubscriberInstance::OnConnected()
         ANS_LOGI("subscribe tsfn is null");
         return;
     }
-    
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -563,7 +564,7 @@ void SubscriberInstance::OnDisconnected()
     dataWorker->ref = unsubscribeCallbackInfo_.ref;
     dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
     dataWorker->type = Type::DIS_CONNECTED;
-    
+
     napi_acquire_threadsafe_function(tsfn_);
     napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
     napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
@@ -901,7 +902,7 @@ void SubscriberInstance::OnBadgeEnabledChanged(
     dataWorker->env = setBadgeEnabledCallbackInfo_.env;
     dataWorker->ref = setBadgeEnabledCallbackInfo_.ref;
     dataWorker->type = Type::BADGE_ENABLED_CHANGED;
-    
+
     napi_acquire_threadsafe_function(tsfn_);
     napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
     napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
@@ -1539,15 +1540,62 @@ void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
     }
 }
 
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode)
+napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content, OperationInfo& operationInfo)
+{
+    operationInfo.withOperationInfo = true;
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, content, &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type for arg1. object expected.");
+        std::string msg = "Incorrect parameter type. The type of operationInfo must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    size_t strLen = 0;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, content, "actionName", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, content, "actionName", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of actionName must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+        operationInfo.actionName = str;
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, content, "userInput", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, content, "userInput", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of userInput must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        char str[LONG_STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, LONG_STR_MAX_SIZE - 1, &strLen));
+        operationInfo.userInput = str;
+    }
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode,
+    napi_value& thisVar, OperationInfo& operationInfo)
 {
     ANS_LOGD("enter");
 
-    size_t argc = DISTRIBUTE_OPERATION_PARA;
-    napi_value argv[DISTRIBUTE_OPERATION_PARA] = {nullptr};
-    napi_value thisVar = nullptr;
+    size_t argc = DISTRIBUTE_REPLY_PARA;
+    napi_value argv[DISTRIBUTE_REPLY_PARA] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc < DISTRIBUTE_OPERATION_PARA) {
+    if (argc < DISTRIBUTE_JUMP_PARA) {
         ANS_LOGE("Wrong number of arguments");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
@@ -1562,9 +1610,22 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         hashCode = str;
     } else {
         ANS_LOGE("Wrong argument type for arg0. string expected.");
-        std::string msg = "Incorrect parameter type.The type of param must be string.";
+        std::string msg = "Incorrect parameter type. The type of hashcode must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
+    }
+
+    if (hashCode.empty()) {
+        ANS_LOGE("Wrong argument type for arg0. not empty expected.");
+        std::string msg = "Incorrect parameter type. The type of hashcode must be not null.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    if (argc > DISTRIBUTE_JUMP_PARA) {
+        if (GetParamOperationInfo(env, argv[PARAM1], operationInfo) == nullptr) {
+            return Common::NapiGetUndefined(env);
+        }
     }
 
     return Common::NapiGetNull(env);

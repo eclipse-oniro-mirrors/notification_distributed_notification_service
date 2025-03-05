@@ -24,14 +24,10 @@
 #include "ability_manager_client.h"
 #include "power_mgr_client.h"
 #include "screenlock_callback_interface.h"
+#include "notification_operation_info.h"
 
 namespace OHOS {
 namespace Notification {
-
-enum OperationType {
-    OPERATION_CLICK_JUMP = 0,
-    OPERATION_QUICK_REPLY,
-};
 
 struct OperationInfo {
     OperationType type;

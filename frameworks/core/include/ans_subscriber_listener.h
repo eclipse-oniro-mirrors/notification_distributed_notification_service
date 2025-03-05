@@ -61,7 +61,7 @@ public:
 
     void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 
-    ErrCode OnResponse(const sptr<Notification> &notification) override;
+    ErrCode OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo) override;
 
 public:
     std::weak_ptr<NotificationSubscriber> subscriber_;

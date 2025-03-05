@@ -65,7 +65,8 @@ namespace OHOS {
         int32_t deleteReason = 1;
         ansSubscriberStub.OnCanceled(notification, notificationMap, deleteReason);
         ansSubscriberStub.OnApplicationInfoNeedChanged("com.test.demo");
-        ansSubscriberStub.OnResponse(notification);
+        sptr<Notification::NotificationOperationInfo> operationInfo = new Notification::NotificationOperationInfo();
+        ansSubscriberStub.OnOperationResponse(operationInfo);
         // test OnUpdated function
         ansSubscriberStub.OnUpdated(notificationMap);
         // test OnDoNotDisturbDateChange function

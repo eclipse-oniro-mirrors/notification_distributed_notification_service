@@ -1236,7 +1236,17 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DistributeOperation(const std::string& hashCode);
+    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<OperationCallbackInterface> &callback);
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result);
 
     /**
      * @brief Get notificationRequest by hashCode.

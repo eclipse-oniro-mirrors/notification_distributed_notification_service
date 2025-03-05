@@ -26,6 +26,7 @@
 #include "notification_request.h"
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"
+#include "notification_operation_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -114,7 +115,7 @@ public:
      *
      * @param notification Indicates the received Notification object.
      */
-    virtual ErrCode OnResponse(const sptr<Notification> &notification) = 0;
+    virtual ErrCode OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

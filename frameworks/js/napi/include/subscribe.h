@@ -131,7 +131,7 @@ public:
      * @param ref Indicates the napi_ref of callback.
      */
     void SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref);
-    
+
     /**
      * @brief Sets threadsafe_function.
      *
@@ -200,11 +200,19 @@ struct AsyncCallbackInfoSubscribe {
     CallbackPromiseInfo info;
 };
 
-struct AsyncCallbackInfoDistributeOperation {
-    napi_env env = nullptr;
+struct OperationInfo {
+    bool withOperationInfo = false;
+    std::string actionName;
+    std::string userInput;
+};
+
+struct AsyncOperationCallbackInfo {
+    napi_env env;
+    napi_value thisVar = nullptr;
+    napi_deferred deferred = nullptr;
     napi_async_work asyncWork = nullptr;
     std::string hashCode;
-    CallbackPromiseInfo info;
+    OperationInfo operationInfo;
 };
 
 static std::mutex mutex_;
@@ -224,7 +232,8 @@ napi_value Subscribe(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback);
-napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode,
+    napi_value& thisVar, OperationInfo& operationInfo);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_SUBSCRIBE_H

@@ -27,8 +27,24 @@ class NotificationResponseBox : public BoxBase {
 public:
     NotificationResponseBox();
     NotificationResponseBox(std::shared_ptr<TlvBox> box);
+    bool SetMessageType(int32_t messageType);
     bool SetNotificationHashCode(const std::string& hashCode);
+    bool SetOperationEventId(const std::string& eventId);
+    bool SetActionName(const std::string& actionName);
+    bool SetUserInput(const std::string& userInput);
+    bool SetOperationType(int32_t type);
+    bool SetMatchType(int32_t type);
+    bool SetLocalDeviceId(const std::string& deviceId);
+    bool SetResponseResult(int32_t result);
+
     bool GetNotificationHashCode(std::string& hashCode) const;
+    bool GetOperationEventId(std::string& eventId) const;
+    bool GetActionName(std::string& actionName) const;
+    bool GetUserInput(std::string& userInput) const;
+    bool GetOperationType(int32_t& type) const;
+    bool GetMatchType(int32_t& type) const;
+    bool GetLocalDeviceId(std::string& deviceId) const;
+    bool GetResponseResult(int32_t& result) const;
 };
 }  // namespace Notification
 }  // namespace OHOS

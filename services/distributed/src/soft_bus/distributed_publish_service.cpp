@@ -32,6 +32,7 @@
 #include "distributed_local_config.h"
 #include "distributed_operation_service.h"
 #include "notification_sync_box.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace Notification {
@@ -55,55 +56,113 @@ int64_t GetCurrentTime()
     return duration.count();
 }
 
+struct TransferNotification {
+    std::string title;
+    std::string context;
+    std::string additionalText;
+    std::string briefText;
+    std::string expandedTitle;
+};
+
+void ConvertBoxToLongContent(const TransferNotification& notificationItem, const NotifticationRequestBox& box,
+    sptr<NotificationRequest>& request)
+{
+    auto pContent = std::make_shared<NotificationLongTextContent>();
+    pContent->SetText(notificationItem.context);
+    pContent->SetTitle(notificationItem.title);
+    pContent->SetAdditionalText(notificationItem.additionalText);
+    pContent->SetBriefText(notificationItem.briefText);
+    pContent->SetExpandedTitle(notificationItem.expandedTitle);
+    std::string longText;
+    box.GetNotificationLongText(longText);
+    pContent->SetLongText(longText);
+    auto content = std::make_shared<NotificationContent>(pContent);
+    request->SetContent(content);
+}
+
+void ConvertBoxToMultileContent(const TransferNotification& notificationItem, const NotifticationRequestBox& box,
+    sptr<NotificationRequest>& request)
+{
+    auto pContent = std::make_shared<NotificationMultiLineContent>();
+    pContent->SetText(notificationItem.context);
+    pContent->SetTitle(notificationItem.title);
+    pContent->SetAdditionalText(notificationItem.additionalText);
+    pContent->SetBriefText(notificationItem.briefText);
+    pContent->SetExpandedTitle(notificationItem.expandedTitle);
+    std::vector<std::string> allLines;
+    box.GetNotificationAllLines(allLines);
+    for (auto& item : allLines) {
+        pContent->AddSingleLine(item);
+    }
+    auto content = std::make_shared<NotificationContent>(pContent);
+    request->SetContent(content);
+}
+
+void ConvertBoxToPictureContent(const TransferNotification& notificationItem, const NotifticationRequestBox& box,
+    sptr<NotificationRequest>& request)
+{
+    auto pContent = std::make_shared<NotificationPictureContent>();
+    pContent->SetText(notificationItem.context);
+    pContent->SetTitle(notificationItem.title);
+    pContent->SetAdditionalText(notificationItem.additionalText);
+    pContent->SetBriefText(notificationItem.briefText);
+    pContent->SetExpandedTitle(notificationItem.expandedTitle);
+    std::shared_ptr<Media::PixelMap> bigPicture;
+    box.GetNotificationBigPicture(bigPicture);
+    pContent->SetBigPicture(bigPicture);
+    auto content = std::make_shared<NotificationContent>(pContent);
+    request->SetContent(content);
+}
+
 void DistributedService::SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
     int32_t contentType)
 {
-    std::string title;
-    std::string context;
-    box.GetNotificationText(context);
-    box.GetNotificationTitle(title);
-    std::shared_ptr<NotificationContent> content;
+    TransferNotification notificationItem;
+    box.GetNotificationText(notificationItem.context);
+    box.GetNotificationTitle(notificationItem.title);
+    box.GetNotificationAdditionalText(notificationItem.additionalText);
     NotificationContent::Type type = static_cast<NotificationContent::Type>(contentType);
+    if (type == NotificationContent::Type::LONG_TEXT || type == NotificationContent::Type::MULTILINE ||
+        type == NotificationContent::Type::PICTURE) {
+        box.GetNotificationBriefText(notificationItem.briefText);
+        box.GetNotificationExpandedTitle(notificationItem.expandedTitle);
+    }
     switch (type) {
         case NotificationContent::Type::BASIC_TEXT: {
             auto pContent = std::make_shared<NotificationNormalContent>();
-            pContent->SetText(context);
-            pContent->SetTitle(title);
-            content = std::make_shared<NotificationContent>(pContent);
+            pContent->SetText(notificationItem.context);
+            pContent->SetTitle(notificationItem.title);
+            pContent->SetAdditionalText(notificationItem.additionalText);
+            auto content = std::make_shared<NotificationContent>(pContent);
+            request->SetContent(content);
             break;
         }
         case NotificationContent::Type::CONVERSATION: {
             auto pContent = std::make_shared<NotificationConversationalContent>();
-            pContent->SetText(context);
-            pContent->SetTitle(title);
-            content = std::make_shared<NotificationContent>(pContent);
+            pContent->SetText(notificationItem.context);
+            pContent->SetTitle(notificationItem.title);
+            pContent->SetAdditionalText(notificationItem.additionalText);
+            auto content = std::make_shared<NotificationContent>(pContent);
+            request->SetContent(content);
             break;
         }
         case NotificationContent::Type::LONG_TEXT: {
-            auto pContent = std::make_shared<NotificationLongTextContent>();
-            pContent->SetLongText(context);
-            pContent->SetTitle(title);
-            content = std::make_shared<NotificationContent>(pContent);
+            ConvertBoxToLongContent(notificationItem, box, request);
             break;
         }
         case NotificationContent::Type::MULTILINE: {
-            auto pContent = std::make_shared<NotificationMultiLineContent>();
-            pContent->SetText(context);
-            pContent->SetTitle(title);
-            content = std::make_shared<NotificationContent>(pContent);
+            ConvertBoxToMultileContent(notificationItem, box, request);
             break;
         }
         case NotificationContent::Type::PICTURE: {
-            auto pContent = std::make_shared<NotificationPictureContent>();
-            pContent->SetText(context);
-            pContent->SetTitle(title);
-            content = std::make_shared<NotificationContent>(pContent);
+            ConvertBoxToPictureContent(notificationItem, box, request);
             break;
         }
-        default:
+        default: {
+            ANS_LOGE("Set notifictaion content %{public}d", type);
             break;
+        }
     }
-    request->SetContent(content);
 }
 
 void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
@@ -185,6 +244,22 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
     request->SetLabel(DISTRIBUTED_LABEL);
 }
 
+void DistributedService::MakeNotificationButtons(const NotifticationRequestBox& box,
+    NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request)
+{
+    if (request != nullptr && slotType == NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
+        std::string actionName;
+        std::string userInputKey;
+        box.GetNotificationActionName(actionName);
+        box.GetNotificationUserInput(userInputKey);
+        std::shared_ptr<NotificationUserInput> userInput  = NotificationUserInput::Create(userInputKey);
+        std::shared_ptr<NotificationActionButton> actionButton =
+            NotificationActionButton::Create(nullptr, actionName, nullptr);
+        actionButton->AddNotificationUserInput(userInput);
+        request->AddActionButton(actionButton);
+    }
+}
+
 void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage)
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
@@ -201,6 +276,7 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
             (static_cast<NotificationContent::Type>(contentType) == NotificationContent::Type::LIVE_VIEW) &&
             (static_cast<NotificationConstant::SlotType>(slotType) == NotificationConstant::SlotType::LIVE_VIEW);
     }
+    MakeNotificationButtons(requestBox, static_cast<NotificationConstant::SlotType>(slotType), request);
     MakeNotifictaionContent(requestBox, request, isCommonLiveView, contentType);
     MakeNotifictaionIcon(requestBox, request, isCommonLiveView);
     MakeNotifictaionReminderFlag(requestBox, request);
@@ -345,41 +421,39 @@ void DistributedService::HandleNotificationSync(const std::shared_ptr<TlvBox>& b
     }
 }
 
-void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage)
+std::shared_ptr<AAFwk::Want> GetNotificationWantPtr(const std::string& hashCode)
 {
-    NotificationResponseBox responseBox = NotificationResponseBox(boxMessage);
-    std::string hashCode;
-    responseBox.GetNotificationHashCode(hashCode);
-    ANS_LOGI("handle response, hashCode: %{public}s.", hashCode.c_str());
-
     sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
     if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");
-        return;
+        return nullptr;
     }
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = notificationRequest->GetWantAgent();
     if (wantAgentPtr == nullptr) {
         ANS_LOGE("Check wantAgentPtr is null.");
-        return;
+        return nullptr;
     }
 
     std::shared_ptr<AbilityRuntime::WantAgent::PendingWant> pendingWantPtr = wantAgentPtr->GetPendingWant();
     if (pendingWantPtr == nullptr) {
         ANS_LOGE("Check pendingWantPtr is null.");
+        return nullptr;
+    }
+
+    return pendingWantPtr->GetWant(pendingWantPtr->GetTarget());
+}
+
+void DistributedService::TriggerJumpApplication(const std::string& hashCode)
+{
+    auto wantPtr = GetNotificationWantPtr(hashCode);
+    if (wantPtr == nullptr) {
+        ANS_LOGE("Get pendingWantPtr is null.");
         return;
     }
 
-    std::shared_ptr<AAFwk::Want> wantPtr = pendingWantPtr->GetWant(pendingWantPtr->GetTarget());
-    if (wantPtr == nullptr) {
-        ANS_LOGE("Check wantPtr is null.");
-        return;
-    }
-    ANS_LOGI("want uri:%{public}s", wantPtr->GetElement().GetURI().c_str());
-    bool isScreenOn = PowerMgr::PowerMgrClient::GetInstance().IsScreenOn();
-    ANS_LOGI("isScreenOn: %{public}d", isScreenOn);
-    if (!isScreenOn) {
+    if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         auto ret = PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         if (ret != PowerMgr::PowerErrors::ERR_OK) {
             ANS_LOGW("Wake up device %{public}d", ret);
@@ -388,11 +462,9 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
     }
 
     code_ = MODIFY_ERROR_EVENT_CODE;
-    bool isScreenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
-    ANS_LOGI("Screen locked status, isScreenLocked: %{public}d.", isScreenLocked);
-    if (isScreenLocked) {
+    if (ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
         OperationInfo info;
-        info.type = OperationType::OPERATION_CLICK_JUMP;
+        info.type = OperationType::DISTRIBUTE_OPERATION_JUMP;
         info.eventId = std::to_string(GetCurrentTime());
         sptr<UnlockScreenCallback> listener = new (std::nothrow) UnlockScreenCallback(info.eventId);
         int32_t unlockResult =
@@ -416,6 +488,151 @@ void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMe
             AbnormalReporting(messageType, ret, errorReason);
         }
         AbnormalReporting(ret, BRANCH9_ID, errorReason);
+    }
+}
+
+ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::string& actionName,
+    std::shared_ptr<AAFwk::Want>& wantPtr)
+{
+    sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
+        ANS_LOGE("Check notificationRequest is null.");
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+
+    auto actionButtons = notificationRequest->GetActionButtons();
+    if (actionButtons.empty()) {
+        ANS_LOGE("Check actionButtons is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::shared_ptr<NotificationActionButton> button = nullptr;
+    for (std::shared_ptr<NotificationActionButton> buttonItem : actionButtons) {
+        if (buttonItem != nullptr && buttonItem->GetUserInput() != nullptr &&
+            buttonItem->GetTitle() == actionName) {
+            button = buttonItem;
+            break;
+        }
+    }
+
+    if (button == nullptr) {
+        ANS_LOGE("Check user input is null %{public}s.", actionName.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = button->GetWantAgent();
+    if (wantAgentPtr == nullptr) {
+        ANS_LOGE("Check wantAgentPtr is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::shared_ptr<AbilityRuntime::WantAgent::PendingWant> pendingWantPtr = wantAgentPtr->GetPendingWant();
+    if (pendingWantPtr == nullptr) {
+        ANS_LOGE("Check pendingWantPtr is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    wantPtr = pendingWantPtr->GetWant(pendingWantPtr->GetTarget());
+    if (wantPtr == nullptr) {
+        ANS_LOGE("Check wantPtr is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ERR_OK;
+}
+
+ErrCode DistributedService::TriggerReplyApplication(const std::string& hashCode,
+    const NotificationResponseBox& responseBox)
+{
+    std::string actionName;
+    std::string userInput;
+    responseBox.GetActionName(actionName);
+    responseBox.GetUserInput(userInput);
+
+    std::shared_ptr<AAFwk::Want> wantPtr = nullptr;
+    auto result = GetNotificationButtonWantPtr(hashCode, actionName, wantPtr);
+    if (result != ERR_OK || wantPtr == nullptr) {
+        return result;
+    }
+
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
+    ANS_LOGI("StartAbility result:%{public}d", ret);
+    if (ret == ERR_OK) {
+        OperationalReporting(BRANCH3_ID, NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    } else {
+        AbnormalReporting(0, ret, "reply up failed");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+
+void DistributedService::HandleOperationResponse(const std::string& hashCode,
+    const NotificationResponseBox& responseBox)
+{
+    int32_t result = 0;
+    std::string eventId;
+    responseBox.GetOperationEventId(eventId);
+    responseBox.GetResponseResult(result);
+    auto ret = NotificationHelper::ReplyDistributeOperation(DISTRIBUTED_LABEL + hashCode + eventId, result);
+    ANS_LOGI("HandleOperationResponse hashcode %{public}s, result:%{public}d %{public}d",
+        hashCode.c_str(), result, ret);
+}
+
+void DistributedService::ReplyOperationResponse(const std::string& hashCode,
+    const NotificationResponseBox& responseBox, OperationType operationType, uint32_t result)
+{
+    std::string eventId;
+    std::string deviceId;
+    responseBox.GetOperationEventId(eventId);
+    responseBox.GetLocalDeviceId(deviceId);
+
+    auto iter = peerDevice_.find(deviceId);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(deviceId).c_str());
+        return;
+    }
+
+    NotificationResponseBox replyBox;
+    replyBox.SetResponseResult(result);
+    replyBox.SetNotificationHashCode(hashCode);
+    replyBox.SetOperationEventId(eventId);
+    replyBox.SetMatchType(MatchType::MATCH_ACK);
+    replyBox.SetOperationType(operationType);
+
+    if (!replyBox.Serialize()) {
+        ANS_LOGW("dans OnResponse reply serialize failed");
+        return;
+    }
+    auto ret = DistributedClient::GetInstance().SendMessage(replyBox.GetByteBuffer(), replyBox.GetByteLength(),
+        TransDataType::DATA_TYPE_MESSAGE, iter->second.deviceId_, iter->second.deviceType_);
+    if (ret != ERR_OK) {
+        ANS_LOGE("dans OnResponse send message failed result: %{public}d", ret);
+        return;
+    }
+    ANS_LOGI("Dans reply operation %{public}s %{public}d.", StringAnonymous(iter->second.deviceId_).c_str(), result);
+    return;
+}
+
+void DistributedService::HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t operationType = 0;
+    int32_t matchType = 0;
+    std::string hashCode;
+    NotificationResponseBox responseBox = NotificationResponseBox(boxMessage);
+    responseBox.GetOperationType(operationType);
+    responseBox.GetMatchType(matchType);
+    responseBox.GetNotificationHashCode(hashCode);
+    ANS_LOGI("handle response, hashCode: %{public}s type: %{public}d %{public}d.",
+        hashCode.c_str(), operationType, matchType);
+
+    if (matchType == MatchType::MATCH_SYN) {
+        if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_JUMP) {
+            TriggerJumpApplication(hashCode);
+        } else if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_REPLY) {
+            ErrCode result = TriggerReplyApplication(hashCode, responseBox);
+            ReplyOperationResponse(hashCode, responseBox, OperationType::DISTRIBUTE_OPERATION_REPLY, result);
+        }
+    } else if (matchType == MatchType::MATCH_ACK) {
+        HandleOperationResponse(hashCode, responseBox);
     }
 }
 }
