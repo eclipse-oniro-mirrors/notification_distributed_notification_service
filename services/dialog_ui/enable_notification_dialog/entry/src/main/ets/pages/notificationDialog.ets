@@ -93,6 +93,7 @@ struct PermissionDialog {
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
   @State titleContainerWidth: string | number = 'auto';
+  @State maxHeight: string|number = '85%';
 
   build() {
     Row(){
@@ -201,7 +202,7 @@ struct PermissionDialog {
       bottom: this.isBottomPopover ? this.naviHeight : 0
     })
     .constraintSize({ 
-      maxHeight: Constants.MAXIMUM_HEADER_HEIGHT,
+      maxHeight: this.maxHeight,
       maxWidth: Constants.MAX_DIALOG_WIDTH
     })
   }
@@ -250,9 +251,27 @@ struct PermissionDialog {
           this.dialog?.subWindow?.resize(windowRect?.width, windowRect?.height);
           this.dialog.initSubWindowSize = true;
         }
+        this.updatemaxHeight();
       });
     } catch (err) {
       console.error(TAG, `updateSubWindowSize error. Cause: ${err?.code}`);
+    }
+  }
+
+  updatemaxHeight(): void {
+    try {
+      let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+      let height = windowRect?.height;
+      let navigationArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+      let navigationHeight = navigationArea?.bottomRect?.height;
+      let systemArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+      let statusBarHeight = systemArea?.topRect?.height;
+      console.info(TAG, `windowHeight ${windowRect?.height} navigationHeight ${navigationHeight} statusBarHeight ${statusBarHeight} `);
+      if (height > 0 && (height - navigationHeight - statusBarHeight) > 0 ) {
+        this.maxHeight = px2vp((height - navigationHeight - statusBarHeight) * 0.9);
+      }
+    } catch (err) {
+      console.error(TAG, `updatemaxHeight error. Cause: ${err?.code}`);
     }
   }
 
@@ -313,6 +332,7 @@ struct PermissionDialog {
     this.session = storage.get('session') as UIExtensionContentSession;
     this.updateAvoidWindow();
     this.updateSubWindowSize();
+    this.updatemaxHeight();
     try {
       await this.updateStatus();
     } catch (err) {

@@ -201,7 +201,7 @@ struct PermissionDialog {
               }
             }
           }
-          .constraintSize({ maxHeight: Constants.MAXIMUM_HEADER_HEIGHT })
+          .constraintSize({ maxHeight: '90%' })
         }
         .borderRadius(Constants.PC_RDIUS_16)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
