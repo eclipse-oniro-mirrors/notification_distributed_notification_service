@@ -262,11 +262,13 @@ struct PermissionDialog {
     try {
       let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
       let height = windowRect?.height;
-      let navigationArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+      let navigationArea = this.dialog?.extensionWindow.getWindowAvoidArea(
+          window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
       let navigationHeight = navigationArea?.bottomRect?.height;
       let systemArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
       let statusBarHeight = systemArea?.topRect?.height;
-      console.info(TAG, `windowHeight ${windowRect?.height} navigationHeight ${navigationHeight} statusBarHeight ${statusBarHeight} `);
+      console.info(TAG, `windowHeight ${windowRect?.height} 
+          navigationHeight ${navigationHeight} statusBarHeight ${statusBarHeight} `);
       if (height > 0 && (height - navigationHeight - statusBarHeight) > 0 ) {
         this.maxHeight = px2vp((height - navigationHeight - statusBarHeight) * 0.9);
       }
