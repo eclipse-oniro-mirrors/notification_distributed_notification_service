@@ -52,6 +52,9 @@ constexpr int32_t ALL_SA_READY_FLAG = 2;  // bundle service and ability service 
 constexpr int32_t ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE = 10;
 // The maximum number of system that can be displayed at a time
 constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
+// The maximun number of system that can be start extension count
+constexpr int32_t TOTAL_MAX_NUMBER_START_EXTENSION = 100;
+constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 }
 
 bool ReminderDataManager::IsSystemReady()
@@ -219,6 +222,41 @@ void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<
         if ((*it)->IsShowing()) {
             ShowReminder((*it), false, false, false, false);
         }
+    }
+}
+
+void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times,
+    const int8_t type, int32_t& count)
+{
+    auto manager = ReminderDataManager::GetInstance();
+    if (manager == nullptr) {
+        ANSR_LOGW("ReminderDataManager is nullptr.");
+        return;
+    }
+    if (!manager->IsSystemReady()) {
+        ANSR_LOGW("bundle service or ability service not ready.");
+        return;
+    }
+    if (!reminder->IsSystemApp()) {
+        ANSR_LOGI("Start extension ability failed, is not system app");
+        return;
+    }
+    if (count > TOTAL_MAX_NUMBER_START_EXTENSION) {
+        ANSR_LOGW("The maximum number of start extension has been reached.");
+        return;
+    }
+    ++count;
+    times--;
+    bool ret = ReminderDataManager::StartExtensionAbility(reminder, type);
+    if (!ret && times > 0 && serviceQueue_ != nullptr) {
+        ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
+        ffrt::task_attr taskAttr;
+        taskAttr.delay(CONNECT_EXTENSION_INTERVAL);
+        auto callback = [reminder, times, type]() {
+            int32_t count = 0;
+            ReminderDataManager::AsyncStartExtensionAbility(reminder, times, type, count);
+        };
+        serviceQueue_->submit(callback, taskAttr);
     }
 }
 }
