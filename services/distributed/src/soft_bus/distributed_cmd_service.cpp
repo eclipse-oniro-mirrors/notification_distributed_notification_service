@@ -130,9 +130,13 @@ void DistributedService::SyncAllLiveViewNotification(const DistributedDeviceInfo
     }
 
     auto iter = peerDevice_.find(peerDevice.deviceId_);
-    if (iter == peerDevice_.end() || (!isForce && iter->second.isSync)) {
-        ANS_LOGI("Dans %{public}s %{public}d %{public}d.", StringAnonymous(peerDevice.deviceId_).c_str(),
-            isForce, iter->second.isSync);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGI("Dans %{public}s.", StringAnonymous(peerDevice.deviceId_).c_str());
+        return;
+    }
+
+    if (!isForce && iter->second.isSync) {
+        ANS_LOGI("Dans %{public}d %{public}d.", isForce, iter->second.isSync);
         return;
     }
 
