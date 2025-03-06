@@ -82,7 +82,6 @@ std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
 std::mutex ReminderDataManager::ACTIVE_MUTEX;
-constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
 constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 std::shared_ptr<ffrt::queue> ReminderDataManager::serviceQueue_ = nullptr;
 ReminderDataManager::ReminderDataManager() = default;
@@ -1065,35 +1064,6 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
     return true;
 }
 
-void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder, int32_t times,
-    const int8_t type)
-{
-    auto manager = ReminderDataManager::GetInstance();
-    if (manager == nullptr) {
-        ANSR_LOGW("ReminderDataManager is nullptr.");
-        return;
-    }
-    if (!manager->IsSystemReady()) {
-        ANSR_LOGW("bundle service or ability service not ready.");
-        return;
-    }
-    if (!reminder->IsSystemApp()) {
-        ANSR_LOGI("Start extension ability failed, is not system app");
-        return;
-    }
-    times--;
-    bool ret = ReminderDataManager::StartExtensionAbility(reminder, type);
-    if (!ret && times > 0 && serviceQueue_ != nullptr) {
-        ANSR_LOGD("StartExtensionAbilty failed, reminder times: %{public}d", times);
-        ffrt::task_attr taskAttr;
-        taskAttr.delay(CONNECT_EXTENSION_INTERVAL);
-        auto callback = [reminder, times, type]() {
-            ReminderDataManager::AsyncStartExtensionAbility(reminder, times, type);
-        };
-        serviceQueue_->submit(callback, taskAttr);
-    }
-}
-
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
     const bool &isNeedToStartNext, const bool &isSysTimeChanged, const bool &needScheduleTimeout)
 {
@@ -1332,8 +1302,9 @@ void ReminderDataManager::HandleImmediatelyShow(
 void ReminderDataManager::HandleExtensionReminder(std::vector<sptr<ReminderRequest>>& extensionReminders,
     const int8_t type)
 {
+    int32_t count = 0;
     for (auto& reminder : extensionReminders) {
-        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES, type);
+        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES, type, count);
     }
 }
 

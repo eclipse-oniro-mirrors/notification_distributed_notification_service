@@ -543,7 +543,7 @@ private:
         std::vector<sptr<ReminderRequest>>& extensionReminders);
     static bool StartExtensionAbility(const sptr <ReminderRequest> &reminder, const int8_t type);
     static void AsyncStartExtensionAbility(const sptr<ReminderRequest> &reminder,
-        int32_t times, const int8_t type);
+        int32_t times, const int8_t type, int32_t& count);
     void InitServiceHandler();
     /**
      * @brief Show the reminder on SystemUI.
