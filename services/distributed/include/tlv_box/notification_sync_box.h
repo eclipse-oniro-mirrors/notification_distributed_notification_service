@@ -29,8 +29,10 @@ public:
     ~NotificationSyncBox();
     NotificationSyncBox(std::shared_ptr<TlvBox> box);
     bool SetLocalDeviceId(const std::string& deviceId);
+    bool SetNotificationEmpty(const bool empty);
     bool SetNotificationList(const std::vector<std::string>& notificationList);
     bool GetLocalDeviceId(std::string& deviceId) const;
+    bool GetNotificationEmpty(bool& empty) const;
     bool GetNotificationList(std::unordered_set<std::string>& notificationList) const;
 };
 }  // namespace Notification

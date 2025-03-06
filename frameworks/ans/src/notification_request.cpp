@@ -869,6 +869,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["isAgent"]          = isAgent_;
     jsonObject["isFloatingIcon"]   = floatingIcon_;
     jsonObject["updateOnly"]   = updateOnly_;
+    jsonObject["distributedCollaborate"]    = distributedCollaborate_;
 
     jsonObject["creatorBundleName"] = creatorBundleName_;
     jsonObject["creatorUid"]        = creatorUid_;
@@ -884,6 +885,7 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["finishDeadLine"]     = finishDeadLine_;
     jsonObject["hashCodeGenerateType"]    = hashCodeGenerateType_;
     jsonObject["collaboratedReminderFlag"]    = collaboratedReminderFlag_;
+    jsonObject["distributedHashCode"]    = distributedHashCode_;
 
     if (!ConvertObjectsToJson(jsonObject)) {
         ANS_LOGE("Cannot convert objects to JSON");
@@ -2271,6 +2273,10 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
     if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
     }
+
+    if (jsonObject.find("distributedHashCode") != jsonEnd && jsonObject.at("distributedHashCode").is_string()) {
+        target->distributedHashCode_ = jsonObject.at("distributedHashCode").get<std::string>();
+    }
 }
 
 void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const nlohmann::json &jsonObject)
@@ -2346,6 +2352,10 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
 
     if (jsonObject.find("updateOnly") != jsonEnd && jsonObject.at("updateOnly").is_boolean()) {
         target->updateOnly_ = jsonObject.at("updateOnly").get<bool>();
+    }
+
+    if (jsonObject.find("distributedCollaborate") != jsonEnd && jsonObject.at("distributedCollaborate").is_boolean()) {
+        target->distributedCollaborate_ = jsonObject.at("distributedCollaborate").get<bool>();
     }
 
     ConvertJsonToBoolExt(target, jsonObject);
@@ -2691,6 +2701,11 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
 std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
 {
     const char *keySpliter = "_";
+
+    if (distributedCollaborate_) {
+        ANS_LOGI("NotificationRequest use collaborate!");
+        return label_ + distributedHashCode_;
+    }
 
     std::stringstream stream;
     uint32_t hashCodeGeneratetype = GetHashCodeGenerateType();

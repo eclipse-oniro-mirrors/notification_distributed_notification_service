@@ -139,8 +139,8 @@ void DistributedService::SyncAllLiveViewNotification(const DistributedDeviceInfo
     std::vector<sptr<Notification>> notifications;
     auto result = NotificationHelper::GetAllNotificationsBySlotType(notifications,
         NotificationConstant::SlotType::LIVE_VIEW);
-    if (result != ERR_OK || notifications.empty()) {
-        ANS_LOGI("Dans get all active %{public}d %{public}d.", result, notifications.empty());
+    if (result != ERR_OK) {
+        ANS_LOGI("Dans get all active %{public}d.", result);
         return;
     }
 
@@ -169,14 +169,13 @@ void DistributedService::SyncAllLiveViewNotification(const DistributedDeviceInfo
 void DistributedService::SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
     const std::vector<std::string>& notificationList)
 {
-    if (notificationList.empty()) {
-        return;
-    }
-
     ANS_LOGI("Dans sync notification %{public}u.", notificationList.size());
     NotificationSyncBox notificationSyncBox;
     notificationSyncBox.SetLocalDeviceId(peerDevice.deviceId_);
-    notificationSyncBox.SetNotificationList(notificationList);
+    notificationSyncBox.SetNotificationEmpty(notificationList.empty());
+    if (!notificationList.empty()) {
+        notificationSyncBox.SetNotificationList(notificationList);
+    }
 
     if (!notificationSyncBox.Serialize()) {
         ANS_LOGW("Dans SyncNotifictionList serialize failed.");
