@@ -347,7 +347,8 @@ bool SmartReminderCenter::HandleReminderFilter(
 {
     // filter
     NotificationConstant::SlotType slotType = request->GetSlotType();
-    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
+    if ((deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 ||
+        deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE)) &&
       CompareStatus(STATUS_UNUSED, bitStatus)) {
         bool wearEnabled = false;
         NotificationPreferences::GetInstance()->IsSmartReminderEnabled(
@@ -365,7 +366,8 @@ bool SmartReminderCenter::HandleReminderFilter(
 
     bitset<DistributedDeviceStatus::STATUS_SIZE> currentStatus;
     GetDeviceStatusByType(NotificationConstant::CURRENT_DEVICE_TYPE, currentStatus);
-    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 &&
+    if ((deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) == 0 ||
+        deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE)) &&
       CompareStatus(STATUS_UNLOCK_OWNER, currentStatus)) {
         if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == slotType ||
             NotificationConstant::SlotType::SERVICE_REMINDER == slotType ||
