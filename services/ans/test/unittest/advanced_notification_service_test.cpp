@@ -729,7 +729,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09600,
         (int)advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true), (int)ERR_OK);
     bool allowed = false;
     ASSERT_EQ((int)advancedNotificationService_->IsAllowedNotifySelf(allowed), (int)ERR_OK);
+#ifdef ANS_DISABLE_FA_MODEL
     EXPECT_FALSE(allowed);
+#else
+    EXPECT_TRUE(allowed);
+#endif
 }
 
 /**

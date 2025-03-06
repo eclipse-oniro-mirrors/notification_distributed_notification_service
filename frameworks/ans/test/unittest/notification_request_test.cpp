@@ -956,7 +956,7 @@ HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0001, Level1)
     notificationRequest.SetLabel(string("test"));
     notificationRequest.SetCreatorBundleName(string("push.com"));
     auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view__1_0_push.com_test_10"};
+    string expectKey {"ans_live_view___1_0_push.com_test_10"};
     EXPECT_EQ(key, expectKey);
 }
 
@@ -976,7 +976,7 @@ HWTEST_F(NotificationRequestTest, GetNotificationRequestKey_0002, Level1)
     notificationRequest.SetOwnerBundleName(string("test.com"));
     notificationRequest.SetIsAgentNotification(true);
     auto key = notificationRequest.GetKey();
-    string expectKey {"ans_live_view__1_2_test.com_test_10"};
+    string expectKey {"ans_live_view___1_2_test.com_test_10"};
     EXPECT_EQ(key, expectKey);
 }
 

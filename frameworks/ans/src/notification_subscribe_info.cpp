@@ -199,8 +199,8 @@ std::string NotificationSubscribeInfo::Dump()
             "deviceType = " + deviceType_ +
             "userId = " + std::to_string(userId_) +
             "slotTypes = [" + slotTypes + "]" +
-            "filterType = " + std::to_string(filterType_) +
             "needNotify = " + std::to_string(needNotifyApplicationChanged_) +
+            "filterType = " + std::to_string(filterType_) +
             "needResponse = " + std::to_string(needNotifyResponse_) +
             " }";
 }

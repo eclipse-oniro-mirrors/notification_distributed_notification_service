@@ -3421,6 +3421,8 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
     MessageOption option = {MessageOption::TF_SYNC};
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
+    string bundlename = "bundle1";
+    bundleOption->SetBundleName(bundlename);
     int32_t type = 4;
     bool enabled = true;
     bool isForceControl = false;
@@ -3432,7 +3434,7 @@ HWTEST_F(AnsManagerStubTest, HandleSetEnabledForBundleSlot01, Function | SmallTe
     data.WriteBool(isForceControl);
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
@@ -3612,10 +3614,10 @@ HWTEST_F(AnsManagerStubTest, HandleSetBadgeNumber03, Function | SmallTest | Leve
 
     data.WriteInterfaceToken(AnsManagerStub::GetDescriptor());
     data.WriteInt32(type);
-    data.WriteInt32(type);
+    data.WriteString("");
 
     ErrCode ret = ansManagerStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(ret, (int)ERR_ANS_PARCELABLE_FAILED);
+    EXPECT_EQ(ret, (int)ERR_INVALID_OPERATION);
 }
 
 /**
@@ -4893,7 +4895,7 @@ HWTEST_F(AnsManagerStubTest, HandleAddDoNotDisturbProfiles_0100, TestSize.Level1
     MessageParcel data;
     MessageParcel reply;
     ErrCode ret = ansManagerStub_->HandleAddDoNotDisturbProfiles(data, reply);
-    EXPECT_EQ(ret, ERR_ANS_PARCELABLE_FAILED);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**

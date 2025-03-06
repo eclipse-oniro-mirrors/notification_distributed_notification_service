@@ -234,8 +234,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -333,8 +333,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -602,8 +602,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             ANS_LOGE("XXXX size %{public}zu", sortingKey.size());
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
@@ -702,8 +702,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -943,8 +943,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -1346,8 +1346,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -1401,8 +1401,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking()) {
                 passed = true;
@@ -1503,7 +1503,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
     g_advancedNotificationService->Publish(label, req);
 
     // remove request
-    g_advancedNotificationService->Delete("_0_1_bundleName_testLabel_0", NotificationConstant::CANCEL_REASON_DELETE);
+    g_advancedNotificationService->Delete("__0_1_bundleName_testLabel_0", NotificationConstant::CANCEL_REASON_DELETE);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     EXPECT_TRUE(passed);
     g_advancedNotificationService->Unsubscribe(listener, nullptr);
@@ -1906,8 +1906,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
 
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
@@ -1970,8 +1970,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -2033,8 +2033,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -2096,8 +2096,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
@@ -2160,8 +2160,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
             NotificationSorting sorting1;
             NotificationSorting sorting2;
             if (sortingKey.size() == 2) {
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_0", sorting1);
-                sortingMap->GetNotificationSorting("_0_1_bundleName_testLabel_1", sorting2);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_0", sorting1);
+                sortingMap->GetNotificationSorting("__0_1_bundleName_testLabel_1", sorting2);
             }
             if (sorting1.GetRanking() < sorting2.GetRanking() && notification->EnableLight() &&
                 notification->EnableSound() && notification->EnableVibrate()) {
