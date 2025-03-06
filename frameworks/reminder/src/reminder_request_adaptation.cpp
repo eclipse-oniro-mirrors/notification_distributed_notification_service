@@ -38,6 +38,10 @@ ReminderRequestAdaptation* ReminderRequestAdaptation::Unmarshalling(Parcel &parc
         return nullptr;
     }
     ReminderRequestAdaptation* reminderRequestAdaptation = new (std::nothrow) ReminderRequestAdaptation();
+    if (reminderRequestAdaptation == nullptr) {
+        delete reminderRequest;
+        return nullptr;
+    }
     reminderRequestAdaptation->reminderRequest_ = reminderRequest;
     return reminderRequestAdaptation;
 }
