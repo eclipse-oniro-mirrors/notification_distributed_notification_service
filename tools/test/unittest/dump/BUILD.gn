@@ -14,7 +14,8 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/test.gni")
 
-module_output_path = "distributed_notification_service/tools"
+module_output_path =
+    "distributed_notification_service/distributed_notification_service/tools"
 
 config("tools_dump_config_mock") {
   include_dirs = [
