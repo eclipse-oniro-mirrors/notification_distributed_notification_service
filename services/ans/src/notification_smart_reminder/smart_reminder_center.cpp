@@ -282,11 +282,28 @@ void SmartReminderCenter::InitValidDevices(
     auto notificationControlFlags = request->GetNotificationControlFlags();
     validDevices.insert(NotificationConstant::CURRENT_DEVICE_TYPE);
     for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
-        if (IsNeedSynergy(request->GetSlotType(), deviceType, request->GetOwnerBundleName(), request->GetOwnerUid()) &&
-            NotificationSubscriberManager::GetInstance()->IsDeviceTypeSubscriberd(deviceType)) {
-            validDevices.insert(deviceType);
-            request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
-            ANS_LOGI("InitValidDevices- %{public}s", deviceType.c_str());
+        if (!NotificationSubscriberManager::GetInstance()->IsDeviceTypeSubscriberd(deviceType)) {
+            continue;
+        }
+        if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
+            bool isEnable = false;
+            NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
+                request->GetSlotType(), deviceType, isEnable);
+            if (!isEnable) {
+                ANS_LOGI("switch-status, slot switch closed. device = %{public}s", deviceType.c_str());
+                continue;
+            } else {
+                validDevices.insert(deviceType);
+                request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
+                ANS_LOGI("InitValidDevices- %{public}s", deviceType.c_str());
+            }
+        } else {
+            if (IsNeedSynergy(request->GetSlotType(), deviceType,
+                request->GetOwnerBundleName(), request->GetOwnerUid())) {
+                validDevices.insert(deviceType);
+                request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
+                ANS_LOGI("InitValidDevices- %{public}s", deviceType.c_str());
+            }
         }
     }
     return;
@@ -313,6 +330,13 @@ void SmartReminderCenter::HandleReminderMethods(
     bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus;
     GetDeviceStatusByType(deviceType, bitStatus);
     request->AdddeviceStatu(deviceType, bitStatus.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
+
+    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType() &&
+        validDevices.find(deviceType) == validDevices.end()
+    ) {
+        ANS_LOGI("live view slot switch is close, not notify");
+        return;
+    }
     if (!HandleReminderFilter(deviceType, request, bitStatus)) {
         return;
     }
@@ -391,12 +415,6 @@ bool SmartReminderCenter::IsNeedSynergy(const NotificationConstant::SlotType &sl
     bool isEnable = true;
     if (NotificationPreferences::GetInstance()->IsSmartReminderEnabled(device, isEnable) != ERR_OK || !isEnable) {
         ANS_LOGI("switch-status, smartReminderEnable closed. device = %{public}s", device.c_str());
-        return false;
-    }
-
-    if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(slotType, device, isEnable) != ERR_OK
-        || !isEnable) {
-        ANS_LOGI("switch-status, slot switch closed. device = %{public}s", device.c_str());
         return false;
     }
 
