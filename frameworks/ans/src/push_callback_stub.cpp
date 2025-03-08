@@ -144,7 +144,7 @@ int32_t PushCallBackProxy::OnCheckNotification(
         return false;
     }
 
-    +    int result = reply.ReadInt32();
+    int result = reply.ReadInt32();
     std::string eventControl;
     if (reply.ReadString(eventControl)) {
         ANS_LOGI("HandleEventControl");
