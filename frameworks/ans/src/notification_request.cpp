@@ -2670,6 +2670,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     if (newExtraInfo == nullptr) {
         newLiveViewContent->SetExtraInfo(oldExtraInfo);
     } else if (oldExtraInfo != nullptr) {
+        newExtraInfo->Remove("eventControl");
         auto oldKeySet = oldExtraInfo->KeySet();
         for (const auto &key : oldKeySet) {
             if (!newExtraInfo->HasParam(key)) {

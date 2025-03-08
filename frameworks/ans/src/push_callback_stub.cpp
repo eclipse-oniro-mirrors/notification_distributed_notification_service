@@ -22,6 +22,7 @@
 #include "push_callback_proxy.h"
 #include "singleton.h"
 #include "ans_inner_errors.h"
+#include "nlohmann/json.hpp"
 
 using namespace OHOS::AppExecFwk;
 namespace OHOS {
@@ -143,7 +144,41 @@ int32_t PushCallBackProxy::OnCheckNotification(
         return false;
     }
 
-    return reply.ReadInt32();
+    +    int result = reply.ReadInt32();
+    std::string eventControl;
+    if (reply.ReadString(eventControl)) {
+        ANS_LOGI("HandleEventControl");
+        HandleEventControl(eventControl, pushCallBackParam);
+    }
+    return result;
+}
+
+void PushCallBackProxy::HandleEventControl(
+    std::string eventControl, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
+{
+    if (pushCallBackParam == nullptr) {
+        ANS_LOGI("pushCallBackParam is null");
+        return;
+    }
+    std::string event = pushCallBackParam->event;
+    if (event.empty()) {
+        ANS_LOGI("event is null");
+        return;
+    }
+    ANS_LOGI("eventControl:%{public}s,event:%{public}s", eventControl.c_str(), event.c_str());
+    if (eventControl.empty() || !nlohmann::json::accept(eventControl)) {
+        return;
+    }
+    auto jsonObject = nlohmann::json::parse(eventControl);
+    if (jsonObject.is_null() || !jsonObject.is_object()) {
+        ANS_LOGE("jsonObject is not right");
+        return;
+    }
+    if (jsonObject.find(event)  == jsonObject.cend()) {
+        ANS_LOGI("This event has not eventControl");
+        return;
+    }
+    pushCallBackParam->eventControl = jsonObject.at(event).dump();
 }
 } // namespace Notification
 } // namespace OHOS

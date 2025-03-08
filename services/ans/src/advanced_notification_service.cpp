@@ -80,6 +80,7 @@
 #include "distributed_device_manager.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "notification_operation_service.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -2198,12 +2199,32 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     if (request->IsCommonLiveView()) {
         FillExtraInfoToJson(request, checkRequest, jsonObject);
     }
+    std::shared_ptr<PushCallBackParam> pushCallBackParam = std::make_shared<PushCallBackParam>();
+    std::shared_ptr<AAFwk::WantParams> extroInfo = nullptr;
+    if (request->IsCommonLiveView()) {
+        auto content = request->GetContent()->GetNotificationContent();
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+        extroInfo = liveViewContent->GetExtraInfo();
+        if (pushCallBackParam != nullptr) {
+            if (extroInfo != nullptr && extroInfo->HasParam("event")) {
+                pushCallBackParam->event = extroInfo->GetStringParam("event");
+                ANS_LOGI("get event,%{public}s", pushCallBackParam->event.c_str());
+            } else {
+                ANS_LOGI("get event fail");
+            }
+        }
+    }
 
-    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), nullptr);
+    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
     if (result != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
             .ErrorCode(result).Message("Push OnCheckNotification failed.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+    }
+    if (pushCallBackParam != nullptr && !pushCallBackParam->eventControl.empty() && extroInfo != nullptr) {
+        extroInfo->SetParam("eventControl", AAFwk::String::Box(pushCallBackParam->eventControl));
+    } else {
+        extroInfo->Remove("eventControl");
     }
     return result;
 }
