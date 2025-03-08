@@ -2125,11 +2125,6 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
         }
 
         NotificationSubscriberManager::GetInstance()->NotifyApplicationInfoNeedChanged(request->GetCreatorBundleName());
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            ANS_LOGI("The creator has the permission, no need to check.");
-            return false;
-        }
         ANS_LOGI("Common live view requires push check.");
         return true;
     }

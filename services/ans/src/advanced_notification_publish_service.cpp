@@ -171,6 +171,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 #ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {
             result = PushCheck(request);
+            if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+                AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
+                result != ERR_OK) {
+                ANS_LOGI("The application with the permission fails to pushcheck.");
+                result = ERR_OK;
+            }
         }
 #endif
 
