@@ -2328,6 +2328,10 @@ void NotificationPreferencesDatabase::GetAllCloneProfileInfo(const int32_t &user
 
     for (auto item : values) {
         sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+        if (profile == nullptr) {
+            ANS_LOGW("Get clone profile failed.");
+            continue;
+        }
         profile->FromJson(item.second);
         profilesInfo.push_back(profile);
     }

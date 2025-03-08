@@ -58,6 +58,14 @@ bool NotificationSyncBox::SetNotificationList(const std::vector<std::string>& no
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, result));
 }
 
+bool NotificationSyncBox::SetNotificationEmpty(const bool empty)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE + 1, empty));
+}
+
 bool NotificationSyncBox::GetLocalDeviceId(std::string& deviceId) const
 {
     if (box_ == nullptr) {
@@ -87,5 +95,12 @@ bool NotificationSyncBox::GetNotificationList(std::unordered_set<std::string>& n
     return true;
 }
 
+bool NotificationSyncBox::GetNotificationEmpty(bool& empty) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetBoolValue(NOTIFICATION_HASHCODE + 1, empty);
+}
 }
 }
