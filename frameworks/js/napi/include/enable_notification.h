@@ -43,6 +43,7 @@ struct AsyncCallbackInfoIsEnable {
     CallbackPromiseInfo info;
     bool newInterface = false;
     bool allowed = false;
+    std::string bundleName = {""};
 };
 
 struct EnableParams {
