@@ -1337,6 +1337,8 @@ private:
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
         sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
+    void CreatePushCheckJson(const sptr<NotificationRequest> &request,
+        sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
     uint64_t StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
         int64_t deleteTimePoint, int32_t reason);

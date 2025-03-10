@@ -80,6 +80,7 @@
 #include "distributed_device_manager.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "notification_operation_service.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -2124,11 +2125,6 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
         }
 
         NotificationSubscriberManager::GetInstance()->NotifyApplicationInfoNeedChanged(request->GetCreatorBundleName());
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            ANS_LOGI("The creator has the permission, no need to check.");
-            return false;
-        }
         ANS_LOGI("Common live view requires push check.");
         return true;
     }
@@ -2176,6 +2172,24 @@ void AdvancedNotificationService::FillExtraInfoToJson(
     }
 }
 
+void AdvancedNotificationService::CreatePushCheckJson(
+    const sptr<NotificationRequest> &request, sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject)
+{
+    if (request->IsAgentNotification()) {
+        jsonObject["pkgName"] = request->GetOwnerBundleName();
+    } else {
+        jsonObject["pkgName"] = request->GetCreatorBundleName();
+    }
+    jsonObject["notifyId"] = request->GetNotificationId();
+    jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
+    jsonObject["creatorUserId"] = request->GetCreatorUserId();
+    jsonObject["slotType"] = static_cast<int32_t>(request->GetSlotType());
+    jsonObject["label"] = request->GetLabel();
+    if (request->IsCommonLiveView()) {
+        FillExtraInfoToJson(request, checkRequest, jsonObject);
+    }
+}
+
 ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("start.");
@@ -2189,21 +2203,37 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
 
     nlohmann::json jsonObject;
-    jsonObject["pkgName"] = request->GetCreatorBundleName();
-    jsonObject["notifyId"] = request->GetNotificationId();
-    jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
-    jsonObject["creatorUserId"] = request->GetCreatorUserId();
-    jsonObject["slotType"] = static_cast<int32_t>(request->GetSlotType());
-    jsonObject["label"] = request->GetLabel();
+    CreatePushCheckJson(request, checkRequest, jsonObject);
+    std::shared_ptr<PushCallBackParam> pushCallBackParam = std::make_shared<PushCallBackParam>();
+    std::shared_ptr<AAFwk::WantParams> extroInfo = nullptr;
     if (request->IsCommonLiveView()) {
-        FillExtraInfoToJson(request, checkRequest, jsonObject);
+        auto content = request->GetContent()->GetNotificationContent();
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+        extroInfo = liveViewContent->GetExtraInfo();
+        if (pushCallBackParam != nullptr) {
+            if (extroInfo != nullptr && extroInfo->HasParam("event")) {
+                pushCallBackParam->event = extroInfo->GetStringParam("event");
+                ANS_LOGI("get event,%{public}s", pushCallBackParam->event.c_str());
+            }
+        }
     }
 
-    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), nullptr);
+    ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
+    if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
+        result != ERR_OK) {
+        ANS_LOGI("The application with the permission fails to pushcheck.");
+        result = ERR_OK;
+    }
     if (result != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
             .ErrorCode(result).Message("Push OnCheckNotification failed.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+    }
+    if (pushCallBackParam != nullptr && !pushCallBackParam->eventControl.empty() && extroInfo != nullptr) {
+        extroInfo->SetParam("eventControl", AAFwk::String::Box(pushCallBackParam->eventControl));
+    } else {
+        extroInfo->Remove("eventControl");
     }
     return result;
 }

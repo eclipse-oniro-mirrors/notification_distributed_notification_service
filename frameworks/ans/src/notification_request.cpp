@@ -2670,6 +2670,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     if (newExtraInfo == nullptr) {
         newLiveViewContent->SetExtraInfo(oldExtraInfo);
     } else if (oldExtraInfo != nullptr) {
+        newExtraInfo->Remove("eventControl");
         auto oldKeySet = oldExtraInfo->KeySet();
         for (const auto &key : oldKeySet) {
             if (!newExtraInfo->HasParam(key)) {
@@ -2684,9 +2685,8 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
 
     auto newPicture = newLiveViewContent->GetPicture();
-    auto oldPicture = oldLiveViewContent->GetPicture();
     bool isSet = false;
-    for (const auto &pictureRecord : oldPicture) {
+    for (const auto &pictureRecord : oldLiveViewContent->GetPicture()) {
         if (newPicture.find(pictureRecord.first) != newPicture.end()) {
             continue;
         }
