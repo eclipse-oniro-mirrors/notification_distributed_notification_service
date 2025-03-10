@@ -2185,7 +2185,11 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
 
     nlohmann::json jsonObject;
-    jsonObject["pkgName"] = request->GetCreatorBundleName();
+    if (request->IsAgentNotification() && !request->GetOwnerBundleName().empty()) {
+        jsonObject["pkgName"] = request->GetOwnerBundleName();
+    } else {
+        jsonObject["pkgName"] = request->GetCreatorBundleName();
+    }
     jsonObject["notifyId"] = request->GetNotificationId();
     jsonObject["contentType"] = static_cast<int32_t>(request->GetNotificationType());
     jsonObject["creatorUserId"] = request->GetCreatorUserId();
@@ -2204,8 +2208,6 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
             if (extroInfo != nullptr && extroInfo->HasParam("event")) {
                 pushCallBackParam->event = extroInfo->GetStringParam("event");
                 ANS_LOGI("get event,%{public}s", pushCallBackParam->event.c_str());
-            } else {
-                ANS_LOGI("get event fail");
             }
         }
     }
