@@ -297,13 +297,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = errCode;
                 return;
             }
-            bool success = CreateUIExtension(asynccallbackinfo->params.context, bundleName);
-            if (success) {
-                asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
-            } else {
-                asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-                NotificationHelper::RemoveEnableNotificationDialog();
-            }
+            asynccallbackinfo->bundleName = bundleName;
         } else {
             ANS_LOGD("un stage mode");
             std::string deviceId {""};
@@ -320,6 +314,15 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
+        if (!asynccallbackinfo->bundleName.empty()) {
+            bool success = CreateUIExtension(asynccallbackinfo->params.context, asynccallbackinfo->bundleName);
+            if (success) {
+                asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
+            } else {
+                asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+                NotificationHelper::RemoveEnableNotificationDialog();
+            }
+        }
         ErrCode errCode = asynccallbackinfo->info.errorCode;
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
             ANS_LOGE("error, code is %{public}d.", errCode);
