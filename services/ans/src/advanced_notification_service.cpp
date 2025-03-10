@@ -2175,7 +2175,7 @@ void AdvancedNotificationService::FillExtraInfoToJson(
 void AdvancedNotificationService::CreatePushCheckJson(
     const sptr<NotificationRequest> &request, sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject)
 {
-    if (request->IsAgentNotification() && !request->GetOwnerBundleName().empty()) {
+    if (request->IsAgentNotification()) {
         jsonObject["pkgName"] = request->GetOwnerBundleName();
     } else {
         jsonObject["pkgName"] = request->GetCreatorBundleName();
