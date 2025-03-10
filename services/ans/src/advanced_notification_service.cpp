@@ -2172,19 +2172,9 @@ void AdvancedNotificationService::FillExtraInfoToJson(
     }
 }
 
-ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
+void AdvancedNotificationService::CreatePushCheckJson(
+    const sptr<NotificationRequest> &request, sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject)
 {
-    ANS_LOGD("start.");
-    if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
-        return ERR_ANS_PUSH_CHECK_UNREGISTERED;
-    }
-    sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
-    sptr<NotificationCheckRequest> checkRequest = checkRequests_[request->GetSlotType()];
-    if (request->GetCreatorUid() == checkRequest->GetUid()) {
-        return ERR_OK;
-    }
-
-    nlohmann::json jsonObject;
     if (request->IsAgentNotification() && !request->GetOwnerBundleName().empty()) {
         jsonObject["pkgName"] = request->GetOwnerBundleName();
     } else {
@@ -2198,6 +2188,22 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     if (request->IsCommonLiveView()) {
         FillExtraInfoToJson(request, checkRequest, jsonObject);
     }
+}
+
+ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
+{
+    ANS_LOGD("start.");
+    if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
+        return ERR_ANS_PUSH_CHECK_UNREGISTERED;
+    }
+    sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
+    sptr<NotificationCheckRequest> checkRequest = checkRequests_[request->GetSlotType()];
+    if (request->GetCreatorUid() == checkRequest->GetUid()) {
+        return ERR_OK;
+    }
+
+    nlohmann::json jsonObject;
+    CreatePushCheckJson(request, checkRequest, jsonObject);
     std::shared_ptr<PushCallBackParam> pushCallBackParam = std::make_shared<PushCallBackParam>();
     std::shared_ptr<AAFwk::WantParams> extroInfo = nullptr;
     if (request->IsCommonLiveView()) {
