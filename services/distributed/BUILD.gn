@@ -96,7 +96,9 @@ ohos_shared_library("libdans") {
   ]
 
   sources = [
+    "src/helper/ability_manager_helper.cpp",
     "src/helper/bundle_resource_helper.cpp",
+    "src/helper/distributed_operation_connection.cpp",
     "src/helper/distributed_preference.cpp",
     "src/helper/distributed_rdb_helper.cpp",
     "src/soft_bus/distributed_client.cpp",

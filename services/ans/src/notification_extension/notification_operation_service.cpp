@@ -19,6 +19,7 @@
 #include "notification_analytics_util.h"
 #include "time_service_client.h"
 #include "ans_inner_errors.h"
+#include "distributed_extension_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -49,7 +50,8 @@ DistributedOperationService::DistributedOperationService()
 void DistributedOperationService::AddOperation(const std::string& hashCode,
     const sptr<OperationCallbackInterface> &callback)
 {
-    int64_t expiredTime = NotificationAnalyticsUtil::GetCurrentTime() + OPERATION_TIMEOUT;
+    int32_t timeout = DistributedExtensionService::GetInstance().GetOperationReplyTimeout();
+    int64_t expiredTime = NotificationAnalyticsUtil::GetCurrentTime() + timeout;
     std::shared_ptr<OperationTimerInfo> timerInfo = std::make_shared<OperationTimerInfo>(hashCode);
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {

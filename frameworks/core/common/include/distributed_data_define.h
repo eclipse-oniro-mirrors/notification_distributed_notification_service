@@ -28,12 +28,14 @@ namespace Notification {
 namespace {
 constexpr const int32_t MIN_DATA_LENGTH = 4;
 constexpr char const AnonymousString[] = "******";
+constexpr int32_t DEFAULT_REPLY_TIMEOUT = 3;
 }
 
 struct DistributedDeviceConfig {
     int32_t maxTitleLength;
     int32_t maxContentLength;
     uint32_t startAbilityTimeout;
+    int32_t operationReplyTimeout = DEFAULT_REPLY_TIMEOUT;
     std::string localType;
     std::set<std::string> supportPeerDevice;
     std::unordered_set<std::string> collaborativeDeleteTypes;

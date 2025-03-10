@@ -33,6 +33,7 @@
 #include "distributed_operation_service.h"
 #include "notification_sync_box.h"
 #include "ans_inner_errors.h"
+#include "ability_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -503,7 +504,7 @@ void DistributedService::TriggerJumpApplication(const std::string& hashCode)
 }
 
 ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::string& actionName,
-    std::shared_ptr<AAFwk::Want>& wantPtr)
+    std::shared_ptr<AAFwk::Want>& wantPtr, std::string& userInputKey)
 {
     sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
@@ -531,6 +532,13 @@ ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::str
         ANS_LOGE("Check user input is null %{public}s.", actionName.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
+    if (button->GetUserInput() != nullptr) {
+        userInputKey = button->GetUserInput()->GetInputKey();
+    }
+    if (userInputKey.empty()) {
+        ANS_LOGE("Check userInputKey is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = button->GetWantAgent();
     if (wantAgentPtr == nullptr) {
         ANS_LOGE("Check wantAgentPtr is null.");
@@ -556,16 +564,23 @@ ErrCode DistributedService::TriggerReplyApplication(const std::string& hashCode,
 {
     std::string actionName;
     std::string userInput;
+    std::string userInputKey;
     responseBox.GetActionName(actionName);
     responseBox.GetUserInput(userInput);
 
     std::shared_ptr<AAFwk::Want> wantPtr = nullptr;
-    auto result = GetNotificationButtonWantPtr(hashCode, actionName, wantPtr);
+    auto result = GetNotificationButtonWantPtr(hashCode, actionName, wantPtr, userInputKey);
     if (result != ERR_OK || wantPtr == nullptr) {
         return result;
     }
 
-    auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
+    if (wantPtr->GetBoolParam(AAFwk::Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+        ANS_LOGE("Not support foreground.");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
+
+    auto ret = AbilityManagerHelper::GetInstance().ConnectAbility(hashCode, *wantPtr,
+        userInputKey, userInput);
     ANS_LOGI("StartAbility result:%{public}d", ret);
     if (ret == ERR_OK) {
         OperationalReporting(BRANCH3_ID, NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
