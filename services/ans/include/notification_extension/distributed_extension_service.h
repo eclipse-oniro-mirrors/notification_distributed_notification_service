@@ -55,10 +55,13 @@ public:
     static DistributedExtensionService& GetInstance();
     void HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason);
     void SendReportCallback(int32_t messageType, int32_t errCode, std::string reason);
+    int32_t GetOperationReplyTimeout();
+
 private:
     DistributedExtensionService();
     ~DistributedExtensionService();
     void SetMaxContentLength(nlohmann::json &configJson);
+    void SetOperationReplyTimeout(nlohmann::json &configJson);
     std::string AnonymousProcessing(std::string data);
 
     std::mutex mapLock_;

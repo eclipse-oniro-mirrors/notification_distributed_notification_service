@@ -50,6 +50,7 @@ constexpr const char* CFG_KEY_LOCAL_TYPE = "localType";
 constexpr const char* CFG_KEY_SUPPORT_DEVICES = "supportPeerDevice";
 constexpr const char* CFG_KEY_TITLE_LENGTH = "maxTitleLength";
 constexpr const char* CFG_KEY_CONTENT_LENGTH = "maxContentLength";
+constexpr const char* CFG_KEY_REPLY_TIMEOUT = "operationReplyTimeout";
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
@@ -57,6 +58,7 @@ constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 
 static const int32_t MAX_DATA_LENGTH = 7;
 static const int32_t START_ANONYMOUS_INDEX = 5;
+constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
 }
 
 std::string TransDeviceTypeToName(uint16_t deviceType_)
@@ -156,6 +158,7 @@ bool DistributedExtensionService::initConfig()
     }
 
     SetMaxContentLength(configJson);
+    SetOperationReplyTimeout(configJson);
 
     deviceConfig_.collaborativeDeleteTypes = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
     deviceConfig_.startAbilityTimeout = NotificationConfigParse::GetInstance()->GetStartAbilityTimeout();
@@ -369,6 +372,22 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
             StringAnonymous(deviceInfo.networkId).c_str());
     });
     distributedQueue_->submit(changeTask);
+}
+
+int32_t DistributedExtensionService::GetOperationReplyTimeout()
+{
+    return deviceConfig_.operationReplyTimeout * DURATION_ONE_SECOND;
+}
+
+void DistributedExtensionService::SetOperationReplyTimeout(nlohmann::json &configJson)
+{
+    nlohmann::json contentJson = configJson[CFG_KEY_REPLY_TIMEOUT];
+    if (contentJson.is_null() || contentJson.empty() || !contentJson.is_number_integer()) {
+        deviceConfig_.operationReplyTimeout = DEFAULT_REPLY_TIMEOUT;
+    } else {
+        deviceConfig_.operationReplyTimeout = contentJson.get<int32_t>();
+        ANS_LOGI("Dans initConfig reply timeout %{public}d.", deviceConfig_.operationReplyTimeout);
+    }
 }
 
 void DistributedExtensionService::SetMaxContentLength(nlohmann::json &configJson)

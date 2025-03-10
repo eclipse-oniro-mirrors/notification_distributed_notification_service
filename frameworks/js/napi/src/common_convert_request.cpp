@@ -410,10 +410,11 @@ napi_value Common::SetNotificationActionButton(
         ANS_LOGI("wantAgent is null");
         napi_set_named_property(env, result, "wantAgent", NapiGetNull(env));
         return NapiGetBoolean(env, false);
+    } else {
+        napi_value wantAgent = nullptr;
+        wantAgent = CreateWantAgentByJS(env, agent);
+        napi_set_named_property(env, result, "wantAgent", wantAgent);
     }
-    napi_value wantAgent = nullptr;
-    wantAgent = CreateWantAgentByJS(env, agent);
-    napi_set_named_property(env, result, "wantAgent", wantAgent);
 
     // icon?: image.PixelMap
     std::shared_ptr<Media::PixelMap> icon = actionButton->GetIcon();
