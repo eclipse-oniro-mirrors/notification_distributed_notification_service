@@ -2232,7 +2232,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
     if (pushCallBackParam != nullptr && !pushCallBackParam->eventControl.empty() && extroInfo != nullptr) {
         extroInfo->SetParam("eventControl", AAFwk::String::Box(pushCallBackParam->eventControl));
-    } else {
+    } else if (extroInfo != nullptr) {
         extroInfo->Remove("eventControl");
     }
     return result;

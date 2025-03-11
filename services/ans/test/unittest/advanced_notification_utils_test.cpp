@@ -339,10 +339,10 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
  * @tc.type: FUNC
  * @tc.require: issue
  */
-// HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00001, Function | SmallTest | Level1)
-// {
-//     advancedNotificationService_->InitNotificationEnableList();
-// }
+HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->InitNotificationEnableList();
+}
 
 /**
  * @tc.name: GetBundleInfoByNotificationBundleOption_00001
@@ -410,6 +410,45 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00001, Function | SmallTest | Level1)
     NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, true);
     advancedNotificationService_->OnBundleDataUpdate(bundle);
     EXPECT_NE(advancedNotificationService_, nullptr);
+}
+
+/**
+ * @tc.name: GetBundlesOfActiveUser_00001
+ * @tc.desc: Test GetBundlesOfActiveUser
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBundlesOfActiveUser_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->GetBundlesOfActiveUser();
+}
+
+/**
+ * @tc.name: ResetDistributedEnabled_00001
+ * @tc.desc: Test ResetDistributedEnabled
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResetDistributedEnabled_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->ResetDistributedEnabled();
+}
+
+/**
+ * @tc.name: UpdateCloneBundleInfo_00001
+ * @tc.desc: Test UpdateCloneBundleInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfo.SetBundleName("test");
+    cloneBundleInfo.SetUid(1);
+    cloneBundleInfo.SetIsShowBadge(true);
+    cloneBundleInfo.SetEnableNotification(true);
+    cloneBundleInfo.SetSlotFlags(63);
+    advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
 }
 }  // namespace Notification
 }  // namespace OHOS
