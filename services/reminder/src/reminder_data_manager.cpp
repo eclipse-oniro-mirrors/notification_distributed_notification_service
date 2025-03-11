@@ -374,7 +374,7 @@ void ReminderDataManager::OnUnlockScreen()
             if (manager == nullptr) {
                 return;
             }
-            manager->InitShareReminders();
+            manager->InitShareReminders(true);
         };
         queue_->submit(callback, taskAttr);
     }
@@ -404,11 +404,22 @@ void ReminderDataManager::OnUserRemove(const int32_t& userId)
 void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 {
     currentUserId_ = userId;
-    ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     if ((alertingReminderId_ != -1) && IsReminderAgentReady()) {
         TerminateAlerting(alertingReminder_, "OnUserSwitch");
     }
+    if (!IsReminderAgentReady() || queue_ == nullptr) {
+        ANSR_LOGE("Reminder service not ready.");
+        return;
+    }
+    auto callback = []() {
+        auto manager = ReminderDataManager::GetInstance();
+        if (manager == nullptr) {
+            return;
+        }
+        manager->InitShareReminders(false);
+    };
+    queue_->submit(callback);
 }
 
 void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
@@ -627,12 +638,14 @@ void ReminderDataManager::StartLoadTimer()
     timer->StartTimer(reminderLoadtimerId_, nowMilli);
 }
 
-void ReminderDataManager::InitShareReminders()
+void ReminderDataManager::InitShareReminders(const bool registerObserver)
 {
     ANSR_LOGD("Call.");
     ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     ReminderDataShareHelper::GetInstance().UpdateCalendarUid();
-    ReminderDataShareHelper::GetInstance().RegisterObserver();
+    if (registerObserver) {
+        ReminderDataShareHelper::GetInstance().RegisterObserver();
+    }
     LoadShareReminders();
     std::vector<sptr<ReminderRequest>> immediatelyReminders;
     std::vector<sptr<ReminderRequest>> extensionReminders;
@@ -1408,7 +1421,7 @@ void ReminderDataManager::Init()
             ANSR_LOGE("ReminderDataManager is nullptr.");
             return;
         }
-        manager->InitShareReminders();
+        manager->InitShareReminders(true);
     };
     queue_->submit(callback, taskAttr);
     ANSR_LOGD("ReminderAgent is ready.");
