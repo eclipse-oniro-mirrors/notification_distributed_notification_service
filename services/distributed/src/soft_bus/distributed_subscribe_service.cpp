@@ -63,6 +63,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
         return;
     }
 
+    int32_t userId = GetCurrentActiveUserId();
     std::shared_ptr<DistribuedSubscriber> subscriber = std::make_shared<DistribuedSubscriber>();
     subscriber->SetLocalDevice(localDevice_);
     subscriber->SetPeerDevice(peerDevice);
@@ -73,7 +74,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
     subscribeInfo->SetSlotTypes(slotTypes);
     subscribeInfo->SetFilterType(DEFAULT_FILTER_TYPE);
     subscribeInfo->AddDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
-    subscribeInfo->AddAppUserId(userId_);
+    subscribeInfo->AddAppUserId(userId);
     subscribeInfo->SetNeedNotifyApplication(true);
     subscribeInfo->SetNeedNotifyResponse(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
@@ -91,7 +92,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
         }
     }
     ANS_LOGI("Subscribe notification %{public}s %{public}d %{public}d %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId_, result);
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId, result);
 }
 
 void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, uint16_t deviceType)
@@ -392,7 +393,7 @@ ErrCode DistributedService::OnResponse(
         ANS_LOGE("dans OnResponse send message failed result: %{public}d", result);
         result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
-    return ERR_OK;
+    return result;
 }
 }
 }

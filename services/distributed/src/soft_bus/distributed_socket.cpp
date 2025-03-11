@@ -195,7 +195,6 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName,
         result = ::Bind(socketId, clientQos, QOS_NUM, &listener);
         if (result != 0) {
             ANS_LOGE("Bind Server failed, ret is %{public}d.", result);
-            std::this_thread::sleep_for(sleepTime);
             retryTimes++;
             continue;
         }
