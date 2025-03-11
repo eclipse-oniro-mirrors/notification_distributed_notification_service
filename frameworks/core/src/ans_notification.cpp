@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2013,12 +2013,12 @@ ErrCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, in
         ANS_LOGE("RegisterSwingCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    swingCallBackStub_ = new(std::nothrow) SwingCallBackStub(swingCbFunc);
-    if (swingCallBackStub_ == nullptr) {
-        ANS_LOGE("RegisterSwingCallback swingCallBackStub_ == null");
+    swingCallBackService_ = new(std::nothrow) SwingCallBackService(swingCbFunc);
+    if (swingCallBackService_ == nullptr) {
+        ANS_LOGE("RegisterSwingCallback swingCallBackService_ == null");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->RegisterSwingCallback(swingCallBackStub_->AsObject());
+    return proxy->RegisterSwingCallback(swingCallBackService_->AsObject());
 }
 #endif
 

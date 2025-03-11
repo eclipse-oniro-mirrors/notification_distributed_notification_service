@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,8 @@
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
-#include "swing_callback_proxy.h"
-#include "swing_callback_stub.h"
+#include "swing_call_back_proxy.h"
+#include "swing_call_back_stub.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -43,9 +43,9 @@ HWTEST_F(SwingCallBackTest, SwingCallBackProxyTest_00100, Function | SmallTest |
 {
     sptr<IRemoteObject> impl;
     SwingCallBackProxy swingCallBackProxy(impl);
-
-    int ret = swingCallBackProxy.OnUpdateStatus(true, 0);
-    EXPECT_EQ(ret, false);
+    int32_t funcResult = -1;
+    int ret = swingCallBackProxy.OnUpdateStatus(true, 0, funcResult);
+    EXPECT_EQ(ret, ERR_INVALID_DATA);
 }
 
 /**
@@ -60,7 +60,7 @@ HWTEST_F(SwingCallBackTest, SwingCallBackStubTest_00100, Function | SmallTest | 
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
 
-    SwingCallBackStub swingCallBackStub = SwingCallBackStub(
+    SwingCallBackStub swingCallBackStub = SwingCallBackService(
         std::bind(&SwingCallBackTest::OnUpdateStatus, this, std::placeholders::_1, std::placeholders::_2));
     data.WriteInterfaceToken(swingCallBackStub.GetDescriptor());
     int ret = swingCallBackStub.OnRemoteRequest(code, data, reply, option);
