@@ -151,7 +151,11 @@ struct PermissionDialog {
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text() {
-                    Span(permission.reason)
+                    if (!this.dialog.innerLake) {
+                      Span(permission.reason)
+                    } else {
+                      Span($r('app.string.reason_zyt'))
+                    }
                   }
                   .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
                   .fontWeight(FontWeight.Regular)
