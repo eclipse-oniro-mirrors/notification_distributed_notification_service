@@ -1671,11 +1671,12 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
 
 ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_8);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         ANS_LOGE("Bundle option is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
-
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()));
     int32_t activeUserId = 0;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         ANS_LOGE("Failed to get active user id.");
@@ -1683,11 +1684,15 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
     }
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager == nullptr) {
+        message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append("Failed to get bundle manager.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Failed to get bundle manager.");
         return ERR_ANS_INVALID_BUNDLE;
     }
     int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
     if (uid == -1) {
+        message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append("Bundle name was not found.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("The specified bundle name was not found.");
         return ERR_ANS_INVALID_BUNDLE;
     }

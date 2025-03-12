@@ -2628,8 +2628,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     sptr<NotificationBundleOption> bundle = bundleOption;
     ErrCode result = CheckBundleOptionValid(bundle);
     if (result != ERR_OK) {
-        message.ErrorCode(result).Append(" Bundle is invalid.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Bundle is invalid.");
         return result;
     }
