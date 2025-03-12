@@ -18,9 +18,6 @@
 #include "ans_log_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "message_parcel.h"
-#include "os_account_manager.h"
-#include "singleton.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
