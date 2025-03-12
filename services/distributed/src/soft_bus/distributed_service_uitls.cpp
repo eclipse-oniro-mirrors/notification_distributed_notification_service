@@ -26,9 +26,21 @@
 #include "common_event_support.h"
 #include "distributed_client.h"
 #include "ans_image_util.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace Notification {
+
+int32_t DistributedService::GetCurrentActiveUserId()
+{
+    int32_t userId = DEFAULT_USER_ID;
+    int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (ret != ERR_OK) {
+        ANS_LOGW("Dans get Current userId failed %{public}d.", ret);
+        return DEFAULT_USER_ID;
+    }
+    return userId;
+}
 
 bool DistributedService::GetBundleResourceInfo(const std::string bundleName, std::string& icon)
 {

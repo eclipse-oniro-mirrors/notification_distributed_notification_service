@@ -107,12 +107,12 @@ private:
         NotificationConstant::SlotType slotType, NotifticationRequestBox &requestBox);
     void MakeNotificationButtons(const NotifticationRequestBox& box, NotificationConstant::SlotType slotType,
         sptr<NotificationRequest>& request);
+    int32_t GetCurrentActiveUserId();
 
 private:
     std::function<void(int32_t, int32_t, uint32_t, std::string)> haCallback_ = nullptr;
     std::function<void(int32_t, int32_t, std::string)> sendReportCallback_ = nullptr;
     std::map<std::string, std::set<std::string>> bundleIconCache_;
-    int32_t userId_ = DEFAULT_USER_ID;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;

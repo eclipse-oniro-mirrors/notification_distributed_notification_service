@@ -14,6 +14,7 @@
  */
 #include "distributed_service.h"
 
+#include <thread>
 #include "notification_helper.h"
 #include "distributed_client.h"
 #include "request_box.h"
@@ -29,6 +30,7 @@ namespace Notification {
 
 namespace {
 static const int32_t MAX_CONNECTED_TYR = 5;
+static const int32_t ADD_DEVICE_SLEEP_TIMES_MS = 1000;  // 1s
 static const uint64_t SYNC_TASK_DELAY = 7 * 1000 * 1000;
 static const int32_t MAX_DATA_LENGTH = 7;
 static const int32_t START_ANONYMOUS_INDEX = 5;
@@ -58,10 +60,6 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
     if (DistributedServer::GetInstance().InitServer(deviceId, deviceType) != 0) {
         ANS_LOGI("Distributed service init server failed.");
         return -1;
-    }
-
-    if (OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId) == 0) {
-        userId_ = userId;
     }
     OberverService::GetInstance().Init(deviceType);
     return 0;
@@ -98,7 +96,7 @@ void DistributedService::SyncConnectedDevice(DistributedDeviceInfo device)
         return;
     }
     int32_t result = SyncDeviceMatch(device, MatchType::MATCH_SYN);
-    ANS_LOGE("SyncConnectedDevice try %{public}d %{public}d.", iter->second.connectedTry_, result);
+    ANS_LOGI("SyncConnectedDevice try %{public}d %{public}d.", iter->second.connectedTry_, result);
     iter->second.connectedTry_ = iter->second.connectedTry_ + 1;
     if (result != 0) {
         if (serviceQueue_ == nullptr) {
@@ -125,6 +123,9 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         peerDevice_[deviceItem.deviceId_] = deviceItem;
+        // Delay linking to avoid bind failure, There is a delay in reporting the device online
+        auto sleepTime = std::chrono::milliseconds(ADD_DEVICE_SLEEP_TIMES_MS);
+        std::this_thread::sleep_for(sleepTime);
         SyncConnectedDevice(device);
     });
 }

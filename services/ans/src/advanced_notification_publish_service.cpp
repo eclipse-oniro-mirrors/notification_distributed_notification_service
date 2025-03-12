@@ -3205,7 +3205,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+ErrCode DistributeOperationParamCheck(sptr<NotificationOperationInfo>& operationInfo,
     const sptr<OperationCallbackInterface> &callback)
 {
     if (operationInfo == nullptr || operationInfo->GetHashCode().empty()) {
@@ -3230,23 +3230,41 @@ ErrCode AdvancedNotificationService::DistributeOperation(sptr<NotificationOperat
         ANS_LOGE("not have permission.");
         return ERR_ANS_PERMISSION_DENIED;
     }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<OperationCallbackInterface> &callback)
+{
+    ErrCode result = DistributeOperationParamCheck(operationInfo, callback);
+    if (result != ERR_OK) {
+        return result;
+    }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalidated");
         return ERR_ANS_INVALID_PARAM;
     }
 
+    OperationType operationType = operationInfo->GetOperationType();
     if (operationType == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         operationInfo->SetEventId(std::to_string(GetCurrentTime()));
         std::string key = operationInfo->GetHashCode() + operationInfo->GetEventId();
         DistributedOperationService::GetInstance().AddOperation(key, callback);
     }
     ANS_LOGI("DistributeOperation trigger hashcode %{public}s.", operationInfo->GetHashCode().c_str());
-    ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         std::string hashCode = operationInfo->GetHashCode();
         for (auto record : notificationList_) {
             if (record->notification->GetKey() != hashCode) {
+                continue;
+            }
+            if (record->notification->GetNotificationRequestPoint() == nullptr) {
+                continue;
+            }
+            auto request = record->notification->GetNotificationRequestPoint();
+            if (!request->GetDistributedCollaborate()) {
+                ANS_LOGI("Not collaborate hashcode %{public}s.", hashCode.c_str());
                 continue;
             }
             result = NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo);
