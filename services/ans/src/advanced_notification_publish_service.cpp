@@ -74,6 +74,7 @@ constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
+const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1013,8 +1014,12 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string bundleName, const int32_t uid)
 {
+    ANS_LOGI("RequestEnableNotification bundleName = %{public}s uid = %{public}d", bundleName.c_str(), uid);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (bundleName == BUNDLE_NAME_ZYT) {
+        return ERR_ANS_NOT_ALLOWED;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true);
