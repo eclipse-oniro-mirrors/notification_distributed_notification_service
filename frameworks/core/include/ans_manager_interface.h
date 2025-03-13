@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "ans_dialog_callback_interface.h"
+#include "ians_dialog_callback.h"
 #include "ans_subscriber_interface.h"
 #include "ans_subscriber_local_live_view_interface.h"
 #include "iremote_broker.h"
@@ -394,7 +394,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) = 0;
 
     /**
@@ -520,7 +520,7 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    virtual ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    virtual ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) = 0;
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1108,7 +1108,7 @@ HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00003, Function | Sm
  */
 HWTEST_F(AnsPublishServiceTest, CanPopEnableNotificationDialog_001, Function | SmallTest | Level1)
 {
-    sptr<AnsDialogCallback> callback = nullptr;
+    sptr<IAnsDialogCallback> callback = nullptr;
     bool canPop = false;
     std::string bundleName = "";
     ErrCode result = advancedNotificationService_->CanPopEnableNotificationDialog(callback, canPop, bundleName);

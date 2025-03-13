@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_ANS_DIALOG_CALLBACK_INTERFACE_H
-#define BASE_NOTIFICATION_ANS_DIALOG_CALLBACK_INTERFACE_H
+#ifndef BASE_NOTIFICATION_DIALOG_STATUS_DATA_H
+#define BASE_NOTIFICATION_DIALOG_STATUS_DATA_H
 
 #include "iremote_broker.h"
 
 #include "nocopyable.h"
 #include "parcel.h"
-
 namespace OHOS::Notification {
 
 enum class EnabledDialogStatus {
@@ -28,7 +27,6 @@ enum class EnabledDialogStatus {
     DENY_CLICKED,
     CRASHED
 };
-
 class DialogStatusData : public Parcelable {
 public:
     explicit DialogStatusData(EnabledDialogStatus status): status_(static_cast<int32_t>(status)) {}
@@ -41,22 +39,5 @@ public:
 private:
     int32_t status_;
 };
-
-class AnsDialogCallback : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.Notification.AnsDialogCallback");
-
-    AnsDialogCallback() = default;
-    ~AnsDialogCallback() override = default;
-    DISALLOW_COPY_AND_MOVE(AnsDialogCallback);
-
-    virtual void OnDialogStatusChanged(const DialogStatusData& statusData) = 0;
-
-    enum {
-        // ipc id for OnDialogStatusChanged
-        ON_DIALOG_STATUS_CHANGED = 1,
-    };
-};
 } // namespace OHOS::Notification
-
-#endif // BASE_NOTIFICATION_ANS_DIALOG_CALLBACK_INTERFACE_H
+#endif // BASE_NOTIFICATION_DIALOG_STATUS_DATA_H
