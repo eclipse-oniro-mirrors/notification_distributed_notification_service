@@ -294,7 +294,7 @@ public:
      * @brief When the device boot complete, need delay for 5 seconds,
      * then load the reminder.
      */
-    void InitShareReminders();
+    void InitShareReminders(const bool registerObserver);
 
     static constexpr uint8_t TIME_ZONE_CHANGE = 0;
     static constexpr uint8_t DATE_TIME_CHANGE = 1;

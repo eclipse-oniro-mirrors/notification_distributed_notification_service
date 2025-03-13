@@ -1280,5 +1280,28 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_028, Level1)
     }
     EXPECT_TRUE(manager != nullptr);
 }
+
+/**
+ * @tc.name: ReminderDataManagerTest_029
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_029, Level1)
+{
+    manager->InitShareReminders(true);
+    manager->InitShareReminders(false);
+    manager->isReminderAgentReady_ = false;
+    manager->OnUserSwitch(1);
+    sleep(1);
+    manager->isReminderAgentReady_ = true;
+    auto queue = std::move(manager->queue_);
+    manager->OnUserSwitch(1);
+    sleep(1);
+    manager->queue_ = std::move(queue);
+    manager->OnUserSwitch(1);
+    EXPECT_TRUE(manager != nullptr);
+    sleep(1);
+}
 }  // namespace Notification
 }  // namespace OHOS
