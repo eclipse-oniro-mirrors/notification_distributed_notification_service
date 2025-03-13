@@ -22,7 +22,7 @@ namespace NotificationNapi {
 using namespace OHOS::Notification;
 
 struct GetDoNotDisturbProfileParams {
-    int32_t profileId = INVALID_PROFILE_ID;
+    int64_t profileId = INVALID_PROFILE_ID;
     napi_ref callback = nullptr;
 };
 

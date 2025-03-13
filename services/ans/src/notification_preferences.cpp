@@ -530,15 +530,6 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
     return result;
 }
 
-bool NotificationPreferences::CheckDoNotDisturbProfileID(int32_t profileId)
-{
-    if (profileId < DO_NOT_DISTURB_PROFILE_MIN_ID || profileId > DO_NOT_DISTURB_PROFILE_MAX_ID) {
-        ANS_LOGE("The profile id is out of range.");
-        return false;
-    }
-    return true;
-}
-
 ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
@@ -546,9 +537,6 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
-            return ERR_ANS_INVALID_PARAM;
-        }
-        if (!CheckDoNotDisturbProfileID(profile->GetProfileId())) {
             return ERR_ANS_INVALID_PARAM;
         }
         auto trustList = profile->GetProfileTrustList();
@@ -604,9 +592,6 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
             ANS_LOGE("The profile is nullptr.");
             return ERR_ANS_INVALID_PARAM;
         }
-        if (!CheckDoNotDisturbProfileID(profile->GetProfileId())) {
-            return ERR_ANS_INVALID_PARAM;
-        }
     }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
@@ -639,11 +624,12 @@ void NotificationPreferences::UpdateProfilesUtil(std::vector<NotificationBundleO
     }
 }
 
-ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int32_t profileId,
+ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int64_t profileId,
     const std::string& name, const std::vector<NotificationBundleOption>& bundleList)
 {
-    ANS_LOGI("Called update Profile %{public}d %{public}d %{public}zu.", userId, profileId, bundleList.size());
-    if (!CheckDoNotDisturbProfileID(profileId) || bundleList.empty()) {
+    ANS_LOGI("Called update Profile %{public}d %{public}s %{public}zu.",
+        userId, std::to_string(profileId).c_str(), bundleList.size());
+    if (bundleList.empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -659,7 +645,8 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int3
         profile->SetProfileName(name);
         profile->SetProfileTrustList(bundleList);
     }
-    ANS_LOGI("Update profile %{public}d %{public}d %{public}zu", userId, profile->GetProfileId(),
+    ANS_LOGI("Update profile %{public}d %{public}s %{public}zu",
+        userId, std::to_string(profile->GetProfileId()).c_str(),
         profile->GetProfileTrustList().size());
     preferencesInfo.AddDoNotDisturbProfiles(userId, {profile});
     if (preferncesDB_ == nullptr) {
@@ -806,11 +793,8 @@ ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 }
 
 ErrCode NotificationPreferences::GetDoNotDisturbProfile(
-    int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
+    int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
 {
-    if (!CheckDoNotDisturbProfileID(profileId)) {
-        return ERR_ANS_INVALID_PARAM;
-    }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (!preferencesInfo_.GetDoNotDisturbProfiles(profileId, userId, profile)) {
         return ERR_ANS_NO_PROFILE_TEMPLATE;

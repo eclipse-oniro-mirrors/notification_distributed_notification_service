@@ -109,7 +109,7 @@ bool GetDoNotDisturbProfile(
         ANS_LOGE("Wrong argument type. Property type expected.");
         return false;
     }
-    int profileId = 0;
+    int64_t profileId = 0;
     napi_value obj = nullptr;
     napi_get_named_property(env, value, "id", &obj);
     napi_valuetype valuetype = napi_undefined;
@@ -118,11 +118,7 @@ bool GetDoNotDisturbProfile(
         ANS_LOGE("Wrong argument type. Number expected.");
         return false;
     }
-    napi_get_value_int32(env, obj, &profileId);
-    if (profileId < DO_NOT_DISTURB_PROFILE_MIN_ID || profileId > DO_NOT_DISTURB_PROFILE_MAX_ID) {
-        ANS_LOGE("The profile id is out of range.");
-        return false;
-    }
+    napi_get_value_int64(env, obj, &profileId);
     profile->SetProfileId(profileId);
 
     NAPI_CALL_BASE(env, napi_has_named_property(env, value, "name", &hasProperty), false);
@@ -568,7 +564,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             ANS_LOGW("Wrong argument type Excute promise.");
             return Common::NapiGetNull(env);
         }
-        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.profileId));
+        NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM0], &params.profileId));
     }
 
     return Common::NapiGetNull(env);
