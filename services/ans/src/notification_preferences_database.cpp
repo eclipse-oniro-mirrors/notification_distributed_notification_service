@@ -541,7 +541,7 @@ bool NotificationPreferencesDatabase::AddDoNotDisturbProfiles(
             return false;
         }
         std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
-            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int64_t)profile->GetProfileId()));
         values[key] = profile->ToJson();
     }
     int32_t result = rdbDataManager_->InsertBatchData(values, userId);
@@ -570,7 +570,7 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbProfiles(
             return false;
         }
         std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
-            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int64_t)profile->GetProfileId()));
         keys.push_back(key);
     }
     int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);

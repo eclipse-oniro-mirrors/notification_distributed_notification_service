@@ -1515,7 +1515,7 @@ napi_value Common::SetDoNotDisturbProfile(const napi_env &env, const Notificatio
     ANS_LOGD("enter");
     napi_value value = nullptr;
     // id: number
-    napi_create_int32(env, data.GetProfileId(), &value);
+    napi_create_int64(env, data.GetProfileId(), &value);
     napi_set_named_property(env, result, "id", value);
 
     // name: string

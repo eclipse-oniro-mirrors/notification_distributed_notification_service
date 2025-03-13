@@ -26,11 +26,11 @@ constexpr const char *DO_NOT_DISTURB_PROFILE_NAME = "name";
 constexpr const char *DO_NOT_DISTURB_PROFILE_TRUSTLIST = "trustlist";
 } // namespace
 NotificationDoNotDisturbProfile::NotificationDoNotDisturbProfile(
-    int32_t id, const std::string &name, const std::vector<NotificationBundleOption> &trustList)
+    int64_t id, const std::string &name, const std::vector<NotificationBundleOption> &trustList)
     : id_(id), name_(name), trustList_(trustList)
 {}
 
-void NotificationDoNotDisturbProfile::SetProfileId(int32_t id)
+void NotificationDoNotDisturbProfile::SetProfileId(int64_t id)
 {
     id_ = id;
 }
@@ -45,7 +45,7 @@ void NotificationDoNotDisturbProfile::SetProfileTrustList(const std::vector<Noti
     trustList_ = trustList;
 }
 
-int32_t NotificationDoNotDisturbProfile::GetProfileId() const
+int64_t NotificationDoNotDisturbProfile::GetProfileId() const
 {
     return id_;
 }
@@ -62,7 +62,7 @@ std::vector<NotificationBundleOption> NotificationDoNotDisturbProfile::GetProfil
 
 bool NotificationDoNotDisturbProfile::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteInt32(id_)) {
+    if (!parcel.WriteInt64(id_)) {
         ANS_LOGE("Failed to write do not disturb id.");
         return false;
     }
@@ -100,7 +100,7 @@ NotificationDoNotDisturbProfile *NotificationDoNotDisturbProfile::Unmarshalling(
 
 bool NotificationDoNotDisturbProfile::ReadFromParcel(Parcel &parcel)
 {
-    id_ = parcel.ReadInt32();
+    id_ = parcel.ReadInt64();
     name_ = parcel.ReadString();
     auto size = parcel.ReadUint32();
     if (size > MAX_PARCELABLE_VECTOR_NUM) {
@@ -152,7 +152,7 @@ void NotificationDoNotDisturbProfile::FromJson(const std::string &jsonObj)
         return;
     }
     if (jsonObject.contains(DO_NOT_DISTURB_PROFILE_ID) && jsonObject[DO_NOT_DISTURB_PROFILE_ID].is_number()) {
-        id_ = jsonObject.at(DO_NOT_DISTURB_PROFILE_ID).get<int32_t>();
+        id_ = jsonObject.at(DO_NOT_DISTURB_PROFILE_ID).get<int64_t>();
     }
     if (jsonObject.contains(DO_NOT_DISTURB_PROFILE_NAME) && jsonObject[DO_NOT_DISTURB_PROFILE_NAME].is_string()) {
         name_ = jsonObject.at(DO_NOT_DISTURB_PROFILE_NAME).get<std::string>();

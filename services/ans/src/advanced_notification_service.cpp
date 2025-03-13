@@ -841,7 +841,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
         }
     }
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
-    if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoi(profileId.c_str()), userId, profile) !=
+    if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoll(profileId.c_str()), userId, profile) !=
         ERR_OK) {
         ANS_LOGE("profile failed. pid: %{public}s, userid: %{public}d", profileId.c_str(), userId);
         return;
