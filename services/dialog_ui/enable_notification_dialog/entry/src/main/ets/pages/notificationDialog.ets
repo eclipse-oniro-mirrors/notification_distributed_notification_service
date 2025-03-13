@@ -262,7 +262,8 @@ struct PermissionDialog {
     try {
       let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
       let height = windowRect?.height;
-      let navigationArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
+      let navigationArea = this.dialog?.extensionWindow.getWindowAvoidArea(
+        window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
       let navigationHeight = navigationArea?.bottomRect?.height;
       let systemArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
       let statusBarHeight = systemArea?.topRect?.height;
