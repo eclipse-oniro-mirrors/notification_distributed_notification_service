@@ -330,6 +330,10 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
     TestAddNotification(notificationId, bundle);
 
     advancedNotificationService_->OnBundleDataCleared(bundle);
+
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ans.OnBundleDataCleared(bundle);
     EXPECT_NE(advancedNotificationService_, nullptr);
 }
 
@@ -374,6 +378,20 @@ HWTEST_F(AnsUtilsTest, OnBundleRemoved_00001, Function | SmallTest | Level1)
     advancedNotificationService_->OnBundleRemoved(bundle);
     SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.name: OnBundleRemoved_00002
+ * @tc.desc: Test OnBundleRemoved
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, OnBundleRemoved_00002, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    ans.OnBundleRemoved(bundle);
 }
 
 /**
@@ -449,6 +467,178 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     cloneBundleInfo.SetEnableNotification(true);
     cloneBundleInfo.SetSlotFlags(63);
     advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
+}
+
+/**
+ * @tc.name: ExecBatchCancel_00001
+ * @tc.desc: Test ExecBatchCancel
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ExecBatchCancel_00001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<Notification>> notifications;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    for (int i = 0; i < 201; i++) {
+        auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        request->SetSlotType(slotType);
+        request->SetOwnerUserId(100);
+        request->SetCreatorUserId(0);
+        request->SetOwnerBundleName("test");
+        request->SetOwnerUid(0);
+        request->SetNotificationId(1000+i);
+        auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+        auto ret = advancedNotificationService_->AssignToNotificationList(record);
+        sptr<Notification> notification = new Notification(request);
+        notifications.push_back(notification);
+    }
+    int reason = 28;
+    advancedNotificationService_->ExecBatchCancel(notifications, reason);
+}
+
+/**
+ * @tc.name: OnBootSystemCompleted_00001
+ * @tc.desc: Test OnBootSystemCompleted
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, OnBootSystemCompleted_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->OnBootSystemCompleted();
+}
+
+/**
+ * @tc.name: OnDistributedKvStoreDeathRecipient_00001
+ * @tc.desc: Test OnDistributedKvStoreDeathRecipient
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, OnDistributedKvStoreDeathRecipient_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->OnDistributedKvStoreDeathRecipient();
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ans.OnDistributedKvStoreDeathRecipient();
+}
+
+/**
+ * @tc.name: SetRequestBundleInfo_00001
+ * @tc.desc: Test SetRequestBundleInfo
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, SetRequestBundleInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorBundleName("test");
+    request->SetOwnerBundleName("test");
+    std::string bundle;
+    ASSERT_EQ(advancedNotificationService_->SetRequestBundleInfo(request, 1111, bundle) ,(int)ERR_OK);
+}
+
+/**
+ * @tc.name: SendNotificationsOnCanceled_00001
+ * @tc.desc: Test SendNotificationsOnCanceled
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, SendNotificationsOnCanceled_00001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<Notification>> notifications;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<Notification> no = new Notification(request);
+    notifications.push_back(no);
+    advancedNotificationService_->SendNotificationsOnCanceled(notifications, nullptr, 1);
+}
+
+/**
+ * @tc.name: OnRecoverLiveView_00001
+ * @tc.desc: Test OnRecoverLiveView
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, OnRecoverLiveView_00001, Function | SmallTest | Level1)
+{
+    std::vector<std::string> keys;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    for (int i = 0; i < 10; i++) {
+        auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        request->SetSlotType(slotType);
+        request->SetOwnerUserId(100);
+        request->SetCreatorUserId(0);
+        request->SetOwnerBundleName("test");
+        request->SetOwnerUid(0);
+        request->SetNotificationId(10000+i);
+        auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+        auto ret = advancedNotificationService_->AssignToNotificationList(record);
+        sptr<Notification> notification = new Notification(request);
+        keys.push_back(notification->GetKey());
+    }
+    advancedNotificationService_->OnRecoverLiveView(keys);
+}
+
+/**
+ * @tc.name: OnRecoverLiveView_00002
+ * @tc.desc: Test OnRecoverLiveView
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, OnRecoverLiveView_00002, Function | SmallTest | Level1)
+{
+    std::vector<std::string> keys;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerUserId(100);
+    request->SetCreatorUserId(0);
+    request->SetOwnerBundleName("test");
+    request->SetOwnerUid(0);
+    request->SetNotificationId(222);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+    sptr<Notification> notification = new Notification(request);
+    keys.push_back(notification->GetKey());
+    keys.push_back("no");
+    advancedNotificationService_->OnRecoverLiveView(keys);
+}
+
+/**
+ * @tc.name: AllowUseReminder_00001
+ * @tc.desc: Test AllowUseReminder
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00001, Function | SmallTest | Level1)
+{
+    std::string str = "test1";
+    bool b = false;
+    advancedNotificationService_->AllowUseReminder(str, b);
+}
+
+/**
+ * @tc.name: CloseAlert_00001
+ * @tc.desc: Test CloseAlert
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, CloseAlert_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerUserId(100);
+    request->SetCreatorUserId(0);
+    request->SetOwnerBundleName("test");
+    request->SetOwnerUid(0);
+    request->SetNotificationId(222);
+    auto flags = std::make_shared<NotificationFlags>();
+    request->SetFlags(flags);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->CloseAlert(record);
 }
 }  // namespace Notification
 }  // namespace OHOS
