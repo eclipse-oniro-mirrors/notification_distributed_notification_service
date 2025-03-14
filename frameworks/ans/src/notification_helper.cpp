@@ -527,6 +527,12 @@ ErrCode NotificationHelper::SetBadgeNumberByBundle(const NotificationBundleOptio
     return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberByBundle(bundleOption, badgeNumber);
 }
 
+ErrCode NotificationHelper::SetBadgeNumberForDhByBundle(
+    const NotificationBundleOption &bundleOption, int32_t badgeNumber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberForDhByBundle(bundleOption, badgeNumber);
+}
+
 ErrCode NotificationHelper::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
