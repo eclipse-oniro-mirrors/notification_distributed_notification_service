@@ -1166,19 +1166,19 @@ HWTEST_F(AnsPublishServiceTest, PrePublishRequest_00001, Function | SmallTest | 
     MockIsOsAccountExists(false);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetReceiverUserId(-99);
-    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request) ,(int)ERROR_USER_NOT_EXIST);
+    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request), (int)ERROR_USER_NOT_EXIST);
     ANS_LOGE("start 2");
     MockIsOsAccountExists(true);
     sptr<NotificationRequest> request1 = new NotificationRequest();
     request1->SetCreatorUid(0);
     request1->SetReceiverUserId(100);
-    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request1) ,(int)ERR_ANS_INVALID_UID);
+    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request1), (int)ERR_ANS_INVALID_UID);
     ANS_LOGE("start 3");
     sptr<NotificationRequest> request2 = new NotificationRequest();
     request2->SetDeliveryTime(-1);
     request2->SetReceiverUserId(100);
     request2->SetCreatorUid(1);
-    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request2) ,(int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request2), (int)ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

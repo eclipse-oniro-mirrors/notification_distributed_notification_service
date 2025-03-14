@@ -534,7 +534,7 @@ HWTEST_F(AnsUtilsTest, SetRequestBundleInfo_00001, Function | SmallTest | Level1
     request->SetCreatorBundleName("test");
     request->SetOwnerBundleName("test");
     std::string bundle;
-    ASSERT_EQ(advancedNotificationService_->SetRequestBundleInfo(request, 1111, bundle) ,(int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetRequestBundleInfo(request, 1111, bundle), (int)ERR_OK);
 }
 
 /**
