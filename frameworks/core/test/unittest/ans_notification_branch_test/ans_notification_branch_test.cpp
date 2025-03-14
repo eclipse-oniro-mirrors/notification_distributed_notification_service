@@ -488,6 +488,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetBadgeNumberForDhByBundle(
+        const sptr<NotificationBundleOption>& bundleOption, int32_t badgeNumber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t &slotFlags) override
     {
         return ERR_ANS_INVALID_PARAM;

@@ -883,6 +883,16 @@ public:
     ErrCode SetBadgeNumberByBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
 
     /**
+     * @brief Set badge number for dh by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    ErrCode SetBadgeNumberForDhByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
+
+    /**
      * @brief Obtains allow notification application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.
