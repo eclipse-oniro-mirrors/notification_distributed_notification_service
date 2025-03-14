@@ -78,6 +78,7 @@ int64_t HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime
 int32_t HaMetaMessage::delByWatch_ = 0;
 int32_t HaMetaMessage::liveViewDelByWatch_ = 0;
 int32_t HaMetaMessage::clickByWatch_ = 0;
+int32_t HaMetaMessage::replyByWatch_ = 0;
 static std::mutex reportCacheMutex_;
 static uint64_t reportTimerId = 0;
 static std::list<ReportCache> reportCacheList;
@@ -233,6 +234,12 @@ HaMetaMessage& HaMetaMessage::DelByWatch(bool isLiveView)
 HaMetaMessage& HaMetaMessage::ClickByWatch()
 {
     HaMetaMessage::clickByWatch_++;
+    return *this;
+}
+
+HaMetaMessage& HaMetaMessage::ReplyByWatch()
+{
+    HaMetaMessage::replyByWatch_++;
     return *this;
 }
 
@@ -896,7 +903,7 @@ bool NotificationAnalyticsUtil::DetermineWhetherToSend(uint32_t slotType)
         if ((NotificationAnalyticsUtil::GetCurrentTime() - HaMetaMessage::time_) >= MAX_TIME) {
             return true;
         } else if (HaMetaMessage::syncWatch_ + HaMetaMessage::syncHeadSet_ + HaMetaMessage::syncWatchHeadSet_ +
-                       HaMetaMessage::delByWatch_ >=
+                       HaMetaMessage::delByWatch_ + HaMetaMessage::replyByWatch_ >=
                    NOTIFICATION_MAX_DATA) {
             return true;
         }
@@ -929,10 +936,12 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const HaMetaMessage& message
         data["syncHeadSet"] = std::to_string(HaMetaMessage::syncHeadSet_);
         data["syncWatchHeadSet"] = std::to_string(HaMetaMessage::syncWatchHeadSet_);
         data["delByWatch"] = std::to_string(HaMetaMessage::delByWatch_);
+        data["replyByWatch"] = std::to_string(HaMetaMessage::replyByWatch_);
         HaMetaMessage::syncWatch_ = 0;
         HaMetaMessage::syncHeadSet_ = 0;
         HaMetaMessage::syncWatchHeadSet_ = 0;
         HaMetaMessage::delByWatch_ = 0;
+        HaMetaMessage::replyByWatch_ = 0;
         HaMetaMessage::time_ = NotificationAnalyticsUtil::GetCurrentTime();
     }
     ansData["data"] = data.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);

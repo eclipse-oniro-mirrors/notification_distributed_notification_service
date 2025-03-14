@@ -75,6 +75,7 @@ public:
     HaMetaMessage& DelByWatch(bool isLiveView);
     HaMetaMessage& DeleteReason(int32_t deleteReason);
     HaMetaMessage& ClickByWatch();
+    HaMetaMessage& ReplyByWatch();
     std::string GetMessage() const;
     HaMetaMessage& Checkfailed(bool checkfailed);
     bool NeedReport() const;
@@ -97,6 +98,7 @@ public:
     static int32_t syncWatchHeadSet_;
     static int32_t delByWatch_;
     static int32_t clickByWatch_;
+    static int32_t replyByWatch_;
     static int32_t keyNode_;
     static int64_t time_;
     static int32_t syncLiveViewWatch_;
