@@ -73,6 +73,10 @@ HWTEST_F(NotificationPreferencesInfoTest, GetSlotFlagsKeyFromType_00001, Functio
     res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::CUSTOMER_SERVICE);
     resStr = res;
     ASSERT_EQ(resStr, "Custom_service");
+
+    res = bundleInfo.GetSlotFlagsKeyFromType(NotificationConstant::SlotType::EMERGENCY_INFORMATION);
+    resStr = res;
+    ASSERT_EQ(resStr, "Emergency_information");
 }
 
 
@@ -90,6 +94,27 @@ HWTEST_F(NotificationPreferencesInfoTest, SetSlotFlagsForSlot_00001, Function | 
     int res = bundleInfo.GetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     ASSERT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: SetSlotFlagsForSlot_00002
+ * @tc.desc: Test SetSlotFlagsForSlot
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetSlotFlagsForSlot_00002, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetSlotFlags(1);
+    bundleInfo.slotFlagsMap_["Social_communication"] = 63;
+    bundleInfo.SetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto size = bundleInfo.slotFlagsMap_.size();
+    ASSERT_EQ(bundleInfo.GetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION), 63);
+    
+    bundleInfo.slotFlagsMap_["Social_communication"] = 1;
+    bundleInfo.SetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    ASSERT_EQ(bundleInfo.GetSlotFlagsForSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION), 1);
+}
+
 
 /**
  * @tc.name: MakeDoNotDisturbProfileKey_0100
@@ -120,6 +145,7 @@ HWTEST_F(NotificationPreferencesInfoTest, AddDoNotDisturbProfiles_0100, TestSize
     int32_t profileId = 1;
     profile->SetProfileId(profileId);
     profiles.emplace_back(profile);
+    profiles.emplace_back(nullptr);
     preferencesInfo->AddDoNotDisturbProfiles(userId, profiles);
 
     auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
@@ -138,6 +164,7 @@ HWTEST_F(NotificationPreferencesInfoTest, RemoveDoNotDisturbProfiles_0100, TestS
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     profiles.emplace_back(profile);
+    profiles.emplace_back(nullptr);
     preferencesInfo->RemoveDoNotDisturbProfiles(userId, profiles);
     int32_t profileId = 1;
     auto res = preferencesInfo->GetDoNotDisturbProfiles(profileId, userId, profile);
@@ -238,6 +265,129 @@ HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0400, TestS
     NotificationDisable disable;
     bool ret = preferencesInfo->GetDisableNotificationInfo(disable);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: RemoveSlot_0100
+ * @tc.desc: test RemoveSlot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveSlot_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    ASSERT_FALSE(bundleInfo.RemoveSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION));
+}
+
+/**
+ * @tc.name: IsExsitBundleInfo_0100
+ * @tc.desc: test IsExsitBundleInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, IsExsitBundleInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption());
+    bundleOption->SetBundleName("test");
+    bundleOption->SetUid(100);
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+
+    ASSERT_TRUE(preferencesInfo->IsExsitBundleInfo(bundleOption));
+
+    bundleOption->SetBundleName("test111");
+    ASSERT_FALSE(preferencesInfo->IsExsitBundleInfo(bundleOption));
+}
+
+/**
+ * @tc.name: GetAllDoNotDisturbProfiles_0100
+ * @tc.desc: test GetAllDoNotDisturbProfiles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+
+    sptr<NotificationDoNotDisturbProfile> profile;
+    preferencesInfo->doNotDisturbProfiles_["2_100_3"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
+    ASSERT_EQ(profiles.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllCLoneBundlesInfo_0100
+ * @tc.desc: test GetAllCLoneBundlesInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllCLoneBundlesInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::unordered_map<std::string, std::string> bunlesMap;
+    std::vector<NotificationCloneBundleInfo> cloneBundles;
+    bunlesMap["test"] = "test100";
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+    
+    preferencesInfo->GetAllCLoneBundlesInfo(100, bunlesMap, cloneBundles);
+    ASSERT_EQ(cloneBundles.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0100
+ * @tc.desc: test GetAllLiveViewEnabledBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    preferencesInfo->SetEnabledAllNotification(100, true);
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(bundleOption.size(), 0);
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0200
+ * @tc.desc: test GetAllLiveViewEnabledBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    preferencesInfo->SetEnabledAllNotification(100, false);
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(bundleOption.size(), 0);
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0300
+ * @tc.desc: test GetAllLiveViewEnabledBundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0300, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationSlot> slot(new NotificationSlot(
+        NotificationConstant::SlotType::LIVE_VIEW));
+    slot->SetEnable(true);
+    bundleInfo.SetSlot(slot);
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+
+    preferencesInfo->isEnabledAllNotification_[100] = true;
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(bundleOption.size(), 1);
 }
 }
 }
