@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,14 @@
 #include <iremote_object.h>
 #include <iremote_stub.h>
 
-#include "swing_callback_interface.h"
+#include "iswing_call_back.h"
 
 namespace OHOS {
 class MockSwingCallBackStub : public IRemoteStub<Notification::ISwingCallBack> {
 public:
     MockSwingCallBackStub();
     virtual ~MockSwingCallBackStub();
-    virtual int32_t OnUpdateStatus(bool isEnable, int triggerMode) override;
+    virtual ErrCode OnUpdateStatus(bool isEnable, int32_t triggerMode, int32_t& funcResult) override;
 };
 }  // namespace OHOS
 #endif  // ANS_MOCK_SWING_CALL_BACK_STUB_H

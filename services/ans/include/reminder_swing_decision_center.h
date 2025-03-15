@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
-#include "swing_callback_proxy.h"
+#include "swing_call_back_proxy.h"
 
 namespace OHOS {
 namespace Notification {
