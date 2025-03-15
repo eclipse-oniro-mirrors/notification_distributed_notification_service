@@ -470,6 +470,43 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number    : SubscribeSelf_279001
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, SubscribeSelf_279001, Function | SmallTest | Level1)
+{
+    auto res = advancedNotificationService_->SubscribeSelf(nullptr);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : SubscribeSelf_279002
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, SubscribeSelf_279002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : SubscribeSelf_279003
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, SubscribeSelf_279003, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_ANS_TASK_ERR);
+}
+
+/**
  * @tc.number    : AnsBranchTest_242000
  * @tc.name      : GetAllActiveNotifications_1000
  * @tc.desc      : Test GetAllActiveNotifications function return ERR_ANS_PERMISSION_DENIED.
