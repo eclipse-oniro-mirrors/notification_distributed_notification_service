@@ -2668,10 +2668,13 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     }
 
     sptr<NotificationBundleOption> bundle = bundleOption;
-    ErrCode result = CheckBundleOptionValid(bundle);
-    if (result != ERR_OK) {
-        ANS_LOGE("Bundle is invalid.");
-        return result;
+    ErrCode result = ERR_OK;
+    if (bundle->GetUid() <= DEFAULT_UID) {
+        result = CheckBundleOptionValid(bundle);
+        if (result != ERR_OK) {
+            ANS_LOGE("Bundle is invalid.");
+            return result;
+        }
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
