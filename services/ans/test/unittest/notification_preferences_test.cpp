@@ -28,6 +28,8 @@
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
+extern void MockIsVerfyPermisson(bool isVerify);
+
 class NotificationPreferencesTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -1678,6 +1680,303 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0300, TestS
         deviceType, bundleInfo, isDistributedEnabled);
     EXPECT_EQ(ret, true);
     EXPECT_EQ(isDistributedEnabled, true);
+}
+
+/**
+ * @tc.number    : UpdateProfilesUtil_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateProfilesUtil_00100, Function | SmallTest | Level1)
+{
+    NotificationBundleOption bundleOne;
+    bundleOne.SetBundleName("test1");
+    bundleOne.SetUid(100);
+    NotificationBundleOption bundleTwo;
+    std::vector<NotificationBundleOption> bundleList;
+    bundleList.push_back(bundleOne);
+    bundleList.push_back(bundleTwo);
+    std::vector<NotificationBundleOption> trustList;
+    trustList.push_back(bundleOne);
+    NotificationPreferences::GetInstance()->UpdateProfilesUtil(trustList, bundleList);
+    ASSERT_EQ(bundleList.size(), trustList.size());
+}
+
+/**
+ * @tc.number    : UpdateDoNotDisturbProfiles_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00100, Function | SmallTest | Level1)
+{
+    int32_t profileId = 3;
+    int32_t userId = 100;
+    std::string name = "testProfile";
+    std::vector<NotificationBundleOption> bundleList;
+
+    NotificationBundleOption bundleOne;
+    bundleOne.SetBundleName("test1");
+    bundleOne.SetUid(100);
+    bundleList.push_back(bundleOne);
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    NotificationPreferences::GetInstance()->UpdateCloneBundleInfo(
+        userId, cloneBundleInfo);
+
+    auto res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
+        userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.number    : UpdateDoNotDisturbProfiles_00200
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00200, Function | SmallTest | Level1)
+{
+    int32_t profileId = 0;
+    int32_t userId = 100;
+    std::string name = "testProfile";
+    std::vector<NotificationBundleOption> bundleList;
+
+    NotificationBundleOption bundleOne;
+    bundleOne.SetBundleName("test1");
+    bundleOne.SetUid(100);
+    bundleList.push_back(bundleOne);
+
+    auto res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
+        userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : GetTemplateSupported_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetTemplateSupported_00100, Function | SmallTest | Level1)
+{
+    bool support = false;
+    auto res = NotificationPreferences::GetInstance()->GetTemplateSupported(
+        "", support);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : SetDistributedEnabledBySlot_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledBySlot_00100, Function | SmallTest | Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    auto res = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
+        slotType, "test", true);
+    ASSERT_EQ(res, ERR_OK);
+    
+    bool enabled = false;
+    res = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
+        slotType, "test", enabled);
+    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(enabled, true);
+}
+
+
+/**
+ * @tc.number    : GetByteFromDb_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetByteFromDb_00100, Function | SmallTest | Level1)
+{
+    std::vector<uint8_t> value;
+    auto res = NotificationPreferences::GetInstance()->GetByteFromDb(
+        "test", value, 100);
+    ASSERT_NE(res, ERR_OK);
+}
+
+/**
+ * @tc.number    : DeleteBatchKvFromDb_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, DeleteBatchKvFromDb_00100, Function | SmallTest | Level1)
+{
+    std::vector<string> keys;
+    auto res = NotificationPreferences::GetInstance()->DeleteBatchKvFromDb(
+        keys, 100);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.number    : IsAgentRelationship_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, IsAgentRelationship_00100, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    auto res = NotificationPreferences::GetInstance()->IsAgentRelationship(
+        "test1", "test2");
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.number    : GetAdditionalConfig_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetAdditionalConfig_00100, Function | SmallTest | Level1)
+{
+    auto res = NotificationPreferences::GetInstance()->GetAdditionalConfig("test");
+    ASSERT_EQ(res, "");
+}
+
+/**
+ * @tc.number    : DelCloneProfileInfo_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, DelCloneProfileInfo_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationDoNotDisturbProfile> info(new NotificationDoNotDisturbProfile());
+    info->SetProfileId(1);
+    info->SetProfileName("TestName");
+
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(100);
+
+    std::vector<NotificationBundleOption> trustList;
+    trustList.push_back(bundleOption);
+    info->SetProfileTrustList(trustList);
+
+    auto res = NotificationPreferences::GetInstance()->DelCloneProfileInfo(
+        100, info);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.number    : UpdateBatchCloneProfileInfo_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateBatchCloneProfileInfo_00100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> infos;
+
+    sptr<NotificationDoNotDisturbProfile> info(new NotificationDoNotDisturbProfile());
+    info->SetProfileId(1);
+    info->SetProfileName("TestName");
+    infos.push_back(info);
+
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(100);
+
+    std::vector<NotificationBundleOption> trustList;
+    trustList.push_back(bundleOption);
+    info->SetProfileTrustList(trustList);
+
+
+    auto res = NotificationPreferences::GetInstance()->UpdateBatchCloneProfileInfo(
+        100, infos);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.number    : UpdateBatchCloneBundleInfo_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateBatchCloneBundleInfo_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationCloneBundleInfo> cloneBundleInfos;
+    NotificationCloneBundleInfo cloneBundleInfo;
+    cloneBundleInfos.push_back(cloneBundleInfo);
+    auto res = NotificationPreferences::GetInstance()->UpdateBatchCloneBundleInfo(
+        100, cloneBundleInfos);
+    ASSERT_EQ(res, true);
+
+    std::vector<NotificationCloneBundleInfo> cloneBundleInfoRes;
+    NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(
+        100, cloneBundleInfoRes);
+    ASSERT_EQ(cloneBundleInfoRes.size(), cloneBundleInfos.size());
+    
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profilesInfos;
+    NotificationPreferences::GetInstance()->GetAllCloneProfileInfo(
+        100, profilesInfos);
+    ASSERT_EQ(0, profilesInfos.size());
+}
+
+/**
+ * @tc.number    : DelCloneBundleInfo_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, DelCloneBundleInfo_00100, Function | SmallTest | Level1)
+{
+    NotificationCloneBundleInfo cloneBundleInfo;
+    auto res = NotificationPreferences::GetInstance()->DelCloneBundleInfo(
+        100, cloneBundleInfo);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.number    : DelBatchCloneProfileInfo_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, DelBatchCloneProfileInfo_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationDoNotDisturbProfile> profileInfo(new NotificationDoNotDisturbProfile());
+
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profileInfos;
+    profileInfos.push_back(profileInfo);
+
+    auto res = NotificationPreferences::GetInstance()->DelBatchCloneProfileInfo(
+        100, profileInfos);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.number    : GetAllLiveViewEnabledBundles_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllLiveViewEnabledBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = NotificationPreferences::GetInstance()->GetAllLiveViewEnabledBundles(
+        100, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.number    : GetAllDistribuedEnabledBundles_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, GetAllDistribuedEnabledBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<NotificationBundleOption> bundleOption;
+    std::string deviceType = "testType";
+    auto res = NotificationPreferences::GetInstance()->GetAllDistribuedEnabledBundles(
+        100, deviceType, bundleOption);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.number    : SetHashCodeRule_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00100, Function | SmallTest | Level1)
+{
+    auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(
+        100, 1);
+    ASSERT_EQ(res, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
