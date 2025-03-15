@@ -2609,7 +2609,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() ||
-      bundleOption->GetUid() <= DEFAULT_UID) {
+        bundleOption->GetUid() <= DEFAULT_UID) {
         return ERR_ANS_INVALID_PARAM;
     }
     if (badgeNumber <= BADGE_NUM_LIMIT) {
