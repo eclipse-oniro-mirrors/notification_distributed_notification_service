@@ -242,6 +242,16 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
         request->SetOwnerUserId(ownerUserId);
+        std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
+            additionalData && additionalData->HasParam("is_ancoNotification")) {
+            AAFwk::IBoolean *bo = AAFwk::IBoolean::Query(additionalData->GetParam("is_ancoNotification"));
+            if (AAFwk::Boolean::Unbox(bo)) {
+                ANS_LOGI("push publish notification");
+                request->SetOwnerUserId(DEFAULT_USER_ID);
+            }
+        }
     }
 
     ErrCode result = CheckPictureSize(request);
