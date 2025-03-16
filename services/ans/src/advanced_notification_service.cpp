@@ -246,8 +246,11 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
             additionalData && additionalData->HasParam("is_ancoNotification")) {
-            ANS_LOGI("push publish notification");
-            request->SetOwnerUserId(DEFAULT_USER_ID);
+            AAFwk::IBoolean *bo = AAFwk::IBoolean::Query(additionalData->GetParam("is_ancoNotification"));
+            if (AAFwk::Boolean::Unbox(bo)) {
+                ANS_LOGI("push publish notification");
+                request->SetOwnerUserId(DEFAULT_USER_ID);
+            }
         }
     }
 
