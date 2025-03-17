@@ -587,6 +587,10 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
          representativeBundle, DEFAULT_UID);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr.");
+        return ERR_ANS_TASK_ERR;
+    }
     return CancelAsBundle(bundleOption, notificationId, userId);
 }
 
@@ -1010,6 +1014,10 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         return ERR_ANS_INVALID_PARAM;
     }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr.");
+        return ERROR_INTERNAL_ERROR;
+    }
     return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false);
 }
 
@@ -1023,6 +1031,10 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         return ERR_ANS_NOT_ALLOWED;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr.");
+        return ERROR_INTERNAL_ERROR;
+    }
     return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true);
 }
 
@@ -1037,6 +1049,10 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
     // To get the permission
     bool allowedNotify = false;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_5);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr.");
+        return ERROR_INTERNAL_ERROR;
+    }
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " deviceId:" + deviceId);
     result = IsAllowedNotifySelf(bundleOption, allowedNotify);

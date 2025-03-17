@@ -692,6 +692,10 @@ void AdvancedNotificationService::UpdateRecordByOwner(
     auto content = record->notification->GetNotificationRequest().GetContent();
     auto wantAgent = record->notification->GetNotificationRequest().GetWantAgent();
     record->request = new (std::nothrow) NotificationRequest(*(oldRecord->request));
+    if (record->request == nullptr) {
+        ANS_LOGE("request is nullptr.");
+        return;
+    }
     if (wantAgent != nullptr) {
         record->request->SetWantAgent(wantAgent);
     }

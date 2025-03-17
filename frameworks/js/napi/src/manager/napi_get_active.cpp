@@ -425,6 +425,11 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
     ANS_LOGD("enter");
 
     auto asyncLiveViewCallBackInfo = new (std::nothrow) AsyncLiveViewCallBackInfo {.env = env, .asyncWork = nullptr};
+    if (asyncLiveViewCallBackInfo == nullptr) {
+        ANS_LOGE("asyncLiveViewCallBackInfo is nullptr.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
     napi_ref callback = nullptr;
     if (ParseGetLiveViewParams(env, info, asyncLiveViewCallBackInfo->filter, callback) == nullptr) {
         ANS_LOGD("ParseGetLiveViewParams is nullptr.");
