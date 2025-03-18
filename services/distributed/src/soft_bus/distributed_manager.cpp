@@ -21,6 +21,7 @@
 #include "distributed_local_config.h"
 #include "ans_log_wrapper.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
+#include "analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -78,12 +79,12 @@ void DistributedManager::RefreshDevice(const std::string &deviceId, uint16_t dev
 
 void DistributedManager::InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
 {
-    DistributedService::GetInstance().InitHACallBack(callback);
+    AnalyticsUtil::GetInstance().InitHACallBack(callback);
 }
 
 void DistributedManager::InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback)
 {
-    DistributedService::GetInstance().InitSendReportCallBack(callback);
+    AnalyticsUtil::GetInstance().InitSendReportCallBack(callback);
 }
 
 }

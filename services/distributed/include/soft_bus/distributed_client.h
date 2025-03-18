@@ -33,10 +33,9 @@ public:
     void RefreshDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
     void initClient(const std::string &deviceId, uint16_t deviceType);
-    int32_t GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
-        int32_t& socketId);
+    int32_t GetSocketId(const std::string &deviceId, TransDataType dataType, int32_t& socketId);
     int32_t SendMessage(const void* data, int32_t length, TransDataType dataType,
-        const std::string &deviceId, uint16_t deviceType);
+        const std::string &deviceId, int32_t eventType);
     void ReleaseClient();
 private:
     DistributedClient() = default;

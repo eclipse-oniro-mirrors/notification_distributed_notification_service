@@ -87,7 +87,7 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
         peerDevice_[peerDevice.deviceId_].peerState_ = DeviceState::STATE_ONLINE;
         if (haCallback_ != nullptr) {
             std::string reason = "deviceType: " + std::to_string(localDevice_.deviceType_) +
-                                 " ; deviceId: " + AnonymousProcessing(localDevice_.deviceId_);
+                                 " ; deviceId: " + StringAnonymous(localDevice_.deviceId_);
             haCallback_(PUBLISH_ERROR_EVENT_CODE, 0, BRANCH3_ID, reason);
         }
     }
@@ -250,9 +250,8 @@ void DistributedService::SendNotifictionRequest(const std::shared_ptr<Notificati
         }
         return;
     }
-    this->code_ = PUBLISH_ERROR_EVENT_CODE;
     DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
-        TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, peerDevice.deviceType_);
+        TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, PUBLISH_ERROR_EVENT_CODE);
 }
 
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
@@ -275,7 +274,7 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         ANS_LOGE("check handler is null.");
         return;
     }
-    code_ = DELETE_ERROR_EVENT_CODE;
+
     std::ostringstream keysStream;
     std::ostringstream slotTypesStream;
     for (auto notification : notifications) {
@@ -302,7 +301,7 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
             return;
         }
         DistributedClient::GetInstance().SendMessage(batchRemoveBox.GetByteBuffer(), batchRemoveBox.GetByteLength(),
-            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, peerDevice.deviceType_);
+            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
     });
     serviceQueue_->submit(task);
 }
@@ -318,7 +317,6 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
         ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
         return;
     }
-    code_ = DELETE_ERROR_EVENT_CODE;
     std::string notificationKey = GetNotificationKey(notification);
     std::function<void()> task = std::bind([peerDevice, notification, notificationKey]() {
         NotificationRemoveBox removeBox;
@@ -330,7 +328,7 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
             return;
         }
         DistributedClient::GetInstance().SendMessage(removeBox.GetByteBuffer(), removeBox.GetByteLength(),
-            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, peerDevice.deviceType_);
+            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
     });
     serviceQueue_->submit(task);
 }
@@ -356,7 +354,6 @@ std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notific
 ErrCode DistributedService::OnResponse(
     const std::shared_ptr<NotificationOperationInfo> & operationInfo, const DistributedDeviceInfo& device)
 {
-    this->code_ = MODIFY_ERROR_EVENT_CODE;
     NotificationResponseBox responseBox;
     ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());
     if (operationInfo == nullptr) {
@@ -388,7 +385,7 @@ ErrCode DistributedService::OnResponse(
     }
 
     auto result = DistributedClient::GetInstance().SendMessage(responseBox.GetByteBuffer(), responseBox.GetByteLength(),
-        TransDataType::DATA_TYPE_MESSAGE, device.deviceId_, device.deviceType_);
+        TransDataType::DATA_TYPE_MESSAGE, device.deviceId_, MODIFY_ERROR_EVENT_CODE);
     if (result != ERR_OK) {
         ANS_LOGE("dans OnResponse send message failed result: %{public}d", result);
         result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;

@@ -198,48 +198,9 @@ int64_t DistributedService::GetCurrentTime()
     return duration.count();
 }
 
-void DistributedService::SendEventReport(
-    int32_t messageType, int32_t errCode, const std::string& errorReason)
+bool DistributedService::IsReportHa()
 {
-    if (sendReportCallback_ != nullptr ||
-        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        sendReportCallback_(messageType, errCode, errorReason);
-    }
+    return localDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
 }
-
-void DistributedService::InitHACallBack(
-    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
-{
-    haCallback_ = callback;
-}
-
-void DistributedService::InitSendReportCallBack(
-    std::function<void(int32_t, int32_t, std::string)> callback)
-{
-    sendReportCallback_ = callback;
-}
-
-std::string DistributedService::AnonymousProcessing(std::string data)
-{
-    int32_t length = data.length();
-    if (length >= MAX_DATA_LENGTH) {
-        data.replace(START_ANONYMOUS_INDEX, length - 1, "**");
-    }
-    return data;
-}
-
-void DistributedService::SendHaReport(
-    int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code)
-{
-    if (haCallback_ == nullptr || localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        return;
-    }
-    if (code == -1) {
-        haCallback_(code_, errorCode, branchId, errorReason);
-    } else {
-        haCallback_(code, errorCode, branchId, errorReason);
-    }
-}
-
 }
 }

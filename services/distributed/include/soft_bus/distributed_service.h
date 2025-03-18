@@ -59,10 +59,6 @@ public:
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
     void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
-    void SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason);
-    void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
-    void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
-    void SendHaReport(int32_t errorCode, uint32_t branchId, const std::string& errorReason, int32_t code = -1);
     ErrCode OnResponse(const std::shared_ptr<NotificationOperationInfo>& operationInfo,
         const DistributedDeviceInfo& device);
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
@@ -70,6 +66,7 @@ public:
     void SyncAllLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
     void SyncNotifictionList(const DistributedDeviceInfo& peerDevice, const std::vector<std::string>& list);
     void HandleNotificationSync(const std::shared_ptr<TlvBox>& boxMessage);
+    bool IsReportHa();
 
 private:
     void OnHandleMsg(std::shared_ptr<TlvBox>& box);
@@ -95,9 +92,6 @@ private:
         NotificationContent::Type type, NotifticationRequestBox &requestBox);
     void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
         std::vector<DistributedDeviceInfo>& updateDeviceList);
-    void AbnormalReporting(int result, uint32_t branchId, const std::string& errorReason);
-    void OperationalReporting(int branchId, int32_t slotType);
-    std::string AnonymousProcessing(std::string data);
     void TriggerJumpApplication(const std::string& hashCode);
     ErrCode TriggerReplyApplication(const std::string& hashCode, const NotificationResponseBox& responseBox);
     void HandleOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox);
@@ -121,7 +115,6 @@ private:
     std::map<std::string, DistributedDeviceInfo> peerDevice_;
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;
     std::map<std::string, std::shared_ptr<DistribuedSubscriber>> subscriberMap_;
-    int32_t code_ = -1;
 };
 }
 }

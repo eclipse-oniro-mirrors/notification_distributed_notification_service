@@ -18,15 +18,10 @@
 #include "session.h"
 #include "distributed_socket.h"
 #include "distributed_server.h"
+#include "analytics_util.h"
+
 namespace OHOS {
 namespace Notification {
-
-namespace {
-constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
-constexpr const int32_t BRANCH1_ID = 1;
-constexpr const int32_t BRANCH2_ID = 2;
-constexpr const int32_t BRANCH4_ID = 4;
-}
 
 DistributedClient& DistributedClient::GetInstance()
 {
@@ -52,7 +47,8 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
             socketItem.second = -1;
             std::string message = "socketID: " + std::to_string(socket) + " ; ShutdownReason: " +
                                   ShutdownReasonToString(reason);
-            DistributedService::GetInstance().SendHaReport(0, BRANCH4_ID, message, PUBLISH_ERROR_EVENT_CODE);
+            AnalyticsUtil::GetInstance().SendHaReport(MODIFY_ERROR_EVENT_CODE, 0,
+                BRANCH4_ID, message, PUBLISH_ERROR_EVENT_CODE);
         }
     }
 }
@@ -93,8 +89,7 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
         StringAnonymous(networkId).c_str());
 }
 
-int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t deviceType, TransDataType dataType,
-    int32_t& socketId)
+int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataType dataType, int32_t& socketId)
 {
     std::string key = deviceId + '_' + std::to_string(dataType);
     {
@@ -114,8 +109,8 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
     std::string name = (dataType == TransDataType::DATA_TYPE_MESSAGE) ? ANS_SOCKET_CMD : ANS_SOCKET_MSG;
     int32_t result = ClientBind(name, ANS_SOCKET_PKG, networkId, dataType, socketId);
     if (result != ERR_OK) {
-        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
-            StringAnonymous(networkId).c_str(), deviceType, dataType);
+        ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d", StringAnonymous(deviceId).c_str(),
+            StringAnonymous(networkId).c_str(), dataType);
         return result;
     }
     {
@@ -127,28 +122,25 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, uint16_t dev
 }
 
 int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDataType dataType,
-    const std::string &deviceId, uint16_t deviceType)
+    const std::string &deviceId, int32_t eventType)
 {
     int32_t socketId = 0;
     DistributedServer::GetInstance().CheckServer();
-    int32_t result = GetSocketId(deviceId, deviceType, dataType, socketId);
+    int32_t result = GetSocketId(deviceId, dataType, socketId);
     if (result != ERR_OK) {
-        ANS_LOGW("Get SocketId failed %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
-            deviceType, dataType);
-        int32_t messageType = 0;
+        ANS_LOGW("Get SocketId failed %{public}s %{public}d", StringAnonymous(deviceId).c_str(), dataType);
         std::string errorReason = "Bind server failed,";
         errorReason.append("dataType: " + std::to_string(dataType));
-        DistributedService::GetInstance().SendEventReport(messageType, result, errorReason);
-        DistributedService::GetInstance().SendHaReport(result, BRANCH1_ID, errorReason);
+        AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
+        AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH1_ID, errorReason);
         return result;
     }
     result = ClientSendMsg(socketId, data, length, dataType);
     if (result != ERR_OK) {
-        int32_t messageType = 0;
         std::string errorReason = "send message failed,";
         errorReason.append("dataType: " + std::to_string(dataType));
-        DistributedService::GetInstance().SendEventReport(messageType, result, errorReason);
-        DistributedService::GetInstance().SendHaReport(result, BRANCH2_ID, errorReason);
+        AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
+        AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH2_ID, errorReason);
     }
     return result;
 }
