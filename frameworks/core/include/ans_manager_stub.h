@@ -944,7 +944,8 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+    virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const std::string deveiceId = std::string()) override;
 
     /**
      * @brief Set the status of the target device.
@@ -955,7 +956,7 @@ public:
      * @return Returns set result.
      */
     virtual ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag) override;
+        const uint32_t controlFlag, const std::string deveiceId = std::string()) override;
 
     /**
      * @brief Get do not disturb profile by id.

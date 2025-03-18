@@ -69,8 +69,13 @@ void DistributedService::HandleDeviceState(const std::shared_ptr<TlvBox>& boxMes
         ANS_LOGW("Dans unbox state failed.");
         return;
     }
+    std::string deviceId;
+    if (!stateBox.GetDeviceId(deviceId)) {
+        ANS_LOGW("Dans unbox deviceId failed.");
+    }
     uint32_t status = (static_cast<uint32_t>(state) << 1);
-    int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status, DEFAULT_LOCK_SCREEN_FLAG);
+    int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status,
+        DEFAULT_LOCK_SCREEN_FLAG, deviceId);
     ANS_LOGI("Dans set state %{public}s %{public}u.", deviceName.c_str(), state);
 }
 
@@ -84,6 +89,7 @@ void DistributedService::SyncDeviceState(int32_t state)
         NotifticationStateBox stateBox;
         stateBox.SetState(state);
         stateBox.SetDeviceType(TransDeviceTypeIdToName(localDevice_.deviceType_));
+        stateBox.SetDeviceId(localDevice_.deviceId_);
         if (!stateBox.Serialize()) {
             ANS_LOGW("Dans SyncDeviceState serialize failed.");
             return;

@@ -3021,7 +3021,8 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
     return NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
-ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const std::string deveiceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     uint32_t status_ = status;
@@ -3041,7 +3042,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag)
+    const uint32_t controlFlag, const std::string deveiceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {

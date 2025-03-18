@@ -1919,7 +1919,8 @@ ErrCode AnsNotification::IsSmartReminderEnabled(const std::string &deviceType, b
     return proxy->IsSmartReminderEnabled(deviceType, enabled);
 }
 
-ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const std::string deveiceId)
 {
     ANS_LOGD("enter");
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
@@ -1928,11 +1929,11 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->SetTargetDeviceStatus(deviceType, status);
+    return proxy->SetTargetDeviceStatus(deviceType, status, deveiceId);
 }
 
 ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag)
+    const uint32_t controlFlag, const std::string deveiceId)
 {
     ANS_LOGD("enter");
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
@@ -1941,7 +1942,7 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->SetTargetDeviceStatus(deviceType, status, controlFlag);
+    return proxy->SetTargetDeviceStatus(deviceType, status, controlFlag, deveiceId);
 }
 
 ErrCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)

@@ -27,9 +27,11 @@ public:
     NotifticationStateBox();
     NotifticationStateBox(std::shared_ptr<TlvBox> box);
     bool SetDeviceType(const std::string& deviceType);
+    bool SetDeviceId(const std::string& deviceId);
     bool SetState(int32_t state);
 
     bool GetDeviceType(std::string& deviceType);
+    bool GetDeviceId(std::string& deviceId);
     bool GetState(int32_t& state);
 };
 }  // namespace Notification

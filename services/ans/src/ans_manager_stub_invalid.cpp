@@ -664,14 +664,15 @@ ErrCode AnsManagerStub::CancelAsBundleWithAgent(const sptr<NotificationBundleOpt
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const std::string deveiceId)
 {
     ANS_LOGE("SetTargetDeviceStatus called!");
     return ERR_INVALID_OPERATION;
 }
 
 ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag)
+    const uint32_t controlFlag, const std::string deveiceId)
 {
     ANS_LOGE("SetTargetDeviceStatus called!");
     return ERR_INVALID_OPERATION;

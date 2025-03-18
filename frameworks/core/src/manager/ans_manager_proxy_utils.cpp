@@ -109,7 +109,8 @@ ErrCode AnsManagerProxy::UnregisterPushCallback()
     return result;
 }
 
-ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const std::string deveiceId)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -124,6 +125,11 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
 
     if (!data.WriteInt32(status)) {
         ANS_LOGE("Set package config fail:: write status failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(deveiceId)) {
+        ANS_LOGE("Set package config fail:: write deveiceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -144,7 +150,7 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
 }
 
 ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag)
+    const uint32_t controlFlag, const std::string deveiceId)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -164,6 +170,11 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
 
     if (!data.WriteInt32(controlFlag)) {
         ANS_LOGE("Set package config fail:: write controlFlag failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!data.WriteString(deveiceId)) {
+        ANS_LOGE("Set package config fail:: write deveiceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

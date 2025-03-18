@@ -1011,7 +1011,7 @@ public:
      * @return Returns set badge number by bundle result.
      */
     static ErrCode SetBadgeNumberForDhByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
-    
+
     /**
      * @brief Obtains allow notification application list.
      *
@@ -1154,7 +1154,8 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
+    static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const std::string deveiceId = std::string());
 
     /**
      * @brief Set the status of the target device.
@@ -1165,7 +1166,7 @@ public:
      * @return Returns set result.
      */
     static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag);
+        const uint32_t controlFlag, const std::string deveiceId = std::string());
 
     /**
      * @brief Register Swing Callback Function.

@@ -1169,7 +1169,8 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const std::string deveiceId = std::string());
 
     /**
      * @brief Set the status of the target device.
@@ -1179,7 +1180,8 @@ public:
      * @param controlFlag The control flag.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status, const uint32_t controlFlag);
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status, const uint32_t controlFlag,
+        const std::string deveiceId = std::string());
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
