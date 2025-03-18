@@ -389,7 +389,7 @@ public:
      */
     bool GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames);
 
-    ErrCode UpdateDoNotDisturbProfiles(int32_t userId, int32_t profileId,
+    ErrCode UpdateDoNotDisturbProfiles(int32_t userId, int64_t profileId,
         const std::string& name, const std::vector<NotificationBundleOption>& bundleList);
 
     void UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
@@ -407,8 +407,7 @@ public:
         const std::string &key, std::unordered_map<std::string, std::string>  &values, const int32_t &userId);
     int32_t DeleteKvFromDb(const std::string &key, const int &userId);
     int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
-    ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
-    bool CheckDoNotDisturbProfileID(int32_t profileId);
+    ErrCode GetDoNotDisturbProfile(int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
     void GetDoNotDisturbProfileListByUserId(int32_t userId,
         std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);

@@ -34,6 +34,8 @@
 #include "notification_sync_box.h"
 #include "ans_inner_errors.h"
 #include "ability_manager_helper.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -503,8 +505,9 @@ void DistributedService::TriggerJumpApplication(const std::string& hashCode)
     }
 }
 
-ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::string& actionName,
-    std::shared_ptr<AAFwk::Want>& wantPtr, std::string& userInputKey)
+ErrCode DistributedService::GetNotificationButtonWantPtr(const std::string& hashCode,
+    const std::string& actionName, std::shared_ptr<AAFwk::Want>& wantPtr, sptr<NotificationRequest>& request,
+    std::string& userInputKey)
 {
     sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
@@ -513,6 +516,7 @@ ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::str
         return ERR_ANS_NOTIFICATION_NOT_EXISTS;
     }
 
+    request = notificationRequest;
     auto actionButtons = notificationRequest->GetActionButtons();
     if (actionButtons.empty()) {
         ANS_LOGE("Check actionButtons is null.");
@@ -559,6 +563,17 @@ ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::str
     return ERR_OK;
 }
 
+void DistributedService::TriggerReplyWantAgent(const sptr<NotificationRequest> request,
+    std::string actionName, int32_t errorCode, std::string desc)
+{
+    AAFwk::WantParams extraInfo;
+    extraInfo.SetParam("desc", AAFwk::String::Box(desc));
+    extraInfo.SetParam("errorCode", AAFwk::Integer::Box(errorCode));
+    extraInfo.SetParam("actionName", AAFwk::String::Box(actionName));
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->TriggerPushWantAgent(request,
+        OperationType::DISTRIBUTE_OPERATION_REPLY, extraInfo);
+}
+
 ErrCode DistributedService::TriggerReplyApplication(const std::string& hashCode,
     const NotificationResponseBox& responseBox)
 {
@@ -568,14 +583,20 @@ ErrCode DistributedService::TriggerReplyApplication(const std::string& hashCode,
     responseBox.GetActionName(actionName);
     responseBox.GetUserInput(userInput);
 
+    code_ = MODIFY_ERROR_EVENT_CODE;
     std::shared_ptr<AAFwk::Want> wantPtr = nullptr;
-    auto result = GetNotificationButtonWantPtr(hashCode, actionName, wantPtr, userInputKey);
+    sptr<NotificationRequest> request = nullptr;
+    auto result = GetNotificationButtonWantPtr(hashCode, actionName, wantPtr, request, userInputKey);
     if (result != ERR_OK || wantPtr == nullptr) {
+        AbnormalReporting(result, BRANCH4_ID, "reply get button failed");
+        TriggerReplyWantAgent(request, actionName, result, "reply get button failed");
         return result;
     }
 
     if (wantPtr->GetBoolParam(AAFwk::Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
         ANS_LOGE("Not support foreground.");
+        AbnormalReporting(ERR_ANS_DISTRIBUTED_OPERATION_FAILED, BRANCH4_ID, "reply foreground failed");
+        TriggerReplyWantAgent(request, actionName, ERR_ANS_DISTRIBUTED_OPERATION_FAILED, "reply foreground failed");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
 
@@ -583,9 +604,11 @@ ErrCode DistributedService::TriggerReplyApplication(const std::string& hashCode,
         userInputKey, userInput);
     ANS_LOGI("StartAbility result:%{public}d", ret);
     if (ret == ERR_OK) {
-        OperationalReporting(BRANCH3_ID, NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        TriggerReplyWantAgent(request, actionName, ERR_OK, "");
+        OperationalReporting(BRANCH4_ID, NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     } else {
-        AbnormalReporting(0, ret, "reply up failed");
+        TriggerReplyWantAgent(request, actionName, ret, "ability reply failed");
+        AbnormalReporting(ret, BRANCH4_ID, "ability reply failed");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;

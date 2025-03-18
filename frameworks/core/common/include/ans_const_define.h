@@ -46,7 +46,7 @@ constexpr int32_t MAX_STATUS_VECTOR_NUM = 1000;
 constexpr uint32_t MAX_CANCELED_PARCELABLE_VECTOR_NUM = 200;
 
 constexpr int32_t DEFAULT_UID = 0;
-constexpr int32_t INVALID_PROFILE_ID = -1;
+constexpr int64_t INVALID_PROFILE_ID = -1;
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
 constexpr int32_t DEFAULT_USER_ID = 100;

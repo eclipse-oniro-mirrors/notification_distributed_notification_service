@@ -19,6 +19,7 @@
 #include "ans_log_wrapper.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
+#include "notification_config_parse.h"
 #include "notification_local_live_view_content.h"
 #include "notification_preferences.h"
 #include "os_account_manager.h"

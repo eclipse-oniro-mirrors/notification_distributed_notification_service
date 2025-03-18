@@ -108,6 +108,10 @@ private:
     void MakeNotificationButtons(const NotifticationRequestBox& box, NotificationConstant::SlotType slotType,
         sptr<NotificationRequest>& request);
     int32_t GetCurrentActiveUserId();
+    void TriggerReplyWantAgent(const sptr<NotificationRequest> request, std::string actionName,
+        int32_t errorCode, std::string desc);
+    ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const std::string& actionName,
+        std::shared_ptr<AAFwk::Want>& wantPtr, sptr<NotificationRequest>& request, std::string& userInputKey);
 
 private:
     std::function<void(int32_t, int32_t, uint32_t, std::string)> haCallback_ = nullptr;

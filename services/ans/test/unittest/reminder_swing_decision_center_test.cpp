@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,12 @@
  */
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "gtest/gtest.h"
+#define private public
 #include "reminder_swing_decision_center.h"
+#include "notification_preferences.h"
+#include "smart_reminder_center.h"
+#include "reminder_affected.h"
+#undef private
 #include "mock_swing_callback_stub.h"
 
 using namespace testing::ext;
@@ -64,6 +69,65 @@ HWTEST_F(ReminderSwingDecisionCenterTest, RegisterSwingCallback_00002, Function 
     sptr<IRemoteObject> swingCallback = swingCallbackProxy->AsObject();
     int ret = reminderSwingDecisionCenter_.RegisterSwingCallback(swingCallback);
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+HWTEST_F(ReminderSwingDecisionCenterTest, NormalResetSwingCallbackProxyTest, Function | SmallTest | Level1)
+{
+    // Arrange
+    reminderSwingDecisionCenter_.swingCallback_ = new (std::nothrow)MockSwingCallBackStub();
+    reminderSwingDecisionCenter_.swingRecipient_ = new (std::nothrow)SwingCallbackRecipient();
+
+    // Act
+    reminderSwingDecisionCenter_.ResetSwingCallbackProxy();
+
+    // Assert
+    EXPECT_EQ(reminderSwingDecisionCenter_.swingCallback_, nullptr);
+    EXPECT_NE(reminderSwingDecisionCenter_.swingRecipient_, nullptr);
+}
+
+// 测试ResetSwingCallbackProxy方法 - swingCallback_为nullptr
+HWTEST_F(ReminderSwingDecisionCenterTest, NullSwingCallbackResetSwingCallbackProxyTest, Function | SmallTest | Level1)
+{
+    // Arrange
+    reminderSwingDecisionCenter_.swingCallback_ = nullptr;
+    reminderSwingDecisionCenter_.swingRecipient_ = new (std::nothrow)SwingCallbackRecipient();
+
+    // Act
+    reminderSwingDecisionCenter_.ResetSwingCallbackProxy();
+
+    // Assert
+    EXPECT_EQ(reminderSwingDecisionCenter_.swingCallback_, nullptr);
+    EXPECT_NE(reminderSwingDecisionCenter_.swingRecipient_, nullptr);
+}
+
+// 测试ResetSwingCallbackProxy方法 - swingRecipient_为nullptr
+HWTEST_F(ReminderSwingDecisionCenterTest, NullSwingRecipientResetSwingCallbackProxyTest, Function | SmallTest | Level1)
+{
+    // Arrange
+    reminderSwingDecisionCenter_.swingCallback_ = new (std::nothrow)MockSwingCallBackStub();
+    reminderSwingDecisionCenter_.swingRecipient_ = nullptr;
+
+    // Act
+    reminderSwingDecisionCenter_.ResetSwingCallbackProxy();
+
+    // Assert
+    EXPECT_EQ(reminderSwingDecisionCenter_.swingCallback_, nullptr);
+    EXPECT_EQ(reminderSwingDecisionCenter_.swingRecipient_, nullptr);
+}
+
+// 测试ResetSwingCallbackProxy方法 - 所有指针都为nullptr
+HWTEST_F(ReminderSwingDecisionCenterTest, AllNullResetSwingCallbackProxyTest, Function | SmallTest | Level1)
+{
+    // Arrange
+    reminderSwingDecisionCenter_.swingCallback_ = nullptr;
+    reminderSwingDecisionCenter_.swingRecipient_ = nullptr;
+
+    // Act
+    reminderSwingDecisionCenter_.ResetSwingCallbackProxy();
+
+    // Assert
+    EXPECT_EQ(reminderSwingDecisionCenter_.swingCallback_, nullptr);
+    EXPECT_EQ(reminderSwingDecisionCenter_.swingRecipient_, nullptr);
 }
 }   //namespace Notification
 }   //namespace OHOS

@@ -784,6 +784,41 @@ ErrCode AnsManagerProxy::SetBadgeNumberByBundle(const sptr<NotificationBundleOpt
     return result;
 }
 
+ErrCode AnsManagerProxy::SetBadgeNumberForDhByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Bundle is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteParcelable(bundleOption)) {
+        ANS_LOGE("Write bundle option failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    if (!data.WriteInt32(badgeNumber)) {
+        ANS_LOGE("Write badge number failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    ErrCode result = InnerTransact(NotificationInterfaceCode::SET_BADGE_NUMBER_FOR_DH_BY_BUNDLE, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("Transact error code is: %{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("Read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
 ErrCode AnsManagerProxy::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");

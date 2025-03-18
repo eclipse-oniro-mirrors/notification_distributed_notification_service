@@ -290,6 +290,11 @@ void DistributedExtensionService::HADotCallback(int32_t code, int32_t ErrCode, u
                                         .ClickByWatch()
                                         .SlotType(ErrCode);
             NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
+        } else if (branchId == BRANCH_4) {
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
+                                        .ReplyByWatch()
+                                        .SlotType(ErrCode);
+            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
         } else {
             bool isLiveView = false;
             if (ErrCode == NotificationConstant::SlotType::LIVE_VIEW) {

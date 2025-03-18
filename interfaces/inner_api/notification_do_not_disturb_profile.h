@@ -36,7 +36,7 @@ public:
      * @param trustlist Indicates the profile trustlist to add.
      */
     NotificationDoNotDisturbProfile(
-        int32_t id, const std::string &name, const std::vector<NotificationBundleOption> &trustList);
+        int64_t id, const std::string &name, const std::vector<NotificationBundleOption> &trustList);
 
     /**
      * Default deconstructor used to deconstruct.
@@ -48,7 +48,7 @@ public:
      *
      * @param profileId Indicates the profile id to add.
      */
-    void SetProfileId(int32_t id);
+    void SetProfileId(int64_t id);
 
     /**
      * Sets profile name for this NotificationDoNotDisturbProfile.
@@ -70,7 +70,7 @@ public:
      *
      *  @return the profile id of this NotificationDoNotDisturbProfile.
      */
-    int32_t GetProfileId() const;
+    int64_t GetProfileId() const;
 
     /**
      * Obtains the profile name of this NotificationDoNotDisturbProfile.
@@ -107,7 +107,7 @@ public:
     void GetProfileJson(nlohmann::json &jsonObject) const;
 
 private:
-    int32_t id_;
+    int64_t id_;
     std::string name_;
     std::vector<NotificationBundleOption> trustList_;
 };

@@ -97,14 +97,6 @@ bool NotificationConfigParse::GetConfigJson(const std::string &keyCheck, nlohman
     return ret;
 }
 
-void NotificationConfigParse::SetCurrentSlotReminder(
-    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder,
-    NotificationConstant::SlotType &slotType, std::shared_ptr<NotificationFlags> &reminderFlags)
-{
-    std::lock_guard<std::mutex> lock(slotReminderMutex_);
-    currentSlotReminder[slotType] = reminderFlags;
-}
-
 bool NotificationConfigParse::GetCurrentSlotReminder(
     std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
 {
@@ -143,8 +135,7 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
                 reminderFilterSlot[CFG_KEY_REMINDER_FLAGS].get<std::string>(), reminderFlags)) {
             continue;
         }
-        DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            SetCurrentSlotReminder(currentSlotReminder, slotType, reminderFlags);
+        currentSlotReminder[slotType] = reminderFlags;
     }
     if (currentSlotReminder.size() <= 0) {
         ANS_LOGE("GetCurrentSlotReminder failed as invalid currentSlotReminder size.");
@@ -153,13 +144,15 @@ bool NotificationConfigParse::GetCurrentSlotReminder(
     return true;
 }
 
-uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const
+uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType)
 {
     static std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> configSlotsReminder;
-    if (configSlotsReminder.empty()) {
-        GetCurrentSlotReminder(configSlotsReminder);
+    {
+        std::lock_guard<std::mutex> lock(slotReminderMutex_);
+        if (configSlotsReminder.empty()) {
+            GetCurrentSlotReminder(configSlotsReminder);
+        }
     }
-
     auto iter = configSlotsReminder.find(slotType);
     if (iter != configSlotsReminder.end()) {
         return iter->second->GetReminderFlags();

@@ -13,7 +13,14 @@
 
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/config/components/idl_tool/idl.gni")
-import("//build/ohos.gni")
+
+idl_gen_interface("swing_call_back_interface") {
+  sources = [ "ISwingCallBack.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
 
 idl_gen_interface("ans_dialog_callback_interface") {
   sources = [ "IAnsDialogCallback.idl" ]
@@ -54,6 +61,65 @@ config("ans_innerkits_config") {
   configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
 }
 
+config("swing_call_back_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+ohos_source_set("swing_call_back_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":swing_call_back_config" ]
+  output_values = get_target_outputs(":swing_call_back_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":swing_call_back_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("swing_call_back_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":swing_call_back_config" ]
+  output_values = get_target_outputs(":swing_call_back_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":swing_call_back_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
 ohos_shared_library("ans_innerkits") {
   sanitize = {
     integer_overflow = true
@@ -79,8 +145,7 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/listener/ans_subscriber_local_live_view_stub.cpp",
     "${core_path}/src/listener/ans_subscriber_proxy.cpp",
     "${core_path}/src/listener/ans_subscriber_stub.cpp",
-    "${core_path}/src/listener/swing_callback_proxy.cpp",
-    "${core_path}/src/listener/swing_callback_stub.cpp",
+    "${core_path}/src/listener/swing_callback_service.cpp",
     "${core_path}/src/manager/ans_manager_death_recipient.cpp",
     "${core_path}/src/manager/ans_manager_proxy.cpp",
     "${core_path}/src/manager/ans_manager_proxy_bundle.cpp",
@@ -179,6 +244,10 @@ ohos_shared_library("ans_innerkits") {
 
   if (notification_smart_reminder_supported) {
     defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+    deps += [
+      ":swing_call_back_proxy",
+      ":swing_call_back_stub",
+    ]
   }
 
   if (distributed_notification_service_feature_privileged_message) {

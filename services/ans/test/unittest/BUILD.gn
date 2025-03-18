@@ -47,7 +47,6 @@ ohos_unittest("ans_unit_test") {
     "notification_local_live_view_subscriber_manager_test.cpp",
     "notification_slot_filter_test.cpp",
     "permission_filter_test.cpp",
-    "reminder_swing_decision_center_test.cpp",
   ]
 
   deps = [
@@ -61,6 +60,11 @@ ohos_unittest("ans_unit_test") {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  if (notification_smart_reminder_supported) {
+    sources += [ "reminder_swing_decision_center_test.cpp" ]
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
   }
 
   external_deps = [
@@ -1301,10 +1305,46 @@ ohos_unittest("disturb_manager_unit_test") {
   part_name = "${component_name}"
 }
 
+ohos_unittest("advanced_datashare_observer_unit_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "${services_path}/ans/test/unittest/mock/include",
+  ]
+
+  sources = [
+    "advanced_datashare_observer_test.cpp",
+    "bundle_manager_helper_branch_test/mock_service_registry.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
+    "eventhandler:libeventhandler",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":access_token_helper_test",
+    ":advanced_datashare_observer_unit_test",
     ":advanced_notification_service_branch_test",
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",

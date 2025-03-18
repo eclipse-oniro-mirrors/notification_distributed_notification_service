@@ -47,6 +47,7 @@
 #include "want_agent_helper.h"
 #include "want_params.h"
 #include "bundle_manager_helper.h"
+#include "distributed_preferences.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 
@@ -979,6 +980,26 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_15300,
     int32_t userId = 4;
     std::vector<std::string> dumpInfo;
     ASSERT_EQ(advancedNotificationService_->ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(advancedNotificationService_->ShellDump("active", bundle, userId, 0, dumpInfo), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->ShellDump("recent", bundle, userId, 0, dumpInfo), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->ShellDump("setRecentCount 2", bundle, userId, 0, dumpInfo), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : ANS_ShellDump_0200
+ * @tc.name      : ANS_ShellDump
+ * @tc.desc      : Test ShellDump function when the result is ERR_ANS_INVALID_PARAM
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, ANS_ShellDump_0200, Function | SmallTest | Level1)
+{
+    std::string cmd = "CMD";
+    std::string bundle = "Bundle";
+    int32_t userId = 4;
+    std::vector<std::string> dumpInfo;
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ASSERT_EQ(ans.ShellDump(cmd, bundle, userId, 0, dumpInfo), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1736,13 +1757,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19800,
 {
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0200 test start";
 
-    sptr<NotificationRequest> req = new NotificationRequest();
+    sptr<NotificationRequest> req = new NotificationRequest(19800);
     std::vector<std::string> devices;
     devices.push_back("a");
     devices.push_back("b");
     devices.push_back("c");
-    req->GetNotificationDistributedOptions().SetDevicesSupportDisplay(devices);
-    ASSERT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), true);
+    req->SetDevicesSupportDisplay(devices);
+    ASSERT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), false);
 
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0200 test end";
 }
@@ -1764,6 +1785,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
     ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
 
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ans.OnDistributedPublish(deviceId, bundleName, request);
+
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
 }
 
@@ -1783,6 +1808,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
 
     ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request);
+
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ans.OnDistributedUpdate(deviceId, bundleName, request);
 
     GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test end";
 }
@@ -1804,6 +1833,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20100,
 
     ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnDistributedDelete(deviceId, bundleName, label, id);
+
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    ans.OnDistributedDelete(deviceId, bundleName, label, id);
 
     GTEST_LOG_(INFO) << "OnDistributedDelete_0100 test end";
 }
@@ -1841,6 +1874,27 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20300,
 
     GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0200 test end";
 }
+
+/**
+ * @tc.number    : CheckPublishWithoutApp_0300
+ * @tc.name      : CheckPublishWithoutApp_0300
+ * @tc.desc      : Test CheckPublishWithoutApp function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckPublishWithoutApp_0300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0300 test start";
+
+    int32_t userId = SYSTEM_APP_UID;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    DistributedPreferences::GetInstance()->SetSyncEnabledWithoutApp(userId, true);
+    ASSERT_EQ(advancedNotificationService_->CheckPublishWithoutApp(userId, request), false);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    request->SetWantAgent(agent);
+    ASSERT_EQ(advancedNotificationService_->CheckPublishWithoutApp(userId, request), false);
+    GTEST_LOG_(INFO) << "CheckPublishWithoutApp_0300 test end";
+}
 #endif
 
 /**
@@ -1854,11 +1908,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20400,
     GTEST_LOG_(INFO) << "TriggerRemoveWantAgent_0100 test start";
 
     sptr<NotificationRequest> request = new NotificationRequest();
-    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo;
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
-        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(paramsInfo);
-
-    request->SetRemovalWantAgent(wantAgent);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    request->SetRemovalWantAgent(agent);
     ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->TriggerRemoveWantAgent(request, 0, false);
 
@@ -1878,6 +1930,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20600,
     int32_t userId = -2;
     ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->OnResourceRemove(userId);
+
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    MockIsSystemApp(false);
+    ans.OnResourceRemove(userId);
+    MockIsSystemApp(true);
 
     GTEST_LOG_(INFO) << "OnResourceRemove_0100 test end";
 }
@@ -1914,6 +1972,19 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20900,
     std::string result = "result";
     ASSERT_NE(nullptr, advancedNotificationService_);
     advancedNotificationService_->GetDumpInfo(args, result);
+
+    std::vector<std::u16string> args2;
+    args2.push_back(Str8ToStr16("-r"));
+        auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto notification = new (std::nothrow) Notification(request);
+    auto recentNotification = std::make_shared<AdvancedNotificationService::RecentNotification>();
+    recentNotification->isActive = true;
+    recentNotification->notification = notification;
+    advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
+    advancedNotificationService_->GetDumpInfo(args2, result);
 
     GTEST_LOG_(INFO) << "GetDumpInfo_0100 test end";
 }

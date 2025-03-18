@@ -358,6 +358,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleSetBadgeNumberByBundle(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::SET_BADGE_NUMBER_FOR_DH_BY_BUNDLE): {
+            result = HandleSetBadgeNumberForDhByBundle(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::GET_ALL_NOTIFICATION_ENABLE_STATUS): {
             result = HandleGetAllNotificationEnableStatus(data, reply);
             break;
@@ -2123,6 +2127,28 @@ ErrCode AnsManagerStub::HandleSetBadgeNumberByBundle(MessageParcel &data, Messag
     }
 
     ErrCode result = SetBadgeNumberByBundle(bundleOption, badgeNumber);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("Write result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    return result;
+}
+
+ErrCode AnsManagerStub::HandleSetBadgeNumberForDhByBundle(MessageParcel &data, MessageParcel &reply)
+{
+    ANS_LOGD("Called.");
+    sptr<NotificationBundleOption> bundleOption = data.ReadParcelable<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Read bundle option failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+    int32_t badgeNumber = 0;
+    if (!data.ReadInt32(badgeNumber)) {
+        ANS_LOGE("Read badge number failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    ErrCode result = SetBadgeNumberForDhByBundle(bundleOption, badgeNumber);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("Write result failed.");
         return ERR_ANS_PARCELABLE_FAILED;
