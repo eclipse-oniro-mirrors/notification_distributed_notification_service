@@ -62,7 +62,6 @@ private:
     ~DistributedExtensionService();
     void SetMaxContentLength(nlohmann::json &configJson);
     void SetOperationReplyTimeout(nlohmann::json &configJson);
-    std::string AnonymousProcessing(std::string data);
 
     std::mutex mapLock_;
     std::atomic<bool> dansRunning_ = false;

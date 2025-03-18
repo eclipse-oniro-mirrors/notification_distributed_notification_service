@@ -254,8 +254,8 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
         std::lock_guard<std::mutex> lock(mapLock_);
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
-            " ; deviceId: " + AnonymousProcessing(deviceInfo.deviceId) + " ; networkId: " +
-            AnonymousProcessing(deviceInfo.networkId);
+            " ; deviceId: " + StringAnonymous(deviceInfo.deviceId) + " ; networkId: " +
+            StringAnonymous(deviceInfo.networkId);
         HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_1, reason);
         DistributedDeviceInfo device = DistributedDeviceInfo(deviceInfo.deviceId, deviceInfo.deviceName,
             deviceInfo.networkId, deviceInfo.deviceTypeId);
@@ -345,7 +345,7 @@ void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
-                             " ; deviceId: " + AnonymousProcessing(deviceInfo.deviceId);
+                             " ; deviceId: " + StringAnonymous(deviceInfo.deviceId);
         HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_2, reason);
         deviceMap_.erase(deviceInfo.deviceId);
     });
@@ -404,15 +404,6 @@ void DistributedExtensionService::SetMaxContentLength(nlohmann::json &configJson
         deviceConfig_.maxContentLength = contentJson.get<int32_t>();
         ANS_LOGI("Dans initConfig content length %{public}d.", deviceConfig_.maxContentLength);
     }
-}
-
-std::string DistributedExtensionService::AnonymousProcessing(std::string data)
-{
-    int32_t length = data.length();
-    if (length >= MAX_DATA_LENGTH) {
-        data.replace(START_ANONYMOUS_INDEX, length - 1, "**");
-    }
-    return data;
 }
 }
 }
