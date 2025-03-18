@@ -273,7 +273,7 @@ void NotificationPreferencesInfo::SetDoNotDisturbDate(const int32_t &userId,
     doNotDisturbDate_.insert_or_assign(userId, doNotDisturbDate);
 }
 
-std::string NotificationPreferencesInfo::MakeDoNotDisturbProfileKey(int32_t userId, int32_t profileId)
+std::string NotificationPreferencesInfo::MakeDoNotDisturbProfileKey(int32_t userId, int64_t profileId)
 {
     return std::to_string(userId).append(KEY_UNDER_LINE).append(std::to_string(profileId));
 }
@@ -307,7 +307,7 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbProfiles(
 }
 
 bool NotificationPreferencesInfo::GetDoNotDisturbProfiles(
-    int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
+    int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     if (profile == nullptr) {
         ANS_LOGE("The profile is nullptr.");

@@ -47,6 +47,11 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
+    triggerHandler_ = (TRIGGER_PUSH_WANT_AGENT)dlsym(ExtensionHandle_, "TriggerPushWantAgent");
+    if (triggerHandler_ == nullptr) {
+        ANS_LOGE("distributed liveview all trigger failed, error: %{public}s", dlerror());
+        return;
+    }
     ANS_LOGI("distributed liveview all scenarios extension wrapper init success");
 }
 
@@ -76,5 +81,15 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewDecodeCon
         return 0;
     }
     return updateLiveviewDecodeContent_(request, buffer);
+}
+
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
+    const sptr<NotificationRequest> &request, int32_t actionType, const AAFwk::WantParams extraInfo)
+{
+    if (triggerHandler_ == nullptr) {
+        ANS_LOGE("distributed TriggerPushWantAgent wrapper symbol failed");
+        return 0;
+    }
+    return triggerHandler_(request, actionType, extraInfo);
 }
 }

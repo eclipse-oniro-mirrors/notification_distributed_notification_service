@@ -32,6 +32,8 @@ namespace OHOS {
 namespace Notification {
 
 const int ANS_CLONE_ERROR = -1;
+constexpr uint64_t NOTIFICATION_FDSAN_TAG = 0xD001203;
+constexpr uint64_t COMMON_FDSAN_TAG = 0;
 constexpr const char *CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
 constexpr const char *CLONE_ITEM_DISTURB = "notificationDisturb";
 constexpr const char *BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
@@ -84,20 +86,20 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
         return ANS_CLONE_ERROR;
     }
 
-    UniqueFd fd = UniqueFd(open(BACKUP_CONFIG_FILE_PATH, O_RDONLY));
-    if (fd.Get() < 0) {
+    FILE *fdfile = fopen(BACKUP_CONFIG_FILE_PATH, "r");
+    if (fdfile == nullptr) {
         ANS_LOGW("Notification open file failed.");
         return ANS_CLONE_ERROR;
     }
-
+    auto fd = fileno(fdfile);
     if (reply.WriteFileDescriptor(fd) == false) {
-        close(fd.Release());
+        (void)fclose(fdfile);
         ANS_LOGW("Notification write file descriptor failed!");
         return ANS_CLONE_ERROR;
     }
 
-    ANS_LOGI("Notification OnBackup end fd: %{public}d.", fd.Get());
-    close(fd.Release());
+    ANS_LOGI("Notification OnBackup end fd: %{public}d.", fd);
+    (void)fclose(fdfile);
     return ERR_OK;
 }
 
@@ -155,12 +157,13 @@ ErrCode NotificationCloneManager::LoadConfig(UniqueFd &fd, std::string& config)
         ANS_LOGW("LoadConfig open file fail.");
         return ANS_CLONE_ERROR;
     }
+    fdsan_exchange_owner_tag(destFd, COMMON_FDSAN_TAG, NOTIFICATION_FDSAN_TAG);
     if (sendfile(destFd, fd.Get(), nullptr, statBuf.st_size) < 0) {
         ANS_LOGW("LoadConfig fd sendfile(size: %{public}d) to destFd fail.", static_cast<int>(statBuf.st_size));
-        close(destFd);
+        fdsan_close_with_tag(destFd, NOTIFICATION_FDSAN_TAG);
         return ANS_CLONE_ERROR;
     }
-    close(destFd);
+    fdsan_close_with_tag(destFd, NOTIFICATION_FDSAN_TAG);
     std::ifstream fs(BACKUP_CONFIG_FILE_PATH);
     if (!fs.is_open()) {
         ANS_LOGW("Loading config file%{public}s is_open() failed!", BACKUP_CONFIG_FILE_PATH);

@@ -44,12 +44,9 @@ public:
     bool GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const;
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
-    void SetCurrentSlotReminder(
-        std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder,
-        NotificationConstant::SlotType &slotType, std::shared_ptr<NotificationFlags> &reminderFlags);
     void GetReportTrustListConfig();
     bool IsReportTrustList(const std::string& bundleName) const;
-    uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType) const;
+    uint32_t GetConfigSlotReminderModeByType(NotificationConstant::SlotType slotType);
     std::shared_ptr<NotificationAppPrivileges> GetAppPrivileges(const std::string &bundleName) const;
     bool IsLiveViewEnabled(const std::string bundleName) const;
     bool IsBannerEnabled(const std::string bundleName) const;

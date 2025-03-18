@@ -808,6 +808,16 @@ public:
     virtual ErrCode SetBadgeNumberByBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) = 0;
 
     /**
+     * @brief Set badge number for dh by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    virtual ErrCode SetBadgeNumberForDhByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) = 0;
+
+    /**
      * @brief Obtains the number of slotFlags.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.

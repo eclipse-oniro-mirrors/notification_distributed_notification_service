@@ -28,7 +28,7 @@ namespace OHOS {
 namespace Notification {
 ErrCode DisturbManager::HandleGetDoNotDisturbProfile(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t profileId = data.ReadInt32();
+    int64_t profileId = data.ReadInt64();
     sptr<NotificationDoNotDisturbProfile> profile = nullptr;
     ErrCode result = GetDoNotDisturbProfileInner(profileId, profile);
     if (!reply.WriteInt32(result)) {
@@ -45,7 +45,7 @@ ErrCode DisturbManager::HandleGetDoNotDisturbProfile(MessageParcel &data, Messag
     return ERR_OK;
 }
 
-ErrCode DisturbManager::GetDoNotDisturbProfileInner(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+ErrCode DisturbManager::GetDoNotDisturbProfileInner(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
@@ -56,7 +56,7 @@ ErrCode DisturbManager::GetDoNotDisturbProfileInner(int32_t id, sptr<Notificatio
     profile = new (std::nothrow) NotificationDoNotDisturbProfile();
     ErrCode result = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(id, userId, profile);
     if (result != ERR_OK) {
-        ANS_LOGE("profile failed id: %{public}d, userid: %{public}d", id, userId);
+        ANS_LOGE("profile failed id: %{public}s, userid: %{public}d", std::to_string(id).c_str(), userId);
     }
     return result;
 }

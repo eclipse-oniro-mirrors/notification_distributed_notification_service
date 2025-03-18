@@ -33,10 +33,14 @@ public:
     ErrCode UpdateLiveviewEncodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer);
     typedef ErrCode (*UPDATE_LIVEVIEW_DECODE_CONTENT)(const sptr<NotificationRequest> &request,
         std::vector<uint8_t> &buffer);
+    typedef ErrCode (*TRIGGER_PUSH_WANT_AGENT)(const sptr<NotificationRequest> &request,
+        int32_t actionType, const AAFwk::WantParams extraInfo);
     ErrCode UpdateLiveviewDecodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer);
-
+    ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
+        const AAFwk::WantParams extraInfo);
 private:
     void* ExtensionHandle_ = nullptr;
+    TRIGGER_PUSH_WANT_AGENT triggerHandler_ = nullptr;
     UPDATE_LIVEVIEW_ENCODE_CONTENT updateLiveviewEncodeContent_ = nullptr;
     UPDATE_LIVEVIEW_DECODE_CONTENT updateLiveviewDecodeContent_ = nullptr;
 };

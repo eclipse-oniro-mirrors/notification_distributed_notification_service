@@ -83,6 +83,11 @@ void NotificationLocalLiveViewSubscriberManagerTest::SetUp()
 void NotificationLocalLiveViewSubscriberManagerTest::TearDown()
 {
     notificationLocalLiveViewSubscriberManager_->RemoveLocalLiveViewSubscriber(subscriber_, nullptr);
+    if (notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ == nullptr) {
+        notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ =
+            std::make_shared<ffrt::queue>("NotificationLocalLiveViewMgr");
+    }
+    notificationLocalLiveViewSubscriberManager_->buttonRecordList_.clear();
 }
 
 /**
@@ -125,6 +130,104 @@ HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
     sptr<NotificationRequest> request = new NotificationRequest();
     sptr<Notification> notification = new Notification(request);
     notificationLocalLiveViewSubscriberManager_->NotifyTriggerResponse(notification, buttonOption);
+}
+
+/**
+ * @tc.number    : NotificationLocalLiveViewSubscriberManagerTest_004
+ * @tc.name      : ANS_AddSubscriber_004
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
+    NotificationLocalLiveViewSubscriberManagerTest_004, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    auto res = notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(nullptr, info);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : NotificationLocalLiveViewSubscriberManagerTest_005
+ * @tc.name      : ANS_AddSubscriber_005
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
+    NotificationLocalLiveViewSubscriberManagerTest_005, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ = nullptr;
+    auto res = notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info);
+    
+    ASSERT_EQ(res, ERR_ANS_TASK_ERR);
+}
+
+/**
+ * @tc.number    : RemoveLocalLiveViewSubscriberTest_001
+ * @tc.name      : RemoveLocalLiveViewSubscriberTest_001
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
+    RemoveLocalLiveViewSubscriberTest_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    auto res = notificationLocalLiveViewSubscriberManager_->RemoveLocalLiveViewSubscriber(nullptr, info);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : RemoveLocalLiveViewSubscriberTest_002
+ * @tc.name      : RemoveLocalLiveViewSubscriberTest_002
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest,
+    RemoveLocalLiveViewSubscriberTest_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ = nullptr;
+    auto res = notificationLocalLiveViewSubscriberManager_->RemoveLocalLiveViewSubscriber(subscriber_, info);
+    ASSERT_EQ(res, ERR_ANS_TASK_ERR);
+}
+
+/**
+ * @tc.number    : OnRemoteDied_001
+ * @tc.name      : OnRemoteDied_001
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest, OnRemoteDied_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
+
+    auto size = notificationLocalLiveViewSubscriberManager_->buttonRecordList_.size();
+    ASSERT_EQ(size, 1);
+
+    wptr<IRemoteObject> obj = subscriber_->AsObject();
+    notificationLocalLiveViewSubscriberManager_->OnRemoteDied(obj);
+
+    size = notificationLocalLiveViewSubscriberManager_->buttonRecordList_.size();
+    ASSERT_EQ(size, 0);
+}
+
+/**
+ * @tc.number    : OnRemoteDied_002
+ * @tc.name      : OnRemoteDied_002
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest, OnRemoteDied_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    ASSERT_EQ(notificationLocalLiveViewSubscriberManager_->AddLocalLiveViewSubscriber(subscriber_, info), (int)ERR_OK);
+    auto size = notificationLocalLiveViewSubscriberManager_->buttonRecordList_.size();
+    ASSERT_EQ(size, 1);
+
+    notificationLocalLiveViewSubscriberManager_->notificationButtonQueue_ = nullptr;
+    wptr<IRemoteObject> obj = subscriber_->AsObject();
+    notificationLocalLiveViewSubscriberManager_->OnRemoteDied(obj);
+    size = notificationLocalLiveViewSubscriberManager_->buttonRecordList_.size();
+    ASSERT_EQ(size, 1);
+}
+
+/**
+ * @tc.number    : IsSystemUser_001
+ * @tc.name      : IsSystemUser_001
+ */
+HWTEST_F(NotificationLocalLiveViewSubscriberManagerTest, IsSystemUser_001, Function | SmallTest | Level1)
+{
+    auto res = notificationLocalLiveViewSubscriberManager_->IsSystemUser(100);
+    ASSERT_FALSE(res);
 }
 }  // namespace Notification
 }  // namespace OHOS

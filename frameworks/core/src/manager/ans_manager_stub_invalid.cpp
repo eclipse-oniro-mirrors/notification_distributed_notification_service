@@ -554,6 +554,13 @@ ErrCode AnsManagerStub::SetBadgeNumberByBundle(const sptr<NotificationBundleOpti
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::SetBadgeNumberForDhByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
+{
+    ANS_LOGD("Called.");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGE("AnsManagerStub::GetAllNotificationEnabledBundles called!");

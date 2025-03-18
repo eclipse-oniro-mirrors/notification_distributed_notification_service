@@ -34,6 +34,7 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
 #include "notification_analytics_util.h"
 #include "liveview_all_scenarios_extension_wrapper.h"

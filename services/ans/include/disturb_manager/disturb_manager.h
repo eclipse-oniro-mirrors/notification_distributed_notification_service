@@ -66,7 +66,7 @@ private:
 
     ErrCode SetDoNotDisturbDateByUserInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUserInner(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
-    ErrCode GetDoNotDisturbProfileInner(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+    ErrCode GetDoNotDisturbProfileInner(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
     ErrCode DoesSupportDoNotDisturbModeInner(bool &doesSupport);
 private:
     std::map<uint32_t, ExecutionType> codeAndExecuteFuncMap_;

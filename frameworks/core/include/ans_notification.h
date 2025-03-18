@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "notification_local_live_view_subscriber.h"
 #include "want_params.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-#include "swing_callback_stub.h"
+#include "swing_callback_service.h"
 #endif
 
 namespace OHOS {
@@ -1019,6 +1019,15 @@ public:
     ErrCode SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
 
     /**
+     * @brief Set badge number for dh by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    ErrCode SetBadgeNumberForDhByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
+
+    /**
      * @brief Obtains allow notification application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.
@@ -1316,7 +1325,7 @@ private:
     std::mutex subscriberMutex_;
     std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    sptr<SwingCallBackStub> swingCallBackStub_;
+    sptr<SwingCallBackService> swingCallBackService_;
 #endif
 };
 }  // namespace Notification

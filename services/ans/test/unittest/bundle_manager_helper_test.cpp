@@ -158,5 +158,58 @@ HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00101, Level
     ASSERT_EQ(result, true);
 }
 #endif
+
+/**
+ * @tc.number    : OnRemoteDied_00100
+ * @tc.name      : OnRemoteDied_00100
+ */
+HWTEST_F(BundleManagerHelperTest, OnRemoteDied_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    bundleManagerHelper.OnRemoteDied(nullptr);
+
+    ASSERT_EQ(bundleManagerHelper.bundleMgr_, nullptr);
+}
+
+/**
+ * @tc.number    : GetBundleInfo_00100
+ * @tc.name      : GetBundleInfo_00100
+ */
+HWTEST_F(BundleManagerHelperTest, GetBundleInfo_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    AppExecFwk::BundleInfo info;
+
+    // need mock
+    auto res = bundleManagerHelper.GetBundleInfo("test",
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, 100, info);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.number    : GetAppIndexByUid_00100
+ * @tc.name      : GetAppIndexByUid_00100
+ */
+HWTEST_F(BundleManagerHelperTest, GetAppIndexByUid_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    AppExecFwk::BundleInfo info;
+
+    // need mock
+    auto res = bundleManagerHelper.GetAppIndexByUid(100);
+    ASSERT_NE(res, 9999);
+}
+
+/**
+ * @tc.number    : GetDefaultUidByBundleName_00100
+ * @tc.name      : GetDefaultUidByBundleName_00100
+ */
+HWTEST_F(BundleManagerHelperTest, GetDefaultUidByBundleName_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    // need mock
+    auto res = bundleManagerHelper.GetDefaultUidByBundleName("test", 100, 0);
+    ASSERT_NE(res, 9999);
+}
 }  // namespace Notification
 }  // namespace OHOS
