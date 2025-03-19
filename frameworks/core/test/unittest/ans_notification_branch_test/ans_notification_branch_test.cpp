@@ -572,13 +572,14 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const std::string deveiceId = std::string())
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag)
+        const uint32_t controlFlag, const std::string deveiceId = std::string())
     {
         return ERR_ANS_INVALID_PARAM;
     }

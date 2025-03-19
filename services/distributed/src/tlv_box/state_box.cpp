@@ -38,6 +38,14 @@ bool NotifticationStateBox::SetDeviceType(const std::string& deviceType)
     return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_TYPE, deviceType));
 }
 
+bool NotifticationStateBox::SetDeviceId(const std::string& deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
 bool NotifticationStateBox::SetState(int32_t state)
 {
     if (box_ == nullptr) {
@@ -52,6 +60,14 @@ bool NotifticationStateBox::GetDeviceType(std::string& deviceType)
         return false;
     }
     return box_->GetStringValue(LOCAL_DEVICE_TYPE, deviceType);
+}
+
+bool NotifticationStateBox::GetDeviceId(std::string& deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
 }
 
 bool NotifticationStateBox::GetState(int32_t& state)
