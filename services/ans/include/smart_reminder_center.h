@@ -68,10 +68,6 @@ private:
         const sptr<NotificationRequest> &request,
         set<string> &validDevices,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
-    bool HandleReminderFilter(
-        const string &deviceType,
-        const sptr<NotificationRequest> &request,
-        const bitset<DistributedDeviceStatus::STATUS_SIZE> bitStatus) const;
     bool HandleAffectedReminder(
         const string &deviceType,
         const shared_ptr<ReminderAffected> &reminderAffected,
