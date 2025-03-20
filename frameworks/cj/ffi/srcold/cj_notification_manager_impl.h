@@ -16,31 +16,16 @@
 #ifndef NOTIFICATION_MANAGER_IMPL_H
 #define NOTIFICATION_MANAGER_IMPL_H
 
-#include "notification_utils.h"
+#include "cj_notification_utils.h"
 #include "ability_runtime/cj_ability_context.h"
 namespace OHOS {
 namespace CJSystemapi {
-class NotificationManagerImplV2 {
+class NotificationManagerImpl {
 public:
-    static int Publish(CNotificationRequestV2 cjRequest);
+    static int Publish(CNotificationRequest cjRequest);
     static int Cancel(int32_t id, const char* label);
     static int CancelAll();
     static int AddSlot(int32_t type);
-    static CNotificationSlotV2 GetSlot(int32_t type, int32_t &errCode);
-    static CArrayNotificationSlotsV2 GetSlots(int32_t &errCode);
-    static int RemoveSlot(int32_t type);
-    static int RemoveAllSlots();
-    static RetDataUI32 GetActiveNotificationCount();
-    static CArrayNotificationRequestV2 GetActiveNotifications(int32_t &errCode);
-    static int CancelGroup(const char* cGroupName);
-    static RetDataBool IsSupportTemplate(const char* cTemplateName);
-    static int SetNotificationEnable(CNotificationBundleOptionV2 option, bool enable);
-    static int DisplayBadge(CNotificationBundleOptionV2 option, bool enable);
-    static RetDataBool IsBadgeDisplayed(CNotificationBundleOptionV2 option);
-    static int SetSlotFlagsByBundle(CNotificationBundleOptionV2 option, int32_t slotFlags);
-    static RetDataUI32 GetSlotFlagsByBundle(CNotificationBundleOptionV2 option);
-    static RetDataUI32 GetSlotNumByBundle(CNotificationBundleOptionV2 option);
-    static int RemoveGroupByBundle(CNotificationBundleOptionV2 option, const char* cGroupName);
     static RetDataBool IsNotificationEnabled();
     static int SetBadgeNumber(int32_t badgeNumber);
     static int RequestEnableNotification();
