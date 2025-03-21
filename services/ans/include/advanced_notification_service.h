@@ -1475,6 +1475,7 @@ private:
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);
+    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

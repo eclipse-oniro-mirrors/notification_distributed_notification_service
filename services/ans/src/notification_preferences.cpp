@@ -1480,7 +1480,7 @@ void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationP
 ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32_t type)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-   
+
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetHashCodeRule(uid, type);
@@ -1495,6 +1495,24 @@ uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
     result = preferncesDB_->GetHashCodeRule(uid);
     ANS_LOGI("GetHashCodeRule uid = %{public}d result = %{public}d", uid, result);
     return result;
+}
+
+bool NotificationPreferences::GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (preferncesDB_ == nullptr) {
+        return true;
+    }
+    return preferncesDB_->GetBundleRemoveFlag(bundleOption, slotType);
+}
+
+bool NotificationPreferences::SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->SetBundleRemoveFlag(bundleOption, slotType);
 }
 }  // namespace Notification
 }  // namespace OHOS

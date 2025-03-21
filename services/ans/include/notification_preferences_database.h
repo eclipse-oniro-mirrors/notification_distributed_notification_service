@@ -309,6 +309,12 @@ public:
      */
     uint32_t GetHashCodeRule(const int32_t uid);
 
+    bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+
+    bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+
 private:
     bool CheckRdbStore();
 
