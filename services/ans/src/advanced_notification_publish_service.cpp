@@ -2345,6 +2345,33 @@ void AdvancedNotificationService::UpdateUnifiedGroupInfo(const std::string &key,
     });
 }
 
+void AdvancedNotificationService::ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid)
+{
+    if (request == nullptr || callingUid != AVSEESAION_PID) {
+        return;
+    }
+    if (request->GetSlotType() != NotificationConstant::SlotType::LIVE_VIEW) {
+        return;
+    }
+
+    int32_t uid = request->GetOwnerUid();
+    std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(uid);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Notification get bundle failed %{public}d", uid);
+        return;
+    }
+
+    if (NotificationPreferences::GetInstance()->GetBundleRemoveFlag(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW)) {
+        return;
+    }
+    NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW);
+    NotificationPreferences::GetInstance()->SetBundleRemoveFlag(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW);
+}
+
 ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -2446,6 +2473,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             return;
         }
 
+        ClearSlotTypeData(record->request, ipcUid);
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);

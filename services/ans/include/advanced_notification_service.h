@@ -1464,6 +1464,7 @@ private:
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
+    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
