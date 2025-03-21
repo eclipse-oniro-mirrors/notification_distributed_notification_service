@@ -2204,6 +2204,10 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
 {
     ANS_LOGD("start.");
     if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            return ERR_OK;  
+        }
         return ERR_ANS_PUSH_CHECK_UNREGISTERED;
     }
     sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
