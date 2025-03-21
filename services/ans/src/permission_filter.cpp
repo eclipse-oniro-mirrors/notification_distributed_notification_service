@@ -52,10 +52,16 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
         if (slot != nullptr) {
             isForceControl = slot->GetForceControl();
         } else {
-            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED).Message("Slot type not exist.");
+            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED).Message("Notification slot not enable.");
             NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_ENABLED;
-            ANS_LOGE("Type[%{public}d] slot does not exist", slotType);
+            ANS_LOGE("Notification slot not enable.");
+        }
+    } else {
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST) {
+            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST).Message("Slot type not exist.");
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            ANS_LOGE("Slot type not exist.");
         }
     }
 
