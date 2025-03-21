@@ -232,6 +232,10 @@ constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
 const static std::string KEY_CLONE_LABEL = "label_ans_clone_";
 
+const static std::string KEY_REMOVE_SLOT_FLAG = "label_ans_remove_";
+
+const static std::string KEY_REMOVED_FLAG = "1";
+
 /**
  * Indicates hashCode rule.
  */
@@ -2625,6 +2629,69 @@ uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
         }
     });
     return result;
+}
+
+bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Current bundle option is null");
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
+        KEY_UNDER_LINE + std::to_string(slotType);
+    int32_t result = rdbDataManager_->InsertData(key, KEY_REMOVED_FLAG, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Current bundle option is null");
+        return true;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGW("Current user acquisition failed");
+        return true;
+    }
+
+    std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
+        KEY_UNDER_LINE + std::to_string(slotType);
+    bool existFlag = true;
+    std::string result;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                existFlag = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = value;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
+    return existFlag;
 }
 
 std::string NotificationPreferencesDatabase::GenerateHashCodeGenerate(const int32_t uid)
