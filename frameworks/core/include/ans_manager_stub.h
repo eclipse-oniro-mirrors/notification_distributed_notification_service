@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,8 @@
 #include <map>
 
 #include "ans_manager_interface.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "distributed_notification_service_ipc_interface_code.h"
-#include "ians_subscriber_local_live_view.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -463,7 +463,7 @@ public:
     virtual ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
 
     virtual ErrCode SubscribeLocalLiveView(
-        const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2749,7 +2749,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 }
 
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
-    const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
     const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
