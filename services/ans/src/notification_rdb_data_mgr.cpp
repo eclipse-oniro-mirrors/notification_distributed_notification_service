@@ -178,6 +178,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
 {
     ANS_LOGD("InsertData start");
     {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_0);
         std::string tableName;
         int32_t ret = GetUserTableName(userId, tableName);
         if (ret != NativeRdb::E_OK) {
@@ -200,6 +201,8 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
         }
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
+            message.ErrorCode(ret).Message("Insert operation failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return NativeRdb::E_ERROR;
         }
     }
@@ -209,6 +212,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
 int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vector<uint8_t> &value,
     const int32_t &userId)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_8);
     std::string tableName;
     int32_t ret = GetUserTableName(userId, tableName);
     if (ret != NativeRdb::E_OK) {
@@ -231,6 +235,8 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
         }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("Insert operation failed, result: %{public}d, key=%{public}s.", ret, key.c_str());
+        message.ErrorCode(ret).Message("Insert operation failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;
@@ -242,6 +248,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
     ANS_LOGD("InsertBatchData start");
     {
         std::string tableName;
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_7);
         int32_t ret = GetUserTableName(userId, tableName);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Get user table name failed.");
@@ -266,6 +273,8 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
         }
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Insert batch operation failed, result: %{public}d.", ret);
+            message.ErrorCode(ret).Message("Insert batch operation failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return NativeRdb::E_ERROR;
         }
     }
@@ -296,6 +305,7 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &u
 int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::string key, int32_t &rowId)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_6);
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     int32_t ret = rdbStore_->Delete(rowId, absRdbPredicates);
     if (ret == NativeRdb::E_SQLITE_CORRUPT) {
@@ -304,6 +314,8 @@ int32_t NotificationDataMgr::DeleteData(const std::string tableName, const std::
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("Delete operation failed from %{public}s, result: %{public}d, key=%{public}s.",
             tableName.c_str(), ret, key.c_str());
+        message.ErrorCode(ret).Message("Delete operation failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;
@@ -370,6 +382,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
 int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::string key, std::string &value)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_2);
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
@@ -384,6 +397,11 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
+            if (ret != NativeRdb::E_ROW_OUT_RANGE) {
+                ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+                message.ErrorCode(ret).Message("GoToFirstRow failed.");
+                NotificationAnalyticsUtil::ReportModifyEvent(message);
+            }
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
@@ -392,6 +410,8 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
+        message.ErrorCode(ret).Message("GetString value failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
@@ -419,6 +439,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8
 int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::string key, std::vector<uint8_t> &value)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_3);
     absRdbPredicates.EqualTo(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
@@ -433,10 +454,17 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
+        if (ret != NativeRdb::E_ROW_OUT_RANGE) {
+            ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+            message.ErrorCode(ret).Message("GoToFirstRow failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetBlob(NOTIFICATION_VALUE_INDEX, value);
     if (ret != NativeRdb::E_OK) {
+        message.ErrorCode(ret).Message("GetString value failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
         return NativeRdb::E_ERROR;
     }
@@ -472,6 +500,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     const std::string tableName, const std::string key, std::unordered_map<std::string, std::string> &values)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_5);
     absRdbPredicates.BeginsWith(NOTIFICATION_KEY, key);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
@@ -486,6 +515,11 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     if (ret != NativeRdb::E_OK) {
         ANS_LOGD("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
+        if (ret != NativeRdb::E_ROW_OUT_RANGE) {
+            ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+            message.ErrorCode(ret).Message("GoToFirstRow failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -494,6 +528,8 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
         ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Failed to GetString key from %{public}s table.", tableName.c_str());
+            message.ErrorCode(ret).Message("GetString key failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return NativeRdb::E_ERROR;
         }
 
@@ -501,6 +537,8 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
         ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("GetString value failed from %{public}s table", tableName.c_str());
+            message.ErrorCode(ret).Message("GetString value failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return NativeRdb::E_ERROR;
         }
 
@@ -537,6 +575,7 @@ int32_t NotificationDataMgr::QueryAllData(
     const std::string tableName, std::unordered_map<std::string, std::string> &datas)
 {
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_4);
     auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
     if (absSharedResultSet == nullptr) {
         ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
@@ -549,6 +588,11 @@ int32_t NotificationDataMgr::QueryAllData(
     }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!", tableName.c_str());
+        if (ret != NativeRdb::E_ROW_OUT_RANGE) {
+            ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+            message.ErrorCode(ret).Message("GoToFirstRow failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -557,6 +601,8 @@ int32_t NotificationDataMgr::QueryAllData(
         ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("GetString key failed from %{public}s table.", tableName.c_str());
+            message.ErrorCode(ret).Message("GetString key failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return NativeRdb::E_ERROR;
         }
 
@@ -564,6 +610,8 @@ int32_t NotificationDataMgr::QueryAllData(
         ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
+            message.ErrorCode(ret).Message("GetString value failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return NativeRdb::E_ERROR;
         }
 
@@ -600,6 +648,7 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
 
 int32_t NotificationDataMgr::GetUserTableName(const int32_t &userId, std::string &tableName)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_1);
     if (!OsAccountManagerHelper::IsSystemAccount(userId)) {
         tableName = notificationRdbConfig_.tableName;
         return NativeRdb::E_OK;
@@ -621,6 +670,8 @@ int32_t NotificationDataMgr::GetUserTableName(const int32_t &userId, std::string
             int32_t ret = rdbStore_->ExecuteSql(createTableSql);
             if (ret != NativeRdb::E_OK) {
                 ANS_LOGW("createTable %{public}s failed, code: %{public}d", tableName.c_str(), ret);
+                message.ErrorCode(ret).Message("create table failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
                 return ret;
             }
             createdTables_.insert(tableName);

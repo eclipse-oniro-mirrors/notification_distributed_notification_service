@@ -122,9 +122,21 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     }));
     notificationSubQueue_->wait(handler);
 
-    ANS_LOGI("%{public}s_, user: %{public}s, Add subscriber result: %{public}d", GetClientBundleName().c_str(),
-        std::to_string(subInfo->GetAppUserId()).c_str(), result);
-    message.ErrorCode(result);
+    std::string bundleNames;
+    for (auto bundleName : subInfo->GetAppNames()) {
+        bundleNames += bundleName;
+        bundleNames += " ";
+    }
+    std::string slotTypes;
+    for (auto slotType : subInfo->GetSlotTypes()) {
+        slotTypes += std::to_string(slotType);
+        slotTypes += " ";
+    }
+    ANS_LOGI("%{public}s_, user: %{public}s, bundleNames: %{public}s, deviceType: %{public}s, slotTypes: %{public}s, "
+        "Add subscriber result: %{public}d", GetClientBundleName().c_str(),
+        std::to_string(subInfo->GetAppUserId()).c_str(), bundleNames.c_str(), subInfo->GetDeviceType().c_str(),
+        slotTypes.c_str(), result);
+    message.ErrorCode(result).Append(bundleNames + "," + subInfo->GetDeviceType() + "," + slotTypes);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }

@@ -344,6 +344,9 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const sptr<NotificationReque
     ansData["ControlFlags"] = SetControlFlags(tempFlags, controlFlags);
     ansData["class"] = request->GetClassification();
     ansData["deviceStatus"] = GetDeviceStatus(request);
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+    std::chrono::system_clock::now().time_since_epoch()).count();
+    ansData["time"] = now;
     ANS_LOGI("Ansdata built, the controlFlags is %{public}d, deviceStatus is %{public}s",
         controlFlags, GetDeviceStatus(request).c_str());
     return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
