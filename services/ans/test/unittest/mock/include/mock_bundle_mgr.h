@@ -35,6 +35,13 @@ public:
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
 };
 }  // namespace AppExecFwk
+
+namespace Notification {
+
+void MockIsNonBundleName(bool isNonBundleName);
+
+void MockDistributedNotificationEnabled(bool isEnable);
+}  // namespace Notification
 }  // namespace OHOS
 
 #endif  // MOCK_OHOS_EDM_MOCK_BUNDLE_MANAGER_H
