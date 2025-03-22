@@ -236,6 +236,8 @@ const static std::string KEY_REMOVE_SLOT_FLAG = "label_ans_remove_";
 
 const static std::string KEY_REMOVED_FLAG = "1";
 
+const static std::string KEY_SECOND_REMOVED_FLAG = "2";
+
 /**
  * Indicates hashCode rule.
  */
@@ -2652,7 +2654,7 @@ bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<Notificatio
     }
     std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
         KEY_UNDER_LINE + std::to_string(slotType);
-    int32_t result = rdbDataManager_->InsertData(key, KEY_REMOVED_FLAG, userId);
+    int32_t result = rdbDataManager_->InsertData(key, KEY_SECOND_REMOVED_FLAG, userId);
     return (result == NativeRdb::E_OK);
 }
 
@@ -2691,7 +2693,10 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
     });
 
     ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
-    return existFlag;
+    if (!existFlag || result == KEY_REMOVED_FLAG) {
+        return false;
+    }
+    return true;
 }
 
 std::string NotificationPreferencesDatabase::GenerateHashCodeGenerate(const int32_t uid)
