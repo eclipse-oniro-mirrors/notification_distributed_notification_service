@@ -74,6 +74,7 @@ group("fuzztest") {
     "publishnotification_fuzzer:PublishNotificationFuzzTest",
     "readfromparcel_fuzzer:ReadFromParcelFuzzTest",
     "reminderdatamanager_fuzzer:ReminderDataManagerFuzzTest",
+    "reminderdatasharehelper_fuzzer:ReminderDataShareHelperFuzzTest",
     "reminderhelper_fuzzer:ReminderHelperFuzzTest",
     "reminderrequest_fuzzer:ReminderRequestFuzzTest",
     "reminderrequestalarm_fuzzer:ReminderRequestAlarmFuzzTest",

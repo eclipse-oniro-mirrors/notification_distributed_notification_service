@@ -123,6 +123,100 @@ namespace OHOS {
         return true;
     }
 
+    bool DoSomethingInteresting1(FuzzedDataProvider* fdp)
+    {
+        std::string bundleName = fdp->ConsumeRandomLengthString();
+        int32_t id = fdp->ConsumeIntegral<int32_t>();
+        int64_t ts = fdp->ConsumeIntegral<int64_t>();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
+        bool value = fdp->ConsumeBool();
+        int32_t callingUid = fdp->ConsumeIntegral<int32_t>();
+        constexpr uint64_t seconds = 1200;
+        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
+        auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->OnUnlockScreen();
+        manager->OnLoadReminderEvent();
+        manager->OnLoadReminderInFfrt();
+        manager->OnDataShareInsertOrDelete();
+        std::map<std::string, sptr<ReminderRequest>> remindersMap;
+        manager->OnDataShareUpdate(remindersMap);
+        manager->HandleAutoDeleteReminder(id, id, ts);
+
+        std::vector<sptr<ReminderRequest>> reminders;
+        manager->UpdateReminderLanguageLocked(id, reminders);
+        manager->IsSystemReady();
+        manager->QueryActiveReminderCount();
+        manager->StartLoadTimer();
+        manager->InitShareReminders(value);
+        manager->UpdateAppDatabase(reminder, Notification::ReminderRequest::ActionButtonType::CLOSE);
+        DataShare::DataSharePredicates predicates;
+        std::vector<std::string> equalToVector;
+        manager->GenPredicates(predicates, equalToVector);
+        DataShare::DataShareValuesBucket valuesBucket;
+        manager->GenValuesBucket(valuesBucket, equalToVector);
+        manager->CloseReminder(reminder, value);
+        Notification::ReminderDataManager::TimerType t = Notification::ReminderDataManager::TimerType::ALERTING_TIMER;
+        manager->CreateTimerInfo(t, reminder);
+        auto sharedTimerInfo = std::make_shared<Notification::ReminderTimerInfo>();
+        manager->InitTimerInfo(sharedTimerInfo, reminder, t);
+        manager->GetRecentReminder();
+        manager->HandleSysTimeChange(reminder);
+        manager->IsMatched(reminder, id, id, value);
+        manager->ResetStates(t);
+        return true;
+    }
+
+    bool DoSomethingInteresting2(FuzzedDataProvider* fdp)
+    {
+        constexpr uint16_t MAX_SECOND = 5;
+        std::string bundleName = fdp->ConsumeRandomLengthString();
+        std::string uri = fdp->ConsumeRandomLengthString();
+        int32_t id = fdp->ConsumeIntegral<int32_t>();
+        int8_t val = fdp->ConsumeIntegral<int8_t>();
+        uint16_t second = fdp->ConsumeIntegral<uint16_t>() % MAX_SECOND + 1;
+        int64_t ts = fdp->ConsumeIntegral<int64_t>();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
+        bool value = fdp->ConsumeBool();
+        int32_t callingUid = fdp->ConsumeIntegral<int32_t>();
+        constexpr uint64_t seconds = 1200;
+        sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(seconds);
+        auto manager = Notification::ReminderDataManager::GetInstance();
+        manager->IsMatchedForGroupIdAndPkgName(reminder, bundleName, uri);
+        manager->IsReminderAgentReady();
+        manager->StartExtensionAbility(reminder, 0);
+        int32_t count = 0;
+        manager->AsyncStartExtensionAbility(reminder, id, val, count);
+        manager->InitServiceHandler();
+        manager->SnoozeReminderImpl(reminder);
+        Notification::ReminderDataManager::TimerType t = Notification::ReminderDataManager::TimerType::ALERTING_TIMER;
+        manager->StartTimerLocked(reminder, t);
+        manager->StartTimer(reminder, t);
+        manager->StopAlertingReminder(reminder);
+        manager->StopTimer(t);
+        manager->StopTimerLocked(t);
+        manager->TerminateAlerting(reminder, uri);
+        manager->TerminateAlerting(second, reminder);
+        manager->UpdateAndSaveReminderLocked(reminder);
+        Notification::ReminderDataManager::cmp(reminder, reminder);
+        manager->ConnectAppMgr();
+        manager->CheckNeedNotifyStatus(reminder, Notification::ReminderRequest::ActionButtonType::INVALID);
+        manager->GetFullPath(uri);
+        manager->IsActionButtonDataShareValid(reminder, static_cast<uint32_t>(id));
+        manager->GetResourceMgr(bundleName, id);
+        Global::Resource::ResourceManager::RawFileDescriptor desc;
+        manager->GetCustomRingFileDesc(reminder, desc);
+        manager->CloseCustomRingFileDesc(id, uri);
+        manager->ReportSysEvent(reminder);
+        std::map<std::string, sptr<ReminderRequest>> reminders;
+        manager->UpdateShareReminders(reminders);
+        std::unordered_map<std::string, int32_t> limits;
+        int32_t totalCount = 0;
+        manager->CheckShowLimit(limits, totalCount, reminder);
+        manager->LoadShareReminders();
+        manager->LoadReminderFromDb();
+        return true;
+    }
+
     bool Clear()
     {
         auto manager = Notification::ReminderDataManager::GetInstance();
@@ -141,5 +235,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     OHOS::DoSomethingInterestingWithManager(&fdp);
     OHOS::DoSomethingInterestingWithReminder(&fdp);
+    OHOS::DoSomethingInteresting1(&fdp);
+    OHOS::DoSomethingInteresting2(&fdp);
     return 0;
 }
