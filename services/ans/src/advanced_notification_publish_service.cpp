@@ -298,8 +298,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
+        ANS_LOGE("Request object is nullptr");
+        message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Request object is nullptr");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = PrePublishRequest(request);
@@ -324,17 +327,23 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
+        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create bundleOption");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NO_MEMORY;
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
+        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create notification");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NO_MEMORY;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
+        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Serial queue is invalid.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -345,6 +354,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         if (IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            message.BranchId(EventBranchId::BRANCH_1)
+                .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
         }
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
@@ -371,10 +382,12 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
         result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
+            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
             return;
         }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
+            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("Failed to assign notification list");
             return;
         }
 
@@ -383,6 +396,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     });
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
