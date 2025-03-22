@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::SubscriberLoca
     recipient_ = new (std::nothrow) DeathRecipient(*this);
 };
 
-ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConnected()
+void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
@@ -49,10 +49,9 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConn
         ANS_LOGD("%s, Add death recipient.", __func__);
     }
     subscriber_.OnConnected();
-    return ERR_OK;
 }
 
-ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisconnected()
+void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
@@ -61,15 +60,13 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisc
         ANS_LOGD("%s, Remove death recipient.", __func__);
     }
     subscriber_.OnDisconnected();
-    return ERR_OK;
 }
 
-ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnResponse(int32_t notificationId,
-    const NotificationButtonOption& buttonOption)
+void NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnResponse(int32_t notificationId,
+    sptr<NotificationButtonOption> buttonOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    subscriber_.OnResponse(notificationId, new (std::nothrow) NotificationButtonOption(buttonOption));
-    return ERR_OK;
+    subscriber_.OnResponse(notificationId, buttonOption);
 }
 
 sptr<AnsManagerInterface> NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::GetAnsManagerProxy()
