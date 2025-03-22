@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include "accesstoken_kit.h"
-#include "ans_log_wrapper.h"
+#include "mock_accesstoken_kit.h"
 #include "ans_ut_constant.h"
 #include "ipc_skeleton.h"
 

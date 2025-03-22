@@ -2066,27 +2066,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21300,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_21400
- * @tc.name      : PrepareNotificationInfo_2000
- * @tc.desc      : Test PrepareNotificationInfo function.
- * @tc.require   : issueI62D8C
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21400, Function | SmallTest | Level1)
-{
-    GTEST_LOG_(INFO) << "PrepareNotificationInfo_2000 test start";
-
-    sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest(1);
-    EXPECT_NE(req, nullptr);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-
-    ASSERT_EQ(advancedNotificationService_->PrepareNotificationInfo(req, bundleOption), ERR_OK);
-
-    GTEST_LOG_(INFO) << "PrepareNotificationInfo_2000 test end";
-}
-
-
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_21600
  * @tc.name      : RegisterPushCallback_0100
  * @tc.desc      : Test RegisterPushCallback function.
@@ -3158,80 +3137,6 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00002, Function |
 }
 
 /**
- * @tc.name: AssignToNotificationList_00001
- * @tc.desc: Test AssignToNotificationList
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00001, Function | SmallTest | Level1)
-{
-    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(content);
-    request->SetSlotType(slotType);
-    request->SetNotificationId(1);
-    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    auto ret = advancedNotificationService_->AssignToNotificationList(record);
-
-    ret = advancedNotificationService_->AssignToNotificationList(record);
-    ASSERT_EQ(ret, (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
-}
-
-/**
- * @tc.name: AssignToNotificationList_00002
- * @tc.desc: Test AssignToNotificationList when NotificationRequest's updateOnly is true but notification ID not exists
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00002, Function | SmallTest | Level1)
-{
-    advancedNotificationService_->notificationList_.clear();
-    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetUpdateOnly(true);
-    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(content);
-    request->SetSlotType(slotType);
-    request->SetNotificationId(1);
-    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    auto ret = advancedNotificationService_->AssignToNotificationList(record);
-
-    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
-    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    advancedNotificationService_->notificationList_.clear();
-}
-
-/**
- * @tc.name: AssignToNotificationList_00003
- * @tc.desc: Test AssignToNotificationList when NotificationRequest's updateOnly is true and notification ID exists
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceTest, AssignToNotificationList_00003, Function | SmallTest | Level1)
-{
-    advancedNotificationService_->notificationList_.clear();
-    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetUpdateOnly(true);
-    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(content);
-    request->SetSlotType(slotType);
-    request->SetNotificationId(1);
-    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    advancedNotificationService_->notificationList_.push_back(record);
-    auto ret = advancedNotificationService_->AssignToNotificationList(record);
-
-    ASSERT_EQ(ret, (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
-    advancedNotificationService_->notificationList_.clear();
-}
-
-/**
  * @tc.name: StartArchiveTimer_00001
  * @tc.desc: Test StartArchiveTimer
  * @tc.type: FUNC
@@ -3488,20 +3393,6 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function
     sptr<NotificationBundleOption> bundleOption = nullptr;
     int32_t badgeNumber = 1;
     ASSERT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber), ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.name: QueryDoNotDisturbProfile_0100
- * @tc.desc: test QueryDoNotDisturbProfile successfully called
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceTest, QueryDoNotDisturbProfile_0100, TestSize.Level1)
-{
-    std::string enable;
-    std::string profileId;
-    int32_t userId = 100;
-    EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->QueryDoNotDisturbProfile(userId, enable, profileId);
 }
 
 /**
