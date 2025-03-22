@@ -26,27 +26,27 @@ namespace CJSystemapi {
     using namespace OHOS::Notification;
     using namespace OHOS::CJSystemapi::Notification;
 
-    static bool ParseParameters(CNotificationRequest params, NotificationRequest &request)
+    static bool ParseParameters(CNotificationRequestV2 params, NotificationRequest &request)
     {
-        if (!GetNotificationRequestByNumber(params, request)) {
+        if (!GetNotificationRequestByNumberV2(params, request)) {
             return false;
         }
 
-        if (!GetNotificationRequestByString(params, request)) {
+        if (!GetNotificationRequestByStringV2(params, request)) {
             return false;
         }
 
-        if (!GetNotificationRequestByBool(params, request)) {
+        if (!GetNotificationRequestByBoolV2(params, request)) {
             return false;
         }
 
-        if (!GetNotificationRequestByCustom(params, request)) {
+        if (!GetNotificationRequestByCustomV2(params, request)) {
             return false;
         }
         return true;
     }
 
-    static bool ParseBundleOption(CNotificationBundleOption &option, NotificationBundleOption &bundleOption)
+    static bool ParseBundleOption(CNotificationBundleOptionV2 &option, NotificationBundleOption &bundleOption)
     {
         char bundle[STR_MAX_SIZE] = {0};
         if (strcpy_s(bundle, STR_MAX_SIZE, option.bundle) != EOK) {
@@ -58,7 +58,7 @@ namespace CJSystemapi {
         return true;
     }
 
-    int NotificationManagerImpl::Publish(CNotificationRequest cjRequest)
+    int NotificationManagerImplV2::Publish(CNotificationRequestV2 cjRequest)
     {
         NotificationRequest request;
         if (!ParseParameters(cjRequest, request)) {
@@ -68,31 +68,31 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::Cancel(int32_t id, const char* label)
+    int NotificationManagerImplV2::Cancel(int32_t id, const char* label)
     {
         int code = NotificationHelper::CancelNotification(label, id);
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::CancelAll()
+    int NotificationManagerImplV2::CancelAll()
     {
         int code = NotificationHelper::CancelAllNotifications();
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::AddSlot(int32_t type)
+    int NotificationManagerImplV2::AddSlot(int32_t type)
     {
         NotificationConstant::SlotType slot = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeCJToC(SlotType(type), slot)) {
+        if (!SlotTypeCJToCV2(SlotTypeV2(type), slot)) {
             return ERROR_PARAM_INVALID;
         }
         int code = NotificationHelper::AddSlotByType(slot);
         return ErrorToExternal(code);
     }
 
-    CNotificationSlot NotificationManagerImpl::GetSlot(int32_t type, int32_t &errCode)
+    CNotificationSlotV2 NotificationManagerImplV2::GetSlot(int32_t type, int32_t &errCode)
     {
-        CNotificationSlot notificationSlot = {
+        CNotificationSlotV2 notificationSlot = {
             .notificationType = 0,
             .level = 0,
             .desc = NULL,
@@ -107,28 +107,28 @@ namespace CJSystemapi {
             .enabled = false
         };
         NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeCJToC(SlotType(type), slotType)) {
+        if (!SlotTypeCJToCV2(SlotTypeV2(type), slotType)) {
             errCode = ERROR_PARAM_INVALID;
             return notificationSlot;
         }
 
         sptr<NotificationSlot> slot = nullptr;
         errCode = ErrorToExternal(NotificationHelper::GetNotificationSlot(slotType, slot));
-        if (slot != nullptr && !SetNotificationSlot(*slot, notificationSlot)) {
+        if (slot != nullptr && !SetNotificationSlotV2(*slot, notificationSlot)) {
             errCode = ERROR_PARAM_INVALID;
         }
         return notificationSlot;
     }
 
-    CArrayNotificationSlots NotificationManagerImpl::GetSlots(int32_t &errCode)
+    CArrayNotificationSlotsV2 NotificationManagerImplV2::GetSlots(int32_t &errCode)
     {
-        CArrayNotificationSlots notificationSlots = { .head = nullptr, .size = 0 };
+        CArrayNotificationSlotsV2 notificationSlots = { .head = nullptr, .size = 0 };
         std::vector<sptr<NotificationSlot>> slots;
         errCode = ErrorToExternal(NotificationHelper::GetNotificationSlots(slots));
-        CNotificationSlot* head =
-            reinterpret_cast<CNotificationSlot *>(malloc(sizeof(CNotificationSlot) * slots.size()));
+        CNotificationSlotV2* head =
+            reinterpret_cast<CNotificationSlotV2 *>(malloc(sizeof(CNotificationSlotV2) * slots.size()));
         if (head == nullptr) {
-            LOGE("malloc CNotificationSlot failed");
+            LOGE("malloc CNotificationSlotV2 failed");
             return notificationSlots;
         }
         int32_t count = 0;
@@ -137,8 +137,8 @@ namespace CJSystemapi {
                 LOGE("Invalidated NotificationSlot object ptr.");
                 continue;
             }
-            if (!SetNotificationSlot(*vec, head[count])) {
-                LOGE("SetNotificationSlot is nullptr.");
+            if (!SetNotificationSlotV2(*vec, head[count])) {
+                LOGE("SetNotificationSlotV2 is nullptr.");
                 continue;
             }
             count++;
@@ -148,23 +148,23 @@ namespace CJSystemapi {
         return notificationSlots;
     }
 
-    int NotificationManagerImpl::RemoveSlot(int32_t type)
+    int NotificationManagerImplV2::RemoveSlot(int32_t type)
     {
         NotificationConstant::SlotType slot = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeCJToC(SlotType(type), slot)) {
+        if (!SlotTypeCJToCV2(SlotTypeV2(type), slot)) {
             return ERROR_PARAM_INVALID;
         }
         int code = NotificationHelper::RemoveNotificationSlot(slot);
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::RemoveAllSlots()
+    int NotificationManagerImplV2::RemoveAllSlots()
     {
         int code = NotificationHelper::RemoveAllSlots();
         return ErrorToExternal(code);
     }
 
-    RetDataUI32 NotificationManagerImpl::GetActiveNotificationCount()
+    RetDataUI32 NotificationManagerImplV2::GetActiveNotificationCount()
     {
         RetDataUI32 ret = { .code = 0, .data = 0 };
         uint64_t num = 0;
@@ -174,17 +174,17 @@ namespace CJSystemapi {
         return ret;
     }
 
-    CArrayNotificationRequest NotificationManagerImpl::GetActiveNotifications(int32_t &errCode)
+    CArrayNotificationRequestV2 NotificationManagerImplV2::GetActiveNotifications(int32_t &errCode)
     {
-        CArrayNotificationRequest notificationRequests = { .head = nullptr, .size = 0 };
+        CArrayNotificationRequestV2 notificationRequests = { .head = nullptr, .size = 0 };
         std::vector<sptr<NotificationRequest>> requests;
         int code = NotificationHelper::GetActiveNotifications(requests);
         errCode = ErrorToExternal(code);
         if (code != ERR_OK) {
             return notificationRequests;
         }
-        CNotificationRequest** head =
-            reinterpret_cast<CNotificationRequest **>(malloc(sizeof(CNotificationRequest*) * requests.size()));
+        CNotificationRequestV2** head =
+            reinterpret_cast<CNotificationRequestV2 **>(malloc(sizeof(CNotificationRequestV2*) * requests.size()));
         if (head == nullptr) {
             return notificationRequests;
         }
@@ -195,9 +195,9 @@ namespace CJSystemapi {
                 LOGI("Invalid NotificationRequest object ptr");
                 continue;
             }
-            head[count] = reinterpret_cast<CNotificationRequest *>(malloc(sizeof(CNotificationRequest)));
+            head[count] = reinterpret_cast<CNotificationRequestV2 *>(malloc(sizeof(CNotificationRequestV2)));
             if (head[count] == nullptr) {
-                LOGE("NotificationManagerImpl::GetActiveNotifications malloc CNotificationRequest failed");
+                LOGE("NotificationManagerImplV2::GetActiveNotifications malloc CNotificationRequest failed");
                 for (int32_t i = 0 ; i < count; i++) {
                     free(head[i]);
                 }
@@ -205,7 +205,7 @@ namespace CJSystemapi {
                 head = nullptr;
                 break;
             }
-            if (!SetNotificationRequest(vec.GetRefPtr(), *(head[count]))) {
+            if (!SetNotificationRequestV2(vec.GetRefPtr(), *(head[count]))) {
                 LOGI("Set NotificationRequest object failed");
                 continue;
             }
@@ -215,14 +215,14 @@ namespace CJSystemapi {
         return notificationRequests;
     }
 
-    int NotificationManagerImpl::CancelGroup(const char* cGroupName)
+    int NotificationManagerImplV2::CancelGroup(const char* cGroupName)
     {
         std::string groupName(cGroupName);
         int code = NotificationHelper::CancelGroup(groupName);
         return ErrorToExternal(code);
     }
 
-    RetDataBool NotificationManagerImpl::IsSupportTemplate(const char* cTemplateName)
+    RetDataBool NotificationManagerImplV2::IsSupportTemplate(const char* cTemplateName)
     {
         RetDataBool ret = { .code = 0, .data = false };
         std::string templateName(cTemplateName);
@@ -233,7 +233,7 @@ namespace CJSystemapi {
         return ret;
     }
 
-    int NotificationManagerImpl::SetNotificationEnable(CNotificationBundleOption option, bool enable)
+    int NotificationManagerImplV2::SetNotificationEnable(CNotificationBundleOptionV2 option, bool enable)
     {
         NotificationBundleOption bundleOption;
         if (!ParseBundleOption(option, bundleOption)) {
@@ -244,7 +244,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::DisplayBadge(CNotificationBundleOption option, bool enable)
+    int NotificationManagerImplV2::DisplayBadge(CNotificationBundleOptionV2 option, bool enable)
     {
         NotificationBundleOption bundleOption;
         if (!ParseBundleOption(option, bundleOption)) {
@@ -254,7 +254,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    RetDataBool NotificationManagerImpl::IsBadgeDisplayed(CNotificationBundleOption option)
+    RetDataBool NotificationManagerImplV2::IsBadgeDisplayed(CNotificationBundleOptionV2 option)
     {
         NotificationBundleOption bundleOption;
         RetDataBool ret = { .code = 0, .data = false };
@@ -269,7 +269,7 @@ namespace CJSystemapi {
         return ret;
     }
 
-    int NotificationManagerImpl::SetSlotFlagsByBundle(CNotificationBundleOption option, int32_t slotFlags)
+    int NotificationManagerImplV2::SetSlotFlagsByBundle(CNotificationBundleOptionV2 option, int32_t slotFlags)
     {
         NotificationBundleOption bundleOption;
         if (!ParseBundleOption(option, bundleOption)) {
@@ -279,7 +279,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    RetDataUI32 NotificationManagerImpl::GetSlotFlagsByBundle(CNotificationBundleOption option)
+    RetDataUI32 NotificationManagerImplV2::GetSlotFlagsByBundle(CNotificationBundleOptionV2 option)
     {
         RetDataUI32 ret = { .code = 0, .data = 0 };
         uint32_t slotFlags = 0;
@@ -294,7 +294,7 @@ namespace CJSystemapi {
         return ret;
     }
 
-    RetDataUI32 NotificationManagerImpl::GetSlotNumByBundle(CNotificationBundleOption option)
+    RetDataUI32 NotificationManagerImplV2::GetSlotNumByBundle(CNotificationBundleOptionV2 option)
     {
         RetDataUI32 ret = { .code = 0, .data = 0 };
         uint64_t num = 0;
@@ -309,7 +309,7 @@ namespace CJSystemapi {
         return ret;
     }
 
-    int NotificationManagerImpl::RemoveGroupByBundle(CNotificationBundleOption option, const char* cGroupName)
+    int NotificationManagerImplV2::RemoveGroupByBundle(CNotificationBundleOptionV2 option, const char* cGroupName)
     {
         NotificationBundleOption bundleOption;
         if (!ParseBundleOption(option, bundleOption)) {
@@ -320,7 +320,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    RetDataBool NotificationManagerImpl::IsNotificationEnabled()
+    RetDataBool NotificationManagerImplV2::IsNotificationEnabled()
     {
         RetDataBool ret = { .code = EINVAL, .data = false };
         IsEnableParams params {};
@@ -344,13 +344,13 @@ namespace CJSystemapi {
         return ret;
     }
 
-    int NotificationManagerImpl::SetBadgeNumber(int32_t badgeNumber)
+    int NotificationManagerImplV2::SetBadgeNumber(int32_t badgeNumber)
     {
         int code = NotificationHelper::SetBadgeNumber(badgeNumber);
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::RequestEnableNotification()
+    int NotificationManagerImplV2::RequestEnableNotification()
     {
         IsEnableParams params {};
         std::string deviceId {""};
@@ -364,7 +364,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::RequestEnableNotificationWithContext(sptr<AbilityRuntime::CJAbilityContext> context)
+    int NotificationManagerImplV2::RequestEnableNotificationWithContext(sptr<AbilityRuntime::CJAbilityContext> context)
     {
         IsEnableParams params {};
         sptr<IRemoteObject> callerToken = context->GetToken();
@@ -381,7 +381,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    RetDataBool NotificationManagerImpl::IsDistributedEnabled()
+    RetDataBool NotificationManagerImplV2::IsDistributedEnabled()
     {
         RetDataBool ret = { .code = EINVAL, .data = false };
         bool enable = false;
