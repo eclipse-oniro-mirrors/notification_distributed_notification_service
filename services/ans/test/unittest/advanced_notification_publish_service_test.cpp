@@ -22,6 +22,7 @@
 
 #define private public
 #include "advanced_notification_service.h"
+#include "advanced_datashare_helper.h"
 #include "ability_manager_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -469,6 +470,20 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: RequestEnableNotification_00004
+ * @tc.desc: Test RequestEnableNotification,two parameters,except is ERROR_INTERNAL_ERROR
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00004, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName1";
+    int32_t uid = 1;
+    auto ret = advancedNotificationService_->RequestEnableNotification(bundleName, uid);
+    ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
 }
 
 /**
@@ -1180,5 +1195,210 @@ HWTEST_F(AnsPublishServiceTest, PrePublishRequest_00001, Function | SmallTest | 
     request2->SetCreatorUid(1);
     ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request2), (int)ERR_OK);
 }
+
+/**
+ * @tc.name: CollaboratePublish_00001
+ * @tc.desc: Test CollaboratePublish
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::string label = "";
+    request->SetAppMessageId("test2");
+    request->SetNotificationId(1);
+    request->SetIsAgentNotification(true);
+    request->SetDistributedCollaborate(true);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: CollaboratePublish_00002
+ * @tc.desc: Test CollaboratePublish, common live view, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> notificationContent = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(notificationContent);
+    std::string label = "";
+    request->SetAppMessageId("test1");
+    request->SetNotificationId(1);
+    request->SetIsAgentNotification(true);
+    request->SetDistributedCollaborate(true);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00001
+ * @tc.desc: Test PublishNotificationForIndirectProxy, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSound("sound");
+    request->SetCreatorBundleName("creatorname");
+    request->SetCreatorUid(1);
+    request->SetAppInstanceKey("key");
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveEnableNotificationDialog_00001
+ * @tc.desc: Test RemoveEnableNotificationDialog, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveEnableNotificationDialog_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto ret = advancedNotificationService_->RemoveEnableNotificationDialog();
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: QueryContactByProfileId_00001
+ * @tc.desc: Test QueryContactByProfileId, except is -1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, QueryContactByProfileId_00001, Function | SmallTest | Level1)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    bool isDataShareReady = true;
+    datashareHelper->SetIsDataShareReady(isDataShareReady);
+    std::string phoneNumber = "12345678";
+    std::string policy = "5";
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->QueryContactByProfileId(phoneNumber, policy, userId);
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledBySlot_00001
+ * @tc.desc: Test SetDistributedEnabledBySlot, except is -1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledBySlot_00001, Function | SmallTest | Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    std::string deviceType = "testdeviceType";
+    bool enabled = true;
+    auto ret = advancedNotificationService_->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetTargetDeviceStatus_00001
+ * @tc.desc: Test SetTargetDeviceStatus, deviceType is empty, except is ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetTargetDeviceStatus_00001, Function | SmallTest | Level1)
+{
+    std::string deviceType = "";
+    uint32_t status = 0;
+    auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetTargetDeviceStatus_00001
+ * @tc.desc: Test GetTargetDeviceStatus, deviceType is empty, except is ERR_ANS_INVALID_PARAM
+ * @tc.desc: Test GetTargetDeviceStatus, deviceType is not empty, status == inputStatus
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetTargetDeviceStatus_00001, Function | SmallTest | Level1)
+{
+    std::string deviceType = "";
+    int32_t inputStatus = 1;
+    int32_t status = 0;
+    auto ret = advancedNotificationService_->GetTargetDeviceStatus(deviceType, status);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    uint32_t controlFlag = 0;
+    deviceType = "testdeviceType";
+    ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, inputStatus);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = advancedNotificationService_->GetTargetDeviceStatus(deviceType, status);
+    ASSERT_EQ(status, inputStatus);
+}
+
+/**
+ * @tc.name: ClearAllNotificationGroupInfo_00001
+ * @tc.desc: Test ClearAllNotificationGroupInfo, deviceType is not empty, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ClearAllNotificationGroupInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    std::string localSwitch = "false";
+    advancedNotificationService_->aggregateLocalSwitch_ = true;
+    advancedNotificationService_->ClearAllNotificationGroupInfo(localSwitch);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ASSERT_EQ(advancedNotificationService_->aggregateLocalSwitch_, false);
+}
+
+/**
+ * @tc.name: RemoveAllNotificationsByBundleName_00001
+ * @tc.desc: Test RemoveAllNotificationsByBundleName, except is notificationList_ == 1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request;
+    record1->notification = notification;
+    record1->bundleOption = bundle;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    auto record2 = nullptr;
+    advancedNotificationService_->notificationList_.push_back(record2);
+    std::string bundleName = TEST_DEFUALT_BUNDLE;
+    int32_t reason = 0;
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: DistributeOperation_00001
+ * @tc.desc: Test DistributeOperation, DistributeOperationParamCheck faild, except is ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DistributeOperation_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    sptr<OperationCallbackInterface> callback = nullptr;
+    auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    std::string hashCode = "123456";
+    operationInfo->SetHashCode(hashCode);
+    ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
 }  // namespace Notification
 }  // namespace OHOS
