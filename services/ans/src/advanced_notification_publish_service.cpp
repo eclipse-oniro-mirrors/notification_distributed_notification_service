@@ -2668,9 +2668,11 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty() ||
         bundleOption->GetUid() <= DEFAULT_UID) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    if (badgeNumber <= BADGE_NUM_LIMIT) {
+    if (badgeNumber < BADGE_NUM_LIMIT) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid badgeNumber");
         return ERR_ANS_INVALID_PARAM;
     }
     ANS_LOGI("SetBadgeNumberForDhByBundle bundleName = %{public}s uid = %{public}d",
