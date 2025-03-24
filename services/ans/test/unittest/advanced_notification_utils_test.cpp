@@ -445,11 +445,11 @@ HWTEST_F(AnsUtilsTest, OnBundleRemoved_00002, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetNotificationId(1);
-    auto record = ans.MakeNotificationRecord(request, bundle);
-    auto ret = ans.AssignToNotificationList(record);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
     advancedNotificationService_->notificationSvrQueue_ = nullptr;
     advancedNotificationService_->OnBundleRemoved(bundle);
-    ASSERT_EQ(ans.notificationList_.size(), 1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
 
 /**
