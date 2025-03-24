@@ -2018,7 +2018,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20900,
         "\t\tLabel: \n"
         "\t\tSlotType = 5\n";
     ASSERT_EQ(result, resMsg);
-    
+
     GTEST_LOG_(INFO) << "GetDumpInfo_0100 test end";
 }
 
@@ -2256,7 +2256,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22100,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_22500, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "PushCheck_0100 test start";
-
+    MockIsVerfyPermisson(false);
     sptr<NotificationRequest> req = new (std::nothrow) NotificationRequest();
     ASSERT_EQ(advancedNotificationService_->PushCheck(req), ERR_ANS_PUSH_CHECK_UNREGISTERED);
 
