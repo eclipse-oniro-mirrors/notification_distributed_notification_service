@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,7 +116,7 @@ ErrCode AnsManagerProxy::HasNotificationPolicyAccessPermission(bool &granted)
 }
 
 ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId,
-    const sptr<AnsDialogCallback> &callback,
+    const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("enter");
@@ -477,7 +477,7 @@ ErrCode AnsManagerProxy::IsAllowedNotifySelf(bool &allowed)
     return result;
 }
 
-ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
     bool &canPop, std::string &bundleName)
 {
     MessageParcel data;

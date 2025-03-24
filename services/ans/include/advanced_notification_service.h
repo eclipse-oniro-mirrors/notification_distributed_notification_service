@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -450,7 +450,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
 
     /**
@@ -576,7 +576,7 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
 
     /**
@@ -1471,7 +1471,7 @@ private:
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CommonRequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);

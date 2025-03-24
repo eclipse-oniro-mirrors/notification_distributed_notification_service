@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1300,7 +1300,7 @@ ErrCode AnsManagerStub::HandleRequestEnableNotification(MessageParcel &data, Mes
         callerToken = data.ReadRemoteObject();
     }
 
-    ErrCode result = RequestEnableNotification(deviceId, iface_cast<AnsDialogCallback>(callback), callerToken);
+    ErrCode result = RequestEnableNotification(deviceId, iface_cast<IAnsDialogCallback>(callback), callerToken);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleRequestEnableNotification] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1621,7 +1621,7 @@ ErrCode AnsManagerStub::HandleCanPopEnableNotificationDialog(MessageParcel &data
     }
     bool canPop = false;
     std::string bundleName;
-    ErrCode result = CanPopEnableNotificationDialog(iface_cast<AnsDialogCallback>(callback), canPop, bundleName);
+    ErrCode result = CanPopEnableNotificationDialog(iface_cast<IAnsDialogCallback>(callback), canPop, bundleName);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleCanPopEnableNotificationDialog] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1019,7 +1019,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
-    const sptr<AnsDialogCallback> &callback,
+    const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1053,7 +1053,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
 }
 
 ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::string &deviceId,
-    const sptr<AnsDialogCallback> &callback,
+    const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken,
     const sptr<NotificationBundleOption> bundleOption,
     const bool innerLake)
@@ -1275,7 +1275,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(bool &allowed)
 }
 
 ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
-    const sptr<AnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
+    const sptr<IAnsDialogCallback> &callback, bool &canPop, std::string &bundleName)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     canPop = false;
