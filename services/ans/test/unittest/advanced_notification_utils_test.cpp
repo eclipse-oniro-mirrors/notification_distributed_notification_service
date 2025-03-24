@@ -39,6 +39,7 @@
 #include "notification_subscriber.h"
 #include "refbase.h"
 #include "bundle_manager_helper.h"
+#include "mock_bundle_mgr.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -49,7 +50,6 @@ namespace Notification {
 extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
-extern void MockSetBundleInfoEnabled(bool enabled);
 
 class AnsUtilsTest : public testing::Test {
 public:
