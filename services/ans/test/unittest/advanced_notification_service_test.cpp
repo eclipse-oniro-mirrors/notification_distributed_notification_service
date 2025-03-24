@@ -1780,14 +1780,17 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
 
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     sptr<NotificationRequest> request = new NotificationRequest();
 
-    ASSERT_NE(nullptr, advancedNotificationService_);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
     advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
 
-    AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
-    ans.OnDistributedPublish(deviceId, bundleName, request);
+    sptr<NotificationRequest> request1 = new NotificationRequest();
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
 }
@@ -1804,14 +1807,30 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
 
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
-    sptr<NotificationRequest> request = new NotificationRequest();
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetTitle("title 1");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    request->SetContent(content);
+    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
 
-    ASSERT_NE(nullptr, advancedNotificationService_);
-    advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request);
+    sptr<NotificationRequest> request2 = new NotificationRequest(1);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    std::shared_ptr<NotificationNormalContent> normalContent2 = std::make_shared<NotificationNormalContent>();
+    normalContent2->SetTitle("title 2");
+    std::shared_ptr<NotificationContent> content2 = std::make_shared<NotificationContent>(normalContent2);
+    request2->SetContent(content2);
+    advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request2);
 
-    AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
-    ans.OnDistributedUpdate(deviceId, bundleName, request);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    for (auto record : advancedNotificationService_->notificationList_) {
+        std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
+        record->request->GetContent()->GetNotificationContent());
+        ASSERT_EQ(ct->GetTitle(), "title 1");
+    }
 
     GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test end";
 }
@@ -1985,7 +2004,21 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20900,
     recentNotification->notification = notification;
     advancedNotificationService_->recentInfo_->list.emplace_front(recentNotification);
     advancedNotificationService_->GetDumpInfo(args2, result);
-
+    std::string resMsg = "error: unknown option.\n"
+        "The arguments are illegal and you can enter '-h' for help.notification list:\n"
+        "No.1\n"
+        "\tUserId: -1\n"
+        "\tCreatePid: 0\n"
+        "\tBundleName: \n"
+        "\tOwnerUid: 0\n"
+        "\tReceiverUserId: -1\n"
+        "\tDeliveryTime = 1970-01-01, 08:00:00\n"
+        "\tNotification:\n"
+        "\t\tId: 1\n"
+        "\t\tLabel: \n"
+        "\t\tSlotType = 5\n";
+    ASSERT_EQ(result, resMsg);
+    
     GTEST_LOG_(INFO) << "GetDumpInfo_0100 test end";
 }
 

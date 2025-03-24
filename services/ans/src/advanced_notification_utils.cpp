@@ -520,15 +520,6 @@ std::string AdvancedNotificationService::TimeToString(int64_t time)
     return stream.str();
 }
 
-int64_t AdvancedNotificationService::GetNowSysTime()
-{
-    std::chrono::time_point<std::chrono::system_clock> nowSys = std::chrono::system_clock::now();
-    auto epoch = nowSys.time_since_epoch();
-    auto value = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-    int64_t duration = value.count();
-    return duration;
-}
-
 void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

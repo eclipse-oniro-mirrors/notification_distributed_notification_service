@@ -1275,7 +1275,6 @@ private:
     sptr<NotificationSortingMap> GenerateSortingMap();
 
     std::string TimeToString(int64_t time);
-    int64_t GetNowSysTime();
     void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
     ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
