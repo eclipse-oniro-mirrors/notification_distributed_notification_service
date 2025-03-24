@@ -21,6 +21,10 @@
 #include "bundle_mgr_interface.h"
 
 namespace OHOS {
+namespace Notification {
+void MockSetBundleInfoEnabled(bool enabled);
+} // namespace Notification
+
 namespace AppExecFwk {
 class BundleMgrProxy : public IRemoteProxy<IBundleMgr> {
 public:

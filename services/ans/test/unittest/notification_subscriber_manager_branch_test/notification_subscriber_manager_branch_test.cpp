@@ -271,6 +271,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     record->request->SetOwnerUid(uid);
     record->deviceId = "";
     advancedNotificationService.notificationList_.push_back(record);
+    std::shared_ptr<NotificationRecord> record1 = std::make_shared<NotificationRecord>();
+    record1->notification = new Notification();
+    record1->request = new NotificationRequest();
+    record1->request->SetOwnerUid(uid);
+    record1->request->SetReceiverUserId(0);
+    advancedNotificationService.notificationList_.push_back(record1);
     MockGetUserId(false);
     MockGetBundleName(false);
     ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
@@ -289,6 +295,26 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     AdvancedNotificationService advancedNotificationService;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->notification = nullptr;
+    advancedNotificationService.notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_01300
+ * @tc.name    : AdvancedNotificationService_01300
+ * @tc.desc    : test DistributedNotificationDump function and recvUserId != record->notification->GetRecvUserId().
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01300, Function | SmallTest | Level1)
+{
+    std::string bundle = "<bundle>";
+    int32_t userId = 1;
+    std::vector<std::string> dumpInfo;
+    AdvancedNotificationService advancedNotificationService;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = new Notification();
+    record->request = new NotificationRequest();
+    record->request->SetReceiverUserId(2);
+    MockGetUserId(false);
     advancedNotificationService.notificationList_.push_back(record);
     ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
