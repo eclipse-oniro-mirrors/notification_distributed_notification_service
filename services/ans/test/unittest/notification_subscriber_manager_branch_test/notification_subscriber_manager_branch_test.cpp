@@ -299,11 +299,11 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 
-+/**
-+ * @tc.number  : AdvancedNotificationService_01300
-+ * @tc.name    : AdvancedNotificationService_01200
-+ * @tc.desc    : test DistributedNotificationDump function and recvUserId != record->notification->GetRecvUserId().
-+ */
+/**
+ * @tc.number  : AdvancedNotificationService_01300
+ * @tc.name    : AdvancedNotificationService_01300
+ * @tc.desc    : test DistributedNotificationDump function and recvUserId != record->notification->GetRecvUserId().
+ */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01300, Function | SmallTest | Level1)
 {
     std::string bundle = "<bundle>";
