@@ -390,7 +390,7 @@ ErrCode AnsManagerProxy::AllowUseReminder(const std::string& bundleName, bool& i
     }
 
     if (!reply.ReadBool(isAllowUseReminder)) {
-        ANS_LOGE("fail: read enabled failed.");
+        ANS_LOGE("fail: read isAllowUseReminder failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

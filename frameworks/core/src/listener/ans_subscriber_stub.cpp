@@ -34,7 +34,7 @@ int32_t AnsSubscriberStub::OnRemoteRequest(uint32_t code, MessageParcel &data, M
     std::u16string descriptor = AnsSubscriberStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        ANS_LOGW("[OnRemoteRequest] fail: invalid interface token!");
+        ANS_LOGE("[OnRemoteRequest] fail: invalid interface token!");
         return OBJECT_NULL;
     }
     ErrCode result = NO_ERROR;
@@ -171,13 +171,13 @@ ErrCode AnsSubscriberStub::HandleOnCanceledMap(MessageParcel &data, MessageParce
 {
     sptr<Notification> notification = data.ReadParcelable<Notification>();
     if (!notification) {
-        ANS_LOGW("[HandleOnCanceledMap] fail: notification ReadParcelable failed");
+        ANS_LOGE("[HandleOnCanceledMap] fail: notification ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
     bool existMap = false;
     if (!data.ReadBool(existMap)) {
-        ANS_LOGW("[HandleOnCanceledMap] fail: read existMap failed");
+        ANS_LOGE("[HandleOnCanceledMap] fail: read existMap failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -185,14 +185,14 @@ ErrCode AnsSubscriberStub::HandleOnCanceledMap(MessageParcel &data, MessageParce
     if (existMap) {
         notificationMap = data.ReadParcelable<NotificationSortingMap>();
         if (notificationMap == nullptr) {
-            ANS_LOGW("[HandleOnCanceledMap] fail: read NotificationSortingMap failed");
+            ANS_LOGE("[HandleOnCanceledMap] fail: read NotificationSortingMap failed");
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }
 
     int32_t reason = 0;
     if (!data.ReadInt32(reason)) {
-        ANS_LOGW("[HandleOnCanceledMap] fail: read reason failed");
+        ANS_LOGE("[HandleOnCanceledMap] fail: read reason failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -240,7 +240,7 @@ bool AnsSubscriberStub::ReadParcelableVector(std::vector<sptr<T>> &parcelableInf
 {
     int32_t infoSize = 0;
     if (!data.ReadInt32(infoSize)) {
-        ANS_LOGE("read Parcelable size failed.");
+        ANS_LOGE("read infoSize failed");
         return false;
     }
 
@@ -262,7 +262,7 @@ ErrCode AnsSubscriberStub::HandleOnUpdated(MessageParcel &data, MessageParcel &r
 {
     sptr<NotificationSortingMap> notificationMap = data.ReadParcelable<NotificationSortingMap>();
     if (!notificationMap) {
-        ANS_LOGW("[HandleOnUpdated] fail: notificationMap ReadParcelable failed");
+        ANS_LOGE("[HandleOnUpdated] fail: notificationMap ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
@@ -274,7 +274,7 @@ ErrCode AnsSubscriberStub::HandleOnDoNotDisturbDateChange(MessageParcel &data, M
 {
     sptr<NotificationDoNotDisturbDate> date = data.ReadParcelable<NotificationDoNotDisturbDate>();
     if (!date) {
-        ANS_LOGW("[HandleOnDoNotDisturbDateChange] fail: date ReadParcelable failed");
+        ANS_LOGE("[HandleOnDoNotDisturbDateChange] fail: date ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     OnDoNotDisturbDateChange(date);
@@ -285,7 +285,7 @@ ErrCode AnsSubscriberStub::HandleOnEnabledNotificationChanged(MessageParcel &dat
 {
     sptr<EnabledNotificationCallbackData> callbackData = data.ReadParcelable<EnabledNotificationCallbackData>();
     if (!callbackData) {
-        ANS_LOGW("[HandleOnEnabledNotificationChanged] fail: callbackData ReadParcelable failed");
+        ANS_LOGE("[HandleOnEnabledNotificationChanged] fail: callbackData ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     OnEnabledNotificationChanged(callbackData);
@@ -296,7 +296,7 @@ ErrCode AnsSubscriberStub::HandleOnBadgeChanged(MessageParcel &data, MessageParc
 {
     sptr<BadgeNumberCallbackData> callbackData = data.ReadParcelable<BadgeNumberCallbackData>();
     if (!callbackData) {
-        ANS_LOGW("[HandleOnBadgeChanged] fail: callbackData ReadParcelable failed");
+        ANS_LOGE("[HandleOnBadgeChanged] fail: callbackData ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     OnBadgeChanged(callbackData);
@@ -329,7 +329,7 @@ ErrCode AnsSubscriberStub::HandleOnResponse(MessageParcel &data, MessageParcel &
 {
     sptr<NotificationOperationInfo> operationInfo = data.ReadParcelable<NotificationOperationInfo>();
     if (!operationInfo) {
-        ANS_LOGW("notification ReadParcelable failed");
+        ANS_LOGE("notification ReadParcelable failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
     ErrCode result = OnOperationResponse(operationInfo);

@@ -46,12 +46,12 @@ ReminderRequest* ReminderRequestFactory::CreateReminderRequest(ReminderRequest::
             break;
         }
         default: {
-            ANSR_LOGW("Create ReminderRequest fail.");
+            ANSR_LOGE("Create ReminderRequest fail.");
             return nullptr;
         }
     }
     if (reminderRequest == nullptr) {
-        ANSR_LOGW("CreateReminderRequest fail.");
+        ANSR_LOGE("CreateReminderRequest fail.");
         return nullptr;
     }
     reminderRequest->SetReminderType(reminderType);

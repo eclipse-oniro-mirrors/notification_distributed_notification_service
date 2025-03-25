@@ -90,7 +90,7 @@ void DistributedDeviceManager::InitTrustList()
 bool DistributedDeviceManager::RegisterDms(bool forceInit)
 {
     if (hasInit.load() && !forceInit) {
-        ANS_LOGE("init device manager has inited.");
+        ANS_LOGW("init device manager has inited.");
         return true;
     }
     if (initCallback_ == nullptr) {

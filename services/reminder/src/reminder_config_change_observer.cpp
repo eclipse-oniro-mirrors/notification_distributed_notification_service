@@ -26,7 +26,7 @@ void ReminderConfigChangeObserver::OnConfigurationUpdated(const AppExecFwk::Conf
     ANSR_LOGD("OnConfigurationUpdated.");
     auto reminderDataMgr = ReminderDataManager::GetInstance();
     if (reminderDataMgr == nullptr) {
-        ANSR_LOGW("Reminder data manager is nullptr");
+        ANSR_LOGE("Reminder data manager is nullptr");
         return;
     }
     std::string newLanguageInfo = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);

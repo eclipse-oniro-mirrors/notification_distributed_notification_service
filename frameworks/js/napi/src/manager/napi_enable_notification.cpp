@@ -153,14 +153,14 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.option, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
-                    ANS_LOGI("userId : %{public}d", asynccallbackinfo->params.userId);
+                    ANS_LOGI("userId:%{public}d", asynccallbackinfo->params.userId);
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotify(
                         asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
                 } else {
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(
                         asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode : %{public}d, allowed : %{public}d",
+                ANS_LOGI("asynccallbackinfo->info.errorCode:%{public}d, allowed:%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -213,7 +213,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
                 }
-                ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}d, allowed = %{public}d",
+                ANS_LOGD("asynccallbackinfo->info.errorCode:%{public}d, allowed:%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -291,7 +291,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             bool canPop = false;
             std::string bundleName {""};
             ErrCode errCode = NotificationHelper::CanPopEnableNotificationDialog(client, canPop, bundleName);
-            ANS_LOGI("CanPopEnableNotificationDialog  result , errCode = %{public}d , canPop = %{public}d",
+            ANS_LOGI("CanPopEnableNotificationDialog result, errCode:%{public}d, canPop:%{public}d",
                 errCode, canPop);
             if (canPop == false) {
                 asynccallbackinfo->info.errorCode = errCode;

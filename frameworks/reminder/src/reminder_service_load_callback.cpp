@@ -33,7 +33,7 @@ void ReminderServiceCallback::OnLoadSystemAbilitySuccess(
 void ReminderServiceCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
 {
     DelayedSingleton<ReminderRequestClient>::GetInstance()->LoadSystemAbilityFail();
-    ANS_LOGI("on load system ability failed!");
+    ANS_LOGE("on load system ability failed!");
 }
 }
 }

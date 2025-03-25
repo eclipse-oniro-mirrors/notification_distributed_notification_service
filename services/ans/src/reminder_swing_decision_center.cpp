@@ -37,7 +37,7 @@ ReminderSwingDecisionCenter &ReminderSwingDecisionCenter::GetInstance()
 ErrCode ReminderSwingDecisionCenter::RegisterSwingCallback(const sptr<IRemoteObject> &swingCallback)
 {
     if (swingCallback == nullptr) {
-        ANS_LOGW("swingCallback is null.");
+        ANS_LOGE("swingCallback is null.");
         return ERR_INVALID_VALUE;
     }
     swingRecipient_ = new (nothrow) SwingCallbackRecipient();

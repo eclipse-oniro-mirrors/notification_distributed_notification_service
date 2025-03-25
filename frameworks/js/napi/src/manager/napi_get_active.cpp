@@ -299,7 +299,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
     // bundle
     napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, obj, "bundle", napi_object);
     if (result == nullptr) {
-        ANS_LOGW("Failed to get bundle from params.");
+        ANS_LOGE("Failed to get bundle from params.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, result, filter.bundle);
@@ -311,7 +311,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
     // notificationKey
     result = AppExecFwk::GetPropertyValueByPropertyName(env, obj, "notificationKey", napi_object);
     if (result == nullptr) {
-        ANS_LOGW("Failed to get notificationKeys from params.");
+        ANS_LOGE("Failed to get notificationKeys from params.");
         return nullptr;
     }
     retValue = Common::GetNotificationKey(env, result, filter.notificationKey);
@@ -322,7 +322,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
 
     // extraInfoKeys
     if (AppExecFwk::IsExistsByPropertyName(env, obj, "extraInfoKeys") == false) {
-        ANS_LOGI("No extraInfoKeys in filter");
+        ANS_LOGW("No extraInfoKeys in filter");
         return Common::NapiGetNull(env);
     }
 

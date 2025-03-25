@@ -27,7 +27,7 @@ bool OH_Notification_IsNotificationEnabled(void)
     bool isEnable = false;
     int32_t result = OHOS::Notification::NotificationHelper::IsAllowedNotifySelf(isEnable);
     if (result != OHOS::ERR_OK) {
-        ANS_LOGW("Get notification enable failed %{public}d", result);
+        ANS_LOGE("Get notification enable failed %{public}d", result);
         return false;
     }
     return isEnable;
