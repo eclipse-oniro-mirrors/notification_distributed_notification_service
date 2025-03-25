@@ -2500,7 +2500,8 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         ANS_LOGE("notificationDisable is no system app");
         return ERR_ANS_NON_SYSTEM_APP;
     }
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
         ANS_LOGE("notificationDisable is permission denied");
         return ERR_ANS_PERMISSION_DENIED;
     }
