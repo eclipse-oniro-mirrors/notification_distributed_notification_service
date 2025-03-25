@@ -1436,14 +1436,14 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
     if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
-        ANS_LOGW("The size of little icon exceeds limit");
-        request.ResetLittleIcon();
+        ANS_LOGE("The size of little icon exceeds limit");
+        return ERR_ANS_ICON_SIZE;
     }
 
     auto overlayIcon = request.GetOverlayIcon();
     if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
-        ANS_LOGW("The size of overlay icon exceeds limit");
-        request.ResetOverLayIcon();
+        ANS_LOGE("The size of overlay icon exceeds limit");
+        return ERR_ANS_ICON_SIZE;
     }
 
     ErrCode err = request.CheckImageSizeForContent();
