@@ -53,7 +53,7 @@ std::shared_ptr<NotificationAppPrivileges> NotificationConfigParse::GetAppPrivil
         return nullptr;
     }
     if (!root.contains(APP_PRIVILEGES)) {
-        ANS_LOGW("not found jsonKey appPrivileges");
+        ANS_LOGE("not found jsonKey appPrivileges");
         return nullptr;
     }
     nlohmann::json affects = root[APP_PRIVILEGES];
@@ -208,7 +208,7 @@ void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &thr
         return;
     }
     if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
-        ANS_LOGW("GetFlowCtrlConfigFromCCM not found jsonKey");
+        ANS_LOGE("GetFlowCtrlConfigFromCCM not found jsonKey");
         return;
     }
     nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
@@ -399,7 +399,7 @@ void NotificationConfigParse::GetCollaborationFilter()
 bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleName, int32_t uid) const
 {
     if (uidList_.empty() && bundleNameList_.empty()) {
-        ANS_LOGW("UidList and bundleNameList empty.");
+        ANS_LOGE("UidList and bundleNameList empty.");
         return false;
     }
 
@@ -413,7 +413,7 @@ bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleN
         return true;
     }
 
-    ANS_LOGI("Uid <%{public}d> and BundleName <%{public}s> not in CollaborationFilter.", uid, bundleName.c_str());
+    ANS_LOGE("Uid <%{public}d> and BundleName <%{public}s> not in CollaborationFilter.", uid, bundleName.c_str());
     return false;
 }
 
@@ -427,7 +427,7 @@ uint32_t NotificationConfigParse::GetStartAbilityTimeout()
         return 0;
     }
     if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
-        ANS_LOGW("GetStartAbilityTimeout not found jsonKey");
+        ANS_LOGE("GetStartAbilityTimeout not found jsonKey");
         return 0;
     }
     nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];

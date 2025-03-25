@@ -411,7 +411,7 @@ void AnsSubscriberProxy::OnApplicationInfoNeedChanged(const std::string& bundleN
     }
 
     if (!data.WriteString(bundleName)) {
-        ANS_LOGE("Write callback data failed.");
+        ANS_LOGE("Write bundleName failed.");
         return;
     }
 
@@ -433,7 +433,7 @@ ErrCode AnsSubscriberProxy::OnOperationResponse(const sptr<NotificationOperation
     }
 
     if (!data.WriteParcelable(operationInfo)) {
-        ANS_LOGE("Write notification failed.");
+        ANS_LOGE("Write operationInfo failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

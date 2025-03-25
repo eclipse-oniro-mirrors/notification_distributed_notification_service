@@ -236,7 +236,7 @@ void NotificationRequest::SetIsAgentNotification(bool isAgent)
 void NotificationRequest::AddMessageUser(const std::shared_ptr<MessageUser> &messageUser)
 {
     if (!messageUser) {
-        ANS_LOGI("messageUser can not be null");
+        ANS_LOGE("messageUser can not be null");
         return;
     }
 
@@ -364,20 +364,20 @@ bool NotificationRequest::IsColorEnabled() const
 
     // no valid content
     if (!notificationContent_) {
-        ANS_LOGI("no valid notification content");
+        ANS_LOGE("no valid notification content");
         return false;
     }
 
     // not a media content
     if (NotificationContent::Type::MEDIA != notificationContentType_) {
-        ANS_LOGI("not a media notification content");
+        ANS_LOGE("not a media notification content");
         return false;
     }
 
     auto basicContent = notificationContent_->GetNotificationContent();
     auto mediaContent = std::static_pointer_cast<NotificationMediaContent>(basicContent);
     if (!mediaContent->GetAVToken()) {
-        ANS_LOGI("AVToken has not been attached");
+        ANS_LOGE("AVToken has not been attached");
         return false;
     }
 
@@ -1136,7 +1136,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteString(distributedHashCode_)) {
-        ANS_LOGE("Failed to write sound");
+        ANS_LOGE("Failed to write distributedHashCode");
         return false;
     }
 
@@ -1618,7 +1618,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     int32_t slotTypeValue = parcel.ReadInt32();
     if (slotTypeValue < 0 ||
         slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid slot type value :%{public}d. It should be in [0 , %{public}d).",
+        ANS_LOGE("Invalid SlotType:%{public}d. It should be in [0 , %{public}d).",
             slotTypeValue, static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE));
         return false;
     }
@@ -1626,7 +1626,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     int32_t groupAlertTypeValue = parcel.ReadInt32();
     if (groupAlertTypeValue < 0 ||
         groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid groupAlert type value :%{public}d. It should be in [0 , %{public}d).",
+        ANS_LOGE("Invalid GroupAlertType:%{public}d. It should be in [0 , %{public}d).",
             groupAlertTypeValue, static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE));
         return false;
     }
@@ -1634,14 +1634,14 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     int32_t visiblenessTypeValue = parcel.ReadInt32();
     if (visiblenessTypeValue < 0 ||
         visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness type value :%{public}d. It should be in [0 , %{public}d).",
+        ANS_LOGE("Invalid VisiblenessType:%{public}d. It should be in [0 , %{public}d).",
             visiblenessTypeValue, static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE));
         return false;
     }
     visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(visiblenessTypeValue);
     int32_t badgeStyleValue = parcel.ReadInt32();
     if (badgeStyleValue < 0) {
-        ANS_LOGE("Invalid badge style value :%{public}d. It should be greater than 0.", badgeStyleValue);
+        ANS_LOGE("Invalid badgeStyle:%{public}d. It should be greater than 0.", badgeStyleValue);
         return false;
     }
     if (badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
@@ -1653,7 +1653,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     int32_t notificationContentTypeValue = parcel.ReadInt32();
     if (notificationContentTypeValue <= static_cast<int>(NotificationContent::Type::NONE) ||
         notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid notification content type value :%{public}d. It should be in (%{public}d , %{public}d)",
+        ANS_LOGE("Invalid notificationContent:%{public}d. It should be in (%{public}d , %{public}d)",
             notificationContentTypeValue, static_cast<int>(NotificationContent::Type::NONE),
             static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE));
         return false;

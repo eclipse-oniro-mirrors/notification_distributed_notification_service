@@ -88,27 +88,27 @@ std::string NotificationOperationInfo::Dump()
 bool NotificationOperationInfo::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(actionName_)) {
-        ANS_LOGE("Failed to write action name");
+        ANS_LOGE("Failed to write actionName");
         return false;
     }
 
     if (!parcel.WriteString(userInput_)) {
-        ANS_LOGE("Failed to write user input");
+        ANS_LOGE("Failed to write userInput");
         return false;
     }
 
     if (!parcel.WriteString(hashCode_)) {
-        ANS_LOGE("Failed to write user input");
+        ANS_LOGE("Failed to write hashCode");
         return false;
     }
 
     if (!parcel.WriteString(eventId_)) {
-        ANS_LOGE("Failed to write user input");
+        ANS_LOGE("Failed to write eventId");
         return false;
     }
 
     if (!parcel.WriteInt32(static_cast<int32_t>(operationType_))) {
-        ANS_LOGE("Failed to write user input");
+        ANS_LOGE("Failed to write operationType");
         return false;
     }
 
@@ -118,22 +118,22 @@ bool NotificationOperationInfo::Marshalling(Parcel &parcel) const
 bool NotificationOperationInfo::ReadFromParcel(Parcel &parcel)
 {
     if (!parcel.ReadString(actionName_)) {
-        ANS_LOGE("Failed to read action name");
+        ANS_LOGE("Failed to read actionName");
         return false;
     }
 
     if (!parcel.ReadString(userInput_)) {
-        ANS_LOGE("Failed to read user input");
+        ANS_LOGE("Failed to read userInput");
         return false;
     }
 
     if (!parcel.ReadString(hashCode_)) {
-        ANS_LOGE("Failed to read action name");
+        ANS_LOGE("Failed to read hashCode");
         return false;
     }
 
     if (!parcel.ReadString(eventId_)) {
-        ANS_LOGE("Failed to read user input");
+        ANS_LOGE("Failed to read eventId");
         return false;
     }
 

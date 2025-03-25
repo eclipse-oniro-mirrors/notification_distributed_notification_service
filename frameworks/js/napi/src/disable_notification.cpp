@@ -26,7 +26,7 @@ bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, value, &valuetype), false);
     if (valuetype != napi_boolean) {
-        ANS_LOGW("wrong argument type. Bool expected");
+        ANS_LOGE("wrong argument type. Bool expected");
         std::string msg = "Incorrect parameter types.The type of disabled must be boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return false;

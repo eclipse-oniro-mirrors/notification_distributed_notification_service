@@ -220,7 +220,7 @@ bool NotificationLiveViewContent::Marshalling(Parcel &parcel) const
     }
     if (valid) {
         if (!parcel.WriteParcelable(extraInfo_.get())) {
-            ANS_LOGE("Failed to write additionalParams");
+            ANS_LOGE("Failed to write extraInfo");
             return false;
         }
     }

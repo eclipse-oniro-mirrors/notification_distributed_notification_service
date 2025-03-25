@@ -34,14 +34,14 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     // argv[0]: date:type
     NAPI_CALL(env, napi_has_named_property(env, argv, "type", &hasProperty));
     if (!hasProperty) {
-        ANS_LOGW("Wrong argument type. Property type expected.");
+        ANS_LOGE("Wrong argument type. Property type expected.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
     napi_get_named_property(env, argv, "type", &value);
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGW("Wrong argument type. Number expected.");
+        ANS_LOGE("Wrong argument type. Number expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -59,7 +59,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     // argv[0]: date:begin
     NAPI_CALL(env, napi_has_named_property(env, argv, "begin", &hasProperty));
     if (!hasProperty) {
-        ANS_LOGW("Wrong argument type. Property type expected.");
+        ANS_LOGE("Wrong argument type. Property type expected.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -79,7 +79,7 @@ napi_value GetDoNotDisturbDate(const napi_env &env, const napi_value &argv, SetD
     // argv[0]: date:end
     NAPI_CALL(env, napi_has_named_property(env, argv, "end", &hasProperty));
     if (!hasProperty) {
-        ANS_LOGW("Wrong argument type. Property type expected.");
+        ANS_LOGE("Wrong argument type. Property type expected.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -190,7 +190,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_DISTURB_MIN_PARA) {
-        ANS_LOGW("Wrong argument type. Property type expected.");
+        ANS_LOGE("Wrong argument type. Property type expected.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -199,7 +199,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Wrong argument type. Property type expected.");
+        ANS_LOGE("Wrong argument type. Property type expected.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -212,7 +212,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= SET_DISTURB_MAX_PARA - 1) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if ((valuetype != napi_number) && (valuetype != napi_function)) {
-            ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+            ANS_LOGE("Wrong argument type. Function or object expected. Excute promise.");
             return Common::NapiGetNull(env);
         }
 

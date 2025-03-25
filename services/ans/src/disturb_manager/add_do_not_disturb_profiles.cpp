@@ -52,7 +52,7 @@ ErrCode DisturbManager::AddDoNotDisturbProfilesSyncQueue(
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGW("No active user found.");
+        ANS_LOGE("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
     AdvancedNotificationService::GetInstance()->SubmitSyncTask(

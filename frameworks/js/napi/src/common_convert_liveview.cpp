@@ -117,7 +117,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
         bool flag = localLiveViewContent->isFlagExist(
             NotificationLocalLiveViewContent::LiveViewContentInner::INITIAL_TIME);
         if (!SetTime(env, localLiveViewContent->GetTime(), time, flag)) {
-            ANS_LOGE("SetMessageUser call failed");
+            ANS_LOGE("SetTime call failed");
             return NapiGetBoolean(env, false);
         }
         napi_set_named_property(env, result, "time", time);
@@ -151,7 +151,7 @@ napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &ca
         iconResult = Media::PixelMapNapi::CreatePixelMap(env, icon);
         NAPI_CALL(env, napi_typeof(env, iconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGW("iconResult is undefined");
+            ANS_LOGE("iconResult is undefined");
             napi_set_named_property(env, result, "icon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "icon", iconResult);
@@ -734,7 +734,7 @@ napi_value Common::GetNotificationIconButton(
             // icon?: Resource
             auto resource = std::make_shared<ResourceManager::Resource>();
             if (Common::GetResourceObject(env, resource, iconResource) == nullptr) {
-                ANS_LOGI("Invalid icon resource object or not resource.");
+                ANS_LOGE("Invalid icon resource object or not resource.");
             } else {
                 button.SetIconResource(resource);
             }

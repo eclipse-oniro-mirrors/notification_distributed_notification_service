@@ -315,7 +315,7 @@ bool Notification::MarshallingString(Parcel &parcel) const
 bool Notification::MarshallingInt32(Parcel &parcel) const
 {
     if (!parcel.WriteInt32(ledLightColor_)) {
-        ANS_LOGE("Can't write ledLigthColor");
+        ANS_LOGE("Can't write ledLightColor");
         return false;
     }
 

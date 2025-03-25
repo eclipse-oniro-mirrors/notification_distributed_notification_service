@@ -93,7 +93,7 @@ bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, c
     int32_t callingUserId;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
     if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
-        ANS_LOGW("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
+        ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
             bundleName.c_str());
         return false;
     }

@@ -484,7 +484,7 @@ napi_value Common::GetNotificationUserInputByInputKey(
     ANS_LOGI("NotificationUserInput::inputKey = %{public}s", str);
     userInput = NotificationUserInput::Create(str);
     if (!userInput) {
-        ANS_LOGI("Failed to create NotificationUserInput by inputKey=%{public}s", str);
+        ANS_LOGE("Failed to create NotificationUserInput by inputKey=%{public}s", str);
         return nullptr;
     }
 
@@ -1218,7 +1218,7 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
     const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &agent)
 {
     if (agent == nullptr) {
-        ANS_LOGI("agent is nullptr");
+        ANS_LOGE("agent is nullptr");
         return nullptr;
     }
 

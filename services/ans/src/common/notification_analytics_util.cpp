@@ -461,7 +461,7 @@ void NotificationAnalyticsUtil::ReportModifyEvent(const HaMetaMessage& message)
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const HaMetaMessage& message)
 {
     if (!ReportFlowControl(DELETE_ERROR_EVENT_CODE)) {
-        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        ANS_LOGE("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
     EventFwk::Want want;
@@ -859,7 +859,7 @@ int64_t NotificationAnalyticsUtil::GetCurrentTime()
 void NotificationAnalyticsUtil::ReportOperationsDotEvent(const HaMetaMessage& message)
 {
     if (!ReportFlowControl(ANS_CUSTOMIZE_CODE)) {
-        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        ANS_LOGE("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
     EventFwk::Want want;
@@ -876,7 +876,7 @@ void NotificationAnalyticsUtil::ReportOperationsDotEvent(const HaMetaMessage& me
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const HaMetaMessage& message)
 {
     if (!ReportFlowControl(PUBLISH_ERROR_EVENT_CODE)) {
-        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        ANS_LOGE("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
     EventFwk::Want want;
@@ -954,7 +954,7 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const HaMetaMessage& message
 void NotificationAnalyticsUtil::ReportSkipFailedEvent(const HaMetaMessage& message)
 {
     if (!ReportFlowControl(MODIFY_ERROR_EVENT_CODE)) {
-        ANS_LOGI("Publish event failed, reason:%{public}s", message.Build().c_str());
+        ANS_LOGE("Publish event failed, reason:%{public}s", message.Build().c_str());
         return;
     }
     EventFwk::Want want;

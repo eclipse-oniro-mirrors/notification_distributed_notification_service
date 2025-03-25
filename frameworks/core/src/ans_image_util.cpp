@@ -42,12 +42,12 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     std::set<std::string> formats;
     auto ret = imagePacker.GetSupportedFormats(formats);
     if (ret) {
-        ANS_LOGE("Failed to GetSupportedFormats, ret : %{public}u", ret);
+        ANS_LOGE("Failed to GetSupportedFormats, ret:%{public}u", ret);
         return {};
     }
 
     auto size = static_cast<uint32_t>(pixelMap->GetByteCount());
-    ANS_LOGD("size of pixelMap : %{public}u", size);
+    ANS_LOGD("size of pixelMap:%{public}u", size);
     if (size < DEFAULT_SIZE) {
         size = DEFAULT_SIZE;
     }
@@ -61,7 +61,7 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     imagePacker.AddImage(*pixelMap);
     int64_t packedSize {0};
     imagePacker.FinalizePacking(packedSize);
-    ANS_LOGD("packed size : %{public}" PRId64, packedSize);
+    ANS_LOGD("packed size:%{public}" PRId64, packedSize);
 
     std::string pixelMapStr(reinterpret_cast<char*>(pbuf), static_cast<size_t>(packedSize));
     delete [] pbuf;
@@ -106,7 +106,7 @@ bool AnsImageUtil::PackImage2File(
     const std::string &format)
 {
     if (!pixelMap || outFilePath.empty() || format.empty()) {
-        ANS_LOGW("invalid parameters");
+        ANS_LOGE("invalid parameters");
         return false;
     }
 
@@ -127,14 +127,14 @@ bool AnsImageUtil::PackImage2File(
     imagePacker.AddImage(*pixelMap);
     int64_t packedSize {0};
     imagePacker.FinalizePacking(packedSize);
-    ANS_LOGI("packed size : %{public}" PRId64, packedSize);
+    ANS_LOGI("packed size:%{public}" PRId64, packedSize);
     return true;
 }
 
 std::shared_ptr<Media::PixelMap> AnsImageUtil::CreatePixelMap(const std::string &inFilePath, const std::string &format)
 {
     if (inFilePath.empty() || format.empty()) {
-        ANS_LOGW("invalid parameters");
+        ANS_LOGE("invalid parameters");
         return {};
     }
 
@@ -150,7 +150,7 @@ std::shared_ptr<Media::PixelMap> AnsImageUtil::CreatePixelMap(const std::string 
     std::set<std::string> formats;
     auto ret = imageSource->GetSupportedFormats(formats);
     if (ret) {
-        ANS_LOGE("image packer get supported format failed, ret : %{public}u", ret);
+        ANS_LOGE("image packer get supported format failed, ret:%{public}u", ret);
         return {};
     }
 
@@ -167,7 +167,7 @@ std::shared_ptr<Media::PixelMap> AnsImageUtil::CreatePixelMap(const std::string 
 bool AnsImageUtil::ImageScale(const std::shared_ptr<Media::PixelMap> &pixelMap, int32_t width, int32_t height)
 {
     if (!pixelMap || width == 0 || height == 0) {
-        ANS_LOGW("invalid parameters");
+        ANS_LOGE("invalid parameters");
         return false;
     }
 
@@ -186,7 +186,7 @@ bool AnsImageUtil::ImageScale(const std::shared_ptr<Media::PixelMap> &pixelMap, 
 std::shared_ptr<Media::PixelMap> AnsImageUtil::CreatePixelMapByString(const std::string &imagedata)
 {
     if (imagedata.empty()) {
-        ANS_LOGW("invalid parameters");
+        ANS_LOGE("invalid parameters");
         return {};
     }
 

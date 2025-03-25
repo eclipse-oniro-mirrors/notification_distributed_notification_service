@@ -83,7 +83,7 @@ bool NotificationSorting::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteInt32(visiblenessOverride_)) {
-        ANS_LOGE("Can't write importance");
+        ANS_LOGE("Can't write visiblenessOverride");
         return false;
     }
 

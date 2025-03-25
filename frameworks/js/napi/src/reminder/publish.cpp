@@ -77,7 +77,7 @@ napi_value GetCallback(const napi_env &env, const napi_value &value, AsyncCallba
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
     if (valuetype != napi_function) {
-        ANSR_LOGW("Wrong argument type. Function expected.");
+        ANSR_LOGE("Wrong argument type. Function expected.");
         return nullptr;
     }
     napi_create_reference(env, value, 1, &asyncCallbackInfo.callback);
@@ -97,7 +97,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value argv[PUBLISH_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < 1) {
-        ANSR_LOGW("Wrong number of arguments");
+        ANSR_LOGE("Wrong number of arguments");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -107,7 +107,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: callback
     if (argc >= PUBLISH_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGW("[reminderAgent]GetCallbak returns nullptr");
+            ANSR_LOGE("[reminderAgent]GetCallbak returns nullptr");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -117,7 +117,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
     // argv[0] : reminderRequest
     if (ReminderCommon::GetReminderRequest(env, argv[0], params.reminder) == nullptr) {
-        ANSR_LOGW("[reminderAgent]CreateReminder returns nullptr");
+        ANSR_LOGE("[reminderAgent]CreateReminder returns nullptr");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -134,7 +134,7 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
     napi_value argv[ADD_SLOT_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < 1) {
-        ANSR_LOGW("Wrong number of arguments");
+        ANSR_LOGE("Wrong number of arguments");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -144,7 +144,7 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
     // argv[1]: callback
     if (argc >= ADD_SLOT_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGW("GetCallbak returns nullptr");
+            ANSR_LOGE("GetCallbak returns nullptr");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -159,7 +159,7 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
     int32_t propertyVal = 0;
     if (!ReminderCommon::GetInt32(env, argv[0], propertyKey, propertyVal, false) &&
         !ReminderCommon::GetInt32(env, argv[0], propertyNewKey, propertyVal, false)) {
-        ANSR_LOGW("Failed to get valid slot type.");
+            ANSR_LOGE("Failed to get valid slot type.");
         params.errCode = ERR_REMINDER_INVALID_PARAM;
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
@@ -168,7 +168,7 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
     }
 
     if (!NotificationNapi::AnsEnumUtil::SlotTypeJSToC(NotificationNapi::SlotType(propertyVal), params.inType)) {
-        ANSR_LOGW("Failed to get valid slot type");
+        ANSR_LOGE("Failed to get valid slot type");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -185,7 +185,7 @@ napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &i
     napi_value argv[CANCEL_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < 1) {
-        ANSR_LOGW("Wrong number of arguments");
+        ANSR_LOGE("Wrong number of arguments");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -195,7 +195,7 @@ napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &i
     // argv[1]: callback
     if (argc >= CANCEL_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGW("GetCallbak is nullptr");
+            ANSR_LOGE("GetCallbak is nullptr");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -212,7 +212,7 @@ napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &i
         return nullptr;
     }
     if (reminderId < 0) {
-        ANSR_LOGW("Param id of cancels Reminder is illegal.");
+        ANSR_LOGE("Param id of cancels Reminder is illegal.");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -234,7 +234,7 @@ napi_value ParseCanCelAllParameter(const napi_env &env, const napi_callback_info
     // argv[0]: callback
     if (argc >= CANCEL_ALL_PARAM_LEN) {
         if (GetCallback(env, argv[0], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGW("getCallbak is nullptr");
+            ANSR_LOGE("getCallbak is nullptr");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -254,7 +254,7 @@ napi_value ParseGetValidParameter(const napi_env &env, const napi_callback_info 
     // argv[0]: callback
     if (argc >= GET_VALID_PARAM_LEN) {
         if (GetCallback(env, argv[0], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGW("getCallbak is nullptr");
+            ANSR_LOGE("getCallbak is nullptr");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -1154,7 +1154,7 @@ napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback
     napi_value argv[ADD_EXCLUDE_DATE_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < ADD_EXCLUDE_DATE_PARAM_LEN) {
-        ANSR_LOGW("Wrong number of arguments");
+        ANSR_LOGE("Wrong number of arguments");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
@@ -1162,12 +1162,12 @@ napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback
     // argv[0]: reminder id
     int32_t reminderId = -1;
     if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
-        ANSR_LOGW("Parse reminder id failed.");
+        ANSR_LOGE("Parse reminder id failed.");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
     if (reminderId < 0) {
-        ANSR_LOGW("Param reminder id is illegal.");
+        ANSR_LOGE("Param reminder id is illegal.");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
@@ -1176,12 +1176,12 @@ napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback
     // argv[1]: exclude date
     double date = 0.0;
     if (!ReminderCommon::GetDate(env, argv[1], nullptr, date)) {
-        ANSR_LOGW("Parse exclude date failed.");
+        ANSR_LOGE("Parse exclude date failed.");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
     if (date < 0.0) {
-        ANSR_LOGW("Param exclude date is illegal.");
+        ANSR_LOGE("Param exclude date is illegal.");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
@@ -1255,7 +1255,7 @@ napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_inf
     napi_value argv[DEL_EXCLUDE_DATE_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < DEL_EXCLUDE_DATE_PARAM_LEN) {
-        ANSR_LOGW("Wrong number of arguments");
+        ANSR_LOGE("Wrong number of arguments");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
@@ -1263,12 +1263,12 @@ napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_inf
     // argv[0]: reminder id
     int32_t reminderId = -1;
     if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
-        ANSR_LOGW("Parse reminder id failed.");
+        ANSR_LOGE("Parse reminder id failed.");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }
     if (reminderId < 0) {
-        ANSR_LOGW("Param reminder id is illegal.");
+        ANSR_LOGE("Param reminder id is illegal.");
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         return nullptr;
     }

@@ -39,7 +39,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SET_STATUS_PARA_NUM) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGE("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -48,7 +48,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: deviceType: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGW("Argument type error. String expected.");
+        ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter deviceType. The type of param must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -67,7 +67,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: status: number
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGW("Argument type error. number expected.");
+        ANS_LOGE("Argument type error. number expected.");
         std::string msg = "Incorrect parameter status. The type of param must be number.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
