@@ -417,6 +417,12 @@ public:
      */
     uint32_t GetHashCodeRule(const int32_t uid);
 
+    bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+
+    bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;
