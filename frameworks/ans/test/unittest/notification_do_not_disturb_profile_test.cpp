@@ -110,28 +110,6 @@ HWTEST_F(NotificationDoNotDisturbProfileTest, Marshalling_0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReadFromParcel_0100
- * @tc.desc: test it when trustlist_ emplace success.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationDoNotDisturbProfileTest, ReadFromParcel_0100, TestSize.Level1)
-{
-    int32_t id = 1;
-    std::string name = "name";
-    std::vector<NotificationBundleOption> trustlist;
-    NotificationBundleOption bundleOption;
-    trustlist.emplace_back(bundleOption);
-    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
-
-    Parcel parcel;
-    parcel.WriteUint32(10);
-    auto res = rrc->ReadFromParcel(parcel);
-    sptr<NotificationBundleOption> notification = new (std::nothrow) NotificationBundleOption();
-    parcel.WriteParcelable(notification);
-    EXPECT_EQ(res, true);
-}
-
-/**
  * @tc.name: ReadFromParcel_0200
  * @tc.desc: test it when trustlist_ emplace success.
  * @tc.type: FUNC
