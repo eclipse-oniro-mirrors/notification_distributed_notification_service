@@ -386,7 +386,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     record->deviceId = "deviceId";
-#endif  // DISTRIBUTED_NOTIFICATION_SUPPORTED 
+#endif  // DISTRIBUTED_NOTIFICATION_SUPPORTED
     advancedNotificationService_->AssignToNotificationList(record);
     advancedNotificationService_->OnBundleDataCleared(bundle);
     SleepForFC();

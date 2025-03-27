@@ -80,15 +80,16 @@ bool BundleMgrProxy::GetApplicationInfo(
 bool BundleMgrProxy::GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId)
 {
     if (Notification::g_setBundleInfoEnabled) {
+        int i = 1;
         BundleInfo info;
         info.applicationInfo.allowEnableNotification = true;
         info.applicationInfo.bundleName = "test";
-        info.uid = 1;
+        info.uid = i;
         bundleInfos.push_back(info);
         BundleInfo info1;
         info1.applicationInfo.allowEnableNotification = false;
         info1.applicationInfo.bundleName = "test1";
-        info1.uid = 2;
+        info1.uid = i+1;
         bundleInfos.push_back(info);
         return true;
     }

@@ -1786,7 +1786,7 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckDistributedNotificationType_0300,
     req->SetDevicesSupportDisplay(devices);
     ASSERT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), false);
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0300 test end";
-}    
+}
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_19900
