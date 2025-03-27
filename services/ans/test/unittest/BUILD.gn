@@ -588,6 +588,7 @@ ohos_unittest("notification_preferences_test") {
     ".",
     "include",
     "/${services_path}/ans/include",
+    "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/test/unittest/mock/include",
   ]
 

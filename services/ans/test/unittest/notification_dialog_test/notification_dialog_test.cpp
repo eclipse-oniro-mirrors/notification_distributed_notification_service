@@ -104,5 +104,31 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest 
         false);
     ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
+
+/**
+ * @tc.name      : NotificationDialog_00500
+ * @tc.number    :
+ * @tc.desc      : test StartEnableNotificationDialogAbility function
+ */
+HWTEST_F(NotificationDialogTest, NotificationDialog_00500, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 1);
+
+    std::string bundleName = "BundleName";
+    int32_t result2 =  NotificationDialog::GetUidByBundleName(bundleName);
+    int32_t code = -1;
+    ASSERT_EQ(result2, code);
+
+    int32_t uid = 100;
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result3 =  NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        bundleName,
+        callerToken,
+        true);
+    ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -1040,6 +1040,28 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_277000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number    : DoDistributedPublish_4000
+ * @tc.name      : DoDistributedPublish
+ * @tc.desc      : Test DoDistributedPublish function return ERR_ANS_MISSIONPER_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, DoDistributedPublish_4000, Function | SmallTest | Level1)
+{
+    MockGetDistributedEnableInApplicationInfo(true, 1);
+    MockGetOsAccountLocalIdFromUid(false, 2);
+    MockDistributedNotificationEnabled(true);
+    advancedNotificationService_->EnableDistributed(true);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
+        TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+        int notificationId = 1;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundleOption);
+    ASSERT_EQ(advancedNotificationService_->DoDistributedPublish(bundleOption, record),
+        (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+}
+
+/**
  * @tc.number    : AnsBranchTest_278000
  * @tc.name      : GetDistributedEnableInApplicationInfo_3000
  * @tc.desc      : Test GetDistributedEnableInApplicationInfo function return ERR_ANS_PERMISSION_DENIED.
@@ -1047,6 +1069,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_277000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
 {
+    MockGetDistributedEnableInApplicationInfo(false, 2);
     MockGetOsAccountLocalIdFromUid(false, 3);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
         TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);

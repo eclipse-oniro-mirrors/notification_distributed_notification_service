@@ -37,6 +37,7 @@ public:
     int GetUidByBundleName(const std::string &bundleName, const int userId) override;
     bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
+    bool GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId) override;
 };
 }  // namespace AppExecFwk
 
