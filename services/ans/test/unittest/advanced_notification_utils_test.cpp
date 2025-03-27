@@ -381,7 +381,7 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
 {
     int notificationId = 1;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
-    ptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetNotificationId(notificationId);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
