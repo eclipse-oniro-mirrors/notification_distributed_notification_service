@@ -1805,11 +1805,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
 
     request->SetSlotType(slotType);
     request->SetOwnerBundleName("test");
-    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
     sptr<NotificationRequest> request1 = new NotificationRequest();
-    advancedNotificationService_.notificationSvrQueue_ = nullptr;
-    advancedNotificationService_.OnDistributedPublish(deviceId, bundleName, request);
+    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
 }
