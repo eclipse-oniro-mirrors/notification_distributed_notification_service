@@ -584,12 +584,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
-    bool isCommonLiveView = notification->GetNotificationRequest().IsCommonLiveView();
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
-    if (isCommonLiveView) {
-        liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-            notification->GetNotificationRequest().GetContent()->GetNotificationContent());
-    }
 
     ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
