@@ -77,5 +77,22 @@ bool BundleMgrProxy::GetApplicationInfo(
     return true;
 }
 
+bool BundleMgrProxy::GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId)
+{
+    if (Notification::g_setBundleInfoEnabled) {
+        BundleInfo info;
+        info.applicationInfo.allowEnableNotification = true;
+        info.applicationInfo.bundleName = "test";
+        info.uid = 1;
+        bundleInfos.push_back(info);
+        BundleInfo info1;
+        info1.applicationInfo.allowEnableNotification = false;
+        info1.applicationInfo.bundleName = "test1";
+        info1.uid = 2;
+        bundleInfos.push_back(info);
+        return true;
+    }
+    return false;
+}
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -381,14 +381,36 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
 {
     int notificationId = 1;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
-    TestAddNotification(notificationId, bundle);
-
+    ptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    record->deviceId = "deviceId";
+#endif  // DISTRIBUTED_NOTIFICATION_SUPPORTED 
+    advancedNotificationService_->AssignToNotificationList(record);
     advancedNotificationService_->OnBundleDataCleared(bundle);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
 
-    AdvancedNotificationService ans;
-    ans.notificationSvrQueue_ = nullptr;
-    ans.OnBundleDataCleared(bundle);
-    EXPECT_NE(advancedNotificationService_, nullptr);
+/**
+ * @tc.name: OnBundleDataCleared_00002
+ * @tc.desc: Test OnBundleDataCleared
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00002, Function | SmallTest | Level1)
+{
+    int notificationId = 1;
+    AdvancedNotificationService advancedNotificationService;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService.MakeNotificationRecord(request, bundle);
+    advancedNotificationService.AssignToNotificationList(record);
+    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    advancedNotificationService.OnBundleDataCleared(bundle);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 }
 
 /**
@@ -399,7 +421,13 @@ HWTEST_F(AnsUtilsTest, OnBundleDataCleared_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00001, Function | SmallTest | Level1)
 {
+    MockSetBundleInfoEnabled(true);
     advancedNotificationService_->InitNotificationEnableList();
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, true);
 }
 
 /**
@@ -461,9 +489,9 @@ HWTEST_F(AnsUtilsTest, OnBundleRemoved_00002, Function | SmallTest | Level1)
 HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00001, Function | SmallTest | Level1)
 {
     int notificationId = 1;
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("OnBundleDataAdd_00001", 1);
     TestAddNotification(notificationId, bundle);
-
+    MockSetBundleInfoEnabled(false);
     advancedNotificationService_->OnBundleDataAdd(bundle);
     SleepForFC();
     bool enable = false;
@@ -483,7 +511,6 @@ HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00002, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     TestAddNotification(notificationId, bundle);
     MockSetBundleInfoEnabled(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
     advancedNotificationService_->OnBundleDataAdd(bundle);
     SleepForFC();
     bool enable = false;
@@ -520,8 +547,8 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00002, Function | SmallTest | Level1)
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     TestAddNotification(notificationId, bundle);
     MockSetBundleInfoEnabled(true);
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
     advancedNotificationService_->OnBundleDataUpdate(bundle);
+    SleepForFC();
     bool enable = false;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
     ASSERT_EQ(enable, true);
@@ -535,8 +562,9 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00002, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsUtilsTest, GetBundlesOfActiveUser_00001, Function | SmallTest | Level1)
 {
-    auto vec = advancedNotificationService_->GetBundlesOfActiveUser();
-    ASSERT_EQ(vec.size(), 0);
+    MockSetBundleInfoEnabled(true);
+    auto list = advancedNotificationService_->GetBundlesOfActiveUser();
+    ASSERT_EQ(list.size(), 2);
 }
 
 /**
@@ -547,7 +575,15 @@ HWTEST_F(AnsUtilsTest, GetBundlesOfActiveUser_00001, Function | SmallTest | Leve
  */
 HWTEST_F(AnsUtilsTest, ResetDistributedEnabled_00001, Function | SmallTest | Level1)
 {
+    std::string oldKey = "enabledNotificationDistributed-test-88-aaa";
+    std::string oldKey1 = "enabledNotificationDistributed-test-88";
+    NotificationPreferences::GetInstance()->SetKvToDb(oldKey, "1", 0);
+    NotificationPreferences::GetInstance()->SetKvToDb(oldKey1, "1", 0);
     advancedNotificationService_->ResetDistributedEnabled();
+    SleepForFC();
+    std::string value;
+    NotificationPreferences::GetInstance()->GetKvFromDb("tableVersion", value, 0);
+    ASSERT_EQ(value, "1");
 }
 
 /**
@@ -564,7 +600,16 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     cloneBundleInfo.SetIsShowBadge(true);
     cloneBundleInfo.SetEnableNotification(true);
     cloneBundleInfo.SetSlotFlags(63);
+    NotificationCloneBundleInfo::SlotInfo info;
+    info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    info.enable_ = true;
+    cloneBundleInfo.AddSlotInfo(info);
     advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, true);
 }
 
 /**
@@ -734,7 +779,25 @@ HWTEST_F(AnsUtilsTest, CloseAlert_00001, Function | SmallTest | Level1)
     request->SetFlags(flags);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->CloseAlert(record);
-    ASSERT_EQ(flags->GetReminderFlags(), 0);
+    advancedNotificationService_->AssignToNotificationList(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.front()->request->GetFlags()->GetReminderFlags(), 0);
+}
+
+/**
+ * @tc.name: OnBundleDataUpdate_00002
+ * @tc.desc: Test OnBundleDataUpdate
+ * @tc.name: IsSupportTemplate_00001
+ * @tc.desc: Test IsSupportTemplate
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, IsSupportTemplate_00001, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService ans;
+    std::string templateName = "";
+    bool support = false;
+    ASSERT_EQ(ans.IsSupportTemplate(templateName, support), (int)ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS
