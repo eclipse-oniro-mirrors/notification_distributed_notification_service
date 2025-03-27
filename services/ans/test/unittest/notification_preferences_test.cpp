@@ -1602,6 +1602,10 @@ HWTEST_F(NotificationPreferencesTest, SetSubscriberExistFlag_0100, TestSize.Leve
     NotificationPreferences notificationPreferences;
     auto ret = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
     ASSERT_EQ(ret, ERR_OK);
+    bool existFlag = true;
+    ret = notificationPreferences.GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, existFlag);
+    ASSERT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(existFlag);
 }
 
 /**
@@ -1634,10 +1638,13 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0100, TestS
     notificationPreferences.mirrorNotificationEnabledStatus_.clear();
     notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
     EXPECT_EQ(notificationPreferences.mirrorNotificationEnabledStatus_.size(), 0);
-    notificationPreferences.mirrorNotificationEnabledStatus_.push_back("testType");
+    std::string deviceType = "deviceTypeA";
+    notificationPreferences.mirrorNotificationEnabledStatus_.push_back(deviceType);
     notificationPreferences.preferncesDB_ = nullptr;
     notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
-    EXPECT_EQ(notificationPreferences.mirrorNotificationEnabledStatus_.size(), 1);
+    NotificationPreferences otherNotificationPreferences;
+    auto ret = otherNotificationPreferences.preferncesDB_->IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -1649,37 +1656,17 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0200, TestS
 {
     NotificationPreferences notificationPreferences;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    notificationPreferences.isCachedMirrorNotificationEnabledStatus_ = true;
-    std::string deviceType = "testType";
-    notificationPreferences.mirrorNotificationEnabledStatus_.push_back(deviceType);
-    notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
-    bool isDistributedEnabled = false;
-    auto ret = notificationPreferences.preferncesDB_->GetDistributedEnabledForBundle(
-        deviceType, bundleInfo, isDistributedEnabled);
-    EXPECT_EQ(ret, false);
-    EXPECT_EQ(isDistributedEnabled, false);
-}
-
-/**
- * @tc.name: SetDistributedEnabledForBundle_0300
- * @tc.desc: test SetDistributedEnabledForBundle.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0300, TestSize.Level1)
-{
-    NotificationPreferences notificationPreferences;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName("testBundleName");
     bundleInfo.SetBundleUid(1000);
     notificationPreferences.isCachedMirrorNotificationEnabledStatus_ = true;
-    std::string deviceType = "testType";
+    std::string deviceType = "deviceTypeC";
     notificationPreferences.mirrorNotificationEnabledStatus_.push_back(deviceType);
     notificationPreferences.SetDistributedEnabledForBundle(bundleInfo);
     bool isDistributedEnabled = false;
     auto ret = notificationPreferences.preferncesDB_->GetDistributedEnabledForBundle(
         deviceType, bundleInfo, isDistributedEnabled);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(isDistributedEnabled, true);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(isDistributedEnabled);
 }
 
 /**
