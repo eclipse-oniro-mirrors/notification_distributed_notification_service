@@ -139,16 +139,12 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
         return false;
     }
 
-    bool isAtLastRow = false;
-    int32_t ret = resultSet->IsAtLastRow(isAtLastRow);
-    while (ret == 0 && !isAtLastRow) {
-        resultSet->GoToNextRow();
+    while (resultSet->GoToNextRow() == NativeRdb::E_OK) {
         sptr<ReminderRequest> reminder = CreateReminder(resultSet);
         if (reminder == nullptr) {
             continue;
         }
         reminders[reminder->GetIdentifier()] = reminder;
-        ret = resultSet->IsAtLastRow(isAtLastRow);
     }
     ReleaseDataShareHelper(helper);
     ANSR_LOGD("Query size: %{public}d.", static_cast<int32_t>(reminders.size()));
