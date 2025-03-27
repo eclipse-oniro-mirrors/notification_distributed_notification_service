@@ -29,5 +29,8 @@ public:
     virtual int32_t OnCheckNotification(const std::string &notificationData,
         const std::shared_ptr<Notification::PushCallBackParam> &pushCallBackParam) override;
 };
+namespace Notification {
+void MockOnCheckNotification(const int32_t retOnCheckNotification);
+} // namespace Notification
 }  // namespace OHOS
 #endif  // ANS_MOCK_PUSH_CALL_BACK_STUB_H

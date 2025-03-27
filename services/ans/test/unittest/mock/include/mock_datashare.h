@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,19 @@
  * limitations under the License.
  */
 
-#include "mock_push_callback_stub.h"
+#ifndef BASE_NOTIFICATION_MOCK_DATASHARE_H
+#define BASE_NOTIFICATION_MOCK_DATASHARE_H
 
 namespace OHOS {
 namespace Notification {
-namespace {
-int32_t g_retOnCheckNotification = 0;
-}
+void MockIsFailedGoToFirstRow(const int GoToFirstRow);
 
-void MockOnCheckNotification(const int32_t retOnCheckNotification)
-{
-    g_retOnCheckNotification = retOnCheckNotification;
-}
+void MockGetStringValue(const std::string& getStringValue);
 
+void MockIsFailedToCreateDataShareHelper(const bool isFailed);
+
+void MockIsFailedToQueryDataShareResultSet(const bool isFailed);
 } // namespace Notification
-MockPushCallBackStub::MockPushCallBackStub() {}
-MockPushCallBackStub::~MockPushCallBackStub() {}
-int32_t MockPushCallBackStub::OnCheckNotification(const std::string &notificationData,
-    const std::shared_ptr<Notification::PushCallBackParam> &pushCallBackParam)
-{
-    return Notification::g_retOnCheckNotification;
-}
 } // namespace OHOS
+
+#endif
