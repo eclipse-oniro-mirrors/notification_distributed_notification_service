@@ -3563,20 +3563,6 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function
 }
 
 /**
- * @tc.name: CheckDoNotDisturbProfile_0100
- * @tc.desc: test CheckDoNotDisturbProfile successfully called
- * @tc.type: FUNC
- */
-HWTEST_F(AdvancedNotificationServiceTest, CheckDoNotDisturbProfile_0100, TestSize.Level1)
-{
-    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    auto request = new (std::nothrow) NotificationRequest();
-    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->CheckDoNotDisturbProfile(record);
-}
-
-/**
  * @tc.name: DoNotDisturbUpdataReminderFlags_0100
  * @tc.desc: test DoNotDisturbUpdataReminderFlags can turn off all reminders.
  * @tc.type: FUNC

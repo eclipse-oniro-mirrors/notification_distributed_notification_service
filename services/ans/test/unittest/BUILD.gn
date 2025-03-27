@@ -1365,7 +1365,9 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_mgr.cpp",
+    "mock/mock_datashare.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_push_callback_stub.cpp",
     "mock/mock_time_service_client.cpp",
   ]
 
@@ -1382,10 +1384,16 @@ ohos_unittest("advanced_notification_service_unit_test") {
     include_dirs += [ "${services_path}/distributed/include" ]
   }
 
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+  }
+
   external_deps = [
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "data_share:datashare_common",
+    "data_share:datashare_consumer",
     "ffrt:libffrt",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
