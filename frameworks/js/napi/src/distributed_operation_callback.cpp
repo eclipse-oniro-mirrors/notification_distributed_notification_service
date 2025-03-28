@@ -28,12 +28,12 @@ DistributedOperationCallback::~DistributedOperationCallback()
 {
 }
 
-void DistributedOperationCallback::OnOperationCallback(const int32_t operationResult)
+ErrCode DistributedOperationCallback::OnOperationCallback(const int32_t operationResult)
 {
     OperationOnCallBack *operationOnCallBack = new (std::nothrow) OperationOnCallBack();
     if (operationOnCallBack == nullptr) {
         ANS_LOGE("new operationOnCallBack failed");
-        return;
+        return ERR_INVALID_DATA;
     }
 
     if (operationResult != ERR_OK) {
@@ -47,6 +47,7 @@ void DistributedOperationCallback::OnOperationCallback(const int32_t operationRe
     if (!bRet) {
         ANS_LOGE("DistributedOperationCallback::OnCallBack failed");
     }
+    return ERR_OK;
 }
 
 void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t status)

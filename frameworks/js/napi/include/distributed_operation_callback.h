@@ -23,11 +23,11 @@
 
 namespace OHOS::NotificationNapi {
 
-class DistributedOperationCallback : public OperationCallbackStub {
+class DistributedOperationCallback : public AnsOperationCallbackStub {
 public:
     explicit DistributedOperationCallback(const AsyncOperationCallbackInfo &asyncCallbackInfo);
     ~DistributedOperationCallback() override;
-    void OnOperationCallback(const int32_t operationResult) override;
+    ErrCode OnOperationCallback(const int32_t operationResult) override;
 
 private:
     static void UvWorkOnCallBack(uv_work_t *work, int32_t status);

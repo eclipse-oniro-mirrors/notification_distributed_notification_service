@@ -32,7 +32,7 @@
 #include "notification_slot.h"
 #include "notification_subscribe_info.h"
 #include "reminder_request.h"
-#include "ans_operation_callback_interface.h"
+#include "ians_operation_callback.h"
 
 namespace OHOS {
 namespace Notification {
@@ -1027,7 +1027,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-        const sptr<OperationCallbackInterface> &callback) = 0;
+        const sptr<IAnsOperationCallback> &callback) = 0;
 
     /**
      * @brief Reply distribute operation.

@@ -2691,7 +2691,7 @@ ErrCode AnsManagerStub::HandleDistributeOperation(MessageParcel &data, MessagePa
         return ERR_INVALID_DATA;
     }
 
-    sptr<OperationCallbackInterface> callback = iface_cast<OperationCallbackInterface>(remote);
+    sptr<IAnsOperationCallback> callback = iface_cast<IAnsOperationCallback>(remote);
     if (callback.GetRefPtr() == nullptr) {
         ANS_LOGE("callback is null");
         return ERR_INVALID_DATA;

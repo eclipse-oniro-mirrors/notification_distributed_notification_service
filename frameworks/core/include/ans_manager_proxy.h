@@ -1008,7 +1008,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-        const sptr<OperationCallbackInterface> &callback) override;
+        const sptr<IAnsOperationCallback> &callback) override;
 
     /**
      * @brief Reply distribute operation.

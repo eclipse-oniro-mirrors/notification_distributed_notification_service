@@ -3322,7 +3322,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
 }
 
 ErrCode DistributeOperationParamCheck(sptr<NotificationOperationInfo>& operationInfo,
-    const sptr<OperationCallbackInterface> &callback)
+    const sptr<IAnsOperationCallback> &callback)
 {
     if (operationInfo == nullptr || operationInfo->GetHashCode().empty()) {
         ANS_LOGE("hashCode is empty.");
@@ -3350,7 +3350,7 @@ ErrCode DistributeOperationParamCheck(sptr<NotificationOperationInfo>& operation
 }
 
 ErrCode AdvancedNotificationService::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-    const sptr<OperationCallbackInterface> &callback)
+    const sptr<IAnsOperationCallback> &callback)
 {
     ErrCode result = DistributeOperationParamCheck(operationInfo, callback);
     if (result != ERR_OK) {

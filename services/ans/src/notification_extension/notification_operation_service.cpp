@@ -48,7 +48,7 @@ DistributedOperationService::DistributedOperationService()
 }
 
 void DistributedOperationService::AddOperation(const std::string& hashCode,
-    const sptr<OperationCallbackInterface> &callback)
+    const sptr<IAnsOperationCallback> &callback)
 {
     int32_t timeout = DistributedExtensionService::GetInstance().GetOperationReplyTimeout();
     int64_t expiredTime = NotificationAnalyticsUtil::GetCurrentTime() + timeout;

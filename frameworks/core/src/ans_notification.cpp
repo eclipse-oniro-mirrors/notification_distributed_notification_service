@@ -2084,7 +2084,7 @@ ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &n
 }
 
 ErrCode AnsNotification::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-    const sptr<OperationCallbackInterface> &callback)
+    const sptr<IAnsOperationCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (operationInfo == nullptr || callback == nullptr) {
