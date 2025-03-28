@@ -47,6 +47,8 @@ ohos_unittest("ans_unit_test") {
     "notification_local_live_view_subscriber_manager_test.cpp",
     "notification_slot_filter_test.cpp",
     "permission_filter_test.cpp",
+    "reminder_affected_test.cpp",
+    "smart_reminder_center_test.cpp",
   ]
 
   deps = [
