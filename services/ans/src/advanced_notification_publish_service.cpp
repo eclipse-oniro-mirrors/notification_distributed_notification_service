@@ -75,6 +75,8 @@ constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
+const static std::string BUNDLE_NAME_ABROAD = "com.easy.transfer.abroad";
+const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
 constexpr int32_t BADGE_NUM_LIMIT = 0;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
@@ -1041,7 +1043,15 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (bundleName == BUNDLE_NAME_ZYT) {
+    if (bundleName == BUNDLE_NAME_ZYT || bundleName == BUNDLE_NAME_ABROAD) {
+        ANS_LOGI("RequestEnableNotification zyt or abroad");
+        return ERR_ANS_NOT_ALLOWED;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, 1, bundleInfo, 0);
+    if (bundleInfo.applicationInfo.installSource == INSTALL_SOURCE_EASYABROAD) {
+        ANS_LOGI("RequestEnableNotification abroad app");
         return ERR_ANS_NOT_ALLOWED;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
