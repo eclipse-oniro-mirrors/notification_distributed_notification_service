@@ -226,6 +226,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "mock/mock_swing_callback_stub.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "notification_subscriber_manager_test.cpp",
   ]
 
