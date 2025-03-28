@@ -134,6 +134,17 @@ public:
      */
     bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
 
+    /**
+     * @brief GetBundleInfoV9.
+     * @param bundle bundle name.
+     * @param flag query condation.
+     * @param bundleInfo bundle info.
+     * @param userId userId.
+     * @return Returns the query result if succeed, retrun 0(main index) otherwise.
+     */
+    bool GetBundleInfoV9(const std::string bundle, const int32_t flag,
+        AppExecFwk::BundleInfo &bundleInfo, const int32_t userId);
+
 private:
     void Connect();
     void Disconnect();
