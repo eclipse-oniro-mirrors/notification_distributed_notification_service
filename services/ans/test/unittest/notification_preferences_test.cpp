@@ -994,6 +994,9 @@ HWTEST_F(NotificationPreferencesTest, SetHasPoppedDialog_00100, Function | Small
     bool hasPopped = false;
 
     ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundleOption_, hasPopped), (int)ERR_OK);
+
+    auto res = NotificationPreferences::GetInstance()->SetHasPoppedDialog(nullptr, hasPopped);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -1964,6 +1967,262 @@ HWTEST_F(NotificationPreferencesTest, SetHashCodeRule_00100, Function | SmallTes
     auto res = NotificationPreferences::GetInstance()->SetHashCodeRule(
         100, 1);
     ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: AddDoNotDisturbProfiles_0400
+ * @tc.desc:
+ * @tc.type:
+ */
+HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0400, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.emplace_back(nullptr);
+    int32_t userId = 1;
+    auto res = notificationPreferences.AddDoNotDisturbProfiles(userId, profiles);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    profiles.clear();
+
+    sptr<NotificationDoNotDisturbProfile> profile(new (std::nothrow) NotificationDoNotDisturbProfile());
+    profile->SetProfileId(1);
+
+    std::vector<NotificationBundleOption> trustList;
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("test");
+    bundle.SetUid(100);
+    profile->SetProfileTrustList(trustList);
+    profiles.emplace_back(profile);
+
+    notificationPreferences.preferncesDB_ = nullptr;
+    res = notificationPreferences.AddDoNotDisturbProfiles(userId, profiles);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.name: IsNotificationSlotFlagsExists_0400
+ * @tc.desc:
+ * @tc.type:
+ */
+HWTEST_F(NotificationPreferencesTest, IsNotificationSlotFlagsExists_0400, TestSize.Level1)
+{
+    auto res = NotificationPreferences::GetInstance()->IsNotificationSlotFlagsExists(nullptr);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.number    : UpdateDoNotDisturbProfiles_00300
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00300, Function | SmallTest | Level1)
+{
+    int32_t profileId = 3;
+    int32_t userId = 100;
+    std::string name = "testProfile";
+    std::vector<NotificationBundleOption> bundleList;
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.UpdateCloneBundleInfo(userId, cloneBundleInfo);
+    auto res =notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+
+    NotificationBundleOption bundleOne;
+    bundleOne.SetBundleName("test1");
+    bundleOne.SetUid(100);
+    bundleList.push_back(bundleOne);
+
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+
+    notificationPreferences.preferncesDB_ = nullptr;
+    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+}
+
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0400
+ * @tc.desc:
+ * @tc.type:
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0400, TestSize.Level1)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    profiles.emplace_back(nullptr);
+    int32_t userId = 1;
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.RemoveDoNotDisturbProfiles(userId, profiles);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    profiles.clear();
+
+    notificationPreferences.preferncesDB_ = nullptr;
+    res = notificationPreferences.RemoveDoNotDisturbProfiles(userId, profiles);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+}
+
+/**
+ * @tc.number    : RemoveNotificationAllSlots_00400
+ * @tc.name      : RemoveNotificationAllSlots
+ * @tc.require   :
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationAllSlots_00400, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_OK);
+
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.RemoveNotificationAllSlots(bundleOption_);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+
+/**
+ * @tc.number    : AddNotificationBundleProperty_00400
+ * @tc.name      : AddNotificationBundleProperty
+ * @tc.require   :
+ */
+HWTEST_F(NotificationPreferencesTest, AddNotificationBundleProperty_00400, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_OK);
+
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.AddNotificationBundleProperty(bundleOption_);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : SetDoNotDisturbDate_00300
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, SetDoNotDisturbDate_00300, Function | SmallTest | Level1)
+{
+    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
+    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
+    int64_t beginDate = beginDuration.count();
+    timePoint += std::chrono::hours(1);
+    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
+    int64_t endDate = endDuration.count();
+    sptr<NotificationDoNotDisturbDate> date =
+        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
+
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.SetDoNotDisturbDate(SYSTEM_APP_UID, date);
+    ASSERT_EQ(res, ERR_OK);
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.SetDoNotDisturbDate(SYSTEM_APP_UID, date);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : UpdateNotificationSlots_00700
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateNotificationSlots_00700, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_OK);
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    std::string des("This is a description.");
+    slot->SetDescription(des);
+    slots.clear();
+    slots.push_back(slot);
+    res = notificationPreferences.UpdateNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : SetNotificationSlotFlagsForBundle_00100
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, SetNotificationSlotFlagsForBundle_00100, Function | SmallTest | Level1)
+{
+    auto res = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(nullptr, 63);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+
+/**
+ * @tc.number    : AddNotificationSlots_00700
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, AddNotificationSlots_00700, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    sptr<NotificationSlot> slot2 = new NotificationSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot1);
+    slots.push_back(slot2);
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_OK);
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : RemoveNotificationSlot_00600
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationSlot_00600, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_OK);
+
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.RemoveNotificationSlot(bundleOption_,
+        NotificationConstant::SlotType::OTHER);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.number    : RemoveNotificationForBundle_00500
+ * @tc.name      :
+ * @tc.desc      :
+ */
+HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00500, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
+    std::vector<sptr<NotificationSlot>> slots;
+    slots.push_back(slot);
+
+    NotificationPreferences notificationPreferences;
+    auto res = notificationPreferences.AddNotificationSlots(bundleOption_, slots);
+    ASSERT_EQ(res, ERR_OK);
+
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.RemoveNotificationForBundle(bundleOption_);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
 }
 }  // namespace Notification
 }  // namespace OHOS
