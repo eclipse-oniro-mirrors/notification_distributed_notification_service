@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "mock_accesstoken_kit.h"
+#include "accesstoken_kit.h"
 #include "ans_ut_constant.h"
 #include "ipc_skeleton.h"
 
@@ -25,6 +25,7 @@ ATokenTypeEnum g_mockGetTokenTypeFlagRet = ATokenTypeEnum::TOKEN_INVALID;
 DlpType g_mockDlpType = DlpType::DLP_COMMON;
 ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
 bool g_mockVerfyPermisson = true;
+bool g_isSystemApp = false;
 }
 
 void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
@@ -43,6 +44,11 @@ void MockApl(ATokenAplEnum mockRet)
 void MockIsVerfyPermisson(bool isVerify)
 {
     g_mockVerfyPermisson = isVerify;
+}
+
+void MockIsSystemAppByFullTokenID(bool isSystemApp)
+{
+    g_isSystemApp = isSystemApp;
 }
 }
 }
@@ -70,6 +76,11 @@ int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo& info)
 {
     info.dlpType = Notification::g_mockDlpType;
     return 0;
+}
+
+bool AccessTokenKit::IsSystemAppByFullTokenID(uint64_t tokenId)
+{
+    return Notification::g_isSystemApp;
 }
 } // namespace AccessToken
 } // namespace Security
