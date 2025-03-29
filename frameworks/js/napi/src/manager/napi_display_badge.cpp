@@ -274,8 +274,9 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
             AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("option.badgeNumber: %{public}d", asynccallbackinfo->params.badgeNumber);
+                std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetBadgeNumber(
-                    asynccallbackinfo->params.badgeNumber);
+                    asynccallbackinfo->params.badgeNumber, instanceKey);
             }
         },
         AsyncCompleteCallbackNapiSetBadgeNumber,
