@@ -49,6 +49,7 @@
 #include "bundle_manager_helper.h"
 #include "distributed_preferences.h"
 #include "distributed_notification_manager.h"
+#include "ans_dialog_host_client.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 
@@ -3695,6 +3696,149 @@ HWTEST_F(AdvancedNotificationServiceTest, OnBundleRemoved_0100, Function | Small
     advancedNotificationService_->OnBundleRemoved(bundleOption);
     NotificationPreferences::GetInstance()->GetSubscriberExistFlag(deviceType, isExist);
     EXPECT_FALSE(isExist);
+}
+
+/**
+ * @tc.name: Dialog_00001
+ * @tc.desc: Test Dialog
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    std::string deviceId = "deviceId";
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
+
+    auto ret = advancedNotificationService_->dialogManager_
+        ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
+
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
+
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), false);
+
+    ret = advancedNotificationService_->dialogManager_
+        ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true);
+    ASSERT_EQ(ret, (int)ERR_ANS_DIALOG_IS_POPPING);
+
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
+        "test", 1), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: Dialog_00002
+ * @tc.desc: Test Dialog
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    std::string deviceId = "deviceId";
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DENY_CLICKED,
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DENY_CLICKED,
+        "test", 1), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: Dialog_00003
+ * @tc.desc: Test Dialog
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    std::string deviceId = "deviceId";
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DIALOG_CRASHED,
+        "test", 1), (int)ERROR_INTERNAL_ERROR);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, client), true);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::DIALOG_CRASHED,
+        "test", 1), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: Dialog_00004
+ * @tc.desc: Test Dialog
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    std::string deviceId = "deviceId";
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
+        DialogStatus::DIALOG_SERVICE_DESTROYED, "test", 1), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: Dialog_00005
+ * @tc.desc: Test Dialog
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    std::string deviceId = "deviceId";
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
+        DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERROR_INTERNAL_ERROR);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfo(bundleOption, nullptr), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfo(
+        bundleOption, nullptr), (int)ERR_ANS_DIALOG_IS_POPPING);
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(
+        DialogStatus::REMOVE_BUNDLE, "test", 1), (int)ERR_OK);
+}
+
+/**
+ * @tc.name      : Dialog_00005
+ * @tc.number    :
+ * @tc.desc      : test dialogEventSubscriber.OnReceiveEvent
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00006, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    std::string deviceId = "deviceId";
+
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetParam("bundleName", bundleOption->GetBundleName());
+    want.SetParam("bundleUid", 0);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService_->dialogManager_->dialogEventSubscriber->OnReceiveEvent(data);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enable);
+    ASSERT_EQ(enable, false);
 }
 }  // namespace Notification
 }  // namespace OHOS
