@@ -59,8 +59,9 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode = NotificationHelper::CancelAsBundleWithAgent(
                         asynccallbackinfo->option, asynccallbackinfo->id);
                 } else {
-                    asynccallbackinfo->info.errorCode =
-                        NotificationHelper::CancelNotification(asynccallbackinfo->label, asynccallbackinfo->id);
+                    std::string instanceKey = Common::GetAppInstanceKey();
+                    asynccallbackinfo->info.errorCode = NotificationHelper::CancelNotification(
+                        asynccallbackinfo->label, asynccallbackinfo->id, instanceKey);
                 }
             }
         },
@@ -120,7 +121,9 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiCancelAll work excute.");
             AsyncCallbackInfoCancel *asynccallbackinfo = static_cast<AsyncCallbackInfoCancel *>(data);
             if (asynccallbackinfo) {
-                asynccallbackinfo->info.errorCode = NotificationHelper::CancelAllNotifications();
+                std::string instanceKey = Common::GetAppInstanceKey();
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::CancelAllNotifications(instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -182,8 +185,9 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 ANS_LOGI("asynccallbackinfo->params.groupName = %{public}s",
                     asynccallbackinfo->params.groupName.c_str());
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::CancelGroup(asynccallbackinfo->params.groupName);
+                std::string instanceKey = Common::GetAppInstanceKey();
+                asynccallbackinfo->info.errorCode = NotificationHelper::CancelGroup(
+                    asynccallbackinfo->params.groupName, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {

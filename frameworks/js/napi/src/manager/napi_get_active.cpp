@@ -201,8 +201,10 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
+                std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetActiveNotifications(asynccallbackinfo->requests);
+                    NotificationHelper::GetActiveNotifications(
+                        asynccallbackinfo->requests, instanceKey);
             }
         },
         AsyncCompleteCallbackNapiGetActiveNotifications,
