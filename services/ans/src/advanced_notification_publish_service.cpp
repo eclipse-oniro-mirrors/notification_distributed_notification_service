@@ -75,6 +75,7 @@ constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
+constexpr int32_t BADGE_NUM_LIMIT = 0;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -2607,7 +2608,13 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
 ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty() ||
+        bundleOption->GetUid() <= DEFAULT_UID) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (badgeNumber < BADGE_NUM_LIMIT) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid badgeNumber");
         return ERR_ANS_INVALID_PARAM;
     }
     ANS_LOGI("SetBadgeNumberForDhByBundle bundleName = %{public}s uid = %{public}d",

@@ -1691,10 +1691,14 @@ ErrCode AdvancedNotificationService::CheckBundleOptionValid(sptr<NotificationBun
     }
     int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
     if (uid == -1) {
-        message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append("Bundle name was not found.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-        ANS_LOGE("The specified bundle name was not found.");
-        return ERR_ANS_INVALID_BUNDLE;
+        if (bundleOption->GetUid() > DEFAULT_UID) {
+            uid = bundleOption->GetUid();
+        } else {
+            message.ErrorCode(ERR_ANS_INVALID_BUNDLE).Append("Bundle name was not found.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            ANS_LOGE("The specified bundle name was not found.");
+            return ERR_ANS_INVALID_BUNDLE;
+        }
     }
 
     if (bundleOption->GetUid() > 0) {
