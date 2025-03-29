@@ -509,7 +509,7 @@ ErrCode DistributedService::GetNotificationButtonWantPtr(const std::string& hash
     const std::string& actionName, std::shared_ptr<AAFwk::Want>& wantPtr, sptr<NotificationRequest>& request,
     std::string& userInputKey)
 {
-    sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
+    sptr<NotificationRequest> notificationRequest = nullptr;
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
     if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");
