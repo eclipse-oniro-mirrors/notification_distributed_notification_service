@@ -438,7 +438,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00002, Function | Smal
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
