@@ -109,7 +109,7 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0002, Function | SmallTest | 
 
     AdvancedDatashareHelper advancedDatashareHelper;
     std::string uri = advancedDatashareHelper.GetFocusModeRepeatCallUri(0);
-    Uri contactUri(uri); 
+    Uri contactUri(uri);
     std::string phoneNumber = "1111";
     AdvancedDatashareHelper::SetIsDataShareReady(true);
 
