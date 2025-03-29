@@ -142,7 +142,7 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0003, Function | SmallTest | 
     MockIsFailedGoToFirstRow(0);
     AdvancedDatashareHelper advancedDatashareHelper;
     std::string uri = advancedDatashareHelper.GetIntelligentExperienceUri(0);
-    Uri contactUri(uri); 
+    Uri contactUri(uri);
     std::string phoneNumber = "11111111111";
 
     int ret = advancedDatashareHelper.QueryContact(
