@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #include "advanced_aggregation_data_roaming_observer.h"
 #include "advanced_datashare_helper.h"
-#include "datashare_helper.h" 
+#include "datashare_helper.h"
 #include "advanced_datashare_helper.h"
 #include "mock_datashare.h"
 
@@ -81,8 +81,8 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0001, Function | SmallTest | 
     MockIsFailedGoToFirstRow(0);
 
     AdvancedDatashareHelper advancedDatashareHelper;
-    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";;
-    Uri contactUri(uri); 
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
     std::string phoneNumber = "11111111111";
 
     bool ret = advancedDatashareHelper.QueryContact(
@@ -147,13 +147,11 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0003, Function | SmallTest | 
 
     int ret = advancedDatashareHelper.QueryContact(
         contactUri, phoneNumber, "10", "1", "true");
-    ANS_LOGE("ret:%{public}d", ret);
     EXPECT_EQ(ret, -1);
 
     MockIsFailedToCreateDataShareHelper(false);
     ret = advancedDatashareHelper.QueryContact(
         contactUri, phoneNumber, "10", "1", "true");
-    ANS_LOGE("ret2:%{public}d", ret);
     EXPECT_EQ(ret, -1);
 }
 
