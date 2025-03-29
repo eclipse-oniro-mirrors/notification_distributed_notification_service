@@ -55,9 +55,9 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
-
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::PublishNotification(asynccallbackinfo->request);
+                std::string instanceKey = Common::GetAppInstanceKey();
+                asynccallbackinfo->info.errorCode = NotificationHelper::PublishNotification(
+                    asynccallbackinfo->request, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -120,9 +120,9 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
-
+                std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::PublishNotification(asynccallbackinfo->request);
+                    NotificationHelper::PublishNotification(asynccallbackinfo->request, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
