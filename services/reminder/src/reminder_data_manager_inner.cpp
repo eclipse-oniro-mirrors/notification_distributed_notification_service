@@ -139,12 +139,12 @@ void ReminderDataManager::CloseCustomRingFileDesc(const int32_t reminderId, cons
 {
     std::lock_guard<std::mutex> locker(resourceMutex_);
     if (soundResource_ == nullptr) {
-        ANSR_LOGW("ResourceManager is nullptr.");
+        ANSR_LOGE("ResourceManager is nullptr.");
         return;
     }
     auto result = soundResource_->CloseRawFileDescriptor(customRingUri);
     if (result != Global::Resource::SUCCESS) {
-        ANSR_LOGW("CloseRawFileDescriptor fail[%{public}d]", static_cast<int32_t>(result));
+        ANSR_LOGE("CloseRawFileDescriptor fail[%{public}d]", static_cast<int32_t>(result));
     }
     ANSR_LOGI("Stop custom sound, reminderId:[%{public}d].", reminderId);
     soundResource_ = nullptr;
@@ -170,7 +170,7 @@ bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t
     sptr<ReminderRequest>& reminder)
 {
     if (totalCount > TOTAL_MAX_NUMBER_SHOW_AT_ONCE) {
-        ANSR_LOGW("The maximum number of displays that can be displayed at a time has been reached.");
+        ANSR_LOGE("The maximum number of displays that can be displayed at a time has been reached.");
         return false;
     }
     ++totalCount;
@@ -181,7 +181,7 @@ bool ReminderDataManager::CheckShowLimit(std::unordered_map<std::string, int32_t
         return true;
     }
     if (iter->second > ONE_HAP_MAX_NUMBER_SHOW_AT_ONCE) {
-        ANSR_LOGW("The maximum number of displays that can be displayed in a single app[%{public}s] has been reached",
+        ANSR_LOGE("The maximum number of displays that can be displayed in a single app[%{public}s] has been reached",
             reminder->GetBundleName().c_str());
         return false;
     }
@@ -230,19 +230,19 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
 {
     auto manager = ReminderDataManager::GetInstance();
     if (manager == nullptr) {
-        ANSR_LOGW("ReminderDataManager is nullptr.");
+        ANSR_LOGE("ReminderDataManager is nullptr.");
         return;
     }
     if (!manager->IsSystemReady()) {
-        ANSR_LOGW("bundle service or ability service not ready.");
+        ANSR_LOGE("bundle service or ability service not ready.");
         return;
     }
     if (!reminder->IsSystemApp()) {
-        ANSR_LOGI("Start extension ability failed, is not system app");
+        ANSR_LOGE("Start extension ability failed, is not system app");
         return;
     }
     if (count > TOTAL_MAX_NUMBER_START_EXTENSION) {
-        ANSR_LOGW("The maximum number of start extension has been reached.");
+        ANSR_LOGE("The maximum number of start extension has been reached.");
         return;
     }
     ++count;

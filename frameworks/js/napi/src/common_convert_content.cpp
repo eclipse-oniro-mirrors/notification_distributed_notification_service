@@ -65,7 +65,7 @@ napi_value Common::SetNotificationContentDetailed(const napi_env &env, const Con
 
     std::shared_ptr<NotificationBasicContent> basicContent = content->GetNotificationContent();
     if (basicContent == nullptr) {
-        ANS_LOGE("content is null");
+        ANS_LOGE("basicContent is null");
         return ret;
     }
 
@@ -1574,7 +1574,7 @@ napi_value Common::SetLockScreenPicture(
     napi_value pictureValue = Media::PixelMapNapi::CreatePixelMap(env, picture);
     NAPI_CALL(env, napi_typeof(env, pictureValue, &valuetype));
     if (valuetype == napi_undefined) {
-        ANS_LOGI("LockScreenPicture is undefined");
+        ANS_LOGE("LockScreenPicture is undefined");
         napi_set_named_property(env, result, "lockscreenPicture", NapiGetNull(env));
     } else {
         napi_set_named_property(env, result, "lockscreenPicture", pictureValue);

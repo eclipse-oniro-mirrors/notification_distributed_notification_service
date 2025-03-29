@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 
 #define private public
 #include "advanced_notification_service.h"
+#include "advanced_datashare_helper.h"
 #include "ability_manager_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
@@ -31,6 +32,7 @@
 #include "ans_ut_constant.h"
 #include "ans_dialog_host_client.h"
 #include "mock_push_callback_stub.h"
+#include "mock_ipc_skeleton.h"
 
 extern void MockIsOsAccountExists(bool exists);
 
@@ -278,6 +280,27 @@ HWTEST_F(AnsPublishServiceTest, Publish_00006, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: Publish_00007
+ * @tc.desc: Test Publish
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00007, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetOwnerUid(1);
+    request->SetIsAgentNotification(true);
+    MockIsOsAccountExists(true);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: DeleteByBundle_00001
  * @tc.desc: Test DeleteByBundle
  * @tc.type: FUNC
@@ -469,6 +492,72 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00003, Function | Smal
     NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundle, false);
     ret = advancedNotificationService_->RequestEnableNotification(deviceId, client, callerToken);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: RequestEnableNotification_00004
+ * @tc.desc: Test RequestEnableNotification,two parameters,except is ERROR_INTERNAL_ERROR
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00004, Function | SmallTest | Level1)
+{
+    std::string bundleName = "bundleName1";
+    int32_t uid = 1;
+    auto ret = advancedNotificationService_->RequestEnableNotification(bundleName, uid);
+    ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: CommonRequestEnableNotification_00001
+ * @tc.desc: Test CommonRequestEnableNotification, when bundleOption is nullptr, except is ERROR_INTERNAL_ERROR
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00001, Function | SmallTest | Level1)
+{
+    std::string deviceId = "";
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    bool innerLake = true;
+    auto ret = advancedNotificationService_->
+        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundleOption, innerLake);
+    ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
+}
+
+/**
+ * @tc.name: CommonRequestEnableNotification_00002
+ * @tc.desc: Test CommonRequestEnableNotification, when bundleOption is not nullptr,
+ *          except is ERROR_INTERNAL_ERROR
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00002, Function | SmallTest | Level1)
+{
+    std::string deviceId = "";
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    bool innerLake = true;
+    auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ret = advancedNotificationService_->
+        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundle, innerLake);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: CommonRequestEnableNotification_00003
+ * @tc.desc: Test CommonRequestEnableNotification, when bundleOption is not nullptr,
+ *          except is ERROR_INTERNAL_ERROR
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00003, Function | SmallTest | Level1)
+{
+    std::string deviceId = "";
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    bool innerLake = true;
+    auto ret = advancedNotificationService_->
+        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundle, innerLake);
+    ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
 }
 
 /**
@@ -1108,7 +1197,7 @@ HWTEST_F(AnsPublishServiceTest, PublishRemoveDuplicateEvent_00003, Function | Sm
  */
 HWTEST_F(AnsPublishServiceTest, CanPopEnableNotificationDialog_001, Function | SmallTest | Level1)
 {
-    sptr<AnsDialogCallback> callback = nullptr;
+    sptr<IAnsDialogCallback> callback = nullptr;
     bool canPop = false;
     std::string bundleName = "";
     ErrCode result = advancedNotificationService_->CanPopEnableNotificationDialog(callback, canPop, bundleName);
@@ -1162,23 +1251,361 @@ HWTEST_F(AnsPublishServiceTest, IsNeedToControllerByDisableNotification_002, Fun
  */
 HWTEST_F(AnsPublishServiceTest, PrePublishRequest_00001, Function | SmallTest | Level1)
 {
-    ANS_LOGE("start 1");
     MockIsOsAccountExists(false);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetReceiverUserId(-99);
     ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request), (int)ERROR_USER_NOT_EXIST);
-    ANS_LOGE("start 2");
     MockIsOsAccountExists(true);
     sptr<NotificationRequest> request1 = new NotificationRequest();
     request1->SetCreatorUid(0);
     request1->SetReceiverUserId(100);
     ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request1), (int)ERR_ANS_INVALID_UID);
-    ANS_LOGE("start 3");
     sptr<NotificationRequest> request2 = new NotificationRequest();
     request2->SetDeliveryTime(-1);
     request2->SetReceiverUserId(100);
     request2->SetCreatorUid(1);
     ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request2), (int)ERR_OK);
 }
+
+/**
+ * @tc.name: CollaboratePublish_00001
+ * @tc.desc: Test CollaboratePublish
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    std::string label = "";
+    request->SetAppMessageId("test2");
+    request->SetNotificationId(1);
+    request->SetIsAgentNotification(true);
+    request->SetDistributedCollaborate(true);
+    MockIsVerfyPermisson(false);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: CollaboratePublish_00002
+ * @tc.desc: Test CollaboratePublish,
+ *  common live view without permisson, except is ERR_ANS_PERMISSION_DENIED
+ *  common live view with permisson, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> notificationContent = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(notificationContent);
+    std::string label = "";
+    request->SetAppMessageId("test1");
+    request->SetNotificationId(1);
+    request->SetIsAgentNotification(true);
+    request->SetDistributedCollaborate(true);
+    MockIsVerfyPermisson(false);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: PublishNotificationForIndirectProxy_00001
+ * @tc.desc: Test PublishNotificationForIndirectProxy,
+ *  request is nullptr, return is ERR_ANS_INVALID_PARAM
+ *  request is valid, uid is invalid, return is ERR_ANS_INVALID_UID
+ *  sound is empty, return is ERR_OK
+ *  sound is not empty, return is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Function | SmallTest | Level1)
+{
+    auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(nullptr);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_UID);
+    request->SetCreatorUid(1);
+    ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    request->SetSound("sound");
+    request->SetCreatorBundleName("creatorname");
+    request->SetAppInstanceKey("key");
+    ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveEnableNotificationDialog_00001
+ * @tc.desc: Test RemoveEnableNotificationDialog, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveEnableNotificationDialog_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto ret = advancedNotificationService_->RemoveEnableNotificationDialog();
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: QueryContactByProfileId_00001
+ * @tc.desc: Test QueryContactByProfileId, except is -1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, QueryContactByProfileId_00001, Function | SmallTest | Level1)
+{
+    auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
+    bool isDataShareReady = true;
+    datashareHelper->SetIsDataShareReady(isDataShareReady);
+    std::string phoneNumber = "12345678";
+    std::string policy = "5";
+    int32_t userId = 100;
+    auto ret = advancedNotificationService_->QueryContactByProfileId(phoneNumber, policy, userId);
+    ASSERT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledBySlot_00001
+ * @tc.desc: Test SetDistributedEnabledBySlot, except is -1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledBySlot_00001, Function | SmallTest | Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    std::string deviceType = "testdeviceType";
+    bool enabled = true;
+    MockIsVerfyPermisson(false);
+    auto ret = advancedNotificationService_->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetTargetDeviceStatus_00001
+ * @tc.desc: Test SetTargetDeviceStatus, deviceType is empty, except is ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetTargetDeviceStatus_00001, Function | SmallTest | Level1)
+{
+    std::string deviceType = "";
+    uint32_t status = 0;
+    auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetTargetDeviceStatus_00001
+ * @tc.desc: Test GetTargetDeviceStatus, deviceType is empty, except is ERR_ANS_INVALID_PARAM
+ * @tc.desc: Test GetTargetDeviceStatus, deviceType is not empty, status == inputStatus
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, GetTargetDeviceStatus_00001, Function | SmallTest | Level1)
+{
+    std::string deviceType = "";
+    int32_t inputStatus = 1;
+    int32_t status = 0;
+    auto ret = advancedNotificationService_->GetTargetDeviceStatus(deviceType, status);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    uint32_t controlFlag = 0;
+    deviceType = "testdeviceType";
+    ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, inputStatus);
+    ASSERT_EQ(ret, ERR_OK);
+    ret = advancedNotificationService_->GetTargetDeviceStatus(deviceType, status);
+    ASSERT_EQ(status, inputStatus);
+}
+
+/**
+ * @tc.name: ClearAllNotificationGroupInfo_00001
+ * @tc.desc: Test ClearAllNotificationGroupInfo, deviceType is not empty, except is ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ClearAllNotificationGroupInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    std::string localSwitch = "false";
+    advancedNotificationService_->aggregateLocalSwitch_ = true;
+    advancedNotificationService_->ClearAllNotificationGroupInfo(localSwitch);
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    ASSERT_EQ(advancedNotificationService_->aggregateLocalSwitch_, false);
+}
+
+/**
+ * @tc.name: RemoveAllNotificationsByBundleName_00001
+ * @tc.desc: Test RemoveAllNotificationsByBundleName, except is notificationList_ == 1
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request;
+    record1->notification = notification;
+    record1->bundleOption = bundle;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    auto record2 = nullptr;
+    advancedNotificationService_->notificationList_.push_back(record2);
+    std::string bundleName = TEST_DEFUALT_BUNDLE;
+    int32_t reason = 0;
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: DistributeOperation_00001
+ * @tc.desc: Test DistributeOperation,
+ *  without hashcode, return is ERR_ANS_INVALID_PARAM
+ *  without permisson, return is ERR_ANS_PERMISSION_DENIED
+ *  DistributeOperationParamCheck faild, except is ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, DistributeOperation_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    sptr<OperationCallbackInterface> callback = nullptr;
+    auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    std::string hashCode = "123456";
+    operationInfo->SetHashCode(hashCode);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetBadgeNumberForDhByBundle_00001
+ * @tc.desc: Test SetBadgeNumberForDhByBundle,
+ *  1. Parameter validation:
+ *      - bundleOption is null -> return ERR_ANS_INVALID_PARAM
+ *      - bundleName is empty -> return ERR_ANS_INVALID_PARAM
+ *      - uid <= 0 -> return ERR_ANS_INVALID_PARAM
+ *      - badgeNumber < 0 -> return ERR_ANS_INVALID_PARAM
+ *  2. Permission validation:
+ *      - Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP
+ *      - Subsystem (Native token) and non-system app -> ERR_OK
+ *      - Non-subsystem (HAP token) and system app -> ERR_OK
+ *      - Subsystem (Native token) and system app -> ERR_OK
+ *  3. Success path:
+ *      -All valid conditions (non-null bundleOption, valid bundleName, uid>0, badgeNumber>0, valid permissions)
+ *       ->return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetBadgeNumberForDhByBundle_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = nullptr;
+    auto ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, -1);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    bundle = new NotificationBundleOption("", 0);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, -1);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    bundle->SetBundleName("bundle");
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, -1);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    bundle->SetUid(12345);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, -1);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+
+    bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 1);
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 1);
+    ASSERT_EQ(ret, ERR_OK);
+
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 1);
+    ASSERT_EQ(ret, ERR_OK);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 1);
+    ASSERT_EQ(ret, ERR_OK);
+
+    bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 1);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetHashCodeRule_00001
+ * @tc.desc: Test SetHashCodeRule,
+ *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP
+ *  2. Non-subsystem (HAP token) and system app with invalid UID -> return ERR_ANS_PERMISSION_DENIED
+ *  3. Non-subsystem (HAP token) and system app with valid UID -> return ERR_OK
+ *  4. Subsystem (Native token) with invalid UID -> return ERR_ANS_PERMISSION_DENIED
+ *  5. Subsystem (Native token) with valid UID -> return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetHashCodeRule_00001, Function | SmallTest | Level1)
+{
+    int32_t avseesaionPid = 6700;
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    IPCSkeleton::SetCallingUid(12345);
+    auto result = advancedNotificationService_->SetHashCodeRule(1);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    IPCSkeleton::SetCallingUid(12345);
+    result = advancedNotificationService_->SetHashCodeRule(1);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    IPCSkeleton::SetCallingUid(avseesaionPid);
+    result = advancedNotificationService_->SetHashCodeRule(1);
+    ASSERT_EQ(result, ERR_OK);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    IPCSkeleton::SetCallingUid(12345);
+    result = advancedNotificationService_->SetHashCodeRule(1);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    IPCSkeleton::SetCallingUid(avseesaionPid);
+    result = advancedNotificationService_->SetHashCodeRule(1);
+    ASSERT_EQ(result, ERR_OK);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

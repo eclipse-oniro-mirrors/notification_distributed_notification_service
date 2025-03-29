@@ -450,7 +450,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
 
     /**
@@ -541,7 +541,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**
@@ -576,7 +576,7 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
 
     /**
@@ -1276,7 +1276,6 @@ private:
     sptr<NotificationSortingMap> GenerateSortingMap();
 
     std::string TimeToString(int64_t time);
-    int64_t GetNowSysTime();
     void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
     ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
@@ -1471,7 +1470,7 @@ private:
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CommonRequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);

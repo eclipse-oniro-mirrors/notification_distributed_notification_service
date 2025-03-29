@@ -293,7 +293,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
             bundle->GetUid(), IPCSkeleton::GetCallingUid());
     } else {
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            ANS_LOGW("Get live view by filter failed because check permission is false.");
+            ANS_LOGE("Get live view by filter failed because check permission is false.");
             return ERR_ANS_PERMISSION_DENIED;
         }
     }
@@ -337,7 +337,7 @@ void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>
     auto bundleManager = BundleManagerHelper::GetInstance();
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-        ANSR_LOGW("Failed to get active user id!");
+        ANSR_LOGE("Failed to get active user id!");
         return;
     }
 
@@ -520,15 +520,6 @@ std::string AdvancedNotificationService::TimeToString(int64_t time)
     return stream.str();
 }
 
-int64_t AdvancedNotificationService::GetNowSysTime()
-{
-    std::chrono::time_point<std::chrono::system_clock> nowSys = std::chrono::system_clock::now();
-    auto epoch = nowSys.time_since_epoch();
-    auto value = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-    int64_t duration = value.count();
-    return duration;
-}
-
 void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -540,7 +531,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         ANS_LOGD("ffrt enter!");
         ErrCode result = NotificationPreferences::GetInstance()->RemoveNotificationForBundle(bundleOption);
         if (result != ERR_OK) {
-            ANS_LOGW("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
+            ANS_LOGE("NotificationPreferences::RemoveNotificationForBundle failed: %{public}d", result);
         }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         DistributedPreferences::GetInstance()->DeleteDistributedBundleInfo(bundleOption);

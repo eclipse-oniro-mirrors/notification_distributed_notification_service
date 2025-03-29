@@ -247,7 +247,7 @@ napi_value Common::SetNotificationRequestByPixelMap(
         smallIconResult = Media::PixelMapNapi::CreatePixelMap(env, littleIcon);
         NAPI_CALL(env, napi_typeof(env, smallIconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGI("smallIconResult is undefined");
+            ANS_LOGE("smallIconResult is undefined");
             napi_set_named_property(env, result, "smallIcon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "smallIcon", smallIconResult);
@@ -262,7 +262,7 @@ napi_value Common::SetNotificationRequestByPixelMap(
         largeIconResult = Media::PixelMapNapi::CreatePixelMap(env, largeIcon);
         NAPI_CALL(env, napi_typeof(env, largeIconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGI("largeIconResult is undefined");
+            ANS_LOGE("largeIconResult is undefined");
             napi_set_named_property(env, result, "largeIcon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "largeIcon", largeIconResult);
@@ -277,7 +277,7 @@ napi_value Common::SetNotificationRequestByPixelMap(
         overlayIconResult = Media::PixelMapNapi::CreatePixelMap(env, overlayIcon);
         NAPI_CALL(env, napi_typeof(env, overlayIconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGI("overlayIconResult is undefined");
+            ANS_LOGE("overlayIconResult is undefined");
             napi_set_named_property(env, result, "overlayIcon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "overlayIcon", overlayIconResult);
@@ -407,7 +407,7 @@ napi_value Common::SetNotificationActionButton(
     // wantAgent: WantAgent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
     if (agent == nullptr) {
-        ANS_LOGI("wantAgent is null");
+        ANS_LOGE("wantAgent is null");
         napi_set_named_property(env, result, "wantAgent", NapiGetNull(env));
         return NapiGetBoolean(env, false);
     } else {
@@ -424,7 +424,7 @@ napi_value Common::SetNotificationActionButton(
         iconResult = Media::PixelMapNapi::CreatePixelMap(env, icon);
         NAPI_CALL(env, napi_typeof(env, iconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGW("icon result is undefined");
+            ANS_LOGE("icon result is undefined");
             napi_set_named_property(env, result, "icon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "icon", iconResult);
@@ -1774,7 +1774,7 @@ napi_value Common::GetNotificationActionButtons(
     }
     napi_get_array_length(env, actionButtons, &length);
     if (length == 0) {
-        ANS_LOGI("The array is empty.");
+        ANS_LOGE("The array is empty.");
         return Common::NapiGetNull(env);
     }
     for (size_t i = 0; i < length; i++) {

@@ -177,10 +177,7 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
         return reminders;
     }
 
-    bool isLastRow = false;
-    queryResult->IsAtLastRow(isLastRow);
-    while (!isLastRow) {
-        queryResult->GoToNextRow();
+    while (queryResult->GoToNextRow() == NativeRdb::E_OK) {
         int32_t reminderId;
         int32_t reminderType;
         GetInt32Val(queryResult, ReminderTable::REMINDER_ID, reminderId);
@@ -210,7 +207,6 @@ std::vector<sptr<ReminderRequest>> ReminderStore::ReminderStoreDataCallBack::Get
         if (reminderReq != nullptr) {
             reminders.push_back(reminderReq);
         }
-        queryResult->IsAtLastRow(isLastRow);
     }
     return reminders;
 }
@@ -758,15 +754,11 @@ std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string
     if (queryResultSet == nullptr) {
         return reminders;
     }
-    bool isAtLastRow = false;
-    int32_t ret = queryResultSet->IsAtLastRow(isAtLastRow);
-    while (ret == NativeRdb::E_OK && !isAtLastRow) {
-        queryResultSet->GoToNextRow();
+    while (queryResultSet->GoToNextRow() == NativeRdb::E_OK) {
         sptr<ReminderRequest> reminder = BuildReminder(queryResultSet);
         if (reminder != nullptr) {
             reminders.push_back(reminder);
         }
-        ret = queryResultSet->IsAtLastRow(isAtLastRow);
     }
     ANSR_LOGD("Size=%{public}zu", reminders.size());
     return reminders;

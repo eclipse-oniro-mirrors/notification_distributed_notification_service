@@ -156,12 +156,12 @@ void PushCallBackProxy::HandleEventControl(
     std::string eventControl, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
 {
     if (pushCallBackParam == nullptr) {
-        ANS_LOGI("pushCallBackParam is null");
+        ANS_LOGE("pushCallBackParam is null");
         return;
     }
     std::string event = pushCallBackParam->event;
     if (event.empty()) {
-        ANS_LOGI("event is null");
+        ANS_LOGE("event is null");
         return;
     }
     ANS_LOGI("eventControl:%{public}s,event:%{public}s", eventControl.c_str(), event.c_str());
@@ -174,7 +174,7 @@ void PushCallBackProxy::HandleEventControl(
         return;
     }
     if (jsonObject.find(event)  == jsonObject.cend()) {
-        ANS_LOGI("This event has not eventControl");
+        ANS_LOGE("This event has not eventControl");
         return;
     }
     pushCallBackParam->eventControl = jsonObject.at(event).dump();

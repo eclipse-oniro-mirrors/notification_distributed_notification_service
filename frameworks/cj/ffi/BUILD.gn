@@ -27,6 +27,7 @@ ohos_shared_library("cj_notification_manager_ffi") {
 
   include_dirs = [
     "include",
+    "srcold",
     "${component_path}/interfaces/inner_api",
     "${component_path}/frameworks/core/common/include",
   ]
@@ -37,32 +38,31 @@ ohos_shared_library("cj_notification_manager_ffi") {
 
   use_exceptions = true
 
-  if (product_name != "ohos-sdk") {
-    deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
-    external_deps = [
-      "ability_base:want",
-      "ability_base:zuri",
-      "ability_runtime:ability_manager",
-      "ability_runtime:abilitykit_native",
-      "ability_runtime:data_ability_helper",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "image_framework:cj_image_ffi",
-      "ipc:ipc_core",
-      "napi:ace_napi",
-      "napi:cj_bind_ffi",
-      "napi:cj_bind_native",
-    ]
-    sources = [
-      "src/inner_errors.cpp",
-      "src/notification_manager_ffi.cpp",
-      "src/notification_manager_impl.cpp",
-      "src/notification_utils.cpp",
-    ]
-  } else {
-    defines += [ "PREVIEWER" ]
-    sources = [ "src/notification_manager_mock.cpp" ]
-  }
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:data_ability_helper",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:cj_image_ffi",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "napi:cj_bind_ffi",
+    "napi:cj_bind_native",
+  ]
+
+  sources = [
+    "src/inner_errors.cpp",
+    "src/notification_manager_ffi.cpp",
+    "src/notification_manager_impl.cpp",
+    "src/notification_utils.cpp",
+    "srcold/cj_notification_manager_ffi.cpp",
+    "srcold/cj_notification_manager_impl.cpp",
+  ]
 
   if (current_os == "ohos") {
     defines += [ "OHOS_PLATFORM" ]

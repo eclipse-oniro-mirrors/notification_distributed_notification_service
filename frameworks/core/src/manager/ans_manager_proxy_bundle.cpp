@@ -18,8 +18,8 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "distributed_notification_service_ipc_interface_code.h"
-#include "ians_subscriber_local_live_view.h"
 #include "message_option.h"
 #include "message_parcel.h"
 #include "parcel.h"
@@ -116,7 +116,7 @@ ErrCode AnsManagerProxy::HasNotificationPolicyAccessPermission(bool &granted)
 }
 
 ErrCode AnsManagerProxy::RequestEnableNotification(const std::string &deviceId,
-    const sptr<AnsDialogCallback> &callback,
+    const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGD("enter");
@@ -477,7 +477,7 @@ ErrCode AnsManagerProxy::IsAllowedNotifySelf(bool &allowed)
     return result;
 }
 
-ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+ErrCode AnsManagerProxy::CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
     bool &canPop, std::string &bundleName)
 {
     MessageParcel data;

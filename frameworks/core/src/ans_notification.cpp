@@ -84,7 +84,7 @@ ErrCode AnsNotification::AddNotificationSlots(const std::vector<NotificationSlot
 
 ErrCode AnsNotification::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
 {
-    ANS_LOGI("enter RemoveNotificationSlot，slotType:%{public}d", slotType);
+    ANS_LOGI("enter RemoveNotificationSlot, slotType:%{public}d", slotType);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -1436,14 +1436,14 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
     if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
-        ANS_LOGW("The size of little icon exceeds limit");
-        request.ResetLittleIcon();
+        ANS_LOGE("The size of little icon exceeds limit");
+        return ERR_ANS_ICON_OVER_SIZE;
     }
 
     auto overlayIcon = request.GetOverlayIcon();
     if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
-        ANS_LOGW("The size of overlay icon exceeds limit");
-        request.ResetOverLayIcon();
+        ANS_LOGE("The size of overlay icon exceeds limit");
+        return ERR_ANS_ICON_OVER_SIZE;
     }
 
     ErrCode err = request.CheckImageSizeForContent();
@@ -1478,7 +1478,7 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
     auto bigIcon = request.GetBigIcon();
     if (NotificationRequest::CheckImageOverSizeForPixelMap(bigIcon, MAX_ICON_SIZE)) {
         request.ResetBigIcon();
-        ANS_LOGI("The size of big icon exceeds limit");
+        ANS_LOGW("The size of big icon exceeds limit");
     }
 
     return ERR_OK;

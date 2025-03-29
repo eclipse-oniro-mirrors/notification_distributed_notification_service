@@ -373,7 +373,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
 
     /**
@@ -465,7 +465,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**
@@ -500,7 +500,7 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
 
     /**

@@ -387,12 +387,12 @@ bool NotificationSlot::Marshalling(Parcel &parcel) const
 
     if (sound_.ToString().empty()) {
         if (!parcel.WriteInt32(VALUE_NULL)) {
-            ANS_LOGE("Failed to write int");
+            ANS_LOGE("Failed to write VALUE_NULL");
             return false;
         }
     } else {
         if (!parcel.WriteInt32(VALUE_OBJECT)) {
-            ANS_LOGE("Failed to write int");
+            ANS_LOGE("Failed to write VALUE_OBJECT");
             return false;
         }
         if (!parcel.WriteString((sound_.ToString()))) {

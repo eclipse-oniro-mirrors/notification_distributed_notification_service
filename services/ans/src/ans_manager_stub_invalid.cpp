@@ -262,7 +262,7 @@ ErrCode AnsManagerStub::UpdateSlots(
 }
 
 ErrCode AnsManagerStub::RequestEnableNotification(const std::string &deviceId,
-    const sptr<AnsDialogCallback> &callback,
+    const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken)
 {
     ANS_LOGE("AnsManagerStub::RequestEnableNotification called!");
@@ -325,7 +325,7 @@ ErrCode AnsManagerStub::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscr
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+ErrCode AnsManagerStub::SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
     const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     ANS_LOGE("AnsManagerStub::SubscribeLocalLiveView called!");
@@ -351,7 +351,7 @@ ErrCode AnsManagerStub::IsAllowedNotifySelf(bool &allowed)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+ErrCode AnsManagerStub::CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
     bool &canPop, std::string &bundleName)
 {
     ANS_LOGE("AnsManagerStub::CanPopEnableNotificationDialog called!");

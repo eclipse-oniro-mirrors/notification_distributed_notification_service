@@ -38,7 +38,7 @@ ErrCode DisturbManager::HandleGetDoNotDisturbProfile(MessageParcel &data, Messag
 
     if (result == ERR_OK) {
         if (!reply.WriteParcelable(profile)) {
-            ANS_LOGE("HandleGetDoNotDisturbProfile write slot failed.");
+            ANS_LOGE("HandleGetDoNotDisturbProfile write profile failed.");
             return ERR_ANS_PARCELABLE_FAILED;
         }
     }
@@ -49,7 +49,7 @@ ErrCode DisturbManager::GetDoNotDisturbProfileInner(int64_t id, sptr<Notificatio
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGW("No active user found.");
+        ANS_LOGE("No active user found.");
         return ERR_ANS_GET_ACTIVE_USER_FAILED;
     }
 

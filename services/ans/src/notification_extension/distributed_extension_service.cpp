@@ -91,7 +91,7 @@ DistributedExtensionService::DistributedExtensionService()
     }
     distributedQueue_ = std::make_shared<ffrt::queue>("ans_extension");
     if (distributedQueue_ == nullptr) {
-        ANS_LOGW("ffrt create failed!");
+        ANS_LOGE("ffrt create failed!");
         return;
     }
 }
@@ -234,7 +234,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
 {
     std::string name = TransDeviceTypeToName(deviceInfo.deviceTypeId);
     if (deviceConfig_.supportPeerDevice.find(name) == deviceConfig_.supportPeerDevice.end()) {
-        ANS_LOGI("The current device type not support %{public}d.", deviceInfo.deviceTypeId);
+        ANS_LOGE("The current device type not support %{public}d.", deviceInfo.deviceTypeId);
         return;
     }
     if (distributedQueue_ == nullptr) {
@@ -242,13 +242,13 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
     }
     std::function<void()> onlineTask = std::bind([&, deviceInfo]() {
         if (InitDans() != 0) {
-            ANS_LOGW("OnDeviceOnline init dans failed.");
+            ANS_LOGE("OnDeviceOnline init dans failed.");
             return;
         };
 
         ADD_DEVICE handler = (ADD_DEVICE)dansHandler_->GetProxyFunc("AddDevice");
         if (handler == nullptr) {
-            ANS_LOGW("Dans handler is null ptr.");
+            ANS_LOGE("Dans handler is null ptr.");
             return;
         }
         std::lock_guard<std::mutex> lock(mapLock_);
@@ -331,16 +331,16 @@ void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo
     std::function<void()> offlineTask = std::bind([&, deviceInfo]() {
         std::lock_guard<std::mutex> lock(mapLock_);
         if (deviceMap_.count(deviceInfo.deviceId) == 0) {
-            ANS_LOGI("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
+            ANS_LOGE("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
             return;
         }
         if (!dansRunning_.load() || dansHandler_ == nullptr || !dansHandler_->IsValid()) {
-            ANS_LOGW("Dans state not normal %{public}d", dansRunning_.load());
+            ANS_LOGE("Dans state not normal %{public}d", dansRunning_.load());
             return;
         }
         RELEASE_DEVICE handler = (RELEASE_DEVICE)dansHandler_->GetProxyFunc("ReleaseDevice");
         if (handler == nullptr) {
-            ANS_LOGW("Dans handler is null ptr.");
+            ANS_LOGE("Dans handler is null ptr.");
             return;
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId);
@@ -360,16 +360,16 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
     std::function<void()> changeTask = std::bind([&, deviceInfo]() {
         std::lock_guard<std::mutex> lock(mapLock_);
         if (deviceMap_.count(deviceInfo.deviceId) == 0) {
-            ANS_LOGI("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
+            ANS_LOGE("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
             return;
         }
         if (!dansRunning_.load() || dansHandler_ == nullptr || !dansHandler_->IsValid()) {
-            ANS_LOGW("Dans state not normal %{public}d", dansRunning_.load());
+            ANS_LOGE("Dans state not normal %{public}d", dansRunning_.load());
             return;
         }
         REFRESH_DEVICE handler = (REFRESH_DEVICE)dansHandler_->GetProxyFunc("RefreshDevice");
         if (handler == nullptr) {
-            ANS_LOGW("Dans handler is null ptr.");
+            ANS_LOGE("Dans handler is null ptr.");
             return;
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);

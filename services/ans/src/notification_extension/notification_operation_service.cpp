@@ -41,7 +41,7 @@ DistributedOperationService::DistributedOperationService()
 {
     operationQueue_ = std::make_shared<ffrt::queue>("ans_operation");
     if (operationQueue_ == nullptr) {
-        ANS_LOGW("ffrt create failed!");
+        ANS_LOGE("ffrt create failed!");
         return;
     }
     ANS_LOGI("Operation service init successfully.");

@@ -43,7 +43,7 @@ NotificationLoadUtils::~NotificationLoadUtils()
 void* NotificationLoadUtils::GetProxyFunc(const std::string& func)
 {
     if (proxyHandle_ == nullptr) {
-        ANS_LOGW("Get func failed: %{public}s %{public}s", path_.c_str(), func.c_str());
+        ANS_LOGE("Get func failed: %{public}s %{public}s", path_.c_str(), func.c_str());
         return nullptr;
     }
 

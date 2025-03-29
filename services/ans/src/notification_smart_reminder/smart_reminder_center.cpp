@@ -50,19 +50,19 @@ void SmartReminderCenter::GetMultiDeviceReminder()
     multiJsonPoint.append("/");
     multiJsonPoint.append(MULTI_DEVICE_REMINDER);
     if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigJson(multiJsonPoint, root)) {
-        ANS_LOGW("Failed to get multiDeviceReminder CCM config file.");
+        ANS_LOGE("Failed to get multiDeviceReminder CCM config file.");
         return;
     }
 
     if (root.find(NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
-        ANS_LOGW("GetMultiDeviceReminder failed as can not find notificationService.");
+        ANS_LOGE("GetMultiDeviceReminder failed as can not find notificationService.");
         return;
     }
 
     nlohmann::json multiDeviceRemindJson =
         root[NotificationConfigParse::CFG_KEY_NOTIFICATION_SERVICE][MULTI_DEVICE_REMINDER];
     if (multiDeviceRemindJson.is_null() || !multiDeviceRemindJson.is_array() || multiDeviceRemindJson.empty()) {
-        ANS_LOGW("GetMultiDeviceReminder failed as invalid multiDeviceReminder json.");
+        ANS_LOGE("GetMultiDeviceReminder failed as invalid multiDeviceReminder json.");
         return;
     }
 

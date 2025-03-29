@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3929,7 +3929,7 @@ HWTEST_F(AnsManagerStubTest, UpdateSlots01, Function | SmallTest | Level1)
 HWTEST_F(AnsManagerStubTest, RequestEnableNotification01, Function | SmallTest | Level1)
 {
     std::string deviceId = "this is deviceId";
-    sptr<AnsDialogCallback> callback = nullptr;
+    sptr<IAnsDialogCallback> callback = nullptr;
     sptr<IRemoteObject> callerToken = nullptr;
     ErrCode result = ansManagerStub_->RequestEnableNotification(deviceId, callback, callerToken);
     EXPECT_EQ(result, (int)ERR_INVALID_OPERATION);

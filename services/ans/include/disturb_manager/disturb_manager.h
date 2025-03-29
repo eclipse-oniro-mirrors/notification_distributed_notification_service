@@ -20,9 +20,9 @@
 #include <map>
 
 #include "ans_manager_interface.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "base_manager.h"
 #include "distributed_notification_service_ipc_interface_code.h"
-#include "ians_subscriber_local_live_view.h"
 #include "iremote_stub.h"
 #include "singleton.h"
 

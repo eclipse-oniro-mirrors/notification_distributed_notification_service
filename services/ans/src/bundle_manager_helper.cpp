@@ -93,7 +93,7 @@ bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, c
     int32_t callingUserId;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
     if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
-        ANS_LOGW("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
+        ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
             bundleName.c_str());
         return false;
     }
@@ -258,6 +258,23 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
         IPCSkeleton::SetCallingIdentity(identity);
     }
     return uid;
+}
+
+bool BundleManagerHelper::GetBundleInfoV9(
+    const std::string bundle, const int32_t flag,
+    AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+
+    if (bundleMgr_ == nullptr) {
+        return false;
+    }
+    bool ret = false;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    ret = bundleMgr_->GetBundleInfoV9(bundle, flag, bundleInfo, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return ret;
 }
 }  // namespace Notification
 }  // namespace OHOS

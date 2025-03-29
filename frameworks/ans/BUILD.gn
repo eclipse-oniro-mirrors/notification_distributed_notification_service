@@ -22,8 +22,8 @@ idl_gen_interface("swing_call_back_interface") {
   part_name = "distributed_notification_service"
 }
 
-idl_gen_interface("ans_subscriber_local_live_view_interface") {
-  sources = [ "IAnsSubscriberLocalLiveView.idl" ]
+idl_gen_interface("ans_dialog_callback_interface") {
+  sources = [ "IAnsDialogCallback.idl" ]
   log_domainid = "0xD001203"
   log_tag = "Ans"
   subsystem_name = "notification"
@@ -137,12 +137,12 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/common/src/ans_convert_enum.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_notification.cpp",
-    "${core_path}/src/listener/ans_dialog_callback_interface.cpp",
-    "${core_path}/src/listener/ans_dialog_callback_proxy.cpp",
-    "${core_path}/src/listener/ans_dialog_callback_stub.cpp",
+    "${core_path}/src/dialog_status_data.cpp",
     "${core_path}/src/listener/ans_operation_callback_proxy.cpp",
     "${core_path}/src/listener/ans_operation_callback_stub.cpp",
     "${core_path}/src/listener/ans_subscriber_listener.cpp",
+    "${core_path}/src/listener/ans_subscriber_local_live_view_proxy.cpp",
+    "${core_path}/src/listener/ans_subscriber_local_live_view_stub.cpp",
     "${core_path}/src/listener/ans_subscriber_proxy.cpp",
     "${core_path}/src/listener/ans_subscriber_stub.cpp",
     "${core_path}/src/listener/swing_callback_service.cpp",
@@ -207,8 +207,8 @@ ohos_shared_library("ans_innerkits") {
   defines = []
 
   deps = [
-    ":ans_subscriber_local_live_view_proxy",
-    ":ans_subscriber_local_live_view_stub",
+    ":ans_dialog_callback_proxy",
+    ":ans_dialog_callback_stub",
   ]
 
   external_deps = [
@@ -258,7 +258,7 @@ ohos_shared_library("ans_innerkits") {
   part_name = "${component_name}"
 }
 
-ohos_source_set("ans_subscriber_local_live_view_proxy") {
+ohos_source_set("ans_dialog_callback_proxy") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -268,12 +268,10 @@ ohos_source_set("ans_subscriber_local_live_view_proxy") {
     debug = false
   }
   public_configs = [ ":ans_innerkits_config" ]
-  output_values =
-      get_target_outputs(":ans_subscriber_local_live_view_interface")
+  output_values = get_target_outputs(":ans_dialog_callback_interface")
   sources = filter_include(output_values, [ "*_proxy.cpp" ])
-  deps = [ ":ans_subscriber_local_live_view_interface" ]
+  deps = [ ":ans_dialog_callback_interface" ]
   external_deps = [
-    "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -283,7 +281,7 @@ ohos_source_set("ans_subscriber_local_live_view_proxy") {
   part_name = "distributed_notification_service"
 }
 
-ohos_source_set("ans_subscriber_local_live_view_stub") {
+ohos_source_set("ans_dialog_callback_stub") {
   sanitize = {
     integer_overflow = true
     ubsan = true
@@ -293,12 +291,10 @@ ohos_source_set("ans_subscriber_local_live_view_stub") {
     debug = false
   }
   public_configs = [ ":ans_innerkits_config" ]
-  output_values =
-      get_target_outputs(":ans_subscriber_local_live_view_interface")
+  output_values = get_target_outputs(":ans_dialog_callback_interface")
   sources = filter_include(output_values, [ "*_stub.cpp" ])
-  deps = [ ":ans_subscriber_local_live_view_interface" ]
+  deps = [ ":ans_dialog_callback_interface" ]
   external_deps = [
-    "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",

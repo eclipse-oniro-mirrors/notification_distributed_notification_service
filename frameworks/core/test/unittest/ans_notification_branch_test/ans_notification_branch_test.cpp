@@ -23,7 +23,7 @@
 #include "ans_manager_proxy.h"
 #undef private
 #undef protected
-#include "ans_dialog_callback_interface.h"
+#include "ians_dialog_callback.h"
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
@@ -222,7 +222,7 @@ public:
     }
 
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -296,7 +296,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNatives) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -318,7 +318,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override
     {
         return ERR_ANS_INVALID_PARAM;

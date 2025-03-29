@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 
-sequenceable  OHOS.Notification.NotificationButtonOption;
-interface OHOS.Notification.IAnsSubscriberLocalLiveView {
-    [oneway] void OnConnected();
-    [oneway] void OnDisconnected();
-    [oneway] void OnResponse([in] int notificationId, [in] NotificationButtonOption buttonOption);
+sequenceable OHOS.Notification.DialogStatusData;
+interface OHOS.Notification.IAnsDialogCallback {
+    void OnDialogStatusChanged([in] DialogStatusData statusData);
 }
- 

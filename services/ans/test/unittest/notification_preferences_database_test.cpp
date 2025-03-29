@@ -1340,7 +1340,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsDistributedEnabledEmptyForBundle
 HWTEST_F(NotificationPreferencesDatabaseTest, GetSmartReminderEnableFromCCM_0100, TestSize.Level1)
 {
     std::string deviceType = "testType";
-    bool enabled = false;
+    bool enabled = true;
     preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
     EXPECT_FALSE(enabled);
     preferncesDB_->isCachedSmartReminderEnableList_ = true;
@@ -1365,7 +1365,10 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateSubscriberExistFlagKey_010
     std::string deviceType = "testType";
     int32_t userId = 0;
     auto ret = preferncesDB_->GenerateSubscriberExistFlagKey(deviceType, userId);
-    EXPECT_FALSE(ret.empty());
+    std::string flag = "existFlag";
+    std::string middleLine = "-";
+    std::string key = flag.append(middleLine).append(deviceType).append(middleLine).append(std::to_string(userId));
+    ASSERT_EQ(ret, key);
 }
 
 /**
@@ -1375,10 +1378,12 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateSubscriberExistFlagKey_010
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0100, TestSize.Level1)
 {
-    std::string deviceType = "testType";
-    bool enabled = false;
-    auto ret = preferncesDB_->SetSubscriberExistFlag(deviceType, enabled);
+    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
     EXPECT_TRUE(ret);
+    bool enabled = true;
+    ret = preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(enabled);
 }
 
 /**
@@ -1388,10 +1393,12 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0100, TestS
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetSubscriberExistFlag_0100, TestSize.Level1)
 {
-    std::string deviceType = "testType";
-    bool enabled = false;
-    auto ret = preferncesDB_->GetSubscriberExistFlag(deviceType, enabled);
+    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
     EXPECT_TRUE(ret);
+    bool enabled = false;
+    ret = preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(enabled);
 }
 
 /**

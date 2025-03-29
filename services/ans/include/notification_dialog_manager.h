@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "common_event_subscribe_info.h"
 #include "refbase.h"
 
-#include "ans_dialog_callback_interface.h"
+#include "ians_dialog_callback.h"
 #include "ans_inner_errors.h"
 
 namespace OHOS::Notification {
@@ -73,7 +73,7 @@ public:
     struct DialogInfo {
         sptr<NotificationBundleOption> bundleOption;
         // When multi devices are going to be supported, a deviceId need to be stored
-        sptr<AnsDialogCallback> callback;
+        sptr<IAnsDialogCallback> callback;
     };
 
     /**
@@ -83,7 +83,7 @@ public:
      */
     ErrCode RequestEnableNotificationDailog(
         const sptr<NotificationBundleOption>& bundle,
-        const sptr<AnsDialogCallback>& callback,
+        const sptr<IAnsDialogCallback>& callback,
         const sptr<IRemoteObject>& callerToken,
         const bool innerLake
     );
@@ -101,7 +101,7 @@ public:
      * AddDialogInfo
      * @return ERR_OK when add Dialog successfully
      */
-    ErrCode AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
+    ErrCode AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<IAnsDialogCallback>& callback);
     
     /*
      * RemoveDialogInfoByBundleOption
@@ -118,7 +118,8 @@ private:
     static bool SetHasPoppedDialog(const sptr<NotificationBundleOption>& bundleOption, bool hasPopped);
 
     // bundle need to be not null
-    bool AddDialogInfoIfNotExist(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
+    bool AddDialogInfoIfNotExist(
+        const sptr<NotificationBundleOption>& bundle, const sptr<IAnsDialogCallback>& callback);
     sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName, const int32_t& uid);
     void RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved);
 

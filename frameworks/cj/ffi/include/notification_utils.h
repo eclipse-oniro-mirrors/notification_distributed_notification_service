@@ -41,14 +41,14 @@
 #include "securec.h"
 
 extern "C" {
-    struct CNotificationBasicContent {
+    struct CNotificationBasicContentV2 {
         char* title;
         char* text;
         char* additionalText;
         int64_t lockscreenPicture;
     };
 
-    struct CNotificationLongTextContent {
+    struct CNotificationLongTextContentV2 {
         char* title;
         char* text;
         char* additionalText;
@@ -58,7 +58,7 @@ extern "C" {
         char* expandedTitle;
     };
 
-    struct CNotificationMultiLineContent {
+    struct CNotificationMultiLineContentV2 {
         char* title;
         char* text;
         char* additionalText;
@@ -68,7 +68,7 @@ extern "C" {
         CArrString lines;
     };
 
-    struct CNotificationPictureContent {
+    struct CNotificationPictureContentV2 {
         char* title;
         char* text;
         char* additionalText;
@@ -78,58 +78,58 @@ extern "C" {
         int64_t picture;
     };
 
-    struct CNotificationCapsule {
+    struct CNotificationCapsuleV2 {
         char* title;
         int64_t icon;
         char* backgroundColor;
     };
 
-    struct CNotificationButton {
+    struct CNotificationButtonV2 {
         CArrString names;
         CArrI64 icons;
     };
 
-    struct CNotificationTime {
+    struct CNotificationTimeV2 {
         int32_t initialTime;
         bool isCountDown;
         bool isPaused;
         bool isInTitle;
     };
 
-    struct CNotificationProgress {
+    struct CNotificationProgressV2 {
         int32_t maxValue;
         int32_t currentValue;
         bool isPercentage;
     };
 
-    struct CNotificationSystemLiveViewContent {
+    struct CNotificationSystemLiveViewContentV2 {
         char* title;
         char* text;
         char* additionalText;
         int64_t lockscreenPicture;
         int32_t typeCode;
-        CNotificationCapsule capsule;
-        CNotificationButton button;
-        CNotificationTime time;
-        CNotificationProgress progress;
+        CNotificationCapsuleV2 capsule;
+        CNotificationButtonV2 button;
+        CNotificationTimeV2 time;
+        CNotificationProgressV2 progress;
     };
 
-    struct CNotificationContent {
+    struct CNotificationContentV2 {
         int32_t notificationContentType;
-        CNotificationBasicContent* normal;
-        CNotificationLongTextContent* longText;
-        CNotificationMultiLineContent* multiLine;
-        CNotificationPictureContent* picture;
-        CNotificationSystemLiveViewContent* systemLiveView;
+        CNotificationBasicContentV2* normal;
+        CNotificationLongTextContentV2* longText;
+        CNotificationMultiLineContentV2* multiLine;
+        CNotificationPictureContentV2* picture;
+        CNotificationSystemLiveViewContentV2* systemLiveView;
     };
 
-    struct CDistributedOptions {
+    struct CDistributedOptionsV2 {
         bool isDistributed;
         CArrString supportDisplayDevices;
         CArrString supportOperateDevices;
     };
 
-    enum class ContentType {
+    enum class ContentTypeV2 {
         NOTIFICATION_CONTENT_BASIC_TEXT,
         NOTIFICATION_CONTENT_LONG_TEXT,
         NOTIFICATION_CONTENT_PICTURE,
@@ -139,7 +139,7 @@ extern "C" {
         NOTIFICATION_CONTENT_LIVE_VIEW
     };
 
-    enum class SlotType {
+    enum class SlotTypeV2 {
         UNKNOWN_TYPE = 0,
         SOCIAL_COMMUNICATION = 1,
         SERVICE_INFORMATION = 2,
@@ -168,13 +168,13 @@ extern "C" {
         CLOSE = 2,
     };
 
-    struct CNotificationFlags {
+    struct CNotificationFlagsV2 {
         int32_t soundEnabled = 0;
         int32_t vibrationEnabled = 0;
     };
 
-    struct CNotificationRequest {
-        CNotificationContent notificationContent;
+    struct CNotificationRequestV2 {
+        CNotificationContentV2 notificationContent;
         int32_t id;
         int32_t notificationSlotType;
         bool isOngoing;
@@ -199,18 +199,18 @@ extern "C" {
         int32_t creatorUserId;
         char* hashCode;
         char* groupName;
-        CDistributedOptions* distributedOption;
-        CNotificationFlags notificationFlags;
+        CDistributedOptionsV2* distributedOption;
+        CNotificationFlagsV2 notificationFlags;
         uint32_t badgeNumber;
         char* appMessageId;
     };
 
-    struct CArrayNotificationRequest {
-        CNotificationRequest** head;
+    struct CArrayNotificationRequestV2 {
+        CNotificationRequestV2** head;
         int64_t size;
     };
 
-    struct CNotificationSlot {
+    struct CNotificationSlotV2 {
         int32_t notificationType;
         int32_t level;
         char* desc;
@@ -225,12 +225,12 @@ extern "C" {
         bool enabled;
     };
 
-    struct CArrayNotificationSlots {
-        CNotificationSlot* head;
+    struct CArrayNotificationSlotsV2 {
+        CNotificationSlotV2* head;
         int64_t size;
     };
 
-    struct CNotificationBundleOption {
+    struct CNotificationBundleOptionV2 {
         char* bundle;
         int32_t uid;
     };
@@ -247,91 +247,95 @@ constexpr int32_t SHORT_STR_SIZE = 1024;
 constexpr int32_t LONG_STR_SIZE = 3072;
 
 char *MallocCString(const std::string &origin);
-bool GetNotificationSupportDisplayDevices(
-    CDistributedOptions* distributedOption,
+bool GetNotificationSupportDisplayDevicesV2(
+    CDistributedOptionsV2* distributedOption,
     OHOS::Notification::NotificationRequest request);
-bool GetNotificationSupportOperateDevices(
-    CDistributedOptions* distributedOption,
+bool GetNotificationSupportOperateDevicesV2(
+    CDistributedOptionsV2* distributedOption,
     OHOS::Notification::NotificationRequest request);
-bool GetNotificationRequestDistributedOptions(
-    CDistributedOptions* distributedOption,
+bool GetNotificationRequestDistributedOptionsV2(
+    CDistributedOptionsV2* distributedOption,
     OHOS::Notification::NotificationRequest request);
-bool GetNotificationRequestByNumber(CNotificationRequest cjRequest, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationRequestByString(CNotificationRequest cjRequest, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationRequestByBool(CNotificationRequest cjRequest, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationRequestByCustom(CNotificationRequest cjRequest, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationBasicContentDetailed(CNotificationBasicContent* contentResult,
+bool GetNotificationRequestByNumberV2(
+    CNotificationRequestV2 cjRequest, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationRequestByStringV2(
+    CNotificationRequestV2 cjRequest, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationRequestByBoolV2(
+    CNotificationRequestV2 cjRequest, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationRequestByCustomV2(
+    CNotificationRequestV2 cjRequest, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationBasicContentDetailedV2(CNotificationBasicContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationBasicContent> basicContent);
-bool GetNotificationBasicContent(CNotificationBasicContent* contentResult,
+bool GetNotificationBasicContentV2(CNotificationBasicContentV2* contentResult,
     OHOS::Notification::NotificationRequest &request);
-bool GetNotificationLongTextContentDetailed(CNotificationLongTextContent* contentResult,
+bool GetNotificationLongTextContentDetailedV2(CNotificationLongTextContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLongTextContent> &longContent);
-bool GetNotificationLongTextContent(CNotificationLongTextContent* contentResult,
+bool GetNotificationLongTextContentV2(CNotificationLongTextContentV2* contentResult,
     OHOS::Notification::NotificationRequest &request);
-bool GetNotificationPictureContentDetailed(CNotificationPictureContent* contentResult,
+bool GetNotificationPictureContentDetailedV2(CNotificationPictureContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationPictureContent> &pictureContent);
-bool GetNotificationPictureContent(CNotificationPictureContent* contentResult,
+bool GetNotificationPictureContentV2(CNotificationPictureContentV2* contentResult,
     OHOS::Notification::NotificationRequest &request);
-bool GetNotificationMultiLineContentLines(CNotificationMultiLineContent* result,
+bool GetNotificationMultiLineContentLinesV2(CNotificationMultiLineContentV2* result,
     std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent);
-bool GetNotificationMultiLineContent(CNotificationMultiLineContent* contentResult,
+bool GetNotificationMultiLineContentV2(CNotificationMultiLineContentV2* contentResult,
     OHOS::Notification::NotificationRequest &request);
-bool GetNotificationLocalLiveViewCapsule(CNotificationSystemLiveViewContent* contentResult,
+bool GetNotificationLocalLiveViewCapsuleV2(CNotificationSystemLiveViewContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> &content);
-bool GetNotificationLocalLiveViewButton(CNotificationSystemLiveViewContent* contentResult,
+bool GetNotificationLocalLiveViewButtonV2(CNotificationSystemLiveViewContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> &content);
-bool GetNotificationLocalLiveViewProgress(CNotificationSystemLiveViewContent* contentResult,
+bool GetNotificationLocalLiveViewProgressV2(CNotificationSystemLiveViewContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> &content);
-bool GetNotificationLocalLiveViewTime(CNotificationSystemLiveViewContent* contentResult,
+bool GetNotificationLocalLiveViewTimeV2(CNotificationSystemLiveViewContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> &content);
-bool GetNotificationLocalLiveViewContentDetailed(CNotificationSystemLiveViewContent* contentResult,
+bool GetNotificationLocalLiveViewContentDetailedV2(CNotificationSystemLiveViewContentV2* contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> &content);
-bool GetNotificationLocalLiveViewContent(CNotificationSystemLiveViewContent* contentResult,
+bool GetNotificationLocalLiveViewContentV2(CNotificationSystemLiveViewContentV2* contentResult,
     OHOS::Notification::NotificationRequest &request);
-bool SlotTypeCJToC(const SlotType &inType, OHOS::Notification::NotificationConstant::SlotType &outType);
-bool SlotTypeCToCJ(const OHOS::Notification::NotificationConstant::SlotType &inType, SlotType &outType);
-bool SlotLevelCToCJ(const OHOS::Notification::NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel);
-bool ContentTypeCJToC(const ContentType &inType, OHOS::Notification::NotificationContent::Type &outType);
-bool ContentTypeCToCJ(const OHOS::Notification::NotificationContent::Type &inType, ContentType &outType);
-bool GetNotificationSlotType(int32_t slotType, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationContent(CNotificationContent &content, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationSmallIcon(int64_t smallIcon, OHOS::Notification::NotificationRequest &request);
-bool GetNotificationLargeIcon(int64_t largeIcon, OHOS::Notification::NotificationRequest &request);
-bool SetNotificationSlot(const OHOS::Notification::NotificationSlot &slot, CNotificationSlot &notificationSlot);
-void SetNotificationRequestByString(const OHOS::Notification::NotificationRequest *request,
-    CNotificationRequest &notificationRequest);
-bool SetNotificationRequestByNumber(const OHOS::Notification::NotificationRequest *request,
-    CNotificationRequest &notificationRequest);
-void SetNotificationRequestByBool(const OHOS::Notification::NotificationRequest *request,
-    CNotificationRequest &notificationRequest);
-void SetNotificationRequestByPixelMap(const OHOS::Notification::NotificationRequest *request,
-    CNotificationRequest &notificationRequest);
-bool SetNotificationBasicContent(const OHOS::Notification::NotificationBasicContent *basicContent,
-    CNotificationBasicContent* normal);
-bool SetNotificationLongTextContent(OHOS::Notification::NotificationBasicContent *basicContent,
-    CNotificationLongTextContent* longText);
-bool SetNotificationPictureContent(OHOS::Notification::NotificationBasicContent *basicContent,
-    CNotificationPictureContent* picture);
-bool SetNotificationMultiLineContent(OHOS::Notification::NotificationBasicContent *basicContent,
-    CNotificationMultiLineContent* multiLine);
-bool SetCapsule(const OHOS::Notification::NotificationCapsule &capsule, CNotificationCapsule &cCapsule);
-bool SetButton(const OHOS::Notification::NotificationLocalLiveViewButton &button, CNotificationButton &cButton);
-bool SetNotificationLocalLiveViewContentDetailed(
+bool SlotTypeCJToCV2(const SlotTypeV2 &inType, OHOS::Notification::NotificationConstant::SlotType &outType);
+bool SlotTypeCToCJV2(const OHOS::Notification::NotificationConstant::SlotType &inType, SlotTypeV2 &outType);
+bool SlotLevelCToCJV2(const OHOS::Notification::NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel);
+bool ContentTypeCJToCV2(const ContentTypeV2 &inType, OHOS::Notification::NotificationContent::Type &outType);
+bool ContentTypeCToCJV2(const OHOS::Notification::NotificationContent::Type &inType, ContentTypeV2 &outType);
+bool GetNotificationSlotTypeV2(int32_t slotType, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationContentV2(CNotificationContentV2 &content, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationSmallIconV2(int64_t smallIcon, OHOS::Notification::NotificationRequest &request);
+bool GetNotificationLargeIconV2(int64_t largeIcon, OHOS::Notification::NotificationRequest &request);
+bool SetNotificationSlotV2(const OHOS::Notification::NotificationSlot &slot, CNotificationSlotV2 &notificationSlot);
+void SetNotificationRequestByStringV2(const OHOS::Notification::NotificationRequest *request,
+    CNotificationRequestV2 &notificationRequest);
+bool SetNotificationRequestByNumberV2(const OHOS::Notification::NotificationRequest *request,
+    CNotificationRequestV2 &notificationRequest);
+void SetNotificationRequestByBoolV2(const OHOS::Notification::NotificationRequest *request,
+    CNotificationRequestV2 &notificationRequest);
+void SetNotificationRequestByPixelMapV2(const OHOS::Notification::NotificationRequest *request,
+    CNotificationRequestV2 &notificationRequest);
+bool SetNotificationBasicContentV2(const OHOS::Notification::NotificationBasicContent *basicContent,
+    CNotificationBasicContentV2* normal);
+bool SetNotificationLongTextContentV2(OHOS::Notification::NotificationBasicContent *basicContent,
+    CNotificationLongTextContentV2* longText);
+bool SetNotificationPictureContentV2(OHOS::Notification::NotificationBasicContent *basicContent,
+    CNotificationPictureContentV2* picture);
+bool SetNotificationMultiLineContentV2(OHOS::Notification::NotificationBasicContent *basicContent,
+    CNotificationMultiLineContentV2* multiLine);
+bool SetCapsuleV2(const OHOS::Notification::NotificationCapsule &capsule, CNotificationCapsuleV2 &cCapsule);
+bool SetButtonV2(const OHOS::Notification::NotificationLocalLiveViewButton &button, CNotificationButtonV2 &cButton);
+bool SetNotificationLocalLiveViewContentDetailedV2(
     OHOS::Notification::NotificationLocalLiveViewContent *localLiveViewContent,
-    CNotificationSystemLiveViewContent* systemLiveView);
-bool SetNotificationLocalLiveViewContent(OHOS::Notification::NotificationBasicContent *basicContent,
-    CNotificationSystemLiveViewContent* systemLiveView);
-bool SetNotificationContentDetailed(const ContentType &type,
+    CNotificationSystemLiveViewContentV2* systemLiveView);
+bool SetNotificationLocalLiveViewContentV2(OHOS::Notification::NotificationBasicContent *basicContent,
+    CNotificationSystemLiveViewContentV2* systemLiveView);
+bool SetNotificationContentDetailedV2(const ContentTypeV2 &type,
     const std::shared_ptr<OHOS::Notification::NotificationContent> &content,
-    CNotificationContent &notificationContent);
-bool SetNotificationContent(const std::shared_ptr<OHOS::Notification::NotificationContent> &content,
-    CNotificationContent &notificationContent);
-bool SetNotificationFlags(const std::shared_ptr<OHOS::Notification::NotificationFlags> &flags,
-    CNotificationFlags &notificationFlags);
-bool SetNotificationRequestByCustom(const OHOS::Notification::NotificationRequest *request,
-    CNotificationRequest &notificationRequest);
-bool SetNotificationRequest(const OHOS::Notification::NotificationRequest *request,
-    CNotificationRequest &notificationRequest);
+    CNotificationContentV2 &notificationContent);
+bool SetNotificationContentV2(const std::shared_ptr<OHOS::Notification::NotificationContent> &content,
+    CNotificationContentV2 &notificationContent);
+bool SetNotificationFlagsV2(const std::shared_ptr<OHOS::Notification::NotificationFlags> &flags,
+    CNotificationFlagsV2 &notificationFlags);
+bool SetNotificationRequestByCustomV2(const OHOS::Notification::NotificationRequest *request,
+    CNotificationRequestV2 &notificationRequest);
+bool SetNotificationRequestV2(const OHOS::Notification::NotificationRequest *request,
+    CNotificationRequestV2 &notificationRequest);
 }
 } // namespace CJSystemapi
 } // namespace OHOS

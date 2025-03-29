@@ -20,8 +20,8 @@
 #include <map>
 
 #include "ans_manager_interface.h"
+#include "ans_subscriber_local_live_view_interface.h"
 #include "distributed_notification_service_ipc_interface_code.h"
-#include "ians_subscriber_local_live_view.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -376,7 +376,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
 
     /**
@@ -463,7 +463,7 @@ public:
     virtual ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
 
     virtual ErrCode SubscribeLocalLiveView(
-        const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
     /**
@@ -498,7 +498,7 @@ public:
      * @param  canPop True if can pop enable notification dialog
      * @return Returns is canPop result.
      */
-    ErrCode CanPopEnableNotificationDialog(const sptr<AnsDialogCallback> &callback,
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
         bool &canPop, std::string &bundleName) override;
 
     /**

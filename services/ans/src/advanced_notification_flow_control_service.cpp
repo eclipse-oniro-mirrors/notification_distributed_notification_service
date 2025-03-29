@@ -40,7 +40,7 @@ ErrCode FlowControlService::FlowControl(const std::shared_ptr<NotificationRecord
     ErrCode result = ERR_OK;
     if (!isNotificationExists) {
         if (record->request->IsUpdateOnly()) {
-            ANS_LOGW("Notification not exists when update");
+            ANS_LOGE("Notification not exists when update");
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
         result = PublishFlowCtrl(record, callingUid);

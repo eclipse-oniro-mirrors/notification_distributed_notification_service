@@ -36,7 +36,7 @@ napi_value ReminderCommon::GetReminderRequest(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, value, &valuetype));
     if (valuetype != napi_object) {
-        ANSR_LOGW("Wrong argument type. Object expected.");
+        ANSR_LOGE("Wrong argument type. Object expected.");
         return nullptr;
     }
 
@@ -59,7 +59,7 @@ bool ReminderCommon::GenActionButtons(
     bool isArray = false;
     napi_is_array(env, actionButtons, &isArray);
     if (!isArray) {
-        ANSR_LOGW("Wrong argument type:%{public}s. array expected.", ACTION_BUTTON);
+        ANSR_LOGE("Wrong argument type:%{public}s. array expected.", ACTION_BUTTON);
         return false;
     }
 
@@ -70,7 +70,7 @@ bool ReminderCommon::GenActionButtons(
         napi_get_element(env, actionButtons, i, &actionButton);
         NAPI_CALL_BASE(env, napi_typeof(env, actionButton, &valuetype), false);
         if (valuetype != napi_object) {
-            ANSR_LOGW("Wrong element type:%{public}s. object expected.", ACTION_BUTTON);
+            ANSR_LOGE("Wrong element type:%{public}s. object expected.", ACTION_BUTTON);
             return false;
         }
 
@@ -82,12 +82,12 @@ bool ReminderCommon::GenActionButtons(
                 ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::SNOOZE ||
                 (ReminderRequest::ActionButtonType(buttonType) == ReminderRequest::ActionButtonType::CUSTOM &&
                 isSysApp))) {
-                ANSR_LOGW("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
+                ANSR_LOGE("Wrong argument type:%{public}s. buttonType not support.", ACTION_BUTTON);
                 return false;
             }
             HandleActionButtonTitle(env, actionButton, reminder, str, buttonType);
         } else {
-            ANSR_LOGW("Parse action button error.");
+            ANSR_LOGE("Parse action button error.");
             return false;
         }
     }
@@ -124,7 +124,7 @@ bool ReminderCommon::IsSelfSystemApp()
 {
     auto selfToken = IPCSkeleton::GetSelfTokenID();
     if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
-        ANSR_LOGW("This application is not system-app, can not use system-api");
+        ANSR_LOGE("This application is not system-app, can not use system-api");
         return false;
     }
     return true;
@@ -193,7 +193,7 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
     uint32_t arrlen = 0;
     napi_status status = napi_get_array_length(env, keys, &arrlen);
     if (status != napi_ok) {
-        ANSR_LOGW("get the valuesBucket length err");
+        ANSR_LOGE("get the valuesBucket length err");
         return false;
     }
     for (size_t i = 0; i < arrlen; ++i) {
@@ -206,7 +206,7 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
         }
         std::string keyStr = GetStringFromJS(env, key);
         if (!ValidateString(keyStr)) {
-            ANSR_LOGW("The key contains separator");
+            ANSR_LOGE("The key contains separator");
             return false;
         }
         // value
@@ -220,7 +220,7 @@ bool ReminderCommon::GetValueBucketObject(std::string &valueBucketString, const 
             continue;
         }
         if (!ValidateString(valueObject)) {
-            ANSR_LOGW("The value contains separator");
+            ANSR_LOGE("The value contains separator");
             return false;
         }
         valueBucketString += keyStr + ReminderRequest::SEP_BUTTON_VALUE + type
@@ -439,11 +439,11 @@ bool ReminderCommon::CreateReminder(
             CreateReminderCalendar(env, value, isSysApp, reminder);
             break;
         default:
-            ANSR_LOGW("Reminder type is not support. (type:%{public}d)", reminderType);
+            ANSR_LOGE("Reminder type is not support. (type:%{public}d)", reminderType);
             break;
     }
     if (reminder == nullptr) {
-        ANSR_LOGW("Instance of reminder error.");
+        ANSR_LOGE("Instance of reminder error.");
         return false;
     }
     return true;
@@ -456,7 +456,7 @@ napi_value ReminderCommon::GenReminder(
     bool hasProperty = false;
     NAPI_CALL(env, napi_has_named_property(env, value, ReminderAgentNapi::REMINDER_TYPE, &hasProperty));
     if (!hasProperty) {
-        ANSR_LOGW("Property %{public}s expected.", ReminderAgentNapi::REMINDER_TYPE);
+        ANSR_LOGE("Property %{public}s expected.", ReminderAgentNapi::REMINDER_TYPE);
         return nullptr;
     }
 
@@ -584,7 +584,7 @@ bool ReminderCommon::GenReminderIntInner(
     if (GetInt32(env, value, ReminderAgentNapi::SLOT_TYPE, slotType, false)) {
         enum NotificationConstant::SlotType actureType = NotificationConstant::SlotType::OTHER;
         if (!NotificationNapi::AnsEnumUtil::SlotTypeJSToC(NotificationNapi::SlotType(slotType), actureType)) {
-            ANSR_LOGW("slot type not support.");
+            ANSR_LOGE("slot type not support.");
             return false;
         }
         reminder->SetSlotType(actureType);
@@ -651,7 +651,7 @@ bool ReminderCommon::GetStringUtf8(const napi_env &env, const napi_value &value,
         napi_get_named_property(env, value, propertyName, &result);
         NAPI_CALL_BASE(env, napi_typeof(env, result, &valuetype), false);
         if (valuetype != napi_string) {
-            ANSR_LOGW("Wrong argument type:%{public}s. string expected.", propertyName);
+            ANSR_LOGE("Wrong argument type:%{public}s. string expected.", propertyName);
             return false;
         }
         NAPI_CALL_BASE(env, napi_get_value_string_utf8(env, result, propertyVal, size - 1, &strLen), false);
@@ -667,13 +667,13 @@ bool ReminderCommon::GetBool(const napi_env &env, const napi_value &value,
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL_BASE(env, napi_has_named_property(env, value, propertyName, &hasProperty), false);
     if (!hasProperty) {
-        ANSR_LOGW("Does not have argument type:%{public}s.", propertyName);
+        ANSR_LOGE("Does not have argument type:%{public}s.", propertyName);
         return false;
     }
     napi_get_named_property(env, value, propertyName, &result);
     NAPI_CALL_BASE(env, napi_typeof(env, result, &valuetype), false);
     if (valuetype != napi_boolean) {
-        ANSR_LOGW("Wrong argument type:%{public}s. boolean expected.", propertyName);
+        ANSR_LOGE("Wrong argument type:%{public}s. boolean expected.", propertyName);
         return false;
     }
     napi_get_value_bool(env, result, &propertyVal);
@@ -744,7 +744,7 @@ bool ReminderCommon::GetObject(const napi_env &env, const napi_value &value,
     napi_get_named_property(env, value, propertyName, &propertyVal);
     NAPI_CALL_BASE(env, napi_typeof(env, propertyVal, &valuetype), false);
     if (valuetype != napi_object) {
-        ANSR_LOGW("Wrong argument type:%{public}s. object expected.", propertyName);
+        ANSR_LOGE("Wrong argument type:%{public}s. object expected.", propertyName);
         return false;
     }
     return true;
@@ -786,7 +786,7 @@ napi_value ReminderCommon::CreateReminderTimer(
 
     auto countDownTimeInSeconds = static_cast<uint64_t>(propertyCountDownTime);
     if (propertyCountDownTime <= 0 || countDownTimeInSeconds >= (UINT64_MAX / ReminderRequest::MILLI_SECONDS)) {
-        ANSR_LOGW("Create countDown reminder fail: designated %{public}s is illegal.",
+        ANSR_LOGE("Create countDown reminder fail: designated %{public}s is illegal.",
             ReminderAgentNapi::TIMER_COUNT_DOWN_TIME);
         return nullptr;
     }
@@ -813,13 +813,13 @@ napi_value ReminderCommon::CreateReminderAlarm(
     }
 
     if ((propertyHourVal < 0) || (propertyHourVal > maxHour)) {
-        ANSR_LOGW("Create alarm reminder fail: designated %{public}s must between [0, 23].",
+        ANSR_LOGE("Create alarm reminder fail: designated %{public}s must between [0, 23].",
             ReminderAgentNapi::ALARM_HOUR);
         return nullptr;
     }
 
     if ((propertyMinuteVal < 0) || (propertyMinuteVal > maxMinute)) {
-        ANSR_LOGW("Create alarm reminder fail: designated %{public}s must between [0, 59].",
+        ANSR_LOGE("Create alarm reminder fail: designated %{public}s must between [0, 59].",
             ReminderAgentNapi::ALARM_MINUTE);
         return nullptr;
     }
@@ -841,12 +841,12 @@ napi_value ReminderCommon::CreateReminderCalendar(
     struct tm dateTime;
     napi_value dateTimeObj = nullptr;
     if (!GetObject(env, value, ReminderAgentNapi::CALENDAR_DATE_TIME, dateTimeObj)) {
-        ANSR_LOGW("Create calendar reminder fail: dateTime must be setted.");
+        ANSR_LOGE("Create calendar reminder fail: dateTime must be setted.");
         return nullptr;
     }
 
     if (!ParseLocalDateTime(env, dateTimeObj, dateTime)) {
-        ANSR_LOGW("Parce DateTime failed.");
+        ANSR_LOGE("Parce DateTime failed.");
         return nullptr;
     }
 
@@ -880,7 +880,7 @@ napi_value ReminderCommon::CreateReminderCalendar(
             return nullptr;
         }
         if (!reminderCalendar->SetEndDateTime(ReminderRequest::GetDurationSinceEpochInMilli(endTime))) {
-            ANSR_LOGW("The end time must be greater than start time");
+            ANSR_LOGE("The end time must be greater than start time");
             return nullptr;
         }
     }
@@ -897,30 +897,30 @@ bool ReminderCommon::CheckCalendarParams(const int32_t &year, const int32_t &mon
     const int32_t &hour, const int32_t &min)
 {
     if ((year < 0) || (year > UINT16_MAX)) {
-        ANSR_LOGW("Create calendar reminder fail: designated %{public}s must between [0, %{public}d]",
+        ANSR_LOGE("Create calendar reminder fail: designated %{public}s must between [0, %{public}d]",
             ReminderAgentNapi::CALENDAR_YEAR, UINT16_MAX);
         return false;
     }
     if ((month < 1) || (month > ReminderRequestCalendar::MAX_MONTHS_OF_YEAR)) {
-        ANSR_LOGW("Create calendar reminder fail: designated %{public}s must between [1, %{public}hhu]",
+        ANSR_LOGE("Create calendar reminder fail: designated %{public}s must between [1, %{public}hhu]",
             ReminderAgentNapi::CALENDAR_MONTH, ReminderRequestCalendar::MAX_MONTHS_OF_YEAR);
         return false;
     }
     uint8_t maxDaysOfMonth = ReminderRequestCalendar::GetDaysOfMonth(static_cast<uint16_t>(year), month);
     if ((day < 1) || (day > maxDaysOfMonth)) {
-        ANSR_LOGW("Create calendar reminder fail: designated %{public}s must between [1, %{public}hhu]",
+        ANSR_LOGE("Create calendar reminder fail: designated %{public}s must between [1, %{public}hhu]",
             ReminderAgentNapi::CALENDAR_DAY, maxDaysOfMonth);
         return false;
     }
     uint8_t maxHour = 23;
     if (hour < 0 || hour > maxHour) {
-        ANSR_LOGW("Create calendar reminder fail: designated %{public}s must between [0, %{public}hhu]",
+        ANSR_LOGE("Create calendar reminder fail: designated %{public}s must between [0, %{public}hhu]",
             ReminderAgentNapi::CALENDAR_HOUR, maxHour);
         return false;
     }
     uint8_t maxMinute = 59;
     if (min < 0 || min > maxMinute) {
-        ANSR_LOGW("Create calendar reminder fail: designated %{public}s must between [0, %{public}hhu]",
+        ANSR_LOGE("Create calendar reminder fail: designated %{public}s must between [0, %{public}hhu]",
             ReminderAgentNapi::CALENDAR_MINUTE, maxMinute);
         return false;
     }
@@ -992,13 +992,13 @@ napi_value ReminderCommon::ParseInt32Array(const napi_env &env, const napi_value
         bool isArray = false;
         napi_is_array(env, result, &isArray);
         if (!isArray) {
-            ANSR_LOGW("Property %{public}s is expected to be an array.", propertyName);
+            ANSR_LOGE("Property %{public}s is expected to be an array.", propertyName);
             return nullptr;
         }
         uint32_t length = 0;
         napi_get_array_length(env, result, &length);
         if (length > maxLen) {
-            ANSR_LOGW("The max length of array of %{public}s is %{public}hhu.", propertyName, maxLen);
+            ANSR_LOGE("The max length of array of %{public}s is %{public}hhu.", propertyName, maxLen);
             return nullptr;
         }
         napi_valuetype valuetype = napi_undefined;
@@ -1008,12 +1008,12 @@ napi_value ReminderCommon::ParseInt32Array(const napi_env &env, const napi_value
             napi_get_element(env, result, i, &repeatDayVal);
             NAPI_CALL(env, napi_typeof(env, repeatDayVal, &valuetype));
             if (valuetype != napi_number) {
-                ANSR_LOGW("%{public}s's element is expected to be number.", propertyName);
+                ANSR_LOGE("%{public}s's element is expected to be number.", propertyName);
                 return nullptr;
             }
             napi_get_value_int32(env, repeatDayVal, &propertyDayVal);
             if (propertyDayVal < 1 || propertyDayVal > static_cast<int32_t>(maxLen)) {
-                ANSR_LOGW("%{public}s's element must between [1, %{public}d].", propertyName, maxLen);
+                ANSR_LOGE("%{public}s's element must between [1, %{public}d].", propertyName, maxLen);
                 return nullptr;
             }
             propertyVal.push_back(static_cast<uint8_t>(propertyDayVal));

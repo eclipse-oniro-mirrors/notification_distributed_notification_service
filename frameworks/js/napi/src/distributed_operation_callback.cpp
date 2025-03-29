@@ -32,7 +32,7 @@ void DistributedOperationCallback::OnOperationCallback(const int32_t operationRe
 {
     OperationOnCallBack *operationOnCallBack = new (std::nothrow) OperationOnCallBack();
     if (operationOnCallBack == nullptr) {
-        ANS_LOGW("new operationOnCallBack failed");
+        ANS_LOGE("new operationOnCallBack failed");
         return;
     }
 
@@ -45,19 +45,19 @@ void DistributedOperationCallback::OnOperationCallback(const int32_t operationRe
     operationOnCallBack->deferred = asyncCallbackInfo_.deferred;
     bool bRet = UvQueue::Call(asyncCallbackInfo_.env, operationOnCallBack, UvWorkOnCallBack);
     if (!bRet) {
-        ANS_LOGW("DistributedOperationCallback::OnCallBack failed");
+        ANS_LOGE("DistributedOperationCallback::OnCallBack failed");
     }
 }
 
 void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t status)
 {
     if (work == nullptr) {
-        ANS_LOGW("UvWorkOnCallBack, work is null");
+        ANS_LOGE("UvWorkOnCallBack, work is null");
         return;
     }
     OperationOnCallBack *callBackPtr = static_cast<OperationOnCallBack *>(work->data);
     if (callBackPtr == nullptr) {
-        ANS_LOGW("UvWorkOnCallBack, callBackPtr is null");
+        ANS_LOGE("UvWorkOnCallBack, callBackPtr is null");
         if (work != nullptr) {
             delete work;
             work = nullptr;
