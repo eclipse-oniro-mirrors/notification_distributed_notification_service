@@ -1321,8 +1321,10 @@ ohos_unittest("advanced_datashare_observer_unit_test") {
   ]
 
   sources = [
+    "advanced_datashare_helper_test.cpp",
     "advanced_datashare_observer_test.cpp",
     "bundle_manager_helper_branch_test/mock_service_registry.cpp",
+    "mock/mock_datashare.cpp",
   ]
 
   deps = [
@@ -1441,6 +1443,8 @@ ohos_unittest("advanced_notification_service_unit_test") {
   external_deps = [
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "data_share:datashare_common",
     "data_share:datashare_consumer",

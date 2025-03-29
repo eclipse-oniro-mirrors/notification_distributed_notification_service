@@ -47,6 +47,7 @@
 #include "want_agent_helper.h"
 #include "want_params.h"
 #include "bundle_manager_helper.h"
+#include "mock_bundle_mgr.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 
@@ -1364,6 +1365,199 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
     req->SetOverlayIcon(nullptr);
     EXPECT_EQ(nullptr, req->GetOverlayIcon());
     ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0200
+ * @tc.name      : OnReceiveEvent_0200
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0200, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    int notificationId = 1;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AssignToNotificationList(record);
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED)
+        .SetElementName("test", "")
+        .SetParam(AppExecFwk::Constants::UID, 1);
+    data.SetWant(want);
+    data.SetCode(200);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->IsNotificationExists(request->GetBaseKey("")), false);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0300
+ * @tc.name      : OnReceiveEvent_0300
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0300, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    int notificationId = 1;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    request->SetReceiverUserId(SUBSCRIBE_USER_INIT);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AssignToNotificationList(record);
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
+    data.SetWant(want);
+    data.SetCode(SUBSCRIBE_USER_INIT);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+    ASSERT_EQ(advancedNotificationService_->IsNotificationExists(request->GetBaseKey("")), true);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0400
+ * @tc.name      : OnReceiveEvent_0400
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0400, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
+    request->SetContent(content);
+    request->SetCreatorUid(1);
+    request->SetCreatorUserId(0);
+    request->SetLabel("test1");
+
+    std::string bundleName = "test";
+    int32_t uid = 0;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    AdvancedNotificationService::NotificationRequestDb requestDbObj =
+        { .request = request, .bundleOption = bundleOption };
+    auto result = advancedNotificationService_->SetNotificationRequestToDb(requestDbObj);
+    ASSERT_EQ(result, ERR_OK);
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0500
+ * @tc.name      : OnReceiveEvent_0500
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0500, Function | SmallTest | Level1)
+{
+    int notificationId = 1;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    advancedNotificationService_->AssignToNotificationList(record);
+
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED)
+        .SetElementName("test", "")
+        .SetParam("ohos.aafwk.param.targetUid", 1);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0600
+ * @tc.name      : OnReceiveEvent_0600
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0600, Function | SmallTest | Level1)
+{
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED)
+        .SetElementName("test", "")
+        .SetParam("uid", 1);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+    
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    SleepForFC();
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, true);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0700
+ * @tc.name      : OnReceiveEvent_0700
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0700, Function | SmallTest | Level1)
+{
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED)
+        .SetElementName("test", "")
+        .SetParam("uid", 1);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+    
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    SleepForFC();
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, true);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_0800
+ * @tc.name      : OnReceiveEvent_0800
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0800, Function | SmallTest | Level1)
+{
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data);
+
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

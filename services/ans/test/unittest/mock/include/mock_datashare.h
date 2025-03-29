@@ -25,6 +25,10 @@ void MockGetStringValue(const std::string& getStringValue);
 void MockIsFailedToCreateDataShareHelper(const bool isFailed);
 
 void MockIsFailedToQueryDataShareResultSet(const bool isFailed);
+
+void MockSetRowCount(const int rowCount);
+
+void MockGoToGetNextRow(const int goToNextRow);
 } // namespace Notification
 } // namespace OHOS
 

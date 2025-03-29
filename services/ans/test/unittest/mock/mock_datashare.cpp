@@ -23,6 +23,8 @@ std::string g_getStringValue = "";
 int g_goToFirstRow = DataShare::E_OK;
 bool g_isFailedToCreateDataShareHelper = false;
 bool g_isFailedToQueryDataShareResultSet = false;
+int g_rowCount = 1;
+int g_goToNextRow = DataShare::E_OK;
 }
 
 void MockIsFailedGoToFirstRow(const int goToFirstRow)
@@ -45,6 +47,16 @@ void MockIsFailedToQueryDataShareResultSet(const bool isFailed)
     g_isFailedToQueryDataShareResultSet = isFailed;
 }
 
+void MockSetRowCount(const int rowCount)
+{
+    g_rowCount = rowCount;
+}
+
+void MockGoToGetNextRow(const int goToNextRow)
+{
+    g_goToNextRow = goToNextRow;
+}
+
 } // namespace Notification
 
 namespace DataShare {
@@ -53,6 +65,12 @@ public:
     int GoToFirstRow() override
     {
         return Notification::g_goToFirstRow;
+    }
+
+    int32_t GetRowCount(int32_t &count) override
+    {
+        count = Notification::g_rowCount;
+        return 0;
     }
 
     int GetColumnIndex(const std::string &columnName, int &columnIndex) override
@@ -98,7 +116,7 @@ public:
 
     int GoToNextRow() override
     {
-        return 0;
+        return Notification::g_goToNextRow;
     }
 
     int GoToPreviousRow() override
@@ -296,6 +314,16 @@ std::shared_ptr<DataShareHelper> DataShareHelper::Creator(const sptr<IRemoteObje
     const std::string &extUri, const int waitTime, bool isSystem)
 {
     return Notification::g_isFailedToCreateDataShareHelper ? nullptr : std::make_shared<MockDataShareHelper>();
+}
+
+std::pair<int, std::shared_ptr<DataShareHelper>> DataShareHelper::Create(const sptr<IRemoteObject> &token,
+    const std::string &strUri, const std::string &extUri, const int waitTime)
+{
+    if (Notification::g_isFailedToCreateDataShareHelper) {
+        return std::make_pair(1, nullptr);
+    } else {
+        return std::make_pair(0, std::make_shared<MockDataShareHelper>());
+    }
 }
 } // namespace DataShare
 } // namespace OHOS
