@@ -258,16 +258,22 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
         return ERR_ANS_INVALID_PARAM;
     }
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_7);
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         if (!bundleInfo.GetSlot(type, slot)) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+            message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST).Message("Slot type not exist.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            ANS_LOGE("Slot type not exist.");
         }
     } else {
         ANS_LOGW("bundle not exist");
         result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+        message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST).Message("Slot type not exist.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
     ANS_LOGD("%{public}s status  = %{public}d ", __FUNCTION__, result);
     return result;
