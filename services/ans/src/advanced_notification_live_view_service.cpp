@@ -167,12 +167,12 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
     CancelArchiveTimer(record);
 }
 
-void AdvancedNotificationService::OnSubscriberAdd(
+ErrCode AdvancedNotificationService::OnSubscriberAdd(
     const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
 {
     if (record == nullptr) {
         ANS_LOGE("No subscriber to notify.");
-        return;
+        return ERR_ANS_INVALID_PARAM;
     }
 
     sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
@@ -187,11 +187,12 @@ void AdvancedNotificationService::OnSubscriberAdd(
 
     if (notifications.empty()) {
         ANS_LOGI("No notification to consume.");
-        return;
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
     }
 
     ANS_LOGI("Consume notification count is %{public}zu.", notifications.size());
     NotificationSubscriberManager::GetInstance()->BatchNotifyConsumed(notifications, sortingMap, record);
+    return ERR_OK;
 }
 
 bool AdvancedNotificationService::IsLiveViewCanRecover(const sptr<NotificationRequest> request)
