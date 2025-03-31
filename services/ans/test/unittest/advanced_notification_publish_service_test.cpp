@@ -1489,7 +1489,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00001, Functi
 HWTEST_F(AnsPublishServiceTest, DistributeOperation_00001, Function | SmallTest | Level1)
 {
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
-    sptr<OperationCallbackInterface> callback = nullptr;
+    sptr<IAnsOperationCallback> callback = nullptr;
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
     std::string hashCode = "123456";

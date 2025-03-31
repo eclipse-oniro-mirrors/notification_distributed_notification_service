@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Huawei Device Co., Ltd.
+ * Copyright (C) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "notification_config_parse.h"
 #include "distributed_data_define.h"
 #include "itimer_info.h"
-#include "ans_operation_callback_interface.h"
+#include "ians_operation_callback.h"
 
 #include <set>
 #include <mutex>
@@ -68,7 +68,7 @@ class DistributedOperationService {
 public:
     static DistributedOperationService& GetInstance();
     void AddOperation(const std::string& hashCode,
-        const sptr<OperationCallbackInterface> &callback);
+        const sptr<IAnsOperationCallback> &callback);
     void ReplyOperationResponse(const std::string& hashCode, int32_t result);
     void HandleOperationTimeOut(const std::string& hashCode);
     void RemoveOperationResponse(const std::string& hashCode);
@@ -81,7 +81,7 @@ private:
     std::mutex mapLock_;
     std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
     std::map<std::string, uint64_t> timerMap_;
-    std::map<std::string, sptr<OperationCallbackInterface>> callbackMap_;
+    std::map<std::string, sptr<IAnsOperationCallback>> callbackMap_;
 };
 }
 }

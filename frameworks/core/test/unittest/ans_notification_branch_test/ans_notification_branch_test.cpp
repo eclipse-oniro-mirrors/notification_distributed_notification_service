@@ -612,7 +612,7 @@ public:
     }
 
     ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-        const sptr<OperationCallbackInterface> &callback) override
+        const sptr<IAnsOperationCallback> &callback) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

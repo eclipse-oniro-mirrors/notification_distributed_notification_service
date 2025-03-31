@@ -633,7 +633,7 @@ ErrCode AnsManagerStub::GetTargetDeviceStatus(const std::string &deviceType, int
 }
 
 ErrCode AnsManagerStub::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-    const sptr<OperationCallbackInterface> &callback)
+    const sptr<IAnsOperationCallback> &callback)
 {
     ANS_LOGE("DistributeOperation called!");
     return ERR_INVALID_OPERATION;

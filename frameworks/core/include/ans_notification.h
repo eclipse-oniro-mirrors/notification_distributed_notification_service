@@ -1251,7 +1251,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
-        const sptr<OperationCallbackInterface> &callback);
+        const sptr<IAnsOperationCallback> &callback);
 
     /**
      * @brief Reply distribute operation.
