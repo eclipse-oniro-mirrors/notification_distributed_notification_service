@@ -301,6 +301,29 @@ HWTEST_F(AnsPublishServiceTest, Publish_00007, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: Publish_00008
+ * @tc.desc: Test Publish
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00008, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetOwnerUid(1);
+    request->SetCreatorUid(1);
+    request->SetCreatorUserId(100);
+    request->SetIsAgentNotification(true);
+    MockIsOsAccountExists(true);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(false);
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: DeleteByBundle_00001
  * @tc.desc: Test DeleteByBundle
  * @tc.type: FUNC

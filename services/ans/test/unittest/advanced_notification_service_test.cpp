@@ -56,6 +56,8 @@ extern void MockIsOsAccountExists(bool mockRet);
 using namespace testing::ext;
 using namespace OHOS::Media;
 
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+
 namespace OHOS {
 namespace Notification {
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
@@ -429,6 +431,21 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04300,
     std::string bundleName = "bundleName";
     advancedNotificationService_->SetAgentNotification(request, bundleName);
     EXPECT_TRUE(advancedNotificationService_ != nullptr);
+}
+
+/**
+ * @tc.number    : SetAgentNotification_0200
+ * @tc.name      : SetAgentNotification_0200
+ * @tc.desc      : Test AddDoNotDisturbProfiles function
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetAgentNotification_0200, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 0);
+    sptr<NotificationRequest> request(new NotificationRequest());
+    std::string bundleName = "bundleName";
+    advancedNotificationService_->SetAgentNotification(request, bundleName);
+    ASSERT_NE(request->GetOwnerBundleName(), bundleName);
+    MockQueryForgroundOsAccountId(true, 0);
 }
 
 /**
@@ -1446,6 +1463,26 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17700,
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17800, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test start";
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    bundleOption->SetBundleName("test");
+    ASSERT_EQ(advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle), ERR_ANS_NON_SYSTEM_APP);
+
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test end";
+}
+
+/**
+ * @tc.number    : GetAppTargetBundle_4000
+ * @tc.name      : GetAppTargetBundle
+ * @tc.desc      : Test GetAppTargetBundle function.
+ * @tc.require   : #I60KYN
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetAppTargetBundle_4000, Function | SmallTest | Level1)
+
+{
+    GTEST_LOG_(INFO) << "GetAppTargetBundle_3000 test start";
 
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationBundleOption> targetBundle = nullptr;
@@ -1816,6 +1853,113 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
 }
 
 /**
+ * @tc.number    : OnDistributedPublish_0200
+ * @tc.name      : OnDistributedPublish_0200
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0200, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(19800);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    std::vector<std::string> devices;
+    devices.push_back("a");
+    request->SetDevicesSupportDisplay(devices);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+    advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_0300
+ * @tc.name      : OnDistributedPublish_0300
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0300, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(19800);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    std::vector<std::string> devices;
+    devices.push_back("a");
+    request->SetDevicesSupportDisplay(devices);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_0300
+ * @tc.name      : OnDistributedPublish_0300
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0400, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(19800);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    std::vector<std::string> devices;
+    devices.push_back("a");
+    request->SetDevicesSupportDisplay(devices);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_0500
+ * @tc.name      : OnDistributedPublish_0500
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0500, Function | SmallTest | Level1)
+{
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    sptr<NotificationRequest> request = new NotificationRequest();
+    ASSERT_NE(nullptr, advancedNotificationService_);
+    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_0300
+ * @tc.name      : OnDistributedPublish_0300
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0600, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(19800);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    request->SetUpdateOnly(true);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_20000
  * @tc.name      : OnDistributedUpdate_0100
  * @tc.desc      : Test OnDistributedUpdate function
@@ -1949,6 +2093,10 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0200, Function | S
     SleepForFC();
 
     int32_t id = 101;
+    MockQueryForgroundOsAccountId(false, 0);
+    advancedNotificationService.OnDistributedDelete(deviceId, bundleName, label, id);
+    SleepForFC();
+    MockQueryForgroundOsAccountId(true, 100);
     advancedNotificationService.notificationSvrQueue_ = nullptr;
     advancedNotificationService.OnDistributedDelete(deviceId, bundleName, label, id);
 
@@ -3839,6 +3987,74 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00006, Function | SmallTest | L
     bool enable = false;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enable);
     ASSERT_EQ(enable, false);
+}
+
+/**
+ * @tc.name      : SetNotificationRemindType_00001
+ * @tc.number    :
+ * @tc.desc      : test SetNotificationRemindType
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->distributedReminderPolicy_ = NotificationConstant::DistributedReminderPolicy::DEFAULT;
+    advancedNotificationService_->localScreenOn_ = false;
+    auto reminderType = advancedNotificationService_->GetRemindType();
+    ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_IDLE_REMIND);
+}
+
+/**
+ * @tc.name      : SetNotificationRemindType_00002
+ * @tc.number    :
+ * @tc.desc      : test SetNotificationRemindType
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->localScreenOn_ = true;
+    advancedNotificationService_->distributedReminderPolicy_ = NotificationConstant::DistributedReminderPolicy::DEFAULT;
+    auto reminderType = advancedNotificationService_->GetRemindType();
+    ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND);
+}
+
+/**
+ * @tc.name      : SetNotificationRemindType_00003
+ * @tc.number    :
+ * @tc.desc      : test SetNotificationRemindType
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->localScreenOn_ = true;
+    advancedNotificationService_->distributedReminderPolicy_ = 
+        NotificationConstant::DistributedReminderPolicy::ALWAYS_REMIND;
+    auto reminderType = advancedNotificationService_->GetRemindType();
+    ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND);
+}
+
+/**
+ * @tc.name      : SetNotificationRemindType_00004
+ * @tc.number    :
+ * @tc.desc      : test SetNotificationRemindType
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->localScreenOn_ = false;
+    advancedNotificationService_->distributedReminderPolicy_ = 
+        NotificationConstant::DistributedReminderPolicy::DO_NOT_REMIND;
+    auto reminderType = advancedNotificationService_->GetRemindType();
+    ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_IDLE_DONOT_REMIND);
+}
+
+/**
+ * @tc.name      : SetNotificationRemindType_00005
+ * @tc.number    :
+ * @tc.desc      : test SetNotificationRemindType
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->localScreenOn_ = true;
+    advancedNotificationService_->distributedReminderPolicy_ = 
+        NotificationConstant::DistributedReminderPolicy::DO_NOT_REMIND;
+    auto reminderType = advancedNotificationService_->GetRemindType();
+    ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_ACTIVE_DONOT_REMIND);
 }
 }  // namespace Notification
 }  // namespace OHOS

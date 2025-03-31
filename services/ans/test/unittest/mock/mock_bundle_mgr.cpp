@@ -25,6 +25,12 @@ namespace {
 bool g_isNonBundleName = false;
 bool g_isEnable = true;
 bool g_setBundleInfoEnabled = false;
+bool g_getBundleInfoFailed = false;
+}
+
+void MockSetBundleInfoFailed(bool getFail)
+{
+    g_getBundleInfoFailed = getFail;
 }
 
 void MockSetBundleInfoEnabled(bool enabled)
@@ -55,6 +61,9 @@ ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
 bool BundleMgrProxy::GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo,
     int32_t userId)
 {
+    if (Notification::g_getBundleInfoFailed) {
+        return false;
+    }
     if (Notification::g_setBundleInfoEnabled) {
         bundleInfo.applicationInfo.allowEnableNotification = true;
     }
