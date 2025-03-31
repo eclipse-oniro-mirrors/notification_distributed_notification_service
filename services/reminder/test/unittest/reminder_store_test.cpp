@@ -708,5 +708,30 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00004, Function | Small
     ClearStore();
     EXPECT_GE(value, 0);
 }
+
+/**
+ * @tc.name: ReminderStoreTest_001
+ * @tc.desc: Test  parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, ReminderStoreTest_001, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
+    ReminderStore::ReminderStoreDataCallBack callback;
+    if (reminderStore.rdbStore_ != nullptr) {
+        NativeRdb::RdbStore& store = *reminderStore.rdbStore_.get();
+        callback.OnCreate(store);
+        callback.OnUpgrade(store, 10, 1);
+        callback.OnUpgrade(store, 1, 2);
+        callback.OnDowngrade(store, 8, 1);
+        callback.OnUpgrade(store, 1, 8);
+        callback.OnDowngrade(store, 1, 8);
+        callback.OnDowngrade(store, 8, 7);
+    }
+    ClearStore();
+    EXPECT_NE(reminderStore.rdbStore_, nullptr);
+}
 }
 }
