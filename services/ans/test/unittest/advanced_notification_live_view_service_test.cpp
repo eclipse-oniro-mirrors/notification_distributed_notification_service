@@ -28,6 +28,7 @@
 #include "notification_preferences.h"
 #include "notification_constant.h"
 #include "pixel_map.h"
+#include "int_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -359,6 +360,427 @@ HWTEST_F(AnsLiveViewServiceTest, AddToDelayNotificationList_001, Function | Smal
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->AddToDelayNotificationList(record);
     ASSERT_EQ(advancedNotificationService_->delayNotificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: OnSubscriberAdd_100
+ * @tc.desc: Test OnSubscriberAdd when record is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_100, Function | SmallTest | Level1)
+{
+    auto ret = advancedNotificationService_->OnSubscriberAdd(nullptr);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: OnSubscriberAdd_200
+ * @tc.desc: Test OnSubscriberAdd when notification doesn't exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_200, Function | SmallTest | Level1)
+{
+    auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+
+    auto ret = advancedNotificationService_->OnSubscriberAdd(record);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.name: OnSubscriberAdd_300
+ * @tc.desc: Test OnSubscriberAdd when notification exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_300, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto notificationRecord = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(notificationRecord);
+
+    auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+
+    auto ret = advancedNotificationService_->OnSubscriberAdd(record);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SetNotificationRequestToDb_100
+ * @tc.desc: Test SetNotificationRequestToDb when isOnlyLocalUpdate is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetIsOnlyLocalUpdate(true);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    AdvancedNotificationService::NotificationRequestDb requestDb =
+        { .request = request, .bundleOption = bundle};
+
+    auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateInDelayNotificationList_100
+ * @tc.desc: Test UpdateInDelayNotificationList when publish immediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, UpdateInDelayNotificationList_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetPublishDelayTime(0);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToDelayNotificationList(record);
+
+    sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
+    request1->SetSlotType(slotType);
+    request1->SetNotificationId(1);
+    request1->SetPublishDelayTime(1000);
+    auto liveContent1 = std::make_shared<NotificationLiveViewContent>();
+    auto content1 = std::make_shared<NotificationContent>(liveContent1);
+    request1->SetContent(content1);
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test", 1);
+    auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle1);
+    advancedNotificationService_->UpdateInDelayNotificationList(record1);
+    
+    auto iter = advancedNotificationService_->delayNotificationList_.begin();
+    ASSERT_EQ((*iter).first->request->GetPublishDelayTime(), 1000);
+}
+
+/**
+ * @tc.name: SaPublishSystemLiveViewAsBundle_100
+ * @tc.desc: Test SaPublishSystemLiveViewAsBundle when publish immediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SaPublishSystemLiveViewAsBundle_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetPublishDelayTime(0);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->SaPublishSystemLiveViewAsBundle(record);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SaPublishSystemLiveViewAsBundle_200
+ * @tc.desc: Test SaPublishSystemLiveViewAsBundle when notification exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SaPublishSystemLiveViewAsBundle_200, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetPublishDelayTime(1000);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToDelayNotificationList(record);
+
+    auto ret = advancedNotificationService_->SaPublishSystemLiveViewAsBundle(record);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SaPublishSystemLiveViewAsBundle_300
+ * @tc.desc: Test SaPublishSystemLiveViewAsBundle when notification doesn't exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, SaPublishSystemLiveViewAsBundle_300, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetPublishDelayTime(1000);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->SaPublishSystemLiveViewAsBundle(record);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: IsNotificationExistsInDelayList_100
+ * @tc.desc: Test IsNotificationExistsInDelayList when notification exists
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, IsNotificationExistsInDelayList_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToDelayNotificationList(record);
+    std::string key = record->notification->GetKey();
+
+    auto ret = advancedNotificationService_->IsNotificationExistsInDelayList(key);
+
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IsNotificationExistsInDelayList_200
+ * @tc.desc: Test IsNotificationExistsInDelayList when notification doesn't exist
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, IsNotificationExistsInDelayList_200, Function | SmallTest | Level1)
+{
+    std::string key = "bunlde";
+
+    auto ret = advancedNotificationService_->IsNotificationExistsInDelayList(key);
+
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StartPublishDelayedNotificationTimeOut_100
+ * @tc.desc: Test StartPublishDelayedNotificationTimeOut when publish with updateOnly is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, StartPublishDelayedNotificationTimeOut_100, Function | SmallTest | Level1)
+{
+    int32_t ownerUid = 1;
+    int32_t notificationId = 1;
+
+    advancedNotificationService_->StartPublishDelayedNotificationTimeOut(ownerUid, notificationId);
+
+    auto ret = advancedNotificationService_->GetFromDelayedNotificationList(ownerUid, notificationId);
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: StartPublishDelayedNotification_100
+ * @tc.desc: Test StartPublishDelayedNotification when publish with updateOnly is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, StartPublishDelayedNotification_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetUpdateOnly(true);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->StartPublishDelayedNotification(record);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.name: StartPublishDelayedNotification_200
+ * @tc.desc: Test StartPublishDelayedNotification when notificationList_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, StartPublishDelayedNotification_200, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetAutoDeletedTime(INT64_MAX);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->StartPublishDelayedNotification(record);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateRecordByOwner_100
+ * @tc.desc: Test UpdateRecordByOwner when notificationList_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    bool isSystem = false;
+
+    advancedNotificationService_->UpdateRecordByOwner(record, isSystem);
+    auto creatorUid = request->GetCreatorUid();
+    auto notificationId = request->GetNotificationId();
+    auto ret = advancedNotificationService_->GetFromNotificationList(creatorUid, notificationId);
+
+    ASSERT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: UpdateRecordByOwner_200
+ * @tc.desc: Test UpdateRecordByOwner when isSystem is true and timerId is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_200, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+    request->SetUpdateByOwnerAllowed(true);
+    std::shared_ptr<NotificationTemplate> notiTemplate = std::make_shared<NotificationTemplate>();
+    std::shared_ptr<AAFwk::WantParams> data = std::make_shared<AAFwk::WantParams>();
+    data->SetParam("progressValue", AAFwk::Integer::Box(1));
+    notiTemplate->SetTemplateData(data);
+    request->SetTemplate(notiTemplate);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    request->SetWantAgent(agent);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->notification->SetFinishTimer(1);
+    advancedNotificationService_->AddToNotificationList(record);
+    bool isSystem = true;
+
+    advancedNotificationService_->UpdateRecordByOwner(record, isSystem);
+    auto ret = record->notification->GetFinishTimer();
+
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: UpdateRecordByOwner_300
+ * @tc.desc: Test UpdateRecordByOwner when isSystem is false and timerId is not 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_300, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+    request->SetUpdateByOwnerAllowed(true);
+    std::shared_ptr<NotificationTemplate> notiTemplate = std::make_shared<NotificationTemplate>();
+    std::shared_ptr<AAFwk::WantParams> data = std::make_shared<AAFwk::WantParams>();
+    data->SetParam("progressValue", AAFwk::Integer::Box(1));
+    notiTemplate->SetTemplateData(data);
+    request->SetTemplate(notiTemplate);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    request->SetWantAgent(agent);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->notification->SetFinishTimer(1);
+    advancedNotificationService_->AddToNotificationList(record);
+    bool isSystem = false;
+
+    advancedNotificationService_->UpdateRecordByOwner(record, isSystem);
+    auto ret = record->notification->GetFinishTimer();
+
+    ASSERT_NE(ret, 0);
+}
+
+/**
+ * @tc.name: StartFinishTimerForUpdate_100
+ * @tc.desc: Test StartFinishTimerForUpdate when process is FINISH_PER
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, StartFinishTimerForUpdate_100, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    uint64_t process = NotificationConstant::FINISH_PER;
+
+    advancedNotificationService_->StartFinishTimerForUpdate(record, process);
+
+    ASSERT_EQ(record->finish_status, AdvancedNotificationService::UploadStatus::FINISH);
+}
+
+/**
+ * @tc.name: StartFinishTimerForUpdate_200
+ * @tc.desc: Test StartFinishTimerForUpdate when process is not FINISH_PER
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, StartFinishTimerForUpdate_200, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    uint64_t process = NotificationConstant::DEFAULT_FINISH_STATUS;
+
+    advancedNotificationService_->StartFinishTimerForUpdate(record, process);
+
+    ASSERT_EQ(record->finish_status, AdvancedNotificationService::UploadStatus::CONTINUOUS_UPDATE_TIME_OUT);
 }
 }  // namespace Notification
 }  // namespace OHOS
