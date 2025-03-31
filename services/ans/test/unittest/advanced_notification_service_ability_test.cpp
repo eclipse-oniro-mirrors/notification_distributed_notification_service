@@ -141,9 +141,10 @@ HWTEST_F(
     bool runOnCreate = true;
     std::string deviceId = "deviceId";
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    test.OnAddSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, deviceId);
     test.OnAddSystemAbility(COMMON_EVENT_SERVICE_ID, deviceId);
     test.OnRemoveSystemAbility(COMMON_EVENT_SERVICE_ID, deviceId);
-    EXPECT_EQ(test.isDatashaReready_, false);
+    EXPECT_EQ(test.isDatashaReready_, true);
 }
 
 /**

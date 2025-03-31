@@ -46,6 +46,8 @@ namespace Notification {
 void MockIsNonBundleName(bool isNonBundleName);
 
 void MockDistributedNotificationEnabled(bool isEnable);
+
+void MockSetBundleInfoFailed(bool getFail);
 }  // namespace Notification
 }  // namespace OHOS
 

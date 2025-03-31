@@ -31,6 +31,10 @@ void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase)
             g_mockId = 101; // 101 mockcase1
             break;
         }
+        case 2: {
+            g_mockId = 0; // 0 mockcase1
+            break;
+        }
         default: {
             g_mockId = 100; // 100 mockdefault
             break;
