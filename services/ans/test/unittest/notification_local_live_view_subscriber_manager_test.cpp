@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,14 +49,14 @@ private:
 
     static std::shared_ptr<NotificationLocalLiveViewSubscriberManager> notificationLocalLiveViewSubscriberManager_;
     static TestAnsSubscriber testAnsSubscriber_;
-    static sptr<AnsSubscriberLocalLiveViewInterface> subscriber_;
+    static sptr<IAnsSubscriberLocalLiveView> subscriber_;
 };
 
 std::shared_ptr<NotificationLocalLiveViewSubscriberManager>
     NotificationLocalLiveViewSubscriberManagerTest::notificationLocalLiveViewSubscriberManager_ = nullptr;
 NotificationLocalLiveViewSubscriberManagerTest::TestAnsSubscriber
     NotificationLocalLiveViewSubscriberManagerTest::testAnsSubscriber_;
-sptr<AnsSubscriberLocalLiveViewInterface>
+sptr<IAnsSubscriberLocalLiveView>
     NotificationLocalLiveViewSubscriberManagerTest::subscriber_ = nullptr;
 
 void NotificationLocalLiveViewSubscriberManagerTest::SetUpTestCase()

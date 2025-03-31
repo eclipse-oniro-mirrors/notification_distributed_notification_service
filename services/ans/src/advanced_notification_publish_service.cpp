@@ -2775,7 +2775,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 }
 
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber,
     const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);

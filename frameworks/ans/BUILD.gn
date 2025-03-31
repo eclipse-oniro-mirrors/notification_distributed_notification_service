@@ -38,6 +38,14 @@ idl_gen_interface("ans_operation_callback_interface") {
   part_name = "distributed_notification_service"
 }
 
+idl_gen_interface("ans_subscriber_local_live_view_interface") {
+  sources = [ "IAnsSubscriberLocalLiveView.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
 group("ans_client") {
   deps = [ ":ans_innerkits" ]
 }
@@ -83,6 +91,19 @@ config("ans_operation_callback_config") {
 }
 
 config("swing_call_back_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+config("ans_subscriber_local_live_view_config") {
   visibility = [ "./../../*" ]
 
   include_dirs = [
@@ -160,8 +181,6 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/ans_notification.cpp",
     "${core_path}/src/dialog_status_data.cpp",
     "${core_path}/src/listener/ans_subscriber_listener.cpp",
-    "${core_path}/src/listener/ans_subscriber_local_live_view_proxy.cpp",
-    "${core_path}/src/listener/ans_subscriber_local_live_view_stub.cpp",
     "${core_path}/src/listener/ans_subscriber_proxy.cpp",
     "${core_path}/src/listener/ans_subscriber_stub.cpp",
     "${core_path}/src/listener/swing_callback_service.cpp",
@@ -230,6 +249,8 @@ ohos_shared_library("ans_innerkits") {
     ":ans_dialog_callback_stub",
     ":ans_operation_callback_proxy",
     ":ans_operation_callback_stub",
+    ":ans_subscriber_local_live_view_proxy",
+    ":ans_subscriber_local_live_view_stub",
   ]
 
   external_deps = [
@@ -361,6 +382,56 @@ ohos_source_set("ans_operation_callback_stub") {
   sources = filter_include(output_values, [ "*_stub.cpp" ])
   deps = [ ":ans_operation_callback_interface" ]
   external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_subscriber_local_live_view_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_subscriber_local_live_view_config" ]
+  output_values =
+      get_target_outputs(":ans_subscriber_local_live_view_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":ans_subscriber_local_live_view_interface" ]
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_subscriber_local_live_view_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_subscriber_local_live_view_config" ]
+  output_values =
+      get_target_outputs(":ans_subscriber_local_live_view_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_subscriber_local_live_view_interface" ]
+  external_deps = [
+    "ability_base:want",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
