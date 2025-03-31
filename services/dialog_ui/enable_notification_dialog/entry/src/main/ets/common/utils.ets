@@ -35,6 +35,18 @@ export function titleTrim(title: string): string {
   }
 }
 
+export function calOverLine(containerWidth: number, options: MeasureOptions,
+  measureUtils: MeasureUtils) : boolean {
+    let crossLineFlag: boolean = false;
+    try {
+      let textWidth = px2vp(measureUtils.measureText(options));
+      crossLineFlag = (textWidth > containerWidth);
+    } catch (err) {
+      console.error(TAG, `cal over line failed, code=${err?.code0}, msg=${err?.message}.`);
+    }
+    return crossLineFlag;
+  }
+
 export function calContainerWidth(
   containerWidth: number,
   options: MeasureOptions,

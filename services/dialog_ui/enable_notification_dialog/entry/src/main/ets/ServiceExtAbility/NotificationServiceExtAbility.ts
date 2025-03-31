@@ -73,7 +73,9 @@ interface NotificationConfig {
 
 interface DeviceInfo {
   isWatch: boolean;
+  isCar: boolean;
   isPc: boolean;
+  isTv: boolean;
 }
 
 export class EnableNotificationDialog {
@@ -81,6 +83,8 @@ export class EnableNotificationDialog {
   static DIALOG_PATH = 'pages/notificationDialog';
   static WATCH_DIALOG_PATH = 'pages/watchNotificationDialog';
   static PC_DIALOG_PATH = 'pages/pcNotificationDialog';
+  static TV_DIALOG_PATH = 'pages/tvNotificationDialog';
+  static CAR_DIALOG_PATH = 'pages/carNotificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
   static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
   static SYSTEMUI_BUNDLE = 'com.ohos.systemui';
@@ -141,6 +145,14 @@ export class EnableNotificationDialog {
                 path = EnableNotificationDialog.PC_DIALOG_PATH;
                 isPcDevice = true;
                 console.info(TAG, 'pc request');
+              }
+              if (deviceInfo.isTv !== undefined) {
+                path = EnableNotificationDialog.TV_DIALOG_PATH;
+                console.info(TAG, 'tv request');
+              }
+              if (deviceInfo.isCar !== undefined) {
+                path = EnableNotificationDialog.CAR_DIALOG_PATH;
+                console.info(TAG, 'car request');
               }
             }
           }

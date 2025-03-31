@@ -25,6 +25,10 @@
         "value":"These may include lock screen and banner notifications as well as sounds and vibration. You can modify these settings in EasyAbroad > App management."
       },
       {
+        "name":"reason_tv",
+        "value":"Notification reminder methods include banner. You can change your preferences in Settings."
+      },
+      {
           "name":"ALLOW",
           "value":"Allow",
           "attr":{

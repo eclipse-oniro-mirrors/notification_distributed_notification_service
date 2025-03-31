@@ -171,6 +171,17 @@ export default class Constants {
 
   public static PC_OUTLINE_COLOR = '#20FFFFFF'; 
   
+  //  tv param config
+  public static TV_BUTTON_FONT_SIZE = 18;
+  public static TV_BUTTON_HEIGHT = 40;
+  public static TV_RADIUS_20 = 20;
+  public static TV_RADIUS_16 = 16;
+  public static TV_DIALOG_ICON_WIDTH = 48;
+  public static TV_ICON_MARGIN_TOP = 24;
+  public static TV_LABEL_FONT_SIZE = 20;
+  public static TV_TITLE_MARGIN_SIDE = 24;
+  public static TV_CONTENT_FONT_SIZE = 16;
+
   // ccm config path
   public static CCM_CONFIG_PATH = "etc/notification/notification_config.json";
 }
