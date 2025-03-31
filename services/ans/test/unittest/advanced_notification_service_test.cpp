@@ -4037,7 +4037,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00003, Funct
 HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00004, Function | SmallTest | Level1)
 {
     advancedNotificationService_->localScreenOn_ = false;
-    advancedNotificationService_->distributedReminderPolicy_ = 
+    advancedNotificationService_->distributedReminderPolicy_ =
         NotificationConstant::DistributedReminderPolicy::DO_NOT_REMIND;
     auto reminderType = advancedNotificationService_->GetRemindType();
     ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_IDLE_DONOT_REMIND);

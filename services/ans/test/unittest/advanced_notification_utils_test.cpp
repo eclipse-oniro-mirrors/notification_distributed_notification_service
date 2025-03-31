@@ -992,7 +992,7 @@ HWTEST_F(AnsUtilsTest, DeleteAllByUserInner_0001, Function | SmallTest | Level1)
 {
     AdvancedNotificationService ans;
     ans.notificationSvrQueue_ = nullptr;
-    ASSERT_EQ(ans.DeleteAllByUserInner(0, 0 , true), (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ans.DeleteAllByUserInner(0, 0, true), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
