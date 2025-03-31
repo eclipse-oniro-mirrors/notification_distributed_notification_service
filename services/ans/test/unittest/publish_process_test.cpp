@@ -75,6 +75,7 @@ HWTEST_F(PublishProcessTest, BaseCommonPublishCheck_00002, Function | SmallTest 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemAppByFullTokenID(true);
     MockIsVerfyPermisson(false);
+    MockIsSystemApp(true);
     sptr<NotificationRequest> request(new NotificationRequest(1));
     request->SetReceiverUserId(100);
 
@@ -157,7 +158,7 @@ HWTEST_F(PublishProcessTest, LivePublishPreWork_00001, Function | SmallTest | Le
 {
     sptr<NotificationRequest> request(new NotificationRequest(1));
     request->SetRemoveAllowed(false);
-    
+    MockIsSystemApp(true);
     LivePublishProcess progress;
     auto res = progress.PublishPreWork(request, true);
     ASSERT_EQ(request->IsRemoveAllowed(), true);
