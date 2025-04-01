@@ -1726,6 +1726,28 @@ ErrCode AnsNotification::SetBadgeNumberByBundle(const NotificationBundleOption &
     return proxy->SetBadgeNumberByBundle(bundleInfo, badgeNumber);
 }
 
+ErrCode AnsNotification::SetBadgeNumberForDhByBundle(
+    const NotificationBundleOption &bundleOption, int32_t badgeNumber)
+{
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Unable to connect to ANS service.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bundleInfo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bundleInfo == nullptr) {
+        ANS_LOGE("Unable to create new bundle info.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    return proxy->SetBadgeNumberForDhByBundle(bundleInfo, badgeNumber);
+}
+
 ErrCode AnsNotification::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
