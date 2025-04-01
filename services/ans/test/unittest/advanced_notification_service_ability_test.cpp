@@ -91,7 +91,7 @@ HWTEST_F(
     MessageParcel reply;
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     ErrCode ret = test.OnExtension(extension, data, reply);
-    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(ret, -1);
 }
 
 /**

@@ -1155,5 +1155,22 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
     ASSERT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
     ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
+
+/**
+ * @tc.number    : GetDeviceRemindType_3000
+ * @tc.name      : GetDeviceRemindType_3000
+ * @tc.desc      : Test GetDeviceRemindType function return ERR_ANS_INVALID_PARAM.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, GetDeviceRemindType_3000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
+    MockIsVerfyPermisson(true);
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

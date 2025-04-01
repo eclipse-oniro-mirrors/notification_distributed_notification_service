@@ -1252,5 +1252,23 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     ASSERT_EQ(advancedNotificationService.IsNeedSilentInDoNotDisturbMode(
         phoneNumber, callerType), ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
+
+/**
+ * @tc.number  : ActiveNotificationDump_0009
+ * @tc.name    : ActiveNotificationDump
+ * @tc.desc    : test ActiveNotificationDump function and record->notification == nullptr.
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ActiveNotificationDump_0009, Function | SmallTest | Level1)
+{
+    std::string bundle = "<bundle>";
+    int32_t userId = 1;
+    std::vector<std::string> dumpInfo;
+    AdvancedNotificationService advancedNotificationService;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = new (std::nothrow) Notification();
+    record->request = nullptr;
+    advancedNotificationService.notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
