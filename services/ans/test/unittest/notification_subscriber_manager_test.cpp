@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -113,12 +113,12 @@ private:
 
     static std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager_;
     static TestAnsSubscriber testAnsSubscriber_;
-    static sptr<AnsSubscriberInterface> subscriber_;
+    static sptr<IAnsSubscriber> subscriber_;
 };
 
 std::shared_ptr<NotificationSubscriberManager> NotificationSubscriberManagerTest::notificationSubscriberManager_ =
     nullptr;
-sptr<AnsSubscriberInterface> NotificationSubscriberManagerTest::subscriber_ = nullptr;
+sptr<IAnsSubscriber> NotificationSubscriberManagerTest::subscriber_ = nullptr;
 
 void NotificationSubscriberManagerTest::SetUpTestCase()
 {
@@ -353,7 +353,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumed_001, Function | 
     notifications.emplace_back(notification);
      
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -382,7 +382,7 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_001, Function | SmallT
     MockGetOsAccountLocalIdFromUid(false, 0);
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     
     ASSERT_EQ(notificationSubscriberManager.AddSubscriber(
         subscriber, nullptr), (int)ERR_ANS_INVALID_PARAM);
@@ -397,7 +397,7 @@ HWTEST_F(NotificationSubscriberManagerTest, AddSubscriber_002, Function | SmallT
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
@@ -426,7 +426,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_001, Functi
     sptr<Notification> notification(new Notification(request));
 
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
@@ -448,7 +448,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_002, Functi
     sptr<Notification> notification(new Notification(request));
 
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
@@ -469,7 +469,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_003, Functi
     sptr<Notification> notification(new Notification(request));
 
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
@@ -507,7 +507,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Function | Small
     sptr<Notification> notification(new Notification(request));
 
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -527,7 +527,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Function | Small
 HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Function | SmallTest | Level1)
 {
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
     ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, nullptr), (int)ERR_OK);
@@ -557,7 +557,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_001, Function | 
     sptr<Notification> notification(new Notification(request));
 
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
@@ -586,7 +586,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_002, Function | 
 
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
 
@@ -609,7 +609,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_003, Function | 
 
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
 
@@ -660,7 +660,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Functi
     notifications.push_back(notificationLocal);
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -687,7 +687,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_0
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -715,7 +715,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -741,7 +741,7 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Function | Small
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -767,7 +767,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001
 {
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 
@@ -810,7 +810,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceFlag_001, Function | SmallTe
     sptr<Notification> notification(new Notification(request));
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> subscriberRecord =
        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
 
@@ -851,7 +851,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceFlag_002, Function | SmallTe
     
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> subscriberRecord =
        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
 
@@ -892,7 +892,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceFlag_003, Function | SmallTe
     
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> subscriberRecord =
        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
 
@@ -937,7 +937,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceFlag_004, Function | SmallTe
     
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> subscriberRecord =
        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
 
@@ -974,7 +974,7 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | 
     sptr<NotificationOperationInfo> operationInfo(new NotificationOperationInfo);
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
-    sptr<AnsSubscriberInterface> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
 

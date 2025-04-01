@@ -155,7 +155,7 @@ ErrCode AnsManagerProxy::RemoveNotifications(const std::vector<std::string> &key
     return result;
 }
 
-ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+ErrCode AnsManagerProxy::Subscribe(const sptr<IAnsSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &info)
 {
     if (subscriber == nullptr) {
@@ -202,7 +202,7 @@ ErrCode AnsManagerProxy::Subscribe(const sptr<AnsSubscriberInterface> &subscribe
     return result;
 }
 
-ErrCode AnsManagerProxy::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+ErrCode AnsManagerProxy::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber)
 {
     if (subscriber == nullptr) {
         ANS_LOGE("[SubscribeSelf] fail: subscriber is empty.");
@@ -291,7 +291,7 @@ ErrCode AnsManagerProxy::SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLi
 }
 
 ErrCode AnsManagerProxy::Unsubscribe(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
     if (subscriber == nullptr) {
         ANS_LOGE("[Unsubscribe] fail: subscriber is empty.");

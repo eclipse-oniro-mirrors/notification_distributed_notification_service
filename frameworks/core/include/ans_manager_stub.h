@@ -452,7 +452,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode Subscribe(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
      * @brief Subscribes notifications self.
@@ -460,7 +460,7 @@ public:
      * @param subscriber Indicates the subscriber.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
+    virtual ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override;
 
     virtual ErrCode SubscribeLocalLiveView(
         const sptr<IAnsSubscriberLocalLiveView> &subscriber,
@@ -474,7 +474,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode Unsubscribe(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
      * @brief Checks whether this device is allowed to publish notifications.

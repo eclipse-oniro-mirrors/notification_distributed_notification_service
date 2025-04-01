@@ -74,7 +74,6 @@ namespace OHOS {
 
         sptr<Notification::NotificationButtonOption> buttonOption = new Notification::NotificationButtonOption();
 
-        sptr<Notification::AnsSubscriberStub> subscriber = new Notification::AnsSubscriberStub();
         sptr<Notification::NotificationSubscribeInfo> info = new Notification::NotificationSubscribeInfo();
 
         sptr<Notification::NotificationSlot> slot = new Notification::NotificationSlot();
@@ -182,11 +181,7 @@ namespace OHOS {
         datas.WriteParcelable(bundleOption);
         ansManagerStub.HandleUpdateSlots(datas, reply);
         datas.WriteString(stringData);
-        datas.WriteRemoteObject(subscriber);
         datas.WriteBool(boolData);
-        if (boolData) {
-            datas.WriteRemoteObject(subscriber);
-        }
         ansManagerStub.HandleRequestEnableNotification(datas, reply);
         datas.WriteString(stringData);
         datas.WriteBool(boolData);
@@ -204,22 +199,18 @@ namespace OHOS {
         datas.WriteParcelable(bundleOption);
         ansManagerStub.HandleGetShowBadgeEnabledForBundle(datas, reply);
         ansManagerStub.HandleGetShowBadgeEnabled(datas, reply);
-        datas.WriteRemoteObject(subscriber);
         datas.WriteBool(boolData);
         if (boolData) {
             datas.WriteParcelable(info);
         }
         ansManagerStub.HandleSubscribe(datas, reply);
-        datas.WriteRemoteObject(subscriber);
         ansManagerStub.HandleSubscribeSelf(datas, reply);
-        datas.WriteRemoteObject(subscriber);
         datas.WriteBool(boolData);
         if (boolData) {
             datas.WriteParcelable(info);
         }
         datas.WriteBool(boolData);
         ansManagerStub.HandleSubscribeLocalLiveView(datas, reply);
-        datas.WriteRemoteObject(subscriber);
         datas.WriteBool(boolData);
         if (boolData) {
             datas.WriteParcelable(info);
@@ -227,7 +218,6 @@ namespace OHOS {
         ansManagerStub.HandleUnsubscribe(datas, reply);
         ansManagerStub.HandleIsAllowedNotify(datas, reply);
         ansManagerStub.HandleIsAllowedNotifySelf(datas, reply);
-        datas.WriteRemoteObject(subscriber);
         ansManagerStub.HandleCanPopEnableNotificationDialog(datas, reply);
         ansManagerStub.HandleRemoveEnableNotificationDialog(datas, reply);
         datas.WriteParcelable(bundleOption);

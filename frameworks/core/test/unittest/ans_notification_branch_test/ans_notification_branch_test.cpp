@@ -264,13 +264,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override
+    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -303,7 +303,7 @@ public:
     }
 
     ErrCode Unsubscribe(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

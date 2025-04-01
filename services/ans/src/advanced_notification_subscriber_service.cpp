@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ namespace OHOS {
 namespace Notification {
 
 ErrCode AdvancedNotificationService::Subscribe(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -81,7 +81,7 @@ ErrCode AdvancedNotificationService::Subscribe(
     return errCode;
 }
 
-ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -133,7 +133,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
 }
 
 ErrCode AdvancedNotificationService::Unsubscribe(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 #include "refbase.h"
 #include "singleton.h"
 
-#include "ans_subscriber_interface.h"
+#include "ians_subscriber.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_request.h"
@@ -48,7 +48,7 @@ public:
      * @param subscribeInfo Indicates the NotificationSubscribeInfo object.
      * @return Indicates the result code.
      */
-    ErrCode AddSubscriber(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode AddSubscriber(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -59,7 +59,7 @@ public:
      * @return Indicates the result code.
      */
     ErrCode RemoveSubscriber(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
      * @brief Notify all subscribers on counsumed.
@@ -157,16 +157,16 @@ public:
 private:
     void NotifyApplicationInfochangedInner(const std::string& bundleName);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
-    std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
-    std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
+    std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);
+    std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);
     void AddRecordInfo(
         std::shared_ptr<SubscriberRecord> &record, const sptr<NotificationSubscribeInfo> &subscribeInfo);
     void RemoveRecordInfo(
         std::shared_ptr<SubscriberRecord> &record, const sptr<NotificationSubscribeInfo> &subscribeInfo);
     ErrCode AddSubscriberInner(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
     ErrCode RemoveSubscriberInner(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     void NotifyConsumedInner(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
@@ -190,7 +190,7 @@ private:
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};
-    sptr<AnsSubscriberInterface> ansSubscriberProxy_ {};
+    sptr<IAnsSubscriber> ansSubscriberProxy_ {};
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;

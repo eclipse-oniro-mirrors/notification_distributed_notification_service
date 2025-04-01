@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,66 +28,86 @@ SubscriberListener::SubscriberListener(const std::shared_ptr<NotificationSubscri
 SubscriberListener::~SubscriberListener()
 {}
 
-void SubscriberListener::OnConnected()
+ErrCode SubscriberListener::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnConnected();
+    return ERR_OK;
 }
 
-void SubscriberListener::OnDisconnected()
+ErrCode SubscriberListener::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnDisconnected();
+    return ERR_OK;
 }
 
-void SubscriberListener::OnConsumed(
+ErrCode SubscriberListener::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
 
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     if (!subscriber->ProcessSyncDecision(subscriber->GetDeviceType(), sharedNotification)) {
-        return;
+        return ERR_INVALID_OPERATION;
     }
 #endif
 
     subscriber->OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
+    return ERR_OK;
 }
 
-void SubscriberListener::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+ErrCode SubscriberListener::OnConsumed(const sptr<Notification> &notification)
+{
+    return OnConsumed(notification, nullptr);
+}
+
+ErrCode SubscriberListener::OnConsumedWithMaxCapacity(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
+{
+    return OnConsumed(notification, notificationMap);
+}
+
+ErrCode SubscriberListener::OnConsumedWithMaxCapacity(const sptr<Notification> &notification)
+{
+    return OnConsumed(notification, nullptr);
+}
+
+ErrCode SubscriberListener::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     for (auto notification : notifications) {
         OnConsumed(notification, notificationMap);
     }
+    return ERR_OK;
 }
 
-void SubscriberListener::OnCanceled(
+ErrCode SubscriberListener::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     if (notificationMap == nullptr) {
         subscriber->OnCanceled(std::make_shared<Notification>(*notification),
@@ -96,6 +116,23 @@ void SubscriberListener::OnCanceled(
         subscriber->OnCanceled(std::make_shared<Notification>(*notification),
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }
+    return ERR_OK;
+}
+
+ErrCode SubscriberListener::OnCanceled(const sptr<Notification> &notification, int32_t deleteReason)
+{
+    return OnCanceled(notification, nullptr, deleteReason);
+}
+
+ErrCode SubscriberListener::OnCanceledWithMaxCapacity(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    return OnCanceled(notification, notificationMap, deleteReason);
+}
+
+ErrCode SubscriberListener::OnCanceledWithMaxCapacity(const sptr<Notification> &notification, int32_t deleteReason)
+{
+    return OnCanceled(notification, nullptr, deleteReason);
 }
 
 void SubscriberListener::OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
@@ -119,92 +156,100 @@ void SubscriberListener::OnBatchCanceled(const std::vector<sptr<Notification>> &
     }
 }
 
-void SubscriberListener::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+ErrCode SubscriberListener::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     if (subscriber->HasOnBatchCancelCallback()) {
         OnBatchCanceled(notifications, notificationMap, deleteReason);
-        return;
+        return ERR_INVALID_DATA;
     }
     for (auto notification : notifications) {
         OnCanceled(notification, notificationMap, deleteReason);
     }
+    return ERR_OK;
 }
 
-void SubscriberListener::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
+ErrCode SubscriberListener::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnUpdate(std::make_shared<NotificationSortingMap>(*notificationMap));
+    return ERR_OK;
 }
 
-void SubscriberListener::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
+ErrCode SubscriberListener::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
 {
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnDoNotDisturbDateChange(std::make_shared<NotificationDoNotDisturbDate>(*date));
+    return ERR_OK;
 }
 
-void SubscriberListener::OnEnabledNotificationChanged(
+ErrCode SubscriberListener::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
 }
 
-void SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+ErrCode SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
+    return ERR_OK;
 }
 
-void SubscriberListener::OnBadgeEnabledChanged(
+ErrCode SubscriberListener::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnBadgeEnabledChanged(callbackData);
+    return ERR_OK;
 }
 
-void SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleName)
+ErrCode SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGW("OnApplicationInfoNeedChanged SubscriberListener 1.");
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
-        return;
+        return ERR_INVALID_DATA;
     }
     subscriber->OnApplicationInfoNeedChanged(bundleName);
+    return ERR_OK;
 }
 
-ErrCode SubscriberListener::OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo)
+ErrCode SubscriberListener::OnOperationResponse(
+    const sptr<NotificationOperationInfo>& operationInfo, int32_t& funcResult)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     auto subscriber = subscriber_.lock();
@@ -214,7 +259,8 @@ ErrCode SubscriberListener::OnOperationResponse(const sptr<NotificationOperation
     }
     std::shared_ptr<NotificationOperationInfo> sharedNotification =
         std::make_shared<NotificationOperationInfo>(*operationInfo);
-    return subscriber->OnOperationResponse(sharedNotification);
+    funcResult = subscriber->OnOperationResponse(sharedNotification);
+    return funcResult;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@
 namespace OHOS {
 namespace Notification {
 struct NotificationSubscriberManager::SubscriberRecord {
-    sptr<AnsSubscriberInterface> subscriber {nullptr};
+    sptr<IAnsSubscriber> subscriber {nullptr};
     std::set<std::string> bundleList_ {};
     bool subscribedAll {false};
     int32_t userId {SUBSCRIBE_USER_INIT};
@@ -79,7 +79,7 @@ void NotificationSubscriberManager::ResetFfrtQueue()
 }
 
 ErrCode NotificationSubscriberManager::AddSubscriber(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber == nullptr) {
@@ -142,7 +142,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
 }
 
 ErrCode NotificationSubscriberManager::RemoveSubscriber(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber == nullptr) {
@@ -356,7 +356,7 @@ std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSub
 }
 
 std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSubscriberManager::FindSubscriberRecord(
-    const sptr<AnsSubscriberInterface> &subscriber)
+    const sptr<IAnsSubscriber> &subscriber)
 {
     auto iter = subscriberRecordList_.begin();
 
@@ -369,7 +369,7 @@ std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSub
 }
 
 std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSubscriberManager::CreateSubscriberRecord(
-    const sptr<AnsSubscriberInterface> &subscriber)
+    const sptr<IAnsSubscriber> &subscriber)
 {
     std::shared_ptr<SubscriberRecord> record = std::make_shared<SubscriberRecord>();
     if (record != nullptr) {
@@ -426,7 +426,7 @@ void NotificationSubscriberManager::RemoveRecordInfo(
 }
 
 ErrCode NotificationSubscriberManager::AddSubscriberInner(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
@@ -460,7 +460,7 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
 }
 
 ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
@@ -512,7 +512,16 @@ void NotificationSubscriberManager::NotifyConsumedInner(
                     record, notification, wearableFlag, headsetFlag, keyNodeFlag);
                 continue;
             }
+
+        if (notificationMap != nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            record->subscriber->OnConsumedWithMaxCapacity(notification, notificationMap);
+        } else if (notificationMap != nullptr && !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
             record->subscriber->OnConsumed(notification, notificationMap);
+        } else if (notificationMap == nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            record->subscriber->OnConsumedWithMaxCapacity(notification);
+        } else {
+            record->subscriber->OnConsumed(notification);
+        }
             NotificationSubscriberManager::IsDeviceFlag(record, notification, wearableFlag, headsetFlag, keyNodeFlag);
         }
     }
@@ -590,7 +599,15 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
         if (IsSubscribedBysubscriber(record, notification)) {
-            record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
+            if (notificationMap != nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+                record->subscriber->OnCanceledWithMaxCapacity(notification, notificationMap, deleteReason);
+            } else if (notificationMap != nullptr && !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+                record->subscriber->OnCanceled(notification, notificationMap, deleteReason);
+            } else if (notificationMap == nullptr && notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+                record->subscriber->OnCanceledWithMaxCapacity(notification, deleteReason);
+            } else {
+                record->subscriber->OnCanceled(notification, deleteReason);
+            }
         }
     }
 }
@@ -888,13 +905,14 @@ ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<Notificati
     }
 
     ErrCode result = ERR_OK;
+    int32_t funcResult = -1;
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([&]() {
         for (const auto& record : subscriberRecordList_) {
             if (record == nullptr) {
                 continue;
             }
             if (record->needNotifyResponse && record->subscriber != nullptr) {
-                result = record->subscriber->OnOperationResponse(operationInfo);
+                result = record->subscriber->OnOperationResponse(operationInfo, funcResult);
                 return;
             }
             result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;

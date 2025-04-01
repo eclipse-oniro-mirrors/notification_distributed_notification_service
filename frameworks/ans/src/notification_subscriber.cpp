@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ NotificationSubscriber::SubscriberImpl::SubscriberImpl(NotificationSubscriber &s
     recipient_ = new (std::nothrow) DeathRecipient(*this);
 };
 
-void NotificationSubscriber::SubscriberImpl::OnConnected()
+ErrCode NotificationSubscriber::SubscriberImpl::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
@@ -123,9 +123,10 @@ void NotificationSubscriber::SubscriberImpl::OnConnected()
         ANS_LOGD("%s, Add death recipient.", __func__);
     }
     subscriber_.OnConnected();
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnDisconnected()
+ErrCode NotificationSubscriber::SubscriberImpl::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
@@ -134,32 +135,51 @@ void NotificationSubscriber::SubscriberImpl::OnDisconnected()
         ANS_LOGD("%s, Remove death recipient.", __func__);
     }
     subscriber_.OnDisconnected();
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnConsumed(
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     if (!subscriber_.ProcessSyncDecision(subscriber_.GetDeviceType(), sharedNotification)) {
-        return;
+        return ERR_OK;
     }
 #endif
     subscriber_.OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(const sptr<Notification> &notification)
+{
+    return OnConsumed(notification, nullptr);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedWithMaxCapacity(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
+{
+    return OnConsumed(notification, notificationMap);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedWithMaxCapacity(const sptr<Notification> &notification)
+{
+    return OnConsumed(notification, nullptr);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     for (auto notification : notifications) {
         OnConsumed(notification, notificationMap);
     }
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnCanceled(
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -170,6 +190,25 @@ void NotificationSubscriber::SubscriberImpl::OnCanceled(
         subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }
+    return ERR_OK;
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceled(
+    const sptr<Notification> &notification, int32_t deleteReason)
+{
+    return OnCanceled(notification, nullptr, deleteReason);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledWithMaxCapacity(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    return OnCanceled(notification, notificationMap, deleteReason);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledWithMaxCapacity(
+    const sptr<Notification> &notification, int32_t deleteReason)
+{
+    return OnCanceled(notification, nullptr, deleteReason);
 }
 
 void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
@@ -189,58 +228,65 @@ void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<s
 }
 
 
-void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber_.HasOnBatchCancelCallback()) {
         OnBatchCanceled(notifications, notificationMap, deleteReason);
-        return;
+        return ERR_OK;
     }
     for (auto notification : notifications) {
         OnCanceled(notification, notificationMap, deleteReason);
     }
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
+ErrCode NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     subscriber_.OnUpdate(std::make_shared<NotificationSortingMap>(*notificationMap));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
+ErrCode NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
 {
     subscriber_.OnDoNotDisturbDateChange(std::make_shared<NotificationDoNotDisturbDate>(*date));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
+ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
+ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnBadgeEnabledChanged(callbackData);
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
+ErrCode NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
     const std::string& bundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnApplicationInfoNeedChanged(bundleName);
+    return ERR_OK;
 }
 
 ErrCode NotificationSubscriber::SubscriberImpl::OnOperationResponse(
-    const sptr<NotificationOperationInfo> &operationInfo)
+    const sptr<NotificationOperationInfo> &operationInfo, int32_t& funcResult)
 {
     return subscriber_.OnOperationResponse(std::make_shared<NotificationOperationInfo>(*operationInfo));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,7 +164,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00800, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<AnsSubscriberInterface> subscriber = nullptr;
+    sptr<IAnsSubscriber> subscriber = nullptr;
     sptr<NotificationSubscribeInfo> subscribeInfo = nullptr;
     ASSERT_EQ(ERR_ANS_INVALID_PARAM, notificationSubscriberManager.RemoveSubscriberInner(subscriber, subscribeInfo));
 }
@@ -598,7 +598,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02400, Function | SmallTest | Level1)
 {
-    sptr<AnsSubscriberInterface> subscriber = nullptr;
+    sptr<IAnsSubscriber> subscriber = nullptr;
     sptr<NotificationSubscribeInfo> info = nullptr;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
