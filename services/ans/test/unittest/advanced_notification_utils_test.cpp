@@ -183,6 +183,11 @@ HWTEST_F(AnsUtilsTest, IsAllowedGetNotificationByFilter_00001, Function | SmallT
     record->bundleOption->SetBundleName("bundleName");
     ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record, bundle);
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    record->bundleOption->SetBundleName("test");
+    record->bundleOption->SetUid(2);
+    ret = advancedNotificationService_->IsAllowedGetNotificationByFilter(record, bundle);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -268,6 +273,10 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00003, Function | SmallTest
     keys.emplace_back("test1");
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
         notificationId, label, keys, newRequest), (int)ERR_OK);
+    
+    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test1", 1);
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle1,
+        notificationId, label, keys, newRequest), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -1042,6 +1051,38 @@ HWTEST_F(AnsUtilsTest, SubmitAsyncTask_0001, Function | SmallTest | Level1)
     }));
     SleepForFC();
     ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetCommonTargetRecordList_0001
+ * @tc.desc: Test GetCommonTargetRecordList_0001
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0001, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("test", 1);
+    request->SetSlotType(slotType);
+    request->SetOwnerUserId(1);
+    request->SetCreatorUserId(2);
+    request->SetOwnerBundleName("test");
+    request->SetOwnerUid(0);
+    request->SetCreatorUid(1);
+    request->SetNotificationId(1);
+
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetIsOnlyLocalUpdate(true);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundleOption);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    advancedNotificationService_->GetCommonTargetRecordList(1, NotificationConstant::SlotType::LIVE_VIEW,
+        NotificationContent::Type::LIVE_VIEW, recordList);
+    ASSERT_EQ(recordList.size(), 1);
 }
 }  // namespace Notification
 }  // namespace OHOS

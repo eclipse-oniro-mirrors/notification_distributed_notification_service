@@ -1960,6 +1960,245 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0600, Function | 
 }
 
 /**
+ * @tc.number    : OnDistributedPublish_0700
+ * @tc.name      : OnDistributedPublish_0700
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0700, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 0);
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    sptr<NotificationRequest> request = new NotificationRequest(19800);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_0800
+ * @tc.name      : OnDistributedPublish_0800
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0800, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 2);
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    sptr<NotificationRequest> request = new NotificationRequest(19800);
+    std::vector<std::string> devices;
+    devices.push_back("DeviceId");
+    request->SetDevicesSupportDisplay(devices);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+    MockQueryForgroundOsAccountId(true, 0);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_0900
+ * @tc.name      : OnDistributedPublish_0900
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0900, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 2);
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+    MockQueryForgroundOsAccountId(true, 0);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_1000
+ * @tc.name      : OnDistributedPublish_1000
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_1000, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 2);
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    advancedNotificationService.permissonFilter_ = nullptr;
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+    MockQueryForgroundOsAccountId(true, 0);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedPublish_1100
+ * @tc.name      : OnDistributedPublish_1100
+ * @tc.desc      : Test OnDistributedPublish function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_1100, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(slotType);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : OnDistributedUpdate_0300
+ * @tc.name      : OnDistributedUpdate_0300
+ * @tc.desc      : Test OnDistributedUpdate function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0300, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnDistributedUpdate_0300 test start";
+
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetTitle("title 1");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(101);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    request->SetContent(content);
+    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+    MockQueryForgroundOsAccountId(false, 0);
+
+    sptr<NotificationRequest> request1 = new NotificationRequest(101);
+    request1->SetSlotType(slotType);
+    request1->SetOwnerBundleName("test");
+    std::shared_ptr<NotificationNormalContent> normalContent1 = std::make_shared<NotificationNormalContent>();
+    normalContent1->SetTitle("title 2");
+    std::shared_ptr<NotificationContent> content1 = std::make_shared<NotificationContent>(normalContent1);
+    request1->SetContent(content1);
+    advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request1);
+    SleepForFC();
+
+    MockQueryForgroundOsAccountId(true, 2);
+    advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request1);
+    SleepForFC();
+    MockQueryForgroundOsAccountId(true, 0);
+
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    for (auto record : advancedNotificationService_->notificationList_) {
+        std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
+        record->request->GetContent()->GetNotificationContent());
+        ASSERT_EQ(ct->GetTitle(), "title 1");
+    }
+}
+
+/**
+ * @tc.number    : OnDistributedUpdate_0400
+ * @tc.name      : OnDistributedUpdate_0400
+ * @tc.desc      : Test OnDistributedUpdate function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0400, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnDistributedUpdate_0400 test start";
+    AdvancedNotificationService advancedNotificationService;
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetTitle("title 1");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(101);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    request->SetContent(content);
+    advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+
+    sptr<NotificationRequest> request1 = new NotificationRequest(101);
+    request1->SetSlotType(slotType);
+    std::shared_ptr<NotificationNormalContent> normalContent1 = std::make_shared<NotificationNormalContent>();
+    normalContent1->SetTitle("title 2");
+    std::shared_ptr<NotificationContent> content1 = std::make_shared<NotificationContent>(normalContent1);
+    request1->SetContent(content1);
+    advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request1);
+    SleepForFC();
+
+    request1->SetOwnerBundleName("test");
+    advancedNotificationService.permissonFilter_ = nullptr;
+    advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request1);
+    SleepForFC();
+
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
+    for (auto record : advancedNotificationService.notificationList_) {
+        std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
+        record->request->GetContent()->GetNotificationContent());
+        ASSERT_EQ(ct->GetTitle(), "title 1");
+    }
+}
+
+/**
+ * @tc.number    : OnDistributedUpdate_0500
+ * @tc.name      : OnDistributedUpdate_0500
+ * @tc.desc      : Test OnDistributedUpdate function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnDistributedUpdate_0500 test start";
+
+    std::string deviceId = "DeviceId";
+    std::string bundleName = "BundleName";
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetTitle("title 1");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    sptr<NotificationRequest> request = new NotificationRequest(101);
+    request->SetSlotType(slotType);
+    request->SetOwnerBundleName("test");
+    request->SetContent(content);
+    advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
+
+    sptr<NotificationRequest> request1 = new NotificationRequest(101);
+    request1->SetSlotType(slotType);
+    request1->SetOwnerBundleName("test");
+    std::shared_ptr<NotificationNormalContent> normalContent1 = std::make_shared<NotificationNormalContent>();
+    normalContent1->SetTitle("title 2");
+    std::shared_ptr<NotificationContent> content1 = std::make_shared<NotificationContent>(normalContent1);
+    request1->SetContent(content1);
+    std::vector<std::string> devices;
+    devices.push_back("DeviceId");
+    request1->SetDevicesSupportDisplay(devices);
+    advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request1);
+    SleepForFC();
+
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    for (auto record : advancedNotificationService_->notificationList_) {
+        std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
+        record->request->GetContent()->GetNotificationContent());
+        ASSERT_EQ(ct->GetTitle(), "title 1");
+    }
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_20000
  * @tc.name      : OnDistributedUpdate_0100
  * @tc.desc      : Test OnDistributedUpdate function
