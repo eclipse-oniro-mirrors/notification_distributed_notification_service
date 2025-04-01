@@ -19,6 +19,8 @@
 #include "reminder_table_old.h"
 #include "reminder_table.h"
 #include "string_wrapper.h"
+#include "reminder_request_factory.h"
+#include "reminder_request_adaptation.h"
 
 extern void MockNowInstantMilli(bool mockRet);
 
@@ -2355,6 +2357,28 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_004, Function | SmallTest | Le
 
     child.OnLanguageChange(nullptr);
     EXPECT_NE(request.GetAdditionalData(), nullptr);
+}
+
+/**
+ * @tc.name: ReminderRequestTest_005
+ * @tc.desc: Test StringToInt parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_005, Function | SmallTest | Level1)
+{
+    auto alarm = ReminderRequestFactory::CreateReminderRequest(ReminderRequest::ReminderType::ALARM);
+    EXPECT_NE(alarm, nullptr);
+    delete alarm;
+    auto timer = ReminderRequestFactory::CreateReminderRequest(ReminderRequest::ReminderType::TIMER);
+    EXPECT_NE(timer, nullptr);
+    delete timer;
+    auto calendar = ReminderRequestFactory::CreateReminderRequest(ReminderRequest::ReminderType::CALENDAR);
+    EXPECT_NE(calendar, nullptr);
+    delete calendar;
+    auto invalid = ReminderRequestFactory::CreateReminderRequest(ReminderRequest::ReminderType::INVALID);
+    EXPECT_EQ(invalid, nullptr);
+    delete invalid;
 }
 }
 }
