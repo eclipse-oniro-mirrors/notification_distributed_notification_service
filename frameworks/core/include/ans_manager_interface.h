@@ -21,7 +21,7 @@
 
 #include "ians_dialog_callback.h"
 #include "ans_subscriber_interface.h"
-#include "ans_subscriber_local_live_view_interface.h"
+#include "ians_subscriber_local_live_view.h"
 #include "iremote_broker.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
@@ -485,7 +485,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    virtual ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) = 0;
 
     /**

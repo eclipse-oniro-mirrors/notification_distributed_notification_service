@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@
 namespace OHOS {
 namespace Notification {
 struct NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord {
-    sptr<AnsSubscriberLocalLiveViewInterface> subscriber {nullptr};
+    sptr<IAnsSubscriberLocalLiveView> subscriber {nullptr};
     std::string bundleName {};
     int32_t userId {SUBSCRIBE_USER_INIT};
 };
@@ -65,7 +65,7 @@ void NotificationLocalLiveViewSubscriberManager::ResetFfrtQueue()
 }
 
 ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber == nullptr) {
@@ -103,7 +103,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
 }
 
 ErrCode NotificationLocalLiveViewSubscriberManager::RemoveLocalLiveViewSubscriber(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber == nullptr) {
@@ -180,7 +180,7 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
 }
 
 std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber)
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber)
 {
     auto iter = buttonRecordList_.begin();
 
@@ -193,7 +193,7 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
 }
 
 std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::CreateSubscriberRecord(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber,
     const sptr<NotificationBundleOption> &bundleOption)
 {
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = std::make_shared<LocalLiveViewSubscriberRecord>();
@@ -210,7 +210,7 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
 
 
 ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationBundleOption> &bundleOption)
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationBundleOption> &bundleOption)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(subscriber);
@@ -232,7 +232,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
 }
 
 ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
-    const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(subscriber);

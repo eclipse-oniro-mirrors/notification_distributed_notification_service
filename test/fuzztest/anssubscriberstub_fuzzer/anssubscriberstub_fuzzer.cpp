@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,6 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         Notification::AnsSubscriberStub ansSubscriberStub;
-        Notification::AnsSubscriberLocalLiveViewStub ansSubscriberLocalLiveViewStub;
         uint32_t code = fdp->ConsumeIntegral<uint32_t>();
         MessageParcel datas;
         MessageParcel reply;
@@ -76,18 +75,12 @@ namespace OHOS {
         sptr<Notification::EnabledNotificationCallbackData> callbackData = new Notification::EnabledNotificationCallbackData();
         // test HandleOnBadgeEnabledChanged function
         ansSubscriberStub.HandleOnBadgeEnabledChanged(datas, reply);
-        // test HandleOnResponse function
-        ansSubscriberLocalLiveViewStub.HandleOnResponse(datas, reply);
         // test HandleOnConsumedListMap function
         ansSubscriberStub.HandleOnConsumedListMap(datas, reply);
-        // test HandleOnDisconnected function
-        ansSubscriberLocalLiveViewStub.HandleOnDisconnected(datas, reply);
         // test HandleOnBadgeChanged function
         ansSubscriberStub.HandleOnBadgeChanged(datas, reply);
         // test HandleOnCanceledListMap function
         ansSubscriberStub.HandleOnCanceledListMap(datas, reply);
-        // test HandleOnConnected function
-        ansSubscriberLocalLiveViewStub.HandleOnConnected(datas, reply);
         return true;
     }
 }
