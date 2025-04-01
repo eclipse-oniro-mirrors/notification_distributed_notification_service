@@ -146,6 +146,7 @@
                 "notification_content.h",
                 "notification_conversational_content.h",
                 "notification_conversational_message.h",
+                "notification_disable.h",
                 "notification_distributed_options.h",
                 "notification_do_not_disturb_date.h",
                 "notification_flags.h",
