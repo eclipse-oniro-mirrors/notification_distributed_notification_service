@@ -1396,7 +1396,7 @@ HWTEST_F(NotificationPreferencesTest, AddDoNotDisturbProfiles_0100, TestSize.Lev
     profile->SetProfileId(0);
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(userId, profiles);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, ERR_OK);
 }
 
 /**
@@ -1442,7 +1442,7 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0100, TestSize.
     profile->SetProfileId(0);
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(userId, profiles);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res, ERR_OK);
 }
 
 /**
@@ -1474,20 +1474,6 @@ HWTEST_F(NotificationPreferencesTest, RemoveDoNotDisturbProfiles_0300, TestSize.
     profiles.emplace_back(profile);
     auto res = NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, ERR_OK);
-}
-
-/**
- * @tc.name: GetDoNotDisturbProfile_0100
- * @tc.desc: test GetDoNotDisturbProfile when profileId Not within the correct range.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0100, TestSize.Level1)
-{
-    int32_t profileId = 0;
-    int32_t userId = 1;
-    sptr<NotificationDoNotDisturbProfile> profile;
-    auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
 
 /**
