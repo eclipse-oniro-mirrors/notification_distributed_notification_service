@@ -4203,7 +4203,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00005, Function | SmallTest | L
 }
 
 /**
- * @tc.name      : Dialog_00005
+ * @tc.name      : Dialog_00006
  * @tc.number    :
  * @tc.desc      : test dialogEventSubscriber.OnReceiveEvent
  */
@@ -4226,6 +4226,31 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00006, Function | SmallTest | L
     bool enable = false;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enable);
     ASSERT_EQ(enable, false);
+}
+
+/**
+ * @tc.name      : Dialog_00007
+ * @tc.number    :
+ * @tc.desc      : test dialogEventSubscriber.SetHasPoppedDialog
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00007, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->SetHasPoppedDialog(bundleOption, true), false);
+}
+
+/**
+ * @tc.name      : Dialog_00008
+ * @tc.number    :
+ * @tc.desc      : test dialogEventSubscriber.SetHasPoppedDialog
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Dialog_00008, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->CreateDialogManager();
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    ASSERT_EQ(advancedNotificationService_->dialogManager_->HandleOneDialogClosed(
+        bundleOption, EnabledDialogStatus::ALLOW_CLICKED), false);
 }
 
 /**
