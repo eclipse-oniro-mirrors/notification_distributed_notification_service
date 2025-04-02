@@ -15,8 +15,6 @@
 
 #define private public
 #define protected public
-#include "ans_subscriber_stub.h"
-#include "ans_subscriber_local_live_view_stub.h"
 #undef private
 #undef protected
 #include "ans_permission_def.h"
@@ -27,60 +25,9 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        Notification::AnsSubscriberStub ansSubscriberStub;
-        uint32_t code = fdp->ConsumeIntegral<uint32_t>();
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
-        // test OnRemoteRequest function
-        ansSubscriberStub.OnRemoteRequest(code, datas, reply, flags);
-        // test HandleOnConnected function
-        ansSubscriberStub.HandleOnConnected(datas, reply);
-        // test HandleOnDisconnected function
-        ansSubscriberStub.HandleOnDisconnected(datas, reply);
-        // test HandleOnConsumedMap function
-        ansSubscriberStub.HandleOnConsumedMap(datas, reply);
-        // test HandleOnCanceledMap function
-        ansSubscriberStub.HandleOnCanceledMap(datas, reply);
-        // test HandleOnUpdated function
-        ansSubscriberStub.HandleOnUpdated(datas, reply);
-        // test HandleOnDoNotDisturbDateChange function
-        ansSubscriberStub.HandleOnDoNotDisturbDateChange(datas, reply);
-        // test HandleOnEnabledNotificationChanged function
-        ansSubscriberStub.HandleOnEnabledNotificationChanged(datas, reply);
-        // test HandleOnApplicationInfoNeedChanged function
-        ansSubscriberStub.HandleOnApplicationInfoNeedChanged(datas, reply);
-        // test HandleOnResponse function
-        ansSubscriberStub.HandleOnResponse(datas, reply);
-        // test OnConnected function
-        ansSubscriberStub.OnConnected();
-        // test OnDisconnected function
-        ansSubscriberStub.OnDisconnected();
-        // test OnConsumed function
-        sptr<Notification::Notification> notification = new Notification::Notification();
-        sptr<Notification::NotificationSortingMap> notificationMap = new Notification::NotificationSortingMap();
-        ansSubscriberStub.OnConsumed(notification, notificationMap);
-        // test OnCanceled function
-        int32_t deleteReason = 1;
-        ansSubscriberStub.OnCanceled(notification, notificationMap, deleteReason);
-        ansSubscriberStub.OnApplicationInfoNeedChanged("com.test.demo");
-        sptr<Notification::NotificationOperationInfo> operationInfo = new Notification::NotificationOperationInfo();
-        ansSubscriberStub.OnOperationResponse(operationInfo);
-        // test OnUpdated function
-        ansSubscriberStub.OnUpdated(notificationMap);
-        // test OnDoNotDisturbDateChange function
-        sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
-        ansSubscriberStub.OnDoNotDisturbDateChange(date);
-        // test OnEnabledNotificationChanged function
-        sptr<Notification::EnabledNotificationCallbackData> callbackData = new Notification::EnabledNotificationCallbackData();
-        // test HandleOnBadgeEnabledChanged function
-        ansSubscriberStub.HandleOnBadgeEnabledChanged(datas, reply);
-        // test HandleOnConsumedListMap function
-        ansSubscriberStub.HandleOnConsumedListMap(datas, reply);
-        // test HandleOnBadgeChanged function
-        ansSubscriberStub.HandleOnBadgeChanged(datas, reply);
-        // test HandleOnCanceledListMap function
-        ansSubscriberStub.HandleOnCanceledListMap(datas, reply);
         return true;
     }
 }

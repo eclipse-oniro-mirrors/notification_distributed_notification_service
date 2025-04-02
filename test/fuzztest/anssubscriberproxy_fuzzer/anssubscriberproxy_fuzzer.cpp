@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,13 +29,10 @@ namespace OHOS {
     {
         sptr<IRemoteObject> impl;
         Notification::AnsSubscriberProxy ansSubscriberProxy(impl);
-        uint32_t code = fdp->ConsumeIntegral<uint32_t>();
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
-        // test InnerTransact function
-        ansSubscriberProxy.InnerTransact(static_cast<Notification::NotificationInterfaceCode>(code),
-            flags, datas, reply);
+        int32_t funcResult = -1;
         // test InnerTransact function
         ansSubscriberProxy.OnConnected();
         // test InnerTransact function
@@ -61,7 +58,7 @@ namespace OHOS {
         ansSubscriberProxy.OnApplicationInfoNeedChanged("com.test.demo");
         // test OnResponse function
         sptr<Notification::NotificationOperationInfo> operationInfo = new Notification::NotificationOperationInfo();
-        ansSubscriberProxy.OnOperationResponse(operationInfo);
+        ansSubscriberProxy.OnOperationResponse(operationInfo, funcResult);
         return true;
     }
 }

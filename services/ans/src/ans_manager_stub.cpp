@@ -1487,7 +1487,7 @@ ErrCode AnsManagerStub::HandleSubscribe(MessageParcel &data, MessageParcel &repl
         }
     }
 
-    ErrCode result = Subscribe(iface_cast<AnsSubscriberInterface>(subscriber), info);
+    ErrCode result = Subscribe(iface_cast<IAnsSubscriber>(subscriber), info);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSubscribe] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1503,7 +1503,7 @@ ErrCode AnsManagerStub::HandleSubscribeSelf(MessageParcel &data, MessageParcel &
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    ErrCode result = SubscribeSelf(iface_cast<AnsSubscriberInterface>(subscriber));
+    ErrCode result = SubscribeSelf(iface_cast<IAnsSubscriber>(subscriber));
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSubscribeSelf] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -1572,7 +1572,7 @@ ErrCode AnsManagerStub::HandleUnsubscribe(MessageParcel &data, MessageParcel &re
         }
     }
 
-    ErrCode result = Unsubscribe(iface_cast<AnsSubscriberInterface>(subscriber), info);
+    ErrCode result = Unsubscribe(iface_cast<IAnsSubscriber>(subscriber), info);
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleUnsubscribe] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;

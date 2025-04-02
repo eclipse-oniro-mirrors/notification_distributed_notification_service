@@ -312,14 +312,14 @@ ErrCode AnsManagerStub::GetShowBadgeEnabled(bool &enabled)
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+ErrCode AnsManagerStub::Subscribe(const sptr<IAnsSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &info)
 {
     ANS_LOGE("AnsManagerStub::Subscribe called!");
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+ErrCode AnsManagerStub::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber)
 {
     ANS_LOGE("AnsManagerStub::SubscribeSelf called!");
     return ERR_INVALID_OPERATION;
@@ -332,7 +332,7 @@ ErrCode AnsManagerStub::SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiv
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::Unsubscribe(const sptr<AnsSubscriberInterface> &subscriber,
+ErrCode AnsManagerStub::Unsubscribe(const sptr<IAnsSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &info)
 {
     ANS_LOGE("AnsManagerStub::Unsubscribe called!");

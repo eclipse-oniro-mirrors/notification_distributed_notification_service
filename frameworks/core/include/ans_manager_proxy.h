@@ -446,7 +446,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
 
     /**
@@ -456,7 +456,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
+    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override;
 
     /**
      * @brief Subscribes notifications.
@@ -475,7 +475,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode Unsubscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode Unsubscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
 
     /**

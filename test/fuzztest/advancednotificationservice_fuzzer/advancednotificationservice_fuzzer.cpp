@@ -100,10 +100,7 @@ namespace OHOS {
         service->SetShowBadgeEnabledForBundle(bundleOption, enabled);
         service->GetShowBadgeEnabledForBundle(bundleOption, enabled);
         service->GetShowBadgeEnabled(enabled);
-        sptr<Notification::AnsSubscriberStub> subscriber = new Notification::AnsSubscriberStub();
         sptr<Notification::NotificationSubscribeInfo> info = new Notification::NotificationSubscribeInfo();
-        service->Subscribe(subscriber, info);
-        service->Unsubscribe(subscriber, info);
         bool allowed = fuzzData->ConsumeBool();
         service->IsAllowedNotify(allowed);
         service->IsAllowedNotifySelf(bundleOption, allowed);
@@ -143,9 +140,7 @@ namespace OHOS {
         int32_t badgeNum = fuzzData->ConsumeIntegral<int32_t>();
         service->SetBadgeNumber(badgeNum, fuzzData->ConsumeRandomLengthString());
         sptr<Notification::IAnsDialogCallback> dialogCallback = new Notification::AnsDialogCallbackProxy(nullptr);
-        sptr<IRemoteObject> callerToken = new Notification::AnsSubscriberStub();
         std::shared_ptr<Notification::NotificationUnifiedGroupInfo> groupInfo;
-        service->RequestEnableNotification(stringData, dialogCallback, callerToken);
         bool enable = fuzzData->ConsumeBool();
         std::string bundleName = fuzzData->ConsumeRandomLengthString();
         std::string phoneNumber = fuzzData->ConsumeRandomLengthString();

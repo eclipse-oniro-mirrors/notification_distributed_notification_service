@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,11 @@
 #define BASE_NOTIFICATION_MOCK_ANS_SUBCRIBER_OBJECT_H
 
 #include "gmock/gmock.h"
-#include "ans_subscriber_interface.h"
+#include "ians_subscriber.h"
 
 namespace OHOS {
 namespace Notification {
-class MockAnsSubscriber : public AnsSubscriberInterface {
+class MockAnsSubscriber : public IAnsSubscriber  {
 public:
     MockAnsSubscriber() {}
     ~MockAnsSubscriber() {}
@@ -30,35 +30,56 @@ public:
     {
         return nullptr;
     }
-    void OnConnected() override {};
+    ErrCode OnConnected() override { return ERR_OK; };
 
-    void OnDisconnected() override {};
+    ErrCode OnDisconnected() override { return ERR_OK; };
 
-    void OnConsumed(
-        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override {};
+    ErrCode OnConsumed(
+        const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap) override { return ERR_OK; };
 
-    MOCK_METHOD(void, OnConsumedList, (const std::vector<sptr<Notification>> &notifications,
+    ErrCode OnConsumed(const sptr<Notification> &notification) override { return ERR_OK; };
+
+    ErrCode OnConsumedWithMaxCapacity(
+        const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap) override { return ERR_OK; };
+
+    ErrCode OnConsumedWithMaxCapacity(const sptr<Notification> &notification) override { return ERR_OK; };
+
+    MOCK_METHOD(ErrCode, OnConsumedList, (const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap));
 
-    void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
-        int32_t deleteReason) override {};
+    ErrCode OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
+        int32_t deleteReason) override { return ERR_OK; };
 
-    void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
-        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override {};
+    ErrCode OnCanceled(const sptr<Notification> &notification, int32_t deleteReason) override { return ERR_OK; };
 
-    void OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override {};
+    ErrCode OnCanceledWithMaxCapacity(
+        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
+        int32_t deleteReason) override { return ERR_OK; };
 
-    void OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override {};
+    ErrCode OnCanceledWithMaxCapacity(
+        const sptr<Notification> &notification, int32_t deleteReason) override { return ERR_OK; };
 
-    void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override {};
+    ErrCode OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override { return ERR_OK; };
 
-    void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override {};
+    ErrCode OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override { return ERR_OK; };
 
-    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override {};
+    ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override { return ERR_OK; };
 
-    void OnApplicationInfoNeedChanged(const std::string& bundleName) override {};
+    ErrCode OnEnabledNotificationChanged(
+        const sptr<EnabledNotificationCallbackData> &callbackData) override { return ERR_OK; };
 
-    ErrCode OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo) { return 0; }
+    ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override { return ERR_OK; };
+
+    ErrCode OnBadgeEnabledChanged(
+        const sptr<EnabledNotificationCallbackData> &callbackData) override { return ERR_OK; };
+
+    ErrCode OnApplicationInfoNeedChanged(const std::string& bundleName) override { return ERR_OK; };
+
+    ErrCode OnOperationResponse(
+        const sptr<NotificationOperationInfo>& operationInfo, int32_t& funcResult) override { return 0; }
 };
 } // namespace Notification
 } // namespace OHOS

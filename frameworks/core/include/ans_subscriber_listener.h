@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,38 +30,52 @@ public:
     SubscriberListener(const std::shared_ptr<NotificationSubscriber> &subscriber);
     ~SubscriberListener();
 
-    void OnConnected() override;
+    ErrCode OnConnected() override;
 
-    void OnDisconnected() override;
+    ErrCode OnDisconnected() override;
 
-    void OnConsumed(
+    ErrCode OnConsumed(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
 
-    void OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+    ErrCode OnConsumed(const sptr<Notification> &notification) override;
+
+    ErrCode OnConsumedWithMaxCapacity(
+        const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap) override;
+
+    ErrCode OnConsumedWithMaxCapacity(const sptr<Notification> &notification) override;
+
+    ErrCode OnConsumedList(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap) override;
 
-    void OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
+    ErrCode OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
         int32_t deleteReason) override;
 
-    void OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+    ErrCode OnCanceled(const sptr<Notification> &notification, int32_t deleteReason) override;
+
+    ErrCode OnCanceledWithMaxCapacity(const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
+
+    ErrCode OnCanceledWithMaxCapacity(const sptr<Notification> &notification, int32_t deleteReason) override;
+
+    ErrCode OnCanceledList(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
 
     void OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
 
-    void OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override;
+    ErrCode OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override;
 
-    void OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
+    ErrCode OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date) override;
 
-    void OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+    ErrCode OnEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
-    void OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
+    ErrCode OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData) override;
 
-    void OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
+    ErrCode OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData) override;
 
-    void OnApplicationInfoNeedChanged(const std::string& bundleName) override;
+    ErrCode OnApplicationInfoNeedChanged(const std::string& bundleName) override;
 
-    ErrCode OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo) override;
+    ErrCode OnOperationResponse(const sptr<NotificationOperationInfo>& operationInfo, int32_t& funcResult) override;
 
 public:
     std::weak_ptr<NotificationSubscriber> subscriber_;

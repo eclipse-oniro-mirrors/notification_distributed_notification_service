@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "ians_dialog_callback.h"
-#include "ans_subscriber_interface.h"
+#include "ians_subscriber.h"
 #include "ians_subscriber_local_live_view.h"
 #include "iremote_broker.h"
 #include "notification_bundle_option.h"
@@ -467,7 +467,7 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    virtual ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) = 0;
 
     /**
@@ -476,7 +476,7 @@ public:
      * @param subscriber Indicates the subscriber.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) = 0;
+    virtual ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) = 0;
 
     /**
      * @brief Subscribes local live view notifications.
@@ -496,7 +496,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode Unsubscribe(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) = 0;
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info) = 0;
 
     /**
      * @brief Checks whether this device is allowed to publish notifications.
