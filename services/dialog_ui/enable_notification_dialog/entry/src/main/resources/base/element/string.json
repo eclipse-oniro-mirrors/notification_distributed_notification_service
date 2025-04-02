@@ -14,11 +14,11 @@
       },
       {
           "name":"reason",
-          "value":"These may include lock screen notifications, banners, sounds, vibrations, and more. You can change this in Settings."
+          "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change this in Settings."
       },
       {
           "name":"reason_simple",
-          "value":"These may include banners, sounds, and more. You can change your preferences in Settings."
+          "value":"These may include banners, badges, and sounds. You can change this in Settings."
       },
       {
         "name":"reason_zyt",
