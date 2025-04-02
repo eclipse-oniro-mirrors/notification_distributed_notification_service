@@ -1461,6 +1461,45 @@ ohos_unittest("advanced_notification_service_unit_test") {
   part_name = "${component_name}"
 }
 
+ohos_unittest("common_utils_test") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  module_out_path = module_output_path
+
+  include_dirs = [
+    ".",
+    "mock/include",
+    "/${services_path}/ans/include",
+  ]
+
+  sources = [
+    "common_utils/notification_analytics_util_test.cpp",
+    "mock/mock_common_event_manager.cpp",
+  ]
+
+  defines = []
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/ans:libans",
+  ]
+
+  external_deps = [
+    "ability_base:zuri",
+    "c_utils:utils",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -1470,6 +1509,7 @@ group("unittest") {
     ":advanced_notification_service_unit_test",
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",
+    ":common_utils_test",
     ":disturb_manager_unit_test",
     ":notification_config_parse_test",
     ":notification_dialog_test",
