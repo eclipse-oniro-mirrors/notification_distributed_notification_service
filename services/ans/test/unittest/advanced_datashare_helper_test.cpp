@@ -155,6 +155,25 @@ HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0003, Function | SmallTest | 
     EXPECT_EQ(ret, -1);
 }
 
+// Test cases
+HWTEST_F(AdvancedDatashareHelperTest, QueryContact_0004, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(1);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+    MockGoToGetNextRow(-1);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "1111";
+
+    bool ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "4", "1", "true");
+    EXPECT_EQ(ret, 1);
+}
+
 HWTEST_F(AdvancedDatashareHelperTest, isRepeatCall_0001, Function | SmallTest | Level1)
 {
     MockGetSystemAbilityManager(false);

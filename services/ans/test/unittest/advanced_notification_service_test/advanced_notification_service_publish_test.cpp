@@ -1559,5 +1559,122 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0800, Function | SmallT
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
     ASSERT_EQ(enable, true);
 }
+
+/**
+ * @tc.number    : OnReceiveEvent_0900
+ * @tc.name      : OnReceiveEvent_0900
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0900, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService.systemEventObserver_->callbacks_.onBootSystemCompleted = nullptr;
+    advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
+
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, false);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_1000
+ * @tc.name      : OnReceiveEvent_1000
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_REMOVED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1000, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED)
+        .SetElementName("test", "")
+        .SetParam("uid", 1);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService.systemEventObserver_->callbacks_.onBundleAdd = nullptr;
+    advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
+    
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    SleepForFC();
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, false);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_1100
+ * @tc.name      : OnReceiveEvent_1100
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_PACKAGE_CHANGED
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1100, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED)
+        .SetElementName("test", "")
+        .SetParam("uid", 1);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService.systemEventObserver_->callbacks_.onBundleUpdate = nullptr;
+    advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
+    
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    SleepForFC();
+    bool enable = false;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    ASSERT_EQ(enable, false);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_1200
+ * @tc.name      : OnReceiveEvent_1200
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_SCREEN
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1200, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
+    ASSERT_EQ(advancedNotificationService.localScreenOn_, true);
+}
+
+/**
+ * @tc.number    : OnReceiveEvent_1300
+ * @tc.name      : OnReceiveEvent_1300
+ * @tc.desc      : Test OnReceiveEvent COMMON_EVENT_SCREEN
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1300, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    MockSetBundleInfoEnabled(true);
+    EventFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    data.SetWant(want);
+    data.SetCode(0);
+    advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
+    ASSERT_EQ(advancedNotificationService.localScreenOn_, false);
+}
 }  // namespace Notification
 }  // namespace OHOS
