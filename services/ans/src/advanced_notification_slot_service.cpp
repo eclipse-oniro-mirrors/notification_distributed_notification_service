@@ -208,13 +208,19 @@ ErrCode AdvancedNotificationService::UpdateSlots(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_6);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("Not system app.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Not system app.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Message("CheckPermission is false.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -233,6 +239,9 @@ ErrCode AdvancedNotificationService::UpdateSlots(
         result = NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundle, slots);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+            message.ErrorCode(result).Message("Slot type not exist.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            ANS_LOGE("Slot type not exist.");
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -532,6 +541,8 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     ret = NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundle, slots);
     if (ret == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         ret = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
+        message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST).Message("Slot type not exist.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
     return ret;
 }
