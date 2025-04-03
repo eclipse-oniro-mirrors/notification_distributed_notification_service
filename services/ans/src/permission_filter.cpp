@@ -44,6 +44,11 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
         }
     }
 
+    if (record->request->IsSystemLiveView()) {
+        ANS_LOGI("System live view no need check switch.");
+        return ERR_OK;
+    }
+
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
     message.SlotType(slotType);
