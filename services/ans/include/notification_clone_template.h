@@ -31,6 +31,10 @@ public:
     virtual void OnUserSwitch(int32_t userId) = 0;
     virtual void OnRestoreStart(const std::string bundleName, int32_t appIndex,
         int32_t userId, int32_t uid) = 0;
+    virtual bool isDhSource()
+    {
+        return false;
+    };
 };
 } // namespace Notification
 } // namespace OHOS

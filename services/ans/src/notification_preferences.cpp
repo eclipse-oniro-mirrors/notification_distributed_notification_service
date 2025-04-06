@@ -738,6 +738,7 @@ void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
         ANS_LOGE("Get bundle map info failed.");
         return;
     }
+    preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, bundlesMap, userId);
     preferencesInfo.GetAllCLoneBundlesInfo(userId, bundlesMap, cloneBundles);
     preferencesInfo_ = preferencesInfo;
 }
