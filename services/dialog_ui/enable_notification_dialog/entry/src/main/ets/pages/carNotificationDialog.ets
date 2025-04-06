@@ -15,11 +15,12 @@
 
 import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
 import window from '@ohos.window';
-import { titleTrim, calOverLine } from '../common/utils';
+import { titleTrim, calOverLine, getFontSizeScale, getLimitFontSize } from '../common/utils';
 import Constants from '../common/constant';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import { MeasureOptions } from '@ohos.measure';
+import common from '@ohos.app.ability.common';
 import uiextension from '@ohos.arkui.uiExtension';
 
 const TAG = 'NotificationDialog_Service ';
@@ -29,7 +30,7 @@ let storage = LocalStorage.getShared();
 @Extend(Button) function customizeButton() {
   .type(ButtonType.Normal)
   .fontColor('#E6FFFFFF')
-  .fontSize(16)
+  .fontSize(getLimitFontSize(16, getFontSizeScale(getContext(this) as common.UIAbilityContext, 2)))
   .fontWeight(FontWeight.Medium)
   .height(40)
   .width('50%')
@@ -95,7 +96,7 @@ struct PermissionDialog {
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text($r('app.string.group_label_notification', this.appName))
-                    .fontSize(20)
+                    .fontSize(getLimitFontSize(20, getFontSizeScale(getContext(this) as common.UIAbilityContext, 2)))
                     .lineHeight(27)
                     .fontColor('#E6FFFFFF')
                     .fontWeight(FontWeight.Bold)
@@ -110,7 +111,7 @@ struct PermissionDialog {
                   let containerWidth = newValue.width as number;
                   let options: MeasureOptions = {
                     textContent: $r('app.string.group_label_notification', this.appName),
-                    fontSize: 20,
+                    fontSize: getLimitFontSize(20, getFontSizeScale(getContext(this) as common.UIAbilityContext, 2)),
                     fontWeight: FontWeight.Bold,
                   };
                   this.titleOverLine = calOverLine(containerWidth, options, this.getUIContext().getMeasureUtils());
@@ -120,7 +121,7 @@ struct PermissionDialog {
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text() {
-                    Span($r('app.string.reason'))
+                    Span($r('app.string.reason_tv'))
                   }
                   .lineHeight(19)
                   .fontSize(14)
@@ -133,8 +134,9 @@ struct PermissionDialog {
                 .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
                   let containerWidth = newValue.width as number;
                   let options: MeasureOptions = {
-                    textContent: $r('app.string.reason'),
-                    fontSize: 14,
+                    textContent: $r('app.string.reason_tv'),
+                    fontSize: getLimitFontSize(14,
+                      getFontSizeScale(getContext(this) as common.UIAbilityContext)),
                     fontWeight: FontWeight.Medium,
                   };
                   this.contentOverLine = calOverLine(containerWidth, options, this.getUIContext().getMeasureUtils());
