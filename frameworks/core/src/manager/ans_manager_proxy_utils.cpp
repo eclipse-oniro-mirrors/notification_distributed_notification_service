@@ -128,11 +128,6 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteString(deveiceId)) {
-        ANS_LOGE("Set package config fail:: write deveiceId failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
     MessageParcel reply;
     MessageOption option = {MessageOption::TF_SYNC};
     ErrCode result = InnerTransact(NotificationInterfaceCode::SET_TARGET_DEVICE_STATUS, option, data, reply);
@@ -170,11 +165,6 @@ ErrCode AnsManagerProxy::SetTargetDeviceStatus(const std::string &deviceType, co
 
     if (!data.WriteInt32(controlFlag)) {
         ANS_LOGE("Set package config fail:: write controlFlag failed.");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    if (!data.WriteString(deveiceId)) {
-        ANS_LOGE("Set package config fail:: write deveiceId failed.");
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

@@ -2529,13 +2529,7 @@ ErrCode AnsManagerStub::HandleSetTargetDeviceStatus(MessageParcel &data, Message
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    std::string deviceId;
-    if (!data.ReadString(deviceId)) {
-        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read deviceId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = SetTargetDeviceStatus(deviceType, status, deviceId);
+    ErrCode result = SetTargetDeviceStatus(deviceType, status, std::string());
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
@@ -2632,13 +2626,7 @@ ErrCode AnsManagerStub::HandleSetDeviceStatus(MessageParcel &data, MessageParcel
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    std::string deviceId;
-    if (!data.ReadString(deviceId)) {
-        ANS_LOGE("[HandleSetTargetDeviceStatus] fail: read deviceId failed");
-        return ERR_ANS_PARCELABLE_FAILED;
-    }
-
-    ErrCode result = SetTargetDeviceStatus(deviceType, status, controlFlag, deviceId);
+    ErrCode result = SetTargetDeviceStatus(deviceType, status, controlFlag, std::string());
     if (!reply.WriteInt32(result)) {
         ANS_LOGE("[HandleSetTargetDeviceStatus] fail: write result failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
