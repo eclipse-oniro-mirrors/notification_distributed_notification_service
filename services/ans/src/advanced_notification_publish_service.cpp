@@ -537,6 +537,14 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
+    if (bundleOption == nullptr) {
+        std::string message = "bundleOption is invalid";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 0)
+            .ErrorCode(ERR_ANS_INVALID_PARAM).NotificationId(notificationId);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         std::string message = "not systemApp";

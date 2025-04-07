@@ -339,7 +339,7 @@ void DistributedService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxM
         std::string slotTypeString;
         while (slotTypesStream >> slotTypeString) {
             if (!slotTypeString.empty()) {
-                AnalyticsUtil::GetInstance().OperationalReporting(OPERATION_DELETE_BRANCH, std::stoi(slotTypeString));
+                AnalyticsUtil::GetInstance().OperationalReporting(OPERATION_DELETE_BRANCH, atoi(slotTypeString.c_str()));
             }
         }
     } else {

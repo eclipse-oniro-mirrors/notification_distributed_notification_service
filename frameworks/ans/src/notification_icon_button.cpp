@@ -311,7 +311,7 @@ bool NotificationIconButton::ReadResourceFromParcel(Parcel &parcel,
         ANS_LOGE("Invalid input for button icons resource");
         return false;
     }
-    resource->id = std::stoi(iconsResource[RESOURCE_ID_INDEX]);
+    resource->id = atoi(iconsResource[RESOURCE_ID_INDEX].c_str());
     resourceObj = resource;
     return true;
 }
