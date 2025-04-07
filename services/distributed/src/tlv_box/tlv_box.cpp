@@ -272,7 +272,7 @@ bool TlvBox::Serialize(bool addCheck)
         uint32_t calCrc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)byteBuffer_, offset);
         uint32_t calValue = htonl(calCrc);
         (void)memcpy_s(byteBuffer_ + offset, sizeof(uint32_t), &calValue, sizeof(uint32_t));
-        ANS_LOGI("Box Serialize crc32 %{public}u %{public}u.", offset + sizeof(uint32_t), calCrc);
+        ANS_LOGI("Box Serialize crc32 %{public}d %{public}d.", (int32_t)(offset + sizeof(uint32_t)), (int32_t)(calCrc));
     } else {
         ANS_LOGI("Box Serialize crc32 %{public}d.", offset);
     }
@@ -288,13 +288,13 @@ bool TlvBox::CheckMessageCRC(const unsigned char*data, uint32_t dataLen)
 {
     uint32_t calcSize = sizeof(uint32_t);
     if (dataLen <= calcSize || dataLen > MAX_BUFFER_LENGTH) {
-        ANS_LOGW("Box check length failed %{public}u.", dataLen);
+        ANS_LOGW("Box check length failed %{public}d.", (int32_t)(dataLen));
         return false;
     }
     uint32_t recv = ntohl((*(uint32_t*)(data + dataLen - calcSize)));
     uint32_t calc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)data, dataLen - calcSize);
     if (calc != recv) {
-        ANS_LOGW("Box check crc32 failed %{public}u %{public}u.", recv, calc);
+        ANS_LOGW("Box check crc32 failed %{public}d %{public}d.", (int32_t)(recv), (int32_t)(calc));
         return false;
     }
     return true;

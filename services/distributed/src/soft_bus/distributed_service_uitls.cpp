@@ -54,7 +54,8 @@ bool DistributedService::GetBundleResourceInfo(const std::string bundleName, std
         return false;
     }
     icon = AnsImageUtil::PackImage(iconPixelmap);
-    ANS_LOGI("Dans get bundle icon bundle %{public}s %{public}u.", bundleName.c_str(), resourceInfo.icon.size());
+    ANS_LOGI("Dans get bundle icon bundle %{public}s %{public}d.", bundleName.c_str(),
+        (int32_t)(resourceInfo.icon.size()));
     return true;
 }
 
