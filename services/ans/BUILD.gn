@@ -84,6 +84,7 @@ ohos_source_set("ans_service_sources") {
     "src/ans_manager_stub.cpp",
     "src/ans_manager_stub_invalid.cpp",
     "src/bundle_manager_helper.cpp",
+    "src/clone/dh_notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_bundle_info.cpp",
     "src/clone/notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_disturb_service.cpp",

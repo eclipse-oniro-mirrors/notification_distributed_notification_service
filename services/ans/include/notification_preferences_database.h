@@ -314,6 +314,15 @@ public:
 
     bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType);
+    /**
+     * @brief ParseBundleFromDistureDB
+     * @param info bundle info.
+     * @param entries bundle keys.
+     * @param userId userId.
+     * @return void
+     */
+    void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
+        const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
 
 private:
     bool CheckRdbStore();
@@ -354,8 +363,6 @@ private:
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
 
-    void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
-        const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
     void ParseBundlePropertyFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,

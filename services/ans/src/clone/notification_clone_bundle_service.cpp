@@ -115,11 +115,11 @@ void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32
 {
     ANS_LOGI("Handle bundle event %{public}s %{public}d %{public}d %{public}d %{public}zu.",
         bundleName.c_str(), appIndex, userId, uid, bundlesInfo_.size());
+    std::unique_lock lock(lock_);
     if (bundlesInfo_.empty()) {
         return;
     }
 
-    std::unique_lock lcck(lock_);
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end();) {
         if (bundle->GetBundleName() == bundleName && bundle->GetAppIndex() == appIndex) {
             bundle->SetUid(uid);

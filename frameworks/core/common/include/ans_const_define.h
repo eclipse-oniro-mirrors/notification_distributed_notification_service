@@ -50,6 +50,7 @@ constexpr int64_t INVALID_PROFILE_ID = -1;
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
 constexpr int32_t DEFAULT_USER_ID = 100;
+constexpr int32_t ZERO_USERID = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_BEGIN = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_END = 99;
 constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
