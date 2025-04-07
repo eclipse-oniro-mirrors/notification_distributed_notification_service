@@ -76,7 +76,7 @@ void DistributedService::HandleDeviceState(const std::shared_ptr<TlvBox>& boxMes
     uint32_t status = (static_cast<uint32_t>(state) << 1);
     int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status,
         DEFAULT_LOCK_SCREEN_FLAG, deviceId);
-    ANS_LOGI("Dans set state %{public}s %{public}u.", deviceName.c_str(), state);
+    ANS_LOGI("Dans set state %{public}s %{public}d.", deviceName.c_str(), state);
 }
 
 void DistributedService::SyncDeviceState(int32_t state)
@@ -98,8 +98,8 @@ void DistributedService::SyncDeviceState(int32_t state)
             DistributedClient::GetInstance().SendMessage(stateBox.GetByteBuffer(),
                 stateBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
                 peer.second.deviceId_, peer.second.deviceType_);
-            ANS_LOGI("Dans SyncDeviceState %{public}d %{public}d %{public}d %{public}u.",
-                peer.second.deviceType_, localDevice_.deviceType_, state, peerDevice_.size());
+            ANS_LOGI("Dans SyncDeviceState %{public}d %{public}d %{public}d %{public}d.",
+                peer.second.deviceType_, localDevice_.deviceType_, state, (int32_t)(peerDevice_.size()));
         }
     });
     serviceQueue_->submit(task);
@@ -179,7 +179,7 @@ void DistributedService::SyncAllLiveViewNotification(const DistributedDeviceInfo
 void DistributedService::SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
     const std::vector<std::string>& notificationList)
 {
-    ANS_LOGI("Dans sync notification %{public}u.", notificationList.size());
+    ANS_LOGI("Dans sync notification %{public}d.", (int32_t)(notificationList.size()));
     NotificationSyncBox notificationSyncBox;
     notificationSyncBox.SetLocalDeviceId(peerDevice.deviceId_);
     notificationSyncBox.SetNotificationEmpty(notificationList.empty());
@@ -353,8 +353,8 @@ void DistributedService::GenerateBundleIconSync(const DistributedDeviceInfo& dev
         cachedIcons.insert(item.GetBundleName());
     }
     bundleIconCache_.insert(std::make_pair(device.deviceId_, cachedIcons));
-    ANS_LOGI("Dans Generate bundleIconSync bundle %{public}u %{public}u %{public}u.",
-        bundleOption.size(), enableBundleOption.size(), unCachedBundleList.size());
+    ANS_LOGI("Dans Generate bundle %{public}d %{public}d %{public}d.", (int32_t)(bundleOption.size()),
+        (int32_t)(enableBundleOption.size()), (int32_t)(unCachedBundleList.size()));
     std::unordered_map<std::string, std::string> icons;
     for (auto bundle : unCachedBundleList) {
         std::string icon;

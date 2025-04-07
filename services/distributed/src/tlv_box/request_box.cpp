@@ -81,7 +81,7 @@ bool NotifticationRequestBox::SetNotificationTitle(const std::string& title)
     }
     uint32_t maxLength = static_cast<uint32_t>(DistributedLocalConfig::GetInstance().GetTitleLength());
     if (title.size() > maxLength) {
-        ANS_LOGI("SetNotificationTitle truncate %{public}u %{public}u", title.size(), maxLength);
+        ANS_LOGI("SetNotificationTitle truncate %{public}d %{public}d", (int32_t)(title.size()), (int32_t)(maxLength));
         std::string subTitle =  title.substr(0, maxLength);
         ANS_LOGI("SetNotificationTitle truncate %{public}s %{public}s", subTitle.c_str(), title.c_str());
         return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_TITLE, subTitle));
@@ -96,7 +96,7 @@ bool NotifticationRequestBox::SetNotificationText(const std::string& text)
     }
     uint32_t maxLength = static_cast<uint32_t>(DistributedLocalConfig::GetInstance().GetContentLength());
     if (text.size() > maxLength) {
-        ANS_LOGI("SetNotificationText truncate %{public}u %{public}u", text.size(), maxLength);
+        ANS_LOGI("SetNotificationText truncate %{public}d %{public}d", (int32_t)(text.size()), (int32_t)(maxLength));
         std::string subText =  text.substr(0, maxLength);
         ANS_LOGI("SetNotificationTitle truncate %{public}s %{public}s", subText.c_str(), text.c_str());
         return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT, subText));
@@ -174,7 +174,7 @@ bool NotifticationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>&
         return false;
     }
     std::string icon = AnsImageUtil::PackImage(copyPixelMap);
-    ANS_LOGI("SetBigIcon %{public}u, %{public}u", copyIcon.size(), icon.size());
+    ANS_LOGI("SetBigIcon %{public}d, %{public}d", (int32_t)(copyIcon.size()), (int32_t)(icon.size()));
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
 }
 
@@ -189,7 +189,7 @@ bool NotifticationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelM
         return false;
     }
     std::string icon = AnsImageUtil::PackImage(copyPixelMap);
-    ANS_LOGI("SetOverlayIcon %{public}u, %{public}u", copyIcon.size(), icon.size());
+    ANS_LOGI("SetOverlayIcon %{public}d, %{public}d", (int32_t)(copyIcon.size()), (int32_t)(icon.size()));
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
 }
 
@@ -342,7 +342,7 @@ bool NotifticationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIc
     if (!box_->GetStringValue(NOTIFICATION_BIG_ICON, bigIconContent)) {
         return false;
     }
-    ANS_LOGI("GetBigIcon %{public}u", bigIconContent.size());
+    ANS_LOGI("GetBigIcon %{public}d", (int32_t)(bigIconContent.size()));
     bigIcon = AnsImageUtil::UnPackImage(bigIconContent);
     return true;
 }
@@ -356,7 +356,7 @@ bool NotifticationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& o
     if (!box_->GetStringValue(NOTIFICATION_OVERLAY_ICON, overlayContent)) {
         return false;
     }
-    ANS_LOGI("GetOverlayIcon %{public}u", overlayContent.size());
+    ANS_LOGI("GetOverlayIcon %{public}d", (int32_t)(overlayContent.size()));
     overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
     return true;
 }
