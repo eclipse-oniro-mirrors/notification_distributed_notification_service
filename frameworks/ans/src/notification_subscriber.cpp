@@ -179,6 +179,11 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector
     return ERR_OK;
 }
 
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications)
+{
+    return OnConsumedList(notifications, nullptr);
+}
+
 ErrCode NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -240,6 +245,12 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector
         OnCanceled(notification, notificationMap, deleteReason);
     }
     return ERR_OK;
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledList(
+    const std::vector<sptr<Notification>> &notifications, int32_t deleteReason)
+{
+    return OnCanceledList(notifications, nullptr, deleteReason);
 }
 
 ErrCode NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
