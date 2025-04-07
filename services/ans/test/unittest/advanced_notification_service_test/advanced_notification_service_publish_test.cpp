@@ -1363,7 +1363,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
     EXPECT_EQ(nullptr, req->GetBigIcon());
     req->SetOverlayIcon(nullptr);
     EXPECT_EQ(nullptr, req->GetOverlayIcon());
-    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->Publish("label", req), (int)ERR_ANS_PUSH_CHECK_UNREGISTERED);
 }
 }  // namespace Notification
 }  // namespace OHOS

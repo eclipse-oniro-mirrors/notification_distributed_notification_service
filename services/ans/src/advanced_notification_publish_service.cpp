@@ -75,6 +75,9 @@ constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
+const static std::string BUNDLE_NAME_ABROAD = "com.easy.transfer.abroad";
+const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
+constexpr int32_t BADGE_NUM_LIMIT = 0;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1018,7 +1021,15 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
-    if (bundleName == BUNDLE_NAME_ZYT) {
+    if (bundleName == BUNDLE_NAME_ZYT || bundleName == BUNDLE_NAME_ABROAD) {
+        ANS_LOGI("RequestEnableNotification zyt or abroad");
+        return ERR_ANS_NOT_ALLOWED;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, 1, bundleInfo, 0);
+    if (bundleInfo.applicationInfo.installSource == INSTALL_SOURCE_EASYABROAD) {
+        ANS_LOGI("RequestEnableNotification abroad app");
         return ERR_ANS_NOT_ALLOWED;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
@@ -2602,6 +2613,49 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
     });
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty() ||
+        bundleOption->GetUid() <= DEFAULT_UID) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (badgeNumber < BADGE_NUM_LIMIT) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid badgeNumber");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ANS_LOGI("SetBadgeNumberForDhByBundle bundleName = %{public}s uid = %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_6);
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " badgeNumber: " + std::to_string(badgeNumber));
+    if (notificationSvrQueue_ == nullptr) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).Append(" Not system app.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Not system app.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        ANS_LOGD("ffrt enter!");
+        sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+            bundleOption->GetBundleName(), bundleOption->GetUid(), badgeNumber);
+        if (badgeData == nullptr) {
+            ANS_LOGE("Failed to create badge number callback data.");
+            result = ERR_ANS_NO_MEMORY;
+        }
+        NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
+    });
+    notificationSvrQueue_->wait(handler);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
