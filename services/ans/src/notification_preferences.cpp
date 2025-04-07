@@ -640,6 +640,10 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int6
     }
 
     sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    if (profile == nullptr) {
+        ANS_LOGE("profile is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
