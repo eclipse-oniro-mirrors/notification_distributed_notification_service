@@ -41,7 +41,7 @@ static void OnServerBind(int32_t socket, PeerSocketInfo info)
 
 static void OnServerShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}u.", socket, reason);
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}d.", socket, (int32_t)(reason));
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -80,7 +80,7 @@ static void OnClientBytes(int32_t socket, const void *data, uint32_t dataLen)
 
 static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 {
-    ANS_LOGI("Socket fd %{public}d shutdown because %{public}u.", socket, reason);
+    ANS_LOGI("Socket fd %{public}d shutdown because %{public}d.", socket, (int32_t)(reason));
     if (socket <= 0) {
         ANS_LOGE("Socket fd invalid.");
         return;
@@ -90,7 +90,7 @@ static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 
 static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
 {
-    ANS_LOGI("OnQos %{public}d %{public}d %{public}u", socket, (int32_t)eventId, qosCount);
+    ANS_LOGI("OnQos %{public}d %{public}d %{public}d", socket, (int32_t)eventId, (int32_t)(qosCount));
     for (uint32_t idx = 0; idx < qosCount; idx++) {
         ANS_LOGI("QosTV: type: %{public}d, value: %{public}d", (int32_t)qos[idx].qos, qos[idx].value);
     }
