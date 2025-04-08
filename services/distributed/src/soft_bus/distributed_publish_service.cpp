@@ -405,8 +405,8 @@ void DistributedService::HandleNotificationSync(const std::shared_ptr<TlvBox>& b
         return;
     }
 
-    ANS_LOGI("Dans handle sync notification %{public}u %{public}u.", notificationList.size(),
-        notifications.size());
+    ANS_LOGI("Dans handle sync notification %{public}d %{public}d.", (int32_t)(notificationList.size()),
+        (int32_t)(notifications.size()));
     for (auto item : notificationList) {
         ANS_LOGI("Dans sync %{public}s.", item.c_str());
     }
@@ -509,7 +509,7 @@ ErrCode DistributedService::GetNotificationButtonWantPtr(const std::string& hash
     const std::string& actionName, std::shared_ptr<AAFwk::Want>& wantPtr, sptr<NotificationRequest>& request,
     std::string& userInputKey)
 {
-    sptr<NotificationRequest> notificationRequest = new (std::nothrow) NotificationRequest();
+    sptr<NotificationRequest> notificationRequest = nullptr;
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
     if (result != ERR_OK || notificationRequest == nullptr) {
         ANS_LOGE("Check notificationRequest is null.");

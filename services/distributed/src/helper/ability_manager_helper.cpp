@@ -49,7 +49,7 @@ int AbilityManagerHelper::ConnectAbility(const std::string &eventId, const AAFwk
     if (result == ERR_OK) {
         operationConnection_[eventId] = connection;
     }
-    ANS_LOGI("Ability manager connect call %{public}d %{public}u!", result, operationConnection_.size());
+    ANS_LOGI("Ability manager connect call %{public}d %{public}d!", result, (int32_t)(operationConnection_.size()));
     return result;
 }
 
@@ -71,7 +71,7 @@ void AbilityManagerHelper::DisconnectServiceAbility(const std::string &eventId, 
 
         auto ret = AAFwk::AbilityManagerClient::GetInstance()->ReleaseCall(iter->second, element);
         operationConnection_.erase(eventId);
-        ANS_LOGI("Ability manager releas call %{public}d %{public}u!", ret, operationConnection_.size());
+        ANS_LOGI("Ability manager releas call %{public}d %{public}d!", ret, (int32_t)(operationConnection_.size()));
     };
     operationQueue_->submit(task);
 }

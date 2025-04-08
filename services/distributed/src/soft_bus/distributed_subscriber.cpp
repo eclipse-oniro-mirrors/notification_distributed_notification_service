@@ -132,7 +132,7 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
 
 void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
 {
-    ANS_LOGI("Notify changed %{public}s %{public}u.", bundleName.c_str(), localDevice_.deviceType_);
+    ANS_LOGI("Notify changed %{public}s %{public}d.", bundleName.c_str(), localDevice_.deviceType_);
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         return;
     }
