@@ -40,6 +40,10 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
     }
 
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    if (operationInfo == nullptr) {
+        ANS_LOGE("create operationInfo failed");
+        return;
+    }
     operationInfo->SetHashCode(asyncCallbackInfo->hashCode);
     if (asyncCallbackInfo->operationInfo.withOperationInfo) {
         operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
