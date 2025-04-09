@@ -104,6 +104,12 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     return result;
 }
 
+ErrCode AdvancedNotificationService::PublishWithMaxCapacity(
+    const std::string& label, const sptr<NotificationRequest>& request)
+{
+    return Publish(label, request);
+}
+
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -293,6 +299,12 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     });
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxyWithMaxCapacity(
+    const sptr<NotificationRequest>& request)
+{
+    return PublishNotificationForIndirectProxy(request);
 }
 
 ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
@@ -671,9 +683,15 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
 }
 
 ErrCode AdvancedNotificationService::PublishAsBundle(
-    const sptr<NotificationRequest> notification, const std::string &representativeBundle)
+    const sptr<NotificationRequest>& notification, const std::string &representativeBundle)
 {
     return ERR_INVALID_OPERATION;
+}
+
+ErrCode AdvancedNotificationService::PublishAsBundleWithMaxCapacity(
+    const sptr<NotificationRequest>& notification, const std::string &representativeBundle)
+{
+    return PublishAsBundle(notification, representativeBundle);
 }
 
 ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
@@ -1029,6 +1047,12 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
+    const sptr<IAnsDialogCallback> &callback)
+{
+    return RequestEnableNotification(deviceId, callback, nullptr);
+}
+
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
     const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken)
 {
@@ -1045,7 +1069,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false);
 }
 
-ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string bundleName, const int32_t uid)
+ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string& bundleName, int32_t uid)
 {
     ANS_LOGI("RequestEnableNotification bundleName = %{public}s uid = %{public}d", bundleName.c_str(), uid);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
@@ -2384,7 +2408,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
         return result;
 }
 
-ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &userId, bool &allowed)
+ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(int32_t userId, bool &allowed)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -2412,7 +2436,7 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(const int32_t &u
     return result;
 }
 
-ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(const int32_t &userId, bool enabled)
+ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(int32_t userId, bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -2783,6 +2807,12 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
 }
 
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
+    const sptr<IAnsSubscriberLocalLiveView> &subscriber, const bool isNative)
+{
+    return SubscribeLocalLiveView(subscriber, nullptr, isNative);
+}
+
+ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber,
     const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
@@ -2892,9 +2922,10 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
 }
 
 ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
-    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+    int32_t slotTypeInt, const std::string &deviceType, bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_7);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -2924,10 +2955,10 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabledBySlot(
-    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+    int32_t slotTypeInt, const std::string &deviceType, bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
@@ -3099,8 +3130,8 @@ ErrCode AdvancedNotificationService::IsSmartReminderEnabled(const std::string &d
     return NotificationPreferences::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
-ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const std::string deveiceId)
+ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+    const std::string &deveiceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     uint32_t status_ = status;
@@ -3119,8 +3150,8 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag, const std::string deveiceId)
+ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+    uint32_t controlFlag, const std::string &deveiceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {

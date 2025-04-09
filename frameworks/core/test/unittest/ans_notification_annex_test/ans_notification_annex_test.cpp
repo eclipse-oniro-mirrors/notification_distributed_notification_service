@@ -49,7 +49,7 @@ public:
 
     void TearDown();
     std::shared_ptr<AnsNotification> ans_;
-    sptr<AnsManagerInterface> ansManagerProxy_{nullptr};
+    sptr<IAnsManager> ansManagerProxy_{nullptr};
 };
 
 void AnsNotificationUnitAnnexTest::SetUpTestCase() {}

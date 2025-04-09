@@ -117,7 +117,7 @@ NotificationSubscriber::SubscriberImpl::SubscriberImpl(NotificationSubscriber &s
 ErrCode NotificationSubscriber::SubscriberImpl::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->AddDeathRecipient(recipient_);
         ANS_LOGD("%s, Add death recipient.", __func__);
@@ -129,7 +129,7 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConnected()
 ErrCode NotificationSubscriber::SubscriberImpl::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->RemoveDeathRecipient(recipient_);
         ANS_LOGD("%s, Remove death recipient.", __func__);
@@ -291,7 +291,7 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnOperationResponse(
     return subscriber_.OnOperationResponse(std::make_shared<NotificationOperationInfo>(*operationInfo));
 }
 
-sptr<AnsManagerInterface> NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
+sptr<IAnsManager> NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -305,7 +305,7 @@ sptr<AnsManagerInterface> NotificationSubscriber::SubscriberImpl::GetAnsManagerP
         return nullptr;
     }
 
-    sptr<AnsManagerInterface> proxy = iface_cast<AnsManagerInterface>(remoteObject);
+    sptr<IAnsManager> proxy = iface_cast<IAnsManager>(remoteObject);
     if ((proxy == nullptr) || (proxy->AsObject() == nullptr)) {
         return nullptr;
     }

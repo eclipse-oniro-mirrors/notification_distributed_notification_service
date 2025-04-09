@@ -16,7 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_SUBSCRIBER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_SUBSCRIBER_H
 
-#include "ans_manager_interface.h"
+#include "ians_manager.h"
 #include "ans_subscriber_stub.h"
 #include "notification_request.h"
 #include "notification_sorting.h"
@@ -203,7 +203,7 @@ private:
 
         ErrCode OnOperationResponse(const sptr<NotificationOperationInfo> &operationInfo, int32_t& funcResult) override;
 
-        sptr<AnsManagerInterface> GetAnsManagerProxy();
+        sptr<IAnsManager> GetAnsManagerProxy();
 
     public:
         NotificationSubscriber &subscriber_;

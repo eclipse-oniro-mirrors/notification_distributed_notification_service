@@ -1907,7 +1907,8 @@ HWTEST_F(AnsPublishServiceTest, SetTargetDeviceStatus_00001, Function | SmallTes
 {
     std::string deviceType = "";
     uint32_t status = 0;
-    auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status);
+    std::string deveiceId = "";
+    auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status, deveiceId);
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
@@ -1927,7 +1928,8 @@ HWTEST_F(AnsPublishServiceTest, GetTargetDeviceStatus_00001, Function | SmallTes
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
     uint32_t controlFlag = 0;
     deviceType = "testdeviceType";
-    ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, inputStatus);
+    std::string deveiceId = "";
+    ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, inputStatus, deveiceId);
     ASSERT_EQ(ret, ERR_OK);
     ret = advancedNotificationService_->GetTargetDeviceStatus(deviceType, status);
     ASSERT_EQ(status, inputStatus);

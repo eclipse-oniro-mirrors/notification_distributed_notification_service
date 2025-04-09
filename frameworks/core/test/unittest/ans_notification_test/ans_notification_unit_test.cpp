@@ -59,7 +59,7 @@ public:
 
     void TearDown();
     std::shared_ptr<AnsNotification> ans_;
-    sptr<AnsManagerInterface> ansManagerProxy_{nullptr};
+    sptr<IAnsManager> ansManagerProxy_{nullptr};
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     void UpdateStatuts(bool isEnable, int status) {}
 #endif

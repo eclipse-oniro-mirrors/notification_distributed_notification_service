@@ -83,7 +83,7 @@ NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 }
 #endif
 
-ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::RemindType &remindType)
+ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -101,7 +101,8 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::R
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() { remindType = GetRemindType(); }));
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([&]() { remindTypeInt = static_cast<int32_t>(GetRemindType()); }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
 #else

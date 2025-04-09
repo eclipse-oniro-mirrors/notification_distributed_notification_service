@@ -278,8 +278,8 @@ ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
 }
 
 ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
-    const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
-    const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request)
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
+    const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1442,7 +1442,7 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
     DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE, true);
 }
 
-ErrCode AdvancedNotificationService::DeleteAllByUser(const int32_t &userId)
+ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {

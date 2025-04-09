@@ -54,6 +54,14 @@ idl_gen_interface("ans_subscriber_interface") {
   part_name = "distributed_notification_service"
 }
 
+idl_gen_interface("ans_manager_interface") {
+  sources = [ "IAnsManager.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
 group("ans_client") {
   deps = [ ":ans_innerkits" ]
 }
@@ -204,13 +212,6 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/listener/ans_subscriber_listener.cpp",
     "${core_path}/src/listener/swing_callback_service.cpp",
     "${core_path}/src/manager/ans_manager_death_recipient.cpp",
-    "${core_path}/src/manager/ans_manager_proxy.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_bundle.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_distributed.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_disturb.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_slot.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_subscribe.cpp",
-    "${core_path}/src/manager/ans_manager_proxy_utils.cpp",
     "${frameworks_module_ans_path}/src/ans_dialog_host_client.cpp",
     "${frameworks_module_ans_path}/src/badge_number_callback_data.cpp",
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
@@ -259,6 +260,9 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/push_promise_callback.cpp",
   ]
 
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources += filter_include(output_values, [ "*_proxy.cpp" ])
+
   public_configs = [ ":ans_innerkits_public_config" ]
 
   defines = []
@@ -266,6 +270,7 @@ ohos_shared_library("ans_innerkits") {
   deps = [
     ":ans_dialog_callback_proxy",
     ":ans_dialog_callback_stub",
+    ":ans_manager_interface",
     ":ans_operation_callback_proxy",
     ":ans_operation_callback_stub",
     ":ans_subscriber_local_live_view_proxy",
@@ -520,6 +525,35 @@ ohos_source_set("ans_subscriber_stub") {
     "image_framework:image_native",
   ]
 
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_manager_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_manager_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  public_external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "image_framework:image_native",
+  ]
   subsystem_name = "notification"
   part_name = "distributed_notification_service"
 }

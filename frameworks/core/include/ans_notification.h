@@ -20,10 +20,10 @@
 #include <memory>
 
 #include "ans_dialog_host_client.h"
-#include "ans_manager_interface.h"
 #include "ans_subscriber_listener.h"
-#include "notification_subscriber.h"
+#include "ians_manager.h"
 #include "notification_local_live_view_subscriber.h"
+#include "notification_subscriber.h"
 #include "want_params.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "swing_callback_service.h"
@@ -1286,7 +1286,7 @@ private:
      *
      * @return Returns true if succeed; returns false otherwise.
      */
-    sptr<AnsManagerInterface> GetAnsManagerProxy();
+    sptr<IAnsManager> GetAnsManagerProxy();
 
     /**
      * @brief Checks if the MediaContent can be published.

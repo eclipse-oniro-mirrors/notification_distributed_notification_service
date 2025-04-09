@@ -41,6 +41,11 @@
 namespace OHOS {
 namespace Notification {
 
+ErrCode AdvancedNotificationService::Subscribe(const sptr<IAnsSubscriber> &subscriber)
+{
+    return Subscribe(subscriber, nullptr);
+}
+
 ErrCode AdvancedNotificationService::Subscribe(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
@@ -130,6 +135,11 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
     return errCode;
+}
+
+ErrCode AdvancedNotificationService::Unsubscribe(const sptr<IAnsSubscriber> &subscriber)
+{
+    return Unsubscribe(subscriber, nullptr);
 }
 
 ErrCode AdvancedNotificationService::Unsubscribe(

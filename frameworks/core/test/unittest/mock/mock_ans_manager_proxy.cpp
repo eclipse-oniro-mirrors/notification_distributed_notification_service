@@ -16,17 +16,17 @@
 #include "ans_notification.h"
 
 namespace {
-    OHOS::sptr<OHOS::Notification::AnsManagerInterface> g_mockGetAnsManagerProxy = nullptr;
+    OHOS::sptr<OHOS::Notification::IAnsManager> g_mockGetAnsManagerProxy = nullptr;
 }
 
-void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::AnsManagerInterface> mockRet)
+void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::IAnsManager> mockRet)
 {
     g_mockGetAnsManagerProxy = mockRet;
 }
 
 namespace OHOS {
 namespace Notification {
-sptr<AnsManagerInterface> AnsNotification::GetAnsManagerProxy()
+sptr<IAnsManager> AnsNotification::GetAnsManagerProxy()
 {
     return g_mockGetAnsManagerProxy;
 }

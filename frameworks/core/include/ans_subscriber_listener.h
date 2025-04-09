@@ -16,8 +16,8 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_CORE_NOTIFICATION_SUBSCRIBER_LISTENER_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_CORE_NOTIFICATION_SUBSCRIBER_LISTENER_H
 
-#include "ans_manager_interface.h"
 #include "ans_subscriber_stub.h"
+#include "ians_manager.h"
 #include "notification_request.h"
 #include "notification_sorting.h"
 #include "notification_sorting_map.h"

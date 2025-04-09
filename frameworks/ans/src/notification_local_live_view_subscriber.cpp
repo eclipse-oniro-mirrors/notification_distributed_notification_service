@@ -43,7 +43,7 @@ NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::SubscriberLoca
 ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->AddDeathRecipient(recipient_);
         ANS_LOGD("%s, Add death recipient.", __func__);
@@ -55,7 +55,7 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConn
 ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->RemoveDeathRecipient(recipient_);
         ANS_LOGD("%s, Remove death recipient.", __func__);
@@ -72,7 +72,7 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnResp
     return ERR_OK;
 }
 
-sptr<AnsManagerInterface> NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::GetAnsManagerProxy()
+sptr<IAnsManager> NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::GetAnsManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -86,7 +86,7 @@ sptr<AnsManagerInterface> NotificationLocalLiveViewSubscriber::SubscriberLocalLi
         return nullptr;
     }
 
-    sptr<AnsManagerInterface> proxy = iface_cast<AnsManagerInterface>(remoteObject);
+    sptr<IAnsManager> proxy = iface_cast<IAnsManager>(remoteObject);
     if ((proxy == nullptr) || (proxy->AsObject() == nullptr)) {
         return nullptr;
     }
