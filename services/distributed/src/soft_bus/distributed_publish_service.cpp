@@ -607,19 +607,19 @@ void DistributedService::ReplyOperationResponse(const std::string& hashCode,
         return;
     }
 
-    NotificationResponseBox replyBox;
-    replyBox.SetResponseResult(result);
-    replyBox.SetNotificationHashCode(hashCode);
-    replyBox.SetOperationEventId(eventId);
-    replyBox.SetMatchType(MatchType::MATCH_ACK);
-    replyBox.SetOperationType(operationType);
+    std::shared_ptr<NotificationResponseBox> replyBox = std::make_shared<NotificationResponseBox>();
+    replyBox->SetResponseResult(result);
+    replyBox->SetNotificationHashCode(hashCode);
+    replyBox->SetOperationEventId(eventId);
+    replyBox->SetMatchType(MatchType::MATCH_ACK);
+    replyBox->SetOperationType(operationType);
 
-    if (!replyBox.Serialize()) {
+    if (!replyBox->Serialize()) {
         ANS_LOGW("dans OnResponse reply serialize failed");
         return;
     }
-    auto ret = DistributedClient::GetInstance().SendMessage(replyBox.GetByteBuffer(), replyBox.GetByteLength(),
-        TransDataType::DATA_TYPE_MESSAGE, iter->second.deviceId_, iter->second.deviceType_);
+    auto ret = DistributedClient::GetInstance().SendMessage(replyBox, TransDataType::DATA_TYPE_MESSAGE,
+        iter->second.deviceId_, iter->second.deviceType_);
     if (ret != ERR_OK) {
         ANS_LOGE("dans OnResponse send message failed result: %{public}d", ret);
         return;

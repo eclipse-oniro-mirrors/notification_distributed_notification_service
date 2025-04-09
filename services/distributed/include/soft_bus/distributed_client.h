@@ -20,6 +20,7 @@
 #include <vector>
 #include <thread>
 #include "distributed_device_data.h"
+#include "box_base.h"
 
 namespace OHOS {
 namespace Notification {
@@ -34,7 +35,7 @@ public:
         const std::string &networkId);
     void initClient(const std::string &deviceId, uint16_t deviceType);
     int32_t GetSocketId(const std::string &deviceId, TransDataType dataType, int32_t& socketId);
-    int32_t SendMessage(const void* data, int32_t length, TransDataType dataType,
+    int32_t SendMessage(const std::shared_ptr<BoxBase>& boxPtr, TransDataType dataType,
         const std::string &deviceId, int32_t eventType);
     void ReleaseClient();
 private:

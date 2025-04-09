@@ -53,9 +53,9 @@ public:
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
     void DestoryService();
     void ReportBundleIconList(const DistributedDeviceInfo peerDevice);
-    void UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
+    int32_t UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
         const DistributedDeviceInfo peerDevice);
-    void RequestBundlesIcon(const DistributedDeviceInfo peerDevice);
+    void RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce);
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
     void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
@@ -89,7 +89,7 @@ private:
     void RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
-        NotificationContent::Type type, NotifticationRequestBox &requestBox);
+        NotificationContent::Type type, std::shared_ptr<NotifticationRequestBox>& requestBox);
     void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
         std::vector<DistributedDeviceInfo>& updateDeviceList);
     void TriggerJumpApplication(const std::string& hashCode);
@@ -98,7 +98,7 @@ private:
     void ReplyOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox,
         OperationType operationType, uint32_t result);
     void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
-        NotificationConstant::SlotType slotType, NotifticationRequestBox &requestBox);
+        NotificationConstant::SlotType slotType, std::shared_ptr<NotifticationRequestBox>& requestBox);
     void MakeNotificationButtons(const NotifticationRequestBox& box, NotificationConstant::SlotType slotType,
         sptr<NotificationRequest>& request);
     int32_t GetCurrentActiveUserId();

@@ -134,17 +134,16 @@ void DistributedService::HandleBundleRemoved(const std::string& bundleName)
             if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
                 continue;
             }
-            BundleIconBox iconBox;
-            iconBox.SetIconSyncType(IconSyncType::REMOVE_BUNDLE_ICON);
-            iconBox.SetBundleList({bundleName});
-            iconBox.SetLocalDeviceId(localDevice_.deviceId_);
-            if (!iconBox.Serialize()) {
+            std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
+            iconBox->SetIconSyncType(IconSyncType::REMOVE_BUNDLE_ICON);
+            iconBox->SetBundleList({bundleName});
+            iconBox->SetLocalDeviceId(localDevice_.deviceId_);
+            if (!iconBox->Serialize()) {
                 ANS_LOGW("Dans HandleBundleRemove serialize failed.");
                 continue;
             }
 
-            DistributedClient::GetInstance().SendMessage(iconBox.GetByteBuffer(),
-                iconBox.GetByteLength(), TransDataType::DATA_TYPE_MESSAGE,
+            DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
                 device.second.deviceId_, device.second.deviceType_);
             ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d %{public}s %{public}d.",
                 StringAnonymous(device.second.deviceId_).c_str(), device.second.deviceType_,
