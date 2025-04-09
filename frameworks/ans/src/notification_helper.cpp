@@ -638,7 +638,7 @@ ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool,
     return ERR_OK;
 #endif
 }
-ErrCode NotificationHelper::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+ErrCode NotificationHelper::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile);
 }
