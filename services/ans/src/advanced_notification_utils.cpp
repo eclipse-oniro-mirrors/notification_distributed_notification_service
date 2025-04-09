@@ -746,6 +746,204 @@ ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const int32_t uid
     }
     return ERR_OK;
 }
+void AdvancedNotificationService::AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate)
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    time_t nowT = std::chrono::system_clock::to_time_t(now);
+    tm nowTm = GetLocalTime(nowT);
+
+    auto beginDateMilliseconds = std::chrono::milliseconds(beginDate);
+    auto beginDateTimePoint =
+        std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>(beginDateMilliseconds);
+    time_t beginDateT = std::chrono::system_clock::to_time_t(beginDateTimePoint);
+    tm beginDateTm = GetLocalTime(beginDateT);
+
+    auto endDateMilliseconds = std::chrono::milliseconds(endDate);
+    auto endDateTimePoint =
+        std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>(endDateMilliseconds);
+    time_t endDateT = std::chrono::system_clock::to_time_t(endDateTimePoint);
+    tm endDateTm = GetLocalTime(endDateT);
+
+    tm todayBeginTm = nowTm;
+    todayBeginTm.tm_sec = 0;
+    todayBeginTm.tm_min = beginDateTm.tm_min;
+    todayBeginTm.tm_hour = beginDateTm.tm_hour;
+
+    tm todayEndTm = nowTm;
+    todayEndTm.tm_sec = 0;
+    todayEndTm.tm_min = endDateTm.tm_min;
+    todayEndTm.tm_hour = endDateTm.tm_hour;
+
+    time_t todayBeginT = mktime(&todayBeginTm);
+    if (todayBeginT == -1) {
+        return;
+    }
+    time_t todayEndT = mktime(&todayEndTm);
+    if (todayEndT == -1) {
+        return;
+    }
+
+    auto newBeginTimePoint = std::chrono::system_clock::from_time_t(todayBeginT);
+    auto newEndTimePoint = std::chrono::system_clock::from_time_t(todayEndT);
+    if (newBeginTimePoint >= newEndTimePoint) {
+        newEndTimePoint += std::chrono::hours(HOURS_IN_ONE_DAY);
+    }
+
+    if (newEndTimePoint < now) {
+        newBeginTimePoint += std::chrono::hours(HOURS_IN_ONE_DAY);
+        newEndTimePoint += std::chrono::hours(HOURS_IN_ONE_DAY);
+    }
+
+    auto newBeginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(newBeginTimePoint.time_since_epoch());
+    beginDate = newBeginDuration.count();
+
+    auto newEndDuration = std::chrono::duration_cast<std::chrono::milliseconds>(newEndTimePoint.time_since_epoch());
+    endDate = newEndDuration.count();
+}
+
+ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const sptr<NotificationDoNotDisturbDate> &date)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGW("Check permission denied!");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGW("No active user found!");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    return SetDoNotDisturbDateByUser(userId, date);
+}
+
+ErrCode AdvancedNotificationService::GetDoNotDisturbDate(sptr<NotificationDoNotDisturbDate> &date)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    return GetDoNotDisturbDateByUser(userId, date);
+}
+
+ErrCode AdvancedNotificationService::AddDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+            ANS_LOGD("The ffrt enter.");
+            NotificationPreferences::GetInstance()->AddDoNotDisturbProfiles(copyUserId, copyProfiles);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveDoNotDisturbProfiles(
+    const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([copyUserId = userId, copyProfiles = profiles]() {
+            ANS_LOGD("The ffrt enter.");
+            NotificationPreferences::GetInstance()->RemoveDoNotDisturbProfiles(copyUserId, copyProfiles);
+        }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    ANS_LOGD("Called.");
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGW("No active user found.");
+        return ERR_ANS_GET_ACTIVE_USER_FAILED;
+    }
+
+    profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+    ErrCode result = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(id, userId, profile);
+    if (result != ERR_OK) {
+        ANS_LOGE("profile failed id: %{public}s, userid: %{public}d", std::to_string(id).c_str(), userId);
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::DoesSupportDoNotDisturbMode(bool &doesSupport)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    doesSupport = SUPPORT_DO_NOT_DISTRUB;
+    return ERR_OK;
+}
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 void AdvancedNotificationService::OnDistributedPublish(
@@ -1404,6 +1602,107 @@ void AdvancedNotificationService::GetDumpInfo(const std::vector<std::u16string> 
         result.append("No." + std::to_string(++index) + "\n");
         result.append(info);
     }
+}
+
+ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &userId,
+    const sptr<NotificationDoNotDisturbDate> &date)
+{
+    ANS_LOGD("%{public}s enter, userId = %{public}d", __FUNCTION__, userId);
+    if (date == nullptr) {
+        ANS_LOGE("Invalid date param");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_OK;
+
+    int64_t beginDate = ResetSeconds(date->GetBeginDate());
+    int64_t endDate = ResetSeconds(date->GetEndDate());
+    switch (date->GetDoNotDisturbType()) {
+        case NotificationConstant::DoNotDisturbType::NONE:
+            beginDate = 0;
+            endDate = 0;
+            break;
+        case NotificationConstant::DoNotDisturbType::ONCE:
+            AdjustDateForDndTypeOnce(beginDate, endDate);
+            break;
+        case NotificationConstant::DoNotDisturbType::CLEARLY:
+            if (beginDate >= endDate) {
+                return ERR_ANS_INVALID_PARAM;
+            }
+            break;
+        default:
+            break;
+    }
+    ANS_LOGD("Before set SetDoNotDisturbDate beginDate = %{public}" PRId64 ", endDate = %{public}" PRId64,
+             beginDate, endDate);
+    const sptr<NotificationDoNotDisturbDate> newConfig = new (std::nothrow) NotificationDoNotDisturbDate(
+        date->GetDoNotDisturbType(),
+        beginDate,
+        endDate
+    );
+    if (newConfig == nullptr) {
+        ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+        return ERR_NO_MEMORY;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Generate invalid bundle option!");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, newConfig);
+        if (result == ERR_OK) {
+            NotificationSubscriberManager::GetInstance()->NotifyDoNotDisturbDateChanged(userId, newConfig);
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &userId,
+    sptr<NotificationDoNotDisturbDate> &date)
+{
+    ErrCode result = ERR_OK;
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        sptr<NotificationDoNotDisturbDate> currentConfig = nullptr;
+        result = NotificationPreferences::GetInstance()->GetDoNotDisturbDate(userId, currentConfig);
+        if (result != ERR_OK) {
+            return;
+        }
+        int64_t now = GetCurrentTime();
+        switch (currentConfig->GetDoNotDisturbType()) {
+            case NotificationConstant::DoNotDisturbType::CLEARLY:
+            case NotificationConstant::DoNotDisturbType::ONCE:
+                if (now >= currentConfig->GetEndDate()) {
+                    date = new (std::nothrow) NotificationDoNotDisturbDate(
+                        NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+                        if (date == nullptr) {
+                        ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
+                        return;
+                    }
+                    date = currentConfig;
+                }
+                break;
+            default:
+                date = currentConfig;
+                break;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<NotificationRequest> &request,
