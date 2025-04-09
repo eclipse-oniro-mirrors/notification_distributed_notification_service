@@ -781,6 +781,72 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_259000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number    : AnsBranchTest_260000
+ * @tc.name      : SetDoNotDisturbDate_1000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_260000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    sptr<NotificationDoNotDisturbDate> date =
+        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_261000
+ * @tc.name      : SetDoNotDisturbDate_2000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_261000, Function | SmallTest | Level1)
+{
+    MockVerifyNativeToken(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    sptr<NotificationDoNotDisturbDate> date =
+        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(date), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_262000
+ * @tc.name      : DoesSupportDoNotDisturbMode_1000
+ * @tc.desc      : Test DoesSupportDoNotDisturbMode function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_262000, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+
+    bool doesSupport = true;
+    ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_263000
+ * @tc.name      : DoesSupportDoNotDisturbMode_2000
+ * @tc.desc      : Test DoesSupportDoNotDisturbMode function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_263000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    bool doesSupport = true;
+    ASSERT_EQ(advancedNotificationService_->DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
  * @tc.number    : AnsBranchTest_264000
  * @tc.name      : EnableDistributed_1000
  * @tc.desc      : Test EnableDistributed function return ERR_ANS_NON_SYSTEM_APP.
@@ -888,6 +954,40 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_267100, Function | SmallTest | Level1)
         userId, allowed), (int)ERR_ANS_NON_SYSTEM_APP);
     ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledByUser(
         userId, enable), (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_268000
+ * @tc.name      : SetDoNotDisturbDate_1000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_NON_SYSTEM_APP.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_268000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    int32_t userId = 3;
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_269000
+ * @tc.name      : SetDoNotDisturbDate_2000
+ * @tc.desc      : Test SetDoNotDisturbDate function return ERR_ANS_PERMISSION_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_269000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    int32_t userId = 3;
+    sptr<NotificationDoNotDisturbDate> date = nullptr;
+    ASSERT_EQ(advancedNotificationService_->SetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->GetDoNotDisturbDate(userId, date), ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -1171,6 +1271,38 @@ HWTEST_F(AnsBranchTest, GetDeviceRemindType_3000, Function | SmallTest | Level1)
     ans.notificationSvrQueue_ = nullptr;
     NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
     ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_285000
+ * @tc.name      : IsNeedSilentInDoNotDisturbMode_1000
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_NON_SYSTEM_APP.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_285000, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), -1);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_286000
+ * @tc.name      : IsNeedSilentInDoNotDisturbMode_2000
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_PERMISSION_DENIED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
 }
 }  // namespace Notification
 }  // namespace OHOS
