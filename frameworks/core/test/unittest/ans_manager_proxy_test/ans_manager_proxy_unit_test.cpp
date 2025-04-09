@@ -24,9 +24,9 @@
 #undef protected
 #include "ans_const_define.h"
 #include "ans_dialog_host_client.h"
-#include "ans_manager_interface.h"
 #include "ans_inner_errors.h"
 #include "ans_subscriber_listener.h"
+#include "ians_manager.h"
 #include "message_parcel.h"
 #include "mock_i_remote_object.h"
 #include "notification.h"
@@ -42,6 +42,9 @@ extern void MockWriteInterfaceToken(bool mockRet);
 
 namespace OHOS {
 namespace Notification {
+
+const int32_t IPC_READ_ERROR = 0;
+
 class AnsManagerProxyUnitTest : public testing::Test {
 public:
     AnsManagerProxyUnitTest() {}
@@ -158,115 +161,6 @@ public:
 };
 
 /*
- * @tc.name: InnerTransactTest_0100
- * @tc.desc: test if AnsManagerProxy's InnerTransact function executed as expected in normal case.
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, InnerTransactTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, InnerTransactTest_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).WillOnce(DoAll(Return(NO_ERROR)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_OK, res);
-}
-
-/*
- * @tc.name: InnerTransactTest_0200
- * @tc.desc: test AnsManagerProxy's InnerTransact function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, InnerTransactTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, InnerTransactTest_0200, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).WillOnce(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_DEAD_OBJECT, res);
-}
-
-/*
- * @tc.name: InnerTransactTest_0300
- * @tc.desc: test AnsManagerProxy's InnerTransact function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, InnerTransactTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, InnerTransactTest_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).WillOnce(DoAll(Return(-1)));
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, res);
-}
-
-/*
- * @tc.name: InnerTransactTest_0400
- * @tc.desc: test AnsManagerProxy's InnerTransact function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, InnerTransactTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, InnerTransactTest_0400, TestSize.Level1";
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(nullptr);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_DEAD_OBJECT, res);
-}
-
-/*
- * @tc.name: PublishTest_0100
- * @tc.desc: test Publish function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishTest_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::string label = "label";
-    sptr<NotificationRequest> notification = nullptr;
-    int32_t result = proxy->Publish(label, notification);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
-}
-
-/*
  * @tc.name: PublishTest_0200
  * @tc.desc: test Publish function
  * @tc.type: FUNC
@@ -286,7 +180,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0200, Function | MediumTest | Leve
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->Publish(label, notification);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -309,7 +203,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0300, Function | MediumTest | Leve
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->Publish(label, notification);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -357,7 +251,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0500, Function | MediumTest | Leve
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->Publish(label, notification);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -382,7 +276,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishTest_0600, Function | MediumTest | Leve
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->Publish(label, notification);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 std::shared_ptr<PixelMap> AnsManagerProxyUnitTest::MakeNewPixelMap(int32_t width, int32_t height)
@@ -466,7 +360,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0100, Function | MediumTest | Level
     int32_t notificationId = 0;
     std::string label = "label";
     int32_t result = proxy->Cancel(notificationId, label, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -487,7 +381,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0200, Function | MediumTest | Level
     int32_t notificationId = 0;
     std::string label = "";
     int32_t result = proxy->Cancel(notificationId, label, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -531,7 +425,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0400, Function | MediumTest | Level
     int32_t notificationId = 0;
     std::string label = "label";
     int32_t result = proxy->Cancel(notificationId, label, "");
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -554,7 +448,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelTest_0500, Function | MediumTest | Level
     int32_t notificationId = 0;
     std::string label = "label";
     int32_t result = proxy->Cancel(notificationId, label, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -573,7 +467,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0100, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelAll("");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -614,7 +508,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0300, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelAll("");
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -635,7 +529,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAllTest_0400, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelAll("");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -657,7 +551,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0100, Function | MediumTest
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -679,7 +573,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0200, Function | MediumTest
     std::string representativeBundle = "";
     int32_t userId = 0;
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -725,7 +619,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0400, Function | MediumTest
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -749,7 +643,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0500, Function | MediumTest
     std::string representativeBundle = "Bundle";
     int32_t userId = 0;
     int32_t result = proxy->CancelAsBundle(notificationId, representativeBundle, userId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -770,7 +664,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0600, Function | MediumTest
     int32_t notificationId = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->CancelAsBundle(bundleOption, notificationId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -792,7 +686,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelAsBundleTest_0700, Function | MediumTest
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t userId = 0;
     int32_t result = proxy->CancelAsBundle(bundleOption, notificationId, userId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -812,7 +706,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotByTypeTest_0100, Function | MediumTest 
     ASSERT_NE(nullptr, proxy);
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->AddSlotByType(slotType);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -855,7 +749,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotByTypeTest_0300, Function | MediumTest 
     ASSERT_NE(nullptr, proxy);
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->AddSlotByType(slotType);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -877,7 +771,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotByTypeTest_0400, Function | MediumTest 
     ASSERT_NE(nullptr, proxy);
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->AddSlotByType(slotType);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -896,7 +790,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0100, Function | MediumTest | Lev
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->AddSlots(slots);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -918,30 +812,8 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0200, Function | MediumTest | Lev
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
     slots.push_back(slot);
     int32_t result = proxy->AddSlots(slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: AddSlotsTest_0300
- * @tc.desc: test AddSlots function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, AddSlotsTest_0300, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationSlot>> slots;
-    slots.resize(MAX_SLOT_NUM + 1);   // set MAX_SLOT_NUM + 1 slots
-    sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
-    slots.push_back(slot);
-    int32_t result = proxy->AddSlots(slots);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -987,7 +859,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0500, Function | MediumTest | Lev
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
     slots.push_back(slot);
     int32_t result = proxy->AddSlots(slots);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1011,7 +883,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddSlotsTest_0600, Function | MediumTest | Lev
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
     slots.push_back(slot);
     int32_t result = proxy->AddSlots(slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -1034,8 +906,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0100, Function |
     sptr<AnsDialogHostClient> client = nullptr;
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
-    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    int32_t result = proxy->RequestEnableNotification(deviceId, client);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1058,8 +930,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0200, Function |
     sptr<AnsDialogHostClient> client = nullptr;
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
-    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    int32_t result = proxy->RequestEnableNotification(deviceId, client);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -1084,7 +956,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0300, Function |
     sptr<AnsDialogHostClient> client = nullptr;
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
-    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
+    int32_t result = proxy->RequestEnableNotification(deviceId, client);
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -1109,8 +981,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RequestEnableNotificationTest_0400, Function |
     sptr<AnsDialogHostClient> client = nullptr;
     AnsDialogHostClient::CreateIfNullptr(client);
     client = AnsDialogHostClient::GetInstance();
-    int32_t result = proxy->RequestEnableNotification(deviceId, client, callerToken);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    int32_t result = proxy->RequestEnableNotification(deviceId, client);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1130,7 +1002,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveSlotByTypeTest_0100, Function | MediumTe
     ASSERT_NE(nullptr, proxy);
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->RemoveSlotByType(slotType);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1173,7 +1045,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveSlotByTypeTest_0300, Function | MediumTe
     ASSERT_NE(nullptr, proxy);
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->RemoveSlotByType(slotType);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1195,7 +1067,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveSlotByTypeTest_0400, Function | MediumTe
     ASSERT_NE(nullptr, proxy);
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->RemoveSlotByType(slotType);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -1214,7 +1086,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveAllSlotsTest_0100, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->RemoveAllSlots();
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1255,7 +1127,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveAllSlotsTest_0300, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->RemoveAllSlots();
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1276,7 +1148,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveAllSlotsTest_0400, Function | MediumTest
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->RemoveAllSlots();
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 int SendRequestReplaceSlot(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option,
@@ -1285,8 +1157,11 @@ int SendRequestReplaceSlot(uint32_t code, MessageParcel &data, MessageParcel &re
     if (setError) {
         reply.WriteInt32(error);
     }
-
+    if (slotNum == 0) {
+        reply.WriteBool(false);
+    }
     if (slotNum == 1) {
+        reply.WriteBool(true);
         sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
         reply.WriteParcelable(slot);
     }
@@ -1318,7 +1193,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotByTypeTest_0100, Function | MediumTest 
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     sptr<NotificationSlot> slot = nullptr;
     int32_t result = proxy->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1364,7 +1239,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotByTypeTest_0300, Function | MediumTest 
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     sptr<NotificationSlot> slot = nullptr;
     int32_t result = proxy->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1387,7 +1262,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotByTypeTest_0400, Function | MediumTest 
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     sptr<NotificationSlot> slot = nullptr;
     int32_t result = proxy->GetSlotByType(slotType, slot);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_OK, result);
 }
 
 /*
@@ -1430,7 +1305,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsTest_0100, Function | MediumTest | Lev
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlots(slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1474,7 +1349,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsTest_0300, Function | MediumTest | Lev
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlots(slots);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1496,7 +1371,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsTest_0400, Function | MediumTest | Lev
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlots(slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -1518,7 +1393,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsTest_0500, Function | MediumTest | Lev
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlots(slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -1539,28 +1414,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0100, Function | Medium
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint64_t num = 0;
     int32_t result = proxy->GetSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetSlotNumAsBundleTest_0200
- * @tc.desc: test GetSlotNumAsBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    uint64_t num = 0;
-    int32_t result = proxy->GetSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -1606,7 +1461,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0400, Function | Medium
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint64_t num = 0;
     int32_t result = proxy->GetSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1629,7 +1484,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0500, Function | Medium
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint64_t num = 0;
     int32_t result = proxy->GetSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -1652,7 +1507,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotNumAsBundleTest_0600, Function | Medium
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint64_t num = 0;
     int32_t result = proxy->GetSlotNumAsBundle(bundleOption, num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 int SendRequestReplaceNotifications(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option,
@@ -1691,7 +1546,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0100, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1779,7 +1634,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0500, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -1826,7 +1681,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0700, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
-    EXPECT_NE(ERR_OK, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -1847,7 +1702,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0100, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -1935,7 +1790,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0500, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2002,7 +1857,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0100, Function | Me
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
     int32_t result = proxy->GetActiveNotifications(notifications, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2025,7 +1880,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0200, Function | Me
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
     int32_t result = proxy->GetActiveNotifications(notifications, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
     EXPECT_EQ(0, notifications.size());
 }
 /*
@@ -2046,7 +1901,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0300, Function | Me
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
     int32_t result = proxy->GetActiveNotifications(notifications, "");
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2068,7 +1923,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0400, Function | Me
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
     int32_t result = proxy->GetActiveNotifications(notifications, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -2090,7 +1945,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationsTest_0500, Function | Me
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<NotificationRequest>> notifications;
     int32_t result = proxy->GetActiveNotifications(notifications, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2110,7 +1965,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationNumsTest_0100, Function |
     ASSERT_NE(nullptr, proxy);
     uint64_t num = 0;
     int32_t result = proxy->GetActiveNotificationNums(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2155,7 +2010,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationNumsTest_0300, Function |
     ASSERT_NE(nullptr, proxy);
     uint64_t num = 0;
     int32_t result = proxy->GetActiveNotificationNums(num);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2177,7 +2032,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationNumsTest_0400, Function |
     ASSERT_NE(nullptr, proxy);
     uint64_t num = 0;
     int32_t result = proxy->GetActiveNotificationNums(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -2199,7 +2054,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationNumsTest_0500, Function |
     ASSERT_NE(nullptr, proxy);
     uint64_t num = 0;
     int32_t result = proxy->GetActiveNotificationNums(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2219,7 +2074,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0100, Function |
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2242,7 +2097,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0200, Function |
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
     EXPECT_EQ(0, notifications.size());
 }
 /*
@@ -2263,7 +2118,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0300, Function |
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2285,7 +2140,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0400, Function |
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -2307,7 +2162,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllActiveNotificationsTest_0500, Function |
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetAllActiveNotifications(notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2327,7 +2182,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0100, Functi
     std::vector<std::string> key;
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2348,7 +2203,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0200, Functi
     std::vector<std::string> key{"0", "1"};
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2372,7 +2227,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0300, Functi
     std::vector<std::string> key{"0", "1"};
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
     EXPECT_EQ(0, notifications.size());
 }
 /*
@@ -2394,7 +2249,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0400, Functi
     std::vector<std::string> key{"0", "1"};
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2417,7 +2272,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0500, Functi
     std::vector<std::string> key{"0", "1"};
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -2440,7 +2295,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSpecialActiveNotificationsTest_0600, Functi
     std::vector<std::string> key{"0", "1"};
     std::vector<sptr<Notification>> notifications;
     int32_t result = proxy->GetSpecialActiveNotifications(key, notifications);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2461,28 +2316,8 @@ HWTEST_F(AnsManagerProxyUnitTest, CanPublishAsBundleTest_0100, Function | Medium
     std::string representativeBundle = "Bundle";
     bool canPublish = false;
     int32_t result = proxy->CanPublishAsBundle(representativeBundle, canPublish);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: CanPublishAsBundleTest_0200
- * @tc.desc: test CanPublishAsBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, CanPublishAsBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, CanPublishAsBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::string representativeBundle = "";
-    bool canPublish = false;
-    int32_t result = proxy->CanPublishAsBundle(representativeBundle, canPublish);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -2528,7 +2363,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CanPublishAsBundleTest_0400, Function | Medium
     std::string representativeBundle = "Bundle";
     bool canPublish = false;
     int32_t result = proxy->CanPublishAsBundle(representativeBundle, canPublish);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2551,7 +2386,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CanPublishAsBundleTest_0500, Function | Medium
     std::string representativeBundle = "Bundle";
     bool canPublish = false;
     int32_t result = proxy->CanPublishAsBundle(representativeBundle, canPublish);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -2574,7 +2409,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CanPublishAsBundleTest_0600, Function | Medium
     std::string representativeBundle = "Bundle";
     bool canPublish = false;
     int32_t result = proxy->CanPublishAsBundle(representativeBundle, canPublish);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2596,50 +2431,8 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishAsBundleTest_0100, Function | MediumTes
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     std::string representativeBundle = "Bundle";
     int32_t result = proxy->PublishAsBundle(notification, representativeBundle);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: PublishAsBundleTest_0200
- * @tc.desc: test PublishAsBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishAsBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishAsBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationRequest> notification = nullptr;
-    std::string representativeBundle = "Bundle";
-    int32_t result = proxy->PublishAsBundle(notification, representativeBundle);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
-}
-
-/*
- * @tc.name: PublishAsBundleTest_0300
- * @tc.desc: test PublishAsBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishAsBundleTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishAsBundleTest_0300, TestSize.Level1";
-    MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    NotificationRequest request(1);
-    sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
-    std::string representativeBundle = "";
-    int32_t result = proxy->PublishAsBundle(notification, representativeBundle);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -2685,7 +2478,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishAsBundleTest_0500, Function | MediumTes
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     std::string representativeBundle = "Bundle";
     int32_t result = proxy->PublishAsBundle(notification, representativeBundle);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2709,7 +2502,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishAsBundleTest_0600, Function | MediumTes
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     std::string representativeBundle = "Bundle";
     int32_t result = proxy->PublishAsBundle(notification, representativeBundle);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2729,7 +2522,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationBadgeNumTest_0100, Function | M
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->SetNotificationBadgeNum(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2772,7 +2565,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationBadgeNumTest_0300, Function | M
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->SetNotificationBadgeNum(num);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2794,7 +2587,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationBadgeNumTest_0400, Function | M
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->SetNotificationBadgeNum(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2814,7 +2607,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetBundleImportanceTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->GetBundleImportance(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2859,7 +2652,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetBundleImportanceTest_0300, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->GetBundleImportance(num);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2881,7 +2674,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetBundleImportanceTest_0400, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->GetBundleImportance(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -2903,7 +2696,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetBundleImportanceTest_0500, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     int32_t num = 0;
     int32_t result = proxy->GetBundleImportance(num);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 
@@ -2924,7 +2717,7 @@ HWTEST_F(AnsManagerProxyUnitTest, HasNotificationPolicyAccessPermissionTest_0100
     ASSERT_NE(nullptr, proxy);
     bool granted = false;
     int32_t result = proxy->HasNotificationPolicyAccessPermission(granted);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -2969,7 +2762,7 @@ HWTEST_F(AnsManagerProxyUnitTest, HasNotificationPolicyAccessPermissionTest_0300
     ASSERT_NE(nullptr, proxy);
     bool granted = false;
     int32_t result = proxy->HasNotificationPolicyAccessPermission(granted);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -2991,7 +2784,7 @@ HWTEST_F(AnsManagerProxyUnitTest, HasNotificationPolicyAccessPermissionTest_0400
     ASSERT_NE(nullptr, proxy);
     bool granted = false;
     int32_t result = proxy->HasNotificationPolicyAccessPermission(granted);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -3013,7 +2806,7 @@ HWTEST_F(AnsManagerProxyUnitTest, HasNotificationPolicyAccessPermissionTest_0500
     ASSERT_NE(nullptr, proxy);
     bool granted = false;
     int32_t result = proxy->HasNotificationPolicyAccessPermission(granted);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3033,27 +2826,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveNotificationTest_0100, Function | Medium
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveNotification(bundleOption, 0, "0", 0);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: RemoveNotificationTest_0200
- * @tc.desc: test RemoveNotification function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, RemoveNotificationTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, RemoveNotificationTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption  = nullptr;
-    int32_t result = proxy->RemoveNotification(bundleOption, 0, "0", 0);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -3094,9 +2868,10 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveNotificationTest_0400, Function | Medium
         .WillRepeatedly(DoAll(Return(DEAD_OBJECT)));
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
+    MockWriteInterfaceToken(true);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveNotification(bundleOption, 0, "0", 0);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3118,7 +2893,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveNotificationTest_0500, Function | Medium
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveNotification(bundleOption, 0, "0", 0);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3138,27 +2913,8 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveAllNotificationsTest_0100, Function | Me
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: RemoveAllNotificationsTest_0200
- * @tc.desc: test RemoveAllNotifications function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, RemoveAllNotificationsTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, RemoveAllNotificationsTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption  = nullptr;
-    int32_t result = proxy->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -3201,7 +2957,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveAllNotificationsTest_0400, Function | Me
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3223,7 +2979,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveAllNotificationsTest_0500, Function | Me
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveAllNotifications(bundleOption);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3242,26 +2998,8 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteTest_0100, Function | MediumTest | Level
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->Delete("key", 0);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: DeleteTest_0200
- * @tc.desc: test Delete function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, DeleteTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, DeleteTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    int32_t result = proxy->Delete("", 0);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -3302,7 +3040,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteTest_0400, Function | MediumTest | Level
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->Delete("key", 0);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3323,7 +3061,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteTest_0500, Function | MediumTest | Level
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->Delete("key", 0);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3343,27 +3081,8 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteByBundleTest_0100, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->DeleteByBundle(bundleOption);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: DeleteByBundleTest_0200
- * @tc.desc: test DeleteByBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, DeleteByBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, DeleteByBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption  = nullptr;
-    int32_t result = proxy->DeleteByBundle(bundleOption);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -3406,7 +3125,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteByBundleTest_0400, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->DeleteByBundle(bundleOption);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3428,7 +3147,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteByBundleTest_0500, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->DeleteByBundle(bundleOption);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3447,7 +3166,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteAllTest_0100, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->DeleteAll();
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -3488,7 +3207,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteAllTest_0300, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->DeleteAll();
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3509,7 +3228,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteAllTest_0400, Function | MediumTest | Le
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->DeleteAll();
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3530,28 +3249,8 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsByBundleTest_0100, Function | MediumTe
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlotsByBundle(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetSlotsByBundleTest_0200
- * @tc.desc: test GetSlotsByBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetSlotsByBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetSlotsByBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    std::vector<sptr<NotificationSlot>> slots;
-    int32_t result = proxy->GetSlotsByBundle(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -3596,7 +3295,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsByBundleTest_0400, Function | MediumTe
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlotsByBundle(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3619,7 +3318,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsByBundleTest_0500, Function | MediumTe
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlotsByBundle(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3642,7 +3341,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotsByBundleTest_0600, Function | MediumTe
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->GetSlotsByBundle(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3662,29 +3361,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UpdateSlotsTest_0100, Function | MediumTest | 
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     std::vector<sptr<NotificationSlot>> slots;
     int32_t result = proxy->UpdateSlots(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
-}
-
-/*
- * @tc.name: UpdateSlotsTest_0200
- * @tc.desc: test UpdateSlots function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, UpdateSlotsTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, UpdateSlotsTest_0200, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    std::vector<sptr<NotificationSlot>> slots;
-    sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
-    slots.push_back(slot);
-    int32_t result = proxy->UpdateSlots(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3707,31 +3384,8 @@ HWTEST_F(AnsManagerProxyUnitTest, UpdateSlotsTest_0300, Function | MediumTest | 
     sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
     slots.push_back(slot);
     int32_t result = proxy->UpdateSlots(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: UpdateSlotsTest_0400
- * @tc.desc: test UpdateSlots function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, UpdateSlotsTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, UpdateSlotsTest_0400, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationSlot>> slots;
-    slots.resize(MAX_SLOT_NUM + 1);   // set MAX_SLOT_NUM + 1 slots
-    sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot();
-    slots.push_back(slot);
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->UpdateSlots(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -3779,7 +3433,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UpdateSlotsTest_0600, Function | MediumTest | 
     slots.push_back(slot);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->UpdateSlots(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3804,7 +3458,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UpdateSlotsTest_0700, Function | MediumTest | 
     slots.push_back(slot);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->UpdateSlots(bundleOption, slots);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3823,7 +3477,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForBundleTest_0100, Fun
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetNotificationsEnabledForBundle("DeviceId", true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -3864,7 +3518,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForBundleTest_0300, Fun
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetNotificationsEnabledForBundle("DeviceId", true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3885,7 +3539,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForBundleTest_0400, Fun
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetNotificationsEnabledForBundle("DeviceId", true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3904,7 +3558,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForAllBundlesTest_0100,
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetNotificationsEnabledForAllBundles("DeviceId", true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -3945,7 +3599,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForAllBundlesTest_0300,
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetNotificationsEnabledForAllBundles("DeviceId", true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -3966,7 +3620,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForAllBundlesTest_0400,
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetNotificationsEnabledForAllBundles("DeviceId", true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -3986,7 +3640,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_01
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4029,7 +3683,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_03
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4051,27 +3705,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_04
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: SetNotificationsEnabledForSpecialBundleTest_0500
- * @tc.desc: test SetNotificationsEnabledForSpecialBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_0500, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4091,7 +3725,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetShowBadgeEnabledForBundleTest_0100, Functio
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetShowBadgeEnabledForBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4134,7 +3768,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetShowBadgeEnabledForBundleTest_0300, Functio
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetShowBadgeEnabledForBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4156,27 +3790,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetShowBadgeEnabledForBundleTest_0400, Functio
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetShowBadgeEnabledForBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: SetShowBadgeEnabledForBundleTest_0500
- * @tc.desc: test SetShowBadgeEnabledForBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, SetShowBadgeEnabledForBundleTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, SetShowBadgeEnabledForBundleTest_0500, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    int32_t result = proxy->SetShowBadgeEnabledForBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4197,7 +3811,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0100, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4244,7 +3858,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0300, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4267,7 +3881,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0400, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -4290,28 +3904,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0500, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetShowBadgeEnabledForBundleTest_0600
- * @tc.desc: test GetShowBadgeEnabledForBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0600, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetShowBadgeEnabledForBundleTest_0600, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    int32_t result = proxy->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4331,7 +3924,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4376,7 +3969,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0300, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4398,7 +3991,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0400, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -4420,7 +4013,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetShowBadgeEnabledTest_0500, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetShowBadgeEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4441,7 +4034,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0100, Function | MediumTest | Le
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
     int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4487,7 +4080,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0300, Function | MediumTest | Le
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
     int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4510,27 +4103,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0400, Function | MediumTest | Le
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
     int32_t result = proxy->Subscribe(subscriber->GetImpl(), subInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: SubscribeTest_0500
- * @tc.desc: test Subscribe function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, SubscribeTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, SubscribeTest_0500, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Subscribe(nullptr, subInfo);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4551,7 +4124,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0100, Function | MediumTest | 
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
     int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4597,7 +4170,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0300, Function | MediumTest | 
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
     int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4620,27 +4193,7 @@ HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0400, Function | MediumTest | 
     auto subscriber = new (std::nothrow) TestSubscriber();
     sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
     int32_t result = proxy->Unsubscribe(subscriber->GetImpl(), subInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: UnsubscribeTest_0500
- * @tc.desc: test Unsubscribe function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, UnsubscribeTest_0500, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, UnsubscribeTest_0500, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationSubscribeInfo> subInfo = new (std::nothrow) NotificationSubscribeInfo();
-    int32_t result = proxy->Unsubscribe(nullptr, subInfo);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4660,7 +4213,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifyTest_0100, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotify(allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4705,7 +4258,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifyTest_0300, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotify(allowed);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4727,7 +4280,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifyTest_0400, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotify(allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -4749,7 +4302,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifyTest_0500, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotify(allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4769,7 +4322,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifySelfTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4814,7 +4367,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifySelfTest_0300, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4836,7 +4389,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifySelfTest_0400, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -4858,7 +4411,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsAllowedNotifySelfTest_0500, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     bool allowed = false;
     int32_t result = proxy->IsAllowedNotifySelf(allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -4879,7 +4432,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0100, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->IsSpecialBundleAllowedNotify(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -4926,7 +4479,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0300, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->IsSpecialBundleAllowedNotify(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -4949,7 +4502,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0400, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->IsSpecialBundleAllowedNotify(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -4972,28 +4525,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0500, Functio
     bool enabled = false;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->IsSpecialBundleAllowedNotify(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: IsSpecialBundleAllowedNotifyTest_0600
- * @tc.desc: test IsSpecialBundleAllowedNotify function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0600, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, IsSpecialBundleAllowedNotifyTest_0600, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    int32_t result = proxy->IsSpecialBundleAllowedNotify(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5012,7 +4544,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0100, Function | MediumTest | 
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelGroup("GroupName", "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5053,7 +4585,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0300, Function | MediumTest | 
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelGroup("GroupName", "");
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5074,7 +4606,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelGroupTest_0400, Function | MediumTest | 
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelGroup("GroupName", "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5094,7 +4626,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveGroupByBundleTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveGroupByBundle(bundleOption, "GroupName");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5137,7 +4669,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveGroupByBundleTest_0300, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveGroupByBundle(bundleOption, "GroupName");
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5159,7 +4691,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveGroupByBundleTest_0400, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->RemoveGroupByBundle(bundleOption, "GroupName");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5179,27 +4711,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = new (std::nothrow) NotificationDoNotDisturbDate();
     int32_t result = proxy->SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: SetDoNotDisturbDateTest_0200
- * @tc.desc: test SetDoNotDisturbDate function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
-    int32_t result = proxy->SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -5241,7 +4754,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_0400, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = new (std::nothrow) NotificationDoNotDisturbDate();
     int32_t result = proxy->SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5263,7 +4776,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_0500, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = new (std::nothrow) NotificationDoNotDisturbDate();
     int32_t result = proxy->SetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5283,7 +4796,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_0100, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t result = proxy->GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5306,7 +4819,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_0200, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t result = proxy->GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
 }
 /*
  * @tc.name: GetDoNotDisturbDateTest_0300
@@ -5326,7 +4839,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_0300, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t result = proxy->GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5348,7 +4861,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_0400, Function | Mediu
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t result = proxy->GetDoNotDisturbDate(doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
 }
 
 /*
@@ -5368,7 +4881,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DoesSupportDoNotDisturbModeTest_0100, Function
     ASSERT_NE(nullptr, proxy);
     bool doesSupport = false;
     int32_t result = proxy->DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5413,7 +4926,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DoesSupportDoNotDisturbModeTest_0300, Function
     ASSERT_NE(nullptr, proxy);
     bool doesSupport = false;
     int32_t result = proxy->DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5435,7 +4948,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DoesSupportDoNotDisturbModeTest_0400, Function
     ASSERT_NE(nullptr, proxy);
     bool doesSupport = false;
     int32_t result = proxy->DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -5457,7 +4970,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DoesSupportDoNotDisturbModeTest_0500, Function
     ASSERT_NE(nullptr, proxy);
     bool doesSupport = false;
     int32_t result = proxy->DoesSupportDoNotDisturbMode(doesSupport);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5477,7 +4990,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnabledTest_0100, Function | Medi
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5522,7 +5035,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnabledTest_0300, Function | Medi
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5544,7 +5057,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnabledTest_0400, Function | Medi
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -5566,7 +5079,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnabledTest_0500, Function | Medi
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnabled(enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5585,7 +5098,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedTest_0100, Function | MediumT
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->EnableDistributed(true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5626,7 +5139,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedTest_0300, Function | MediumT
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->EnableDistributed(true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5647,7 +5160,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedTest_0400, Function | MediumT
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->EnableDistributed(true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5667,27 +5180,8 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedByBundleTest_0100, Function |
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->EnableDistributedByBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: EnableDistributedByBundleTest_0200
- * @tc.desc: test EnableDistributedByBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedByBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, EnableDistributedByBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption  = nullptr;
-    int32_t result = proxy->EnableDistributedByBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -5730,7 +5224,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedByBundleTest_0400, Function |
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->EnableDistributedByBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5752,7 +5246,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedByBundleTest_0500, Function |
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->EnableDistributedByBundle(bundleOption, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5771,7 +5265,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedSelfTest_0100, Function | Med
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->EnableDistributedSelf(true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -5812,7 +5306,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedSelfTest_0300, Function | Med
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->EnableDistributedSelf(true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5833,7 +5327,7 @@ HWTEST_F(AnsManagerProxyUnitTest, EnableDistributedSelfTest_0400, Function | Med
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->EnableDistributedSelf(true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -5854,28 +5348,8 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0100, Function
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: IsDistributedEnableByBundleTest_0200
- * @tc.desc: test IsDistributedEnableByBundle function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    bool enabled = false;
-    int32_t result = proxy->IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -5921,7 +5395,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0400, Function
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -5944,7 +5418,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0500, Function
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -5967,26 +5441,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsDistributedEnableByBundleTest_0600, Function
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     bool enabled = false;
     int32_t result = proxy->IsDistributedEnableByBundle(bundleOption, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: PublishContinuousTaskNotificationTest_0100
- * @tc.desc: test PublishContinuousTaskNotification function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationRequest> notification = nullptr;
-    int32_t result = proxy->PublishContinuousTaskNotification(notification);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6008,7 +5463,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0200, Fu
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = ansManagerProxy->PublishContinuousTaskNotification(notification);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6030,7 +5485,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0300, Fu
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->PublishContinuousTaskNotification(notification);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6077,7 +5532,7 @@ HWTEST_F(AnsManagerProxyUnitTest, PublishContinuousTaskNotificationTest_0500, Fu
     sptr<NotificationRequest> notification = new (std::nothrow) NotificationRequest(request);
     ASSERT_NE(nullptr, notification);
     int32_t result = proxy->PublishContinuousTaskNotification(notification);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6096,7 +5551,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelContinuousTaskNotificationTest_0100, Fun
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelContinuousTaskNotification("label", 0);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6137,7 +5592,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelContinuousTaskNotificationTest_0300, Fun
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelContinuousTaskNotification("label", 0);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6158,7 +5613,7 @@ HWTEST_F(AnsManagerProxyUnitTest, CancelContinuousTaskNotificationTest_0400, Fun
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->CancelContinuousTaskNotification("label", 0);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6179,7 +5634,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSupportTemplateTest_0100, Function | MediumT
     std::string templateName = "TemplateName";
     bool support = false;
     int32_t result = proxy->IsSupportTemplate(templateName, support);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6200,7 +5655,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSupportTemplateTest_0200, Function | MediumT
     std::string templateName = "TemplateName";
     bool support = false;
     int32_t result = proxy->IsSupportTemplate(templateName, support);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6246,7 +5701,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSupportTemplateTest_0400, Function | MediumT
     std::string templateName = "TemplateName";
     bool support = false;
     int32_t result = proxy->IsSupportTemplate(templateName, support);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6269,7 +5724,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSupportTemplateTest_0500, Function | MediumT
     std::string templateName = "TemplateName";
     bool support = false;
     int32_t result = proxy->IsSupportTemplate(templateName, support);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -6292,7 +5747,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSupportTemplateTest_0600, Function | MediumT
     std::string templateName = "TemplateName";
     bool support = false;
     int32_t result = proxy->IsSupportTemplate(templateName, support);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6313,7 +5768,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialUserAllowedNotifyTest_0100, Function 
     int32_t userId = 0;
     bool allowed = false;
     int32_t result = proxy->IsSpecialUserAllowedNotify(userId, allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6360,7 +5815,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialUserAllowedNotifyTest_0300, Function 
     int32_t userId = 0;
     bool allowed = false;
     int32_t result = proxy->IsSpecialUserAllowedNotify(userId, allowed);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6383,7 +5838,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialUserAllowedNotifyTest_0400, Function 
     int32_t userId = 0;
     bool allowed = false;
     int32_t result = proxy->IsSpecialUserAllowedNotify(userId, allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -6406,7 +5861,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsSpecialUserAllowedNotifyTest_0500, Function 
     int32_t userId = 0;
     bool allowed = false;
     int32_t result = proxy->IsSpecialUserAllowedNotify(userId, allowed);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6427,7 +5882,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledByUserTest_0100, Functi
     int32_t userId = 0;
     bool enabled = true;
     int32_t result = proxy->SetNotificationsEnabledByUser(userId, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6472,7 +5927,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledByUserTest_0300, Functi
     int32_t userId = 0;
     bool enabled = true;
     int32_t result = proxy->SetNotificationsEnabledByUser(userId, enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6495,7 +5950,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledByUserTest_0400, Functi
     int32_t userId = 0;
     bool enabled = true;
     int32_t result = proxy->SetNotificationsEnabledByUser(userId, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6515,7 +5970,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteAllByUserTest_0100, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     int32_t userId = 0;
     int32_t result = proxy->DeleteAllByUser(userId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6558,7 +6013,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteAllByUserTest_0300, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     int32_t userId = 0;
     int32_t result = proxy->DeleteAllByUser(userId);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6580,7 +6035,7 @@ HWTEST_F(AnsManagerProxyUnitTest, DeleteAllByUserTest_0400, Function | MediumTes
     ASSERT_NE(nullptr, proxy);
     int32_t userId = 0;
     int32_t result = proxy->DeleteAllByUser(userId);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6601,28 +6056,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_2_0100, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = new (std::nothrow) NotificationDoNotDisturbDate();
     int32_t userId = 100; // 100 default user
     int32_t result = proxy->SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: SetDoNotDisturbDateTest_2_0200
- * @tc.desc: test SetDoNotDisturbDate function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_2_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_2_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
-    int32_t userId = 100; // 100 default user
-    int32_t result = proxy->SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -6666,7 +6101,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_2_0400, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = new (std::nothrow) NotificationDoNotDisturbDate();
     int32_t userId = 100; // 100 default user
     int32_t result = proxy->SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6689,7 +6124,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetDoNotDisturbDateTest_2_0500, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = new (std::nothrow) NotificationDoNotDisturbDate();
     int32_t userId = 100; // 100 default user
     int32_t result = proxy->SetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6710,7 +6145,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_2_0100, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t userId = 0;
     int32_t result = proxy->GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6734,7 +6169,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_2_0200, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t userId = 0;
     int32_t result = proxy->GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
 }
 /*
  * @tc.name: GetDoNotDisturbDateTest_2_0300
@@ -6755,7 +6190,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_2_0300, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t userId = 0;
     int32_t result = proxy->GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6778,7 +6213,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetDoNotDisturbDateTest_2_0400, Function | Med
     sptr<NotificationDoNotDisturbDate> doNotDisturbDate = nullptr;
     int32_t userId = 0;
     int32_t result = proxy->GetDoNotDisturbDate(userId, doNotDisturbDate);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
 }
 
 /*
@@ -6799,28 +6234,8 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0100, Function | M
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetEnabledForBundleSlot(
         bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: SetEnabledForBundleSlotTest_0200
- * @tc.desc: test SetEnabledForBundleSlot function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0200, TestSize.Level1";
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
     MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<NotificationBundleOption> bundleOption  = nullptr;
-    int32_t result = proxy->SetEnabledForBundleSlot(
-        bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
 }
 
 /*
@@ -6865,7 +6280,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0400, Function | M
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetEnabledForBundleSlot(
         bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6888,7 +6303,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetEnabledForBundleSlotTest_0500, Function | M
     sptr<NotificationBundleOption> bundleOption  = new (std::nothrow) NotificationBundleOption();
     int32_t result = proxy->SetEnabledForBundleSlot(
         bundleOption, NotificationConstant::SOCIAL_COMMUNICATION, true, false);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -6910,7 +6325,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0100, Function | M
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -6959,7 +6374,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0300, Function | M
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -6983,7 +6398,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0400, Function | M
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -7007,29 +6422,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0500, Function | M
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
     int32_t result = proxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetEnabledForBundleSlotTest_0600
- * @tc.desc: test GetEnabledForBundleSlot function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0600, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetEnabledForBundleSlotTest_0600, TestSize.Level1";
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    bool enabled = false;
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    NotificationConstant::SlotType slotType = NotificationConstant::SOCIAL_COMMUNICATION;
-    int32_t result = proxy->GetEnabledForBundleSlot(bundleOption, slotType, enabled);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -7048,7 +6441,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSyncNotificationEnabledWithoutAppTest_0100,
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetSyncNotificationEnabledWithoutApp(0, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -7089,7 +6482,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSyncNotificationEnabledWithoutAppTest_0300,
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetSyncNotificationEnabledWithoutApp(0, true);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -7110,7 +6503,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSyncNotificationEnabledWithoutAppTest_0400,
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     int32_t result = proxy->SetSyncNotificationEnabledWithoutApp(0, true);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -7130,7 +6523,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSyncNotificationEnabledWithoutAppTest_0100,
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetSyncNotificationEnabledWithoutApp(0, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -7175,7 +6568,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSyncNotificationEnabledWithoutAppTest_0300,
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetSyncNotificationEnabledWithoutApp(0, enabled);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -7197,7 +6590,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSyncNotificationEnabledWithoutAppTest_0400,
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetSyncNotificationEnabledWithoutApp(0, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
 }
 
 /*
@@ -7219,7 +6612,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSyncNotificationEnabledWithoutAppTest_0500,
     ASSERT_NE(nullptr, proxy);
     bool enabled = false;
     int32_t result = proxy->GetSyncNotificationEnabledWithoutApp(0, enabled);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 int SendRequestReplaceDumpInfo(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option,
@@ -7257,7 +6650,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0100, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
     int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -7303,7 +6696,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0300, Function | MediumTest | Le
     ASSERT_NE(nullptr, ansManagerProxy);
     std::vector<std::string> dumpInfo;
     int32_t result = ansManagerProxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -7324,7 +6717,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0400, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
     int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -7346,7 +6739,7 @@ HWTEST_F(AnsManagerProxyUnitTest, ShellDumpTest_0500, Function | MediumTest | Le
     ASSERT_NE(nullptr, proxy);
     std::vector<std::string> dumpInfo;
     int32_t result = proxy->ShellDump("anm dump -A", "BundleName", 0, 0, dumpInfo);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -7366,7 +6759,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0100, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     int32_t userId = 0;
     int32_t result = proxy->SetBadgeNumber(userId, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -7409,7 +6802,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0300, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     int32_t badgeNumber = 0;
     int32_t result = proxy->SetBadgeNumber(badgeNumber, "");
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -7431,24 +6824,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberTest_0400, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     int32_t badgeNumber = 0;
     int32_t result = proxy->SetBadgeNumber(badgeNumber, "");
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/**
- * @tc.name: SetBadgeNumberByBundleTest_0100
- * @tc.desc: test SetBadgeNumberByBundle with null bundleOption, expect ErrCode ERR_ANS_INVALID_PARAM.
- * @tc.type: FUNC
- */
-HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberByBundleTest_0100, TestSize.Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    int32_t badgeNumber = 0;
-    int32_t result = proxy->SetBadgeNumberByBundle(nullptr, badgeNumber);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /**
@@ -7469,7 +6845,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetBadgeNumberByBundleTest_0200, TestSize.Leve
     bundleOption->SetBundleName(bundleName);
     int32_t badgeNumber = 0;
     int32_t result = proxy->SetBadgeNumberByBundle(bundleOption, badgeNumber);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /**
@@ -7511,7 +6887,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0100, Functio
     ASSERT_NE(nullptr, proxy);
     std::vector<NotificationBundleOption> bundleOption;
     int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -7555,7 +6931,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0300, Functio
     ASSERT_NE(nullptr, proxy);
     std::vector<NotificationBundleOption> bundleOption;
     int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -7578,7 +6954,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetAllNotificationEnabledBundles_0400, Functio
     ASSERT_NE(nullptr, proxy);
     std::vector<NotificationBundleOption> bundleOption;
     int32_t result = proxy->GetAllNotificationEnabledBundles(bundleOption);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -7607,53 +6983,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0100, Functi
 
     int32_t result = proxy->GetActiveNotificationByFilter(bundleOption, notificationId, label,
         extraInfoKeys, liveViewRequest);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
-}
-
-/*
- * @tc.name: GetActiveNotificationByFilterTest_0200
- * @tc.desc: test GetActiveNotificationByFilter function
- * @tc.type: FUNC
- * @tc.require: #I5XO2O
- */
-HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0200, TestSize.Level1";
-    MockWriteInterfaceToken(true);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    int32_t notificationId = 0;
-    std::string label = "label";
-    std::vector<std::string> extraInfoKeys;
-
-    NotificationRequest request(1);
-    sptr<NotificationRequest> liveViewRequest = new (std::nothrow) NotificationRequest(request);
-
-    int32_t result = proxy->GetActiveNotificationByFilter(bundleOption, notificationId, label,
-        extraInfoKeys, liveViewRequest);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, result);
-}
-
-/**
- * @tc.name: AddDoNotDisturbProfiles_0100
- * @tc.desc: test AddDoNotDisturbProfiles when profiles is empty.
- * @tc.type: FUNC
- */
-HWTEST_F(AnsManagerProxyUnitTest, AddDoNotDisturbProfiles_0100, TestSize.Level1)
-{
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    profiles.clear();
-    auto res = proxy->AddDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, res);
+    EXPECT_EQ(ERR_OK, result);
 }
 
 /**
@@ -7678,7 +7008,7 @@ HWTEST_F(AnsManagerProxyUnitTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
 
     MockWriteInterfaceToken(false);
     auto res = proxy->AddDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_INVALID_VALUE, res);
 }
 
 /**
@@ -7713,23 +7043,6 @@ HWTEST_F(AnsManagerProxyUnitTest, AddDoNotDisturbProfiles_0300, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveDoNotDisturbProfiles_0100
- * @tc.desc: test RemoveDoNotDisturbProfiles when profiles is empty.
- * @tc.type: FUNC
- */
-HWTEST_F(AnsManagerProxyUnitTest, RemoveDoNotDisturbProfiles_0100, TestSize.Level1)
-{
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    profiles.clear();
-    auto res = proxy->RemoveDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, res);
-}
-
-/**
  * @tc.name: RemoveDoNotDisturbProfiles_0200
  * @tc.desc: test RemoveDoNotDisturbProfiles when WriteInterfaceToken return false.
  * @tc.type: FUNC
@@ -7751,7 +7064,7 @@ HWTEST_F(AnsManagerProxyUnitTest, RemoveDoNotDisturbProfiles_0200, TestSize.Leve
 
     MockWriteInterfaceToken(false);
     auto res = proxy->RemoveDoNotDisturbProfiles(profiles);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, res);
+    EXPECT_EQ(ERR_INVALID_VALUE, res);
 }
 
 /**
@@ -7802,7 +7115,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0100, Funct
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
     int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
 /*
@@ -7846,7 +7159,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0300, Funct
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
     int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, result);
+    EXPECT_EQ(DEAD_OBJECT, result);
 }
 
 /*
@@ -7868,7 +7181,7 @@ HWTEST_F(AnsManagerProxyUnitTest, IsNeedSilentInDoNotDisturbModeTest_0400, Funct
     std::string phoneNumber = "11111111111";
     int32_t callerType = 0;
     int32_t result = proxy->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
-    EXPECT_EQ(ERR_ANS_PARCELABLE_FAILED, result);
+    EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
 /*
@@ -7936,5 +7249,6 @@ HWTEST_F(AnsManagerProxyUnitTest, DisableNotificationFeature_0100, Function | Me
     ErrCode res = proxy->DisableNotificationFeature(notificationDisable);
     EXPECT_EQ(res, ERR_OK);
 }
+
 }  // namespace Notification
 }  // namespace OHOS

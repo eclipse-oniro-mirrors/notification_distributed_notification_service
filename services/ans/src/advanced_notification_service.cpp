@@ -1585,10 +1585,11 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
 }
 
 ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
-    const NotificationConstant::SlotType slotType)
+    int32_t slotTypeInt)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -1936,7 +1937,7 @@ ErrCode AdvancedNotificationService::IsDistributedEnableByBundle(
 #endif
 }
 
-ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const int32_t &userId,
+ErrCode AdvancedNotificationService::SetDoNotDisturbDate(int32_t userId,
     const sptr<NotificationDoNotDisturbDate> &date)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1958,7 +1959,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(const int32_t &userId,
     return SetDoNotDisturbDateByUser(userId, date);
 }
 
-ErrCode AdvancedNotificationService::GetDoNotDisturbDate(const int32_t &userId,
+ErrCode AdvancedNotificationService::GetDoNotDisturbDate(int32_t userId,
     sptr<NotificationDoNotDisturbDate> &date)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

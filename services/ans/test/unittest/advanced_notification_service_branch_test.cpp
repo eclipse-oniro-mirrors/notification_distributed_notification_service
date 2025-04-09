@@ -897,7 +897,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_265000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -912,7 +912,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_266000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -1269,7 +1269,7 @@ HWTEST_F(AnsBranchTest, GetDeviceRemindType_3000, Function | SmallTest | Level1)
     MockIsVerfyPermisson(true);
     AdvancedNotificationService ans;
     ans.notificationSvrQueue_ = nullptr;
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_ANS_INVALID_PARAM);
 }
 

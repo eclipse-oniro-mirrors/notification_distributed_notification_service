@@ -1015,8 +1015,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05400, Function | SmallTest | Level1)
 {
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
-
+    int32_t remindType = -1;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;

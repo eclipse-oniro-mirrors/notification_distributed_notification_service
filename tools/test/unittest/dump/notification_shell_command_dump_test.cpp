@@ -19,7 +19,7 @@
 #include "notification_shell_command.h"
 #undef private
 #include "ans_inner_errors.h"
-#include "ans_manager_interface.h"
+#include "ians_manager.h"
 #include "mock_ans_manager_stub.h"
 #include "singleton.h"
 
@@ -162,7 +162,7 @@ public:
     std::string cmd_ = "dump";
     std::string enable_ = "setting";
     std::string toolName_ = "anm";
-    sptr<AnsManagerInterface> proxyPtr_;
+    sptr<IAnsManager> proxyPtr_;
     sptr<MockAnsManagerStub> stubPtr_;
 };
 
@@ -190,7 +190,7 @@ void AnmManagerDumpTest::MakeMockObjects()
     stubPtr_ = new (std::nothrow) MockAnsManagerStub();
 
     // mock a proxy
-    proxyPtr_ = iface_cast<AnsManagerInterface>(stubPtr_);
+    proxyPtr_ = iface_cast<IAnsManager>(stubPtr_);
 
     // set the mock proxy
     auto ansNotificationPtr = DelayedSingleton<AnsNotification>::GetInstance();

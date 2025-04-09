@@ -34,7 +34,7 @@ constexpr int32_t REMINDER_SERVICE_LOADSA_TIMEOUT_MS = 10000;
 constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
 ErrCode ReminderRequestClient::AddSlotByType(const NotificationConstant::SlotType &slotType)
 {
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -44,7 +44,7 @@ ErrCode ReminderRequestClient::AddSlotByType(const NotificationConstant::SlotTyp
 
 ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
 {
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -62,7 +62,7 @@ ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
 ErrCode ReminderRequestClient::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
 {
     ANS_LOGI("enter RemoveNotificationSlot，slotType:%{public}d", slotType);
-    sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
@@ -141,7 +141,7 @@ ErrCode ReminderRequestClient::GetExcludeDates(const int32_t reminderId, std::ve
     return proxy->GetExcludeDates(reminderId, dates);
 }
 
-sptr<AnsManagerInterface> ReminderRequestClient::GetAnsManagerProxy()
+sptr<IAnsManager> ReminderRequestClient::GetAnsManagerProxy()
 {
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -157,7 +157,7 @@ sptr<AnsManagerInterface> ReminderRequestClient::GetAnsManagerProxy()
         return nullptr;
     }
 
-    sptr<AnsManagerInterface> proxy = iface_cast<AnsManagerInterface>(remoteObject);
+    sptr<IAnsManager> proxy = iface_cast<IAnsManager>(remoteObject);
     if ((!proxy) || (!proxy->AsObject())) {
         ANS_LOGE("Failed to get notification Manager's proxy");
         return nullptr;

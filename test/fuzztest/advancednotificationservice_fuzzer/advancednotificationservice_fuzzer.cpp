@@ -118,7 +118,7 @@ namespace OHOS {
         service->EnableDistributedSelf(enabled);
         service->EnableDistributed(enabled);
         service->IsDistributedEnableByBundle(bundleOption, enabled);
-        Notification::NotificationConstant::RemindType remindType;
+        int32_t remindType;
         service->GetDeviceRemindType(remindType);
         sptr<Notification::NotificationRequest> request = new Notification::NotificationRequest();
         service->PublishContinuousTaskNotification(request);
@@ -179,7 +179,7 @@ namespace OHOS {
         service->RemoveExpiredUniqueKey();
         service->SetSmartReminderEnabled(deviceType, enabled);
         service->IsSmartReminderEnabled(deviceType, enabled);
-        service->SetTargetDeviceStatus(deviceType, fuzzData->ConsumeIntegral<int32_t>());
+        service->SetTargetDeviceStatus(deviceType, fuzzData->ConsumeIntegral<int32_t>(), "");
         service->ClearAllNotificationGroupInfo(localSwitch);
 
         OHOS::DoTestForAdvancedNotificationUtils(service, fuzzData);

@@ -298,7 +298,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03000,
 {
     const std::string device = "current";
     const uint32_t status = 1;
-    ASSERT_EQ((int)advancedNotificationService_->SetTargetDeviceStatus(device, status),
+    std::string deveiceId = "";
+    ASSERT_EQ((int)advancedNotificationService_->SetTargetDeviceStatus(device, status, deveiceId),
               (int)ERR_OK);
 }
 
@@ -1537,7 +1538,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
 
     ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enable), ERR_OK);
 
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_OK);
 
     int32_t userId = 1;
@@ -1949,7 +1950,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19500,
 {
     GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test start";
 
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_OK);
 
     GTEST_LOG_(INFO) << "GetDeviceRemindType_0100 test end";

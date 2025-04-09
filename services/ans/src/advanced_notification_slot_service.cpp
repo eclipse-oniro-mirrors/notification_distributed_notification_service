@@ -165,11 +165,11 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
 }
 
 ErrCode AdvancedNotificationService::GetSlotByBundle(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+    const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt,
     sptr<NotificationSlot> &slot)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is false.");
@@ -300,9 +300,10 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
     return result;
 }
 
-ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotType slotType)
+ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
 
     if (!AccessTokenHelper::IsSystemApp() && slotType == NotificationConstant::SlotType::EMERGENCY_INFORMATION) {
         ANS_LOGE("Non system app used illegal slot type.");
@@ -342,9 +343,9 @@ ErrCode AdvancedNotificationService::AddSlotByType(NotificationConstant::SlotTyp
     return result;
 }
 
-ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(
-    const NotificationConstant::SlotType &slotType, bool &enabled)
+ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled)
 {
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d", slotType);
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
@@ -651,11 +652,10 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     ANS_LOGI("classification:%{public}s", request->GetClassification().c_str());
 }
 
-ErrCode AdvancedNotificationService::GetSlotByType(
-    const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot)
+ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGD("Failed to generateBundleOption.");
@@ -675,10 +675,11 @@ ErrCode AdvancedNotificationService::GetSlotByType(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::RemoveSlotByType(const NotificationConstant::SlotType &slotType)
+ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -810,9 +811,10 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
 }
 
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
+    int32_t slotTypeInt, bool enabled, bool isForceControl)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);
     ErrCode result = CheckCommonParams();
@@ -843,8 +845,9 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
 }
 
 ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
-    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType, bool &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt, bool &enabled)
 {
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d", slotType);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());

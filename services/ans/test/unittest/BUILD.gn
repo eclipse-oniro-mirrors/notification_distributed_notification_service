@@ -317,7 +317,6 @@ ohos_unittest("notification_service_test") {
     "advanced_notification_service_test.cpp",
     "advanced_notification_slot_service_test.cpp",
     "advanced_notification_utils_test.cpp",
-    "ans_manager_stub_test.cpp",
     "clone_test/notification_clone_bundle_info_test.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",

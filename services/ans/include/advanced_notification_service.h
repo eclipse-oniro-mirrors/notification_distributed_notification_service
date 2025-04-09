@@ -118,6 +118,8 @@ public:
      */
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &request) override;
 
+    ErrCode PublishWithMaxCapacity(const std::string& label, const sptr<NotificationRequest>& request) override;
+
     /**
      * @brief Publishes a notification.
      * @note If a notification with the same ID has been published by the current application and has not been deleted,
@@ -128,6 +130,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request) override;
+
+    ErrCode PublishNotificationForIndirectProxyWithMaxCapacity(const sptr<NotificationRequest> &request) override;
 
     /**
      * @brief Cancels a published notification matching the specified label and notificationId.
@@ -190,7 +194,7 @@ public:
      * @param slotType Indicates the notification slot type to be added.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode AddSlotByType(NotificationConstant::SlotType slotType) override;
+    ErrCode AddSlotByType(int32_t slotTypeInt) override;
 
     /**
      * @brief Creates multiple notification slots.
@@ -207,7 +211,7 @@ public:
      *                 This parameter must be specified.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RemoveSlotByType(const NotificationConstant::SlotType &slotType) override;
+    ErrCode RemoveSlotByType(int32_t slotTypeInt) override;
 
     /**
      * @brief Deletes all notification slots.
@@ -224,7 +228,7 @@ public:
      * @param slot Indicates the created NotificationSlot.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetSlotByType(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot) override;
+    ErrCode GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot) override;
 
     /**
      * @brief Obtains all notification slots of this application.
@@ -269,7 +273,7 @@ public:
      * @return Returns get all active notifications
      */
     ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
-        const NotificationConstant::SlotType slotType) override;
+        int32_t slotTypeInt) override;
 
     /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
@@ -294,8 +298,8 @@ public:
         const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications) override;
 
     ErrCode GetActiveNotificationByFilter(
-        const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
-        const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) override;
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
+        const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request) override;
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -320,7 +324,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PublishAsBundle(
-        const sptr<NotificationRequest> notification, const std::string &representativeBundle) override;
+        const sptr<NotificationRequest>& notification, const std::string &representativeBundle) override;
+
+    ErrCode PublishAsBundleWithMaxCapacity(
+        const sptr<NotificationRequest>& notification, const std::string &representativeBundle) override;
 
     /**
      * @brief Sets the number of active notifications of the current application as the number to be displayed on the
@@ -430,7 +437,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetSlotByBundle(
-        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt,
         sptr<NotificationSlot> &slot) override;
 
     /**
@@ -453,6 +460,9 @@ public:
         const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
 
+    ErrCode RequestEnableNotification(const std::string &deviceId,
+        const sptr<IAnsDialogCallback> &callback) override;
+
     /**
      * @brief Allow application to publish notifications.
      *
@@ -460,7 +470,7 @@ public:
      * @param uid uid.
      * @return Returns set notifications enabled for the bundle result.
      */
-    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid) override;
+    ErrCode RequestEnableNotification(const std::string& bundleName, int32_t uid) override;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.
@@ -526,6 +536,8 @@ public:
     ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
 
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber) override;
+
     /**
      * @brief Subscribes notifications self.
      *
@@ -544,6 +556,8 @@ public:
     ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
 
+    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber, const bool isNative) override;
+
     /**
      * @brief Unsubscribes notifications.
      *
@@ -553,6 +567,8 @@ public:
      */
     ErrCode Unsubscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
+
+    ErrCode Unsubscribe(const sptr<IAnsSubscriber> &subscriber) override;
 
     /**
      * @brief Checks whether this device is allowed to publish notifications.
@@ -712,7 +728,7 @@ public:
      * @param remindType Reminder type for the device.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) override;
+    ErrCode GetDeviceRemindType(int32_t& remindTypeInt) override;
 
     /**
      * @brief Publishes a continuous notification.
@@ -752,7 +768,7 @@ public:
      * @param allowed Identifies the allowed flag.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode IsSpecialUserAllowedNotify(const int32_t &userId, bool &allowed) override;
+    ErrCode IsSpecialUserAllowedNotify(int32_t userId, bool &allowed) override;
 
     /**
      * @brief Sets whether to allow all applications to publish notifications on a specified device. The caller must
@@ -765,7 +781,7 @@ public:
      *                are not allowed.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetNotificationsEnabledByUser(const int32_t &deviceId, bool enabled) override;
+    ErrCode SetNotificationsEnabledByUser(int32_t userId, bool enabled) override;
 
     /**
      * @brief Delete all notifications by user.
@@ -773,7 +789,7 @@ public:
      * @param userId Indicates the user id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DeleteAllByUser(const int32_t &userId) override;
+    ErrCode DeleteAllByUser(int32_t userId) override;
 
     /**
      * @brief Set do not disturb date by user.
@@ -782,7 +798,7 @@ public:
      * @param date Indicates NotificationDoNotDisturbDate object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetDoNotDisturbDate(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date) override;
+    ErrCode SetDoNotDisturbDate(int32_t userId, const sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
      * @brief Get the do not disturb date by user.
@@ -791,13 +807,15 @@ public:
      * @param date Indicates the NotificationDoNotDisturbDate object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
+    ErrCode GetDoNotDisturbDate(int32_t userId, sptr<NotificationDoNotDisturbDate> &date) override;
 
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
+        int32_t slotTypeInt, bool enabled, bool isForceControl) override;
+
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool &enabled) override;
-    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override;
+        int32_t slotTypeInt, bool &enabled) override;
+
+    ErrCode GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled) override;
 
     // SystemEvent
 
@@ -1053,7 +1071,7 @@ public:
      * @return Returns set channel switch result.
      */
     ErrCode SetDistributedEnabledBySlot(
-        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled) override;
+        int32_t slotTypeInt, const std::string &deviceType, bool enabled) override;
 
     /**
      * @brief Query the channel switch for collaborative reminders.
@@ -1065,7 +1083,7 @@ public:
      * @return Returns channel switch result.
      */
     ErrCode IsDistributedEnabledBySlot(
-        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled) override;
+        int32_t slotTypeInt, const std::string &deviceType, bool &enabled) override;
 
     /**
      * @brief Set the status of the target device.
@@ -1074,8 +1092,8 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const std::string deveiceId = std::string()) override;
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+        const std::string &deveiceId) override;
 
     /**
      * @brief Set the status of the target device.
@@ -1084,8 +1102,8 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag, const std::string deveiceId = std::string()) override;
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+        uint32_t controlFlag, const std::string &deveiceId) override;
 
     /**
      * @brief clear notification when aggregate local switch close.
@@ -1544,6 +1562,23 @@ private:
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid);
+
+    template<typename T>
+    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
+    {
+        if (!data.WriteInt32(parcelableVector.size())) {
+            ANS_LOGE("Failed to write ParcelableVector size.");
+            return false;
+        }
+
+        for (auto &parcelable : parcelableVector) {
+            if (!data.WriteStrongParcelable(parcelable)) {
+                ANS_LOGE("Failed to write ParcelableVector");
+                return false;
+            }
+        }
+        return true;
+    }
 
 private:
     static sptr<AdvancedNotificationService> instance_;

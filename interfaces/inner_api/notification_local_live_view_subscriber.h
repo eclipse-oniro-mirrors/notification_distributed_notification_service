@@ -16,7 +16,7 @@
 #ifndef BND_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_LOCAL_LIVE_VIEW_SUBSCRIBER_H
 #define BND_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_LOCAL_LIVE_VIEW_SUBSCRIBER_H
 
-#include "ans_manager_interface.h"
+#include "ians_manager.h"
 #include "ans_subscriber_stub.h"
 #include "ans_subscriber_local_live_view_stub.h"
 #include "notification_request.h"
@@ -73,7 +73,7 @@ private:
 
         ErrCode OnResponse(int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override;
 
-        sptr<AnsManagerInterface> GetAnsManagerProxy();
+        sptr<IAnsManager> GetAnsManagerProxy();
 
     public:
         NotificationLocalLiveViewSubscriber &subscriber_;

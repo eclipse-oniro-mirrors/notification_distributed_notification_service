@@ -21,7 +21,7 @@
 #include "reminder_request_adaptation.h"
 #include "notification_slot.h"
 #include "notification_constant.h"
-#include "ans_manager_interface.h"
+#include "ians_manager.h"
 #include "ireminder_agent_service.h"
 #include "ffrt.h"
 
@@ -126,7 +126,7 @@ private:
      */
     ErrCode AddSlotByType(const NotificationConstant::SlotType &slotType);
 
-    sptr<AnsManagerInterface> GetAnsManagerProxy();
+    sptr<IAnsManager> GetAnsManagerProxy();
 
     sptr<IReminderAgentService> GetReminderServiceProxy();
 

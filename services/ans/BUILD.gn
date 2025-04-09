@@ -81,8 +81,6 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_notification_slot_service.cpp",
     "src/advanced_notification_subscriber_service.cpp",
     "src/advanced_notification_utils.cpp",
-    "src/ans_manager_stub.cpp",
-    "src/ans_manager_stub_invalid.cpp",
     "src/bundle_manager_helper.cpp",
     "src/clone/dh_notification_clone_bundle_service.cpp",
     "src/clone/notification_clone_bundle_info.cpp",
@@ -140,6 +138,7 @@ ohos_source_set("ans_service_sources") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_ans_path}:ans_manager_stub",
     "${frameworks_module_reminder_path}:reminder_innerkits",
     "../ans:ans.para",
     "../ans:ans.para.dac",
