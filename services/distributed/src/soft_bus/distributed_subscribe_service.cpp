@@ -30,16 +30,13 @@
 #include "ans_inner_errors.h"
 #include "remove_box.h"
 #include "response_box.h"
+#include "analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
 
 const std::string DISTRIBUTED_LABEL = "ans_distributed";
 const int32_t DEFAULT_FILTER_TYPE = 1;
-constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
-constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
-constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
-constexpr const int32_t BRANCH3_ID = 3;
 
 std::string SubscribeTransDeviceType(uint16_t deviceType)
 {
@@ -91,6 +88,10 @@ void DistributedService::SubscribeNotifictaion(const DistributedDeviceInfo peerD
             haCallback_(PUBLISH_ERROR_EVENT_CODE, 0, BRANCH3_ID, reason);
         }
     }
+    std::string message = "Subscribe: " + StringAnonymous(peerDevice.deviceId_) + " type: " +
+        std::to_string(peerDevice.deviceType_) + ", userId: " + std::to_string(userId);
+    AnalyticsUtil::GetInstance().SendHaReport(OPERATION_DELETE_BRANCH, result, BRANCH1_ID, message,
+        PUBLISH_ERROR_EVENT_CODE);
     ANS_LOGI("Subscribe notification %{public}s %{public}d %{public}d %{public}d.",
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId, result);
 }
@@ -114,16 +115,20 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
             return;
         }
 
-        if (NotificationHelper::UnSubscribeNotification(iter->second) == 0) {
+        int32_t result = NotificationHelper::UnSubscribeNotification(iter->second);
+        if (result == ERR_OK) {
             subscriberMap_.erase(deviceId);
         }
+        std::string message = "UnSubscribe: " + StringAnonymous(deviceId) + " type: " + std::to_string(deviceType);
+        AnalyticsUtil::GetInstance().SendHaReport(OPERATION_DELETE_BRANCH, result, BRANCH2_ID, message,
+            PUBLISH_ERROR_EVENT_CODE);
         ANS_LOGI("UnSubscribe notification %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), deviceType);
     });
     serviceQueue_->submit(subscribeTask);
 }
 
 void DistributedService::SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
-    NotificationContent::Type type, NotifticationRequestBox &requestBox)
+    NotificationContent::Type type, std::shared_ptr<NotifticationRequestBox>& requestBox)
 {
     if (content == nullptr || content->GetNotificationContent() == nullptr) {
         return;
@@ -133,33 +138,33 @@ void DistributedService::SetNotificationContent(const std::shared_ptr<Notificati
     switch (type) {
         case NotificationContent::Type::PICTURE: {
             auto picture = std::static_pointer_cast<NotificationPictureContent>(content->GetNotificationContent());
-            requestBox.SetNotificationTitle(picture->GetTitle());
-            requestBox.SetNotificationText(picture->GetText());
-            requestBox.SetNotificationAdditionalText(picture->GetAdditionalText());
-            requestBox.SetNotificationExpandedTitle(picture->GetExpandedTitle());
-            requestBox.SetNotificationBriefText(picture->GetBriefText());
-            requestBox.SetNotificationBigPicture(picture->GetBigPicture());
+            requestBox->SetNotificationTitle(picture->GetTitle());
+            requestBox->SetNotificationText(picture->GetText());
+            requestBox->SetNotificationAdditionalText(picture->GetAdditionalText());
+            requestBox->SetNotificationExpandedTitle(picture->GetExpandedTitle());
+            requestBox->SetNotificationBriefText(picture->GetBriefText());
+            requestBox->SetNotificationBigPicture(picture->GetBigPicture());
             break;
         }
         case NotificationContent::Type::MULTILINE: {
             auto multiline = std::static_pointer_cast<NotificationMultiLineContent>(content->GetNotificationContent());
-            requestBox.SetNotificationTitle(multiline->GetTitle());
-            requestBox.SetNotificationText(multiline->GetText());
-            requestBox.SetNotificationAdditionalText(multiline->GetAdditionalText());
-            requestBox.SetNotificationExpandedTitle(multiline->GetExpandedTitle());
-            requestBox.SetNotificationBriefText(multiline->GetBriefText());
-            requestBox.SetNotificationAllLines(multiline->GetAllLines());
+            requestBox->SetNotificationTitle(multiline->GetTitle());
+            requestBox->SetNotificationText(multiline->GetText());
+            requestBox->SetNotificationAdditionalText(multiline->GetAdditionalText());
+            requestBox->SetNotificationExpandedTitle(multiline->GetExpandedTitle());
+            requestBox->SetNotificationBriefText(multiline->GetBriefText());
+            requestBox->SetNotificationAllLines(multiline->GetAllLines());
             break;
         }
         case NotificationContent::Type::LONG_TEXT: {
             std::shared_ptr<NotificationLongTextContent> contentLong =
                 std::static_pointer_cast<NotificationLongTextContent>(content->GetNotificationContent());
-            requestBox.SetNotificationTitle(contentLong->GetTitle());
-            requestBox.SetNotificationText(contentLong->GetText());
-            requestBox.SetNotificationAdditionalText(contentLong->GetAdditionalText());
-            requestBox.SetNotificationExpandedTitle(contentLong->GetExpandedTitle());
-            requestBox.SetNotificationBriefText(contentLong->GetBriefText());
-            requestBox.SetNotificationLongText(contentLong->GetLongText());
+            requestBox->SetNotificationTitle(contentLong->GetTitle());
+            requestBox->SetNotificationText(contentLong->GetText());
+            requestBox->SetNotificationAdditionalText(contentLong->GetAdditionalText());
+            requestBox->SetNotificationExpandedTitle(contentLong->GetExpandedTitle());
+            requestBox->SetNotificationBriefText(contentLong->GetBriefText());
+            requestBox->SetNotificationLongText(contentLong->GetLongText());
             break;
         }
         case NotificationContent::Type::LIVE_VIEW:
@@ -168,16 +173,16 @@ void DistributedService::SetNotificationContent(const std::shared_ptr<Notificati
         default: {
             std::shared_ptr<NotificationBasicContent> contentBasic =
                 std::static_pointer_cast<NotificationBasicContent>(content->GetNotificationContent());
-            requestBox.SetNotificationTitle(contentBasic->GetTitle());
-            requestBox.SetNotificationText(contentBasic->GetText());
-            requestBox.SetNotificationAdditionalText(contentBasic->GetAdditionalText());
+            requestBox->SetNotificationTitle(contentBasic->GetTitle());
+            requestBox->SetNotificationText(contentBasic->GetText());
+            requestBox->SetNotificationAdditionalText(contentBasic->GetAdditionalText());
             break;
         }
     }
 }
 
 void DistributedService::SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
-    NotificationConstant::SlotType slotType, NotifticationRequestBox &requestBox)
+    NotificationConstant::SlotType slotType, std::shared_ptr<NotifticationRequestBox>& requestBox)
 {
     if (notificationRequest == nullptr) {
         return;
@@ -198,8 +203,8 @@ void DistributedService::SetNotificationButtons(const sptr<NotificationRequest> 
             }
         }
         if (button != nullptr && button->GetUserInput() != nullptr) {
-            requestBox.SetNotificationActionName(button->GetTitle());
-            requestBox.SetNotificationUserInput(button->GetUserInput()->GetInputKey());
+            requestBox->SetNotificationActionName(button->GetTitle());
+            requestBox->SetNotificationUserInput(button->GetUserInput()->GetInputKey());
         }
     }
 }
@@ -207,51 +212,51 @@ void DistributedService::SetNotificationButtons(const sptr<NotificationRequest> 
 void DistributedService::SendNotifictionRequest(const std::shared_ptr<Notification> request,
     const DistributedDeviceInfo& peerDevice, bool isSyncNotification)
 {
-    NotifticationRequestBox requestBox;
+    std::shared_ptr<NotifticationRequestBox> requestBox = std::make_shared<NotifticationRequestBox>();
     if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
         return;
     }
 
     auto requestPoint = request->GetNotificationRequestPoint();
     ANS_LOGI("Dans OnConsumed %{public}s", requestPoint->Dump().c_str());
-    requestBox.SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
-    requestBox.SetFinishTime(requestPoint->GetFinishDeadLine());
-    requestBox.SetNotificationHashCode(request->GetKey());
-    requestBox.SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
-    requestBox.SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
+    requestBox->SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
+    requestBox->SetFinishTime(requestPoint->GetFinishDeadLine());
+    requestBox->SetNotificationHashCode(request->GetKey());
+    requestBox->SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
+    requestBox->SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
     if (isSyncNotification) {
-        requestBox.SetReminderFlag(0);
+        requestBox->SetReminderFlag(0);
     } else {
-        requestBox.SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
+        requestBox->SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
     }
     if (request->GetBundleName().empty()) {
-        requestBox.SetCreatorBundleName(request->GetCreateBundle());
+        requestBox->SetCreatorBundleName(request->GetCreateBundle());
     } else {
-        requestBox.SetCreatorBundleName(request->GetBundleName());
+        requestBox->SetCreatorBundleName(request->GetBundleName());
     }
     if (requestPoint->GetBigIcon() != nullptr) {
-        requestBox.SetBigIcon(requestPoint->GetBigIcon());
+        requestBox->SetBigIcon(requestPoint->GetBigIcon());
     }
     if (requestPoint->GetOverlayIcon() != nullptr) {
-        requestBox.SetOverlayIcon(requestPoint->GetOverlayIcon());
+        requestBox->SetOverlayIcon(requestPoint->GetOverlayIcon());
     }
     if (requestPoint->IsCommonLiveView()) {
         std::vector<uint8_t> buffer;
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
-        requestBox.SetCommonLiveView(buffer);
+        requestBox->SetCommonLiveView(buffer);
     }
     SetNotificationButtons(requestPoint, requestPoint->GetSlotType(), requestBox);
     SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
         requestPoint->GetNotificationType(), requestBox);
-    if (!requestBox.Serialize()) {
+    if (!requestBox->Serialize()) {
         ANS_LOGW("Dans OnConsumed serialize failed.");
         if (haCallback_ != nullptr) {
             haCallback_(PUBLISH_ERROR_EVENT_CODE, -1, BRANCH3_ID, "serialization failed");
         }
         return;
     }
-    DistributedClient::GetInstance().SendMessage(requestBox.GetByteBuffer(), requestBox.GetByteLength(),
-        TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, PUBLISH_ERROR_EVENT_CODE);
+    DistributedClient::GetInstance().SendMessage(requestBox, TransDataType::DATA_TYPE_BYTES,
+        peerDevice.deviceId_, PUBLISH_ERROR_EVENT_CODE);
 }
 
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
@@ -290,18 +295,18 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
     std::string slotTypes = slotTypesStream.str();
 
     std::function<void()> task = std::bind([peerDevice, notifications, notificationKeys, slotTypes]() {
-        BatchRemoveNotificationBox batchRemoveBox;
+        std::shared_ptr<BatchRemoveNotificationBox> batchRemoveBox = std::make_shared<BatchRemoveNotificationBox>();
         if (!notificationKeys.empty()) {
-            batchRemoveBox.SetNotificationHashCode(notificationKeys);
+            batchRemoveBox->SetNotificationHashCode(notificationKeys);
         }
-        batchRemoveBox.SetNotificationSlotTypes(slotTypes);
+        batchRemoveBox->SetNotificationSlotTypes(slotTypes);
 
-        if (!batchRemoveBox.Serialize()) {
+        if (!batchRemoveBox->Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
             return;
         }
-        DistributedClient::GetInstance().SendMessage(batchRemoveBox.GetByteBuffer(), batchRemoveBox.GetByteLength(),
-            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
+        DistributedClient::GetInstance().SendMessage(batchRemoveBox, TransDataType::DATA_TYPE_MESSAGE,
+            peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
     });
     serviceQueue_->submit(task);
 }
@@ -319,16 +324,16 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
     }
     std::string notificationKey = GetNotificationKey(notification);
     std::function<void()> task = std::bind([peerDevice, notification, notificationKey]() {
-        NotificationRemoveBox removeBox;
+        std::shared_ptr<NotificationRemoveBox> removeBox = std::make_shared<NotificationRemoveBox>();
         ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());
-        removeBox.SetNotificationHashCode(notificationKey);
-        removeBox.setNotificationSlotType(notification->GetNotificationRequestPoint()->GetSlotType());
-        if (!removeBox.Serialize()) {
+        removeBox->SetNotificationHashCode(notificationKey);
+        removeBox->setNotificationSlotType(notification->GetNotificationRequestPoint()->GetSlotType());
+        if (!removeBox->Serialize()) {
             ANS_LOGW("dans OnCanceled serialize failed");
             return;
         }
-        DistributedClient::GetInstance().SendMessage(removeBox.GetByteBuffer(), removeBox.GetByteLength(),
-            TransDataType::DATA_TYPE_MESSAGE, peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
+        DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_MESSAGE,
+            peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
     });
     serviceQueue_->submit(task);
 }
@@ -354,7 +359,7 @@ std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notific
 ErrCode DistributedService::OnResponse(
     const std::shared_ptr<NotificationOperationInfo> & operationInfo, const DistributedDeviceInfo& device)
 {
-    NotificationResponseBox responseBox;
+    std::shared_ptr<NotificationResponseBox> responseBox = std::make_shared<NotificationResponseBox>();
     ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());
     if (operationInfo == nullptr) {
         return ERR_ANS_INVALID_PARAM;
@@ -366,26 +371,26 @@ ErrCode DistributedService::OnResponse(
 
     OperationType type = operationInfo->GetOperationType();
     if (type == OperationType::DISTRIBUTE_OPERATION_REPLY) {
-        if (!responseBox.SetMessageType(NOTIFICATION_RESPONSE_REPLY_SYNC)) {
+        if (!responseBox->SetMessageType(NOTIFICATION_RESPONSE_REPLY_SYNC)) {
             ANS_LOGW("dans OnResponse SetMessageType failed");
             return ERR_ANS_TASK_ERR;
         }
-        responseBox.SetActionName(operationInfo->GetActionName());
-        responseBox.SetUserInput(operationInfo->GetUserInput());
+        responseBox->SetActionName(operationInfo->GetActionName());
+        responseBox->SetUserInput(operationInfo->GetUserInput());
     }
 
-    responseBox.SetMatchType(MatchType::MATCH_SYN);
-    responseBox.SetOperationType(static_cast<int32_t>(type));
-    responseBox.SetNotificationHashCode(hashCode);
-    responseBox.SetOperationEventId(operationInfo->GetEventId());
-    responseBox.SetLocalDeviceId(localDevice_.deviceId_);
-    if (!responseBox.Serialize()) {
+    responseBox->SetMatchType(MatchType::MATCH_SYN);
+    responseBox->SetOperationType(static_cast<int32_t>(type));
+    responseBox->SetNotificationHashCode(hashCode);
+    responseBox->SetOperationEventId(operationInfo->GetEventId());
+    responseBox->SetLocalDeviceId(localDevice_.deviceId_);
+    if (!responseBox->Serialize()) {
         ANS_LOGW("dans OnResponse serialize failed");
         return ERR_ANS_TASK_ERR;
     }
 
-    auto result = DistributedClient::GetInstance().SendMessage(responseBox.GetByteBuffer(), responseBox.GetByteLength(),
-        TransDataType::DATA_TYPE_MESSAGE, device.deviceId_, MODIFY_ERROR_EVENT_CODE);
+    auto result = DistributedClient::GetInstance().SendMessage(responseBox, TransDataType::DATA_TYPE_MESSAGE,
+        device.deviceId_, MODIFY_ERROR_EVENT_CODE);
     if (result != ERR_OK) {
         ANS_LOGE("dans OnResponse send message failed result: %{public}d", result);
         result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;

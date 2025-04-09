@@ -59,6 +59,10 @@ void DistributedClient::AddDevice(DistributedDeviceInfo peerDevice)
     ANS_LOGI("Distributed client AddDevice %{public}s %{public}s", StringAnonymous(peerDevice.deviceId_).c_str(),
         StringAnonymous(peerDevice.networkId_).c_str());
     networksId_[peerDevice.deviceId_] = peerDevice.networkId_;
+    std::string message = "AddnetworkId: " + StringAnonymous(peerDevice.deviceId_) + " id: " +
+        StringAnonymous(peerDevice.networkId_);
+    AnalyticsUtil::GetInstance().SendHaReport(MODIFY_ERROR_EVENT_CODE, 0,
+        BRANCH6_ID, message, PUBLISH_ERROR_EVENT_CODE);
 }
 
 void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
@@ -77,6 +81,9 @@ void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t devi
         socketsId_.erase(socket);
     }
     networksId_.erase(deviceId);
+    std::string message = "ReleasenetworkId: " + StringAnonymous(deviceId);
+    AnalyticsUtil::GetInstance().SendHaReport(MODIFY_ERROR_EVENT_CODE, 0,
+        BRANCH7_ID, message, PUBLISH_ERROR_EVENT_CODE);
 }
 
 void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t deviceType,
@@ -87,6 +94,10 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
     networksId_[deviceId] = networkId;
     ANS_LOGI("Distributed refresh device %{public}s %{public}s", StringAnonymous(deviceId).c_str(),
         StringAnonymous(networkId).c_str());
+    std::string message = "RefreshnetworkId: " + StringAnonymous(deviceId) + " id: " +
+        StringAnonymous(networkId);
+    AnalyticsUtil::GetInstance().SendHaReport(MODIFY_ERROR_EVENT_CODE, 0,
+        BRANCH8_ID, message, PUBLISH_ERROR_EVENT_CODE);
 }
 
 int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataType dataType, int32_t& socketId)
@@ -111,6 +122,10 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataTyp
     if (result != ERR_OK) {
         ANS_LOGW("Get socketid failed %{public}s %{public}s %{public}d", StringAnonymous(deviceId).c_str(),
             StringAnonymous(networkId).c_str(), dataType);
+        std::string message = "Get socketid failed: " + StringAnonymous(deviceId) + " id: " +
+            StringAnonymous(networkId);
+        AnalyticsUtil::GetInstance().SendHaReport(OPERATION_DELETE_BRANCH, result,
+            BRANCH8_ID, message, PUBLISH_ERROR_EVENT_CODE);
         return result;
     }
     {
@@ -121,24 +136,27 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataTyp
     return ERR_OK;
 }
 
-int32_t DistributedClient::SendMessage(const void* data, int32_t length, TransDataType dataType,
+int32_t DistributedClient::SendMessage(const std::shared_ptr<BoxBase>& boxPtr, TransDataType dataType,
     const std::string &deviceId, int32_t eventType)
 {
+    int32_t type = -1;
     int32_t socketId = 0;
     DistributedServer::GetInstance().CheckServer();
     int32_t result = GetSocketId(deviceId, dataType, socketId);
+    if (boxPtr == nullptr || boxPtr->box_ == nullptr) {
+        return ERR_OK;
+    }
+    boxPtr->box_->GetMessageType(type);
     if (result != ERR_OK) {
         ANS_LOGW("Get SocketId failed %{public}s %{public}d", StringAnonymous(deviceId).c_str(), dataType);
-        std::string errorReason = "Bind server failed,";
-        errorReason.append("dataType: " + std::to_string(dataType));
+        std::string errorReason = "Bind failed type: " + std::to_string(type) + " , id: " + StringAnonymous(deviceId);
         AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
         AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH1_ID, errorReason);
         return result;
     }
-    result = ClientSendMsg(socketId, data, length, dataType);
+    result = ClientSendMsg(socketId, boxPtr->GetByteBuffer(), boxPtr->GetByteLength(), dataType);
     if (result != ERR_OK) {
-        std::string errorReason = "send message failed,";
-        errorReason.append("dataType: " + std::to_string(dataType));
+        std::string errorReason = "Send failed type: " + std::to_string(type) + " , id: " + StringAnonymous(deviceId);
         AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
         AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH2_ID, errorReason);
     }

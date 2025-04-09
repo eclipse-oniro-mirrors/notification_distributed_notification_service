@@ -373,6 +373,10 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
             return;
         }
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
+        std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
+            " deviceId: " + StringAnonymous(deviceInfo.deviceId) + " networkId: " +
+            StringAnonymous(deviceInfo.networkId);
+        HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_3, reason);
         ANS_LOGI("Dans refresh %{public}s %{public}s.", StringAnonymous(deviceInfo.deviceId).c_str(),
             StringAnonymous(deviceInfo.networkId).c_str());
     });
