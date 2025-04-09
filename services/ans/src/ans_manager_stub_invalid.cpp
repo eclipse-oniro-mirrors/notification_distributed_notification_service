@@ -678,7 +678,7 @@ ErrCode AnsManagerStub::SetTargetDeviceStatus(const std::string &deviceType, con
     return ERR_INVALID_OPERATION;
 }
 
-ErrCode AnsManagerStub::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+ErrCode AnsManagerStub::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     ANS_LOGE("GetDoNotDisturbProfile called!");
     return ERR_INVALID_OPERATION;

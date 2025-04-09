@@ -955,7 +955,7 @@ public:
      * @param status Indicates the NotificationDoNotDisturbProfile objects.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
 
     /**
      * @brief Whether reminders are allowed.

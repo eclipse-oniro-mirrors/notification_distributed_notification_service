@@ -584,7 +584,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
     {
         return ERR_ANS_INVALID_PARAM;
     }

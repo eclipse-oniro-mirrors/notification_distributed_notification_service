@@ -1203,7 +1203,7 @@ public:
      * @param status Indicates the NotificationDoNotDisturbProfile objects.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
 
     /**
      * @brief Get the status of the target device.

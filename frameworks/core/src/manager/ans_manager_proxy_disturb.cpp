@@ -300,7 +300,7 @@ ErrCode AnsManagerProxy::IsNeedSilentInDoNotDisturbMode(const std::string &phone
     return result;
 }
 
-ErrCode AnsManagerProxy::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+ErrCode AnsManagerProxy::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     MessageParcel data;
     if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
@@ -308,7 +308,7 @@ ErrCode AnsManagerProxy::GetDoNotDisturbProfile(int32_t id, sptr<NotificationDoN
         return ERR_ANS_PARCELABLE_FAILED;
     }
 
-    if (!data.WriteInt32(id)) {
+    if (!data.WriteInt64(id)) {
         ANS_LOGE("GetDoNotDisturbProfile write id failed");
         return ERR_ANS_PARCELABLE_FAILED;
     }
