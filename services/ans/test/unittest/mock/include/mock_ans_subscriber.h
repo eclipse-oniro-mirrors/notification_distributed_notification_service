@@ -49,6 +49,8 @@ public:
     MOCK_METHOD(ErrCode, OnConsumedList, (const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap));
 
+    MOCK_METHOD(ErrCode, OnConsumedList, (const std::vector<sptr<Notification>> &notifications));
+
     ErrCode OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
         int32_t deleteReason) override { return ERR_OK; };
 
@@ -63,6 +65,9 @@ public:
 
     ErrCode OnCanceledList(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override { return ERR_OK; };
+
+    ErrCode OnCanceledList(
+        const std::vector<sptr<Notification>> &notifications, int32_t deleteReason) override { return ERR_OK; };
 
     ErrCode OnUpdated(const sptr<NotificationSortingMap> &notificationMap) override { return ERR_OK; };
 

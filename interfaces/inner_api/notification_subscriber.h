@@ -173,6 +173,8 @@ private:
         ErrCode OnConsumedList(const std::vector<sptr<Notification>> &notifications,
             const sptr<NotificationSortingMap> &notificationMap) override;
 
+        ErrCode OnConsumedList(const std::vector<sptr<Notification>> &notifications) override;
+
         ErrCode OnCanceled(const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap,
             int32_t deleteReason) override;
 
@@ -185,6 +187,8 @@ private:
 
         ErrCode OnCanceledList(const std::vector<sptr<Notification>> &notifications,
             const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason) override;
+
+        ErrCode OnCanceledList(const std::vector<sptr<Notification>> &notifications, int32_t deleteReason) override;
 
         void OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
             const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
