@@ -1887,6 +1887,9 @@ ErrCode AnsNotification::SetBadgeNumberForDhByBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ANS_LOGI("SetBadgeNumberForDhByBundle, info:%{public}s %{public}d %{public}d",
+        bundleOption.GetBundleName().c_str(), bundleOption.GetUid(), badgeNumber);
+
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("Unable to connect to ANS service.");
