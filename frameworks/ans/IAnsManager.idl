@@ -97,7 +97,7 @@ interface OHOS.Notification.IAnsManager {
 
     void RemoveNotification(
         [in] sptr<NotificationBundleOption> bundleOption,
-        [in] FileDescriptor notificationId,
+        [in] int notificationId,
         [in] String label,
         [in] int removeReason);
 
@@ -277,13 +277,13 @@ interface OHOS.Notification.IAnsManager {
 
     void AllowUseReminder([in] String bundleName, [out] boolean isAllowUseReminder);
 
-    void UpdateNotificationTimerByUid([in] int uid, [in] boolean isPaused);
+    [oneway] void UpdateNotificationTimerByUid([in] int uid, [in] boolean isPaused);
 
     void DisableNotificationFeature([in] sptr<NotificationDisable> notificationDisable);
 
     void GetTargetDeviceStatus([in] String deviceType, [out] int status);
 
-    void DistributeOperation([out] null_sptr<NotificationOperationInfo> operationInfo, [in] IAnsOperationCallback operationCallback);
+    void DistributeOperation([in] null_sptr<NotificationOperationInfo> operationInfo, [in] IAnsOperationCallback operationCallback);
 
     void ReplyDistributeOperation([in] String hashCode, [in] int resultCode);
 

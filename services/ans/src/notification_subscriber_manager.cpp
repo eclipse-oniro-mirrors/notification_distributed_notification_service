@@ -726,12 +726,13 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         }
         if (!currNotifications.empty()) {
             ANS_LOGD("onCanceledList currNotifications size = <%{public}zu>", currNotifications.size());
-            if (record->subscriber != nullptr) {
-                if (notificationMap != nullptr) {
-                    record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
-                } else {
-                    record->subscriber->OnCanceledList(currNotifications, deleteReason);
-                }
+            if (record->subscriber == nullptr) {
+                return;
+            }
+            if (notificationMap != nullptr) {
+                record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
+            } else {
+                record->subscriber->OnCanceledList(currNotifications, deleteReason);
             }
         }
     }

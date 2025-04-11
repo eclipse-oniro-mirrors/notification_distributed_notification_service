@@ -1224,7 +1224,7 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
         const sptr<IAnsOperationCallback> &callback) override;
 
     /**
