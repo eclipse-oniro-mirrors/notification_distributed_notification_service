@@ -1689,10 +1689,13 @@ ErrCode AdvancedNotificationService::GetDoNotDisturbDateByUser(const int32_t &us
                 if (now >= currentConfig->GetEndDate()) {
                     date = new (std::nothrow) NotificationDoNotDisturbDate(
                         NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-                        if (date == nullptr) {
+                    if (date == nullptr) {
                         ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
                         return;
                     }
+                    NotificationPreferences::GetInstance()->SetDoNotDisturbDate(userId, date);
+                    return;
+                } else {
                     date = currentConfig;
                 }
                 break;
