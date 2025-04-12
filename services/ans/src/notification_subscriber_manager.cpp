@@ -623,7 +623,6 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return false;
     }
     auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
-    ANS_LOGI("slotTypecount:%{public}d", (int)record->slotTypes.size());
     auto slotIter = std::find(record->slotTypes.begin(), record->slotTypes.end(), soltType);
     bool isSubscribedSlotType = (record->slotTypes.size() == 0) || (slotIter != record->slotTypes.end());
     if (!isSubscribedSlotType) {
