@@ -176,7 +176,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode RemoveNotification(const sptr<NotificationBundleOption> &bundleOption, int notificationId,
+    ErrCode RemoveNotification(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
         const std::string &label, int32_t removeReason) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -632,7 +632,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
         const sptr<IAnsOperationCallback>& operationCallback) override
     {
         return ERR_ANS_INVALID_PARAM;

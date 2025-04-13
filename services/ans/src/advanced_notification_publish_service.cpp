@@ -3356,7 +3356,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
     return ERR_OK;
 }
 
-ErrCode DistributeOperationParamCheck(sptr<NotificationOperationInfo>& operationInfo,
+ErrCode DistributeOperationParamCheck(const sptr<NotificationOperationInfo>& operationInfo,
     const sptr<IAnsOperationCallback> &callback)
 {
     if (operationInfo == nullptr || operationInfo->GetHashCode().empty()) {
@@ -3384,7 +3384,7 @@ ErrCode DistributeOperationParamCheck(sptr<NotificationOperationInfo>& operation
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+ErrCode AdvancedNotificationService::DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
     const sptr<IAnsOperationCallback> &callback)
 {
     ErrCode result = DistributeOperationParamCheck(operationInfo, callback);
