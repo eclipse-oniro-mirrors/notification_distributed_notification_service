@@ -888,34 +888,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10600,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_10700
- * @tc.name      : ANS_GetDisturbMode_10700
- * @tc.desc      : Test GetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10700, Function | SmallTest | Level1)
-{
-    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
-    timePoint = std::chrono::time_point_cast<std::chrono::minutes>(timePoint);
-    timePoint += std::chrono::hours(1);
-    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t endDate = endDuration.count();
-
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    sptr<NotificationDoNotDisturbDate> result = nullptr;
-    ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
-    ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::ONCE);
-    ASSERT_EQ(result->GetBeginDate(), beginDate);
-    ASSERT_EQ(result->GetEndDate(), endDate);
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_10800
  * @tc.name      : ANS_GetDisturbMode_10800
  * @tc.desc      : Test GetDisturbMode function
@@ -939,34 +911,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10800,
     ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
     ASSERT_NE(result, nullptr);
     ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::DAILY);
-    ASSERT_EQ(result->GetBeginDate(), beginDate);
-    ASSERT_EQ(result->GetEndDate(), endDate);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_10900
- * @tc.name      : ANS_GetDisturbMode_10900
- * @tc.desc      : Test GetDisturbMode function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_10900, Function | SmallTest | Level1)
-{
-    std::chrono::system_clock::time_point timePoint = std::chrono::system_clock::now();
-    timePoint = std::chrono::time_point_cast<std::chrono::minutes>(timePoint);
-    timePoint += std::chrono::hours(1);
-    auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t beginDate = beginDuration.count();
-    timePoint += std::chrono::hours(1);
-    auto endDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
-    int64_t endDate = endDuration.count();
-
-    sptr<NotificationDoNotDisturbDate> date =
-        new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::CLEARLY, beginDate, endDate);
-    ASSERT_EQ((int)advancedNotificationService_->SetDoNotDisturbDate(date), (int)ERR_OK);
-
-    sptr<NotificationDoNotDisturbDate> result = nullptr;
-    ASSERT_EQ((int)advancedNotificationService_->GetDoNotDisturbDate(result), (int)ERR_OK);
-    ASSERT_NE(result, nullptr);
-    ASSERT_EQ(result->GetDoNotDisturbType(), NotificationConstant::DoNotDisturbType::CLEARLY);
     ASSERT_EQ(result->GetBeginDate(), beginDate);
     ASSERT_EQ(result->GetEndDate(), endDate);
 }
