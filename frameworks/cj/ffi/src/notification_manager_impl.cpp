@@ -205,11 +205,10 @@ namespace CJSystemapi {
                 head = nullptr;
                 break;
             }
-            if (!SetNotificationRequestV2(vec.GetRefPtr(), *(head[count]))) {
+            if (!SetNotificationRequestV2(vec.GetRefPtr(), *(head[count++]))) {
                 LOGI("Set NotificationRequest object failed");
                 continue;
             }
-            count++;
         }
         notificationRequests.head = head;
         return notificationRequests;
