@@ -192,9 +192,10 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
 NotificationCloneManager::NotificationCloneManager()
 {
     ANS_LOGI("Notification clone manager init.");
-    cloneTemplates.insert_or_assign(CLONE_ITEM_BUNDLE_INFO, NotificationCloneBundle::GetInstance());
-    cloneTemplates.insert_or_assign(DH_CLONE_ITEM_BUNDLE_INFO, DhNotificationCloneBundle::GetInstance());
-    cloneTemplates.insert_or_assign(CLONE_ITEM_DISTURB, NotificationCloneDisturb::GetInstance());
+    // not change push sequence, ensure [clone item] before [dh clone item]
+    cloneTemplates.push_back(std::make_pair(CLONE_ITEM_BUNDLE_INFO, NotificationCloneBundle::GetInstance()));
+    cloneTemplates.push_back(std::make_pair(DH_CLONE_ITEM_BUNDLE_INFO, DhNotificationCloneBundle::GetInstance()));
+    cloneTemplates.push_back(std::make_pair(CLONE_ITEM_DISTURB, NotificationCloneDisturb::GetInstance()));
 
     restoreStartEventSubscriber_ = AncoRestoreStartEventSubscriber::create();
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(restoreStartEventSubscriber_)) {
