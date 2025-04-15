@@ -19,7 +19,8 @@ import("//build/test.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("ReminderDataShareHelperFuzzTest") {
   module_out_path = service_fuzz_test_path
-  fuzz_config_file = "${component_path}/test/fuzztest/reminderstore_fuzzer"
+  fuzz_config_file =
+      "${component_path}/test/fuzztest/reminderdatasharehelper_fuzzer"
 
   include_dirs = [
     "${component_path}/test/fuzztest/fuzz_common_base",
@@ -38,7 +39,7 @@ ohos_fuzztest("ReminderDataShareHelperFuzzTest") {
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
     "${frameworks_module_reminder_path}:reminder_innerkits",
-    "${services_path}/reminder:libreminder",
+    "${services_path}/reminder:libreminder_static",
   ]
 
   external_deps = [
