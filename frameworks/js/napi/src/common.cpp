@@ -1539,5 +1539,17 @@ napi_value Common::SetDoNotDisturbProfile(const napi_env &env, const Notificatio
     }
     return NapiGetBoolean(env, true);
 }
+
+std::string Common::GetAppInstanceKey()
+{
+    std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext>context =
+        OHOS::AbilityRuntime::Context::GetApplicationContext();
+    if (context != nullptr) {
+        return context->GetCurrentInstanceKey();
+    } else {
+        ANS_LOGE("GetApplicationContext for instacekey fail.");
+        return "";
+    }
+}
 }  // namespace NotificationNapi
 }  // namespace OHOS

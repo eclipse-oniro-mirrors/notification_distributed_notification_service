@@ -1852,6 +1852,7 @@ public:
         const std::string& value);
     static napi_value SetObjectUint32Property(const napi_env &env, napi_value& object, const std::string& key,
         uint32_t value);
+    static std::string GetAppInstanceKey();
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;
