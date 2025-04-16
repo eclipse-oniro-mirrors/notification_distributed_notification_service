@@ -303,8 +303,6 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
         ANS_LOGE("Request object is nullptr");
-        message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Request object is nullptr");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = PrePublishRequest(request);
@@ -329,23 +327,17 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create bundleOption");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NO_MEMORY;
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create notification");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NO_MEMORY;
     }
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Serial queue is invalid.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
     }
 
