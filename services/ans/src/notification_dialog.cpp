@@ -51,16 +51,16 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 
     auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     if (topBundleName != appBundleName) {
-        ANS_LOGE("Current application isn't in foreground, top is %{public}s.", topBundleName.c_str());
+        ANS_LOGW("Current application isn't in foreground, top is %{public}s.", topBundleName.c_str());
         if (!innerLake) {
             return ERR_ANS_INVALID_BUNDLE;
         } else {
-            ANS_LOGE("get top ability again");
+            ANS_LOGW("get top ability again");
             std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
             topBundleName = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
             if (topBundleName != appBundleName) {
-                ANS_LOGE("get top ability again failed");
+                ANS_LOGW("get top ability again failed");
                 return ERR_ANS_INVALID_BUNDLE;
             }
         }
