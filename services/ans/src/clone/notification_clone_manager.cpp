@@ -105,6 +105,7 @@ static std::string SetBackUpReply()
 
 int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& reply)
 {
+    ANS_LOGI("OnBackup start");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_22, EventBranchId::BRANCH_1);
     if (cloneTemplates.empty()) {
         ANS_LOGI("Notification no need Backup.");
@@ -155,6 +156,7 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
 
 int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& reply)
 {
+    ANS_LOGI("OnRestore start");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_22, EventBranchId::BRANCH_2);
     reply.WriteString(SetBackUpReply());
     std::string storeMessage;
@@ -186,6 +188,7 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
             iter->second->OnRestore(jsonObject.at(iter->first));
         }
     }
+    ANS_LOGI("OnRestore end");
     return ERR_OK;
 }
 

@@ -1152,7 +1152,9 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
     ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), deviceId.c_str(), result);
     message.ErrorCode(result);
-    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    if (!innerLake || result == ERR_ANS_DIALOG_POP_SUCCEEDED) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
     return result;
 }
 
@@ -2704,9 +2706,15 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
 ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty() ||
-        bundleOption->GetUid() <= DEFAULT_UID) {
-        ANS_LOGE("SetBadgeNumberForDhByBundle invalid bundleOption");
+    if (bundleOption == nullptr) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle bundleOption is null");
+    }
+    if (bundleOption->GetBundleName().empty()) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    if (bundleOption->GetUid() <= DEFAULT_UID) {
+        ANS_LOGE("SetBadgeNumberForDhByBundle invalid uid");
         return ERR_ANS_INVALID_PARAM;
     }
     if (badgeNumber < BADGE_NUM_LIMIT) {
