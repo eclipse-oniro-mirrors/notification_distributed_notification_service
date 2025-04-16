@@ -155,6 +155,7 @@ HWTEST_F(NotificationExtensionWrapperTest, SetlocalSwitch_True_Test, TestSize.Le
 HWTEST_F(NotificationExtensionWrapperTest, SyncAdditionConfig_NullSyncAdditionConfig, TestSize.Level0)
 {
     ExtensionWrapper extensionWrapper;
+    extensionWrapper.syncAdditionConfig_ = nullptr;
     ErrCode result = extensionWrapper.SyncAdditionConfig("key", "value");
     EXPECT_EQ(result, 0);
 }
@@ -217,6 +218,7 @@ HWTEST_F(NotificationExtensionWrapperTest, ReminderControl_NullReminderControl, 
 {
     OHOS::Notification::ExtensionWrapper extensionWrapper;
     std::string bundleName = "testBundle";
+    extensionWrapper.reminderControl_ = nullptr;
     int32_t result = extensionWrapper.ReminderControl(bundleName);
     EXPECT_EQ(result, 0);
 }
@@ -235,6 +237,7 @@ HWTEST_F(NotificationExtensionWrapperTest, BannerControl_NullBannerControl, Test
     // Arrange
     ExtensionWrapper wrapper;
     std::string bundleName = "testBundle";
+    wrapper.bannerControl_ = nullptr;
 
     // Act
     int32_t result = wrapper.BannerControl(bundleName);
