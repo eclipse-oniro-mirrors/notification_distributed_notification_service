@@ -2067,6 +2067,9 @@ HWTEST_F(AnsPublishServiceTest, SetBadgeNumberForDhByBundle_00001, Function | Sm
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 1);
     ASSERT_EQ(ret, ERR_OK);
+
+    ret = advancedNotificationService_->SetBadgeNumberForDhByBundle(bundle, 0);
+    ASSERT_EQ(ret, ERR_OK);
 }
 
 /**
