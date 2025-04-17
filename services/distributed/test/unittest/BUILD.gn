@@ -15,6 +15,9 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
+
 group("ans_unit_test") {
   testonly = true
   deps = []
@@ -29,16 +32,15 @@ group("ans_unit_test") {
       ":distributed_preferences_branch_test",
       ":distributed_preferences_database_test",
       ":distributed_screen_status_manager_branch_test",
+      ":distributed_service_test",
+      ":distributed_subscriber_test",
     ]
   }
 }
 
 ohos_unittest("ans_distributed_unit_test") {
-  module_out_path = "${component_name}/unittest"
-  include_dirs = [
-    "/${services_path}/distributed/include",
-    "${ffrt_path}/interfaces/kits",
-  ]
+  module_out_path = module_output_path
+  include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
     "${services_path}/distributed/src/distributed_database.cpp",
@@ -93,7 +95,7 @@ ohos_unittest("ans_distributed_unit_test") {
 }
 
 ohos_unittest("distributed_preferences_database_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "${services_path}/distributed/test/unittest/mock",
@@ -138,7 +140,7 @@ ohos_unittest("distributed_preferences_database_test") {
 }
 
 ohos_unittest("distributed_screen_status_manager_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "${services_path}/distributed/test/unittest/mock",
@@ -184,7 +186,7 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
 }
 
 ohos_unittest("distributed_database_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [
     "/${services_path}/distributed/include",
     "${services_path}/distributed/test/unittest/mock",
@@ -230,7 +232,7 @@ ohos_unittest("distributed_database_branch_test") {
 }
 
 ohos_unittest("distributed_preferences_branch_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
@@ -270,7 +272,7 @@ ohos_unittest("distributed_preferences_branch_test") {
 }
 
 ohos_unittest("distributed_device_callback_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [ "distributed_device_callback_test.cpp" ]
@@ -307,7 +309,7 @@ ohos_unittest("distributed_device_callback_test") {
 }
 
 ohos_unittest("distributed_database_callback_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [ "distributed_database_callback_test.cpp" ]
@@ -343,7 +345,7 @@ ohos_unittest("distributed_database_callback_test") {
 }
 
 ohos_unittest("distributed_flow_control_test") {
-  module_out_path = "${component_name}/unittest"
+  module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [ "distributed_flow_control_test.cpp" ]
@@ -379,11 +381,8 @@ ohos_unittest("distributed_flow_control_test") {
 }
 
 ohos_unittest("distributed_notification_manager_branch_test") {
-  module_out_path = "${component_name}/unittest"
-  include_dirs = [
-    "/${services_path}/distributed/include",
-    "${ffrt_path}/interfaces/kits",
-  ]
+  module_out_path = module_output_path
+  include_dirs = [ "/${services_path}/distributed/include" ]
 
   sources = [
     "distributed_notification_manager_branch_test/distributed_notification_manager_branch_test.cpp",
@@ -416,6 +415,190 @@ ohos_unittest("distributed_notification_manager_branch_test") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("distributed_service_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "/${services_path}/distributed/include",
+    "/${services_path}/distributed/include/soft_bus",
+    "/${services_path}/distributed/include/tlv_box",
+    "/${services_path}/distributed/include/helper",
+    "/${services_path}/ans/include",
+  ]
+
+  sources = [
+    "/${frameworks_path}/ans/src/notification_helper.cpp",
+    "/${frameworks_path}/ans/src/notification_subscribe_info.cpp",
+    "/${services_path}/ans/src/common/notification_config_parse.cpp",
+    "/${services_path}/distributed/src/helper/ability_manager_helper.cpp",
+    "/${services_path}/distributed/src/helper/analytics_util.cpp",
+    "/${services_path}/distributed/src/helper/bundle_resource_helper.cpp",
+    "/${services_path}/distributed/src/helper/distributed_operation_connection.cpp",
+    "/${services_path}/distributed/src/helper/distributed_preference.cpp",
+    "/${services_path}/distributed/src/helper/distributed_rdb_helper.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_client.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_cmd_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_liveview_all_scenarios_extension_wrapper.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_local_config.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_observer_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_operation_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_publish_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_server.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_service_uitls.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_socket.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_subscribe_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_subscriber.cpp",
+    "/${services_path}/distributed/src/tlv_box/batch_remove_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/box_base.cpp",
+    "/${services_path}/distributed/src/tlv_box/bundle_icon_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/match_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/notification_sync_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/remove_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/request_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/response_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/state_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/tlv_box.cpp",
+    "distributed_service_test.cpp",
+  ]
+
+  configs = [
+    "${services_path}/distributed/:ans_distributed_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/distributed:libans_distributed",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "ability_runtime:uri_permission_mgr",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "power_manager:powermgr_client",
+    "relational_store:native_rdb",
+    "relational_store:native_rdb",
+    "samgr:samgr_proxy",
+    "screenlock_mgr:screenlock_client",
+    "time_service:time_client",
+    "zlib:libz",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+ohos_unittest("distributed_subscriber_test") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "/${services_path}/distributed/include",
+    "/${services_path}/distributed/include/soft_bus",
+    "/${services_path}/distributed/include/tlv_box",
+    "/${services_path}/distributed/include/helper",
+    "/${services_path}/ans/include",
+    "/${interfaces_path}/inner_api",
+  ]
+
+  sources = [
+    "/${frameworks_path}/ans/src/notification_helper.cpp",
+    "/${frameworks_path}/ans/src/notification_subscribe_info.cpp",
+    "/${services_path}/ans/src/common/notification_config_parse.cpp",
+    "/${services_path}/distributed/src/helper/ability_manager_helper.cpp",
+    "/${services_path}/distributed/src/helper/analytics_util.cpp",
+    "/${services_path}/distributed/src/helper/bundle_resource_helper.cpp",
+    "/${services_path}/distributed/src/helper/distributed_operation_connection.cpp",
+    "/${services_path}/distributed/src/helper/distributed_preference.cpp",
+    "/${services_path}/distributed/src/helper/distributed_rdb_helper.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_client.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_cmd_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_liveview_all_scenarios_extension_wrapper.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_local_config.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_observer_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_operation_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_publish_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_server.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_service_uitls.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_socket.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_subscribe_service.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_subscriber.cpp",
+    "/${services_path}/distributed/src/tlv_box/batch_remove_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/box_base.cpp",
+    "/${services_path}/distributed/src/tlv_box/bundle_icon_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/match_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/notification_sync_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/remove_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/request_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/response_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/state_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/tlv_box.cpp",
+    "distributed_subscriber_test.cpp",
+  ]
+
+  configs = [
+    "${services_path}/distributed/:ans_distributed_config",
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${services_path}/distributed:libans_distributed",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "ability_runtime:uri_permission_mgr",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "os_account:os_account_innerkits",
+    "power_manager:powermgr_client",
+    "relational_store:native_rdb",
+    "relational_store:native_rdb",
+    "samgr:samgr_proxy",
+    "screenlock_mgr:screenlock_client",
+    "time_service:time_client",
+    "zlib:libz",
   ]
 
   subsystem_name = "${subsystem_name}"

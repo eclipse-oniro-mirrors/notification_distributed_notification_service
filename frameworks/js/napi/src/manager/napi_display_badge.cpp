@@ -36,6 +36,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
     AsyncCallbackInfoEnableBadge *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnableBadge {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -123,6 +124,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsDisplayBadge {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -272,8 +274,9 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
             AsyncCallbackSetBadgeNumber *asynccallbackinfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asynccallbackinfo) {
                 ANS_LOGI("option.badgeNumber: %{public}d", asynccallbackinfo->params.badgeNumber);
+                std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetBadgeNumber(
-                    asynccallbackinfo->params.badgeNumber);
+                    asynccallbackinfo->params.badgeNumber, instanceKey);
             }
         },
         AsyncCompleteCallbackNapiSetBadgeNumber,
@@ -319,7 +322,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("Napi set badge number by bundle work execute.");
             AsyncCallbackSetBadgeNumber *asyncCallbackInfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asyncCallbackInfo) {
-                ANS_LOGD("Option.bundle = %{public}s, option.uid = %{public}d, badge number = %{public}d.",
+                ANS_LOGI("Option.bundle = %{public}s, option.uid = %{public}d, badge number = %{public}d.",
                     asyncCallbackInfo->params.option.GetBundleName().c_str(),
                     asyncCallbackInfo->params.option.GetUid(),
                     asyncCallbackInfo->params.badgeNumber);

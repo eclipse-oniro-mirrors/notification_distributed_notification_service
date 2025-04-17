@@ -35,7 +35,7 @@ napi_value ParseParameters(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < REMOVE_GROUP_BY_BUNDLE_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGE("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -43,7 +43,7 @@ napi_value ParseParameters(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Argument type error. Object expected.");
+        ANS_LOGE("Argument type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -58,7 +58,7 @@ napi_value ParseParameters(
     // argv[1]: groupName: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. String number boolean expected.");
+        ANS_LOGE("Wrong argument type. String number boolean expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -121,6 +121,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemoveGroupByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -137,7 +138,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo =
                 static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle : %{public}s, option.uid : %{public}d, groupName : %{public}s",
+                ANS_LOGI("option.bundle:%{public}s, option.uid:%{public}d, groupName:%{public}s",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.groupName.c_str());

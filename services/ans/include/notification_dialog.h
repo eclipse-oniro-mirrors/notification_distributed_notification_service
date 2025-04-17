@@ -33,9 +33,10 @@ public:
         const std::string &serviceBundleName,
         const std::string &serviceAbilityName,
         int32_t uid,
-        const sptr<IRemoteObject> &callerToken);
+        std::string appBundleName,
+        const sptr<IRemoteObject> &callerToken,
+        const bool innerLake);
 
-    static int32_t GetActiveUserId();
     static int32_t GetUidByBundleName(const std::string &bundleName);
 };
 } // namespace Notification

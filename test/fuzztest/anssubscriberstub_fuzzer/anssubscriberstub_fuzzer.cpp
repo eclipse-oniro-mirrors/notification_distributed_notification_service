@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,54 +15,19 @@
 
 #define private public
 #define protected public
-#include "ans_subscriber_stub.h"
 #undef private
 #undef protected
+#include "ans_permission_def.h"
 #include "anssubscriberstub_fuzzer.h"
 #include "notification_request.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        Notification::AnsSubscriberStub ansSubscriberStub;
-        uint32_t code = GetU32Data(data);
         MessageParcel datas;
         MessageParcel reply;
         MessageOption flags;
-        // test OnRemoteRequest function
-        ansSubscriberStub.OnRemoteRequest(code, datas, reply, flags);
-        // test HandleOnConnected function
-        ansSubscriberStub.HandleOnConnected(datas, reply);
-        // test HandleOnDisconnected function
-        ansSubscriberStub.HandleOnDisconnected(datas, reply);
-        // test HandleOnConsumedMap function
-        ansSubscriberStub.HandleOnConsumedMap(datas, reply);
-        // test HandleOnCanceledMap function
-        ansSubscriberStub.HandleOnCanceledMap(datas, reply);
-        // test HandleOnUpdated function
-        ansSubscriberStub.HandleOnUpdated(datas, reply);
-        // test HandleOnDoNotDisturbDateChange function
-        ansSubscriberStub.HandleOnDoNotDisturbDateChange(datas, reply);
-        // test HandleOnEnabledNotificationChanged function
-        ansSubscriberStub.HandleOnEnabledNotificationChanged(datas, reply);
-        // test OnConnected function
-        ansSubscriberStub.OnConnected();
-        // test OnDisconnected function
-        ansSubscriberStub.OnDisconnected();
-        // test OnConsumed function
-        sptr<Notification::Notification> notification = new Notification::Notification();
-        sptr<Notification::NotificationSortingMap> notificationMap = new Notification::NotificationSortingMap();
-        ansSubscriberStub.OnConsumed(notification, notificationMap);
-        // test OnCanceled function
-        int32_t deleteReason = 1;
-        ansSubscriberStub.OnCanceled(notification, notificationMap, deleteReason);
-        // test OnUpdated function
-        ansSubscriberStub.OnUpdated(notificationMap);
-        // test OnDoNotDisturbDateChange function
-        sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
-        ansSubscriberStub.OnDoNotDisturbDateChange(date);
-        // test OnEnabledNotificationChanged function
-        sptr<Notification::EnabledNotificationCallbackData> callbackData = new Notification::EnabledNotificationCallbackData();
         return true;
     }
 }
@@ -71,11 +36,13 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    SystemHapTokenGet(requestPermission);
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

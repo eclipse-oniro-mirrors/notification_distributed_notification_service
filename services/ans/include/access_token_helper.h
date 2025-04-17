@@ -37,6 +37,9 @@ public:
     static bool IsSystemApp();
     static bool IsDlpHap(const Security::AccessToken::AccessTokenID &callerToken);
     static bool VerifyShellToken(const Security::AccessToken::AccessTokenID &callerToken);
+    static bool CheckPermission(const std::string &permission);
+private:
+    static std::string supportCheckSaPermission_;
 };
 }  // namespace Notification
 }  // namespace OHOS

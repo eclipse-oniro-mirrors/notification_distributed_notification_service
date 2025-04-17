@@ -22,6 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+const int32_t DISTURB_DEFAULT_FLAG = 13;
 struct AsyncCallbackInfoIsEnabled {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
@@ -102,6 +103,19 @@ struct AsyncCallbackInfoGetEnabledWithoutApp {
     bool enable = false;
 };
 
+struct DeviceStatus {
+    std::string deviceType;
+    int32_t status;
+    napi_ref callback = nullptr;
+};
+
+struct AsynDeviceStatusConfig {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    DeviceStatus deviceStatus;
+    CallbackPromiseInfo info;
+};
+
 napi_value IsDistributedEnabled(napi_env env, napi_callback_info info);
 napi_value EnableDistributed(napi_env env, napi_callback_info info);
 napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info);
@@ -111,6 +125,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info);
 napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info);
 napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info);
 
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, DeviceStatus &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledByBundleParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnabledByBundleParams &params);

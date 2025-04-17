@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace Notification {
 #ifndef ANS_LOG_DOMAIN
-#define ANS_LOG_DOMAIN 0xD001200
+#define ANS_LOG_DOMAIN 0xD001203
 #endif
 
 #ifndef ANS_LOG_TAG
@@ -37,56 +37,6 @@ namespace Notification {
 #endif
 
 #define ANS_LOG_LIMIT_INTERVALS 10000 //ms
-
-enum class AnsLogLevel : uint8_t { DEBUG = 0, INFO, WARN, ERROR, FATAL };
-
-static constexpr OHOS::HiviewDFX::HiLogLabel ANS_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, ANS_LOG_TAG};
-static constexpr OHOS::HiviewDFX::HiLogLabel ANS_REMINDER_LABEL = {LOG_CORE, ANS_LOG_DOMAIN, ANS_REMINDER_LOG_TAG};
-
-class AnsLogWrapper {
-public:
-    AnsLogWrapper() = delete;
-    ~AnsLogWrapper() = delete;
-
-    /**
-     * @brief Judge the level of the log.
-     *
-     * @param level Indicates the level of the log.
-     * @return Returns ture on passed, otherwise false.
-     */
-    static bool JudgeLevel(const AnsLogLevel &level);
-
-    /**
-     * @brief Set the level of the log.
-     *
-     * @param level Indicates the level of the log.
-     */
-    static void SetLogLevel(const AnsLogLevel &level)
-    {
-        level_ = level;
-    }
-
-    /**
-     * @brief Get the level of the log.
-     *
-     * @return Indicates the level of the log.
-     */
-    static const AnsLogLevel &GetLogLevel()
-    {
-        return level_;
-    }
-
-    /**
-     * @brief Get the brief name of the file.
-     *
-     * @param str Indicates the full name of the file.
-     * @return Indicates the file name.
-     */
-    static std::string GetBriefFileName(const char *str);
-
-private:
-    static AnsLogLevel level_;
-};
 
 #define CUR_FILENAME (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 

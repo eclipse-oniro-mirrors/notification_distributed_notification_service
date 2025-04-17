@@ -21,12 +21,21 @@ import CommonEventManager from '@ohos.commonEventManager';
 import type Want from '@ohos.app.ability.Want';
 import UIExtensionAbility from '@ohos.app.ability.UIExtensionAbility';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
-import uiExtensionHost from '@ohos.uiExtensionHost';
+import uiExtension from '@ohos.arkui.uiExtension';
 import StartOptions from '@ohos.app.ability.StartOptions';
+import configPolicy from '@ohos.configPolicy';
+import fs from '@ohos.file.fs';
+import Constants from '../common/constant';
 
 
 
 const TAG = 'NotificationDialog_Service ';
+
+const UPDATE_INIT = 1;
+const UPDATE_NUM = 1;
+const UPDATE_BOUNDARY = 100;
+
+let eventSubscriber:CommonEventManager.CommonEventSubscriber;
 
 const enableNotificationDialogDestroyedEvent = {
   eventId: 1,
@@ -38,7 +47,9 @@ enum DialogStatus {
   ALLOW_CLICKED,
   DENY_CLICKED,
   DIALOG_CRASHED,
-  DIALOG_SERVICE_DESTROYED
+  DIALOG_SERVICE_DESTROYED,
+  REMOVE_BUNDLE,
+  DIALOG_OPEN
 };
 
 async function handleDialogQuitException(want: Want): Promise<void> {
@@ -46,78 +57,62 @@ async function handleDialogQuitException(want: Want): Promise<void> {
     COMMON_EVENT_NAME,
     {
       code: DialogStatus.DIALOG_CRASHED,
-      data: want.parameters.from.toString(),
+      data: want.parameters.bundleName.toString(),
+      parameters: {
+        bundleName: want.parameters.bundleName.toString(),
+        bundleUid: want.parameters.bundleUid.toString()
+      }
     } as CommonEventManager.CommonEventPublishData,
     () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
   );
 }
 
+interface NotificationConfig {
+  deviceInfo: DeviceInfo;
+}
+
+interface DeviceInfo {
+  isWatch: boolean;
+  isCar: boolean;
+  isPc: boolean;
+  isTv: boolean;
+}
 
 export class EnableNotificationDialog {
   static ENABLE_NOTIFICATION_DIALOG_NAME = 'EnableNotificationDialog';
   static DIALOG_PATH = 'pages/notificationDialog';
+  static WATCH_DIALOG_PATH = 'pages/watchNotificationDialog';
+  static PC_DIALOG_PATH = 'pages/pcNotificationDialog';
+  static TV_DIALOG_PATH = 'pages/tvNotificationDialog';
+  static CAR_DIALOG_PATH = 'pages/carNotificationDialog';
   static TRANSPARANT_COLOR = '#00000000';
+  static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
+  static SYSTEMUI_BUNDLE = 'com.ohos.systemui';
 
   id: number;
   want: Want;
   window: window.Window;
-  extensionWindow:uiExtensionHost.UIExtensionHostWindowProxy;
+  extensionWindow:uiExtension.WindowProxy;
   storage: LocalStorage;
+  stageModel: boolean;
+  subWindow: window.Window;
+  initSubWindowSize: boolean;
+  innerLake: boolean;
 
-  constructor(id: number, want: Want) {
+  constructor(id: number, want: Want, stageModel: boolean, innerLake: boolean) {
     this.id = id;
     this.want = want;
+    this.stageModel = stageModel;
     this.window = undefined;
     this.extensionWindow = undefined;
-  }
-
-  async createWindow(windowType: window.WindowType, context, displayRect): Promise<void> {
-    try {
-      let winArgs = {
-        'name': `${EnableNotificationDialog.ENABLE_NOTIFICATION_DIALOG_NAME}${this.id}`,
-        'windowType': windowType,
-        'ctx': context
-      };
-      let win = await window.createWindow(winArgs);
-      this.window = win;
-      let shouldHide = true;
-
-      if (windowType === window.WindowType.TYPE_DIALOG) {
-        await win.bindDialogTarget(this.want.parameters.callerToken['value'],
-          async (): Promise<void> => {
-            console.info(TAG, `window ${this.id} died`);
-            await this.destroyException();
-          }
-        );
-      }
-
-      this.storage = new LocalStorage({
-        'dialog': this
-      });
-      await win.moveWindowTo(displayRect.left, displayRect.top);
-      await win.resize(displayRect.width, displayRect.height);
-      await win.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
-      try {
-        await win.hideNonSystemFloatingWindows(shouldHide);
-      } catch (err) {
-        console.error(TAG, 'window hideNonSystemFloatingWindows failed!');
-      }
-      await win.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
-      await win.showWindow();
-      await win.setWindowLayoutFullScreen(true);
-    } catch (err) {
-      if (this.window !== undefined) {
-        await this.destroyWindow();
-      }
-      console.error(TAG, 'window create failed!');
-      throw new Error('Failed to create window');
-    }
+    this.initSubWindowSize = false;
+    this.innerLake = innerLake;
   }
 
 
-  async createUiExtensionWindow(session: UIExtensionContentSession): Promise<void> {
+  async createUiExtensionWindow(session: UIExtensionContentSession, stageModel: boolean): Promise<void> {
     try {
-      let extensionWindow = session.getUIExtensionHostWindowProxy();
+      let extensionWindow = session.getUIExtensionWindowProxy();
       this.extensionWindow = extensionWindow;
       let shouldHide = true;
 
@@ -125,17 +120,113 @@ export class EnableNotificationDialog {
         'dialog': this,
         'session': session
       });
-      await session.loadContent(EnableNotificationDialog.DIALOG_PATH, this.storage);
+
+      let path = EnableNotificationDialog.DIALOG_PATH;
+      let hasConfig = true;
+      let isPcDevice = false;
       try {
-        await extensionWindow.hideNonSecureWindows(shouldHide);
+        let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
+        if (filePaths.length === 0) {
+          console.info(TAG, 'not get any configFile');
+          hasConfig = false;
+        }
+        for (let i = 0; i < filePaths.length; i++) {
+          let res = fs.accessSync(filePaths[i]);
+          if (res) {
+            let fileContent = fs.readTextSync(filePaths[i]);
+            let config: NotificationConfig = JSON.parse(fileContent);
+            if (config.deviceInfo !== undefined) {
+              let deviceInfo: DeviceInfo = config.deviceInfo;
+              if (deviceInfo.isWatch !== undefined) {
+                path = EnableNotificationDialog.WATCH_DIALOG_PATH;
+                console.info(TAG, 'watch request');
+              }
+              if (deviceInfo.isPc !== undefined) {
+                path = EnableNotificationDialog.PC_DIALOG_PATH;
+                isPcDevice = true;
+                console.info(TAG, 'pc request');
+              }
+              if (deviceInfo.isTv !== undefined) {
+                path = EnableNotificationDialog.TV_DIALOG_PATH;
+                console.info(TAG, 'tv request');
+              }
+              if (deviceInfo.isCar !== undefined) {
+                path = EnableNotificationDialog.CAR_DIALOG_PATH;
+                console.info(TAG, 'car request');
+              }
+            }
+          }
+        }
       } catch (err) {
-        console.error(TAG, 'window hideNonSecureWindows failed!');
+        console.error(TAG, 'Failed get ccm files');
       }
-      await session.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
+
+      if (stageModel && hasConfig) {
+        let subWindowOpts : window.SubWindowOptions = {
+          'title': '',
+          decorEnabled: false,
+          isModal: true,
+          isTopmost: true
+        };
+        let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
+        this.subWindow = subWindow;
+        
+        if(isPcDevice) {
+          let hasDisalogRectInfo = false;
+          let waiteTimes = 0;
+          extensionWindow.on('rectChange', uiExtension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
+            console.info(TAG, `windowRectChange ts event ${data.rect?.left},${data.rect?.top}, ${data.rect?.width}, ${data.rect?.height}`);
+            hasDisalogRectInfo = true;
+          });
+          while(!hasDisalogRectInfo && waiteTimes < 10){
+            waiteTimes ++;
+            await this.sleep(200);
+          }
+          if(hasDisalogRectInfo) {
+            let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+            console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
+            await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
+            await subWindow.resize(windowRect?.width, windowRect?.height);
+            hasDisalogRectInfo = false;
+          } else {
+            console.info(TAG,'waite send windwow info fail');
+            throw new Error('Failed to create window');
+          }
+        } else {
+          let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+          console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
+          if (windowRect.width > 0 && windowRect.height > 0) {
+            console.log(TAG, `valid rect data`);
+            await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
+            await subWindow.resize(windowRect?.width, windowRect?.height);
+            this.initSubWindowSize = true;
+          }
+        }
+        await subWindow.loadContent(path, this.storage);
+        try {
+          await subWindow.hideNonSystemFloatingWindows(true);
+        } catch (err) {
+          console.error(TAG, 'subWindow hideNonSystemFloatingWindows failed!');
+        }
+        await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
+        await subWindow.showWindow();
+      } else {
+        await session.loadContent(path, this.storage);  
+        try {    
+          await extensionWindow.hideNonSecureWindows(shouldHide);
+        } catch (err) {
+          console.error(TAG, 'window hideNonSecureWindows failed!');
+        }
+        await session.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
+      }
     } catch (err) {
       console.error(TAG, 'window create failed!');
       throw new Error('Failed to create window');
     }
+  }
+
+  async sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async publishButtonClickedEvent(enabled: boolean): Promise<void> {
@@ -143,12 +234,31 @@ export class EnableNotificationDialog {
       COMMON_EVENT_NAME,
       {
         code: enabled ? DialogStatus.ALLOW_CLICKED : DialogStatus.DENY_CLICKED,
-        data: this.want.parameters.from.toString(),
+        data: this.want.parameters.bundleName.toString(),
+        parameters: {
+          bundleName: this.want.parameters.bundleName.toString(),
+          bundleUid: this.want.parameters.bundleUid.toString()
+        }
       } as CommonEventManager.CommonEventPublishData,
       () => { console.info(TAG, 'publish CLICKED succeeded'); }
     );
   }
 
+  async dialogOpenEvent(): Promise<void> {
+    CommonEventManager.publish(
+      COMMON_EVENT_NAME,
+      {
+        code: DialogStatus.DIALOG_OPEN,
+        data: this.want.parameters.bundleName.toString(),
+        parameters: {
+          bundleName: this.want.parameters.bundleName.toString(),
+          bundleUid: this.want.parameters.bundleUid.toString()
+        }
+      } as CommonEventManager.CommonEventPublishData,
+      () => { console.info(TAG, 'publish DIALOG OPEN event succeeded'); }
+    );
+  }
+  
   async destroyException(): Promise<void> {
     await handleDialogQuitException(this.want);
   }
@@ -171,41 +281,145 @@ export class EnableNotificationDialog {
 };
 
 
-
 class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
 
   onCreate() {
     console.log(TAG, `UIExtAbility onCreate`);
-    AppStorage.SetOrCreate('context', this.context);
+    AppStorage.setOrCreate('context', this.context);
+    AppStorage.setOrCreate('isUpdate', UPDATE_INIT);
+    AppStorage.setOrCreate('clicked', false);
+    this.subscribe();
   
   }
 
   async onSessionCreate(want: Want, session: UIExtensionContentSession) {
-    console.log(TAG, `UIExtAbility onSessionCreate`);    
     try {
-      let dialog = new EnableNotificationDialog(1, want);
-      await dialog.createUiExtensionWindow(session);
+      let stageModel = false;
+      let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
+      let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
+      let innerLake = false;
+      if (bundleName !== EnableNotificationDialog.SCENEBOARD_BUNDLE &&
+        bundleName !== EnableNotificationDialog.SYSTEMUI_BUNDLE) {
+        want.parameters.bundleName = bundleName;
+        want.parameters.bundleUid = bundleUid;
+        stageModel = true;
+        console.log(TAG, `stage model`);
+      } else {
+        stageModel = false;
+        innerLake = Boolean(want.parameters.innerLake);
+        console.log(TAG, ` un stage model innerLake = , ${innerLake}`);
+      }
+      console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}` +
+        `uid ${want.parameters.bundleUid}`);    
+      let dialog = new EnableNotificationDialog(1, want, stageModel, innerLake);
+      await dialog.createUiExtensionWindow(session, stageModel);
+      AppStorage.setOrCreate('dialog', dialog);
     } catch (err) {
       console.error(TAG, `Failed to handle onSessionCreate`);
       await handleDialogQuitException(want);
+      this.context.terminateSelf();
     }
   }
 
   onForeground() {
     console.log(TAG, `UIExtAbility onForeground`);
+    let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
+    
+    if (dialog?.subWindow !== undefined) {
+      try {
+        dialog?.subWindow?.hideNonSystemFloatingWindows(true);
+      } catch (err) {
+        console.error(TAG, 'onForeground hideNonSystemFloatingWindows failed!');
+      } 
+    } else {
+      try {
+        dialog?.extensionWindow?.hideNonSecureWindows(true);
+      } catch (err) {
+        console.error(TAG, 'onForeground hideNonSecureWindows failed!');
+      }  
+    }
   }
 
   onBackground() {
     console.log(TAG, `UIExtAbility onBackground`);
+    let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
+
+    if (dialog?.subWindow !== undefined) {
+      try {
+        dialog?.subWindow?.hideNonSystemFloatingWindows(false);
+      } catch (err) {
+        console.error(TAG, 'onBackground hideNonSystemFloatingWindows failed!');
+      } 
+    } else {
+      try {
+        dialog?.extensionWindow?.hideNonSecureWindows(false);
+      } catch (err) {
+        console.error(TAG, 'onBackground hideNonSecureWindows failed!');
+      }  
+    }
   }
 
-  onSessionDestroy(session: UIExtensionContentSession) {
-    console.log(TAG, `UIExtAbility onSessionDestroy`);
+  async onSessionDestroy(session: UIExtensionContentSession): Promise<void> {
+    console.log(TAG, `UIExtAbility onSessionDestroy`);  
+    if (AppStorage.get('clicked') === false) {
+      console.log(TAG, `UIExtAbility onSessionDestroy unclick destory`);
+      let dialog = AppStorage.get<EnableNotificationDialog>('dialog');
+      await dialog?.destroyException();
+    }
   }
 
-  onDestroy() {
+  async onDestroy(): Promise<void> {
     console.info(TAG, 'UIExtAbility onDestroy.');
+    await this.unsubscribe();
+    await this.sleep(500);
     this.context.terminateSelf();
+  }
+
+  async sleep(ms: number): Promise<void> {
+      return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async subscribe(): Promise<void> {
+    await CommonEventManager.createSubscriber(
+      { events: ['usual.event.BUNDLE_RESOURCES_CHANGED'] })
+      .then((subscriber:CommonEventManager.CommonEventSubscriber) => {
+        eventSubscriber = subscriber;
+      })
+      .catch((err) => {
+        console.log(TAG, `subscriber createSubscriber error code is ${err.code}, message is ${err.message}`);
+      });
+
+    if (eventSubscriber === null) {
+      console.log(TAG, 'need create subscriber');
+      return;
+    }
+    CommonEventManager.subscribe(eventSubscriber, (err, data) => {
+      if (err?.code) {
+        console.error(TAG, `subscribe callBack err= ${JSON.stringify(err)}`);
+      } else {
+        console.log(TAG, `subscribe callBack data= ${JSON.stringify(data)}`);
+        if (data.parameters?.bundleResourceChangeType !== 1) {
+          return;
+        }
+        console.log(TAG, `BUNDLE_RESOURCES_CHANGED-language change`);
+        let isUpdate:number = AppStorage.get('isUpdate');
+        if (isUpdate === undefined || isUpdate > UPDATE_BOUNDARY) {
+          AppStorage.setOrCreate('isUpdate', UPDATE_NUM);
+        } else {
+          AppStorage.setOrCreate('isUpdate', ++isUpdate);
+        }
+      }
+    });
+  }
+
+  async unsubscribe(): Promise<void> {
+    try {
+      if (eventSubscriber != null) {
+        CommonEventManager.unsubscribe(eventSubscriber, (err) => {});
+      }      
+    } catch (err) {
+      console.info('ubsubscribe fail');
+    }
   }
 }
 

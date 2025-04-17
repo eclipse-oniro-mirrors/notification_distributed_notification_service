@@ -1,0 +1,204 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/notification/distributed_notification_service/notification.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
+
+ohos_unittest("reminder_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "/${services_path}/reminder/include",
+    "${services_path}/ans/test/unittest/mock/include",
+  ]
+
+  sources = [
+    "${frameworks_module_reminder_path}/test/unittest/reminder_helper_test.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_alarm_test.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_calendar_test.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_timer_test.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/reminder:libreminder",
+  ]
+
+  defines = []
+  if (distributed_notification_supported) {
+    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+  }
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:wantagent_innerkits",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "relational_store:native_rdb",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+}
+
+ohos_unittest("reminder_request_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/ans/include",
+    "/${services_path}/reminder/include",
+    "${services_path}/reminder/test/unittest/mock/include",
+  ]
+
+  sources = [
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_branch_test/mock_reminder_request.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_test.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "c_utils:utils",
+    "relational_store:native_rdb",
+  ]
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("reminder_request_branch_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    ".",
+    "include",
+    "/${services_path}/reminder/include",
+    "${services_path}/reminder/test/unittest/mock/include",
+  ]
+
+  sources = [
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_branch_test/mock_reminder_request.cpp",
+    "${frameworks_module_reminder_path}/test/unittest/reminder_request_branch_test/reminder_request_branch_test.cpp",
+  ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "c_utils:utils",
+    "relational_store:native_rdb",
+  ]
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+ohos_unittest("reminder_agent_idl_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    ".",
+    "include",
+    "mock",
+    "/${services_path}/reminder/include",
+    "${services_path}/reminder/test/unittest/mock/include",
+  ]
+
+  sources = [ "${frameworks_module_reminder_path}/test/unittest/reminder_agent_proxy_test.cpp" ]
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "ipc:ipc_core",
+    "relational_store:native_rdb",
+  ]
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}
+
+group("unittest") {
+  testonly = true
+  deps = [
+    ":reminder_agent_idl_test",
+    ":reminder_request_branch_test",
+    ":reminder_request_test",
+    ":reminder_test",
+  ]
+}

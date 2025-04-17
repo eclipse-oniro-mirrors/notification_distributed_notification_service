@@ -18,6 +18,8 @@
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <filesystem>
+#include <file_ex.h>
 
 #include "accesstoken_kit.h"
 #include "ans_inner_errors.h"
@@ -28,9 +30,9 @@
 #include "access_token_helper.h"
 #include "notification_constant.h"
 #include "notification_request.h"
+#include "reminder_helper.h"
 #include "os_account_manager.h"
 #include "hitrace_meter_adapter.h"
-#include "reminder_data_manager.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
@@ -41,216 +43,10 @@
 
 namespace OHOS {
 namespace Notification {
-inline bool AdvancedNotificationService::CheckReminderPermission()
-{
-    Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
-    ErrCode result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(
-        callerToken, "ohos.permission.PUBLISH_AGENT_REMINDER");
-    return result == Security::AccessToken::PermissionState::PERMISSION_GRANTED;
-}
-
-ErrCode AdvancedNotificationService::PublishReminder(sptr<ReminderRequest> &reminder)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("Publish reminder");
-    if (!reminder) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    std::string bundle = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundle)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-    ANSR_LOGD("is system app: %{public}d", AccessTokenHelper::IsSystemApp());
-    reminder->SetSystemApp(AccessTokenHelper::IsSystemApp());
-    sptr<NotificationRequest> notificationRequest = reminder->GetNotificationRequest();
-    reminder->InitCreatorBundleName(bundle);
-    reminder->InitCreatorUid(IPCSkeleton::GetCallingUid());
-    if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
-        ANSR_LOGE("wantagent info is nullptr");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    std::string wantAgentName = reminder->GetWantAgentInfo()->pkgName;
-    std::string msWantAgentName = reminder->GetMaxScreenWantAgentInfo()->pkgName;
-    if (wantAgentName != msWantAgentName && wantAgentName != "" && msWantAgentName != "") {
-        ANSR_LOGE("wantAgentName is not same to msWantAgentName, wantAgentName:%{public}s, msWantAgentName:%{public}s",
-            wantAgentName.c_str(), msWantAgentName.c_str());
-        return ERR_ANS_INVALID_PARAM;
-    }
-    if (wantAgentName != bundle && wantAgentName != "") {
-        ANSR_LOGI("Set agent reminder, bundle:%{public}s, wantAgentName:%{public}s", bundle.c_str(),
-            wantAgentName.c_str());
-        SetAgentNotification(notificationRequest, wantAgentName);
-    } else if (msWantAgentName != bundle && msWantAgentName != "") {
-        ANSR_LOGI("Set agent reminder, bundle:%{public}s, msWantAgentName:%{public}s", bundle.c_str(),
-            msWantAgentName.c_str());
-        SetAgentNotification(notificationRequest, msWantAgentName);
-    }
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    ErrCode result = PrepareNotificationInfo(notificationRequest, bundleOption);
-    if (result != ERR_OK) {
-        ANSR_LOGW("PrepareNotificationInfo fail");
-        return result;
-    }
-    bool allowedNotify = false;
-    result = IsAllowedNotifySelf(bundleOption, allowedNotify);
-    if (!reminder->IsSystemApp() && (result != ERR_OK || !allowedNotify)) {
-        ANSR_LOGW("The application does not request enable notification");
-        return ERR_REMINDER_NOTIFICATION_NOT_ENABLE;
-    }
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        return ERR_NO_INIT;
-    }
-    return rdm->PublishReminder(reminder, bundleOption);
-}
-
-ErrCode AdvancedNotificationService::CancelReminder(const int32_t reminderId)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("Cancel Reminder");
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        return ERR_NO_INIT;
-    }
-    return rdm->CancelReminder(reminderId, bundleOption);
-}
-
-ErrCode AdvancedNotificationService::CancelAllReminders()
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("Cancel all reminders");
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    int32_t userId = -1;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        return ERR_NO_INIT;
-    }
-    return rdm->CancelAllReminders(bundleOption->GetBundleName(), userId, bundleOption->GetUid());
-}
-
-
-ErrCode AdvancedNotificationService::GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("GetValidReminders");
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-
-    reminders.clear();
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        return ERR_NO_INIT;
-    }
-    rdm->GetValidReminders(bundleOption, reminders);
-    ANSR_LOGD("Valid reminders size=%{public}zu", reminders.size());
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::AddExcludeDate(const int32_t reminderId, const uint64_t date)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("Add Exclude Date");
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        ANSR_LOGW("Generate bundle option failed!");
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        ANSR_LOGW("Reminder data manager not init!");
-        return ERR_NO_INIT;
-    }
-    return rdm->AddExcludeDate(reminderId, date, bundleOption);
-}
-
-ErrCode AdvancedNotificationService::DelExcludeDates(const int32_t reminderId)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("Del Exclude Dates");
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        ANSR_LOGW("Generate bundle option failed!");
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        ANSR_LOGW("Reminder data manager not init!");
-        return ERR_NO_INIT;
-    }
-    return rdm->DelExcludeDates(reminderId, bundleOption);
-}
-
-ErrCode AdvancedNotificationService::GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
-    ANSR_LOGI("Get Exclude Dates");
-    std::string bundleName = GetClientBundleName();
-    if (!CheckReminderPermission() || !AllowUseReminder(bundleName)) {
-        ANSR_LOGW("Permission denied: ohos.permission.PUBLISH_AGENT_REMINDER"
-            "or not allowed use reminder");
-        return ERR_REMINDER_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        ANSR_LOGW("Generate bundle option failed!");
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    auto rdm = ReminderDataManager::GetInstance();
-    if (rdm == nullptr) {
-        ANSR_LOGW("Reminder data manager not init!");
-        return ERR_NO_INIT;
-    }
-    return rdm->GetExcludeDates(reminderId, bundleOption, dates);
-}
+constexpr const char* REMINDER_DB_PATH = "/data/service/el1/public/notification/notification.db";
+constexpr const char* REMINDER_AGENT_SERVICE_CONFIG_PATH =
+    "/data/service/el1/public/notification/reminder_agent_service_config";
+constexpr const char* CALENDAR_DATA_NAME = "com.ohos.calendardata";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
@@ -287,7 +83,7 @@ NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 }
 #endif
 
-ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::RemindType &remindType)
+ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -296,7 +92,7 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::R
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -305,7 +101,8 @@ ErrCode AdvancedNotificationService::GetDeviceRemindType(NotificationConstant::R
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() { remindType = GetRemindType(); }));
+    ffrt::task_handle handler =
+        notificationSvrQueue_->submit_h(std::bind([&]() { remindTypeInt = static_cast<int32_t>(GetRemindType()); }));
     notificationSvrQueue_->wait(handler);
     return ERR_OK;
 #else
@@ -321,6 +118,37 @@ ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification
     notification->SetRemindType(NotificationConstant::RemindType::NONE);
 #endif
     return ERR_OK;
+}
+
+void AdvancedNotificationService::TryStartReminderAgentService()
+{
+    auto checkCalendarFunc = []() {
+        int32_t activeUserId = 0;
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
+            ANSR_LOGE("Failed to get active user id");
+            return false;
+        }
+        std::shared_ptr<BundleManagerHelper> bundleMgr = BundleManagerHelper::GetInstance();
+        if (bundleMgr == nullptr) {
+            ANSR_LOGE("Failed to get bundle manager");
+            return false;
+        }
+        int32_t uid = bundleMgr->GetDefaultUidByBundleName(CALENDAR_DATA_NAME, activeUserId);
+        return uid != -1;
+    };
+    if (!checkCalendarFunc()) {
+        if (access(REMINDER_DB_PATH, F_OK) != 0) {
+            ANS_LOGW("Reminder db no exist");
+            return;
+        }
+        std::string reminderAgentServiceConfig;
+        OHOS::LoadStringFromFile(REMINDER_AGENT_SERVICE_CONFIG_PATH, reminderAgentServiceConfig);
+        if (reminderAgentServiceConfig != "1") {
+            return;
+        }
+    }
+    ANS_LOGI("Reminder db exist, start reminder service");
+    ReminderHelper::StartReminderAgentService();
 }
 }  // namespace Notification
 }  // namespace OHOS

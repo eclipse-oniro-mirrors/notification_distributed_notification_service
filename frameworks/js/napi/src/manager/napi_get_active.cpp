@@ -86,6 +86,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -183,6 +184,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("Create asynccallbackinfo failed.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -199,8 +201,10 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiGetActiveNotifications work excute.");
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
+                std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::GetActiveNotifications(asynccallbackinfo->requests);
+                    NotificationHelper::GetActiveNotifications(
+                        asynccallbackinfo->requests, instanceKey);
             }
         },
         AsyncCompleteCallbackNapiGetActiveNotifications,
@@ -297,7 +301,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
     // bundle
     napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, obj, "bundle", napi_object);
     if (result == nullptr) {
-        ANS_LOGW("Failed to get bundle from params.");
+        ANS_LOGE("Failed to get bundle from params.");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, result, filter.bundle);
@@ -309,7 +313,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
     // notificationKey
     result = AppExecFwk::GetPropertyValueByPropertyName(env, obj, "notificationKey", napi_object);
     if (result == nullptr) {
-        ANS_LOGW("Failed to get notificationKeys from params.");
+        ANS_LOGE("Failed to get notificationKeys from params.");
         return nullptr;
     }
     retValue = Common::GetNotificationKey(env, result, filter.notificationKey);
@@ -320,7 +324,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
 
     // extraInfoKeys
     if (AppExecFwk::IsExistsByPropertyName(env, obj, "extraInfoKeys") == false) {
-        ANS_LOGI("No extraInfoKeys in filter");
+        ANS_LOGW("No extraInfoKeys in filter");
         return Common::NapiGetNull(env);
     }
 
@@ -423,6 +427,11 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
     ANS_LOGD("enter");
 
     auto asyncLiveViewCallBackInfo = new (std::nothrow) AsyncLiveViewCallBackInfo {.env = env, .asyncWork = nullptr};
+    if (asyncLiveViewCallBackInfo == nullptr) {
+        ANS_LOGE("asyncLiveViewCallBackInfo is nullptr.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
     napi_ref callback = nullptr;
     if (ParseGetLiveViewParams(env, info, asyncLiveViewCallBackInfo->filter, callback) == nullptr) {
         ANS_LOGD("ParseGetLiveViewParams is nullptr.");

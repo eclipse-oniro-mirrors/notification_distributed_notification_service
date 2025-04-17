@@ -22,16 +22,12 @@ namespace OHOS {
 namespace Notification {
 class BasePublishProcess {
 public:
-    BasePublishProcess();
+    BasePublishProcess() = default;
     ~BasePublishProcess() = default;
     virtual ErrCode PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
     virtual ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) = 0;
-    bool CheckPermission(const std::string &permission);
     ErrCode CommonPublishCheck(const sptr<NotificationRequest> &request);
     ErrCode CommonPublishProcess(const sptr<NotificationRequest> &request);
-
-private:
-    static std::string supportCheckSaPermission_;
 };
 }  // namespace Notification
 }  // namespace OHOS

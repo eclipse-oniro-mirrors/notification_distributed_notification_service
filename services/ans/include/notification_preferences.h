@@ -21,18 +21,20 @@
 
 #include "notification_do_not_disturb_date.h"
 #include "notification_preferences_database.h"
+#include <memory>
 #include <mutex>
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
 class NotificationPreferences final {
 public:
-    DISALLOW_COPY_AND_MOVE(NotificationPreferences);
-
+    NotificationPreferences();
+    ~NotificationPreferences() = default;
     /**
      * @brief Get NotificationPreferences instance object.
      */
-    static NotificationPreferences &GetInstance();
+    static std::shared_ptr<NotificationPreferences> GetInstance();
 
     /**
      * @brief Add notification slots into DB.
@@ -276,6 +278,11 @@ public:
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
 
+    ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
+
+    ErrCode GetAllDistribuedEnabledBundles(int32_t userId,
+        const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
+
     /**
      * @brief Remove all proferences info from DB.
      *
@@ -312,7 +319,7 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled);
-    
+
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
@@ -350,6 +357,30 @@ public:
         const std::string &deviceType, bool &enabled);
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    ErrCode SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    ErrCode IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
+
+    /**
      * @brief Get the bundle name set for send the sound.
      *
      * @param allPackage Specifies whether to allow all bundle to publish notification with sound.
@@ -358,7 +389,13 @@ public:
      */
     bool GetBundleSoundPermission(bool &allPackage, std::set<std::string> &bundleNames);
 
-    void InitSettingFromDisturbDB();
+    ErrCode UpdateDoNotDisturbProfiles(int32_t userId, int64_t profileId,
+        const std::string& name, const std::vector<NotificationBundleOption>& bundleList);
+
+    void UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
+        const std::vector<NotificationBundleOption> bundleList);
+
+    void InitSettingFromDisturbDB(int32_t userId = -1);
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
     void RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption);
@@ -369,11 +406,57 @@ public:
     int32_t GetBatchKvsFromDb(
         const std::string &key, std::unordered_map<std::string, std::string>  &values, const int32_t &userId);
     int32_t DeleteKvFromDb(const std::string &key, const int &userId);
-    ErrCode GetDoNotDisturbProfile(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
-    bool CheckDoNotDisturbProfileID(int32_t profileId);
+    int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
+    ErrCode GetDoNotDisturbProfile(int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
+    void GetDoNotDisturbProfileListByUserId(int32_t userId,
+        std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    void GetAllCLoneBundlesInfo(int32_t userId, std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
+    bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
+    bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);
+    bool UpdateBatchCloneProfileInfo(const int32_t &userId,
+        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
+    void GetAllCloneProfileInfo(const int32_t &userId,
+        std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo);
+    void GetAllCloneBundleInfo(const int32_t &userId, std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool UpdateBatchCloneBundleInfo(const int32_t &userId,
+        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool DelCloneBundleInfo(const int32_t &userId, const NotificationCloneBundleInfo& cloneBundleInfo);
+    bool DelBatchCloneBundleInfo(const int32_t &userId,
+        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool DelBatchCloneProfileInfo(const int32_t &userId,
+        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
+    ErrCode SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
+    bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    ErrCode SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
+    ErrCode GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const int32_t uid, const uint32_t type);
+
+    /**
+     * @brief get rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @return  generate hashCode type.
+     */
+    uint32_t GetHashCodeRule(const int32_t uid);
+
+    bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+
+    bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
 
 private:
+    bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
+        const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;
     ErrCode CheckSlotForCreateSlot(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationSlot> &slot, NotificationPreferencesInfo &preferencesInfo) const;
     ErrCode CheckSlotForRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
@@ -391,12 +474,16 @@ private:
         const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value);
     std::string GenerateBundleKey(const sptr<NotificationBundleOption> &bundleOption) const;
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption) const;
+    void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 
 private:
+    static std::mutex instanceMutex_;
+    static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     std::mutex preferenceMutex_;
-    std::unique_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
-    DECLARE_DELAYED_REF_SINGLETON(NotificationPreferences);
+    std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
+    bool isCachedMirrorNotificationEnabledStatus_ = false;
+    std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
 };
 }  // namespace Notification
 }  // namespace OHOS

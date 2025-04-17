@@ -14,7 +14,8 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/benchmarktest"
+module_output_path =
+    "${component_name}/distributed_notification_service/benchmarktest"
 
 ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
   module_out_path = module_output_path
@@ -25,7 +26,6 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "${access_token_path}/interfaces/innerkits/nativetoken/include",
     "${access_token_path}/interfaces/innerkits/accesstoken/include",
     "${services_path}/ans/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [

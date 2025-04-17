@@ -1,5 +1,9 @@
 {
   "src": [
-    "pages/notificationDialog"
+    "pages/notificationDialog",
+    "pages/carNotificationDialog",
+    "pages/watchNotificationDialog",
+    "pages/pcNotificationDialog",
+    "pages/tvNotificationDialog"
   ]
 }

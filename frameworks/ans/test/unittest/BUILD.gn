@@ -15,9 +15,10 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/unittest"
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
 
-ohos_unittest("ans_reminder_unit_test") {
+ohos_unittest("ans_test") {
   module_out_path = module_output_path
 
   include_dirs = [
@@ -25,7 +26,6 @@ ohos_unittest("ans_reminder_unit_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
@@ -42,10 +42,12 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_conversational_message_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_disable_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_date_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_do_not_disturb_profile_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_flags_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_helper_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_icon_button_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_live_view_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_local_live_view_button_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_local_live_view_content_test.cpp",
@@ -55,6 +57,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_picture_content_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_progress_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_request_test.cpp",
+    "${frameworks_module_ans_path}/test/unittest/notification_slot_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_sorting_map_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_sorting_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_subscribe_info_test.cpp",
@@ -64,16 +67,16 @@ ohos_unittest("ans_reminder_unit_test") {
     "${frameworks_module_ans_path}/test/unittest/notification_unified_group_info_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/notification_user_input_test.cpp",
     "${frameworks_module_ans_path}/test/unittest/push_promise_callback_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_helper_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_alarm_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_calendar_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_timer_test.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_store_test.cpp",
+  ]
+
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
   ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gtest_main",
+    "${services_path}/ans:libans",
   ]
 
   defines = []
@@ -94,6 +97,7 @@ ohos_unittest("ans_reminder_unit_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "image_framework:image_native",
@@ -115,74 +119,7 @@ ohos_unittest("ans_reminder_unit_test") {
   branch_protector_ret = "pac_ret"
 }
 
-ohos_unittest("reminder_request_test") {
-  module_out_path = module_output_path
-
-  include_dirs = [
-    ".",
-    "include",
-    "/${services_path}/ans/include",
-    "${services_path}/ans/test/unittest/mock/include",
-  ]
-
-  sources = [
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_branch_test/mock_reminder_request.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_test.cpp",
-  ]
-
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = [
-    "ability_base:base",
-    "ability_base:want",
-    "ability_base:zuri",
-    "c_utils:utils",
-    "relational_store:native_rdb",
-  ]
-
-  subsystem_name = "${subsystem_name}"
-  part_name = "${component_name}"
-}
-
-ohos_unittest("reminder_request_branch_test") {
-  module_out_path = module_output_path
-
-  include_dirs = [
-    ".",
-    "include",
-    "/${services_path}/ans/include",
-    "${services_path}/ans/test/unittest/mock/include",
-  ]
-
-  sources = [
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_branch_test/mock_reminder_request.cpp",
-    "${frameworks_module_ans_path}/test/unittest/reminder_request_branch_test/reminder_request_branch_test.cpp",
-  ]
-
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "ability_base:zuri",
-    "c_utils:utils",
-    "relational_store:native_rdb",
-  ]
-
-  subsystem_name = "${subsystem_name}"
-  part_name = "${component_name}"
-}
-
 group("unittest") {
   testonly = true
-  deps = [
-    ":ans_reminder_unit_test",
-    ":reminder_request_branch_test",
-    ":reminder_request_test",
-  ]
+  deps = [ ":ans_test" ]
 }

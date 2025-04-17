@@ -28,6 +28,7 @@ public:
     static const uint8_t SHIFT_FOUR;
     static const uint8_t NUM_TEN;
     static const size_t  TWO_TIMES;
+    static const uint32_t DEFAULT_SIZE;
 
     /**
      * @brief Packs an image to a string.
@@ -45,7 +46,8 @@ public:
      * @param pixelMapStr Indicates the string of image.
      * @return Returns an image object.
      */
-    static std::shared_ptr<Media::PixelMap> UnPackImage(const std::string &pixelMapStr);
+    static std::shared_ptr<Media::PixelMap> UnPackImage(const std::string &pixelMapStr,
+        const std::string &format = IMAGE_FORMAT_PNG);
 
     /**
      * @brief Packs an image to a file.
@@ -69,6 +71,10 @@ public:
      */
     static std::shared_ptr<Media::PixelMap> CreatePixelMap(
         const std::string &inFilePath, const std::string &format = IMAGE_FORMAT_PNG);
+
+    static std::shared_ptr<Media::PixelMap> CreatePixelMapByString(const std::string &imagedata);
+
+    static bool ImageScale(const std::shared_ptr<Media::PixelMap> &pixelMap, int32_t width, int32_t height);
 
     /**
      * @brief Converts a binary string to a hexadecimal string.

@@ -66,6 +66,7 @@ ohos_shared_library("notificationmanager") {
     "../common_convert_request.cpp",
     "../common_utils.cpp",
     "../constant.cpp",
+    "../disable_notification.cpp",
     "../display_badge.cpp",
     "../distributed.cpp",
     "../disturb_mode.cpp",
@@ -77,6 +78,7 @@ ohos_shared_library("notificationmanager") {
     "init_module.cpp",
     "local_live_view_subscribe.cpp",
     "napi_cancel.cpp",
+    "napi_disable_notification.cpp",
     "napi_display_badge.cpp",
     "napi_distributed.cpp",
     "napi_distributed_enable.cpp",
@@ -84,6 +86,7 @@ ohos_shared_library("notificationmanager") {
     "napi_enable_notification.cpp",
     "napi_get_active.cpp",
     "napi_local_live_view.cpp",
+    "napi_open_settings.cpp",
     "napi_publish.cpp",
     "napi_push.cpp",
     "napi_push_callback.cpp",
@@ -93,19 +96,26 @@ ohos_shared_library("notificationmanager") {
     "napi_template.cpp",
   ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+  ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
     "ability_runtime:napi_base_context",
     "ability_runtime:napi_common",
+    "ability_runtime:napi_wantagent_common",
     "ability_runtime:runtime",
+    "ability_runtime:ui_extension",
     "ability_runtime:wantagent_innerkits",
     "access_token:libtokenid_sdk",
+    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
@@ -113,6 +123,40 @@ ohos_shared_library("notificationmanager") {
     "napi:ace_napi",
     "relational_store:native_rdb",
   ]
+
+  defines = []
+
+  if (distributed_notification_service_disable_control) {
+    defines += [ "DISABLE_NOTIFICATION_FEATURE_ENABLE" ]
+  }
+
+  if (distributed_notification_service_feature_badge_manager) {
+    defines += [ "ANS_FEATURE_BADGE_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_local_liveview) {
+    defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
+  }
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "ANS_FEATURE_DISTRIBUTED_DB" ]
+  }
+
+  if (distributed_notification_service_feature_disturb_manager) {
+    defines += [ "ANS_FEATURE_DISTURB_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_slot_manager) {
+    defines += [ "ANS_FEATURE_SLOT_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_additional_config) {
+    defines += [ "ANS_FEATURE_ADDITIONAL_CONFIG" ]
+  }
+
+  if (distributed_notification_service_feature_open_notification_settings) {
+    defines += [ "ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS" ]
+  }
 
   relative_install_dir = "module"
   subsystem_name = "${subsystem_name}"

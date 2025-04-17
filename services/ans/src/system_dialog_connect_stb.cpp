@@ -18,10 +18,10 @@
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"
 #include "common_event_manager.h"
+#include "advanced_notification_service.h"
+#include "notification_bundle_option.h"
 
 constexpr int32_t SIGNAL_NUM = 3;
-constexpr int32_t DIALOG_CRASH_CODE = 2;
-const static std::string DIALOG_CRASH_EVENT = "OnNotificationServiceDialogClicked";
 
 namespace OHOS {
 namespace Notification {
@@ -44,8 +44,33 @@ void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName 
     int32_t errCode = remoteObject->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
     ANS_LOGI("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
     if (errCode != ERR_OK) {
-        ANS_LOGD("send Request to SytemDialog fail");
-        SendCrashEvent();
+        ANS_LOGE("send Request to SytemDialog fail");
+        if (commandStr_.empty() || !nlohmann::json::accept(commandStr_)) {
+            ANS_LOGE("Invalid JSON");
+            return;
+        }
+        nlohmann::json root = nlohmann::json::parse(commandStr_);
+        if (root.is_null() or !root.is_object()) {
+            ANS_LOGE("Invalid JSON object");
+            return;
+        }
+        if (!root.contains("bundleName") || !root.contains("bundleUid")) {
+            ANS_LOGE("not found jsonKey from");
+            return;
+        }
+        if (!root["bundleName"].is_string() || !root["bundleUid"].is_number_integer()) {
+            ANS_LOGE("value type is not right");
+            return;
+        }
+        std::string bundleName = root["bundleName"];
+        int32_t bundleUid = root["bundleUid"];
+        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
+            bundleName, bundleUid);
+        if (bundleOption == nullptr) {
+            ANS_LOGE("bundleOption inin fail");
+            return;
+        }
+        AdvancedNotificationService::GetInstance()->RemoveEnableNotificationDialog(bundleOption);
     }
 }
 
@@ -53,22 +78,6 @@ void SystemDialogConnectStb::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
     int32_t resultCode)
 {
     ANS_LOGI("on ability disconnected");
-}
-
-void SystemDialogConnectStb::SendCrashEvent()
-{
-    EventFwk::Want want;
-    want.SetAction(DIALOG_CRASH_EVENT);
-
-    EventFwk::CommonEventData commonData;
-    commonData.SetWant(want);
-    commonData.SetCode(DIALOG_CRASH_CODE);
-    nlohmann::json root = nlohmann::json::parse(commandStr_);
-    std::string from = root["from"];
-    commonData.SetData(from);
-    if (!EventFwk::CommonEventManager::PublishCommonEvent(commonData)) {
-        ANS_LOGE("Publish Dialog Crash failed");
-    }
 }
 
 }

@@ -21,7 +21,7 @@ namespace {
     bool g_mockInsertDataRet = true;
     bool g_mockInsertBatchDataRet = true;
     bool g_mockQueryDataBeginWithKeyRet = true;
-    bool g_mockDeleteBathchDataRet = true;
+    bool g_mockDeleteBatchDataRet = true;
     bool g_mockDeleteDataRet = true;
     bool g_mockQueryAllData = true;
     bool g_mockDropTable = true;
@@ -52,9 +52,9 @@ void MockQueryDataBeginWithKey(bool mockRet)
     g_mockQueryDataBeginWithKeyRet = mockRet;
 }
 
-void MockDeleteBathchData(bool mockRet)
+void MockDeleteBatchData(bool mockRet)
 {
-    g_mockDeleteBathchDataRet = mockRet;
+    g_mockDeleteBatchDataRet = mockRet;
 }
 
 void MockDeleteData(bool mockRet)
@@ -128,9 +128,9 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     return NativeRdb::E_OK;
 }
 
-int32_t NotificationDataMgr::DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId)
+int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &keys, const int32_t &userId)
 {
-    if (g_mockDeleteBathchDataRet == false) {
+    if (g_mockDeleteBatchDataRet == false) {
         return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;

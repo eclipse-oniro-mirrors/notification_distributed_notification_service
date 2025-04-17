@@ -74,7 +74,7 @@ NotificationButtonOption *NotificationButtonOption::FromJson(const nlohmann::jso
 bool NotificationButtonOption::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString(buttonName_)) {
-        ANS_LOGE("Failed to write title");
+        ANS_LOGE("Failed to write buttonName");
         return false;
     }
 

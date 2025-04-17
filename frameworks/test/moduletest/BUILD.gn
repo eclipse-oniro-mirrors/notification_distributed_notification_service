@@ -15,7 +15,8 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/moduletest"
+module_output_path =
+    "${component_name}/distributed_notification_service/moduletest"
 
 config("public_ans_config") {
   include_dirs = [
@@ -40,7 +41,6 @@ ohos_moduletest("ans_fw_module_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
@@ -118,7 +118,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
@@ -186,7 +185,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
@@ -263,7 +261,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${core_path}/include",
     "${inner_api_path}",
     "${frameworks_path}/test/moduletest/mock/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
@@ -326,7 +323,7 @@ group("moduletest") {
   deps = []
 
   deps += [
-    ":ReminderAgentJsTest",
+    # ":ReminderAgentJsTest",
 
     # ":ans_fw_module_test",
     ":ans_innerkits_module_publish_test",

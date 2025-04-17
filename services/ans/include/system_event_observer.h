@@ -44,21 +44,14 @@ private:
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void OnReceiveEventInner(const EventFwk::CommonEventData &data);
     sptr<NotificationBundleOption> GetBundleOption(AAFwk::Want want);
-
-    void InitEventList();
+    sptr<NotificationBundleOption> GetBundleOptionDataCleared(AAFwk::Want want);
 
     void OnBundleUpdateEventInner(const EventFwk::CommonEventData &data);
     void OnBundleAddEventInner(const EventFwk::CommonEventData &data);
     void OnBootSystemCompletedEventInner(const EventFwk::CommonEventData &data);
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    void OnScreenLock(const EventFwk::CommonEventData &data);
-    void OnScreenUnlock(const EventFwk::CommonEventData &data);
-#endif
 private:
     std::shared_ptr<SystemEventSubscriber> subscriber_ = nullptr;
     ISystemEvent callbacks_;
-    using SystemEventObserverFunc = void (SystemEventObserver::*)(const EventFwk::CommonEventData &data);
-    std::map<std::string, SystemEventObserverFunc> memberFuncMap_;
 };
 }  // namespace Notification
 }  // namespace OHOS

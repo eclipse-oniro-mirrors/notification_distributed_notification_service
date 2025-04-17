@@ -33,11 +33,13 @@
 #include "notification_bundle_option.h"
 #include "notification_unified_group_Info.h"
 #include <string>
+#include <map>
 
 namespace OHOS {
 namespace Notification {
 
 inline const std::string REQUEST_STORAGE_KEY_PREFIX {"ans_live_view"};
+inline const std::string REQUEST_STORAGE_SECURE_KEY_PREFIX {"secure_live_view"};
 
 struct NotificationKey {
     int32_t id {};
@@ -64,7 +66,12 @@ public:
         /**
          * displayed as a small icon.
          */
-        LITTLE
+        LITTLE,
+        /**
+         * invalid type
+         * It is used as the upper limit of the enumerated value.
+         */
+        ILLEGAL_TYPE
     };
 
     enum class GroupAlertType {
@@ -82,7 +89,12 @@ public:
          * the overview notification has sound or vibration but child notifications are muted (no sound or vibration)
          * in a group if sound or vibration is enabled for the associated NotificationSlot objects.
          */
-        OVERVIEW
+        OVERVIEW,
+        /**
+         * invalid type
+         * It is used as the upper limit of the enumerated value.
+         */
+        ILLEGAL_TYPE
     };
 
     /**
@@ -508,11 +520,24 @@ public:
     const std::shared_ptr<Media::PixelMap> GetLittleIcon() const;
 
     /**
+     * @brief Obtains the icon type of the notification.
+     *
+     * @return Returns the notification icon type
+     */
+    const std::string GetLittleIconType() const;
+
+    /**
      * @brief Sets the large icon of this notification, which is usually displayed on the right of the notification.
      *
      * @param bigIcon Indicates the large icon to set. It must be a PixelMap object.
      */
     void SetBigIcon(const std::shared_ptr<Media::PixelMap> &bigIcon);
+
+    /**
+     * @brief reset the large icon of this notification, which is usually displayed on the right of the notification.
+     *
+     */
+    void ResetBigIcon() const;
 
     /**
      * @brief Obtains the large icon of this notification.
@@ -1080,7 +1105,7 @@ public:
     /**
      * @brief Sets the InstanceKey of the notification creator.
      *
-     * @param userId Indicates the InstanceKey of the notification creator.
+     * @param key Indicates the InstanceKey of the notification creator.
      */
     void SetCreatorInstanceKey(int32_t key);
 
@@ -1090,6 +1115,20 @@ public:
      * @return Returns the InstanceKey of the notification creator.
      */
     int32_t GetCreatorInstanceKey() const;
+
+    /**
+     * @brief Sets the InstanceKey of the notification creator.
+     *
+     * @param key Indicates the InstanceKey of the notification creator.
+     */
+    void SetAppInstanceKey(const std::string &key);
+ 
+    /**
+     * @brief Obtains the InstanceKey of the notification creator.
+     *
+     * @return Returns the InstanceKey of the notification creator.
+     */
+    std::string GetAppInstanceKey() const;
 
     /**
      * @brief Sets the UserId of the notification owner.
@@ -1204,6 +1243,18 @@ public:
 
     void SetRemoveAllowed(bool isRemoveAllowed);
 
+    bool IsForceDistributed() const;
+
+    void SetForceDistributed(bool forceDistributed);
+
+    bool IsNotDistributed() const;
+
+    void SetNotDistributed(bool notDistributed);
+
+    bool IsSystemApp() const;
+
+    void SetIsSystemApp(bool isSystemApp);
+
     bool IsCommonLiveView() const;
 
     bool IsSystemLiveView() const;
@@ -1238,6 +1289,13 @@ public:
      * @return Return the unique key of notification request.
      */
     std::string GetKey();
+
+    /**
+     * @brief Get notification request key.
+     *
+     * @return Return the unique key of notification request.
+     */
+    std::string GetSecureKey();
 
     /**
      * @brief Get notification request base key.
@@ -1372,6 +1430,42 @@ public:
      */
     bool IsUpdateByOwnerAllowed() const;
 
+    /**
+     * @brief Set notification updateOnly value.
+     *
+     * @param updateOnly Indicates the updateOnly value of this notification.
+     */
+    void SetUpdateOnly(bool updateOnly);
+
+    /**
+     * @brief Obtains the value of updateOnly.
+     *
+     * @return Returns the updateOnly value of the notification.
+     */
+    bool IsUpdateOnly() const;
+
+    bool GetDistributedCollaborate() const;
+
+    void SetDistributedCollaborate(bool distributedCollaborate);
+
+    const std::string GetDistributedHashCode() const;
+
+    void SetDistributedHashCode(const std::string hashCode);
+
+    bool HasUserInputButton();
+
+    void AdddeviceStatu(const std::string &deviceType, const std::string deviceStatu);
+    
+    const std::map<std::string, std::string> GetdeviceStatus() const;
+
+    void SetHashCodeGenerateType(uint32_t type);
+
+    uint32_t GetHashCodeGenerateType() const;
+
+    void SetCollaboratedReminderFlag(uint32_t reminderFlag);
+
+    uint32_t GetCollaboratedReminderFlag() const;
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1455,7 +1549,10 @@ private:
     int32_t ownerUserId_ {SUBSCRIBE_USER_INIT};
     int32_t receiverUserId_ {SUBSCRIBE_USER_INIT};
     int32_t creatorInstanceKey_ {DEFAULT_UID};
+    uint32_t hashCodeGenerateType_ {0};
+    uint32_t collaboratedReminderFlag_ {0};
 
+    std::string appInstanceKey_ {};
     std::string settingsText_ {};
     std::string creatorBundleName_ {};
     std::string ownerBundleName_ {};
@@ -1467,6 +1564,8 @@ private:
     std::string classification_ {};
     std::string appMessageId_ {};
     std::string sound_ {};
+    std::string distributedHashCode_ {};
+    std::map<std::string, std::string> deviceStatus_ {};
 
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::OTHER};
     NotificationRequest::GroupAlertType groupAlertType_ {NotificationRequest::GroupAlertType::ALL};
@@ -1491,13 +1590,19 @@ private:
     bool isRemoveAllowed_ {true};
     bool isCoverActionButtons_ {false};
     bool isUpdateByOwnerAllowed_ {false};
+    bool distributedCollaborate_ {false};
+    bool updateOnly_ {false};
+    bool forceDistributed_ {false};
+    bool notDistributed_ {false};
+    bool isSystemApp_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenWantAgent_ {};
     std::shared_ptr<AAFwk::WantParams> additionalParams_ {};
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
-    std::shared_ptr<Media::PixelMap> bigIcon_ {};
+    std::string littleIconType_ {};
+    mutable std::shared_ptr<Media::PixelMap> bigIcon_ {};
     std::shared_ptr<Media::PixelMap> overlayIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};
 

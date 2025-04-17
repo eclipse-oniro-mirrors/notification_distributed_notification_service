@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "common_event_subscribe_info.h"
 #include "refbase.h"
 
-#include "ans_dialog_callback_interface.h"
+#include "ians_dialog_callback.h"
 #include "ans_inner_errors.h"
 
 namespace OHOS::Notification {
@@ -38,7 +38,8 @@ enum class DialogStatus {
     ALLOW_CLICKED,
     DENY_CLICKED,
     DIALOG_CRASHED,
-    DIALOG_SERVICE_DESTROYED
+    DIALOG_SERVICE_DESTROYED,
+    REMOVE_BUNDLE
 };
 
 class NotificationDialogEventSubscriber : public EventFwk::CommonEventSubscriber {
@@ -54,6 +55,7 @@ public:
 
 private:
     inline static const std::string EVENT_NAME = "OnNotificationServiceDialogClicked";
+
     NotificationDialogManager& dialogManager_;
 };
 
@@ -71,7 +73,7 @@ public:
     struct DialogInfo {
         sptr<NotificationBundleOption> bundleOption;
         // When multi devices are going to be supported, a deviceId need to be stored
-        sptr<AnsDialogCallback> callback;
+        sptr<IAnsDialogCallback> callback;
     };
 
     /**
@@ -81,8 +83,9 @@ public:
      */
     ErrCode RequestEnableNotificationDailog(
         const sptr<NotificationBundleOption>& bundle,
-        const sptr<AnsDialogCallback>& callback,
-        const sptr<IRemoteObject>& callerToken
+        const sptr<IAnsDialogCallback>& callback,
+        const sptr<IRemoteObject>& callerToken,
+        const bool innerLake
     );
 
     /*
@@ -92,7 +95,20 @@ public:
      * "com.ohos.notificationdialog", caller token is not checked
      * when commonEvent callback is triggered.
      */
-    ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName);
+    ErrCode OnBundleEnabledStatusChanged(DialogStatus status, const std::string& bundleName, const int32_t& uid);
+
+    /*
+     * AddDialogInfo
+     * @return ERR_OK when add Dialog successfully
+     */
+    ErrCode AddDialogInfo(const sptr<NotificationBundleOption>& bundle, const sptr<IAnsDialogCallback>& callback);
+    
+    /*
+     * RemoveDialogInfoByBundleOption
+     * @return void
+     */
+    void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
+        std::unique_ptr<DialogInfo>& dialogInfoRemoved);
 
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
     inline static const std::string NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
@@ -102,16 +118,15 @@ private:
     static bool SetHasPoppedDialog(const sptr<NotificationBundleOption>& bundleOption, bool hasPopped);
 
     // bundle need to be not null
-    bool AddDialogInfoIfNotExist(const sptr<NotificationBundleOption>& bundle, const sptr<AnsDialogCallback>& callback);
-    sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName);
-    // bundle need to be not null
-    void RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
-        std::unique_ptr<DialogInfo>& dialogInfoRemoved);
+    bool AddDialogInfoIfNotExist(
+        const sptr<NotificationBundleOption>& bundle, const sptr<IAnsDialogCallback>& callback);
+    sptr<NotificationBundleOption> GetBundleOptionByBundleName(const std::string& bundleName, const int32_t& uid);
     void RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved);
 
-    bool OnDialogButtonClicked(const std::string& bundleName, bool enabled);
-    bool OnDialogCrashed(const std::string& bundleName);
+    bool OnDialogButtonClicked(const std::string& bundleName, const int32_t& uid, bool enabled);
+    bool OnDialogCrashed(const std::string& bundleName, const int32_t& uid);
     bool OnDialogServiceDestroyed();
+    bool onRemoveBundle(const std::string bundleName, const int32_t& uid);
 
     bool HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption, EnabledDialogStatus status);
     bool HandleAllDialogsClosed();

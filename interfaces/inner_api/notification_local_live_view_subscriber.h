@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef BND_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_LOCAL_LIVE_VIEW_SUBSCRIBER_H
 #define BND_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_LOCAL_LIVE_VIEW_SUBSCRIBER_H
 
-#include "ans_manager_interface.h"
+#include "ians_manager.h"
 #include "ans_subscriber_stub.h"
 #include "ans_subscriber_local_live_view_stub.h"
 #include "notification_request.h"
@@ -67,19 +67,17 @@ private:
         SubscriberLocalLiveViewImpl(NotificationLocalLiveViewSubscriber &subscriber);
         ~SubscriberLocalLiveViewImpl() {};
 
-        void OnConnected() override;
+        ErrCode OnConnected() override;
 
-        void OnDisconnected() override;
+        ErrCode OnDisconnected() override;
 
-        void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption) override;
+        ErrCode OnResponse(int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption) override;
 
-        bool GetAnsManagerProxy();
+        sptr<IAnsManager> GetAnsManagerProxy();
 
     public:
         NotificationLocalLiveViewSubscriber &subscriber_;
         sptr<DeathRecipient> recipient_ {nullptr};
-        sptr<AnsManagerInterface> proxy_ {nullptr};
-        std::mutex mutex_ {};
     };
 
 private:

@@ -17,6 +17,7 @@
 
 #include <regex>
 #include <string>
+#include <sstream>
 
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
@@ -25,7 +26,9 @@
 #include "hitrace_meter_adapter.h"
 #include "os_account_manager.h"
 #include "ipc_skeleton.h"
-
+#include "bundle_manager_helper.h"
+#include "notification_analytics_util.h"
+#include "notification_config_parse.h"
 #include "uri.h"
 namespace OHOS {
 namespace Notification {
@@ -87,7 +90,7 @@ const static std::string KEY_BUNDLE_IMPORTANCE = "importance";
 /**
  * Indicates that disturbe key which bundle show badge.
  */
-const static std::string KEY_BUNDLE_SHOW_BADGE = "showBadge";
+const static std::string KEY_BUNDLE_SHOW_BADGE = "showBadgeEnable";
 
 /**
  * Indicates that disturbe key which bundle total badge num.
@@ -102,12 +105,17 @@ const static std::string KEY_BUNDLE_ENABLE_NOTIFICATION = "enabledNotification";
 /**
  * Indicates that disturbe key which bundle enable notification.
  */
-const static std::string KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION = "enabledNotificationDistributed";
+const static std::string KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION = "enabledDistributedNotification";
 
 /**
  * Indicates that disturbe key which bundle enable notification.
  */
 const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartReminder";
+
+/**
+ * Indicates that disturbe key which bundle enable notification.
+ */
+const static std::string KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION = "enabledSlotDistributedNotification";
 
 /**
  * Indicates that disturbe key which bundle popped dialog.
@@ -222,130 +230,27 @@ const static std::string KEY_REMINDER_MODE = "reminderMode";
 constexpr char RELATIONSHIP_JSON_KEY_SERVICE[] = "service";
 constexpr char RELATIONSHIP_JSON_KEY_APP[] = "app";
 
-const std::map<std::string,
-    std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
-    NotificationPreferencesDatabase::slotMap_ = {
-        {
-            KEY_SLOT_DESCRIPTION,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotDescription, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_LEVEL,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotLevel, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_SHOW_BADGE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotShowBadge, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLE_LIGHT,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnableLight, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLE_VRBRATION,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnableVrbration, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_LED_LIGHT_COLOR,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotLedLightColor, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_LOCKSCREEN_VISIBLENESS,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotLockscreenVisibleness, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_SOUND,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotSound, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_VIBRATION_STYLE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotVibrationSytle, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLE_BYPASS_DND,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnableBypassDnd, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_ENABLED,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotEnabled, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_SLOTFLGS_TYPE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotFlags, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_AUTHORIZED_STATUS,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthorizedStatus, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_SLOT_AUTH_HINT_CNT,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotAuthHitnCnt, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_REMINDER_MODE,
-            std::bind(&NotificationPreferencesDatabase::ParseSlotReminderMode, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-};
+const static std::string KEY_CLONE_LABEL = "label_ans_clone_";
 
-const std::map<std::string,
-    std::function<void(NotificationPreferencesDatabase *, NotificationPreferencesInfo::BundleInfo &, std::string &)>>
-    NotificationPreferencesDatabase::bundleMap_ = {
-        {
-            KEY_BUNDLE_NAME,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleName, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_IMPORTANCE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleImportance, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_SHOW_BADGE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleShowBadge, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_BADGE_TOTAL_NUM,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleBadgeNum, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_ENABLE_NOTIFICATION,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleEnableNotification, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_POPPED_DIALOG,
-            std::bind(&NotificationPreferencesDatabase::ParseBundlePoppedDialog, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_UID,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleUid, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3),
-        },
-        {
-            KEY_BUNDLE_SLOTFLGS_TYPE,
-            std::bind(&NotificationPreferencesDatabase::ParseBundleSlotFlags, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3),
-        },
-};
+const static std::string KEY_REMOVE_SLOT_FLAG = "label_ans_remove_";
+
+const static std::string KEY_REMOVED_FLAG = "1";
+
+const static std::string KEY_SECOND_REMOVED_FLAG = "2";
+
+/**
+ * Indicates hashCode rule.
+ */
+const static std::string KEY_HASH_CODE_RULE = "hashCodeRule";
+
+const static std::string CLONE_BUNDLE = "bundle_";
+const static std::string CLONE_PROFILE = "profile_";
+const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
+constexpr int32_t ZERO_USER_ID = 0;
+const static std::string KEY_SUBSCRIBER_EXISTED_FLAG = "existFlag";
+const static int32_t DISTRIBUTED_KEY_NUM = 4;
+const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
+const static int32_t DISTRIBUTED_KEY_UID_INDEX = 2;
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
@@ -437,6 +342,20 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     return result;
 }
 
+bool NotificationPreferencesDatabase::IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return false;
+    }
+    std::string bundleKey = bundleOption->GetBundleName().append(std::to_string(bundleOption->GetUid()));
+    std::string key = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
+    std::string value;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    int32_t result = rdbDataManager_->QueryData(key, value, userId);
+    return  (result == NativeRdb::E_OK) || (!value.empty());
+}
+
 bool NotificationPreferencesDatabase::PutShowBadge(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enable)
 {
@@ -444,6 +363,8 @@ bool NotificationPreferencesDatabase::PutShowBadge(
         ANS_LOGE("Bundle name is nullptr.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, showBadge[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), enable);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
@@ -462,6 +383,8 @@ bool NotificationPreferencesDatabase::PutImportance(
         ANS_LOGE("Bundle name is empty.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, importance[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), importance);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
@@ -480,6 +403,8 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
         ANS_LOGE("Bundle name is blank.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, totalBadgeNum[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), totalBadgeNum);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
@@ -493,12 +418,13 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
 {
-    ANS_LOGD("%{public}s, enabled[%{public}d]", __FUNCTION__, enabled);
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is null.");
         return false;
     }
 
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, enabled[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), enabled);
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
@@ -535,6 +461,8 @@ bool NotificationPreferencesDatabase::PutSlotFlags(NotificationPreferencesInfo::
         return false;
     }
 
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, slotFlags[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), slotFlags);
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags,
         bundleInfo.GetBundleUid());
@@ -548,6 +476,8 @@ bool NotificationPreferencesDatabase::PutHasPoppedDialog(
         ANS_LOGE("Bundle name is null.");
         return false;
     }
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, hasPopped[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), hasPopped);
 
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
@@ -617,7 +547,7 @@ bool NotificationPreferencesDatabase::AddDoNotDisturbProfiles(
             return false;
         }
         std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
-            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int64_t)profile->GetProfileId()));
         values[key] = profile->ToJson();
     }
     int32_t result = rdbDataManager_->InsertBatchData(values, userId);
@@ -646,10 +576,10 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbProfiles(
             return false;
         }
         std::string key = std::string().append(KEY_DO_NOT_DISTURB_ID).append(KEY_UNDER_LINE).append(
-            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int32_t)profile->GetProfileId()));
+            std::to_string(userId)).append(KEY_UNDER_LINE).append(std::to_string((int64_t)profile->GetProfileId()));
         keys.push_back(key);
     }
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("Delete do not disturb profiles failed.");
         return false;
@@ -720,6 +650,7 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
                 bundleInfo.SetBundleName(bundleName);
                 bundleInfo.SetBundleUid(bundleUid);
+                bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleName, bundleUid));
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
             }
@@ -769,7 +700,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     return true;
 }
 
-bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info)
+bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreferencesInfo &info, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (!CheckRdbStore()) {
@@ -777,23 +708,59 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         return false;
     }
     std::vector<int> activeUserId;
-    OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
+    if (userId == -1) {
+        OsAccountManagerHelper::GetInstance().GetAllActiveOsAccount(activeUserId);
+    } else {
+        activeUserId.push_back(userId);
+    }
+
     for (auto iter : activeUserId) {
         GetDoNotDisturbType(info, iter);
         GetDoNotDisturbBeginDate(info, iter);
         GetDoNotDisturbEndDate(info, iter);
         GetEnableAllNotification(info, iter);
         GetDoNotDisturbProfile(info, iter);
-
-        std::unordered_map<std::string, std::string> values;
-        int32_t result = rdbDataManager_->QueryDataBeginWithKey(KEY_BUNDLE_LABEL, values, iter);
-        if (result == NativeRdb::E_ERROR) {
-            ANS_LOGE("Get Bundle Info failed.");
-            continue;
-        }
-        ParseBundleFromDistureDB(info, values, iter);
     }
-    
+    GetDisableNotificationInfo(info);
+
+    return true;
+}
+
+
+bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundleOption> &bundleOption,
+    NotificationPreferencesInfo::BundleInfo &bundleInfo)
+{
+    std::string bundleDBKey = KEY_BUNDLE_LABEL + bundleOption->GetBundleName() +
+        std::to_string(bundleOption->GetUid());
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    std::string bundleKey;
+    int32_t result = rdbDataManager_->QueryData(bundleDBKey, bundleKey, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get Bundle Info failed,key:%{public}s", bundleDBKey.c_str());
+        return false;
+    }
+    ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());
+    std::unordered_map<std::string, std::string> bundleEntries;
+    rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
+    ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
+    std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
+    bool badgeEnableExist = false;
+    for (auto bundleEntry : bundleEntries) {
+        if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
+            ParseSlotFromDisturbeDB(bundleInfo, bundleKey, bundleEntry, userId);
+        } else {
+            ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, bundleEntry);
+        }
+
+        if (keyStr.compare(bundleEntry.first) == 0) {
+            badgeEnableExist = true;
+        }
+    }
+
+    if (!badgeEnableExist) {
+        bundleInfo.SetIsShowBadge(static_cast<bool>(true));
+    }
     return true;
 }
 
@@ -835,7 +802,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(
 
     std::string bundleDBKey = KEY_BUNDLE_LABEL + KEY_BUNDLE_NAME + KEY_UNDER_LINE + bundleKey;
     keys.push_back(bundleDBKey);
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -872,7 +839,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
         keys.push_back(iter.first);
     }
 
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -901,14 +868,60 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
     return HandleDataBaseMap(datas, bundleOption);
 }
 
+bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t userId,
+    const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE);
+    ANS_LOGD("key is %{public}s", key.c_str());
+    std::unordered_map<std::string, std::string> values;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(key, values, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        return true;
+    } else if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Get failed, key %{public}s,result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+
+    for (auto& Item : values) {
+        if (!static_cast<bool>(StringToInt(Item.second))) {
+            continue;
+        }
+        std::vector<std::string> result;
+        StringSplit(Item.first, '-', result);
+        if (result.size() != DISTRIBUTED_KEY_NUM && result.back() != deviceType) {
+            continue;
+        }
+        int32_t uid = StringToInt(result[DISTRIBUTED_KEY_UID_INDEX]);
+        NotificationBundleOption bundleInfo(result[DISTRIBUTED_KEY_BUNDLE_INDEX], uid);
+        bundleOption.push_back(bundleInfo);
+        result.clear();
+    }
+    return true;
+}
+
+void NotificationPreferencesDatabase::StringSplit(const std::string content, char delim,
+    std::vector<std::string>& result) const
+{
+    std::string token;
+    std::istringstream in(content);
+    while (std::getline(in, token, delim)) {
+        result.push_back(token);
+    }
+}
+
 bool NotificationPreferencesDatabase::HandleDataBaseMap(
     const std::unordered_map<std::string, std::string> &datas, std::vector<NotificationBundleOption> &bundleOption)
 {
     std::regex matchBundlenamePattern("^ans_bundle_(.*)_name$");
     std::smatch match;
-    std::vector<int32_t> ids;
+    int32_t currentUserId = SUBSCRIBE_USER_INIT;
     ErrCode result = ERR_OK;
-    result = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    result = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
     if (result != ERR_OK) {
         ANS_LOGE("Get account id fail");
         return false;
@@ -933,13 +946,12 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
                 continue;
             }
             int userid = -1;
-            constexpr int FIRST_USERID = 0;
             result =
-                OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
+                OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(StringToInt(uidItem->second), userid);
             if (result != ERR_OK) {
                 return false;
             }
-            if (userid != ids[FIRST_USERID]) {
+            if (userid != currentUserId) {
                 continue;
             }
             NotificationBundleOption obj(value, StringToInt(uidItem->second));
@@ -976,7 +988,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(
         keys.push_back(iter.first);
     }
 
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     return (result == NativeRdb::E_OK);
 }
 
@@ -1113,12 +1125,22 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPrefe
         rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
         ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
         NotificationPreferencesInfo::BundleInfo bunldeInfo;
+        std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
+        bool badgeEnableExist = false;
         for (auto bundleEntry : bundleEntries) {
             if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
                 ParseSlotFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry, userId);
             } else {
                 ParseBundlePropertyFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry);
             }
+
+            if (keyStr.compare(bundleEntry.first) == 0) {
+                badgeEnableExist = true;
+            }
+        }
+
+        if (!badgeEnableExist) {
+            bunldeInfo.SetIsShowBadge(static_cast<bool>(true));
         }
 
         info.SetBundleInfoFromDb(bunldeInfo, bundleKey);
@@ -1151,10 +1173,29 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
     std::string typeStr = FindLastString(GenerateBundleKey(bundleKey), entry.first);
     std::string valueStr = entry.second;
 
-    auto iter = bundleMap_.find(typeStr);
-    if (iter != bundleMap_.end()) {
-        auto func = iter->second;
-        func(this, bundleInfo, valueStr);
+    if (typeStr.compare(KEY_BUNDLE_NAME) == 0) {
+        return ParseBundleName(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_IMPORTANCE) == 0) {
+        return ParseBundleImportance(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_SHOW_BADGE) == 0) {
+        return ParseBundleShowBadgeEnable(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_BADGE_TOTAL_NUM) == 0) {
+        return ParseBundleBadgeNum(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_ENABLE_NOTIFICATION) == 0) {
+        return ParseBundleEnableNotification(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_POPPED_DIALOG) == 0) {
+        return ParseBundlePoppedDialog(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_UID) == 0) {
+        return ParseBundleUid(bundleInfo, valueStr);
+    }
+    if (typeStr.compare(KEY_BUNDLE_SLOTFLGS_TYPE) == 0) {
+        return ParseBundleSlotFlags(bundleInfo, valueStr);
     }
 }
 
@@ -1167,13 +1208,63 @@ void NotificationPreferencesDatabase::ParseSlot(const std::string &findString, s
         entry.first.c_str(),
         typeStr.c_str(),
         entry.second.c_str());
+    SetSoltProperty(slot, typeStr, valueStr, findString, userId);
+}
 
-    auto iter = slotMap_.find(typeStr);
-    if (iter != slotMap_.end()) {
-        auto func = iter->second;
-        func(this, slot, valueStr);
+void NotificationPreferencesDatabase::SetSoltProperty(sptr<NotificationSlot> &slot, std::string &typeStr,
+    std::string &valueStr, const std::string &findString, const int32_t &userId)
+{
+    if (typeStr.compare(KEY_SLOT_DESCRIPTION) == 0) {
+        return ParseSlotDescription(slot, valueStr);
     }
+    if (typeStr.compare(KEY_SLOT_LEVEL) == 0) {
+        return ParseSlotLevel(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_SHOW_BADGE) == 0) {
+        return ParseSlotShowBadge(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLE_LIGHT) == 0) {
+        return ParseSlotEnableLight(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLE_VRBRATION) == 0) {
+        return ParseSlotEnableVrbration(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_LED_LIGHT_COLOR) == 0) {
+        return ParseSlotLedLightColor(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_LOCKSCREEN_VISIBLENESS) == 0) {
+        return ParseSlotLockscreenVisibleness(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_SOUND) == 0) {
+        return ParseSlotSound(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_VIBRATION_STYLE) == 0) {
+        return ParseSlotVibrationSytle(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLE_BYPASS_DND) == 0) {
+        return ParseSlotEnableBypassDnd(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_ENABLED) == 0) {
+        return ParseSlotEnabled(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_SLOTFLGS_TYPE) == 0) {
+        return ParseSlotFlags(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_AUTHORIZED_STATUS) == 0) {
+        return ParseSlotAuthorizedStatus(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_SLOT_AUTH_HINT_CNT) == 0) {
+        return ParseSlotAuthHitnCnt(slot, valueStr);
+    }
+    ExecuteDisturbeDB(slot, typeStr, valueStr, findString, userId);
+}
 
+void NotificationPreferencesDatabase::ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr,
+    std::string &valueStr, const std::string &findString, const int32_t &userId)
+{
+    if (typeStr.compare(KEY_REMINDER_MODE) == 0) {
+        return ParseSlotReminderMode(slot, valueStr);
+    }
     if (!typeStr.compare(KEY_SLOT_VIBRATION_STYLE)) {
         GetValueFromDisturbeDB(findString + KEY_SLOT_ENABLE_VRBRATION, userId,
             [&](std::string &value) { ParseSlotEnableVrbration(slot, value); });
@@ -1216,7 +1307,7 @@ int32_t NotificationPreferencesDatabase::StringToInt(const std::string &str) con
 {
     int32_t value = 0;
     if (!str.empty()) {
-        value = stoi(str, nullptr);
+        value = atoi(str.c_str());
     }
     return value;
 }
@@ -1225,7 +1316,7 @@ int64_t NotificationPreferencesDatabase::StringToInt64(const std::string &str) c
 {
     int64_t value = 0;
     if (!str.empty()) {
-        value = stoll(str, nullptr);
+        value = atoll(str.c_str());
     }
     return value;
 }
@@ -1315,7 +1406,7 @@ void NotificationPreferencesDatabase::ParseBundleImportance(
     bundleInfo.SetImportance(static_cast<NotificationSlot::NotificationLevel>(StringToInt(value)));
 }
 
-void NotificationPreferencesDatabase::ParseBundleShowBadge(
+void NotificationPreferencesDatabase::ParseBundleShowBadgeEnable(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleShowBadge bundle show badge is %{public}s.", value.c_str());
@@ -1655,7 +1746,7 @@ bool NotificationPreferencesDatabase::RemoveDoNotDisturbDate(const int32_t userI
         endDateKey
     };
 
-    int32_t result = rdbDataManager_->DeleteBathchData(keys, userId);
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete DoNotDisturb date failed.");
         return false;
@@ -1693,7 +1784,7 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
     }
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
-    std::string key = std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(
+    std::string key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(
         KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
     ANS_LOGD("key is %{public}s", key.c_str());
     int32_t result = NativeRdb::E_OK;
@@ -1712,7 +1803,7 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
         keys.push_back(iter.first);
     }
 
-    result = rdbDataManager_->DeleteBathchData(keys, userId);
+    result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("delete bundle Info failed.");
         return false;
@@ -1724,12 +1815,17 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
 int32_t NotificationPreferencesDatabase::SetKvToDb(
     const std::string &key, const std::string &value, const int32_t &userId)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_2);
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");
+        message.Message("RdbStore is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NativeRdb::E_ERROR;
     }
     int32_t result = rdbDataManager_->InsertData(key, value, userId);
     if (result != NativeRdb::E_OK) {
+        message.Message("Set key failed: " + key);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
@@ -1742,12 +1838,17 @@ int32_t NotificationPreferencesDatabase::SetKvToDb(
 int32_t NotificationPreferencesDatabase::SetByteToDb(
     const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_2);
     if (!CheckRdbStore()) {
+        message.Message("RdbStore is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("RdbStore is nullptr.");
         return NativeRdb::E_ERROR;
     }
     int32_t result = rdbDataManager_->InsertData(key, value, userId);
     if (result != NativeRdb::E_OK) {
+        message.Message("Set key failed: " + key);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Set key: %{public}s failed, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
@@ -1765,7 +1866,7 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
 
     int32_t result = rdbDataManager_->QueryData(key, value, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get key-value failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        ANS_LOGE("Get key-value failed, key %{public}s, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
 
@@ -1784,7 +1885,7 @@ int32_t NotificationPreferencesDatabase::GetByteFromDb(
 
     int32_t result = rdbDataManager_->QueryData(key, value, userId);
     if (result != NativeRdb::E_OK) {
-        ANS_LOGE("Get byte failed, key %{public}s, result %{pubic}d.", key.c_str(), result);
+        ANS_LOGE("Get byte failed, key %{public}s, result %{public}d.", key.c_str(), result);
         return NativeRdb::E_ERROR;
     }
 
@@ -1826,6 +1927,23 @@ int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key, 
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::DeleteBatchKvFromDb(const std::vector<std::string> &keys,
+    const int32_t &userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete key-value failed, result %{public}d.", result);
+        return NativeRdb::E_ERROR;
+    }
+
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationPreferencesDatabase::DropUserTable(const int32_t userId)
 {
     if (!CheckRdbStore()) {
@@ -1856,6 +1974,10 @@ bool NotificationPreferencesDatabase::IsAgentRelationship(const std::string &age
     }
     ANS_LOGD("The agent relationship is :%{public}s.", agentShip.c_str());
     nlohmann::json jsonAgentShip = nlohmann::json::parse(agentShip, nullptr, false);
+    if (jsonAgentShip.is_null() || jsonAgentShip.empty()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
     if (jsonAgentShip.is_discarded() || !jsonAgentShip.is_array()) {
         ANS_LOGE("Parse agent ship failed due to data is discarded or not array");
         return false;
@@ -1895,7 +2017,7 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
 {
-    return std::string(KEY_BUNDLE_DISTRIBUTED_ENABLE_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
+    return std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE).append(
         std::string(bundleInfo.GetBundleName()).append(KEY_MIDDLE_LINE).append(std::to_string(
             bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
 }
@@ -1954,6 +2076,16 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(const std::str
         deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
 }
 
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(
+    const NotificationConstant::SlotType &slotType,
+    const std::string &deviceType,
+    const int32_t userId) const
+{
+    return std::string(KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION).append(KEY_MIDDLE_LINE)
+        .append(deviceType).append(KEY_MIDDLE_LINE)
+        .append(std::to_string(static_cast<int32_t>(slotType))).append(KEY_MIDDLE_LINE)
+        .append(std::to_string(userId));
+}
 
 bool NotificationPreferencesDatabase::SetSmartReminderEnabled(const std::string deviceType, const bool &enabled)
 {
@@ -1988,7 +2120,60 @@ bool NotificationPreferencesDatabase::IsSmartReminderEnabled(const std::string d
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
-                enabled = false;
+                GetSmartReminderEnableFromCCM(deviceType, enabled);
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s, %{public}d,deviceType:%{public}s,enabled[%{public}d]",
+        __FUNCTION__, slotType, deviceType.c_str(), enabled);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(slotType, deviceType, userId);
+    ANS_LOGD("%{public}s, key:%{public}s,enabled[%{public}d]", __FUNCTION__, key.c_str(), enabled);
+    int32_t result = PutDataToDB(key, enabled, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s, %{public}d,deviceType:%{public}s]",
+        __FUNCTION__, slotType, deviceType.c_str());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateBundleLablel(slotType, deviceType, userId);
+    bool result = false;
+    enabled = false;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                enabled = true;
                 break;
             }
             case NativeRdb::E_OK: {
@@ -2018,6 +2203,505 @@ std::string NotificationPreferencesDatabase::GetAdditionalConfig(const std::stri
     }
     ANS_LOGD("The additional config key is :%{public}s, value is :%{public}s.", key.c_str(), configValue.c_str());
     return configValue;
+}
+
+bool NotificationPreferencesDatabase::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager == nullptr) {
+        return false;
+    }
+    return bundleManager->CheckApiCompatibility(bundleName, uid);
+}
+
+bool NotificationPreferencesDatabase::UpdateBundlePropertyToDisturbeDB(int32_t userId,
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string value;
+    std::string bundleLabelKey = KEY_BUNDLE_LABEL + GenerateBundleLablel(bundleInfo);
+    int32_t result = rdbDataManager_->QueryData(bundleLabelKey, value, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        if (rdbDataManager_->InsertData(bundleLabelKey, GenerateBundleLablel(bundleInfo), userId)
+            != NativeRdb::E_OK) {
+            ANS_LOGE("Store bundle name %{public}s to db is failed.", bundleLabelKey.c_str());
+            return false;
+        }
+    }
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET || result == NativeRdb::E_OK) {
+        return PutBundlePropertyValueToDisturbeDB(bundleInfo);
+    }
+    ANS_LOGW("Query bundle name %{public}s failed %{public}d.", bundleLabelKey.c_str(), result);
+    return false;
+}
+
+bool NotificationPreferencesDatabase::UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
+    const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots)
+{
+    if (bundleName.empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+    if (slots.empty()) {
+        ANS_LOGI("Slot is empty.");
+        return true;
+    }
+
+    std::string bundleKey = bundleName + std::to_string(bundleUid);
+    std::unordered_map<std::string, std::string> values;
+    for (auto& slot : slots) {
+        GenerateSlotEntry(bundleKey, slot, values);
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    int32_t result = rdbDataManager_->InsertBatchData(values, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::DelCloneProfileInfo(const int32_t &userId,
+    const sptr<NotificationDoNotDisturbProfile>& info)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::string key = KEY_CLONE_LABEL + CLONE_PROFILE + std::to_string(info->GetProfileId());
+    int32_t result = rdbDataManager_->DeleteData(key, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete clone profile Info failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::DelBatchCloneProfileInfo(const int32_t &userId,
+    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
+{
+    std::string cloneProfile = KEY_CLONE_LABEL + CLONE_PROFILE;
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    for (auto info : profileInfo) {
+        std::string key = cloneProfile + std::to_string(info->GetProfileId());
+        keys.emplace_back(key);
+    }
+
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete clone bundle Info failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::UpdateBatchCloneProfileInfo(const int32_t &userId,
+    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
+{
+    std::string cloneProfile = KEY_CLONE_LABEL + CLONE_PROFILE;
+    std::unordered_map<std::string, std::string> values;
+    for (auto& info : profileInfo) {
+        std::string key = cloneProfile + std::to_string(info->GetProfileId());
+        std::string jsonString = info->ToJson();
+        values.emplace(key, jsonString);
+    }
+    return UpdateCloneToDisturbeDB(userId, values);
+}
+
+void NotificationPreferencesDatabase::GetAllCloneProfileInfo(const int32_t &userId,
+    std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo)
+{
+    std::string cloneProfile = KEY_CLONE_LABEL + CLONE_PROFILE;
+    std::unordered_map<std::string, std::string> values;
+    if (GetBatchKvsFromDb(cloneProfile, values, userId) != ERR_OK) {
+        ANS_LOGW("Get clone bundle map info failed %{public}d.", userId);
+        return;
+    }
+
+    for (auto item : values) {
+        sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
+        if (profile == nullptr) {
+            ANS_LOGW("Get clone profile failed.");
+            continue;
+        }
+        profile->FromJson(item.second);
+        profilesInfo.push_back(profile);
+    }
+}
+
+void NotificationPreferencesDatabase::GetAllCloneBundleInfo(const int32_t &userId,
+    std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
+{
+    std::unordered_map<std::string, std::string> values;
+    if (GetBatchKvsFromDb(KEY_CLONE_LABEL + CLONE_BUNDLE, values, userId) != ERR_OK) {
+        ANS_LOGW("Get clone bundle map info failed %{public}d.", userId);
+        return;
+    }
+
+    for (auto item : values) {
+        NotificationCloneBundleInfo bundleInfo;
+        if (item.second.empty() || !nlohmann::json::accept(item.second)) {
+            ANS_LOGE("Invalid accept json");
+            continue;
+        }
+        nlohmann::json jsonObject = nlohmann::json::parse(item.second, nullptr, false);
+        if (jsonObject.is_null() || !jsonObject.is_object()) {
+            ANS_LOGE("Invalid JSON object");
+            continue;
+        }
+        bundleInfo.FromJson(jsonObject);
+        cloneBundleInfo.emplace_back(bundleInfo);
+    }
+}
+
+bool NotificationPreferencesDatabase::DelBatchCloneBundleInfo(const int32_t &userId,
+    const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
+{
+    std::string cloneBundle = KEY_CLONE_LABEL + CLONE_BUNDLE;
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    for (auto bundleInfo : cloneBundleInfo) {
+        std::string key = cloneBundle + bundleInfo.GetBundleName() +
+            std::to_string(bundleInfo.GetAppIndex());
+        keys.emplace_back(key);
+    }
+    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete clone bundle Info failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::UpdateBatchCloneBundleInfo(const int32_t &userId,
+    const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo)
+{
+    std::string cloneBundle = KEY_CLONE_LABEL + CLONE_BUNDLE;
+    std::unordered_map<std::string, std::string> values;
+    for (auto& info : cloneBundleInfo) {
+        nlohmann::json jsonNode;
+        std::string key = cloneBundle + info.GetBundleName() + std::to_string(info.GetAppIndex());
+        info.ToJson(jsonNode);
+        values.emplace(key, jsonNode.dump());
+    }
+    return UpdateCloneToDisturbeDB(userId, values);
+}
+
+bool NotificationPreferencesDatabase::DelCloneBundleInfo(const int32_t &userId,
+    const NotificationCloneBundleInfo& cloneBundleInfo)
+{
+    std::string cloneBundle = KEY_CLONE_LABEL + CLONE_BUNDLE;
+    std::string key = cloneBundle + cloneBundleInfo.GetBundleName() +
+        std::to_string(cloneBundleInfo.GetAppIndex());
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    int32_t result = rdbDataManager_->DeleteData(key, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("delete clone bundle Info failed.");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::UpdateCloneToDisturbeDB(const int32_t &userId,
+    const std::unordered_map<std::string, std::string> values)
+{
+    if (values.empty() || !CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    int32_t result = rdbDataManager_->InsertBatchData(values, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
+{
+    if (notificationDisable == nullptr || !CheckRdbStore()) {
+        ANS_LOGE("notificationDisable or rdbStore is nullptr");
+        return false;
+    }
+    if (notificationDisable->GetBundleList().empty()) {
+        ANS_LOGE("the bundle list is empty");
+        return false;
+    }
+    std::string value = notificationDisable->ToJson();
+    int32_t result = rdbDataManager_->InsertData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("rdbStore is nullptr");
+        return false;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("query disable data fail");
+        return false;
+    }
+    notificationDisable.FromJson(value);
+    return true;
+}
+
+void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPreferencesInfo &info)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("rdbStore is nullptr");
+        return;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("query disable data failed");
+        return;
+    }
+    info.AddDisableNotificationInfo(value);
+}
+
+bool NotificationPreferencesDatabase::IsDistributedEnabledEmptyForBundle(
+    const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("bundle name is empty.");
+        return true;
+    }
+
+    std::string key = GenerateBundleLablel(bundleInfo, deviceType);
+    bool result = true;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        if (status == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+            result = false;
+        }
+    });
+    return result;
+}
+
+void NotificationPreferencesDatabase::GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!isCachedSmartReminderEnableList_) {
+        if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetSmartReminderEnableList(
+            smartReminderEnableList_)) {
+            ANS_LOGE("GetSmartReminderEnableList failed from json");
+            enabled = false;
+            return;
+        }
+        isCachedSmartReminderEnableList_ = true;
+    }
+
+    if (smartReminderEnableList_.empty()) {
+        ANS_LOGD("smartReminderEnableList_ is empty");
+        enabled = false;
+        return;
+    }
+
+    if (std::find(smartReminderEnableList_.begin(), smartReminderEnableList_.end(), deviceType) !=
+        smartReminderEnableList_.end()) {
+        enabled = true;
+    } else {
+        enabled = false;
+    }
+    ANS_LOGD("get %{public}s smartReminderEnable is %{public}d from json", deviceType.c_str(), enabled);
+}
+
+std::string NotificationPreferencesDatabase::GenerateSubscriberExistFlagKey(
+    const std::string& deviceType, const int32_t userId) const
+{
+    return std::string(KEY_SUBSCRIBER_EXISTED_FLAG)
+        .append(KEY_MIDDLE_LINE)
+        .append(deviceType)
+        .append(KEY_MIDDLE_LINE)
+        .append(std::to_string(userId));
+}
+
+bool NotificationPreferencesDatabase::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s, existFlag[%{public}d]", __FUNCTION__, deviceType.c_str(), existFlag);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateSubscriberExistFlagKey(deviceType, userId);
+    int32_t result = PutDataToDB(key, existFlag, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag)
+{
+    ANS_LOGD("%{public}s, deviceType:%{public}s, existFlag[%{public}d]", __FUNCTION__, deviceType.c_str(), existFlag);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateSubscriberExistFlagKey(deviceType, userId);
+    bool result = false;
+    existFlag = false;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                existFlag = static_cast<bool>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::SetHashCodeRule(const int32_t uid, const uint32_t type)
+{
+    ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, type);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    ANS_LOGI("SetHashCodeRule userId = %{public}d", userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    std::string key = GenerateHashCodeGenerate(uid);
+    ANS_LOGD("%{public}s, key:%{public}s,type = %{public}d", __FUNCTION__, key.c_str(), type);
+    int32_t result = PutDataToDB(key, type, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
+{
+    ANS_LOGD("%{public}s, %{public}d,", __FUNCTION__, uid);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return 0;
+    }
+
+    std::string key = GenerateHashCodeGenerate(uid);
+    ANS_LOGD("%{public}s, key:%{public}s", __FUNCTION__, key.c_str());
+    uint32_t result = 0;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = StringToInt(value);
+                break;
+            }
+            default:
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Current bundle option is null");
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+    std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
+        KEY_UNDER_LINE + std::to_string(slotType);
+    int32_t result = rdbDataManager_->InsertData(key, KEY_SECOND_REMOVED_FLAG, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Current bundle option is null");
+        return true;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGW("Current user acquisition failed");
+        return true;
+    }
+
+    std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
+        KEY_UNDER_LINE + std::to_string(slotType);
+    bool existFlag = true;
+    std::string result;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                existFlag = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = value;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
+    if (!existFlag || result == KEY_REMOVED_FLAG) {
+        return false;
+    }
+    return true;
+}
+
+std::string NotificationPreferencesDatabase::GenerateHashCodeGenerate(const int32_t uid)
+{
+    return std::string(KEY_HASH_CODE_RULE).append(KEY_MIDDLE_LINE).append(std::to_string(uid));
 }
 }  // namespace Notification
 }  // namespace OHOS

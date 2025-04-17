@@ -26,6 +26,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info);
 napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info);
 napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info);
 napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info);
+napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_DISTURB_MODE_H

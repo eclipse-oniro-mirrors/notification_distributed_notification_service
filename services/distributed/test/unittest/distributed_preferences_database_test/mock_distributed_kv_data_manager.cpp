@@ -37,7 +37,7 @@ Status DistributedKvDataManager::GetSingleKvStore(const Options &options, const 
     return Status::INVALID_ARGUMENT;
 }
 
-Status DistributedKvDataManager::CloseKvStore(const AppId &appId, const StoreId &storeId)
+Status DistributedKvDataManager::CloseKvStore(const AppId &appId, const StoreId &storeId, int32_t subUser)
 {
     if (false == g_mockCloseKvStoreRet) {
         return Status::INVALID_ARGUMENT;
@@ -45,7 +45,8 @@ Status DistributedKvDataManager::CloseKvStore(const AppId &appId, const StoreId 
     return Status::SUCCESS;
 }
 
-Status DistributedKvDataManager::DeleteKvStore(const AppId &appId, const StoreId &storeId, const std::string &path)
+Status DistributedKvDataManager::DeleteKvStore(const AppId &appId, const StoreId &storeId, const std::string &path,
+    int32_t subUser)
 {
     return Status::INVALID_ARGUMENT;
 }

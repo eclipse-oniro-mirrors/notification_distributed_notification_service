@@ -31,6 +31,12 @@ const std::string EVENT_PARAM_NOTIFICATION_ID = "NOTIFICATION_ID";
 const std::string EVENT_PARAM_NOTIFICATION_LABEL = "NOTIFICATION_LABEL";
 const std::string EVENT_PARAM_CONTENT_TYPE = "CONTENT_TYPE";
 const std::string EVENT_PARAM_OPERATE_FLAG = "OPERATE_FLAG";
+const std::string EVENT_MESSAGE_TYPE = "MESSAGE_TYPE";
+const std::string EVENT_REASON = "REASON";
+const std::string EVENT_PARAM_REASON = "REASON";
+const std::string EVENT_PARAM_CLASS = "CLASS";
+const std::string EVENT_PARAM_REMINDERFLAGS = "REMINDERFLAGS";
+const std::string EVENT_PARAM_CONTROLFLAGS = "CONTROLFLAGS";
 } // namespace
 
 void EventReport::SendHiSysEvent(const std::string &eventName, const EventInfo &eventInfo)
@@ -60,6 +66,9 @@ std::unordered_map<std::string, void (*)(const EventInfo& eventInfo)> EventRepor
     }},
     {PUBLISH_ERROR, [](const EventInfo& eventInfo) {
         InnerSendPublishErrorEvent(eventInfo);
+    }},
+    {EVENT_NOTIFICATION_ERROR, [](const EventInfo& eventInfo) {
+        InnerSendNotificationSystemErrorEvent(eventInfo);
     }},
     {FLOW_CONTROL_OCCUR, [](const EventInfo& eventInfo) {
         InnerSendFlowControlOccurEvent(eventInfo);
@@ -129,7 +138,7 @@ void EventReport::InnerSendPublishErrorEvent(const EventInfo &eventInfo)
 {
     InnerEventWrite(
         PUBLISH_ERROR,
-        HiviewDFX::HiSysEvent::EventType::FAULT,
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
         EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
         EVENT_PARAM_CONTENT_TYPE, eventInfo.contentType,
         EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
@@ -145,6 +154,16 @@ void EventReport::InnerSendFlowControlOccurEvent(const EventInfo &eventInfo)
         EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
         EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_PARAM_UID, eventInfo.uid);
+}
+
+void EventReport::InnerSendNotificationSystemErrorEvent(const EventInfo &eventInfo)
+{
+    InnerEventWrite(
+        EVENT_NOTIFICATION_ERROR,
+        HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_MESSAGE_TYPE, eventInfo.messageType,
+        EVENT_PARAM_ERROR_CODE, eventInfo.errCode,
+        EVENT_REASON, eventInfo.reason);
 }
 
 void EventReport::InnerSendSubscribeEvent(const EventInfo &eventInfo)
@@ -209,7 +228,11 @@ void EventReport::InnerSendPublishEvent(const EventInfo &eventInfo)
         EVENT_PARAM_NOTIFICATION_ID, eventInfo.notificationId,
         EVENT_PARAM_CONTENT_TYPE, eventInfo.contentType,
         EVENT_PARAM_BUNDLE_NAME, eventInfo.bundleName,
-        EVENT_PARAM_USER_ID, eventInfo.userId);
+        EVENT_PARAM_USER_ID, eventInfo.userId,
+        EVENT_PARAM_SLOT_TYPE, eventInfo.slotType,
+        EVENT_PARAM_CLASS, eventInfo.classification,
+        EVENT_PARAM_CONTROLFLAGS, eventInfo.notificationControlFlags,
+        EVENT_PARAM_REMINDERFLAGS, eventInfo.reminderFlags);
 }
 
 void EventReport::InnerSendCancelEvent(const EventInfo &eventInfo)

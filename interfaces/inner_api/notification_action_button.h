@@ -205,6 +205,15 @@ public:
     static NotificationActionButton *FromJson(const nlohmann::json &jsonObject);
 
     /**
+     * @brief Convert a NotificationActionButton object from a Json and targetUid.
+     *
+     * @param jsonObject Indicates the Json object.
+     * @return Returns the NotificationActionButton.
+     */
+    static NotificationActionButton *ConvertNotificationActionButton(const int32_t targetUid,
+        const nlohmann::json &jsonObject);
+
+    /**
      * @brief Marshal a object into a Parcel.
      *
      * @param parcel the object into the parcel.

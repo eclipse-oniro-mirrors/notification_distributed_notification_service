@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +12,55 @@
 # limitations under the License.
 
 import("//base/notification/distributed_notification_service/notification.gni")
-import("//build/ohos.gni")
+import("//build/config/components/idl_tool/idl.gni")
+
+idl_gen_interface("swing_call_back_interface") {
+  sources = [ "ISwingCallBack.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+idl_gen_interface("ans_dialog_callback_interface") {
+  sources = [ "IAnsDialogCallback.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+idl_gen_interface("ans_operation_callback_interface") {
+  sources = [ "IAnsOperationCallback.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+idl_gen_interface("ans_subscriber_local_live_view_interface") {
+  sources = [ "IAnsSubscriberLocalLiveView.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+idl_gen_interface("ans_subscriber_interface") {
+  sources = [ "IAnsSubscriber.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+idl_gen_interface("ans_manager_interface") {
+  sources = [ "IAnsManager.idl" ]
+  log_domainid = "0xD001203"
+  log_tag = "Ans"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
 
 group("ans_client") {
   deps = [ ":ans_innerkits" ]
@@ -26,9 +74,121 @@ config("ans_innerkits_public_config") {
     "${interfaces_path}/kits/native",
     "${core_path}/common/include",
     "${core_path}/include",
+    "${target_gen_dir}",
     "//third_party/json/single_include",
   ]
   configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+config("ans_innerkits_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+config("ans_operation_callback_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+config("swing_call_back_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+config("ans_subscriber_local_live_view_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+config("ans_subscriber_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${interfaces_path}/kits/native",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
+}
+
+ohos_source_set("swing_call_back_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":swing_call_back_config" ]
+  output_values = get_target_outputs(":swing_call_back_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":swing_call_back_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("swing_call_back_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":swing_call_back_config" ]
+  output_values = get_target_outputs(":swing_call_back_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":swing_call_back_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
 }
 
 ohos_shared_library("ans_innerkits") {
@@ -46,28 +206,12 @@ ohos_shared_library("ans_innerkits") {
 
   sources = [
     "${core_path}/common/src/ans_convert_enum.cpp",
-    "${core_path}/common/src/ans_log_wrapper.cpp",
-    "${core_path}/common/src/ans_watchdog.cpp",
-    "${core_path}/src/ans_dialog_callback_interface.cpp",
-    "${core_path}/src/ans_dialog_callback_proxy.cpp",
-    "${core_path}/src/ans_dialog_callback_stub.cpp",
     "${core_path}/src/ans_image_util.cpp",
-    "${core_path}/src/ans_manager_death_recipient.cpp",
-    "${core_path}/src/ans_manager_proxy.cpp",
-    "${core_path}/src/ans_manager_proxy_disturb.cpp",
-    "${core_path}/src/ans_manager_proxy_reminder.cpp",
-    "${core_path}/src/ans_manager_proxy_slot.cpp",
-    "${core_path}/src/ans_manager_proxy_subscribe.cpp",
-    "${core_path}/src/ans_manager_proxy_utils.cpp",
-    "${core_path}/src/ans_manager_stub.cpp",
-    "${core_path}/src/ans_manager_stub_invalid.cpp",
     "${core_path}/src/ans_notification.cpp",
-    "${core_path}/src/ans_subscriber_local_live_view_proxy.cpp",
-    "${core_path}/src/ans_subscriber_local_live_view_stub.cpp",
-    "${core_path}/src/ans_subscriber_proxy.cpp",
-    "${core_path}/src/ans_subscriber_stub.cpp",
-    "${core_path}/src/swing_callback_proxy.cpp",
-    "${core_path}/src/swing_callback_stub.cpp",
+    "${core_path}/src/dialog_status_data.cpp",
+    "${core_path}/src/listener/ans_subscriber_listener.cpp",
+    "${core_path}/src/listener/swing_callback_service.cpp",
+    "${core_path}/src/manager/ans_manager_death_recipient.cpp",
     "${frameworks_module_ans_path}/src/ans_dialog_host_client.cpp",
     "${frameworks_module_ans_path}/src/badge_number_callback_data.cpp",
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
@@ -84,11 +228,13 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_content.cpp",
     "${frameworks_module_ans_path}/src/notification_conversational_content.cpp",
     "${frameworks_module_ans_path}/src/notification_conversational_message.cpp",
+    "${frameworks_module_ans_path}/src/notification_disable.cpp",
     "${frameworks_module_ans_path}/src/notification_distributed_options.cpp",
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_date.cpp",
     "${frameworks_module_ans_path}/src/notification_do_not_disturb_profile.cpp",
     "${frameworks_module_ans_path}/src/notification_flags.cpp",
     "${frameworks_module_ans_path}/src/notification_helper.cpp",
+    "${frameworks_module_ans_path}/src/notification_icon_button.cpp",
     "${frameworks_module_ans_path}/src/notification_live_view_content.cpp",
     "${frameworks_module_ans_path}/src/notification_local_live_view_button.cpp",
     "${frameworks_module_ans_path}/src/notification_local_live_view_content.cpp",
@@ -97,6 +243,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_media_content.cpp",
     "${frameworks_module_ans_path}/src/notification_multiline_content.cpp",
     "${frameworks_module_ans_path}/src/notification_normal_content.cpp",
+    "${frameworks_module_ans_path}/src/notification_operation_info.cpp",
     "${frameworks_module_ans_path}/src/notification_picture_content.cpp",
     "${frameworks_module_ans_path}/src/notification_progress.cpp",
     "${frameworks_module_ans_path}/src/notification_request.cpp",
@@ -111,23 +258,31 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_user_input.cpp",
     "${frameworks_module_ans_path}/src/push_callback_stub.cpp",
     "${frameworks_module_ans_path}/src/push_promise_callback.cpp",
-    "${frameworks_module_ans_path}/src/reminder_helper.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request_alarm.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request_calendar.cpp",
-    "${frameworks_module_ans_path}/src/reminder_request_timer.cpp",
-    "${frameworks_module_ans_path}/src/reminder_store.cpp",
-    "${frameworks_module_ans_path}/src/reminder_table.cpp",
-    "${frameworks_module_ans_path}/src/reminder_table_old.cpp",
   ]
+
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources += filter_include(output_values, [ "*_proxy.cpp" ])
 
   public_configs = [ ":ans_innerkits_public_config" ]
 
   defines = []
 
+  deps = [
+    ":ans_dialog_callback_proxy",
+    ":ans_dialog_callback_stub",
+    ":ans_manager_interface",
+    ":ans_operation_callback_proxy",
+    ":ans_operation_callback_stub",
+    ":ans_subscriber_local_live_view_proxy",
+    ":ans_subscriber_local_live_view_stub",
+    ":ans_subscriber_proxy",
+    ":ans_subscriber_stub",
+  ]
+
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:appkit_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -136,8 +291,6 @@ ohos_shared_library("ans_innerkits") {
     "hilog:libhilog",
     "i18n:intl_util",
     "ipc:ipc_core",
-    "os_account:os_account_innerkits",
-    "relational_store:native_rdb",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
@@ -158,9 +311,249 @@ ohos_shared_library("ans_innerkits") {
 
   if (notification_smart_reminder_supported) {
     defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+    deps += [
+      ":swing_call_back_proxy",
+      ":swing_call_back_stub",
+    ]
   }
 
-  innerapi_tags = [ "platformsdk" ]
+  if (distributed_notification_service_feature_privileged_message) {
+    defines += [ "ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER" ]
+  }
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
+}
+
+ohos_source_set("ans_dialog_callback_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_dialog_callback_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":ans_dialog_callback_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_dialog_callback_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_dialog_callback_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_dialog_callback_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_operation_callback_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_operation_callback_config" ]
+  output_values = get_target_outputs(":ans_operation_callback_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":ans_operation_callback_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_operation_callback_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_operation_callback_config" ]
+  output_values = get_target_outputs(":ans_operation_callback_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_operation_callback_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_subscriber_local_live_view_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_subscriber_local_live_view_config" ]
+  output_values =
+      get_target_outputs(":ans_subscriber_local_live_view_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":ans_subscriber_local_live_view_interface" ]
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_subscriber_local_live_view_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_subscriber_local_live_view_config" ]
+  output_values =
+      get_target_outputs(":ans_subscriber_local_live_view_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_subscriber_local_live_view_interface" ]
+  external_deps = [
+    "ability_base:want",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_subscriber_proxy") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_subscriber_config" ]
+  output_values = get_target_outputs(":ans_subscriber_interface")
+  sources = filter_include(output_values, [ "*_proxy.cpp" ])
+  deps = [ ":ans_subscriber_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  public_external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "image_framework:image_native",
+  ]
+
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_subscriber_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_subscriber_config" ]
+  output_values = get_target_outputs(":ans_subscriber_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_subscriber_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  public_external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "image_framework:image_native",
+  ]
+
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
+}
+
+ohos_source_set("ans_manager_stub") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":ans_innerkits_config" ]
+  output_values = get_target_outputs(":ans_manager_interface")
+  sources = filter_include(output_values, [ "*_stub.cpp" ])
+  deps = [ ":ans_manager_interface" ]
+  external_deps = [
+    "c_utils:utils",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+  public_external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "image_framework:image_native",
+  ]
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
 }

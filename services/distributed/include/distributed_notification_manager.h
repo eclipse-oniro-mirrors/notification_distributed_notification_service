@@ -172,6 +172,7 @@ private:
     std::shared_ptr<DistributedDatabaseCallback> databaseCb_;
     std::shared_ptr<DistributedDeviceCallback> deviceCb_;
     IDistributedCallback callback_ = {0};
+    std::mutex callbackMutex_;
     std::shared_ptr<ffrt::queue> distributedQueue_ = nullptr;
 
     DECLARE_DELAYED_SINGLETON(DistributedNotificationManager);

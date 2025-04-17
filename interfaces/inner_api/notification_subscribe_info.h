@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_SUBSCRIBER_INFO_H
 
 #include "parcel.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -123,6 +124,62 @@ public:
      **/
     int32_t GetSubscriberUid() const;
 
+    /**
+     * @brief Adds subscriber slotTypes.
+     *
+     * @param slotTypes Indicates the slotTypes of subscriber.
+     **/
+    void SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes);
+
+    /**
+     * @brief Obtains the slotTypes of subscriber.
+     *
+     * @return Returns the slotTypes of subscriber.
+     **/
+    std::vector<NotificationConstant::SlotType> GetSlotTypes() const;
+
+    /**
+     * @brief Adds filter type.
+     *
+     * @param filterType Indicates the filter type of subscriber.
+     **/
+    void SetFilterType(const uint32_t filterType);
+
+    /**
+     * @brief Obtains the filter type.
+     *
+     * @return Returns the filter type of subscriber.
+     **/
+    uint32_t GetFilterType() const;
+
+    /**
+     * @brief Obtains notify application change.
+     *
+     * @return Returns the result.
+     **/
+    bool GetNeedNotifyApplication() const;
+
+    /**
+     * @brief Obtains notify application change.
+     *
+     * @return Returns the result.
+     **/
+    void SetNeedNotifyApplication(bool isNeed);
+
+    /**
+     * @brief Obtains notify repsponse.
+     *
+     * @return Returns the result.
+     **/
+    bool GetNeedNotifyResponse() const;
+
+    /**
+     * @brief Obtains notify repsponse.
+     *
+     * @return Returns the result.
+     **/
+    void SetNeedNotifyResponse(bool isNeed);
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -131,6 +188,10 @@ private:
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};
+    uint32_t filterType_ {0};
+    std::vector<NotificationConstant::SlotType> slotTypes_ {};
+    bool needNotifyApplicationChanged_ = false;
+    bool needNotifyResponse_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

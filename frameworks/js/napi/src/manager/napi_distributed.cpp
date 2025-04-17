@@ -111,6 +111,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
         new (std::nothrow) AsyncCallbackInfoEnabled {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
         ANS_LOGD("Create asyncCallbackinfo fail.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -327,6 +328,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
     AsyncCallbackInfoIsEnabledByBundle *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnabledByBundle {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -413,6 +415,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoGetRemindType {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -461,6 +464,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     AsyncCallbackInfoEnabledWithoutApp *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnabledWithoutApp {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -526,6 +530,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
         new (std::nothrow) AsyncCallbackInfoGetEnabledWithoutApp {
         .env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -577,6 +582,60 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
 
     if (isCallback) {
         ANS_LOGD("napiGetSyncNotificationEnabledWithoutApp callback is nullptr.");
+        return Common::NapiGetNull(env);
+    } else {
+        return promise;
+    }
+}
+
+napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    DeviceStatus paras;
+    if (ParseParameters(env, info, paras) == nullptr) {
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+
+    AsynDeviceStatusConfig *asynccallbackinfo = new (std::nothrow) AsynDeviceStatusConfig {
+        .env = env, .asyncWork = nullptr, .deviceStatus = paras
+    };
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, paras.callback);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "setTargetDeviceStatus", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGI("NapiSetTargetDeviceStatus work excute.");
+            AsynDeviceStatusConfig *asynccallbackinfo = static_cast<AsynDeviceStatusConfig *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::SetTargetDeviceStatus(
+                    asynccallbackinfo->deviceStatus.deviceType, asynccallbackinfo->deviceStatus.status,
+                    DISTURB_DEFAULT_FLAG);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANS_LOGD("Napi add do not disturb profiles work complete.");
+            AsynDeviceStatusConfig *asynccallbackinfo = static_cast<AsynDeviceStatusConfig *>(data);
+            if (asynccallbackinfo) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
+            }
+        }, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
+
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+
+    if (asynccallbackinfo->info.isCallback) {
+        ANS_LOGD("NapiSetTargetDeviceStatus callback is nullptr.");
         return Common::NapiGetNull(env);
     } else {
         return promise;

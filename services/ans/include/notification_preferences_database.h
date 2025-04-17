@@ -87,7 +87,7 @@ public:
      */
     bool PutNotificationsEnabledForBundle(
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
-    
+
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
      *
@@ -129,6 +129,30 @@ public:
     bool IsSmartReminderEnabled(const std::string deviceType, bool &enabled);
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    bool SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    bool IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
+
+    /**
      * @brief Querying Aggregation Configuration Values
      *
      * @return Configured value
@@ -161,7 +185,7 @@ public:
      * @param info Indicates notification info.
      * @return Return true on success, false on failure.
      */
-    bool ParseFromDisturbeDB(NotificationPreferencesInfo &info);
+    bool ParseFromDisturbeDB(NotificationPreferencesInfo &info, int32_t userId = -1);
 
     /**
      * @brief Delete all data from disturbe DB.
@@ -207,6 +231,16 @@ public:
      */
     bool RemoveAllSlotsFromDisturbeDB(const std::string &bundleKey, const int32_t &bundleUid);
 
+     /**
+     * @brief Get bundleInfo from DB.
+     *
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @param bundleInfo Indicates bundle info.
+     * @return Return true on success, false on failure.
+     */
+    bool GetBundleInfo(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationPreferencesInfo::BundleInfo &bundleInfo);
+
     /**
      * @brief Query whether there is a agent relationship between the two apps.
      *
@@ -231,7 +265,65 @@ public:
     int32_t GetBatchKvsFromDb(
         const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId);
     int32_t DeleteKvFromDb(const std::string &key, const int32_t &userId);
+    int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
     int32_t DropUserTable(const int32_t userId);
+    bool UpdateBundlePropertyToDisturbeDB(int32_t userId, const NotificationPreferencesInfo::BundleInfo &bundleInfo);
+    bool UpdateBundleSlotToDisturbeDB(int32_t userId, const std::string &bundleName,
+        const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots);
+    bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
+    bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);
+    bool UpdateBatchCloneProfileInfo(const int32_t &userId,
+        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
+    void GetAllCloneProfileInfo(const int32_t &userId,
+        std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo);
+    void GetAllCloneBundleInfo(const int32_t &userId, std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool UpdateBatchCloneBundleInfo(const int32_t &userId,
+        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool DelCloneBundleInfo(const int32_t &userId, const NotificationCloneBundleInfo& cloneBundleInfo);
+    bool DelBatchCloneProfileInfo(const int32_t &userId,
+        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
+    bool DelBatchCloneBundleInfo(const int32_t &userId,
+        const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
+    bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
+    bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
+    bool GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
+    bool IsDistributedEnabledEmptyForBundle(
+        const std::string& deviceType, const NotificationPreferencesInfo::BundleInfo& bundleInfo);
+    bool GetAllDistribuedEnabledBundles(int32_t userId,
+        const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @param type generate hashCode.
+     * @return result true:success.
+     */
+    bool SetHashCodeRule(const int32_t uid, const uint32_t type);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param uid uid.
+     * @return type generate hashCode.
+     */
+    uint32_t GetHashCodeRule(const int32_t uid);
+
+    bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+
+    bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SlotType &slotType);
+    /**
+     * @brief ParseBundleFromDistureDB
+     * @param info bundle info.
+     * @param entries bundle keys.
+     * @param userId userId.
+     * @return void
+     */
+    void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
+        const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
+
 private:
     bool CheckRdbStore();
 
@@ -265,13 +357,12 @@ private:
     void StringToVector(const std::string &str, std::vector<int64_t> &data) const;
     int32_t StringToInt(const std::string &str) const;
     int64_t StringToInt64(const std::string &str) const;
+    void StringSplit(const std::string content, char delim, std::vector<std::string>& result) const;
     bool IsSlotKey(const std::string &bundleKey, const std::string &key) const;
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
 
-    void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
-        const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
     void ParseBundlePropertyFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
@@ -279,7 +370,8 @@ private:
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
-    void ParseBundleShowBadge(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
+    void ParseBundleShowBadgeEnable(NotificationPreferencesInfo::BundleInfo &bundleInfo,
+        const std::string &value) const;
     void ParseBundleBadgeNum(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleEnableNotification(
         NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
@@ -303,25 +395,32 @@ private:
     void ParseSlotAuthorizedStatus(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotAuthHitnCnt(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
+    bool UpdateCloneToDisturbeDB(const int32_t &userId,
+        const std::unordered_map<std::string, std::string> values);
 
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo) const;
     std::string GenerateBundleLablel(const NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &deviceType) const;
     std::string GenerateBundleLablel(const std::string &deviceType, const int32_t userId) const;
+    std::string GenerateBundleLablel(const NotificationConstant::SlotType &slotType,
+        const std::string &deviceType, const int32_t userId) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbBeginDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
-
-    static const std::map<std::string,
-        std::function<void(NotificationPreferencesDatabase *, sptr<NotificationSlot> &, std::string &)>>
-        slotMap_;
-    static const std::map<std::string, std::function<void(NotificationPreferencesDatabase *,
-                                           NotificationPreferencesInfo::BundleInfo &, std::string &)>>
-        bundleMap_;
-
+    void GetDisableNotificationInfo(NotificationPreferencesInfo &info);
+    void SetSoltProperty(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
+        const std::string &findString, const int32_t &userId);
+    void ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
+        const std::string &findString, const int32_t &userId);
+    bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
     std::shared_ptr<NotificationDataMgr> rdbDataManager_;
+    std::string GenerateSubscriberExistFlagKey(const std::string& deviceType, const int32_t userId) const;
+    void GetSmartReminderEnableFromCCM(const std::string& deviceType, bool& enabled);
+    bool isCachedSmartReminderEnableList_ = false;
+    std::vector<std::string> smartReminderEnableList_ = {};
+    std::string GenerateHashCodeGenerate(int32_t uid);
 };
 } // namespace Notification
 } // namespace OHOS

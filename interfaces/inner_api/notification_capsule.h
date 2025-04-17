@@ -16,9 +16,10 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_CAPSULE_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_CAPSULE_H
 
-#include "foundation/multimedia/image_framework/interfaces/innerkits/include/pixel_map.h"
+#include "pixel_map.h"
 #include "notification_json_convert.h"
 #include "parcel.h"
+#include "notification_icon_button.h"
 #include <string>
 
 namespace OHOS {
@@ -66,6 +67,24 @@ public:
     void SetContent(const std::string &content);
 
     /**
+     * @brief Obtains the button of the notification capsule.
+     *
+     * @return Returns the button of the notification capsule.
+     */
+    std::vector<NotificationIconButton> GetCapsuleButton() const;
+
+    void SetCapsuleButton(const std::vector<NotificationIconButton> &buttons);
+
+    /**
+     * @brief Obtains the expire time of the notification capsule.
+     *
+     * @return Returns the expire time of the notification capsule.
+     */
+    int32_t GetTime() const;
+
+    void SetTime(int32_t time);
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -104,6 +123,8 @@ public:
      */
     static NotificationCapsule *Unmarshalling(Parcel &parcel);
 
+    void ResetIcon();
+
 private:
     /**
      * @brief Read a NotificationConversationalMessage object from a Parcel.
@@ -118,6 +139,8 @@ private:
     std::string backgroundColor_ {};
     std::string content_ {};
     std::shared_ptr<Media::PixelMap> icon_ {};
+    std::vector<NotificationIconButton> capsuleButton_;
+    int32_t time_ {0};
 };
 }  // namespace Notification
 }  // namespace OHOS

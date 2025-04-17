@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,15 +17,16 @@
 #define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_NOTIFICATION_H
 
 #include <list>
+#include <memory>
 
 #include "ans_dialog_host_client.h"
-#include "ans_manager_death_recipient.h"
-#include "ans_manager_interface.h"
-#include "notification_subscriber.h"
+#include "ans_subscriber_listener.h"
+#include "ians_manager.h"
 #include "notification_local_live_view_subscriber.h"
+#include "notification_subscriber.h"
 #include "want_params.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-#include "swing_callback_stub.h"
+#include "swing_callback_service.h"
 #endif
 
 namespace OHOS {
@@ -133,7 +134,7 @@ public:
      *                This parameter must be specified.
      * @return Returns publish notification result.
      */
-    ErrCode PublishNotification(const NotificationRequest &request);
+    ErrCode PublishNotification(const NotificationRequest &request, std::string instanceKey = "");
 
     /**
      * @brief Publishes a notification with a specified label.
@@ -145,7 +146,19 @@ public:
      *                This parameter must be specified.
      * @return Returns publish notification result.
      */
-    ErrCode PublishNotification(const std::string &label, const NotificationRequest &request);
+    ErrCode PublishNotification(const std::string &label, const NotificationRequest &request,
+        std::string instanceKey = "");
+
+    /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     * this method will update the notification.
+     *
+     * @param request Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns publish notification result.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const NotificationRequest &request);
 
     /**
      * @brief Cancels a published notification.
@@ -155,7 +168,7 @@ public:
      *                       Otherwise, this method does not take effect.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelNotification(int32_t notificationId);
+    ErrCode CancelNotification(int32_t notificationId, std::string instanceKey = "");
 
     /**
      * @brief Cancels a published notification matching the specified label and notificationId.
@@ -164,15 +177,16 @@ public:
      * @param notificationId Indicates the ID of the notification to cancel.
      * @return Returns cancel notification result.
      */
-    ErrCode CancelNotification(const std::string &label, int32_t notificationId);
+    ErrCode CancelNotification(const std::string &label, int32_t notificationId,
+        std::string instanceKey = "");
 
     /**
      * @brief Cancels all the published notifications.
-     * @note To cancel a specified notification, see CancelNotification(int_32).
+     * @note To cancel a specified notification, see CancelNotification(int32_t).
      *
      * @return Returns cancel all notifications result.
      */
-    ErrCode CancelAllNotifications();
+    ErrCode CancelAllNotifications(std::string instanceKey = "");
 
     /**
      * @brief Cancels a published agent notification.
@@ -211,25 +225,8 @@ public:
      * @param  request Indicates active NotificationRequest objects of the current application.
      * @return Returns get active notifications result.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request);
-
-    /**
-     * @brief Allows another application to act as an agent to publish notifications in the name of your application
-     * bundle. You can revoke this authorization by passing null to this method.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application.
-     * @return Returns set notification agent result.
-     */
-    ErrCode SetNotificationAgent(const std::string &agent);
-
-    /**
-     * @brief Obtains the name of the application bundle that can publish notifications in the name of your application.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application if
-     * any; returns null otherwise.
-     * @return Returns get notification agent result.
-     */
-    ErrCode GetNotificationAgent(std::string &agent);
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request,
+        std::string instanceKey = "");
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -291,6 +288,22 @@ public:
     ErrCode IsAllowedNotifySelf(bool &allowed);
 
     /**
+     * @brief Checks whether this application can pop enable notification dialog.
+     *
+     * @param  canPop True if can pop enable notification dialog
+     * @return Returns is canPop result.
+     */
+    ErrCode CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+        bool &canPop, std::string &bundleName);
+
+    /**
+     * @brief remove enable notification dialog.
+     *
+     * @return Returns remove dialog result.
+     */
+    ErrCode RemoveEnableNotificationDialog();
+
+    /**
      * @brief Allows the current application to publish notifications on a specified device.
      *
      * @param deviceId Indicates the ID of the device running the application. At present, this parameter can
@@ -300,6 +313,15 @@ public:
     ErrCode RequestEnableNotification(std::string &deviceId,
         sptr<AnsDialogHostClient> &hostClient,
         sptr<IRemoteObject> &callerToken);
+
+    /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    ErrCode RequestEnableNotification(const std::string bundleName, const int32_t uid);
 
     /**
      * @brief Checks whether this application has permission to modify the Do Not Disturb (DND) notification policy.
@@ -327,12 +349,43 @@ public:
      * notification. To subscribe to notifications published only by specified sources, for example, notifications from
      *        certain applications, call the {SubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)}
      * method.
-     *
+     * @deprecated This function is deprecated,
+     *             use 'SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
      * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
     ErrCode SubscribeNotification(const NotificationSubscriber &subscriber);
+
+    /**
+     * @brief Subscribes to notifications from all applications. This method can be called only by applications
+     * with required system permissions.
+     * @note  To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     * notification. To subscribe to notifications published only by specified sources, for example, notifications from
+     *        certain applications, call the {SubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)}
+     * method.
+     *
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns subscribe notification result.
+     */
+    ErrCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
+
+    /**
+     * @brief Subscribes to notifications from the appliaction self.
+     * @note  To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     * notification.
+     * @deprecated This function is deprecated,
+     *             use 'SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns subscribe notification result.
+     */
+    ErrCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
 
     /**
      * @brief Subscribes to notifications from the appliaction self.
@@ -345,7 +398,7 @@ public:
      *                   This parameter must be specified.
      * @return Returns subscribe notification result.
      */
-    ErrCode SubscribeNotificationSelf(const NotificationSubscriber &subscriber);
+    ErrCode SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber);
 
     /**
      * @brief Subscribes liveView notification. This method can be called only by applications
@@ -370,7 +423,9 @@ public:
      *        After the notification is published, subscribers that meet the filter criteria can receive the
      * notification. To subscribe to and receive all notifications, call the
      * {SubscribeNotification(NotificationSubscriber)} method.
-     *
+     * @deprecated This function is deprecated,
+     *             use 'SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+     *             const std::shared_ptr<NotificationSubscribeInfo> &subscribeInfo)'.
      * @param subscriber Indicates the subscribers to receive notifications. This parameter must be specified.
      *                   For details, see {NotificationSubscriber}.
      * @param subscribeInfo Indicates the filters for specified notification sources, including application name,
@@ -379,6 +434,44 @@ public:
      */
     ErrCode SubscribeNotification(
         const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo);
+
+    /**
+     * @brief Subscribes to all notifications based on the filtering criteria. This method can be called only
+     * by applications with required system permissions.
+     * @note  After {subscribeInfo} is specified, a subscriber receives only the notifications that
+     *        meet the filter criteria specified by {subscribeInfo}.
+     *        To subscribe to a notification, inherit the {NotificationSubscriber} class, override its
+     *        callback methods and create a subscriber. The subscriber will be used as a parameter of this method.
+     *        After the notification is published, subscribers that meet the filter criteria can receive the
+     * notification. To subscribe to and receive all notifications, call the
+     * {SubscribeNotification(NotificationSubscriber)} method.
+     *
+     * @param subscriber Indicates the subscribers to receive notifications. This parameter must be specified.
+     *                   For details, see {NotificationSubscriber}.
+     * @param subscribeInfo Indicates the filters for specified notification sources, including application name,
+     *                      user ID, or device name. This parameter is optional.
+     * @return Returns subscribe notification result.
+     */
+    ErrCode SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
+
+    /**
+     * @brief Unsubscribes from all notifications. This method can be called only by applications with required
+     * system permissions.
+     * @note Generally, you subscribe to a notification by calling the
+     *       {SubscribeNotification(NotificationSubscriber)} method. If you do not want your application
+     *       to receive a notification any longer, unsubscribe from that notification using this method.
+     *       You can unsubscribe from only those notifications that your application has subscribed to.
+     *        To unsubscribe from notifications published only by specified sources, for example,
+     *       notifications from certain applications, call the
+     *       {UnSubscribeNotification(NotificationSubscriber, NotificationSubscribeInfo)} method.
+     * @deprecated This function is deprecated,
+     *             use 'UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)'.
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @return Returns unsubscribe notification result.
+     */
+    ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber);
 
     /**
      * @brief Unsubscribes from all notifications. This method can be called only by applications with required
@@ -395,7 +488,23 @@ public:
      *                   This parameter must be specified.
      * @return Returns unsubscribe notification result.
      */
-    ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber);
+    ErrCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber);
+
+    /**
+     * @brief Unsubscribes from all notifications based on the filtering criteria. This method can be called
+     * only by applications with required system permissions.
+     * @note A subscriber will no longer receive the notifications from specified notification sources.
+     *
+     * @deprecated This function is deprecated,
+     *             use 'UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+     *             const std::shared_ptr<NotificationSubscribeInfo> &subscribeInfo)'.
+     * @param subscriber Indicates the {NotificationSubscriber} to receive notifications.
+     *                   This parameter must be specified.
+     * @param subscribeInfo Indicates the filters for , including application name,
+     *                      user ID, or device name. This parameter is optional.
+     * @return Returns unsubscribe notification result.
+     */
+    ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
 
     /**
      * @brief Unsubscribes from all notifications based on the filtering criteria. This method can be called
@@ -408,7 +517,8 @@ public:
      *                      user ID, or device name. This parameter is optional.
      * @return Returns unsubscribe notification result.
      */
-    ErrCode UnSubscribeNotification(NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo);
+    ErrCode UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
      * @brief Trigger the local live view after the button has been clicked.
@@ -513,6 +623,9 @@ public:
      * @return Returns get all active notifications
      */
     ErrCode GetAllActiveNotifications(std::vector<sptr<Notification>> &notification);
+
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        const NotificationConstant::SlotType slotType);
 
     /**
      * @brief Obtains the active notifications corresponding to the specified key in the system. To call this method
@@ -621,7 +734,7 @@ public:
      * @param groupName the specified group name.
      * @return Returns cancel group result.
      */
-    ErrCode CancelGroup(const std::string &groupName);
+    ErrCode CancelGroup(const std::string &groupName, std::string instanceKey = "");
 
     /**
      * @brief Removes the notification of the specified group of the specified application.
@@ -675,6 +788,14 @@ public:
      * @return Returns check result.
      */
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport);
+
+    /**
+     * @brief Is coming call need silent in do not disturb mode.
+     *
+     * @param phoneNumber the calling format number.
+     * @return Returns silent in do not disturb mode.
+     */
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType);
 
     /**
      * @brief Checks if the device supports distributed notification.
@@ -770,64 +891,6 @@ public:
      * @brief try to reconnect ans SA when SA manager OnAddSystemAbility called.
      */
     void Reconnect();
-
-    /**
-     * @brief Publishes a scheduled reminder.
-     *
-     * @param reminder Indicates a reminder.
-     * @return Returns publish result.
-     */
-    ErrCode PublishReminder(ReminderRequest &reminder);
-
-    /**
-     * @brief Cancels a specified reminder.
-     *
-     * @param reminderId Indicates reminder Id.
-     * @return Returns cancel result.
-     */
-    ErrCode CancelReminder(const int32_t reminderId);
-
-    /**
-     * @brief Cancels all reminders of current third part application.
-     *
-     * @return Returns cancel result.
-     */
-    ErrCode CancelAllReminders();
-
-    /**
-     * @brief Obtains all valid reminder notifications set by the current application.
-     *
-     * @param[out] validReminders Indicates the vector to store the result.
-     * @return Returns get valid reminders result.
-     */
-    ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders);
-
-    /**
-     * @brief Add exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param date exclude date
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
-
-    /**
-     * @brief Clear exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode DelExcludeDates(const int32_t reminderId);
-
-    /**
-     * @brief Get exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param dates exclude dates
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates);
-
     /**
      * @brief Checks whether this application has permission to publish notifications under the user.
      *
@@ -947,7 +1010,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    ErrCode SetBadgeNumber(int32_t badgeNumber);
+    ErrCode SetBadgeNumber(int32_t badgeNumber, std::string instanceKey = "");
 
     /**
      * @brief Set badge number by bundle.
@@ -959,12 +1022,39 @@ public:
     ErrCode SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
 
     /**
+     * @brief Set badge number for dh by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    ErrCode SetBadgeNumberForDhByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber);
+
+    /**
      * @brief Obtains allow notification application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains allow liveview application list.
+     *
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains allow distributed application list.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllDistribuedEnabledBundles(const std::string& deviceType,
+        std::vector<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Register Push Callback.
@@ -1043,6 +1133,30 @@ public:
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    ErrCode SetDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    ErrCode IsDistributedEnabledBySlot(
+        const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled);
+
+    /**
      * @brief Cancels a published agent notification.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
@@ -1058,7 +1172,19 @@ public:
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status);
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const std::string deveiceId = std::string());
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @param controlFlag The control flag.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status, const uint32_t controlFlag,
+        const std::string deveiceId = std::string());
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
@@ -1070,13 +1196,97 @@ public:
     ErrCode RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc);
 #endif
 
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile objects.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile);
+
+    /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t& status);
+
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder);
+
+    /**
+     * @brief Ans service died, OnRemoteDied called.
+     */
+    void OnServiceDied();
+
+    /**
+     * @brief Update Notification Timer by uid.
+     *
+     * @param uid uid.
+     * @return Returns Update result.
+     */
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused);
+
+    /**
+     * @brief Set switch and bundle list of disable notification feature.
+     *
+     * @param notificationDisable Switch and bundle list of disable notification feature.
+     * @return Returns set result.
+     */
+    ErrCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
+
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<IAnsOperationCallback> &callback);
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result);
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const uint32_t type);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.
      *
      * @return Returns true if succeed; returns false otherwise.
      */
-    sptr<AnsManagerInterface> GetAnsManagerProxy();
+    sptr<IAnsManager> GetAnsManagerProxy();
 
     /**
      * @brief Checks if the MediaContent can be published.
@@ -1112,12 +1322,15 @@ private:
 
     bool IsValidTemplate(const NotificationRequest &request) const;
     bool IsValidDelayTime(const NotificationRequest &request) const;
+    void CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
+        sptr<SubscriberListener> &listener);
+    std::string GetAppInstanceKey() const;
 
 private:
-    std::mutex mutex_;
-    sptr<AnsManagerInterface> ansManagerProxy_;
+    std::mutex subscriberMutex_;
+    std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    sptr<SwingCallBackStub> swingCallBackStub_;
+    sptr<SwingCallBackService> swingCallBackService_;
 #endif
 };
 }  // namespace Notification

@@ -23,54 +23,37 @@
 #include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
 #include "parameters.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
-namespace {
-const std::string NOTIFICATION_CES_CHECK_SA_PERMISSION = "notification.ces.check.sa.permission";
-} // namespace
-
-std::string BasePublishProcess::supportCheckSaPermission_ = "false";
-
-BasePublishProcess::BasePublishProcess()
-{
-    supportCheckSaPermission_ = OHOS::system::GetParameter(NOTIFICATION_CES_CHECK_SA_PERMISSION, "false");
-}
 
 ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
     if (!request->IsRemoveAllowed()) {
-        if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
         }
     }
     return ERR_OK;
 }
 
-bool BasePublishProcess::CheckPermission(const std::string &permission)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    if (supportCheckSaPermission_.compare("true") != 0) {
-        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-        if (isSubsystem) {
-            return true;
-        }
-    }
-    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    bool result = AccessTokenHelper::VerifyCallerPermission(tokenCaller, permission);
-    if (!result) {
-        ANS_LOGE("Permission denied");
-    }
-    return result;
-}
-
 ErrCode BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &request)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_1);
     if (request->GetReceiverUserId() != SUBSCRIBE_USER_INIT) {
         if (!AccessTokenHelper::IsSystemApp()) {
+            message.Message("Not SystemApp");
+            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_NON_SYSTEM_APP;
         }
-        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)
+            && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SEND_NOTIFICATION_CROSS_USER)) {
+            message.BranchId(EventBranchId::BRANCH_3);
+            message.Message("CheckPermission denied");
+            message.ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_PERMISSION_DENIED;
         }
     }
@@ -82,6 +65,9 @@ ErrCode BasePublishProcess::CommonPublishProcess(const sptr<NotificationRequest>
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
     if (AccessTokenHelper::IsDlpHap(callerToken)) {
         ANS_LOGE("DLP hap not allowed to send notifications");
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
+            .ErrorCode(ERR_ANS_DLP_HAP).Message("CommonPublishProcess failed");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_DLP_HAP;
     }
     return ERR_OK;

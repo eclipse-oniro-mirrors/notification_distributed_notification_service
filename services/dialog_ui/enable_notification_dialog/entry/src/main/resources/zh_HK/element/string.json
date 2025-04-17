@@ -1,32 +1,49 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "包括橫幅、鎖屏、鈴聲等。可前往「設定」>「通知和狀態欄」更改。"
-    },
-    {
-      "name": "ALLOW",
-      "value": "允許"
-    },
-    {
-      "name": "BAN",
-      "value": "禁止"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "允許「%s」發送通知？"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"通知提醒方式可能包括鎖屏、橫幅、徽章圖標、響鬧和震動。可前往「設定」更改。"
+      },
+      {
+          "name":"reason_simple",
+          "value":"通知提醒方式可能包括橫幅、徽章圖標、響鬧。可前往「設定」更改。"
+      },
+      {
+        "name":"reason_zyt",
+        "value":"通知提醒方式可能包括鎖屏、橫幅、響鬧和震動等。可前往「卓易通」>「應用程式管理」更改。"
+      },
+      {
+          "name":"ALLOW",
+          "value":"允許",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"不允許",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"允許「%s」向你發送通知？",
+          "attr":{
+              "priority":"LT"
+          }
+      }
   ]
 }

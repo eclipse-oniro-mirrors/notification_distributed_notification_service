@@ -34,6 +34,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         ANS_LOGD("asynccallbackinfo is nullptr.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     asynccallbackinfo->request = params.request;
@@ -54,9 +55,9 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
-
-                asynccallbackinfo->info.errorCode =
-                    NotificationHelper::PublishNotification(asynccallbackinfo->request);
+                std::string instanceKey = Common::GetAppInstanceKey();
+                asynccallbackinfo->info.errorCode = NotificationHelper::PublishNotification(
+                    asynccallbackinfo->request, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -119,9 +120,9 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
                         "%{public}d",
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
-
+                std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    NotificationHelper::PublishNotification(asynccallbackinfo->request);
+                    NotificationHelper::PublishNotification(asynccallbackinfo->request, instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -157,6 +158,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
 

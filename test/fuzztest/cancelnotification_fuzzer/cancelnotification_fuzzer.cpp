@@ -16,12 +16,13 @@
 #include "cancelnotification_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        std::string label(data);
-        int32_t notificationId = static_cast<int32_t>(GetU32Data(data));
+        std::string label = fdp->ConsumeRandomLengthString();
+        int32_t notificationId = fdp->ConsumeIntegral<int32_t>();
         // test CancelAllNotifications function
         Notification::NotificationHelper::CancelAllNotifications();
         // test CancelNotification function
@@ -34,11 +35,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

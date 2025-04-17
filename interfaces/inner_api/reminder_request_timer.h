@@ -39,7 +39,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestTimer(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestTimer(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::TIMER);
+    };
 
     /**
      * @brief Copy construct from an exist reminder.
@@ -51,6 +54,8 @@ public:
     ~ReminderRequestTimer() override {};
 
     uint64_t GetInitInfo() const;
+    void SetInitInfo(const uint64_t countDownTimeInSeconds);
+
     virtual bool OnDateTimeChange() override;
     virtual bool OnTimeZoneChange() override;
     virtual bool UpdateNextReminder() override;
@@ -68,16 +73,14 @@ public:
     static ReminderRequestTimer *Unmarshalling(Parcel &parcel);
 
     bool ReadFromParcel(Parcel &parcel) override;
+    bool WriteParcel(Parcel &parcel) const override;
 
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
+    ReminderRequestTimer() : ReminderRequest(ReminderType::TIMER) {};
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestTimer() {};
     void CheckParamsValid(const uint64_t countDownTimeInSeconds) const;
     void UpdateTimeInfo(const std::string &description);
     uint64_t countDownTimeInSeconds_ {0};

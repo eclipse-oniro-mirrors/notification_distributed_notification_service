@@ -16,13 +16,14 @@
 #include "removenotificationsbybundle_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         // test RemoveNotificationsByBundle function
-        std::string stringData(data);
-        int32_t usingData = static_cast<int32_t>(GetU32Data(data));
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        int32_t usingData = fdp->ConsumeIntegral<int32_t>();
         Notification::NotificationBundleOption bundleOption;
         bundleOption.SetBundleName(stringData);
         bundleOption.SetUid(usingData);
@@ -36,12 +37,8 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size > GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
 

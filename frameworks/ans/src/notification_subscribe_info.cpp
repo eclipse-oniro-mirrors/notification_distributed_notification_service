@@ -23,6 +23,7 @@
 
 namespace OHOS {
 namespace Notification {
+constexpr uint32_t MAX_SLOT_SIZE = 1000;
 NotificationSubscribeInfo::NotificationSubscribeInfo()
 {}
 
@@ -35,6 +36,8 @@ NotificationSubscribeInfo::NotificationSubscribeInfo(const NotificationSubscribe
     deviceType_ = subscribeInfo.GetDeviceType();
     userId_ = subscribeInfo.GetAppUserId();
     subscriberUid_ = subscribeInfo.GetSubscriberUid();
+    slotTypes_ = subscribeInfo.GetSlotTypes();
+    filterType_ = subscribeInfo.GetFilterType();
 }
 
 void NotificationSubscribeInfo::AddAppName(const std::string appName)
@@ -89,6 +92,34 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write userId_");
         return false;
     }
+     //write slotTypes_
+    if (!parcel.WriteUint32(slotTypes_.size())) {
+        ANS_LOGE("Failed to write slotTypes_ size.");
+        return false;
+    }
+    for (auto slotType : slotTypes_) {
+        if (!parcel.WriteInt32(static_cast<int32_t>(slotType))) {
+            ANS_LOGE("Failed to write slotType");
+            return false;
+        }
+    }
+    // write filterType_
+    if (!parcel.WriteUint32(filterType_)) {
+        ANS_LOGE("Can't write filterType_");
+        return false;
+    }
+
+    // write needNotifyApplicationChanged_
+    if (!parcel.WriteBool(needNotifyApplicationChanged_)) {
+        ANS_LOGE("Can't write needNotifyApplicationChanged");
+        return false;
+    }
+
+    // write needNotifyResponse
+    if (!parcel.WriteBool(needNotifyResponse_)) {
+        ANS_LOGE("Can't write needNotifyResponse");
+        return false;
+    }
     return true;
 }
 
@@ -120,6 +151,34 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Can't read userId_");
         return false;
     }
+    //read slotTypes_
+    uint32_t size = 0;
+    if (!parcel.ReadUint32(size)) {
+        ANS_LOGE("read slotType_ size failed.");
+        return false;
+    }
+    if (size > MAX_SLOT_SIZE) {
+        ANS_LOGE("slotType_ size over 1000.");
+        return false;
+    }
+    for (uint32_t index = 0; index < size; index++) {
+        int32_t slotType = -1;
+        if (!parcel.ReadInt32(slotType)) {
+            ANS_LOGE("read Parcelable slotType failed.");
+            return false;
+        }
+        slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
+        }
+    // read filterType_
+    if (!parcel.ReadUint32(filterType_)) {
+        ANS_LOGE("Can't read filterType_");
+        return false;
+    }
+
+    // read needNotifyApplicationChanged_
+    needNotifyApplicationChanged_ = parcel.ReadBool();
+    // read needNotifyResponse
+    needNotifyResponse_ = parcel.ReadBool();
     return true;
 }
 
@@ -130,10 +189,19 @@ std::string NotificationSubscribeInfo::Dump()
         appNames += name;
         appNames += ", ";
     }
+    std::string slotTypes = "";
+    for (auto slotType : slotTypes_) {
+        slotTypes += std::to_string(static_cast<int32_t>(slotType));
+        slotTypes += ", ";
+    }
     return "NotificationSubscribeInfo{ "
             "appNames = [" + appNames + "]" +
             "deviceType = " + deviceType_ +
             "userId = " + std::to_string(userId_) +
+            "slotTypes = [" + slotTypes + "]" +
+            "needNotify = " + std::to_string(needNotifyApplicationChanged_) +
+            "filterType = " + std::to_string(filterType_) +
+            "needResponse = " + std::to_string(needNotifyResponse_) +
             " }";
 }
 
@@ -145,6 +213,46 @@ void NotificationSubscribeInfo::SetSubscriberUid(const int32_t uid)
 int32_t NotificationSubscribeInfo::GetSubscriberUid() const
 {
     return subscriberUid_;
+}
+
+void NotificationSubscribeInfo::SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes)
+{
+    slotTypes_ = slotTypes;
+}
+
+std::vector<NotificationConstant::SlotType> NotificationSubscribeInfo::GetSlotTypes() const
+{
+    return slotTypes_;
+}
+
+void NotificationSubscribeInfo::SetFilterType(const uint32_t filterType)
+{
+    filterType_ = filterType;
+}
+
+uint32_t NotificationSubscribeInfo::GetFilterType() const
+{
+    return filterType_;
+}
+
+bool NotificationSubscribeInfo::GetNeedNotifyApplication() const
+{
+    return needNotifyApplicationChanged_;
+}
+
+void NotificationSubscribeInfo::SetNeedNotifyApplication(bool isNeed)
+{
+    needNotifyApplicationChanged_ = isNeed;
+}
+
+bool NotificationSubscribeInfo::GetNeedNotifyResponse() const
+{
+    return needNotifyResponse_;
+}
+
+void NotificationSubscribeInfo::SetNeedNotifyResponse(bool isNeed)
+{
+    needNotifyResponse_ = isNeed;
 }
 }  // namespace Notification
 }  // namespace OHOS

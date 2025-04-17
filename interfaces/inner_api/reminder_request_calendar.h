@@ -58,7 +58,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestCalendar(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestCalendar(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::CALENDAR);
+    };
 
     explicit ReminderRequestCalendar(const ReminderRequestCalendar &other);
     ReminderRequestCalendar& operator = (const ReminderRequestCalendar &other);
@@ -68,9 +71,9 @@ public:
 
     std::shared_ptr<ReminderRequest::WantAgentInfo> GetRRuleWantAgentInfo();
 
-    void AddExcludeDate(const uint64_t date);
+    void AddExcludeDate(const int64_t date);
     void DelExcludeDates();
-    std::vector<uint64_t> GetExcludeDates() const;
+    std::vector<int64_t> GetExcludeDates() const;
     bool IsInExcludeDate() const;
 
     inline uint16_t GetYear() const
@@ -117,6 +120,133 @@ public:
     {
         return firstDesignateDay_;
     }
+
+    /**
+     * @brief Gets the repeat day.
+     */
+    uint32_t GetRepeatDay() const
+    {
+        return repeatDay_;
+    }
+
+    /**
+     * @brief Gets the repeat month.
+     */
+    uint16_t GetRepeatMonth() const
+    {
+        return repeatMonth_;
+    }
+
+    /**
+     * @brief Gets the start date time.
+     */
+    uint64_t GetDateTime() const;
+
+    /**
+     * @brief Gets the end date time.
+     */
+    uint64_t GetEndDateTime() const;
+
+    /**
+     * @brief Sets the year.
+     *
+     * @param year Indicates the year.
+     */
+    void SetYear(const uint16_t year);
+
+    /**
+     * @brief Sets the month.
+     *
+     * @param month Indicates the month.
+     */
+    void SetMonth(const uint8_t month);
+
+    /**
+     * @brief Sets the day.
+     *
+     * @param day Indicates the day.
+     */
+    void SetDay(const uint8_t day);
+
+    /**
+     * @brief Sets the hour.
+     *
+     * @param hour Indicates the hour.
+     */
+    void SetHour(const uint8_t hour);
+
+    /**
+     * @brief Sets the minute.
+     *
+     * @param minute Indicates the minute.
+     */
+    void SetMinute(const uint8_t minute);
+
+    /**
+     * @brief Sets the repeat day.
+     *
+     * @param repeatDay Indicates the repeat day.
+     */
+    void SetRepeatDay(const uint32_t repeatDay);
+
+    /**
+     * @brief Sets the repeat month.
+     *
+     * @param repeatMonth Indicates the repeat month.
+     */
+    void SetRepeatMonth(const uint16_t repeatMonth);
+
+    /**
+     * @brief Sets the first designate year.
+     *
+     * @param firstDesignateYear Indicates the first designate year.
+     */
+    void SetFirstDesignateYear(const uint16_t firstDesignateYear);
+
+    /**
+     * @brief Sets the first designate month.
+     *
+     * @param firstDesignateMonth Indicates the first designate month.
+     */
+    void SetFirstDesignageMonth(const uint16_t firstDesignateMonth);
+
+    /**
+     * @brief Sets the first designate day.
+     *
+     * @param firstDesignateDay Indicates the first designate day.
+     */
+    void SetFirstDesignateDay(const uint16_t firstDesignateDay);
+
+    /**
+     * @brief Sets the hour.
+     *
+     * @param hour Indicates the hour.
+     */
+    void SetDateTime(const uint64_t time);
+
+    /**
+     * @brief Serialize the rrule to string.
+     * Persist to the rdb.
+     */
+    std::string SerializationRRule();
+
+    /**
+     * @brief Deserialize the rrule from string.
+     * Recover from the rdb.
+     */
+    void DeserializationRRule(const std::string& str);
+
+    /**
+     * @brief Serialize the exclude date to string.
+     * Persist to the rdb.
+     */
+    std::string SerializationExcludeDates();
+
+    /**
+     * @brief Deserialize the exclude date from string.
+     * Recover from the rdb.
+     */
+    void DeserializationExcludeDates(const std::string& str);
 
     bool InitTriggerTime();
 
@@ -169,15 +299,30 @@ public:
      * @return true if read parcel success.
      */
     bool ReadFromParcel(Parcel &parcel) override;
+    bool WriteParcel(Parcel &parcel) const override;
     bool SetNextTriggerTime() override;
 
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet> &resultSet) override;
-
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
     static uint8_t GetDaysOfMonth(const uint16_t &year, const uint8_t &month);
     bool SetEndDateTime(const uint64_t time);
+
+    /**
+     * @brief Sets the start time when the notification was last displayed in the notification bar.
+     * When OnDateTimeChange or OnClose, the time will change to next start time if the reminder
+     * is repeat, otherwise not changed.
+     */
+    void SetLastStartDateTime(const uint64_t time);
+
+    /**
+     * @brief Get the start time when the notification was last displayed in the notification bar.
+     */
+    uint64_t GetLastStartDateTime() const;
+
+    ReminderRequestCalendar() : ReminderRequest(ReminderType::CALENDAR) {};
+
+    /**
+     * @brief Copy datashare reminder
+     */
+    void Copy(const sptr<ReminderRequest>& other);
 
 public:
     static constexpr uint8_t MAX_MONTHS_OF_YEAR = 12;
@@ -187,19 +332,10 @@ protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestCalendar() : ReminderRequest() {}
 
     uint8_t GetNextDay(const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const;
-    uint64_t GetNextTriggerTime();
+    uint64_t GetNextTriggerTime(const bool updateLast = false);
     uint64_t GetNextTriggerTimeAsRepeatReminder(const tm &nowTime, const tm &tarTime) const;
-    uint32_t GetRepeatDay() const
-    {
-        return repeatDay_;
-    }
-    uint16_t GetRepeatMonth() const
-    {
-        return repeatMonth_;
-    }
     uint64_t GetTimeInstantMilli(
         uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) const;
 
@@ -217,14 +353,10 @@ private:
     void SetRepeatDaysOfMonth(const std::vector<uint8_t> &repeatDays);
     bool CheckCalenderIsExpired(const uint64_t now);
 
-    void SetDateTime(const uint64_t time);
-    uint64_t GetDateTime();
-    uint64_t GetEndDateTime();
-
-    std::string SerializationRRule();
-    std::string SerializationExcludeDates();
-    void DeserializationRRule(const std::string& str);
-    void DeserializationExcludeDates(const std::string& str);
+    /**
+     * @brief When OnShow or OnSnooze, need calculate the start time of this alert
+     */
+    void CalcLastStartDateTime();
 
     static const uint8_t DEFAULT_SNOOZE_TIMES;
 
@@ -254,8 +386,9 @@ private:
     uint64_t startDateTime_{0};
     uint64_t endDateTime_{0};
     uint64_t durationTime_{0};
+    uint64_t lastStartDateTime_{0};
 
-    std::set<uint64_t> excludeDates_;
+    std::set<int64_t> excludeDates_;
 
     // repeat calendar
     std::shared_ptr<WantAgentInfo> rruleWantAgentInfo_ = nullptr;
