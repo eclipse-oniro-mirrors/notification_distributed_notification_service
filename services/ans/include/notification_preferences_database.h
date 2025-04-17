@@ -310,10 +310,10 @@ public:
     uint32_t GetHashCodeRule(const int32_t uid);
 
     bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType);
+        const NotificationConstant::SlotType &slotType, int32_t sourceType);
 
     bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType);
+        const NotificationConstant::SlotType &slotType, int32_t sourceType);
     /**
      * @brief ParseBundleFromDistureDB
      * @param info bundle info.

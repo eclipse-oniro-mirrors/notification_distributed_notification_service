@@ -1561,7 +1561,7 @@ private:
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);
-    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid);
+    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

@@ -1509,21 +1509,21 @@ uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
 }
 
 bool NotificationPreferences::GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
-    const NotificationConstant::SlotType &slotType)
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
 {
     if (preferncesDB_ == nullptr) {
         return true;
     }
-    return preferncesDB_->GetBundleRemoveFlag(bundleOption, slotType);
+    return preferncesDB_->GetBundleRemoveFlag(bundleOption, slotType, sourceType);
 }
 
 bool NotificationPreferences::SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
-    const NotificationConstant::SlotType &slotType)
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
 {
     if (preferncesDB_ == nullptr) {
         return false;
     }
-    return preferncesDB_->SetBundleRemoveFlag(bundleOption, slotType);
+    return preferncesDB_->SetBundleRemoveFlag(bundleOption, slotType, sourceType);
 }
 }  // namespace Notification
 }  // namespace OHOS
