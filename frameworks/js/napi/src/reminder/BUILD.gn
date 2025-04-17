@@ -37,11 +37,7 @@ ohos_shared_library("reminderagent") {
   }
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [
-    "../../include",
-    "//third_party/node/src",
-    "//third_party/libuv/include",
-  ]
+  include_dirs = [ "../../include" ]
 
   configs = [ ":native_module_config" ]
 
@@ -76,7 +72,9 @@ ohos_shared_library("reminderagent") {
     "hilog:libhilog",
     "image_framework:image",
     "ipc:ipc_single",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "relational_store:native_rdb",
   ]
 

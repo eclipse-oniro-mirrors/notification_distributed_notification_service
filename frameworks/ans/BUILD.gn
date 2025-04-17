@@ -75,7 +75,6 @@ config("ans_innerkits_public_config") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${target_gen_dir}",
-    "//third_party/json/single_include",
   ]
   configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
 }
@@ -298,6 +297,7 @@ ohos_shared_library("ans_innerkits") {
   public_external_deps = [
     "ability_runtime:wantagent_innerkits",
     "image_framework:image_native",
+    "json:nlohmann_json_static",
   ]
 
   if (is_double_framework) {

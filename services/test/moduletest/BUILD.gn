@@ -14,7 +14,6 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path =
     "${component_name}/distributed_notification_service/moduletest"

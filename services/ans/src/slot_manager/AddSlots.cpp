@@ -33,7 +33,7 @@
 #include "smart_reminder_center.h"
 #endif
 
-#include "../advanced_notification_inline.cpp"
+#include "advanced_notification_inline.cpp"
 #include "notification_extension_wrapper.h"
 #include "notification_analytics_util.h"
 

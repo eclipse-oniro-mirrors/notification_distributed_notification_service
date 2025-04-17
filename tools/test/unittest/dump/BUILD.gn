@@ -19,7 +19,6 @@ module_output_path =
 
 config("tools_dump_config_mock") {
   include_dirs = [
-    "//third_party/googletest/googlemock/include",
     "${tools_path}/test/mock",
     "${component_path}/services/ans/include",
   ]
@@ -62,8 +61,6 @@ ohos_unittest("notification_shell_command_dump_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:ans_service_sources",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -78,6 +75,11 @@ ohos_unittest("notification_shell_command_dump_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "relational_store:native_rdb",
+  ]
+
+  public_external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
 }
 

@@ -61,14 +61,7 @@ ohos_shared_library("notification") {
   }
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_napi_path}/inner/napi_common",
-    "include",
-    "//third_party/node/src",
-    "//third_party/libuv/include",
-    "//third_party/json/single_include",
-  ]
+  include_dirs = [ "include" ]
 
   configs = [ ":native_module_config" ]
 
@@ -136,7 +129,10 @@ ohos_shared_library("notification") {
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
+    "json:nlohmann_json_static",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
   ]
