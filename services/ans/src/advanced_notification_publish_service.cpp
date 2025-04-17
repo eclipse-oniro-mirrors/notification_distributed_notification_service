@@ -2708,6 +2708,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
 {
     if (bundleOption == nullptr) {
         ANS_LOGE("SetBadgeNumberForDhByBundle bundleOption is null");
+        return ERR_ANS_INVALID_PARAM;
     }
     if (bundleOption->GetBundleName().empty()) {
         ANS_LOGE("SetBadgeNumberForDhByBundle Invalid bundle name.");
