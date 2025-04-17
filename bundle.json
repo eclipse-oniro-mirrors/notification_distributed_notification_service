@@ -102,12 +102,17 @@
         "openssl",
         "power_manager",
         "dsoftbus",
-        "zlib"
+        "zlib",
+        "libuv",
+        "json",
+        "node"
       ],
       "third_party": [
         "libuv",
         "libxml2",
-        "icu"
+        "icu",
+        "json",
+        "node"
       ]
     },
     "build": {

@@ -47,11 +47,8 @@ ohos_shared_library("notificationmanager") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_napi_path}/inner/napi_common",
     "../../include",
     "../../include/manager",
-    "//third_party/node/src",
   ]
 
   configs = [ ":native_module_config" ]
@@ -121,6 +118,7 @@ ohos_shared_library("notificationmanager") {
     "image_framework:image",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "node:node_header_notice",
     "relational_store:native_rdb",
   ]
 

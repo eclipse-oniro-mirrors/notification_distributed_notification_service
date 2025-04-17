@@ -56,6 +56,7 @@ ohos_source_set("ans_service_sources") {
     "${services_path}/ans/include/notification_extension",
     "${services_path}/ans/include/utils",
     "${services_path}/ans/include/slot_manager",
+    "${services_path}/ans/src",
   ]
 
   defines = []

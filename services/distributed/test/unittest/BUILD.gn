@@ -68,10 +68,7 @@ ohos_unittest("ans_distributed_unit_test") {
     "${frameworks_module_ans_path}:ans_innerkits_public_config",
   ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:base",
@@ -89,6 +86,8 @@ ohos_unittest("ans_distributed_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
