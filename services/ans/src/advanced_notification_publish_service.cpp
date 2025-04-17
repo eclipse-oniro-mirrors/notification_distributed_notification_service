@@ -300,8 +300,9 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
+        ANS_LOGE("Request object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = PrePublishRequest(request);
@@ -347,6 +348,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         if (IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            message.BranchId(EventBranchId::BRANCH_1)
+                .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
         }
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
@@ -373,10 +376,12 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
         result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
+            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
             return;
         }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
+            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("Failed to assign notification list");
             return;
         }
 
@@ -385,6 +390,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     });
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
