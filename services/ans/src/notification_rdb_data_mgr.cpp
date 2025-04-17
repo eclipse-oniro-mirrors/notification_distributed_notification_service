@@ -402,6 +402,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
                 message.ErrorCode(ret).Message("GoToFirstRow failed.");
                 NotificationAnalyticsUtil::ReportModifyEvent(message);
             }
+        absSharedResultSet->Close();
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
@@ -412,6 +413,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
         ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
         message.ErrorCode(ret).Message("GetString value failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
+        absSharedResultSet->Close();
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
@@ -459,6 +461,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
             message.ErrorCode(ret).Message("GoToFirstRow failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
         }
+        absSharedResultSet->Close();
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetBlob(NOTIFICATION_VALUE_INDEX, value);
@@ -466,6 +469,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
         message.ErrorCode(ret).Message("GetString value failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
+        absSharedResultSet->Close();
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
@@ -520,6 +524,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
             message.ErrorCode(ret).Message("GoToFirstRow failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
         }
+        absSharedResultSet->Close();
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -530,6 +535,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
             ANS_LOGE("Failed to GetString key from %{public}s table.", tableName.c_str());
             message.ErrorCode(ret).Message("GetString key failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
+            absSharedResultSet->Close();
             return NativeRdb::E_ERROR;
         }
 
@@ -539,6 +545,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
             ANS_LOGE("GetString value failed from %{public}s table", tableName.c_str());
             message.ErrorCode(ret).Message("GetString value failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
+            absSharedResultSet->Close();
             return NativeRdb::E_ERROR;
         }
 
@@ -593,6 +600,7 @@ int32_t NotificationDataMgr::QueryAllData(
             message.ErrorCode(ret).Message("GoToFirstRow failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
         }
+        absSharedResultSet->Close();
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -603,6 +611,7 @@ int32_t NotificationDataMgr::QueryAllData(
             ANS_LOGE("GetString key failed from %{public}s table.", tableName.c_str());
             message.ErrorCode(ret).Message("GetString key failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
+            absSharedResultSet->Close();
             return NativeRdb::E_ERROR;
         }
 
@@ -612,6 +621,7 @@ int32_t NotificationDataMgr::QueryAllData(
             ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
             message.ErrorCode(ret).Message("GetString value failed.");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
+            absSharedResultSet->Close();
             return NativeRdb::E_ERROR;
         }
 
