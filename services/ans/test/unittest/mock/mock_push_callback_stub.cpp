@@ -16,11 +16,22 @@
 #include "mock_push_callback_stub.h"
 
 namespace OHOS {
+namespace Notification {
+namespace {
+int32_t g_retOnCheckNotification = 0;
+}
+
+void MockOnCheckNotification(const int32_t retOnCheckNotification)
+{
+    g_retOnCheckNotification = retOnCheckNotification;
+}
+
+} // namespace Notification
 MockPushCallBackStub::MockPushCallBackStub() {}
 MockPushCallBackStub::~MockPushCallBackStub() {}
 int32_t MockPushCallBackStub::OnCheckNotification(const std::string &notificationData,
     const std::shared_ptr<Notification::PushCallBackParam> &pushCallBackParam)
 {
-    return false;
+    return Notification::g_retOnCheckNotification;
 }
 } // namespace OHOS

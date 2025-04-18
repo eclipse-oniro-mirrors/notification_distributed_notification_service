@@ -46,7 +46,10 @@ public:
      *
      * @param reminderId Indicates reminder id.
      */
-    explicit ReminderRequestAlarm(int32_t reminderId) : ReminderRequest(reminderId) {};
+    explicit ReminderRequestAlarm(int32_t reminderId) : ReminderRequest(reminderId)
+    {
+        SetReminderType(ReminderType::ALARM);
+    };
 
     /**
      * @brief Copy construct from an exist reminder.
@@ -70,6 +73,20 @@ public:
      * @return setted minute.
      */
     uint8_t GetMinute() const;
+
+    /**
+     * @brief Sets the hour.
+     *
+     * @param hour Indicates the hour.
+     */
+    void SetHour(const uint8_t hour);
+
+    /**
+     * @brief Sets the minute.
+     *
+     * @param minute Indicates the minute.
+     */
+    void SetMinute(const uint8_t minute);
 
     virtual bool UpdateNextReminder() override;
 
@@ -95,16 +112,14 @@ public:
      * @return true if read parcel success.
      */
     bool ReadFromParcel(Parcel &parcel) override;
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) override;
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values);
+    bool WriteParcel(Parcel &parcel) const override;
+
+    ReminderRequestAlarm() : ReminderRequest(ReminderType::ALARM) {};
 
 protected:
     virtual uint64_t PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext) override;
 
 private:
-    ReminderRequestAlarm() : ReminderRequest() {};
     void CheckParamValid() const;
 
     /**

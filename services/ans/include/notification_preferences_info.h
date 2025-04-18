@@ -25,6 +25,8 @@
 #include "notification_slot.h"
 #include "preferences_constant.h"
 #include "advanced_notification_service.h"
+#include "notification_clone_bundle_info.h"
+#include "notification_disable.h"
 
 namespace OHOS {
 namespace Notification {
@@ -236,6 +238,7 @@ public:
      */
     NotificationPreferencesInfo()
     {}
+
     /**
      * @brief Default destructor.
      */
@@ -310,17 +313,29 @@ public:
     void RemoveNotificationEnable(const int32_t userId);
     void RemoveDoNotDisturbDate(const int32_t userId);
     void SetBundleInfoFromDb(BundleInfo &info, std::string bundleKey);
-    std::string MakeDoNotDisturbProfileKey(int32_t userId, int32_t profileId);
+    std::string MakeDoNotDisturbProfileKey(int32_t userId, int64_t profileId);
     void AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
-    bool GetDoNotDisturbProfiles(int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
+    bool GetDoNotDisturbProfiles(int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profiles);
     void GetAllDoNotDisturbProfiles(int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+    void GetAllCLoneBundlesInfo(const int32_t &userId, const std::unordered_map<std::string, std::string> &bunlesMap,
+        std::vector<NotificationCloneBundleInfo> &cloneBundles);
+    void SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
+    bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    void AddDisableNotificationInfo(const std::string &value);
+    ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
     std::map<int32_t, sptr<NotificationDoNotDisturbDate>> doNotDisturbDate_;
     std::map<std::string, sptr<NotificationDoNotDisturbProfile>> doNotDisturbProfiles_;
     std::map<std::string, BundleInfo> infos_;
+
+    struct DisableNotificationInfo {
+        int32_t disabled = -1;
+        std::vector<std::string> bundleList;
+    };
+    DisableNotificationInfo disableNotificationInfo_;
 };
 }  // namespace Notification
 }  // namespace OHOS

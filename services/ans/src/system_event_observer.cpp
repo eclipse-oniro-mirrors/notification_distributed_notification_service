@@ -21,6 +21,8 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "notification_preferences.h"
+#include "notification_clone_manager.h"
+#include "distributed_device_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -42,6 +44,7 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -49,7 +52,6 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
         commonEventSubscribeInfo, std::bind(&SystemEventObserver::OnReceiveEvent, this, std::placeholders::_1));
 
     EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
-    InitEventList();
 }
 
 SystemEventObserver::~SystemEventObserver()
@@ -61,12 +63,30 @@ sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want 
 {
     auto element = want.GetElement();
     std::string bundleName = element.GetBundleName();
+    int32_t appIndex = want.GetIntParam("appIndex", -1);
     int32_t uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     if (bundleOption == nullptr) {
         ANS_LOGE("Failed to create bundleOption.");
         return nullptr;
     }
+    bundleOption->SetAppIndex(appIndex);
+    return bundleOption;
+}
+
+sptr<NotificationBundleOption> SystemEventObserver::GetBundleOptionDataCleared(AAFwk::Want want)
+{
+    auto element = want.GetElement();
+    std::string bundleName = element.GetBundleName();
+    int32_t appIndex = want.GetIntParam("appIndex", -1);
+    // 元能力提供的UID，该UID获取的是want信息中bundleName对应的UID。
+    int32_t uid = want.GetIntParam("ohos.aafwk.param.targetUid", -1);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create bundleOption.");
+        return nullptr;
+    }
+    bundleOption->SetAppIndex(appIndex);
     return bundleOption;
 }
 
@@ -93,11 +113,20 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
 #endif
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
-        NotificationPreferences::GetInstance().InitSettingFromDisturbDB();
-        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb();
+        int32_t userId = data.GetCode();
+        if (userId <= SUBSCRIBE_USER_INIT) {
+            ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
+            return;
+        }
+
+        NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
+        AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
+        NotificationCloneManager::GetInstance().OnUserSwitch(userId);
+        DistributedDeviceManager::GetInstance().InitTrustList();
+        return;
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int32_t userId = data.GetCode();
-        if (userId <= DEFAULT_USER_ID) {
+        if (userId <= SUBSCRIBE_USER_INIT) {
             ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
             return;
         }
@@ -106,47 +135,30 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED) {
         if (callbacks_.onBundleDataCleared != nullptr) {
-            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
+            sptr<NotificationBundleOption> bundleOption = GetBundleOptionDataCleared(want);
             if (bundleOption != nullptr) {
                 callbacks_.onBundleDataCleared(bundleOption);
             }
         }
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START) {
+        NotificationCloneManager::GetInstance().OnRestoreStart(want);
     } else {
         OnReceiveEventInner(data);
     }
 }
 
-void SystemEventObserver::InitEventList()
-{
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED] =
-        &SystemEventObserver::OnBundleAddEventInner;
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED] =
-        &SystemEventObserver::OnBundleUpdateEventInner;
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED] =
-        &SystemEventObserver::OnBootSystemCompletedEventInner;
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED] =
-        &SystemEventObserver::OnScreenLock;
-    memberFuncMap_[EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED] =
-        &SystemEventObserver::OnScreenUnlock;
-#endif
-}
-
 void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &data)
 {
     std::string action = data.GetWant().GetAction();
-    auto itFunc = memberFuncMap_.find(action);
-    if (itFunc == memberFuncMap_.end()) {
-        ANS_LOGE("Action %{public}s callback is not found.", action.c_str());
-        return;
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
+        return OnBundleAddEventInner(data);
     }
-
-    if (itFunc->second == nullptr) {
-        ANS_LOGE("Action [%{public}s] callback is nullptr.", action.c_str());
-        return;
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
+        return OnBundleUpdateEventInner(data);
     }
-
-    (this->*(itFunc->second))(data);
+    if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {
+        return OnBootSystemCompletedEventInner(data);
+    }
 }
 
 void SystemEventObserver::OnBundleAddEventInner(const EventFwk::CommonEventData &data)
@@ -175,21 +187,5 @@ void SystemEventObserver::OnBootSystemCompletedEventInner(const EventFwk::Common
         callbacks_.onBootSystemCompleted();
     }
 }
-
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-void SystemEventObserver::OnScreenLock(const EventFwk::CommonEventData &data)
-{
-    if (callbacks_.onScreenLock != nullptr) {
-        callbacks_.onScreenLock();
-    }
-}
-
-void SystemEventObserver::OnScreenUnlock(const EventFwk::CommonEventData &data)
-{
-    if (callbacks_.onScreenUnlock != nullptr) {
-        callbacks_.onScreenUnlock();
-    }
-}
-#endif
 }  // namespace Notification
 }  // namespace OHOS

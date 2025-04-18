@@ -21,6 +21,10 @@
 #include "bundle_mgr_interface.h"
 
 namespace OHOS {
+namespace Notification {
+void MockSetBundleInfoEnabled(bool enabled);
+} // namespace Notification
+
 namespace AppExecFwk {
 class BundleMgrProxy : public IRemoteProxy<IBundleMgr> {
 public:
@@ -33,8 +37,18 @@ public:
     int GetUidByBundleName(const std::string &bundleName, const int userId) override;
     bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
+    bool GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId) override;
 };
 }  // namespace AppExecFwk
+
+namespace Notification {
+
+void MockIsNonBundleName(bool isNonBundleName);
+
+void MockDistributedNotificationEnabled(bool isEnable);
+
+void MockSetBundleInfoFailed(bool getFail);
+}  // namespace Notification
 }  // namespace OHOS
 
 #endif  // MOCK_OHOS_EDM_MOCK_BUNDLE_MANAGER_H

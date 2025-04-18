@@ -24,7 +24,7 @@ std::shared_ptr<RdbStore> RdbHelper::GetRdbStore(
     return nullptr;
 }
 
-int RdbHelper::DeleteRdbStore(const std::string &dbFileName)
+int RdbHelper::DeleteRdbStore(const std::string &dbFileName, bool shouldClose)
 {
     return NativeRdb::E_ERROR;
 }

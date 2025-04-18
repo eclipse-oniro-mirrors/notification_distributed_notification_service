@@ -15,7 +15,8 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/unittest"
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
 
 ohos_unittest("ans_notification_annex_test") {
   module_out_path = module_output_path
@@ -23,10 +24,7 @@ ohos_unittest("ans_notification_annex_test") {
 
   sources = [ "ans_notification_annex_test.cpp" ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
@@ -38,6 +36,8 @@ ohos_unittest("ans_notification_annex_test") {
     "ipc:ipc_single",
     "relational_store:native_rdb",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

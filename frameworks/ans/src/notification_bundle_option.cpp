@@ -59,12 +59,33 @@ int32_t NotificationBundleOption::GetInstanceKey() const
     return instanceKey_;
 }
 
+void NotificationBundleOption::SetAppInstanceKey(const std::string &key)
+{
+    appInstanceKey_ = key;
+}
+ 
+std::string NotificationBundleOption::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
+}
+
+void NotificationBundleOption::SetAppIndex(const int32_t appIndex)
+{
+    appIndex_ = appIndex;
+}
+
+int32_t NotificationBundleOption::GetAppIndex() const
+{
+    return appIndex_;
+}
+
 std::string NotificationBundleOption::Dump()
 {
     return "NotificationBundleOption{ "
             "bundleName = " + bundleName_ +
             ", uid = " + std::to_string(uid_) +
             ", instanceKey = " + std::to_string(instanceKey_) +
+            ", appIndex = " + std::to_string(appIndex_) +
             " }";
 }
 
@@ -118,6 +139,7 @@ bool NotificationBundleOption::ToJson(nlohmann::json &jsonObject) const
     jsonObject["uid"] = uid_;
     jsonObject["bundleName"] = bundleName_;
     jsonObject["instanceKey"] = instanceKey_;
+    jsonObject["appIndex"] = appIndex_;
     return true;
 }
 
@@ -148,6 +170,9 @@ NotificationBundleOption *NotificationBundleOption::FromJson(const nlohmann::jso
         pBundle->instanceKey_ = jsonObject.at("instanceKey").get<int32_t>();
     }
 
+    if (jsonObject.find("appIndex") != jsonEnd && jsonObject.at("appIndex").is_number_integer()) {
+        pBundle->appIndex_ = jsonObject.at("appIndex").get<int32_t>();
+    }
     return pBundle;
 }
 

@@ -50,7 +50,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < SETADDITION_CONFIG_NUM) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGE("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -59,7 +59,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: key: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGW("Argument type error. String expected.");
+        ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -71,7 +71,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (std::strlen(keyStr) == 0 ||
         (strcmp(keyStr, KEY_NAME) != 0 && strcmp(keyStr, RING_LIST_KEY_NAME) != 0
             && strcmp(keyStr, CTRL_LIST_KEY_NAME) != 0)) {
-        ANS_LOGW("Argument type error. String expected.");
+        ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -80,7 +80,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: value: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGW("Argument type error. String expected.");
+        ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -127,6 +127,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
         .params = paras
     };
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;

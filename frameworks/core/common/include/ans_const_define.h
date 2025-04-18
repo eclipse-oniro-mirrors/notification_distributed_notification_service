@@ -27,12 +27,15 @@ namespace Notification {
 // Max active notification number
 constexpr size_t MAX_ACTIVE_NUM = 1000;
 constexpr uint32_t MAX_ACTIVE_NUM_PERAPP = 100;
-constexpr uint32_t MAX_ACTIVE_NUM_PERSECOND = 10;
-constexpr uint32_t MAX_UPDATE_NUM_PERSECOND = 20;
+constexpr uint32_t MAX_CREATE_NUM_PERSECOND = 15;
+constexpr uint32_t MAX_UPDATE_NUM_PERSECOND = 30;
+constexpr uint32_t MAX_CREATE_NUM_PERSECOND_PERAPP = 10;
+constexpr uint32_t MAX_UPDATE_NUM_PERSECOND_PERAPP = 20;
+constexpr std::chrono::seconds SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME = std::chrono::seconds(1);
 constexpr size_t MAX_SLOT_NUM = 5;
 constexpr uint32_t MAX_ICON_SIZE = 192 * 1024;
 constexpr uint32_t MAX_PICTURE_SIZE = 2 * 1024 * 1024;
-constexpr uint32_t MAX_LIVE_VIEW_ICON_NUM = 6;
+constexpr uint32_t MAX_LIVE_VIEW_ICON_NUM = 11;
 constexpr bool SUPPORT_DO_NOT_DISTRUB = true;
 constexpr uint32_t SYSTEM_SERVICE_UID = 1000;
 constexpr uint32_t MAX_CONVERSATIONAL_NUM = 10000;
@@ -43,9 +46,11 @@ constexpr int32_t MAX_STATUS_VECTOR_NUM = 1000;
 constexpr uint32_t MAX_CANCELED_PARCELABLE_VECTOR_NUM = 200;
 
 constexpr int32_t DEFAULT_UID = 0;
+constexpr int64_t INVALID_PROFILE_ID = -1;
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
 constexpr int32_t DEFAULT_USER_ID = 100;
+constexpr int32_t ZERO_USERID = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_BEGIN = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_END = 99;
 constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
@@ -62,6 +67,10 @@ const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_templat
 const std::string CURRENT_DEVICE_TYPE = "current";
 const std::string RING_TRUST_PKG_KEY = "RING_TRUSTLIST_PKG";
 const std::string DOWNLOAD_TEMPLATE_NAME = "downloadTemplate";
+
+const std::string DEVICE_TYPE_WEARABLE = "wearable";
+const std::string DEVICE_TYPE_LITE_WEARABLE = "liteWearable";
+const std::string DEVICE_TYPE_HEADSET = "headset";
 
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 constexpr NotificationConstant::DistributedReminderPolicy DEFAULT_DISTRIBUTED_REMINDER_POLICY =

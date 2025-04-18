@@ -13,11 +13,18 @@
  * limitations under the License.
  */
 
+#include "accesstoken_kit.h"
+#include "access_token.h"
+#include "access_token_error.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 #include "fuzz_common_base.h"
 
 extern "C" {
-static constexpr uint32_t U32_AT_SIZE     = 4;
+static constexpr uint32_t U32_AT_SIZE     = 3;
 static constexpr uint32_t MAX_MEMORY_SIZE = 4 * 1024 * 1024;
+
+using namespace OHOS::Security::AccessToken;
 
 uint32_t GetU32Size()
 {
@@ -27,7 +34,7 @@ uint32_t GetU32Size()
 uint32_t GetU32Data(const char* ptr)
 {
     // convert fuzz input data to an integer
-    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+    return (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
 }
 
 char* ParseData(const uint8_t* data, size_t size)
@@ -53,5 +60,77 @@ char* ParseData(const uint8_t* data, size_t size)
     }
 
     return ch;
+}
+
+void NativeTokenGet(const std::vector<std::string> &permissions)
+{
+    uint64_t tokenId;
+    size_t size = permissions.size();
+    const char **perms = new const char *[size];
+    for (size_t i = 0; i < permissions.size(); i++) {
+        perms[i] = permissions[i].c_str();
+    }
+    
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = size,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .aplStr = "system_core",
+    };
+
+    infoInstance.processName = "AnsFuzzTest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    AccessTokenKit::ReloadNativeTokenInfo();
+    delete []perms;
+}
+
+void SystemHapTokenGet(const std::vector<std::string> &permissions)
+{
+
+    HapPolicyParams hapPolicyPrams = {
+        .apl = APL_SYSTEM_CORE,
+        .domain = "com.ohos.notificationdialog",
+        .permList = {},
+        .permStateList = {}
+    };
+    
+    for (auto permission : permissions) {
+        PermissionStateFull permStateFull = {
+            .permissionName = permission,
+            .isGeneral = true,
+            .resDeviceID = {"local"},
+            .grantStatus = {PermissionState::PERMISSION_GRANTED},
+            .grantFlags = {1}
+        };
+        PermissionDef permDef = {
+            .permissionName = permission,
+            .bundleName = "com.ohos.notificationdialog",
+            .grantMode = 1,
+            .availableLevel = APL_NORMAL,
+            .label = "label",
+            .labelId = 1,
+            .description = "break the door",
+            .descriptionId = 1,
+        };
+        hapPolicyPrams.permList.emplace_back(permDef);
+        hapPolicyPrams.permStateList.emplace_back(permStateFull);
+    }
+
+    HapInfoParams hapInfoParams = {
+        .userID = 100,
+        .bundleName = "com.ohos.notificationdialog",
+        .instIndex = 0,
+        .appIDDesc = "com.ohos.notificationdialog",
+        .apiVersion = 12,
+        .isSystemApp = true
+    };
+
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(hapInfoParams, hapPolicyPrams);
+    SetSelfTokenID(tokenIdEx.tokenIDEx);
 }
 }

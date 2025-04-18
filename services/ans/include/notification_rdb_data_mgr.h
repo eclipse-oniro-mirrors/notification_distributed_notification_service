@@ -110,7 +110,7 @@ public:
      * @param userId Optional, Indicate which table to delete data.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t DeleteBathchData(const std::vector<std::string> &keys, const int32_t &userId = -1);
+    int32_t DeleteBatchData(const std::vector<std::string> &keys, const int32_t &userId = -1);
 
     /**
      * @brief Query data from DB.
@@ -158,6 +158,7 @@ private:
         std::unordered_map<std::string, std::string> &values);
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
     int32_t InitCreatedTables();
+    int32_t RestoreForMasterSlaver();
 
 private:
     NotificationRdbConfig notificationRdbConfig_;

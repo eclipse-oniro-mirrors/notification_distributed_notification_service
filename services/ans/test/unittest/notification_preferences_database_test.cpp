@@ -201,6 +201,20 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutNotificationsEnabledForBundle_0
 }
 
 /**
+ * @tc.name      : PutNotificationsEnabledForBundle_00300
+ * @tc.number    :
+ * @tc.desc      : Put bundle enable into disturbe DB when bundle name is null, return is false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    ASSERT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, true));
+    ASSERT_TRUE(preferncesDB_->RemoveEnabledDbByBundleName(bundleName_, bundleUid_));
+}
+
+/**
  * @tc.number    : PutNotificationsEnabled_00100
  * @tc.name      :
  * @tc.desc      : Put notification enable into disturbe DB, return is true.
@@ -412,7 +426,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0010
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), true);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
 }
 
 /**
@@ -585,6 +599,44 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_
     entry.second = "1";
     ASSERT_NE(nullptr, preferncesDB_);
     preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_00900
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_00900, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_showBadgeEnable";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+    auto show = bundleInfo.GetIsShowBadge();
+    ASSERT_TRUE(show);
+}
+
+/**
+ * @tc.number    : ParseBundlePropertyFromDisturbeDB_01000
+ * @tc.name      : ParseBundlePropertyFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundlePropertyFromDisturbeDB_01000, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_bundleReminderFlagsType";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, entry);
+    auto show = bundleInfo.GetSlotFlags();
+    ASSERT_EQ(show, 1);
 }
 
 /**
@@ -809,6 +861,91 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01300, Fun
 }
 
 /**
+ * @tc.number    : ParseSlotFromDisturbeDB_01400
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01400, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_reminderFlagsType";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01500
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01500, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_authorizedStatus";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01600
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01600, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_authHintCnt";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01700
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01700, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_reminderMode";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
+}
+
+/**
+ * @tc.number    : ParseSlotFromDisturbeDB_01800
+ * @tc.name      : ParseSlotFromDisturbeDB
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFromDisturbeDB_01800, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName(bundleName_);
+    bundleInfo.SetBundleUid(bundleUid_);
+    std::string bundleKey = "bundleKey";
+    std::pair<std::string, std::string> entry;
+    entry.first = "ans_bundle_bundleKey_slot_type_1_vibrationSytle";
+    entry.second = "1";
+    ASSERT_NE(nullptr, preferncesDB_);
+    preferncesDB_->ParseSlotFromDisturbeDB(bundleInfo, bundleKey, entry, -1);
+}
+
+/**
  * @tc.name      : PutHasPoppedDialog_00100
  * @tc.number    :
  * @tc.desc      : Put bundle total badge nums into disturbe DB, return is true.
@@ -904,7 +1041,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestS
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
-    ASSERT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+    ASSERT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }
 
 /**
@@ -932,7 +1069,20 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateBundleLablel_0100, TestSiz
     bundleInfo.SetBundleUid(1);
     std::string deviceType = "test";
     auto ret = preferncesDB_->GenerateBundleLablel(bundleInfo, deviceType);
-    ASSERT_EQ(ret, "enabledNotificationDistributed-name-1-test");
+    ASSERT_EQ(ret, "enabledDistributedNotification-name-1-test");
+}
+
+/**
+ * @tc.name: GenerateBundleLablel_0100
+ * @tc.desc: test GenerateBundleLablel
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GenerateBundleLablel_0200, TestSize.Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    std::string deviceType = "test";
+    auto res = preferncesDB_->GenerateBundleLablel(slotType, deviceType, userId);
+    ASSERT_EQ(res, "enabledSlotDistributedNotification-test-0-100");
 }
 
 /**
@@ -1024,6 +1174,20 @@ HWTEST_F(NotificationPreferencesDatabaseTest, AddDoNotDisturbProfiles_0100, Test
 }
 
 /**
+ * @tc.name: AddDoNotDisturbProfiles_0200
+ * @tc.desc: test AddDoNotDisturbProfiles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, AddDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = nullptr;
+    profiles.push_back(profile);
+    auto ret = preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
+    ASSERT_FALSE(ret);
+}
+
+/**
  * @tc.name: RemoveDoNotDisturbProfiles_0100
  * @tc.desc: test RemoveDoNotDisturbProfiles run success.
  * @tc.type: FUNC
@@ -1046,6 +1210,20 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbProfiles_0100, T
     preferncesDB_->AddDoNotDisturbProfiles(userId, profiles);
     auto res = preferncesDB_->RemoveDoNotDisturbProfiles(userId, profiles);
     ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: RemoveDoNotDisturbProfiles_0200
+ * @tc.desc: test RemoveDoNotDisturbProfiles
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, RemoveDoNotDisturbProfiles_0200, TestSize.Level1)
+{
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = nullptr;
+    profiles.push_back(profile);
+    auto ret = preferncesDB_->RemoveDoNotDisturbProfiles(userId, profiles);
+    ASSERT_FALSE(ret);
 }
 
 /**
@@ -1079,6 +1257,302 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDoNotDisturbProfile_0100, TestS
     sptr<NotificationDoNotDisturbProfile> profile;
     auto res = info.GetDoNotDisturbProfiles(profileId, userId, profile);
     auto infos = new (std::nothrow) NotificationPreferencesInfo();
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0100
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    EXPECT_FALSE(notificationPreferencesDatabase->SetDisableNotificationInfo(nullptr));
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0200
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    EXPECT_FALSE(notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable));
+}
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0300
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0300, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    EXPECT_TRUE(notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable));
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0100
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDisableNotificationInfo_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    EXPECT_TRUE(notificationPreferencesDatabase->GetDisableNotificationInfo(disable));
+}
+
+/**
+ * @tc.name: IsDistributedEnabledEmptyForBundle_0100
+ * @tc.desc: test IsDistributedEnabledEmptyForBundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsDistributedEnabledEmptyForBundle_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("testBundleName");
+    bundleInfo.SetBundleUid(1000);
+    std::string deviceType = "testType";
+    bool ret = preferncesDB_->IsDistributedEnabledEmptyForBundle(deviceType, bundleInfo);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetSmartReminderEnableFromCCM_0100
+ * @tc.desc: test GetSmartReminderEnableFromCCM
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetSmartReminderEnableFromCCM_0100, TestSize.Level1)
+{
+    std::string deviceType = "testType";
+    bool enabled = true;
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_FALSE(enabled);
+    preferncesDB_->isCachedSmartReminderEnableList_ = true;
+    preferncesDB_->smartReminderEnableList_.clear();
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_FALSE(enabled);
+    preferncesDB_->smartReminderEnableList_.push_back("test");
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_FALSE(enabled);
+    preferncesDB_->smartReminderEnableList_.push_back(deviceType);
+    preferncesDB_->GetSmartReminderEnableFromCCM(deviceType, enabled);
+    EXPECT_TRUE(enabled);
+}
+
+/**
+ * @tc.name: GenerateSubscriberExistFlagKey_0100
+ * @tc.desc: test GenerateSubscriberExistFlagKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GenerateSubscriberExistFlagKey_0100, TestSize.Level1)
+{
+    std::string deviceType = "testType";
+    int32_t userId = 0;
+    auto ret = preferncesDB_->GenerateSubscriberExistFlagKey(deviceType, userId);
+    std::string flag = "existFlag";
+    std::string middleLine = "-";
+    std::string key = flag.append(middleLine).append(deviceType).append(middleLine).append(std::to_string(userId));
+    ASSERT_EQ(ret, key);
+}
+
+/**
+ * @tc.name: SetSubscriberExistFlag_0100
+ * @tc.desc: test SetSubscriberExistFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetSubscriberExistFlag_0100, TestSize.Level1)
+{
+    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, false);
+    EXPECT_TRUE(ret);
+    bool enabled = true;
+    ret = preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled);
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(enabled);
+}
+
+/**
+ * @tc.name: GetSubscriberExistFlag_0100
+ * @tc.desc: test GetSubscriberExistFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetSubscriberExistFlag_0100, TestSize.Level1)
+{
+    auto ret = preferncesDB_->SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, true);
+    EXPECT_TRUE(ret);
+    bool enabled = false;
+    ret = preferncesDB_->GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, enabled);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(enabled);
+}
+
+/**
+ * @tc.name: IsNotificationSlotFlagsExists_0100
+ * @tc.desc: test IsNotificationSlotFlagsExists
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsNotificationSlotFlagsExists_0100, TestSize.Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    auto ret = preferncesDB_->IsNotificationSlotFlagsExists(bundleOption);
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ParseFromDisturbeDB_0100
+ * @tc.desc: test ParseFromDisturbeDB
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseFromDisturbeDB_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo preferencesInfo;
+    auto ret = preferncesDB_->ParseFromDisturbeDB(preferencesInfo, userId);
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ParseBundleFromDistureDB_0100
+ * @tc.desc: test ParseBundleFromDistureDB
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, ParseBundleFromDistureDB_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo preferencesInfo;
+    std::unordered_map<std::string, std::string> values;
+    values["test"] =  "test";
+    preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, values, userId);
+    ASSERT_EQ(1, preferencesInfo.infos_.size());
+    preferencesInfo.infos_.clear();
+}
+
+/**
+ * @tc.name: StringToVector_0100
+ * @tc.desc: test StringToVector
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, StringToVector_0100, TestSize.Level1)
+{
+    std::string str = "";
+    std::vector<int64_t> data;
+    preferncesDB_->StringToVector(str, data);
+    ASSERT_EQ(0, data.size());
+}
+
+/**
+ * @tc.name: StringToVector_0200
+ * @tc.desc: test StringToVector
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, StringToVector_0200, TestSize.Level1)
+{
+    std::string str = "1_2_3";
+    std::vector<int64_t> data;
+    preferncesDB_->StringToVector(str, data);
+    ASSERT_EQ(2, data.size());
+}
+
+/**
+ * @tc.name: GetByteFromDb_0100
+ * @tc.desc: test GetByteFromDb
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetByteFromDb_0100, TestSize.Level1)
+{
+    std::string key;
+    std::vector<uint8_t> value;
+    auto res = preferncesDB_->GetByteFromDb(key, value, userId);
+    ASSERT_NE(res, ERR_OK);
+}
+
+/**
+ * @tc.name: DeleteBatchKvFromDb_0100
+ * @tc.desc: test DeleteBatchKvFromDb
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, DeleteBatchKvFromDb_0100, TestSize.Level1)
+{
+    std::vector<std::string> keys;
+    auto res = preferncesDB_->DeleteBatchKvFromDb(keys, userId);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledBySlot_0100
+ * @tc.desc: test SetDistributedEnabledBySlot
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDistributedEnabledBySlot_0100, TestSize.Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    std::string deviceType = "test1";
+    
+    auto res = preferncesDB_->SetDistributedEnabledBySlot(slotType, deviceType, true);
+    ASSERT_EQ(res, true);
+
+    bool enabled = false;
+    res = preferncesDB_->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+    ASSERT_EQ(res, true);
+    ASSERT_EQ(enabled, true);
+}
+
+/**
+ * @tc.name: SetDistributedEnabledBySlot_0200
+ * @tc.desc: test SetDistributedEnabledBySlot
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDistributedEnabledBySlot_0200, TestSize.Level1)
+{
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
+    std::string deviceType = "test2";
+    
+    bool enabled = false;
+    auto res = preferncesDB_->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+    ASSERT_EQ(res, true);
+    ASSERT_EQ(enabled, true);
+}
+
+/**
+ * @tc.name: UpdateBundlePropertyToDisturbeDB_0100
+ * @tc.desc: test UpdateBundlePropertyToDisturbeDB
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, UpdateBundlePropertyToDisturbeDB_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("test1");
+    bundleInfo.SetBundleUid(1000);
+    
+    auto res = preferncesDB_->UpdateBundlePropertyToDisturbeDB(userId, bundleInfo);
+    ASSERT_EQ(res, true);
+}
+
+/**
+ * @tc.name: UpdateBundlePropertyToDisturbeDB_0200
+ * @tc.desc: test UpdateBundlePropertyToDisturbeDB
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, UpdateBundlePropertyToDisturbeDB_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("");
+    bundleInfo.SetBundleUid(1000);
+    
+    auto res = preferncesDB_->UpdateBundlePropertyToDisturbeDB(userId, bundleInfo);
     ASSERT_EQ(res, false);
 }
 }  // namespace Notification

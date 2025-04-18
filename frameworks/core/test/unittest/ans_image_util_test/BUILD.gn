@@ -15,7 +15,8 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/unittest"
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
 
 ohos_unittest("ans_image_util_test") {
   module_out_path = module_output_path
@@ -26,7 +27,6 @@ ohos_unittest("ans_image_util_test") {
   ]
 
   sources = [
-    "${core_path}/common/src/ans_log_wrapper.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "../mock/mock_image_packer.cpp",
     "../mock/mock_image_source.cpp",
@@ -34,16 +34,14 @@ ohos_unittest("ans_image_util_test") {
     "ans_image_util_unit_test.cpp",
   ]
 
-  deps = [
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = []
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "image_framework:image_native",
     "relational_store:native_rdb",

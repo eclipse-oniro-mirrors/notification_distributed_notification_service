@@ -124,6 +124,7 @@ HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00500, Level1)
     ASSERT_EQ(result, 1000);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : GetDistributedNotificationEnabled_00100
  * @tc.name      : GetDistributedNotificationEnabled
@@ -155,6 +156,60 @@ HWTEST_F(BundleManagerHelperTest, GetDistributedNotificationEnabled_00101, Level
     bundleManagerHelper->bundleMgr_ = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
     bool result = bundleManagerHelper->GetDistributedNotificationEnabled(bundle, userId);
     ASSERT_EQ(result, true);
+}
+#endif
+
+/**
+ * @tc.number    : OnRemoteDied_00100
+ * @tc.name      : OnRemoteDied_00100
+ */
+HWTEST_F(BundleManagerHelperTest, OnRemoteDied_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    bundleManagerHelper.OnRemoteDied(nullptr);
+
+    ASSERT_EQ(bundleManagerHelper.bundleMgr_, nullptr);
+}
+
+/**
+ * @tc.number    : GetBundleInfo_00100
+ * @tc.name      : GetBundleInfo_00100
+ */
+HWTEST_F(BundleManagerHelperTest, GetBundleInfo_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    AppExecFwk::BundleInfo info;
+
+    // need mock
+    auto res = bundleManagerHelper.GetBundleInfo("test",
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, 100, info);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.number    : GetAppIndexByUid_00100
+ * @tc.name      : GetAppIndexByUid_00100
+ */
+HWTEST_F(BundleManagerHelperTest, GetAppIndexByUid_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    AppExecFwk::BundleInfo info;
+
+    // need mock
+    auto res = bundleManagerHelper.GetAppIndexByUid(100);
+    ASSERT_NE(res, 9999);
+}
+
+/**
+ * @tc.number    : GetDefaultUidByBundleName_00100
+ * @tc.name      : GetDefaultUidByBundleName_00100
+ */
+HWTEST_F(BundleManagerHelperTest, GetDefaultUidByBundleName_00100, Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    // need mock
+    auto res = bundleManagerHelper.GetDefaultUidByBundleName("test", 100, 0);
+    ASSERT_NE(res, 9999);
 }
 }  // namespace Notification
 }  // namespace OHOS

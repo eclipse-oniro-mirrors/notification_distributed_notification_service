@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_LOCAL_LIVE_VIEW_CONTENT_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_LOCAL_LIVE_VIEW_CONTENT_H
 
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_capsule.h"
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_progress.h"
-#include "base/notification/distributed_notification_service/interfaces/inner_api/notification_local_live_view_button.h"
+#include "notification_capsule.h"
+#include "notification_progress.h"
+#include "notification_local_live_view_button.h"
 #include "message_user.h"
 #include "notification_basic_content.h"
 #include "notification_conversational_message.h"
@@ -26,6 +26,7 @@
 #include "notification_time.h"
 #include "parcel.h"
 #include <vector>
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -37,8 +38,16 @@ public:
         PROGRESS,
         TIME,
         INITIAL_TIME,
+        CARD_BUTTON,
     };
-    
+
+    enum class LiveViewTypes {
+        LIVE_VIEW_ACTIVITY,
+        LIVE_VIEW_INSTANT,
+        LIVE_VIEW_LONG_TERM,
+        LIVE_VIEW_INSTANT_BANNER,
+    };
+
     NotificationLocalLiveViewContent() = default;
     ~NotificationLocalLiveViewContent() = default;
 
@@ -82,10 +91,22 @@ public:
     NotificationLocalLiveViewButton GetButton();
 
     /*
+     * @brief Sets the card button to be included in a local live view notification.
+     *
+     * @param button Indicates the type to be included.
+     */
+    void SetCardButton(std::vector<NotificationIconButton> buttons);
+
+    /*
+     * @brief Get the card button of a local live view notification.
+     *
+     */
+    std::vector<NotificationIconButton> GetCardButton();
+
+    /*
      * @brief Sets the progress to be included in a local live view notification.
      *
      * @param progress Indicates the type to be included.
-     
      */
     void SetProgress(NotificationProgress progress);
 
@@ -99,7 +120,6 @@ public:
      * @brief Sets the time to be included in a local live view notification.
      *
      * @param time Indicates the type to be included.
-     
      */
     void SetTime(NotificationTime time);
 
@@ -113,7 +133,6 @@ public:
      * @add flag function.
      *
      * @param flag Indicates the flag to be added.
-     
      */
     void addFlag(int32_t flag);
 
@@ -123,6 +142,19 @@ public:
      * @param flag Indicates the flag to be added.
      */
     bool isFlagExist(int32_t flag);
+
+    /*
+     * @brief Sets the type to be included in a local live view notification.
+     *
+     * @param type Indicates the type to be included.
+     */
+    void SetLiveViewType(const LiveViewTypes type);
+
+    /*
+     * @brief Get the type of a local live view notification.
+     *
+     */
+    LiveViewTypes GetLiveViewType() const;
 
     /**
      * @brief Returns a string representation of the object.
@@ -163,6 +195,10 @@ public:
      */
     static NotificationLocalLiveViewContent *Unmarshalling(Parcel &parcel);
 
+    void ClearButton();
+
+    void ClearCapsuleIcon();
+
 protected:
     /**
      * @brief Read a NotificationConversationalContent object from a Parcel.
@@ -176,9 +212,11 @@ private:
     int32_t type_ {0};
     NotificationCapsule capsule_ {};
     NotificationLocalLiveViewButton button_ {};
+    std::vector<NotificationIconButton> card_button_ {};
     NotificationProgress progress_ {};
     NotificationTime time_ {};
     std::vector<int32_t> flags_ {};
+    LiveViewTypes liveviewType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

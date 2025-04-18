@@ -42,6 +42,7 @@ public:
     int32_t OnCheckNotification(
         const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam) override;
 
+    void HandleEventControl(std::string eventControl, const std::shared_ptr<PushCallBackParam> &pushCallBackParam);
 private:
     static inline BrokerDelegator<PushCallBackProxy> delegator_;
 };

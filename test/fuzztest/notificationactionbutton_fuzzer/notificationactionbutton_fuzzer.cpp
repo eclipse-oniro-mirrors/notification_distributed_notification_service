@@ -22,14 +22,15 @@
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
 #include "want_params.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         AbilityRuntime::WantAgent::WantAgentInfo paramsInfo;
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
             AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(paramsInfo);
-        std::string title(data);
+        std::string title = fdp->ConsumeRandomLengthString();
         std::shared_ptr<Notification::NotificationActionButton> actionButton =
             Notification::NotificationActionButton::Create(nullptr, title, wantAgent);
         if (actionButton == nullptr) {
@@ -57,11 +58,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

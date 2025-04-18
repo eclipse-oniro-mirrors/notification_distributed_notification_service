@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@
 #include "notification_bundle_option.h"
 #include "notification_dialog.h"
 #include "notification_preferences.h"
+#include <cstdlib>
+#include <string>
 
 namespace OHOS::Notification {
 using DialogInfo = NotificationDialogManager::DialogInfo;
@@ -47,10 +49,11 @@ NotificationDialogEventSubscriber::NotificationDialogEventSubscriber(
 void NotificationDialogEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     int32_t code = data.GetCode();
-    std::string text = data.GetData();
-    ANS_LOGI("NotificationDialogEventSubscriber Get Data %{public}d %{public}s", code, text.c_str());
-    dialogManager_.OnBundleEnabledStatusChanged(
-        static_cast<DialogStatus>(code), text);
+    std::string bundleName = data.GetWant().GetStringParam("bundleName");
+    int32_t bundleUid = std::atoi(data.GetWant().GetStringParam("bundleUid").c_str());
+    ANS_LOGI("NotificationDialogEventSubscriber Get Data %{public}d %{public}s %{public}d", code,
+        bundleName.c_str(), bundleUid);
+    dialogManager_.OnBundleEnabledStatusChanged(static_cast<DialogStatus>(code), bundleName, bundleUid);
 }
 
 NotificationDialogEventSubscriber::~NotificationDialogEventSubscriber()
@@ -84,21 +87,22 @@ bool NotificationDialogManager::Init()
 
 ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     const sptr<NotificationBundleOption>& bundle,
-    const sptr<AnsDialogCallback>& callback,
-    const sptr<IRemoteObject>& callerToken)
+    const sptr<IAnsDialogCallback>& callback,
+    const sptr<IRemoteObject>& callerToken,
+    const bool innerLake)
 {
-    if (bundle == nullptr || callback == nullptr) {
-        return ERROR_INTERNAL_ERROR;
-    }
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
-        ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists.");
+        ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists. bundle = %{public}s",
+            bundle->GetBundleName().c_str());
         return ERR_ANS_DIALOG_IS_POPPING;
     }
     ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
         NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
         bundle->GetUid(),
-        callerToken);
+        bundle->GetBundleName(),
+        callerToken,
+        innerLake);
     if (result != ERR_OK) {
         ANS_LOGE("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
         std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;
@@ -108,22 +112,25 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
 }
 
 ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
-    DialogStatus status, const std::string& bundleName)
+    DialogStatus status, const std::string& bundleName, const int32_t& uid)
 {
     ANS_LOGD("enter");
     bool result = false;
     switch (status) {
         case DialogStatus::ALLOW_CLICKED:
-            result = OnDialogButtonClicked(bundleName, true);
+            result = OnDialogButtonClicked(bundleName, uid, true);
             break;
         case DialogStatus::DENY_CLICKED:
-            result = OnDialogButtonClicked(bundleName, false);
+            result = OnDialogButtonClicked(bundleName, uid, false);
             break;
         case DialogStatus::DIALOG_CRASHED:
-            result = OnDialogCrashed(bundleName);
+            result = OnDialogCrashed(bundleName, uid);
             break;
         case DialogStatus::DIALOG_SERVICE_DESTROYED:
             result = OnDialogServiceDestroyed();
+            break;
+        case DialogStatus::REMOVE_BUNDLE:
+            result = onRemoveBundle(bundleName, uid);
             break;
         default:
             result = false;
@@ -135,15 +142,25 @@ ErrCode NotificationDialogManager::OnBundleEnabledStatusChanged(
     return ERR_OK;
 }
 
+ErrCode NotificationDialogManager::AddDialogInfo(const sptr<NotificationBundleOption>& bundle,
+    const sptr<IAnsDialogCallback>& callback)
+{
+    if (!AddDialogInfoIfNotExist(bundle, callback)) {
+        return ERR_ANS_DIALOG_IS_POPPING;
+    }
+    return ERR_OK;
+}
+
 bool NotificationDialogManager::AddDialogInfoIfNotExist(
     const sptr<NotificationBundleOption>& bundle,
-    const sptr<AnsDialogCallback>& callback)
+    const sptr<IAnsDialogCallback>& callback)
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
+    int32_t uid = bundle->GetUid();
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
-            return dialogInfo->bundleOption->GetBundleName() == name;
+            return dialogInfo->bundleOption->GetBundleName() == name && dialogInfo->bundleOption->GetUid() == uid;
         });
     if (dialogIter != dialogsOpening_.end()) {
         return false;
@@ -156,12 +173,12 @@ bool NotificationDialogManager::AddDialogInfoIfNotExist(
 }
 
 sptr<NotificationBundleOption> NotificationDialogManager::GetBundleOptionByBundleName(
-    const std::string& bundleName)
+    const std::string& bundleName, const int32_t& uid)
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
-            return dialogInfo->bundleOption->GetBundleName() == bundleName;
+            return dialogInfo->bundleOption->GetBundleName() == bundleName && dialogInfo->bundleOption->GetUid() == uid;
         });
     if (dialogIter == dialogsOpening_.end()) {
         return nullptr;
@@ -175,9 +192,10 @@ void NotificationDialogManager::RemoveDialogInfoByBundleOption(const sptr<Notifi
 {
     std::lock_guard<std::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
+    int32_t uid = bundle->GetUid();
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
-            return dialogInfo->bundleOption->GetBundleName() == name;
+            return dialogInfo->bundleOption->GetBundleName() == name && dialogInfo->bundleOption->GetUid() == uid;
         });
     if (dialogIter == dialogsOpening_.end()) {
         dialogInfoRemoved = nullptr;
@@ -203,14 +221,14 @@ bool NotificationDialogManager::SetHasPoppedDialog(
     if (bundleOption == nullptr) {
         return false;
     }
-    ErrCode result = NotificationPreferences::GetInstance().SetHasPoppedDialog(bundleOption, hasPopped);
+    ErrCode result = NotificationPreferences::GetInstance()->SetHasPoppedDialog(bundleOption, hasPopped);
     return result == ERR_OK;
 }
 
-bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleName, bool enabled)
+bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleName, const int32_t& uid, bool enabled)
 {
     ANS_LOGD("enter");
-    auto bundleOption = GetBundleOptionByBundleName(bundleName);
+    auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
     if (bundleOption == nullptr) {
         return false;
     }
@@ -228,10 +246,10 @@ bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleN
     return HandleOneDialogClosed(bundleOption, status);
 }
 
-bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName)
+bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName, const int32_t& uid)
 {
     ANS_LOGD("enter");
-    auto bundleOption = GetBundleOptionByBundleName(bundleName);
+    auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
     if (bundleOption == nullptr) {
         return false;
     }
@@ -250,6 +268,18 @@ bool NotificationDialogManager::OnDialogServiceDestroyed()
 {
     ANS_LOGD("enter");
     return HandleAllDialogsClosed();
+}
+
+bool NotificationDialogManager::onRemoveBundle(const std::string bundleName, const int32_t& uid)
+{
+    auto bundleOption = GetBundleOptionByBundleName(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGE("onRemoveBundle bundle is null. bundleName = %{public}s", bundleName.c_str());
+        return false;
+    }
+    std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;
+    RemoveDialogInfoByBundleOption(bundleOption, dialogInfoRemoved);
+    return true;
 }
 
 bool NotificationDialogManager::HandleOneDialogClosed(

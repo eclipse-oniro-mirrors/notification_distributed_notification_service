@@ -18,20 +18,40 @@
 
 #include "native/ffi_remote_data.h"
 #include "notification_manager_impl.h"
+#include "notification_utils.h"
 #include "inner_errors.h"
 
 #include <cstdint>
 
 extern "C" {
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerPublish(OHOS::CJSystemapi::CNotificationRequest request);
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerCancel(int32_t id, const char* label);
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerCancelAll();
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerAddSlot(int32_t type);
-    FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsNotificationEnabled();
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerSetBadgeNumber(int32_t badgeNumber);
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerRequestEnableNotification();
-    FFI_EXPORT int32_t FfiOHOSNotificationManagerRequestEnableNotificationWithContext(int64_t id);
-    FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsDistributedEnabled();
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerPublishV2(CNotificationRequestV2 request);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerCancelV2(int32_t id, const char* label);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerCancelAllV2();
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerAddSlotV2(int32_t type);
+    FFI_EXPORT CNotificationSlotV2 FfiOHOSNotificationManagerGetSlot(int32_t type, int32_t* errCode);
+    FFI_EXPORT CArrayNotificationSlotsV2 FfiOHOSNotificationManagerGetSlots(int32_t* errCode);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerRemoveSlot(int32_t type);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerRemoveAllSlots();
+    FFI_EXPORT RetDataUI32 FfiOHOSNotificationManagerGetActiveNotificationCount();
+    FFI_EXPORT CArrayNotificationRequestV2 FfiOHOSNotificationManagerGetActiveNotifications(int32_t* errCode);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerCancelGroup(const char* cGroupName);
+    FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsSupportTemplate(const char* cTemplateName);
+    FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsNotificationEnabledV2();
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerSetBadgeNumberV2(int32_t badgeNumber);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerRequestEnableNotificationV2();
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerRequestEnableNotificationWithContextV2(int64_t id);
+    FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsDistributedEnabledV2();
+
+    // systemAPI
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerSetNotificationEnable(CNotificationBundleOptionV2 option, bool enable);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerDisplayBadge(CNotificationBundleOptionV2 option, bool enable);
+    FFI_EXPORT RetDataBool FfiOHOSNotificationManagerIsBadgeDisplayed(CNotificationBundleOptionV2 option);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerSetSlotFlagsByBundle(CNotificationBundleOptionV2 option,
+        int32_t slotFlags);
+    FFI_EXPORT RetDataUI32 FfiOHOSNotificationManagerGetSlotFlagsByBundle(CNotificationBundleOptionV2 option);
+    FFI_EXPORT RetDataUI32 FfiOHOSNotificationManagerGetSlotNumByBundle(CNotificationBundleOptionV2 option);
+    FFI_EXPORT int32_t FfiOHOSNotificationManagerRemoveGroupByBundle(CNotificationBundleOptionV2 option,
+        const char* cGroupName);
 }
 
 #endif // NOTIFICATION_MANAGER_FFI_H

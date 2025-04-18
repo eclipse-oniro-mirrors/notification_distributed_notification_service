@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"อนุญาต %s ให้ส่งการแจ้งเตือนถึงคุณหรือไม่",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"อนุญาต",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"ปฏิเสธ",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

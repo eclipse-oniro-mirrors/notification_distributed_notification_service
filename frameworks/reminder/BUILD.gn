@@ -1,0 +1,120 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/notification/distributed_notification_service/notification.gni")
+import("//build/config/components/idl_tool/idl.gni")
+import("//build/ohos.gni")
+
+group("reminder_client") {
+  deps = [ ":reminder_innerkits" ]
+}
+
+idl_interface_sources = [
+  "${target_gen_dir}/reminder_agent_service_proxy.cpp",
+  "${target_gen_dir}/reminder_agent_service_stub.cpp",
+]
+
+idl_gen_interface("reminder_service_interface") {
+  src_idl = rebase_path("IReminderAgentService.idl")
+  dst_file = string_join(",", idl_interface_sources)
+  hitrace = "HITRACE_TAG_ABILITY_MANAGER"
+  log_domainid = "0xD003900"
+  log_tag = "ReminderAgentService"
+}
+
+config("reminder_innerkits_public_config") {
+  visibility = [ "./../../*" ]
+
+  include_dirs = [
+    "${inner_api_path}",
+    "${core_path}/common/include",
+    "${core_path}/include",
+    "${target_gen_dir}",
+  ]
+}
+
+ohos_shared_library("reminder_innerkits") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  include_dirs = [ "${inner_api_path}" ]
+  public_configs = [
+    ":reminder_innerkits_public_config",
+    "${frameworks_path}/ans:ans_innerkits_config",
+    "${frameworks_path}/ans:ans_subscriber_local_live_view_config",
+    "${frameworks_path}/ans:ans_subscriber_config",
+  ]
+  output_values = get_target_outputs(":reminder_service_interface")
+  sources = [
+    "${frameworks_module_reminder_path}/src/reminder_helper.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request_adaptation.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request_alarm.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request_calendar.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request_client.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request_factory.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_request_timer.cpp",
+    "${frameworks_module_reminder_path}/src/reminder_service_load_callback.cpp",
+  ]
+  sources += filter_include(output_values, [ "*.cpp" ])
+  defines = []
+  deps = [
+    ":reminder_service_interface",
+    "${frameworks_path}/ans:ans_client",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:appkit_native",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "i18n:intl_util",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+    "time_service:time_client",
+  ]
+
+  public_external_deps = [
+    "ability_runtime:wantagent_innerkits",
+    "ffrt:libffrt",
+    "image_framework:image_native",
+  ]
+
+  if (is_double_framework) {
+    cflags = [ "-DCONFIG_DUAL_FRAMEWORK" ]
+  }
+
+  if (ans_hitrace_usage) {
+    external_deps += [ "hitrace:hitrace_meter" ]
+    defines += [ "HITRACE_METER_ENABLE" ]
+  }
+
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+  }
+
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}

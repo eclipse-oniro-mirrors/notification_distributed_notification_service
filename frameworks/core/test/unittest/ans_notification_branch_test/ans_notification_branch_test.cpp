@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,11 @@
 #define protected public
 #include "ans_notification.h"
 #include "ans_subscriber_proxy.h"
-#include "ans_manager_interface.h"
 #include "ans_manager_proxy.h"
+#include "ians_manager.h"
 #undef private
 #undef protected
-#include "ans_dialog_callback_interface.h"
+#include "ians_dialog_callback.h"
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
@@ -31,7 +31,7 @@
 #include "singleton.h"
 #include "notification_subscriber.h"
 
-extern void MockGetAnsManagerProxy(bool mockRet);
+extern void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::IAnsManager> mockRet);
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,7 +40,7 @@ using namespace OHOS::Notification;
 
 namespace OHOS {
 namespace Notification {
-class MockAnsManagerInterface : public AnsManagerInterface {
+class MockAnsManagerInterface : public IAnsManager {
 public:
     MockAnsManagerInterface() = default;
     virtual ~MockAnsManagerInterface()
@@ -55,12 +55,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode Cancel(int notificationId, const std::string &label, int32_t instanceKey) override
+    ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &notification) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CancelAll(int32_t instanceKey) override
+    ErrCode Cancel(int notificationId, const std::string &label, const std::string &instanceKey) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAll(const std::string &instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -83,7 +88,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode AddSlotByType(NotificationConstant::SlotType slotType) override
+    ErrCode AddSlotByType(int32_t slotTypeInt) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -93,7 +98,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode RemoveSlotByType(const NotificationConstant::SlotType &slotType) override
+    ErrCode RemoveSlotByType(int32_t slotTypeInt) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -103,7 +108,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetSlotByType(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot) override
+    ErrCode GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -118,7 +123,8 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) override
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
+        const std::string &instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -139,23 +145,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetNotificationAgent(const std::string &agent) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode GetNotificationAgent(std::string &agent) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode PublishAsBundle(
-        const sptr<NotificationRequest> notification, const std::string &representativeBundle) override
+        const sptr<NotificationRequest> &notification, const std::string &representativeBundle) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -180,7 +176,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode RemoveNotification(const sptr<NotificationBundleOption> &bundleOption, int notificationId,
+    ErrCode RemoveNotification(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
         const std::string &label, int32_t removeReason) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -213,7 +209,7 @@ public:
     }
 
     ErrCode GetSlotByBundle(
-        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt,
         sptr<NotificationSlot> &slot) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -226,8 +222,19 @@ public:
     }
 
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
-        const sptr<IRemoteObject> &callerToken) override
+        const sptr<IAnsDialogCallback>& ansDialogCallback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RequestEnableNotification(const std::string &deviceId,
+        const sptr<IAnsDialogCallback>& ansDialogCallback,
+        const sptr<IRemoteObject>& callerToken) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RequestEnableNotification(const std::string& bundleName, int32_t uid) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -263,13 +270,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode Subscribe(const sptr<IAnsSubscriber>& subscriber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override
+    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -279,14 +291,40 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
-        const sptr<NotificationSubscribeInfo> &info, const bool isNatives) override
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode Unsubscribe(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info) override
+    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetAllDistribuedEnabledBundles(const std::string& deviceType,
+        std::vector<NotificationBundleOption> &bundleOption) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
+        bool isNatives) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView>& subscriber,
+        const sptr<NotificationSubscribeInfo>& info, bool isNatives) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode Unsubscribe(const sptr<IAnsSubscriber>& subscriber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode Unsubscribe(const sptr<IAnsSubscriber>& subscriber, const sptr<NotificationSubscribeInfo>& info) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -297,6 +335,17 @@ public:
     }
 
     ErrCode IsAllowedNotifySelf(bool &allowed) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
+        bool &canPop, std::string &bundleName) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RemoveEnableNotificationDialog() override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -331,7 +380,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelGroup(const std::string &groupName, const std::string &instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -367,7 +421,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) override
+    ErrCode GetDeviceRemindType(int32_t& remindTypeInt) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -382,84 +436,49 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode PublishReminder(sptr<ReminderRequest> &reminder) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode CancelReminder(const int32_t reminderId) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode CancelAllReminders() override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode DelExcludeDates(const int32_t reminderId) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override
-    {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     ErrCode IsSupportTemplate(const std::string &templateName, bool &support) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode IsSpecialUserAllowedNotify(const int32_t &userId, bool &allowed) override
+    ErrCode IsSpecialUserAllowedNotify(int32_t userId, bool &allowed) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetNotificationsEnabledByUser(const int32_t &deviceId, bool enabled) override
+    ErrCode SetNotificationsEnabledByUser(int32_t userId, bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode DeleteAllByUser(const int32_t &userId) override
+    ErrCode DeleteAllByUser(int32_t userId) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetDoNotDisturbDate(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date) override
+    ErrCode SetDoNotDisturbDate(int32_t userId, const sptr<NotificationDoNotDisturbDate> &date) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override
+    ErrCode GetDoNotDisturbDate(int32_t userId, sptr<NotificationDoNotDisturbDate> &date) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override
+        int32_t slotTypeInt, bool enabled, bool isForceControl) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool &enabled) override
+        int32_t slotTypeInt, bool &enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override
+    ErrCode GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -480,12 +499,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) override
+    ErrCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode SetBadgeNumberByBundle(const sptr<NotificationBundleOption>& bundleOption, int32_t badgeNumber) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetBadgeNumberForDhByBundle(
+        const sptr<NotificationBundleOption>& bundleOption, int32_t badgeNumber) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -512,7 +537,7 @@ public:
     }
 
     ErrCode GetActiveNotificationByFilter(const sptr<NotificationBundleOption> &bundleOption,
-        const int32_t notificationId, const std::string &label, std::vector<std::string> extraInfoKeys,
+        int32_t notificationId, const std::string &label, const std::vector<std::string>& extraInfoKeys,
         sptr<NotificationRequest> &request) override
     {
         return ERR_ANS_INVALID_PARAM;
@@ -524,13 +549,13 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override
+    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::string &deviceType, const bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
-        const std::string &deviceType, const bool enabled) override
+    ErrCode SetAdditionConfig(const std::string &key, const std::string &value) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -551,12 +576,36 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id)
+    ErrCode SetDistributedEnabledBySlot(
+        int32_t slotTypeInt, const std::string &deviceType, bool enabled) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+    ErrCode IsDistributedEnabledBySlot(
+        int32_t slotTypeInt, const std::string &deviceType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+        const std::string& deveiceId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+        uint32_t controlFlag, const std::string& deveiceId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -567,6 +616,65 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 #endif
+
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<IAnsOperationCallback>& operationCallback) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetHashCodeRule(const uint32_t type) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        int32_t slotTypeInt) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode PublishWithMaxCapacity(const std::string& label, const sptr<NotificationRequest>& notification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode PublishNotificationForIndirectProxyWithMaxCapacity(const sptr<NotificationRequest>& notification) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode PublishAsBundleWithMaxCapacity(
+        const sptr<NotificationRequest>& notification, const std::string& representativeBundle) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {
@@ -582,7 +690,10 @@ public:
     void SetUp();
 };
 
-void AnsNotificationBranchTest::SetUpTestCase() {}
+void AnsNotificationBranchTest::SetUpTestCase()
+{
+    MockGetAnsManagerProxy(nullptr);
+}
 
 void AnsNotificationBranchTest::TearDownTestCase() {}
 
@@ -619,7 +730,6 @@ HWTEST_F(AnsNotificationBranchTest, RemoveNotifications_0200, Function | MediumT
     std::vector<std::string> hashcodes;
     hashcodes.emplace_back(hashcode);
     int32_t removeReason = 1;
-    MockGetAnsManagerProxy(false);
     ErrCode ret = ansNotification->RemoveNotifications(hashcodes, removeReason);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
@@ -639,8 +749,6 @@ HWTEST_F(AnsNotificationBranchTest, RemoveNotifications_0300, Function | MediumT
     std::vector<std::string> hashcodes;
     hashcodes.emplace_back(hashcode);
     int32_t removeReason = 1;
-    MockGetAnsManagerProxy(true);
-    ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     ansNotification->RemoveNotifications(hashcodes, removeReason);
 }
 
@@ -656,7 +764,6 @@ HWTEST_F(AnsNotificationBranchTest, RegisterPushCallback_0100, Function | Medium
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
     sptr<IRemoteObject> pushCallback = nullptr;
-    MockGetAnsManagerProxy(false);
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
     ErrCode ret = ansNotification->RegisterPushCallback(pushCallback, checkRequest);
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
@@ -674,8 +781,6 @@ HWTEST_F(AnsNotificationBranchTest, RegisterPushCallback_0200, Function | Medium
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
     sptr<IRemoteObject> pushCallback = nullptr;
-    MockGetAnsManagerProxy(true);
-    ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
     ansNotification->RegisterPushCallback(pushCallback, checkRequest);
 }
@@ -691,7 +796,6 @@ HWTEST_F(AnsNotificationBranchTest, UnregisterPushCallback_0100, Function | Medi
 {
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
-    MockGetAnsManagerProxy(false);
     ErrCode ret = ansNotification->UnregisterPushCallback();
     EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
@@ -707,8 +811,6 @@ HWTEST_F(AnsNotificationBranchTest, UnregisterPushCallback_0200, Function | Medi
 {
     auto ansNotification = std::make_shared<AnsNotification>();
     EXPECT_NE(ansNotification, nullptr);
-    MockGetAnsManagerProxy(true);
-    ansNotification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
     ansNotification->UnregisterPushCallback();
 }
 
@@ -834,14 +936,6 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
     ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-
-    notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
-    bundle.SetBundleName("test");
-    bundle.SetUid(1);
-    ret = notification->SetNotificationSlotFlagsAsBundle(bundle, slotFlags);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-    ret = notification->GetNotificationSlotFlagsAsBundle(bundle, slotFlags);
-    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 
 /*
@@ -853,7 +947,7 @@ HWTEST_F(AnsNotificationBranchTest, SetNotificationSlotFlagsAsBundle_0001, Funct
 HWTEST_F(AnsNotificationBranchTest, PublishNotification_0001, Function | MediumTest | Level1)
 {
     auto notification = std::make_shared<AnsNotification>();
-    notification->ansManagerProxy_ = new (std::nothrow) MockAnsManagerInterface();
+    MockGetAnsManagerProxy(new (std::nothrow) MockAnsManagerInterface());
     NotificationRequest req;
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     auto content = std::make_shared<NotificationContent>(mediaContent);

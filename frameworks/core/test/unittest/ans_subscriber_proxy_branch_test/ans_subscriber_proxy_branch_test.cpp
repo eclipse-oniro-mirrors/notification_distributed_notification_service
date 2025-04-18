@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "notification_request.h"
 #include <gtest/gtest.h>
 
 #define protected public
@@ -88,7 +89,8 @@ HWTEST_F(AnsSubscriberProxyBranchTest, OnCanceledList_0200, Function | MediumTes
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     notifications.emplace_back(notification);
     sptr<NotificationSortingMap> notificationMap = nullptr;
@@ -111,50 +113,11 @@ HWTEST_F(AnsSubscriberProxyBranchTest, OnCanceledList_0300, Function | MediumTes
     ASSERT_NE(nullptr, iremoteObject);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
+    sptr<NotificationRequest> request = new (std::nothrow) OHOS::Notification::NotificationRequest();
+    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification(request);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     notifications.emplace_back(notification);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
     int32_t deleteReason = 1;
     proxy->OnCanceledList(notifications, notificationMap, deleteReason);
-}
-
-/*
- * @tc.name: WriteParcelableVector_0100
- * @tc.desc: Test WriteParcelableVector function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyBranchTest, WriteParcelableVector_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyBranchTest, WriteParcelableVector_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    std::vector<sptr<OHOS::Notification::Notification>> notifications;
-    MessageParcel data;
-    proxy->WriteParcelableVector(notifications, data);
-}
-
-/*
- * @tc.name: WriteParcelableVector_0200
- * @tc.desc: Test WriteParcelableVector function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyBranchTest, WriteParcelableVector_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyBranchTest, WriteParcelableVector_0200, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    sptr<OHOS::Notification::Notification> notification = new (std::nothrow) OHOS::Notification::Notification();
-    std::vector<sptr<OHOS::Notification::Notification>> notifications;
-    notifications.emplace_back(notification);
-    MessageParcel data;
-    proxy->WriteParcelableVector(notifications, data);
 }

@@ -16,12 +16,19 @@
 #include "advanced_notification_service_ability.h"
 #include "notification_extension_wrapper.h"
 #include "system_event_observer.h"
+#include "common_event_manager.h"
+#include "liveview_all_scenarios_extension_wrapper.h"
+#include "distributed_device_manager.h"
+#include "advanced_datashare_helper.h"
 
 namespace OHOS {
 namespace Notification {
 namespace {
 REGISTER_SYSTEM_ABILITY_BY_ID(AdvancedNotificationServiceAbility, ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, true);
 }
+
+const std::string EXTENSION_BACKUP = "backup";
+const std::string EXTENSION_RESTORE = "restore";
 
 AdvancedNotificationServiceAbility::AdvancedNotificationServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
@@ -37,26 +44,32 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
 
     service_ = AdvancedNotificationService::GetInstance();
+    service_->CreateDialogManager();
+    service_->InitPublishProcess();
+    
     if (!Publish(service_)) {
         return;
     }
-    service_->CreateDialogManager();
-    service_->InitPublishProcess();
-    reminderAgent_ = ReminderDataManager::InitInstance(service_);
 
-    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
-    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #ifdef ENABLE_ANS_EXT_WRAPPER
     EXTENTION_WRAPPER->InitExtentionWrapper();
 #else
     ANS_LOGI("Not enabled ans_ext");
 #endif
+    AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
+    AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+    TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
+#endif
+    AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
+    LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
 }
 
 void AdvancedNotificationServiceAbility::OnStop()
 {
     service_ = nullptr;
-    reminderAgent_ = nullptr;
 }
 
 void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
@@ -64,15 +77,16 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
     ANS_LOGD("SubSystemAbilityListener::OnAddSystemAbility enter !");
     if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
         if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-            if (isDatashaReready) {
+            if (isDatashaReready_) {
                 return;
             }
-            isDatashaReready =true;
-            ANS_LOGD("CheckIfSettingsDataReady() ok!");
+#ifdef ENABLE_ANS_AGGREATION
             EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+#endif
+            isDatashaReready_ = true;
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        if (isDatashaReready) {
+        if (isDatashaReready_) {
             return;
         }
         EventFwk::MatchingSkills matchingSkills;
@@ -85,21 +99,36 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
             return;
         }
         EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    } else if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+        if (isDatashaReready_) {
+            return;
+        }
+        auto notificationService = AdvancedNotificationService::GetInstance();
+        if (notificationService == nullptr) {
+            return;
+        }
+        notificationService->ResetDistributedEnabled();
+    } else if (systemAbilityId == DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) {
+        ANS_LOGW("DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID");
+        DistributedDeviceManager::GetInstance().RegisterDms(true);
     }
 }
 
 void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
     ANS_LOGI("CheckIfSettingsDataReady() ok!");
-    if (isDatashaReready) {
+    if (isDatashaReready_) {
         return;
     }
-    isDatashaReready =true;
     auto const &want = data.GetWant();
     std::string action = want.GetAction();
     if (action == "usual.event.DATA_SHARE_READY") {
+        AdvancedDatashareHelper::SetIsDataShareReady(true);
+        isDatashaReready_ = true;
         ANS_LOGI("COMMON_EVENT_SERVICE_ID OnReceiveEvent ok!");
+#ifdef ENABLE_ANS_AGGREATION
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
+#endif
     }
 }
 
@@ -108,6 +137,23 @@ void AdvancedNotificationServiceAbility::OnRemoveSystemAbility(int32_t systemAbi
     if (systemAbilityId != COMMON_EVENT_SERVICE_ID) {
         return;
     }
+}
+
+int32_t AdvancedNotificationServiceAbility::OnExtension(const std::string& extension,
+    MessageParcel& data, MessageParcel& reply)
+{
+    ANS_LOGI("extension is %{public}s.", extension.c_str());
+    auto notificationService = AdvancedNotificationService::GetInstance();
+    if (notificationService == nullptr) {
+        ANS_LOGW("notification service is not initial.");
+        return ERR_OK;
+    }
+    if (extension == EXTENSION_BACKUP) {
+        return notificationService->OnBackup(data, reply);
+    } else if (extension == EXTENSION_RESTORE) {
+        return notificationService->OnRestore(data, reply);
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

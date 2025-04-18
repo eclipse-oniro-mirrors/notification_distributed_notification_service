@@ -17,11 +17,12 @@
 
 #include "ans_dialog_host_client.h"
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         // test RequestEnableNotification function
-        std::string deviceId(data);
+        std::string deviceId = fdp->ConsumeRandomLengthString();
         sptr<IRemoteObject> callerToken = nullptr;
         sptr<Notification::AnsDialogHostClient> client = nullptr;
         Notification::AnsDialogHostClient::CreateIfNullptr(client);
@@ -31,7 +32,7 @@ namespace OHOS {
         bool hasPermission = true;
         Notification::NotificationHelper::HasNotificationPolicyAccessPermission(hasPermission);
         // test SetNotificationBadgeNum function
-        return Notification::NotificationHelper::SetNotificationBadgeNum(GetU32Data(data)) == ERR_OK;
+        return Notification::NotificationHelper::SetNotificationBadgeNum(fdp->ConsumeIntegral<int32_t>()) == ERR_OK;
     }
 }
 
@@ -39,11 +40,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

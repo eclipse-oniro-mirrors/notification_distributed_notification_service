@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_request.h"
-#undef private
-#undef protected
 #include "reminderrequestannex_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
-        int32_t reminderId = static_cast<int32_t>(GetU32Data(data));
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminderRequest(reminderId);
-        reminderRequest.SetSnoozeTimes(*data);
-        reminderRequest.SetSnoozeTimesDynamic(*data);
+        uint8_t snoozeTimes = fdp->ConsumeIntegral<uint8_t>();
+        reminderRequest.SetSnoozeTimes(snoozeTimes);
+        uint8_t snooziTimes = fdp->ConsumeIntegral<uint8_t>();
+        reminderRequest.SetSnoozeTimesDynamic(snooziTimes);
         uint64_t timeIntervalInSeconds = 1;
         reminderRequest.SetTimeInterval(timeIntervalInSeconds);
         reminderRequest.SetTitle(stringData);
@@ -41,7 +40,6 @@ namespace OHOS {
         reminderRequest.GetExpiredContent();
         reminderRequest.GetMaxScreenWantAgentInfo();
         reminderRequest.GetNotificationId();
-        reminderRequest.GetNotificationRequest();
         reminderRequest.GetReminderId();
         reminderRequest.GetReminderTimeInMilli();
         reminderRequest.SetReminderId(reminderId);
@@ -63,7 +61,6 @@ namespace OHOS {
         reminderRequest.UpdateNextReminder();
         reminderRequest.SetNextTriggerTime();
         Parcel parcel;
-        reminderRequest.InitNotificationRequest();
         reminderRequest.InitServerObj();
         return reminderRequest.IsAlerting();
     }
@@ -73,11 +70,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

@@ -33,6 +33,7 @@ struct IsEnableParams {
     bool allowToPop = false;
     sptr<IRemoteObject> callerToken = nullptr;
     bool hasCallerToken = false;
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context;
 };
 
 struct AsyncCallbackInfoIsEnable {
@@ -42,6 +43,7 @@ struct AsyncCallbackInfoIsEnable {
     CallbackPromiseInfo info;
     bool newInterface = false;
     bool allowed = false;
+    std::string bundleName = {""};
 };
 
 struct EnableParams {

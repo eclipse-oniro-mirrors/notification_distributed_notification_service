@@ -39,11 +39,13 @@ public:
     /**
      * A constructor used to create a BadgeNumberCallbackData instance with the input parameters passed.
      * @param bundle Indicates the name of the application.
+     * @param appInstanceKey Indicates the application instance key.
      * @param uid Indicates the uid of the application.
      * @param badgeNumber badge number.
-     * @param badgeNumber application instance key.
+     * @param instanceKey application instance key.
      */
-    BadgeNumberCallbackData(const std::string &bundle, int32_t uid, int32_t badgeNumber, int32_t instanceKey);
+    BadgeNumberCallbackData(const std::string &bundle, const std::string &appInstanceKey_, int32_t uid,
+        int32_t badgeNumber, int32_t instanceKey = 0);
 
     /**
      * Default deconstructor used to deconstruct.
@@ -66,6 +68,10 @@ public:
 
     int32_t GetInstanceKey() const;
 
+    void SetAppInstanceKey(const std::string &key);
+
+    std::string GetAppInstanceKey() const;
+
     /**
      * Returns a string representation of the BadgeNumberCallbackData object.
      */
@@ -87,6 +93,7 @@ private:
     bool ReadFromParcel(Parcel &parcel);
 
     std::string bundle_;
+    std::string appInstanceKey_;
     int32_t uid_;
     int32_t badgeNumber_;
     int32_t instanceKey_;

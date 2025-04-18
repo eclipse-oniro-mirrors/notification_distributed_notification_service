@@ -3,7 +3,7 @@
   "version": "",
   "description": "为应用程序提供发布通知的能力",
   "homePage": "https://gitee.com/openharmony",
-  "license": "Apache V2",
+  "license": "Apache-2.0",
   "repository": "https://gitee.com/openharmony/notification_ans_standard",
   "domain": "os",
   "language": "",
@@ -40,9 +40,23 @@
     "subsystem": "notification",
     "syscap": [
       "SystemCapability.Notification.Notification",
-      "SystemCapability.Notification.ReminderAgent"
+      "SystemCapability.Notification.ReminderAgent",
+      "SystemCapability.Notification.NotificationSettings"
     ],
-    "features": [],
+    "features": [
+      "distributed_notification_service_feature_summary",
+      "distributed_notification_service_feature_additional_control",
+      "distributed_notification_service_feature_disable_fa_model",
+      "distributed_notification_service_feature_privileged_message",
+      "distributed_notification_service_disable_control",
+      "distributed_notification_service_feature_badge_manager",
+      "distributed_notification_service_feature_local_liveview",
+      "distributed_notification_service_feature_distributed_db",
+      "distributed_notification_service_feature_disturb_manager",
+      "distributed_notification_service_feature_slot_manager",
+      "distributed_notification_service_feature_additional_config",
+      "distributed_notification_service_feature_open_notification_settings"
+    ],
     "adapted_system_type": [
       "standard"
     ],
@@ -80,16 +94,25 @@
         "device_manager",
         "kv_store",
         "ffrt",
-        "config_policy",
         "device_standby",
         "resource_management",
         "config_policy",
-        "screenlock_mgr"
+        "screenlock_mgr",
+        "ace_engine",
+        "openssl",
+        "power_manager",
+        "dsoftbus",
+        "zlib",
+        "libuv",
+        "json",
+        "node"
       ],
       "third_party": [
         "libuv",
         "libxml2",
-        "icu"
+        "icu",
+        "json",
+        "node"
       ]
     },
     "build": {
@@ -100,11 +123,16 @@
         "fwk_group": [
           "//base/notification/distributed_notification_service/frameworks/ans:ans_client",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
-          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder"
+          "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
+          "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification",
+          "//base/notification/distributed_notification_service/frameworks/reminder:reminder_client"
         ],
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
           "//base/notification/distributed_notification_service/services:ans_service",
+          "//base/notification/distributed_notification_service/services/dialog_ui/enable_notification_dialog:dialog_hap",
+          "//base/notification/distributed_notification_service/services/reminder/sa_profile:reminder_sa_profile",
+          "//base/notification/distributed_notification_service/services/reminder:reminder_service",
           "//base/notification/distributed_notification_service/tools:tools_shell"
         ]
       },
@@ -123,6 +151,7 @@
                 "notification_content.h",
                 "notification_conversational_content.h",
                 "notification_conversational_message.h",
+                "notification_disable.h",
                 "notification_distributed_options.h",
                 "notification_do_not_disturb_date.h",
                 "notification_flags.h",
@@ -161,10 +190,12 @@
         }
       ],
       "test": [
+        "//base/notification/distributed_notification_service/services/reminder/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/services/distributed/test/unittest:ans_unit_test",
         "//base/notification/distributed_notification_service/services/test/moduletest:moduletest",
         "//base/notification/distributed_notification_service/frameworks/test/moduletest:moduletest",
+        "//base/notification/distributed_notification_service/frameworks/reminder/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/ans/test/unittest:unittest",
         "//base/notification/distributed_notification_service/frameworks/core/test/unittest:unittest",
         "//base/notification/distributed_notification_service/test:systemtest",

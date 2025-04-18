@@ -21,6 +21,7 @@
 #include "os_account_info.h"
 #include "os_account_manager.h"
 #include <vector>
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -28,6 +29,9 @@ ErrCode OsAccountManagerHelper::GetOsAccountLocalIdFromUid(const int32_t uid, in
 {
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
     if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_1)
+            .Message("Get userId failed, uid = " + std::to_string(uid) + " ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Get userId failed, uid = <%{public}d>, code is %{public}d", uid, ret);
         return ret;
     }
@@ -40,6 +44,10 @@ ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2)
+            .Message("Get userId failed, callingUid = " + std::to_string(callingUid) +
+            " ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Get userId failed, callingUid = <%{public}d>, code is %{public}d", callingUid, ret);
         return ERR_ANS_INVALID_PARAM;
     }
@@ -49,10 +57,12 @@ ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
 
 ErrCode OsAccountManagerHelper::GetCurrentActiveUserId(int32_t &id)
 {
-    std::vector<int> activeUserId;
-    int32_t ret = GetAllActiveOsAccount(activeUserId);
-    if (activeUserId.size() > 0) {
-        id = activeUserId[0];
+    int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
+    if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_4)
+            .Message("Get foreground os account failed ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        ANS_LOGE("Failed to call OsAccountManager::GetForegroundOsAccountLocalId, code is %{public}d", ret);
     }
     return ret;
 }
@@ -62,6 +72,9 @@ ErrCode OsAccountManagerHelper::GetAllOsAccount(std::vector<int32_t> &userIds)
     std::vector<AccountSA::OsAccountInfo> accounts;
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
     if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3)
+            .Message("Get all userId failed ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Failed to call OsAccountManager::QueryAllCreatedOsAccounts, code is %{public}d", ret);
         return ret;
     }
@@ -75,6 +88,9 @@ ErrCode OsAccountManagerHelper::GetAllActiveOsAccount(std::vector<int32_t> &user
 {
     int32_t ret = OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
     if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_4)
+            .Message("Get all active failed ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Failed to call OsAccountManager::QueryActiveOsAccountIds, code is %{public}d", ret);
     }
     return ret;
@@ -85,8 +101,11 @@ bool OsAccountManagerHelper::CheckUserExists(const int32_t &userId)
     bool isAccountExists = false;
     int32_t ret = OHOS::AccountSA::OsAccountManager::IsOsAccountExists(userId, isAccountExists);
     if (ret != ERR_OK) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_5)
+            .Message("Get all exist failed ret " + std::to_string(ret));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE("Failed to call OsAccountManager::IsOsAccountExists, code is %{public}d", ret);
-        return ret;
+        return false;
     }
     ANS_LOGD("Call IsOsAccountExists Success, user = %{public}d userExists = %{public}d", userId, isAccountExists);
     return isAccountExists;

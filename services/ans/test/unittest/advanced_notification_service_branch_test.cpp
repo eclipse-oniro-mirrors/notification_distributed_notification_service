@@ -25,6 +25,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_subscriber_listener.h"
 #include "ans_ut_constant.h"
 #include "iremote_object.h"
 #include "want_agent_info.h"
@@ -82,8 +83,7 @@ void AnsBranchTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    NotificationPreferences::GetInstance().ClearNotificationInRestoreFactorySettings();
-    advancedNotificationService_->CancelAll(0);
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";
@@ -144,21 +144,6 @@ void AnsBranchTest::TestAddSlot(NotificationConstant::SlotType type)
 }
 
 /**
- * @tc.number    : AnsBranchTest_221
- * @tc.name      : CheckPermission_1000
- * @tc.desc      : Test permission function result is false.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_221, Function | SmallTest | Level1)
-{
-    MockIsVerfyPermisson(false);
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
-    bool result = advancedNotificationService_->CheckPermission(permission);
-    ASSERT_EQ(result, false);
-}
-
-/**
  * @tc.number    : AnsBranchTest_222000
  * @tc.name      : PrepareNotificationRequest_1000
  * @tc.desc      : Test PrepareNotificationRequest function return ERR_ANS_NON_SYSTEM_APP.
@@ -173,9 +158,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_222000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    std::string permission = "ohos.permission.NOTIFICATION_CONTROLLER";
-    bool result = advancedNotificationService_->CheckPermission(permission);
-    ASSERT_EQ(result, false);
+
     ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -484,6 +467,43 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
     ASSERT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : SubscribeSelf_279001
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, SubscribeSelf_279001, Function | SmallTest | Level1)
+{
+    auto res = advancedNotificationService_->SubscribeSelf(nullptr);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : SubscribeSelf_279002
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, SubscribeSelf_279002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.number    : SubscribeSelf_279003
+ * @tc.require   : issue
+ */
+HWTEST_F(AnsBranchTest, SubscribeSelf_279003, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_ANS_TASK_ERR);
 }
 
 /**
@@ -877,7 +897,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_265000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
 
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_NON_SYSTEM_APP);
 }
 
@@ -892,7 +912,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_266000, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(false);
 
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
+    int32_t remindType = -1;
     ASSERT_EQ(advancedNotificationService_->GetDeviceRemindType(remindType), ERR_ANS_PERMISSION_DENIED);
 }
 
@@ -1091,6 +1111,8 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_275000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
 {
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     MockVerifyNativeToken(true);
     MockGetDistributedEnableInApplicationInfo(true, 2);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
@@ -1099,6 +1121,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_276000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->IsDistributedEnableByBundle(bundleOption, enabled), ERR_OK);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number    : AnsBranchTest_277000
  * @tc.name      : DoDistributedPublish_3000
@@ -1117,6 +1140,31 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_277000, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.number    : DoDistributedPublish_4000
+ * @tc.name      : DoDistributedPublish
+ * @tc.desc      : Test DoDistributedPublish function return ERR_ANS_MISSIONPER_DENIED.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, DoDistributedPublish_4000, Function | SmallTest | Level1)
+{
+    MockGetDistributedEnableInApplicationInfo(true, 1);
+    MockGetOsAccountLocalIdFromUid(false, 2);
+    MockDistributedNotificationEnabled(true);
+    advancedNotificationService_->EnableDistributed(true);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
+        TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+        int notificationId = 1;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(notificationId);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundleOption);
+    ASSERT_EQ(advancedNotificationService_->DoDistributedPublish(bundleOption, record),
+        (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+    auto ret = advancedNotificationService_->DoDistributedDelete(
+        "1", "DoDistributedPublish_4000", record->notification);
+    ASSERT_EQ(ret, (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+}
+
+/**
  * @tc.number    : AnsBranchTest_278000
  * @tc.name      : GetDistributedEnableInApplicationInfo_3000
  * @tc.desc      : Test GetDistributedEnableInApplicationInfo function return ERR_ANS_PERMISSION_DENIED.
@@ -1124,6 +1172,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_277000, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
 {
+    MockGetDistributedEnableInApplicationInfo(false, 2);
     MockGetOsAccountLocalIdFromUid(false, 3);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(
         TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
@@ -1131,6 +1180,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_278000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->GetDistributedEnableInApplicationInfo(
         bundleOption, enabled), ERR_ANS_INVALID_PARAM);
 }
+#endif
 
 void AnsBranchTest::InitNotificationRecord(std::shared_ptr<NotificationRecord> &record,
     const NotificationLiveViewContent::LiveViewStatus &status)
@@ -1206,5 +1256,53 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
     ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
 
+/**
+ * @tc.number    : GetDeviceRemindType_3000
+ * @tc.name      : GetDeviceRemindType_3000
+ * @tc.desc      : Test GetDeviceRemindType function return ERR_ANS_INVALID_PARAM.
+ * @tc.require   : #I6P8UI
+ */
+HWTEST_F(AnsBranchTest, GetDeviceRemindType_3000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
+    MockIsVerfyPermisson(true);
+    AdvancedNotificationService ans;
+    ans.notificationSvrQueue_ = nullptr;
+    int32_t remindType = -1;
+    ASSERT_EQ(ans.GetDeviceRemindType(remindType), ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_285000
+ * @tc.name      : IsNeedSilentInDoNotDisturbMode_1000
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_NON_SYSTEM_APP.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_285000, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), -1);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_286000
+ * @tc.name      : IsNeedSilentInDoNotDisturbMode_2000
+ * @tc.desc      : Test IsNeedSilentInDoNotDisturbMode function return ERR_ANS_PERMISSION_DENIED.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286000, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(false);
+
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
+}
 }  // namespace Notification
 }  // namespace OHOS

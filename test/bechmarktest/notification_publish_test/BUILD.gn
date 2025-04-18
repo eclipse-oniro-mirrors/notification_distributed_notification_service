@@ -14,7 +14,8 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/benchmarktest"
+module_output_path =
+    "${component_name}/distributed_notification_service/benchmarktest"
 
 ohos_benchmarktest("Benchmark_Publish_Test") {
   module_out_path = module_output_path
@@ -25,11 +26,7 @@ ohos_benchmarktest("Benchmark_Publish_Test") {
 
   sources = [ "notification_publish_test.cpp" ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/benchmark:benchmark",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
@@ -39,6 +36,12 @@ ohos_benchmarktest("Benchmark_Publish_Test") {
     "image_framework:image_native",
     "relational_store:native_rdb",
   ]
+
+  public_external_deps = [
+    "benchmark:benchmark",
+    "googletest:gtest_main",
+  ]
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

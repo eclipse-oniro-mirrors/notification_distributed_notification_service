@@ -16,12 +16,14 @@
 
 #include "ans_log_wrapper.h"
 #include "notification_constant.h"
+#include "bundle_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
 namespace {
 const static std::string KEY_UNDER_LINE = "_";
 } // namespace
+
 NotificationPreferencesInfo::BundleInfo::BundleInfo()
 {
 }
@@ -271,7 +273,7 @@ void NotificationPreferencesInfo::SetDoNotDisturbDate(const int32_t &userId,
     doNotDisturbDate_.insert_or_assign(userId, doNotDisturbDate);
 }
 
-std::string NotificationPreferencesInfo::MakeDoNotDisturbProfileKey(int32_t userId, int32_t profileId)
+std::string NotificationPreferencesInfo::MakeDoNotDisturbProfileKey(int32_t userId, int64_t profileId)
 {
     return std::to_string(userId).append(KEY_UNDER_LINE).append(std::to_string(profileId));
 }
@@ -285,6 +287,7 @@ void NotificationPreferencesInfo::AddDoNotDisturbProfiles(
             continue;
         }
         std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
+        ANS_LOGI("AddDoNotDisturbProfiles key: %{public}s.", key.c_str());
         doNotDisturbProfiles_.insert_or_assign(key, profile);
     }
 }
@@ -298,12 +301,13 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbProfiles(
             continue;
         }
         std::string key = MakeDoNotDisturbProfileKey(userId, profile->GetProfileId());
+        ANS_LOGI("RemoveDoNotDisturbProfiles  key: %{public}s.", key.c_str());
         doNotDisturbProfiles_.erase(key);
     }
 }
 
 bool NotificationPreferencesInfo::GetDoNotDisturbProfiles(
-    int32_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
+    int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
 {
     if (profile == nullptr) {
         ANS_LOGE("The profile is nullptr.");
@@ -323,12 +327,45 @@ void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
 {
     for (const auto &doNotDisturbProfile : doNotDisturbProfiles_) {
         std::string key = doNotDisturbProfile.first;
+        ANS_LOGI("GetAllDoNotDisturbProfiles key: %{public}s.", key.c_str());
         auto result = key.find(std::to_string(userId));
         if (result != std::string::npos) {
             auto profile = doNotDisturbProfile.second;
             profiles.emplace_back(profile);
         }
     }
+}
+
+void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
+    const std::unordered_map<std::string, std::string> &bunlesMap,
+    std::vector<NotificationCloneBundleInfo> &cloneBundles)
+{
+    for (const auto& bundleItem : bunlesMap) {
+        auto iter = infos_.find(bundleItem.second);
+        if (iter == infos_.end()) {
+            ANS_LOGI("No finde bundle info %{public}s.", bundleItem.second.c_str());
+            continue;
+        }
+
+        std::vector<sptr<NotificationSlot>> slots;
+        NotificationCloneBundleInfo cloneBundleInfo;
+        int32_t index = BundleManagerHelper::GetInstance()->GetAppIndexByUid(iter->second.GetBundleUid());
+        cloneBundleInfo.SetBundleName(iter->second.GetBundleName());
+        cloneBundleInfo.SetAppIndex(index);
+        cloneBundleInfo.SetSlotFlags(iter->second.GetSlotFlags());
+        cloneBundleInfo.SetIsShowBadge(iter->second.GetIsShowBadge());
+        cloneBundleInfo.SetEnableNotification(iter->second.GetEnableNotification());
+        iter->second.GetAllSlots(slots);
+        for (auto& slot : slots) {
+            NotificationCloneBundleInfo::SlotInfo slotInfo;
+            slotInfo.slotType_ = slot->GetType();
+            slotInfo.enable_ = slot->GetEnable();
+            slotInfo.isForceControl_ = slot->GetForceControl();
+            cloneBundleInfo.AddSlotInfo(slotInfo);
+        }
+        cloneBundles.emplace_back(cloneBundleInfo);
+    }
+    ANS_LOGI("GetAllCLoneBundlesInfo size: %{public}zu.", cloneBundles.size());
 }
 
 bool NotificationPreferencesInfo::GetDoNotDisturbDate(const int32_t &userId,
@@ -370,6 +407,81 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbDate(const int32_t userId)
 void NotificationPreferencesInfo::SetBundleInfoFromDb(BundleInfo &info, std::string bundleKey)
 {
     infos_.insert_or_assign(bundleKey, info);
+}
+
+void NotificationPreferencesInfo::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
+{
+    if (notificationDisable == nullptr) {
+        ANS_LOGE("the notificationDisable is nullptr");
+        return;
+    }
+    if (notificationDisable->GetBundleList().empty()) {
+        ANS_LOGE("the bundle list is empty");
+        return;
+    }
+    DisableNotificationInfo disableNotificationInfo;
+    if (notificationDisable->GetDisabled()) {
+        disableNotificationInfo_.disabled = 1;
+    } else {
+        disableNotificationInfo_.disabled = 0;
+    }
+    disableNotificationInfo_.bundleList = notificationDisable->GetBundleList();
+}
+
+bool NotificationPreferencesInfo::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
+{
+    if (disableNotificationInfo_.disabled == -1) {
+        ANS_LOGD("notificationDisable is invalid");
+        return false;
+    }
+    if (disableNotificationInfo_.bundleList.empty()) {
+        ANS_LOGE("notificationDisable bundleList is empty");
+        return false;
+    }
+    notificationDisable.SetDisabled(disableNotificationInfo_.disabled);
+    notificationDisable.SetBundleList(disableNotificationInfo_.bundleList);
+    return true;
+}
+
+void NotificationPreferencesInfo::AddDisableNotificationInfo(const std::string &value)
+{
+    NotificationDisable notificationDisable;
+    notificationDisable.FromJson(value);
+    DisableNotificationInfo disableNotificationInfo;
+    if (notificationDisable.GetDisabled()) {
+        disableNotificationInfo_.disabled = 1;
+    } else {
+        disableNotificationInfo_.disabled = 0;
+    }
+    disableNotificationInfo_.bundleList = notificationDisable.GetBundleList();
+}
+
+ErrCode NotificationPreferencesInfo::GetAllLiveViewEnabledBundles(const int32_t userId,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("Called.");
+    auto iter = isEnabledAllNotification_.find(userId);
+    if (iter == isEnabledAllNotification_.end()) {
+        ANS_LOGW("Get user all notification info failed.");
+        return ERR_OK;
+    }
+
+    if (iter->second == false) {
+        ANS_LOGI("Get user all notification enable is false.");
+        return ERR_OK;
+    }
+
+    sptr<NotificationSlot> liveSlot;
+    for (auto bundleInfo : infos_) {
+        if (!bundleInfo.second.GetSlot(NotificationConstant::SlotType::LIVE_VIEW, liveSlot)) {
+            continue;
+        }
+        if (liveSlot->GetEnable()) {
+            NotificationBundleOption bundleItem(bundleInfo.second.GetBundleName(), bundleInfo.second.GetBundleUid());
+            bundleOption.push_back(bundleItem);
+        }
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS

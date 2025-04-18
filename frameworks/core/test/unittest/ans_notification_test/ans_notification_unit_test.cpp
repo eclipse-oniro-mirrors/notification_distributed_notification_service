@@ -13,7 +13,14 @@
  * limitations under the License.
  */
 
+#include "ans_dialog_callback_stub.h"
+#include "errors.h"
+#include "notification_slot.h"
+#include "refbase.h"
+#include <cstdint>
 #include <gtest/gtest.h>
+#include <memory>
+#include <new>
 
 #define private public
 #define protected public
@@ -52,7 +59,7 @@ public:
 
     void TearDown();
     std::shared_ptr<AnsNotification> ans_;
-    sptr<AnsManagerInterface> ansManagerProxy_{nullptr};
+    sptr<IAnsManager> ansManagerProxy_{nullptr};
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     void UpdateStatuts(bool isEnable, int status) {}
 #endif
@@ -212,6 +219,292 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0100, Function 
 }
 
 /*
+ * @tc.name: GetNotificationSlotFlagsAsBundle_0100
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    std::string bundleName = "bundleName";
+    bundleOptions.SetBundleName(bundleName);
+    uint32_t num = 10;
+    ErrCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSlotFlagsAsBundle_0200
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0200, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("");
+    uint32_t num = 10;
+    ErrCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetNotificationSlotFlagsAsBundle_0200
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0200, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("");
+    uint64_t num = 10;
+    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CanPopEnableNotificationDialog_0100
+ * @tc.desc: test CanPopEnableNotificationDialog.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    sptr<AnsDialogHostClient> client = nullptr;
+    bool enable = true;
+    std::string bundleName = "";
+    ErrCode ret1 = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: RemoveNotifications_0100
+ * @tc.desc: test RemoveNotifications.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveNotifications_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<std::string> hashCodes = {"data1", "data2"};
+    ErrCode ret1 = ans_->RemoveNotifications(hashCodes, 1);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSlotForBundle_0100
+ * @tc.desc: test GetNotificationSlotForBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotForBundle_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("name");
+    sptr<NotificationSlot> slot = new NotificationSlot();
+    ErrCode ret1 = ans_->GetNotificationSlotForBundle(bundleOptions,
+        NotificationConstant::SlotType::CONTENT_INFORMATION, slot);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSlotForBundle_0200
+ * @tc.desc: test GetNotificationSlotForBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotForBundle_0200, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("");
+    sptr<NotificationSlot> slot = new NotificationSlot();
+    ErrCode ret1 = ans_->GetNotificationSlotForBundle(bundleOptions,
+        NotificationConstant::SlotType::CONTENT_INFORMATION, slot);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetEnabledForBundleSlotSelf_0100
+ * @tc.desc: test GetEnabledForBundleSlotSelf.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetEnabledForBundleSlotSelf_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    bool enable = true;
+    ErrCode ret1 = ans_->GetEnabledForBundleSlotSelf(
+        NotificationConstant::SlotType::CONTENT_INFORMATION, enable);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: RegisterPushCallback_0100
+ * @tc.desc: test RegisterPushCallback.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RegisterPushCallback_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    sptr<AnsDialogHostClient> callback = new AnsDialogHostClient();
+    sptr<NotificationCheckRequest> checkRequest = nullptr;
+    ErrCode ret1 = ans_->RegisterPushCallback(callback->AsObject(), checkRequest);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: UnregisterPushCallback_0100
+ * @tc.desc: test UnregisterPushCallback.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnregisterPushCallback_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    ErrCode ret1 = ans_->UnregisterPushCallback();
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetAdditionConfig_0100
+ * @tc.desc: test SetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::string key = "key";
+    std::string value = "value";
+    ErrCode ret1 = ans_->SetAdditionConfig(key, value);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetAdditionConfig_0200
+ * @tc.desc: test SetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetAdditionConfig_0200, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::string key = "";
+    std::string value = "value";
+    ErrCode ret1 = ans_->SetAdditionConfig(key, value);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CancelAsBundleWithAgent_0100
+ * @tc.desc: test CancelAsBundleWithAgent.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, CancelAsBundleWithAgent_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    int32_t id = 1;
+    NotificationBundleOption bundleOption = NotificationBundleOption();
+    ErrCode ret1 = ans_->CancelAsBundleWithAgent(bundleOption, id);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetTargetDeviceStatus_0100
+ * @tc.desc: test SetAdditionConfig.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetTargetDeviceStatus_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::string deviceType = "device";
+    const uint32_t status = 1;
+    ErrCode ret1 = ans_->SetTargetDeviceStatus(deviceType, status);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: PublishNotification_0100
  * @tc.desc: test PublishNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
@@ -263,11 +556,6 @@ HWTEST_F(AnsNotificationUnitTest, GetActiveNotificationNums_0100, Function | Med
     std::vector<sptr<NotificationRequest>> request;
     ErrCode ret2 = ans_->GetActiveNotifications(request);
     EXPECT_EQ(ret2, ERR_ANS_SERVICE_NOT_CONNECTED);
-    std::string agent = "this is agent";
-    ErrCode ret4 = ans_->SetNotificationAgent(agent);
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret5 = ans_->GetNotificationAgent(agent);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -586,37 +874,6 @@ HWTEST_F(AnsNotificationUnitTest, IsDistributedEnabled_0100, Function | MediumTe
 }
 
 /*
- * @tc.name: GetDeviceRemindType_0100
- * @tc.desc: test GetDeviceRemindType ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, GetDeviceRemindType_0100, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::NONE;
-    ErrCode ret1 = ans_->GetDeviceRemindType(remindType);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ReminderRequest reminder;
-    ErrCode ret2 = ans_->PublishReminder(reminder);
-    EXPECT_EQ(ret2, ERR_ANS_INVALID_PARAM);
-    int32_t reminderId = 1;
-    ErrCode ret3 = ans_->CancelReminder(reminderId);
-    EXPECT_EQ(ret3, ERR_ANS_SERVICE_NOT_CONNECTED);
-    ErrCode ret4 = ans_->CancelAllReminders();
-    EXPECT_EQ(ret4, ERR_ANS_SERVICE_NOT_CONNECTED);
-    std::vector<sptr<ReminderRequest>> validReminders;
-    ErrCode ret5 = ans_->GetValidReminders(validReminders);
-    EXPECT_EQ(ret5, ERR_ANS_SERVICE_NOT_CONNECTED);
-}
-
-/*
  * @tc.name: IsSupportTemplate_0100
  * @tc.desc: test IsSupportTemplate ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
@@ -798,6 +1055,48 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0200, Function | MediumT
 }
 
 /*
+ * @tc.name: SubscribeNotification_0300
+ * @tc.desc: test SubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0300, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject_ = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject_);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject_);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
+    ErrCode ret1 = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SubscribeNotification_0400
+ * @tc.desc: test SubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0400, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    ErrCode ret1 = ans_->SubscribeNotification(nullptr);
+    EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: GetAllActiveNotifications_0100
  * @tc.desc: test GetAllActiveNotifications return false.
  * @tc.type: FUNC
@@ -879,6 +1178,49 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0200, Function | Mediu
 
     auto subscriber = TestAnsSubscriber();
     NotificationSubscribeInfo info;
+    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_0300
+ * @tc.desc: test UnSubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0300, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    ErrCode ret1 = ans_->UnSubscribeNotification(subscriber);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_0400
+ * @tc.desc: test UnSubscribeNotification return false.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0400, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool res = ans_->GetAnsManagerProxy();
+    EXPECT_EQ(res, false);
+
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
     ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
@@ -1219,5 +1561,64 @@ HWTEST_F(AnsNotificationUnitTest, RegisterSwingCallback_0100, TestSize.Level1)
     EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 #endif
+
+/*
+ * @tc.name: IsNeedSilentInDoNotDisturbMode_0100
+ * @tc.desc: test IsNeedSilentInDoNotDisturbMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, IsNeedSilentInDoNotDisturbMode_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+    ErrCode ret = ans_->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: DisableNotificationFeature_0100
+ * @tc.desc: test DisableNotificationFeature.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, DisableNotificationFeature_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_FALSE(ret);
+
+    NotificationDisable notificationDisable;
+    ErrCode res = ans_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0100
+ * @tc.desc: test PublishNotificationForIndirectProxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    bool ret = ans_->GetAnsManagerProxy();
+    EXPECT_FALSE(ret);
+
+    NotificationRequest request;
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

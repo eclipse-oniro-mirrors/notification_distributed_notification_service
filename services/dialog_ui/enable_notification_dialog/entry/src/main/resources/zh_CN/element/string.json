@@ -1,32 +1,53 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "包括横幅、锁屏、铃声等。可前往“设置”>“通知和状态栏”更改。"
-    },
-    {
-      "name": "ALLOW",
-      "value": "允许"
-    },
-    {
-      "name": "BAN",
-      "value": "禁止"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "是否允许“%s”发送通知？"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"通知提醒方式可能包括锁屏、横幅、角标、响铃、振动。可前往“设置”更改。"
+      },
+      {
+          "name":"reason_simple",
+          "value":"通知提醒方式可能包括横幅、角标、响铃。可前往“设置”更改。"
+      },
+      {
+        "name":"reason_zyt",
+        "value":"通知提醒方式可能包括锁屏、横幅、角标、响铃、振动。可前往“卓易通”>“应用管理”更改。"
+      },
+      {
+        "name":"reason_tv",
+        "value":"通知提醒方式包括横幅。可前往“设置” 更改。"
+      },
+      {
+          "name":"ALLOW",
+          "value":"允许",
+          "attr":{
+              "priority":"translate"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"不允许",
+          "attr":{
+              "priority":"translate"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"允许“%s”向你发送通知？",
+          "attr":{
+              "priority":"translate"
+          }
+      }
   ]
 }

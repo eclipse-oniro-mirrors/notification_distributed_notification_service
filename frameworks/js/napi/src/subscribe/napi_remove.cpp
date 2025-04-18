@@ -22,7 +22,6 @@ namespace OHOS {
 namespace NotificationNapi {
 void NapiRemoveExecuteCallback(napi_env env, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work start");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -45,7 +44,6 @@ void NapiRemoveExecuteCallback(napi_env env, void *data)
 
 void NapiRemoveCompleteCallback(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work end");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -72,6 +70,7 @@ napi_value NapiRemove(napi_env env, napi_callback_info info)
     }
     auto removeInfo = new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!removeInfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -103,6 +102,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
     AsyncCallbackInfoRemove *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoRemove {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -115,7 +115,7 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ANS_LOGD("NapiRemoveAll work excute.");
+            ANS_LOGI("NapiRemoveAll work excute.");
             AsyncCallbackInfoRemove *asynccallbackinfo = static_cast<AsyncCallbackInfoRemove *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {

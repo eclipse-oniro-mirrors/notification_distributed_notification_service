@@ -27,6 +27,7 @@
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
+#include "napi_common_want_agent.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -44,11 +45,11 @@ napi_value Common::SetNotificationSortingMap(
 {
     ANS_LOGD("enter");
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGD("sortingMap is null");
         return NapiGetBoolean(env, false);
     }
     if (sortingMap->GetKey().size() == 0) {
-        ANS_LOGE("sortingMap GetKey().size is empty");
+        ANS_LOGD("sortingMap GetKey().size is empty");
         return NapiGetBoolean(env, false);
     }
 
@@ -85,7 +86,7 @@ napi_value Common::SetNotificationSortingMap(
     return NapiGetBoolean(env, true);
 }
 
-napi_value Common::SetNotificationSorting(const napi_env &env, const NotificationSorting &sorting, napi_value &result)
+napi_value Common::SetNotificationSorting(const napi_env &env, NotificationSorting &sorting, napi_value &result)
 {
     ANS_LOGD("enter");
 
@@ -93,7 +94,7 @@ napi_value Common::SetNotificationSorting(const napi_env &env, const Notificatio
     napi_value slotResult = nullptr;
     napi_value value = nullptr;
     napi_create_object(env, &slotResult);
-    if (!SetNotificationSlot(env, sorting.GetSlot(), slotResult)) {
+    if (!sorting.GetSlot() || !SetNotificationSlot(env, *sorting.GetSlot(), slotResult)) {
         ANS_LOGE("SetNotificationSlot call failed");
         return NapiGetBoolean(env, false);
     }
@@ -271,6 +272,11 @@ napi_value Common::SetBadgeCallbackData(const napi_env &env, const BadgeNumberCa
     napi_create_string_utf8(env, data.GetBundle().c_str(), NAPI_AUTO_LENGTH, &bundleNapi);
     napi_set_named_property(env, result, "bundle", bundleNapi);
 
+    // appInstanceKey: string
+    napi_value appKeyNapi = nullptr;
+    napi_create_string_utf8(env, data.GetAppInstanceKey().c_str(), NAPI_AUTO_LENGTH, &appKeyNapi);
+    napi_set_named_property(env, result, "appInstanceKey", appKeyNapi);
+
     // uid: int32_t
     napi_value uidNapi = nullptr;
     napi_create_int32(env, data.GetUid(), &uidNapi);
@@ -297,6 +303,7 @@ napi_value Common::GetNotificationSubscriberInfo(
     size_t strLen = 0;
     bool hasProperty = false;
     bool isArray = false;
+    bool hasSlotTypes = false;
     napi_valuetype valuetype = napi_undefined;
 
     // bundleNames?: Array<string>
@@ -364,6 +371,62 @@ napi_value Common::GetNotificationSubscriberInfo(
         subscriberInfo.hasSubscribeInfo = true;
     }
 
+    // filterType?: number
+    NAPI_CALL(env, napi_has_named_property(env, value, "filterLimit", &hasProperty));
+    if (hasProperty) {
+        napi_value nFilterType = nullptr;
+        napi_get_named_property(env, value, "filterLimit", &nFilterType);
+        NAPI_CALL(env, napi_typeof(env, nFilterType, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_uint32(env, nFilterType, &subscriberInfo.filterType));
+        subscriberInfo.hasSubscribeInfo = true;
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasSlotTypes));
+    if (hasSlotTypes) {
+        napi_value nSlotTypes = nullptr;
+        napi_get_named_property(env, value, "slotTypes", &nSlotTypes);
+        napi_is_array(env, nSlotTypes, &isArray);
+        if (!isArray) {
+            ANS_LOGE("Property slotTypes is expected to be an array.");
+            std::string msg = "Incorrect parameter types.The type of slotTypes must be array.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_get_array_length(env, nSlotTypes, &length);
+        if (length == 0) {
+            ANS_LOGE("The array is empty.");
+            std::string msg = "Incorrect parameters are left unspecified. The slotTypes list length is zero.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+
+        for (uint32_t i = 0; i < length; ++i) {
+            napi_value nSlotType = nullptr;
+            int32_t slotType = 0;
+            napi_get_element(env, nSlotTypes, i, &nSlotType);
+            NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
+            if (valuetype != napi_number) {
+                ANS_LOGE("Wrong argument type. Number expected.");
+                std::string msg = "Incorrect parameter types.The type of slotType must be number.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+                return nullptr;
+            }
+            napi_get_value_int32(env, nSlotType, &slotType);
+            NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+            if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+                std::string msg = "Incorrect parameter types.slotType name must be in enum.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+                return nullptr;
+            }
+            subscriberInfo.slotTypes.emplace_back(outType);
+            subscriberInfo.hasSubscribeInfo = true;
+        }
+    }
+
     return NapiGetNull(env);
 }
 
@@ -421,7 +484,7 @@ napi_value Common::GetNotificationUserInputByInputKey(
     ANS_LOGI("NotificationUserInput::inputKey = %{public}s", str);
     userInput = NotificationUserInput::Create(str);
     if (!userInput) {
-        ANS_LOGI("Failed to create NotificationUserInput by inputKey=%{public}s", str);
+        ANS_LOGE("Failed to create NotificationUserInput by inputKey=%{public}s", str);
         return nullptr;
     }
 
@@ -440,7 +503,6 @@ napi_value Common::GetNotificationUserInputByTag(
     size_t strLen = 0;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
     // tag: string
@@ -475,7 +537,6 @@ napi_value Common::GetNotificationUserInputByOptions(
     bool isArray = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -528,7 +589,6 @@ napi_value Common::GetNotificationUserInputByPermitMimeTypes(
     bool isArray = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -572,7 +632,6 @@ napi_value Common::GetNotificationUserInputByPermitFreeFormInput(
     bool hasProperty = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -604,7 +663,6 @@ napi_value Common::GetNotificationUserInputByEditType(
     int32_t editType = 0;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -615,6 +673,8 @@ napi_value Common::GetNotificationUserInputByEditType(
         NAPI_CALL(env, napi_typeof(env, value, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of editType must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, value, &editType);
@@ -633,7 +693,6 @@ napi_value Common::GetNotificationUserInputByAdditionalData(
     bool hasProperty = false;
 
     if (!userInput) {
-        ANS_LOGE("userInput is nullptr");
         return nullptr;
     }
 
@@ -644,6 +703,8 @@ napi_value Common::GetNotificationUserInputByAdditionalData(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of additionalData must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         AAFwk::WantParams wantParams;
@@ -671,6 +732,8 @@ napi_value Common::GetNotificationContentType(const napi_env &env, const napi_va
         NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of notificationContentType must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, contentResult, &type);
@@ -686,6 +749,8 @@ napi_value Common::GetNotificationContentType(const napi_env &env, const napi_va
         NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of contentType must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, contentResult, &type);
@@ -714,6 +779,8 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of notificationType must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
     } else if (!hasNotificationType && hasType) {
@@ -721,6 +788,8 @@ napi_value Common::GetNotificationSlot(const napi_env &env, const napi_value &va
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of type must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
     } else {
@@ -771,6 +840,8 @@ napi_value Common::GetNotificationSlotByString(const napi_env &env, const napi_v
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of desc must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, nobj, str, STR_MAX_SIZE - 1, &strLen));
@@ -788,6 +859,8 @@ napi_value Common::GetNotificationSlotByString(const napi_env &env, const napi_v
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of sound must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, nobj, str, STR_MAX_SIZE - 1, &strLen));
@@ -814,6 +887,8 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of badgeFlag must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, nobj, &badgeFlag);
@@ -829,6 +904,8 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of bypassDnd must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, nobj, &bypassDnd);
@@ -844,6 +921,8 @@ napi_value Common::GetNotificationSlotByBool(const napi_env &env, const napi_val
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of lightEnabled must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, nobj, &lightEnabled);
@@ -870,6 +949,8 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of level must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, nobj, &inLevel);
@@ -890,6 +971,8 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of lockscreenVisibility must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, nobj, &lockscreenVisibility);
@@ -905,6 +988,8 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of lightColor must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, nobj, &lightColor);
@@ -930,6 +1015,8 @@ napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const nap
         NAPI_CALL(env, napi_typeof(env, nobj, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of vibrationEnabled must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -992,6 +1079,8 @@ napi_value Common::GetBundleOption(const napi_env &env, const napi_value &value,
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of bundle must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -1034,6 +1123,8 @@ napi_value Common::GetButtonOption(const napi_env &env, const napi_value &value,
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of buttonName must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -1087,6 +1178,8 @@ napi_value Common::GetNotificationKey(const napi_env &env, const napi_value &val
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument type. Number expected.");
+        std::string msg = "Incorrect parameter types. The type of id must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_int32(env, result, &key.id);
@@ -1100,6 +1193,8 @@ napi_value Common::GetNotificationKey(const napi_env &env, const napi_value &val
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of label must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -1123,7 +1218,7 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
     const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &agent)
 {
     if (agent == nullptr) {
-        ANS_LOGI("agent is nullptr");
+        ANS_LOGE("agent is nullptr");
         return nullptr;
     }
 
@@ -1131,26 +1226,8 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
         std::lock_guard<std::mutex> lock(mutex_);
         wantAgent_.insert(agent);
     }
-    napi_value wantAgent = nullptr;
-    napi_value wantAgentClass = nullptr;
-    napi_define_class(env,
-        "wantAgentClass",
-        NAPI_AUTO_LENGTH,
-        [](napi_env env, napi_callback_info info) -> napi_value {
-            napi_value thisVar = nullptr;
-            napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-            return thisVar;
-        },
-        nullptr,
-        0,
-        nullptr,
-        &wantAgentClass);
-    napi_new_instance(env, wantAgentClass, 0, nullptr, &wantAgent);
-    napi_wrap(env,
-        wantAgent,
-        (void *)agent.get(),
-        [](napi_env env, void *data, void *hint) {
-            AbilityRuntime::WantAgent::WantAgent *objectInfo =
+    napi_finalize finalize = [](napi_env env, void *data, void *hint) {
+        AbilityRuntime::WantAgent::WantAgent *objectInfo =
                 static_cast<AbilityRuntime::WantAgent::WantAgent *>(data);
             if (objectInfo) {
                 std::lock_guard<std::mutex> lock(mutex_);
@@ -1161,11 +1238,8 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
                     }
                 }
             }
-        },
-        nullptr,
-        nullptr);
-
-    return wantAgent;
+    };
+    return AppExecFwk::WrapWantAgent(env, agent.get(), finalize);
 }
 
 napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value &value, NotificationRequest &request)
@@ -1182,6 +1256,8 @@ napi_value Common::GetNotificationTemplate(const napi_env &env, const napi_value
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of template must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -1215,6 +1291,8 @@ napi_value Common::GetNotificationBundleOption(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of representativeBundle must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -1254,6 +1332,8 @@ napi_value Common::GetNotificationTemplateInfo(const napi_env &env, const napi_v
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of name must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -1267,6 +1347,8 @@ napi_value Common::GetNotificationTemplateInfo(const napi_env &env, const napi_v
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of data must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         AAFwk::WantParams wantParams;
@@ -1411,6 +1493,63 @@ napi_value Common::SetNotificationUnifiedGroupInfo(
     }
 
     return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetBundleOption(const napi_env &env, const NotificationBundleOption &bundleInfo,
+    napi_value &result)
+{
+    napi_value value = nullptr;
+    // bundle: string
+    napi_create_string_utf8(env, bundleInfo.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "bundle", value);
+
+    // uid: uid_t
+    napi_create_int32(env, bundleInfo.GetUid(), &value);
+    napi_set_named_property(env, result, "uid", value);
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetDoNotDisturbProfile(const napi_env &env, const NotificationDoNotDisturbProfile &data,
+    napi_value &result)
+{
+    ANS_LOGD("enter");
+    napi_value value = nullptr;
+    // id: number
+    napi_create_int64(env, data.GetProfileId(), &value);
+    napi_set_named_property(env, result, "id", value);
+
+    // name: string
+    napi_create_string_utf8(env, data.GetProfileName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "name", value);
+
+    size_t count = 0;
+    napi_create_array(env, &value);
+    // trustList?: std::vector<NotificationBundleOption>
+    for (auto bundleInfo : data.GetProfileTrustList()) {
+        napi_value bundleValue = nullptr;
+        napi_create_object(env, &bundleValue);
+        if (!Common::SetBundleOption(env, bundleInfo, bundleValue)) {
+            continue;
+        }
+        napi_set_element(env, value, count, bundleValue);
+        count++;
+    }
+    if (count > 0) {
+        napi_set_named_property(env, result, "trustlist", value);
+    }
+    return NapiGetBoolean(env, true);
+}
+
+std::string Common::GetAppInstanceKey()
+{
+    std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext>context =
+        OHOS::AbilityRuntime::Context::GetApplicationContext();
+    if (context != nullptr) {
+        return context->GetCurrentInstanceKey();
+    } else {
+        ANS_LOGE("GetApplicationContext for instacekey fail.");
+        return "";
+    }
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -29,10 +29,12 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
-constexpr int32_t STR_MAX_SIZE = 200;
-constexpr int32_t LONG_STR_MAX_SIZE = 1024;
+constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr uint8_t OPERATION_MAX_TYPE = 3;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
+constexpr int32_t COMMON_TEXT_SIZE = 3074;
+constexpr int32_t SHORT_TEXT_SIZE = 1026;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
 constexpr uint8_t PARAM0 = 0;
@@ -86,6 +88,8 @@ struct NotificationSubscribeInfo {
     int32_t userId = 0;
     bool hasSubscribeInfo = false;
     std::string deviceType;
+    std::vector<NotificationConstant::SlotType> slotTypes;
+    uint32_t filterType = 0;
 };
 
 struct CallbackPromiseInfo {
@@ -335,7 +339,7 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value SetNotificationSorting(
-        const napi_env &env, const NotificationSorting &sorting, napi_value &result);
+        const napi_env &env, NotificationSorting &sorting, napi_value &result);
 
     /**
      * @brief Sets a js object by specified NotificationSlot object
@@ -455,6 +459,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result);
+
+    /**
+     * @brief Sets a js object by specified NotificationIconButton array
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param buttons Indicates a NotificationIconButton object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetCardButton(const napi_env &env, const std::vector<NotificationIconButton> buttons,
+        napi_value &result);
 
     /**
      * @brief Sets a js object by specified NotificationProgress object
@@ -902,8 +917,40 @@ public:
     static napi_value GetNotificationShowDeliveryTime(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
+    /**
+     * @brief Gets the updateOnly flag of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationIsUpdateOnly(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     static napi_value GetNotificationIsRemoveAllowed(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the forceDistributed flag of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationForceDistributed(
+        const napi_env &env, const napi_value &value, NotificationRequest &request);
+
+    /**
+     * @brief Gets the notDistributed flag of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param request Indicates a NotificationRequest object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationIsNotDistributed(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
 
     /**
@@ -1306,6 +1353,42 @@ public:
         std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
 
     /**
+     * @brief Gets a card button of NotificationLocalLiveViewContent object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param contentResult Indicates a js object to be converted
+     * @param content Indicates a button object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewCardButton(
+        const napi_env &env, const napi_value &contentResult,
+        std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content);
+
+    /**
+     * @brief Gets a capsule button of NotificationCapsule object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param capsuletResult Indicates a js object to be converted
+     * @param capsule Indicates a capsule object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationLocalLiveViewCapsuleCardButton(
+        const napi_env &env, const napi_value &capsuletResult,
+            OHOS::Notification::NotificationCapsule &capsule);
+
+    /**
+     * @brief Gets array<iconbutton> of NotificationCapsule object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param buttonResult Indicates a js array<object> to be converted
+     * @param cardButtons Indicates a button array from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationIconButton(
+        const napi_env &env, const napi_value &buttonResult,
+        std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen);
+
+    /**
      * @brief Gets a time of NotificationLocalLiveViewContent object from specified js object
      *
      * @param env Indicates the environment that the API is invoked under
@@ -1474,6 +1557,17 @@ public:
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetMessageUserByCustom(const napi_env &env, const napi_value &result, MessageUser &messageUser);
+
+    /**
+     * @brief Gets the multi-line content of NotificationRequest object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param result Indicates a js object to be converted
+     * @param multiLineContent Indicates a NotificationMultiLineContent object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetNotificationContentLineWantAgents(const napi_env &env, const napi_value &result,
+        std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent);
 
     /**
      * @brief Gets the multi-line content of NotificationRequest object from specified js object
@@ -1700,7 +1794,7 @@ public:
          * @return Returns a napi value with specified error object for callback
          */
     static napi_value CreateErrorValue(napi_env env, int32_t errCode, std::string &msg);
-    
+
     /**
      * @brief Sets a js object by specified BadgeNumberCallbackData object
      *
@@ -1722,9 +1816,26 @@ public:
      */
     static napi_value GetNotificationBundleOption(
         const napi_env &env, const napi_value &value, NotificationRequest &request);
+    /**
+     * @brief Sets a js object by specified NotificationDoNotDisturbProfile object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param date Indicates a NotificationDoNotDisturbProfile object to be converted
+     * @param result Indicates a js object to be set
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value SetDoNotDisturbProfile(
+        const napi_env &env, const NotificationDoNotDisturbProfile &data, napi_value &result);
+
+    static napi_value SetBundleOption(
+        const napi_env &env, const NotificationBundleOption &bundleInfo, napi_value &result);
     static bool IsValidRemoveReason(int32_t reasonType);
     static void NapiThrow(napi_env env, int32_t errCode);
     static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
+    static napi_value NapiReturnCapErrCb(napi_env env, napi_callback_info info);
+    static napi_value NapiReturnCapErr(napi_env env, napi_callback_info info);
+    static napi_value NapiReturnFalseCb(napi_env env, napi_callback_info info);
+    static napi_value NapiReturnFalseCbNewType(napi_env env, napi_callback_info info);
     static int32_t ErrorToExternal(uint32_t errCode);
     static void CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result);
     static napi_value GetLockScreenPicture(
@@ -1733,6 +1844,15 @@ public:
         const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
     static napi_value SetAgentBundle(const napi_env &env,
         const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
+    static napi_value GetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
+        napi_value &value);
+    static napi_value SetResourceObject(napi_env env, const std::shared_ptr<ResourceManager::Resource> &resource,
+        napi_value &value);
+    static napi_value SetObjectStringProperty(const napi_env &env, napi_value& object, const std::string& key,
+        const std::string& value);
+    static napi_value SetObjectUint32Property(const napi_env &env, napi_value& object, const std::string& key,
+        uint32_t value);
+    static std::string GetAppInstanceKey();
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;
@@ -1741,6 +1861,7 @@ private:
     static std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgent_;
     static std::mutex mutex_;
     static const char *GetPropertyNameByContentType(ContentType type);
+    static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

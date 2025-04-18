@@ -15,18 +15,19 @@
 
 #include "notification_subscribe_info.h"
 #include "notificationsubscribeInfo_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationSubscribeInfo sotificationSubscribeInfo;
         sotificationSubscribeInfo.AddAppName(stringData);
         std::vector<std::string> appNames;
         appNames.emplace_back(stringData);
         sotificationSubscribeInfo.AddAppNames(appNames);
         sotificationSubscribeInfo.GetAppNames();
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
         sotificationSubscribeInfo.AddAppUserId(userId);
         sotificationSubscribeInfo.GetAppUserId();
         sotificationSubscribeInfo.Dump();
@@ -39,11 +40,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

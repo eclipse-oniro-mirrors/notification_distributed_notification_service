@@ -24,11 +24,13 @@
 #include "notification_capsule.h"
 #include "notification_constant.h"
 #include "notification_local_live_view_content.h"
+#include "notification_icon_button.h"
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "pixel_map_napi.h"
 
 namespace OHOS {
+using namespace Global::Resource;
 namespace NotificationNapi {
 napi_value Common::SetNotificationLocalLiveViewContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
@@ -77,6 +79,26 @@ napi_value Common::SetNotificationLocalLiveViewContent(
         napi_set_named_property(env, result, "button", button);
     }
 
+    // cardButtons?: Array<NotificationIconButton>;
+    if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::CARD_BUTTON)) {
+        napi_value cardBtn = nullptr;
+        napi_create_array_with_length(env, localLiveViewContent->GetCardButton().size(), &cardBtn);
+        if (!SetCardButton(env, localLiveViewContent->GetCardButton(), cardBtn)) {
+            ANS_LOGE("SetCardButton call failed");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "cardButtons", cardBtn);
+    }
+
+    // liveViewType?: LiveViewTypes
+    LiveViewTypes outType = LiveViewTypes::LIVE_VIEW_ACTIVITY;
+    if (!AnsEnumUtil::LiveViewTypesCToJS(localLiveViewContent->GetLiveViewType(), outType)) {
+        ANS_LOGE("Liveview type is invalid");
+        return NapiGetBoolean(env, false);
+    }
+    napi_create_int32(env, static_cast<int32_t>(outType), &value);
+    napi_set_named_property(env, result, "liveViewType", value);
+
     // progress: NotificationProgress
     if (localLiveViewContent->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::PROGRESS)) {
         napi_value progress = nullptr;
@@ -95,7 +117,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
         bool flag = localLiveViewContent->isFlagExist(
             NotificationLocalLiveViewContent::LiveViewContentInner::INITIAL_TIME);
         if (!SetTime(env, localLiveViewContent->GetTime(), time, flag)) {
-            ANS_LOGE("SetMessageUser call failed");
+            ANS_LOGE("SetTime call failed");
             return NapiGetBoolean(env, false);
         }
         napi_set_named_property(env, result, "time", time);
@@ -129,12 +151,26 @@ napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &ca
         iconResult = Media::PixelMapNapi::CreatePixelMap(env, icon);
         NAPI_CALL(env, napi_typeof(env, iconResult, &valuetype));
         if (valuetype == napi_undefined) {
-            ANS_LOGW("iconResult is undefined");
+            ANS_LOGE("iconResult is undefined");
             napi_set_named_property(env, result, "icon", NapiGetNull(env));
         } else {
             napi_set_named_property(env, result, "icon", iconResult);
         }
     }
+
+    // time?: number
+    napi_create_int32(env, capsule.GetTime(), &value);
+    napi_set_named_property(env, result, "time", value);
+
+    // capsuleButtons?: Array<NotificationIconButton>;
+    napi_value cardBtn = nullptr;
+    napi_create_array_with_length(env, capsule.GetCapsuleButton().size(), &cardBtn);
+    if (!SetCardButton(env, capsule.GetCapsuleButton(), cardBtn)) {
+        ANS_LOGE("capsuleButton call failed");
+        return NapiGetBoolean(env, false);
+    }
+    napi_set_named_property(env, result, "capsuleButtons", cardBtn);
+
     return NapiGetBoolean(env, true);
 }
 
@@ -185,6 +221,59 @@ napi_value Common::SetTime(const napi_env &env, const NotificationTime &time,
     return NapiGetBoolean(env, true);
 }
 
+napi_value Common::SetObjectStringProperty(const napi_env& env, napi_value& object,
+    const std::string& key, const std::string& value)
+{
+    napi_value property;
+    napi_status status = napi_create_string_utf8(env, value.c_str(), NAPI_AUTO_LENGTH, &property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to create value.");
+        return nullptr;
+    }
+    status = napi_set_named_property(env, object, key.c_str(), property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to set locale property");
+        return nullptr;
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetObjectUint32Property(const napi_env &env, napi_value& object,
+    const std::string& key, uint32_t value)
+{
+    napi_value property;
+    napi_status status = napi_create_uint32(env, value, &property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to create value.");
+        return nullptr;
+    }
+
+    status = napi_set_named_property(env, object, key.c_str(), property);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to set locale property");
+        return nullptr;
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::SetResourceObject(napi_env env, const std::shared_ptr<ResourceManager::Resource> &resource,
+    napi_value &object)
+{
+    if (SetObjectStringProperty(env, object, "bundleName", resource->bundleName) == nullptr) {
+        ANS_LOGE("Failed to set property bundleName");
+        return NapiGetBoolean(env, false);
+    }
+    if (SetObjectStringProperty(env, object, "moduleName", resource->moduleName) == nullptr) {
+        ANS_LOGE("Failed to set property moduleName");
+        return NapiGetBoolean(env, false);
+    }
+    if (SetObjectUint32Property(env, object, "id", resource->id) == nullptr) {
+        ANS_LOGE("Failed to set property id");
+        return NapiGetBoolean(env, false);
+    }
+    return NapiGetBoolean(env, true);
+}
+
 napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result)
 {
     ANS_LOGD("enter");
@@ -220,6 +309,76 @@ napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveVie
     }
     napi_set_named_property(env, result, "icons", iconArr);
 
+    // buttonIcons: Array<Resource>
+    iconCount = 0;
+    napi_value resourceArr = nullptr;
+    napi_create_array(env, &resourceArr);
+    auto iconResources = button.GetAllButtonIconResource();
+    for (auto resource : iconResources) {
+        napi_value object;
+        napi_status status = napi_create_object(env, &object);
+        if (status != napi_ok) {
+            ANS_LOGE("Failed to create Configuration object");
+            return NapiGetBoolean(env, false);
+        }
+        if (!SetResourceObject(env, resource, object)) {
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_element(env, resourceArr, iconCount, object);
+        iconCount++;
+    }
+    napi_set_named_property(env, result, "iconsResource", resourceArr);
+
+    return NapiGetBoolean(env, true);
+}
+
+napi_value Common::SetCardButton(const napi_env &env, const std::vector<NotificationIconButton> buttons,
+    napi_value &result)
+{
+    ANS_LOGD("enter");
+
+    int iconCount = 0;
+    napi_value value = nullptr;
+    for (auto btn : buttons) {
+        // name: string
+        napi_value item = nullptr;
+        napi_status status = napi_create_object(env, &item);
+        if (status != napi_ok) {
+            ANS_LOGE("Failed to create card button item");
+            return NapiGetBoolean(env, false);
+        }
+        napi_create_string_utf8(env, btn.GetName().c_str(), NAPI_AUTO_LENGTH, &value);
+        napi_set_named_property(env, item, "name", value);
+
+        // text?: string;
+        napi_create_string_utf8(env, btn.GetText().c_str(), NAPI_AUTO_LENGTH, &value);
+        napi_set_named_property(env, item, "text", value);
+
+        // hidePanel?: boolean;
+        napi_get_boolean(env, btn.GetHidePanel(), &value);
+        napi_set_named_property(env, item, "hidePanel", value);
+
+        // iconResource: Resource;
+        napi_value object;
+        status = napi_create_object(env, &object);
+        if (status != napi_ok) {
+            ANS_LOGE("Failed to create card button item.resource");
+            return NapiGetBoolean(env, false);
+        }
+        // resource | pixelMap
+        std::shared_ptr<Media::PixelMap> icon = btn.GetIconImage();
+        if (icon) {
+            object = Media::PixelMapNapi::CreatePixelMap(env, icon);
+        } else {
+            if (!SetResourceObject(env, btn.GetIconResource(), object)) {
+                return NapiGetBoolean(env, false);
+            }
+        }
+
+        napi_set_named_property(env, item, "iconResource", object);
+        status = napi_set_element(env, result, iconCount, item);
+        iconCount++;
+    }
     return NapiGetBoolean(env, true);
 }
 
@@ -357,6 +516,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
     char str[STR_MAX_SIZE] = {0};
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     napi_value result = nullptr;
+    int32_t intValue;
 
     ANS_LOGD("enter");
 
@@ -377,6 +537,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of title must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -391,6 +553,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of backgroundColor must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -404,6 +568,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of content must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -417,6 +583,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of icon must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
@@ -428,9 +596,241 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         ANS_LOGD("capsule icon = %{public}d", pixelMap->GetWidth());
     }
 
+    //time?: number
+    NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "time", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, capsuleResult, "time", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, result, &intValue);
+        capsule.SetTime(intValue);
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, capsuleResult, "capsuleButtons", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, capsuleResult, "capsuleButtons", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return nullptr;
+        }
+        if (hasProperty && GetNotificationLocalLiveViewCapsuleCardButton(env, result, capsule) == nullptr) {
+            return nullptr;
+        }
+    }
+
     content->SetCapsule(capsule);
     content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::CAPSULE);
 
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationLocalLiveViewCardButton(
+    const napi_env &env, const napi_value &contentResult,
+    std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> content)
+{
+    napi_value buttonResult = nullptr;
+
+    ANS_LOGD("enter");
+    napi_get_named_property(env, contentResult, "cardButtons", &buttonResult);
+    
+    // 解析iconbutton数组
+    std::vector<NotificationIconButton> cardButtons;
+    if (GetNotificationIconButton(env, buttonResult, cardButtons, BUTTON_MAX_SIZE) == nullptr) {
+        return nullptr;
+    }
+
+    content->SetCardButton(cardButtons);
+    content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::CARD_BUTTON);
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
+    const napi_env &env, const napi_value &capsuletResult,
+    OHOS::Notification::NotificationCapsule &capsule)
+{
+    ANS_LOGD("enter");
+    std::vector<NotificationIconButton> cardButtons;
+    if (GetNotificationIconButton(env, capsuletResult, cardButtons, CAPSULE_BTN_MAX_SIZE) == nullptr) {
+        return nullptr;
+    }
+
+    capsule.SetCapsuleButton(cardButtons);
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationIconButton(
+    const napi_env &env, const napi_value &buttonResult,
+    std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen)
+{
+    // cardButton_item?: NotificationIconButton;
+    napi_value cardButton = nullptr;
+    napi_value result = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+
+    bool isArray = false;
+    bool boolValue = false;
+    uint32_t length = 0;
+
+    size_t strLen = 0;
+    char str[STR_MAX_SIZE] = {0};
+    bool hasProperty = false;
+
+    ANS_LOGD("enter");
+    napi_is_array(env, buttonResult, &isArray);
+    if (!isArray) {
+        ANS_LOGE("Property names is expected to be an array.");
+        return nullptr;
+    }
+    napi_get_array_length(env, buttonResult, &length);
+    if (length > maxLen) {
+        length = maxLen;
+    }
+
+    for (size_t i = 0; i < length; i++) {
+        napi_get_element(env, buttonResult, i, &cardButton);
+
+        NAPI_CALL(env, napi_typeof(env, cardButton, &valuetype));
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            return nullptr;
+        }
+        // 数组item
+        NotificationIconButton button;
+        // name: string
+        NAPI_CALL(env, napi_has_named_property(env, cardButton, "name", &hasProperty));
+        if (!hasProperty) {
+            ANS_LOGE("Property name expected.");
+            return nullptr;
+        } else {
+            napi_get_named_property(env, cardButton, "name", &result);
+            NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+            if (valuetype != napi_string) {
+                ANS_LOGE("Wrong argument type. String expected.");
+                return nullptr;
+            }
+            NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+            button.SetName(str);
+        }
+
+        // iconResource: Resource
+        NAPI_CALL(env, napi_has_named_property(env, cardButton, "iconResource", &hasProperty));
+        if (!hasProperty) {
+            ANS_LOGE("Property iconResource expected.");
+            return nullptr;
+        } else {
+            // if icon type is Rersouce, get the resource object and return.
+            napi_value iconResource = nullptr;
+            napi_get_named_property(env, cardButton, "iconResource", &iconResource);
+            NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
+            if (valuetype != napi_object) {
+                ANS_LOGE("Wrong argument type. iconResource Object expected.");
+                return nullptr;
+            }
+
+            // icon?: Resource
+            auto resource = std::make_shared<ResourceManager::Resource>();
+            if (Common::GetResourceObject(env, resource, iconResource) == nullptr) {
+                ANS_LOGE("Invalid icon resource object or not resource.");
+            } else {
+                button.SetIconResource(resource);
+            }
+
+            // icon?: image.PixelMap
+            auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, iconResource);
+            if (pixelMap == nullptr) {
+                ANS_LOGE("Invalid pixelMap object is null.");
+            } else {
+                button.SetIconImage(pixelMap);
+            }
+        }
+
+        // text?: string
+        NAPI_CALL(env, napi_has_named_property(env, cardButton, "text", &hasProperty));
+        if (hasProperty) {
+            napi_get_named_property(env, cardButton, "text", &result);
+            NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+            if (valuetype != napi_string) {
+                ANS_LOGE("Wrong argument type. String expected.");
+                return nullptr;
+            }
+            NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+            button.SetText(str);
+        }
+
+        // hidePanel?: boolean;
+        NAPI_CALL(env, napi_has_named_property(env, cardButton, "hidePanel", &hasProperty));
+        if (hasProperty) {
+            napi_get_named_property(env, cardButton, "hidePanel", &result);
+            NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+            if (valuetype != napi_boolean) {
+                ANS_LOGE("Wrong argument type. bool expected.");
+                return nullptr;
+            }
+            napi_get_value_bool(env, result, &boolValue);
+            button.SetHidePanel(boolValue);
+        }
+
+        cardButtons.push_back(button);
+        ANS_LOGD("icon button = %{public}s", button.Dump().c_str());
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetResourceObject(napi_env env,
+    std::shared_ptr<ResourceManager::Resource> &resource, napi_value &value)
+{
+    napi_value name;
+    size_t strLen = 0;
+    char str[STR_MAX_SIZE] = {0};
+    std::vector<std::string> typeName = {"bundleName", "moduleName"};
+    for (const std::string& type: typeName) {
+        napi_status status = napi_get_named_property(env, value, type.c_str(), &name);
+        if (status != napi_ok || name == nullptr) {
+            ANS_LOGE("Failed to get resource name property");
+            return nullptr;
+        }
+        napi_valuetype valueType = napi_valuetype::napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, name, &valueType));
+        if (valueType != napi_string) {
+            ANS_LOGE("Failed to get resource type %{public}d", valueType);
+            return nullptr;
+        }
+        NAPI_CALL(env, napi_get_value_string_utf8(env, name, str, STR_MAX_SIZE - 1, &strLen));
+        if (type == "bundleName") {
+            resource->bundleName = str;
+        } else if (type == "moduleName") {
+            resource->moduleName = str;
+        }
+    }
+
+    napi_value id;
+    napi_status status = napi_get_named_property(env, value, "id", &id);
+    if (status != napi_ok || id == nullptr) {
+        ANS_LOGE("Failed to get resource id property");
+        return nullptr;
+    }
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    napi_typeof(env, id, &valueType);
+    if (valueType != napi_number) {
+        ANS_LOGE("Failed to get resource name string");
+        std::string msg = "Incorrect parameter types. The type of id must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    int32_t resId = 0;
+    status = napi_get_value_int32(env, id, &resId);
+    if (status != napi_ok) {
+        ANS_LOGE("Wrong argument type. Object expected.");
+        return nullptr;
+    }
+    resource->id = resId;
+    ANS_LOGE("Get to get resource bundleName %{public}s moduleName %{public}s id %{public}d",
+        resource->bundleName.c_str(), resource->moduleName.c_str(), resource->id);
     return NapiGetNull(env);
 }
 
@@ -508,6 +908,34 @@ napi_value Common::GetNotificationLocalLiveViewButton(
             }
         }
     }
+
+    NAPI_CALL(env, napi_has_named_property(env, buttonResult, "iconsResource", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, buttonResult, "iconsResource", &result);
+        napi_is_array(env, result, &isArray);
+        if (!isArray) {
+            ANS_LOGE("Property icon resource is expected to be an array.");
+            return nullptr;
+        }
+        napi_get_array_length(env, result, &length);
+        for (size_t i = 0; i < length; i++) {
+            napi_value iconResource = nullptr;
+            auto resource = std::make_shared<ResourceManager::Resource>();
+            napi_get_element(env, result, i, &iconResource);
+            NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
+            if (valuetype != napi_object) {
+                ANS_LOGE("Wrong argument type. Object expected.");
+                return nullptr;
+            }
+            if (Common::GetResourceObject(env, resource, iconResource) == nullptr) {
+                ANS_LOGW("Invalid icon resource object.");
+                return nullptr;
+            } else {
+                button.addSingleButtonIconResource(resource);
+            }
+        }
+    }
+
     ANS_LOGD("button buttonIcon = %{public}s", str);
     content->SetButton(button);
     content->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::BUTTON);
@@ -541,6 +969,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
         napi_get_named_property(env, progressResult, "maxValue", &result);
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
+            std::string msg = "Incorrect parameter types. The type of maxValue must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             ANS_LOGE("Wrong argument type. Number expected.");
             return nullptr;
         }
@@ -555,6 +985,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of currentValue must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &intValue);
@@ -568,6 +1000,8 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isPercentage must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -608,6 +1042,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of initialTime must be number.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &intValue);
@@ -622,6 +1058,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isCountDown must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -635,6 +1073,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isPaused must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -648,6 +1088,8 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isInTitle must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &boolValue);
@@ -688,6 +1130,8 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_number) {
         ANS_LOGE("Wrong argument typeCode. Number expected.");
+        std::string msg = "Incorrect parameter types. The type of typeCode must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     napi_get_value_int32(env, result, &type);
@@ -705,6 +1149,23 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     if (hasProperty && GetNotificationLocalLiveViewButton(env, contentResult, content) == nullptr) {
         return nullptr;
     }
+
+    //cardButton?
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "cardButtons", &hasProperty));
+    if (hasProperty && GetNotificationLocalLiveViewCardButton(env, contentResult, content) == nullptr) {
+        return nullptr;
+    }
+
+    // liveViewType?: LiveViewTypes
+    NAPI_CALL(env, napi_has_named_property(env, contentResult, "liveViewType", &hasProperty));
+    NotificationLocalLiveViewContent::LiveViewTypes outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY;
+    if (hasProperty && AppExecFwk::UnwrapInt32ByPropertyName(env, contentResult, "liveViewType", type)) {
+        if (!AnsEnumUtil::LiveViewTypesJSToC(LiveViewTypes(type), outType)) {
+            ANS_LOGE("The liveview types is not valid.");
+            return nullptr;
+        }
+    }
+    content->SetLiveViewType(outType);
 
     //progress?
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "progress", &hasProperty));

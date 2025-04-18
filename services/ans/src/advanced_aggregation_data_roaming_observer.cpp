@@ -27,11 +27,11 @@ AdvancedAggregationDataRoamingObserver::~AdvancedAggregationDataRoamingObserver(
 
 void AdvancedAggregationDataRoamingObserver::OnChange()
 {
-    string enable = "";
+    std::string enable = "";
     AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
     ANS_LOGI("GetUnifiedGroupInfoFromDb enter, enable:%{public}s", enable.c_str());
 
-#ifdef ENABLE_ANS_EXT_WRAPPER
+#ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->SetlocalSwitch(enable);
     AdvancedNotificationService::GetInstance()->ClearAllNotificationGroupInfo(enable);
 #else

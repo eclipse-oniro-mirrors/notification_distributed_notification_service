@@ -72,7 +72,7 @@ HWTEST_F(NotificationCapsuleTest, Dump_00001, Function | SmallTest | Level1)
     std::string backgroundColor = "testBackgroundColor";
     rrc->SetBackgroundColor(backgroundColor);
     EXPECT_EQ(rrc->Dump(), "Capsule{ title = " + title + ", backgroundColor = " + backgroundColor +
-        ", content = , icon = null }");
+        ", content = , icon = null, time = 0 }");
 }
 
 /**
@@ -129,6 +129,7 @@ HWTEST_F(NotificationCapsuleTest, Unmarshalling_00001, Function | SmallTest | Le
     Parcel parcel;
     std::shared_ptr<NotificationCapsule> result =
         std::make_shared<NotificationCapsule>();
+    result->Marshalling(parcel);
 
     if (nullptr != result) {
         if (nullptr == result->Unmarshalling(parcel)) {

@@ -46,6 +46,7 @@ void NotificationTimerInfo::OnTrigger()
         ANS_LOGD("ffrt enter!");
         if (callBack_ != nullptr) {
             callBack_();
+            callBack_ = nullptr;
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -54,6 +55,11 @@ void NotificationTimerInfo::OnTrigger()
 void NotificationTimerInfo::SetCallbackInfo(const std::function<void()> &callBack)
 {
     callBack_ = callBack;
+}
+
+std::function<void()> NotificationTimerInfo::GetCallBack()
+{
+    return callBack_;
 }
 }
 }

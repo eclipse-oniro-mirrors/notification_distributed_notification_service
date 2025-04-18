@@ -262,9 +262,9 @@ HWTEST_F(NotificationLocalLiveViewContentTest, Dump_00001, Function | SmallTest 
 
     std::string dumpStr = "NotificationLocalLiveViewContent{ title = , text = , additionalText = , "
         "lockScreenPicture = null, type = 0, "
-        "capsule = Capsule{ title = testTitle, backgroundColor = , content = , icon = null }, button = , "
+        "capsule = Capsule{ title = testTitle, backgroundColor = , content = , icon = null, time = 0 }, button = , "
         "progress = Progress{ maxValue = 1, currentValue = 0, isPercentage = 1 }, "
-        "time = Time{ initialTime = 1, isCountDown = 0, isPaused = 0, isInTitle = 0 } }";
+        "time = Time{ initialTime = 1, isCountDown = 0, isPaused = 0, isInTitle = 0 }, liveviewType = 0 }";
     EXPECT_EQ(liveViewContent->Dump(), dumpStr);
 }
 }

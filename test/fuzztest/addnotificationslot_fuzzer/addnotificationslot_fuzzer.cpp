@@ -15,36 +15,38 @@
 
 #include "addnotificationslot_fuzzer.h"
 
+#include "base/accesscontrol/sandbox_manager/test/fuzztest/common/alloc_token.h"
 #include "notification_helper.h"
+#include <string>
+#include <vector>
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t SLOT_LEVEL_NUM = 6;
         constexpr uint8_t SLOT_VISIBLENESS_TYPE_NUM = 4;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
-
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationSlot slot;
         slot.SetDescription(stringData);
-        slot.SetEnableLight(*data % ENABLE);
-        slot.SetEnableVibration(*data % ENABLE);
-        slot.SetLedLightColor(GetU32Data(data));
+        slot.SetEnableLight(fdp->ConsumeBool());
+        slot.SetEnableVibration(fdp->ConsumeBool());
+        slot.SetLedLightColor(fdp->ConsumeIntegral<uint32_t>());
 
-        uint8_t level = *data % SLOT_LEVEL_NUM;
+        uint8_t level = fdp->ConsumeIntegral<uint8_t>() % SLOT_LEVEL_NUM;
         Notification::NotificationSlot::NotificationLevel notificatoinLevel =
             Notification::NotificationSlot::NotificationLevel(level);
         slot.SetLevel(notificatoinLevel);
 
-        uint8_t visibleness = *data % SLOT_VISIBLENESS_TYPE_NUM;
+        uint8_t visibleness = fdp->ConsumeIntegral<uint8_t>() % SLOT_VISIBLENESS_TYPE_NUM;
         Notification::NotificationConstant::VisiblenessType visiblenessType =
             Notification::NotificationConstant::VisiblenessType(visibleness);
         slot.SetLockscreenVisibleness(visiblenessType);
 
-        uint8_t type = *data % SLOT_TYPE_NUM;
+        uint8_t type = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(type);
         slot.SetType(slotType);
 
@@ -56,11 +58,9 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size > GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    std::vector<std::string> permissions;
+    NativeTokenGet(permissions);
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

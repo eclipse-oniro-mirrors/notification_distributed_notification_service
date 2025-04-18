@@ -1,32 +1,49 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "འཕྲེད་བྱང་དང་སྒོ་ལྕགས་བརྙན་ཡོལ། དྲིལ་སྒྲ་སོགས་ཚུད་ཡོད། ༼སྒྲིག་འགོད་༽>༼བརྡ་ཐོ་དང་རྣམ་པའི་ཚན་བྱང་༽ལ་བསྐྱོད་ནས་གསར་སྒྱུར་བྱ་ཆོག"
-    },
-    {
-      "name": "ALLOW",
-      "value": "ཆོག་པ།"
-    },
-    {
-      "name": "BAN",
-      "value": "བཀག་འགོག"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "༼%s༽ཡིས་བརྡ་ཐོ་གཏོང་ཆོག་གམ།"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་སྒོ་ལྕགས་བརྙན་ཡོལ་དང་། འཕྲེད་བྱང་། ཟུར་རྟགས། དྲིལ་སྒྲ། སྦིར་བརྡ་སོགས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
+      },
+      {
+          "name":"reason_simple",
+          "value":"བརྡ་ཐོ་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་འཕྲེད་བྱང་། ཟུར་རྟགས། དྲིལ་སྒྲ་བཅས་ཚུད་སྲིད། ༼སྒྲིག་འགོད་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
+      },
+      {
+        "name":"reason_zyt",
+        "value":"བརྡ་ཐོའི་དྲན་སྐུལ་གྱི་ཐབས་ལམ་ལ་སྒོ་ལྕགས་བརྙན་ཡོལ་དང་། འཕྲེད་བྱང་། ཟུར་རྟགས། དྲིལ་སྒྲ། སྦིར་བརྡ་བཅས་ཚུད་སྲིད། ༼DroiTong༽>༼ ཉེར་སྤྱོད་དོ་དམ་༽ལ་བསྐྱོད་ནས་བཅོས་ཆོག"
+      },
+      {
+          "name":"ALLOW",
+          "value":"ཆོག་པ།",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"མི་ཆོག",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"༼%s༽ཡིས་ཁྱེད་ལ་བརྡ་ཐོ་གཏོང་ཆོག་པར་བྱེད་དམ།",
+          "attr":{
+              "priority":"LT"
+          }
+      }
   ]
 }

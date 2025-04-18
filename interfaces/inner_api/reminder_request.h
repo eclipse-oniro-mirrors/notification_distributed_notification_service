@@ -19,11 +19,8 @@
 #include <map>
 #include <string>
 
-#include "abs_shared_result_set.h"
-#include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_request.h"
-#include "values_bucket.h"
 #include "want_params.h"
 
 namespace OHOS {
@@ -90,7 +87,7 @@ namespace Notification {
     }                                                   \
 
 #define WRITE_INT64_RETURN_FALSE_LOG(parcel, value, msg) \
-    if (!(parcel.WriteInt64(value))) {                   \
+    if (!((parcel).WriteInt64(value))) {                 \
         ANSR_LOGE("Failed to write %s", msg);            \
         return false;                                    \
     }                                                    \
@@ -289,7 +286,7 @@ public:
      */
     static ReminderRequest *Unmarshalling(Parcel &parcel);
     virtual bool ReadFromParcel(Parcel &parcel);
-
+    virtual bool WriteParcel(Parcel &parcel) const;
     /**
      * @brief If the reminder is showing on the notification panel, it should not be removed automatically.
      *
@@ -312,6 +309,11 @@ public:
      * @return map of action buttons.
      */
     std::map<ActionButtonType, ActionButtonInfo> GetActionButtons() const;
+
+    /**
+     * @brief Set the reminder action buttons.
+     */
+    void SetActionButtons(const std::map<ActionButtonType, ActionButtonInfo>& buttons);
 
     /**
      * @brief Obtains creator bundle name
@@ -356,13 +358,6 @@ public:
      * @return group id.
      */
     std::string GetGroupId() const;
-
-    /**
-     * @brief Obtains notification request.
-     *
-     * @return notification request instance.
-     */
-    sptr<NotificationRequest> GetNotificationRequest() const;
 
     /**
      * @brief Obtains reminder id.
@@ -427,6 +422,40 @@ public:
      */
     uint64_t GetTriggerTimeInMilli() const;
 
+    int32_t GetTitleResourceId() const
+    {
+        return titleResourceId_;
+    }
+    int32_t GetContentResourceId() const
+    {
+        return contentResourceId_;
+    }
+    int32_t GetExpiredContentResourceId() const
+    {
+        return expiredContentResourceId_;
+    }
+    int32_t GetSnoozeContentResourceId() const
+    {
+        return snoozeContentResourceId_;
+    }
+
+    void SetTitleResourceId(const int32_t titleResourceId)
+    {
+        titleResourceId_ = titleResourceId;
+    }
+    void SetContentResourceId(const int32_t contentResourceId)
+    {
+        contentResourceId_ = contentResourceId;
+    }
+    void SetExpiredContentResourceId(const int32_t expiredContentResourceId)
+    {
+        expiredContentResourceId_ = expiredContentResourceId;
+    }
+    void SetSnoozeContentResourceId(const int32_t snoozeContentResourceId)
+    {
+        snoozeContentResourceId_ = snoozeContentResourceId;
+    }
+
     int32_t GetUserId() const;
     int32_t GetUid() const;
 
@@ -436,6 +465,27 @@ public:
      * @return bundle name
      */
     std::string GetBundleName() const;
+
+    /**
+     * @brief Set the reminder type.
+     *
+     * @param reminderType the reminder type.
+     */
+    void SetReminderType(const ReminderType type);
+
+    /**
+     * @brief Set the reminder state.
+     *
+     * @param state the reminder state.
+     */
+    void SetState(const uint8_t state);
+
+    /**
+     * @brief Set the reminder repeat days of week.
+     *
+     * @param state the reminder repeat days of week.
+     */
+    void SetRepeatDaysOfWeek(const uint8_t repeatDaysOfWeek);
 
     /**
      * @brief Set the app system.
@@ -608,17 +658,6 @@ public:
      */
     virtual bool OnTimeZoneChange();
 
-    void RecoverBasicFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    virtual void RecoverFromOldVersion(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-
-    /**
-     * @brief Recovery reminder instance from database record.
-     *
-     * @param resultSet Indicates the resultSet with pointer to the row of record data.
-     */
-    void RecoverFromDbBase(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    virtual void RecoverFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet) {};
-
     /**
      * @brief Sets action button.
      *
@@ -747,6 +786,16 @@ public:
      */
     void SetTriggerTimeInMilli(uint64_t triggerTimeInMilli);
 
+    void SetIdentifier(const std::string& identifier)
+    {
+        identifier_ = identifier;
+    }
+
+    std::string GetIdentifier() const
+    {
+        return identifier_;
+    }
+
     /**
      * @brief Sets want agent information.
      *
@@ -801,7 +850,9 @@ public:
         return true;
     }
 
+    void SetWantAgentStr(const std::string& wantStr);
     std::string GetWantAgentStr();
+    void SetMaxWantAgentStr(const std::string& maxWantStr);
     std::string GetMaxWantAgentStr();
 
     /**
@@ -847,6 +898,16 @@ public:
     std::string GetCustomButtonUri() const;
 
     /**
+     * @brief Is the reminder from datashare.
+     */
+    bool IsShare() const;
+
+    /**
+     * @brief Set the reminder from datashare.
+     */
+    void SetShare(const bool isShare);
+
+    /**
      * @brief Gets custom ring uri.
      *
      * @return custom ring uri.
@@ -867,10 +928,10 @@ public:
      * For example, action button should not init until the reminder is published successfully, as the reminder id is
      * assigned after that.
      *
-     * @param type Indicates the update type.
-     * @param extra Indicates the extra content.
+     * @param notificationRequest notification request object
+     * @param isSnooze isSnooze
      */
-    void UpdateNotificationRequest(UpdateNotificationType type, std::string extra);
+    void UpdateNotificationRequest(NotificationRequest& notificationRequest, bool isSnooze);
 
     /**
      * @brief Get repeated days of the week.
@@ -880,22 +941,51 @@ public:
     std::vector<int32_t> GetDaysOfWeek() const;
 
     /**
+     * @brief Gets repeat days of week
+     */
+    uint8_t GetRepeatDaysOfWeek() const;
+
+    /**
      * @brief When system language change, will call this function.
      *     need load resource to update button title
      * @param resMgr Indicates the resource manager for get button title
      */
     void OnLanguageChange(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
 
+public:
+    /**
+     * @brief Serialize want agent info and max want agent info to string.
+     * Persist to the rdb.
+     */
+    void SerializeWantAgent(std::string& wantInfoStr, std::string& maxWantInfoStr);
+
+    /**
+     * @brief Deserialize want agent info and max want agent info from string.
+     * Recover from the rdb.
+     */
+    void DeserializeWantAgent(const std::string& wantAgentInfo, const uint8_t type);
+
+    /**
+     * @brief Serialize action button info to string.
+     * Persist to the rdb.
+     */
+    std::string SerializeButtonInfo() const;
+
+    /**
+     * @brief Deserialize action button info from string.
+     * Recover from the rdb.
+     */
+    void DeserializeButtonInfo(const std::string& buttonInfoStr);
+    void DeserializeButtonInfoFromJson(const std::string& jsonString);
+
     static int32_t GetActualTime(const TimeTransferType &type, int32_t cTime);
     static int32_t GetCTime(const TimeTransferType &type, int32_t actualTime);
     static uint64_t GetDurationSinceEpochInMilli(const time_t target);
-    static int32_t GetUid(const int32_t &userId, const std::string &bundleName);
-    static int32_t GetAppIndex(const int32_t uid);
-    static int32_t GetUserId(const int32_t &uid);
-    static void AppendValuesBucket(const sptr<ReminderRequest> &reminder,
-        const sptr<NotificationBundleOption> &bundleOption, NativeRdb::ValuesBucket &values,
-        bool oldVersion = false);
     static std::vector<std::string> StringSplit(std::string source, const std::string &split);
+    static double StringToDouble(const std::string& str);
+    static int32_t StringToInt(const std::string& str);
+
+    static bool ReadReminderTypeFormParcel(Parcel &parcel, ReminderType& tarReminderType);
 
     static int32_t GLOBAL_ID;
     static const uint64_t INVALID_LONG_LONG_VALUE;
@@ -942,6 +1032,7 @@ public:
      */
     static const std::string REMINDER_EVENT_REMOVE_NOTIFICATION;
     static const std::string PARAM_REMINDER_ID;
+    static const std::string PARAM_REMINDER_SHARE;
     static const uint8_t REMINDER_STATUS_INACTIVE;
     static const uint8_t REMINDER_STATUS_ACTIVE;
     static const uint8_t REMINDER_STATUS_ALERTING;
@@ -979,9 +1070,6 @@ protected:
         return INVALID_LONG_LONG_VALUE;
     }
 
-    int64_t RecoverInt64FromDb(const std::shared_ptr<NativeRdb::ResultSet> &resultSet,
-        const std::string &columnName, const DbRecoveryType &columnType);
-
     uint8_t repeatDaysOfWeek_{0};
 
     /**
@@ -993,31 +1081,33 @@ protected:
      */
     int64_t GetNextDaysOfWeek(const time_t now, const time_t target) const;
     void SetRepeatDaysOfWeek(bool set, const std::vector<uint8_t> &daysOfWeek);
-    uint8_t GetRepeatDaysOfWeek() const;
     time_t GetTriggerTimeWithDST(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetTriggerTime(const time_t now, const time_t nextTriggerTime) const;
     uint64_t GetNowInstantMilli() const;
 
 private:
-    void AddActionButtons(const bool includeSnooze);
-    void AddRemovalWantAgent();
+
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element) const;
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateMaxWantAgent(AppExecFwk::ElementName &element) const;
-    std::string GetButtonInfo() const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
     bool HandleSysTimeChange(uint64_t oriTriggerTime, uint64_t optTriggerTime);
     bool HandleTimeZoneChange(uint64_t oldZoneTriggerTime, uint64_t newZoneTriggerTime, uint64_t optTriggerTime);
-    bool InitNotificationRequest();
     void InitServerObj();
     void SetMaxScreenWantAgent(AppExecFwk::ElementName &element);
     void SetState(bool deSet, const uint8_t newState, std::string function);
     void SetWantAgent(AppExecFwk::ElementName &element);
-    void UpdateActionButtons(const bool &setSnooze);
+    void SetExtraInfo(const AAFwk::WantParams& params);
+    void UpdateActionButtons(NotificationRequest& notificationRequest, const bool &setSnooze);
     bool UpdateNextReminder(const bool &force);
-    void UpdateNotificationContent(const bool &setSnooze);
-    void UpdateNotificationCommon(bool isSnooze);
+    void AddActionButtons(NotificationRequest& notificationRequest, const bool includeSnooze);
+    void UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze);
+    void UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze);
+    void UpdateNotificationAddRemovalWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationMaxScreenWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationBundleInfo(NotificationRequest& notificationRequest);
 
     /**
      * @brief Determine whether it is repeated every week.
@@ -1027,38 +1117,25 @@ private:
     bool IsRepeatDaysOfWeek(int32_t day) const;
 
     /**
-     * @brief Used for reminder recovery from database.
-     *
-     * @param bundleName Indicates the third part bundle name.
-     */
-    void UpdateNotificationBundleInfo();
-
-    /**
      * @brief Update the notification, which will be shown for the "Alerting" reminder.
      * 1. Update the notification label/content.
      * 2. Restore the snooze action button.
      */
-    void UpdateNotificationStateForAlert();
+    void UpdateNotificationStateForAlert(NotificationRequest& notificationRequest);
 
     /**
      * @brief Update the notification, which will be shown when user do a snooze.
      * 1. Update the notification label/content.
      * 2. Remove the snooze action button.
      */
-    void UpdateNotificationStateForSnooze();
-
-    static void AppendWantAgentValuesBucket(const sptr<ReminderRequest>& reminder,
-        NativeRdb::ValuesBucket& values);
+    void UpdateNotificationStateForSnooze(NotificationRequest& notificationRequest);
 
     bool MarshallingWantParameters(Parcel& parcel, const AAFwk::WantParams& params) const;
     bool MarshallingActionButton(Parcel& parcel) const;
     bool ReadWantParametersFromParcel(Parcel& parcel, AAFwk::WantParams& wantParams);
     bool ReadActionButtonFromParcel(Parcel& parcel);
 
-    void RecoverBasicFromDb(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
     void RecoverActionButtonJsonMode(const std::string& jsonString);
-    void RecoverActionButton(const std::shared_ptr<NativeRdb::ResultSet>& resultSet);
-    void RecoverWantAgent(const std::string& wantAgentInfo, const uint8_t& type);
     void RecoverWantAgentByJson(const std::string& wantAgentInfo, const uint8_t& type);
 
     static const uint32_t MIN_TIME_INTERVAL_IN_MILLI;
@@ -1073,6 +1150,7 @@ private:
     std::string title_ {};
     std::string bundleName_ {};
     bool isExpired_ {false};
+    bool isShare_ {false};
     uint8_t snoozeTimes_ {0};
     uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
@@ -1098,14 +1176,20 @@ private:
     ReminderType reminderType_ {ReminderType::INVALID};
     NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::SOCIAL_COMMUNICATION};
     NotificationConstant::SlotType snoozeSlotType_ {NotificationConstant::SlotType::OTHER};
-    sptr<NotificationRequest> notificationRequest_ = nullptr;
     std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
     std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;
     std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_ {};
 
+    std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
     std::string wantAgentStr_{};
     std::string maxWantAgentStr_{};
+    std::string identifier_;
+
+    int32_t titleResourceId_ {0};
+    int32_t contentResourceId_ {0};
+    int32_t expiredContentResourceId_ {0};
+    int32_t snoozeContentResourceId_ {0};
 };
-}  // namespace Reminder
+}  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_REMINDER_REQUEST_H

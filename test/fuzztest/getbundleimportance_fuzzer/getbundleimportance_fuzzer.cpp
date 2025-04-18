@@ -16,14 +16,18 @@
 #include "getbundleimportance_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
+
 namespace OHOS {
     namespace {
         constexpr uint8_t NOTIFICATION_LEVEL_NUM = 6;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
+        std::string representativeBundle = fdp->ConsumeRandomLengthString();
+        uint8_t levels = fdp->ConsumeIntegral<uint8_t>() % NOTIFICATION_LEVEL_NUM;
+
         // test CanPublishNotificationAsBundle function
-        std::string representativeBundle(data);
         bool canPublish = true;
         Notification::NotificationHelper::CanPublishNotificationAsBundle(representativeBundle, canPublish);
         // test SetNotificationBadgeNum function and no parameter
@@ -34,7 +38,6 @@ namespace OHOS {
         // test IsAllowedNotifySelf function
         Notification::NotificationHelper::IsAllowedNotifySelf(allowed);
         // test GetBundleImportance function
-        uint8_t levels = *data % NOTIFICATION_LEVEL_NUM;
         Notification::NotificationSlot::NotificationLevel level =
             Notification::NotificationSlot::NotificationLevel(levels);
         return Notification::NotificationHelper::GetBundleImportance(level) == ERR_OK;
@@ -45,11 +48,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

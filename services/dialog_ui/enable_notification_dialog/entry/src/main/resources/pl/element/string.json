@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Zezwolić aplikacji %s na wysyłanie powiadomień?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Zezwól",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Odmów",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

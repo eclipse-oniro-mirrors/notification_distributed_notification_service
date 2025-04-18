@@ -16,15 +16,15 @@
 #include "setdonotdisturbdate_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 namespace OHOS {
     namespace {
-        constexpr uint8_t ENABLE = 2;
         constexpr uint8_t SLOT_TYPE_NUM = 5;
     }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
-        uint32_t type = GetU32Data(data);
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
+        uint32_t type = fdp->ConsumeIntegral<uint32_t>();
         Notification::NotificationDoNotDisturbDate disturb;
         Notification::NotificationConstant::DoNotDisturbType disturbType =
             Notification::NotificationConstant::DoNotDisturbType(type);
@@ -34,13 +34,13 @@ namespace OHOS {
         // test GetDoNotDisturbDate function
         Notification::NotificationHelper::GetDoNotDisturbDate(userId, disturb);
         // test SetEnabledForBundleSlot function
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationBundleOption bundleOption;
         bundleOption.SetBundleName(stringData);
         bundleOption.SetUid(userId);
-        uint8_t types = *data % SLOT_TYPE_NUM;
+        uint8_t types = fdp->ConsumeIntegral<uint8_t>() % SLOT_TYPE_NUM;
         Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType(types);
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         Notification::NotificationHelper::SetEnabledForBundleSlot(bundleOption, slotType, enabled, false);
         // test GetEnabledForBundleSlot function
         Notification::NotificationHelper::GetEnabledForBundleSlot(bundleOption, slotType, enabled);
@@ -57,11 +57,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

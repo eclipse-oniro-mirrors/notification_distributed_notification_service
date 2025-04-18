@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_INTERFACES_INNER_API_NOTIFICATION_MULTILINE_CONTENT_H
 
 #include "notification_basic_content.h"
+#include "want_agent.h"
 #include "parcel.h"
 
 namespace OHOS {
@@ -78,6 +79,20 @@ public:
     std::vector<std::string> GetAllLines() const;
 
     /**
+     * @brief Sets the wantAgents for lines included in this multi-line notification.
+     *
+     * @param lineWantAgents which seted to line.
+     */
+    void SetLineWantAgents(std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents);
+
+    /**
+     * @brief Obtains the lineWantAgents included in the multi-line notification.
+     *
+     * @return lineWantAgents included in the multi-line notification.
+     */
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> GetLineWantAgents();
+
+    /**
      * @brief Returns a string representation of the object.
      *
      * @return Returns a string representation of the object.
@@ -135,6 +150,7 @@ private:
     std::string expandedTitle_ {};
     std::string briefText_ {};
     std::vector<std::string> allLines_ {};
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

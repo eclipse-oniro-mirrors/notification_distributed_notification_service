@@ -15,7 +15,8 @@ import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "${component_name}/unittest"
+module_output_path =
+    "${component_name}/distributed_notification_service/unittest"
 
 ohos_unittest("ans_manager_proxy_test") {
   module_out_path = module_output_path
@@ -30,17 +31,14 @@ ohos_unittest("ans_manager_proxy_test") {
     "ans_manager_proxy_unit_test.cpp",
   ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",

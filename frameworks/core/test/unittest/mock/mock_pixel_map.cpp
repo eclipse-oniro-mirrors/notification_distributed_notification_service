@@ -66,7 +66,7 @@ std::unique_ptr<PixelMap> PixelMap::Create(const InitializationOptions &opts)
 }
 
 void PixelMap::UpdatePixelsAlpha(const AlphaType &alphaType, const PixelFormat &pixelFormat, uint8_t *dstPixels,
-                                 PixelMap dstPixelMap)
+                                 PixelMap &dstPixelMap)
 {}
 
 std::unique_ptr<PixelMap> PixelMap::Create(PixelMap &source, const InitializationOptions &opts)
@@ -324,7 +324,8 @@ bool PixelMap::WriteImageData(Parcel &parcel, size_t size) const
     return true;
 }
 
-uint8_t *PixelMap::ReadImageData(Parcel &parcel, int32_t bufferSize)
+uint8_t *PixelMap::ReadImageData(Parcel &parcel, int32_t size,
+    std::function<int(Parcel &parcel, std::function<int(Parcel&)> readFdDefaultFunc)> readSafeFdFunc)
 {
     return nullptr;
 }
@@ -354,7 +355,8 @@ bool PixelMap::ReadImageInfo(Parcel &parcel, ImageInfo &imgInfo)
     return true;
 }
 
-PixelMap *PixelMap::Unmarshalling(Parcel &parcel)
+PixelMap *PixelMap::Unmarshalling(Parcel &data,
+    std::function<int(Parcel &parcel, std::function<int(Parcel&)> readFdDefaultFunc)> readSafeFdFunc)
 {
     return nullptr;
 }

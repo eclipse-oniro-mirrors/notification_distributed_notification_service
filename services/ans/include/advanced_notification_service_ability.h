@@ -20,7 +20,6 @@
 
 #include "advanced_datashare_observer.h"
 #include "advanced_notification_service.h"
-#include "reminder_data_manager.h"
 #include "system_ability_definition.h"
 #include "notification_extension_wrapper.h"
 
@@ -45,16 +44,16 @@ public:
     DECLARE_SYSTEM_ABILITY(AdvancedNotificationServiceAbility);
 
 private:
-    bool isDatashaReready = false;
     void OnStart() final;
     void OnStop() final;
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
+    int32_t OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply) override;
 
 private:
+    std::atomic<bool> isDatashaReready_ {false};
     sptr<AdvancedNotificationService> service_;
-    std::shared_ptr<ReminderDataManager> reminderAgent_;
     std::shared_ptr<SystemEventSubscriber> subscriber_ = nullptr;
 };
 }  // namespace Notification

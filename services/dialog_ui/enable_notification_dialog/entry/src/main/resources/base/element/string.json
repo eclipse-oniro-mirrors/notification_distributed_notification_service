@@ -1,32 +1,53 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "These may include banner notifications, lock screen notifications, notification sounds, and more. You can change this in Settings."
-    },
-    {
-      "name": "ALLOW",
-      "value": "ALLOW"
-    },
-    {
-      "name": "BAN",
-      "value": "DENY"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "Allow %s to send you notifications?"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change this in Settings."
+      },
+      {
+          "name":"reason_simple",
+          "value":"These may include banners, badges, and sounds. You can change this in Settings."
+      },
+      {
+        "name":"reason_zyt",
+        "value":"These may include lock screen notifications, banners, badges, sounds, and vibration. You can change these settings in DroiTong > App management."
+      },
+      {
+        "name":"reason_tv",
+        "value":"Notification reminder methods include banner. You can change your preferences in Settings."
+      },
+      {
+          "name":"ALLOW",
+          "value":"Allow",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"Deny",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"Allow %s to send you notifications?",
+          "attr":{
+              "priority":"LT"
+          }
+      }
   ]
 }

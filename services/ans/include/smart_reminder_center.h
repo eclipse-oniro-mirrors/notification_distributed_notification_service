@@ -29,7 +29,6 @@
 #include "distributed_device_status.h"
 #include "file_utils.h"
 #include "nlohmann/json.hpp"
-#include "notification_config_parse.h"
 #include "notification_constant.h"
 #include "notification_content.h"
 #include "notification_flags.h"
@@ -79,8 +78,10 @@ private:
         const sptr<NotificationRequest> &request,
         vector<shared_ptr<ReminderAffected>> &reminderAffecteds) const;
     void GetDeviceStatusByType(const string &deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
-    bool IsNeedSynergy(const string &deviceType, const string &ownerBundleName) const;
-
+    bool IsNeedSynergy(const NotificationConstant::SlotType &slotType,
+        const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
+    void InitValidDevices(set<string> &validDevices, const sptr<NotificationRequest> &request) const;
+    bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;
 
@@ -93,6 +94,8 @@ private:
     constexpr static const char* TYPE_CODE = "typeCode";
     constexpr static const char* REMINDER_FILTER_CODE = "reminderFilterCode";
     constexpr static const char* SPLIT_FLAG = "|";
+    constexpr static const char* STATUS_UNUSED = "xxx0";
+    constexpr static const char* STATUS_UNLOCK_OWNER = "x01x";
 };
 }  // namespace Notification
 }  // namespace OHOS

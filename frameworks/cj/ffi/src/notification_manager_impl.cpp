@@ -14,631 +14,53 @@
  */
 
 #include "notification_manager_impl.h"
+#include "notification_utils.h"
 #include "inner_errors.h"
 #include "notification_enable.h"
-#include "pixel_map_impl.h"
-
-#include "notification_request.h"
-#include "notification_constant.h"
-#include "notification_content.h"
-#include "notification_helper.h"
-#include "notification_multiline_content.h"
-#include "notification_normal_content.h"
-#include "notification_picture_content.h"
-#include "notification_long_text_content.h"
 #include "notification_manager_log.h"
-
-#include "ans_notification.h"
-#include "singleton.h"
-#include "securec.h"
+#include "pixel_map_impl.h"
 
 namespace OHOS {
 namespace CJSystemapi {
+
     using namespace OHOS::Notification;
     using namespace OHOS::CJSystemapi::Notification;
 
-    static bool GetNotificationBasicContentDetailed(
-        CNotificationBasicContent* contentResult,
-        std::shared_ptr<NotificationBasicContent> basicContent)
+    static bool ParseParameters(CNotificationRequestV2 params, NotificationRequest &request)
     {
-        char str[STR_MAX_SIZE] = {0};
-        // title: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->title) != EOK) {
-            return false;
-        }
-        if (strlen(str) == 0) {
-            LOGE("Property title is empty");
-            return false;
-        }
-        basicContent->SetTitle(std::string(str));
-        LOGI("normal::title = %{public}s", str);
-
-        // text: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->text) != EOK) {
-            return false;
-        }
-        if (strlen(str) == 0) {
-            LOGE("Property text is empty");
-            return false;
-        }
-        basicContent->SetText(std::string(str));
-        LOGI("normal::text = %{public}s", str);
-
-        // additionalText: string
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->additionalText) != EOK) {
-            return false;
-        }
-        basicContent->SetAdditionalText(std::string(str));
-        LOGI("normal::additionalText = %{public}s", str);
-
-        return true;
-    }
-
-    static bool GetNotificationLongTextContentDetailed(
-        CNotificationLongTextContent* contentResult,
-        std::shared_ptr<NotificationLongTextContent> &longContent)
-    {
-        char str[STR_MAX_SIZE] = {0};
-        char long_str[LONG_STR_MAX_SIZE + 1] = {0};
-
-        std::shared_ptr<CNotificationBasicContent> tempContent = std::make_shared<CNotificationBasicContent>();
-        tempContent->title = contentResult->title;
-        tempContent->text = contentResult->text;
-        tempContent->additionalText = contentResult->additionalText;
-        if (!GetNotificationBasicContentDetailed(tempContent.get(), longContent)) {
-            return false;
-        }
-        
-        // longText: String
-        if (strcpy_s(long_str, LONG_STR_MAX_SIZE + 1, contentResult->longText) != EOK) {
-            return false;
-        }
-        if (strlen(long_str) == 0) {
-            LOGE("Property longText is empty");
-            return false;
-        }
-        longContent->SetLongText(std::string(long_str));
-        LOGI("longText::longText = %{public}s", long_str);
-
-        // briefText: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->briefText) != EOK) {
-            return false;
-        }
-        if (strlen(str) == 0) {
-            LOGE("Property briefText is empty");
-            return false;
-        }
-        longContent->SetBriefText(std::string(str));
-        LOGI("longText::briefText = %{public}s", str);
-
-        // expandedTitle: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->expandedTitle) != EOK) {
-            return false;
-        }
-        if (strlen(str) == 0) {
-            LOGE("Property expandedTitle is empty");
-            return false;
-        }
-        longContent->SetExpandedTitle(std::string(str));
-        LOGI("longText::expandedTitle = %{public}s", str);
-
-        return true;
-    }
-
-    static bool GetNotificationPictureContentDetailed(
-        CNotificationPictureContent* contentResult,
-        std::shared_ptr<OHOS::Notification::NotificationPictureContent> &pictureContent)
-    {
-        char str[STR_MAX_SIZE] = {0};
-
-        std::shared_ptr<CNotificationBasicContent> tempContent = std::make_shared<CNotificationBasicContent>();
-        tempContent->title = contentResult->title;
-        tempContent->text = contentResult->text;
-        tempContent->additionalText = contentResult->additionalText;
-        if (!GetNotificationBasicContentDetailed(tempContent.get(), pictureContent)) {
+        if (!GetNotificationRequestByNumberV2(params, request)) {
             return false;
         }
 
-        // briefText: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->briefText) != EOK) {
-            return false;
-        }
-        if (std::strlen(str) == 0) {
-            LOGE("Property briefText is empty");
-            return false;
-        }
-        pictureContent->SetBriefText(std::string(str));
-        LOGI("longText::briefText = %{public}s", str);
-
-        // expandedTitle: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->expandedTitle) != EOK) {
-            return false;
-        }
-        if (std::strlen(str) == 0) {
-            LOGE("Property expandedTitle is empty");
-            return false;
-        }
-        pictureContent->SetExpandedTitle(std::string(str));
-        LOGI("picture::expandedTitle = %{public}s", str);
-
-        // picture: image.PixelMap
-        auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(contentResult->picture);
-        if (pixelMap == nullptr) {
-            LOGE("Invalid object pixelMap");
-            return false;
-        }
-        pictureContent->SetBigPicture(pixelMap->GetRealPixelMap());
-
-        return true;
-    }
-
-    static bool GetNotificationBasicContent(
-        CNotificationBasicContent* contentResult,
-        NotificationRequest &request)
-    {
-        std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
-        if (normalContent == nullptr) {
-            LOGE("normalContent is null");
+        if (!GetNotificationRequestByStringV2(params, request)) {
             return false;
         }
 
-        if (!GetNotificationBasicContentDetailed(contentResult, normalContent)) {
-            return false;
-        }
-        request.SetContent(std::make_shared<NotificationContent>(normalContent));
-        return true;
-    }
-
-    static bool GetNotificationLongTextContent(
-        CNotificationLongTextContent* contentResult,
-        NotificationRequest &request)
-    {
-        std::shared_ptr<OHOS::Notification::NotificationLongTextContent> longContent =
-        std::make_shared<OHOS::Notification::NotificationLongTextContent>();
-        if (longContent == nullptr) {
-            LOGE("longContent is null");
-            return false;
-        }
-        if (!GetNotificationLongTextContentDetailed(contentResult, longContent)) {
-            return false;
-        }
-        
-        request.SetContent(std::make_shared<NotificationContent>(longContent));
-        return true;
-    }
-
-    static bool GetNotificationPictureContent(
-        CNotificationPictureContent* contentResult,
-        NotificationRequest &request)
-    {
-        std::shared_ptr<OHOS::Notification::NotificationPictureContent> pictureContent =
-        std::make_shared<OHOS::Notification::NotificationPictureContent>();
-        if (pictureContent == nullptr) {
-            LOGE("pictureContent is null");
+        if (!GetNotificationRequestByBoolV2(params, request)) {
             return false;
         }
 
-        if (!GetNotificationPictureContentDetailed(contentResult, pictureContent)) {
-            return false;
-        }
-
-        request.SetContent(std::make_shared<NotificationContent>(pictureContent));
-        return true;
-    }
-
-    static bool GetNotificationMultiLineContentLines(
-        CNotificationMultiLineContent* result,
-        std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent)
-    {
-        char str[STR_MAX_SIZE] = {0};
-        int64_t length = result->lines.size;
-        if (length == 0) {
-            LOGE("The array is empty.");
-            return false;
-        }
-        for (int64_t i = 0; i < length; i++) {
-            if (strcpy_s(str, STR_MAX_SIZE, result->lines.head[i]) != EOK) {
-                return false;
-            }
-            multiLineContent->AddSingleLine(std::string(str));
-            LOGI("multiLine: lines : addSingleLine = %{public}s", str);
-        }
-        return true;
-    }
-
-    static bool GetNotificationMultiLineContent(
-        CNotificationMultiLineContent* contentResult,
-        NotificationRequest &request)
-    {
-        char str[STR_MAX_SIZE] = {0};
-
-        std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> multiLineContent =
-        std::make_shared<OHOS::Notification::NotificationMultiLineContent>();
-        if (multiLineContent == nullptr) {
-            LOGE("multiLineContent is null");
-            return false;
-        }
-
-        std::shared_ptr<CNotificationBasicContent> tempContent = std::make_shared<CNotificationBasicContent>();
-        tempContent->title = contentResult->title;
-        tempContent->text = contentResult->text;
-        tempContent->additionalText = contentResult->additionalText;
-        if (!GetNotificationBasicContentDetailed(tempContent.get(), multiLineContent)) {
-            return false;
-        }
-
-        // briefText: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->briefText) != EOK) {
-            return false;
-        }
-        if (std::strlen(str) == 0) {
-            LOGE("Property briefText is empty");
-            return false;
-        }
-        multiLineContent->SetBriefText(std::string(str));
-        LOGI("multiLine: briefText = %{public}s", str);
-
-        // longTitle: String
-        if (strcpy_s(str, STR_MAX_SIZE, contentResult->longTitle)) {
-            return false;
-        }
-        if (std::strlen(str) == 0) {
-            LOGE("Property longTitle is empty");
-            return false;
-        }
-        multiLineContent->SetExpandedTitle(std::string(str));
-        LOGI("multiLine: longTitle = %{public}s", str);
-
-        // lines: Array<String>
-        if (!GetNotificationMultiLineContentLines(contentResult, multiLineContent)) {
-            return false;
-        }
-
-        request.SetContent(std::make_shared<NotificationContent>(multiLineContent));
-        return true;
-    }
-
-    static bool ContentTypeCJToC(const ContentType &inType, NotificationContent::Type &outType)
-    {
-        switch (inType) {
-            case ContentType::NOTIFICATION_CONTENT_BASIC_TEXT:
-                outType = NotificationContent::Type::BASIC_TEXT;
-                break;
-            case ContentType::NOTIFICATION_CONTENT_LONG_TEXT:
-                outType = NotificationContent::Type::LONG_TEXT;
-                break;
-            case ContentType::NOTIFICATION_CONTENT_MULTILINE:
-                outType = NotificationContent::Type::MULTILINE;
-                break;
-            case ContentType::NOTIFICATION_CONTENT_PICTURE:
-                outType = NotificationContent::Type::PICTURE;
-                break;
-            case ContentType::NOTIFICATION_CONTENT_CONVERSATION:
-                outType = NotificationContent::Type::CONVERSATION;
-                break;
-            case ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW:
-                outType = NotificationContent::Type::LOCAL_LIVE_VIEW;
-                break;
-            case ContentType::NOTIFICATION_CONTENT_LIVE_VIEW:
-                outType = NotificationContent::Type::LIVE_VIEW;
-                break;
-            default:
-                LOGE("ContentType %{public}d is an invalid value", inType);
-                return false;
-        }
-        return true;
-    }
-
-    static bool SlotTypeCJToC(const SlotType &inType, NotificationConstant::SlotType &outType)
-    {
-        switch (inType) {
-            case SlotType::SOCIAL_COMMUNICATION:
-                outType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-                break;
-            case SlotType::SERVICE_INFORMATION:
-                outType = NotificationConstant::SlotType::SERVICE_REMINDER;
-                break;
-            case SlotType::CONTENT_INFORMATION:
-                outType = NotificationConstant::SlotType::CONTENT_INFORMATION;
-                break;
-            case SlotType::LIVE_VIEW:
-                outType = NotificationConstant::SlotType::LIVE_VIEW;
-                break;
-            case SlotType::CUSTOMER_SERVICE:
-                outType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
-                break;
-            case SlotType::UNKNOWN_TYPE:
-            case SlotType::OTHER_TYPES:
-                outType = NotificationConstant::SlotType::OTHER;
-                break;
-            default:
-                LOGE("SlotType %{public}d is an invalid value", inType);
-                return false;
-        }
-        return true;
-    }
-
-    static bool GetNotificationContent(CNotificationContent content, NotificationRequest &request)
-    {
-        NotificationContent::Type outType = NotificationContent::Type::NONE;
-        if (!ContentTypeCJToC(ContentType(content.notificationContentType), outType)) {
-            return false;
-        }
-        switch (outType) {
-            case NotificationContent::Type::BASIC_TEXT:
-                if (content.normal == nullptr || !GetNotificationBasicContent(content.normal, request)) {
-                    return false;
-                }
-                break;
-            case NotificationContent::Type::LONG_TEXT:
-                if (content.longText == nullptr || !GetNotificationLongTextContent(content.longText, request)) {
-                    return false;
-                }
-                break;
-            case NotificationContent::Type::PICTURE:
-                if (content.picture == nullptr || !GetNotificationPictureContent(content.picture, request)) {
-                    return false;
-                }
-                break;
-            case NotificationContent::Type::CONVERSATION:
-                break;
-            case NotificationContent::Type::MULTILINE:
-                if (content.multiLine == nullptr || !GetNotificationMultiLineContent(content.multiLine, request)) {
-                    return false;
-                }
-                break;
-            case NotificationContent::Type::LOCAL_LIVE_VIEW:
-                break;
-            case NotificationContent::Type::LIVE_VIEW:
-                break;
-            default:
-                return false;
-        }
-        return true;
-    }
-
-    static bool GetNotificationSlotType(int32_t slotType, NotificationRequest &request)
-    {
-        NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeCJToC(SlotType(slotType), outType)) {
-            return false;
-        }
-        request.SetSlotType(outType);
-        return true;
-    }
-
-    static bool GetNotificationSmallIcon(int64_t smallIcon, NotificationRequest request)
-    {
-        if (smallIcon != -1) {
-            auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(smallIcon);
-            if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
-                return false;
-            }
-            request.SetLittleIcon(pixelMap->GetRealPixelMap());
-        }
-        return true;
-    }
-
-    static bool GetNotificationLargeIcon(int64_t largeIcon, NotificationRequest request)
-    {
-        if (largeIcon != -1) {
-            auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(largeIcon);
-            if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
-                return false;
-            }
-            request.SetBigIcon(pixelMap->GetRealPixelMap());
-        }
-        return true;
-    }
-
-    static bool GetNotificationSupportDisplayDevices(
-        CDistributedOptions* distributedOption,
-        NotificationRequest request)
-    {
-        int64_t length = distributedOption->supportDisplayDevices.size;
-        if (length == 0) {
-            LOGE("The array is empty.");
-            return false;
-        }
-        std::vector<std::string> devices;
-        for (int64_t i = 0; i < length; i++) {
-            char str[STR_MAX_SIZE] = {0};
-            auto displayDevice = distributedOption->supportDisplayDevices.head[i];
-            if (strcpy_s(str, STR_MAX_SIZE, displayDevice) != EOK) {
-                return false;
-            }
-            devices.emplace_back(str);
-            LOGI("supportDisplayDevices = %{public}s", str);
-        }
-        request.SetDevicesSupportDisplay(devices);
-        return true;
-    }
-
-    static bool GetNotificationSupportOperateDevices(
-        CDistributedOptions* distributedOption,
-        NotificationRequest request)
-    {
-        int64_t length = distributedOption->supportOperateDevices.size;
-        if (length == 0) {
-            LOGE("The array is empty.");
-            return false;
-        }
-        std::vector<std::string> devices;
-        for (int64_t i = 0; i < length; i++) {
-            char str[STR_MAX_SIZE] = {0};
-            auto operateDevice = distributedOption->supportOperateDevices.head[i];
-            if (strcpy_s(str, STR_MAX_SIZE, operateDevice) != EOK) {
-                return false;
-            }
-            devices.emplace_back(str);
-            LOGI("supportOperateDevices = %{public}s", str);
-        }
-        request.SetDevicesSupportOperate(devices);
-        return true;
-    }
-
-    static bool GetNotificationRequestDistributedOptions(
-        CDistributedOptions* distributedOption,
-        NotificationRequest request)
-    {
-        if (distributedOption != nullptr) {
-            // isDistributed?: boolean
-            request.SetDistributed(distributedOption->isDistributed);
-
-            // supportDisplayDevices?: Array<string>
-            if (!GetNotificationSupportDisplayDevices(distributedOption, request)) {
-                return false;
-            }
-
-            // supportOperateDevices?: Array<string>
-            if (!GetNotificationSupportOperateDevices(distributedOption, request)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static bool GetNotificationRequestByNumber(CNotificationRequest cjRequest, NotificationRequest &request)
-    {
-        // id?: number
-        int32_t id = cjRequest.id;
-        request.SetNotificationId(id);
-
-        // deliveryTime?: number
-        int64_t deliveryTime = cjRequest.deliveryTime;
-        request.SetDeliveryTime(deliveryTime);
-
-        // autoDeletedTime?: number
-        int64_t autoDeletedTime = cjRequest.autoDeletedTime;
-        request.SetAutoDeletedTime(autoDeletedTime);
-
-        // color?: number
-        request.SetColor(cjRequest.color);
-
-        // badgeIconStyle?: number
-        int32_t badgeIconStyle = cjRequest.badgeIconStyle;
-        request.SetBadgeIconStyle(static_cast<NotificationRequest::BadgeStyle>(badgeIconStyle));
-
-        // badgeNumber?: number
-        int32_t badgeNumber = cjRequest.badgeNumber;
-        if (badgeNumber < 0) {
-            LOGE("Wrong badge number.");
-            return false;
-        }
-        request.SetBadgeNumber(badgeNumber);
-
-        return true;
-    }
-
-    static bool GetNotificationRequestByString(CNotificationRequest cjRequest, NotificationRequest &request)
-    {
-        // label?: string
-        char label[STR_MAX_SIZE] = {0};
-        if (strcpy_s(label, STR_MAX_SIZE, cjRequest.label) != EOK) {
-            return false;
-        }
-        request.SetLabel(std::string(label));
-
-        // groupName?: string
-        char groupName[STR_MAX_SIZE] = {0};
-        if (strcpy_s(groupName, STR_MAX_SIZE, cjRequest.groupName) != EOK) {
-            return false;
-        }
-        request.SetGroupName(std::string(groupName));
-
-        return true;
-    }
-
-    static bool GetNotificationRequestByBool(CNotificationRequest cjRequest, NotificationRequest &request)
-    {
-        // isOngoing?: boolean
-        bool isOngoing = cjRequest.isOngoing;
-        request.SetInProgress(isOngoing);
-
-        // isUnremovable?: boolean
-        bool isUnremovable = cjRequest.isUnremovable;
-        request.SetUnremovable(isUnremovable);
-
-        // tapDismissed?: boolean
-        bool tapDismissed = cjRequest.tapDismissed;
-        request.SetTapDismissed(tapDismissed);
-        
-        // colorEnabled?: boolean
-        bool colorEnabled = cjRequest.colorEnabled;
-        request.SetColorEnabled(colorEnabled);
-
-        // isAlertOnce?: boolean
-        bool isAlertOnce = cjRequest.isAlertOnce;
-        request.SetAlertOneTime(isAlertOnce);
-
-        // isStopwatch?: boole
-        bool isStopwatch = cjRequest.isStopwatch;
-        request.SetShowStopwatch(isStopwatch);
-
-        // isCountDown?: boolean
-        bool isCountDown = cjRequest.isCountDown;
-        request.SetCountdownTimer(isCountDown);
-
-        // showDeliveryTime?: boolean
-        bool showDeliveryTime = cjRequest.showDeliveryTime;
-        request.SetShowDeliveryTime(showDeliveryTime);
-
-        return true;
-    }
-
-    static bool GetNotificationRequestByCustom(CNotificationRequest cjRequest, NotificationRequest &request)
-    {
-        // content: NotificationContent
-        if (!GetNotificationContent(cjRequest.notificationContent, request)) {
-            return false;
-        }
-        // slotType?: notification.SlotType
-        if (!GetNotificationSlotType(cjRequest.notificationSlotType, request)) {
-            return false;
-        }
-        // smallIcon?: image.PixelMap
-        if (!GetNotificationSmallIcon(cjRequest.smallIcon, request)) {
-            return false;
-        }
-        // largeIcon?: image.PixelMap
-        if (!GetNotificationLargeIcon(cjRequest.largeIcon, request)) {
-            return false;
-        }
-        // distributedOption?:DistributedOptions
-        if (!GetNotificationRequestDistributedOptions(cjRequest.distributedOption, request)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    static bool ParseParameters(CNotificationRequest params, NotificationRequest &request)
-    {
-        if (!GetNotificationRequestByNumber(params, request)) {
-            return false;
-        }
-
-        if (!GetNotificationRequestByString(params, request)) {
-            return false;
-        }
-
-        if (!GetNotificationRequestByBool(params, request)) {
-            return false;
-        }
-
-        if (!GetNotificationRequestByCustom(params, request)) {
+        if (!GetNotificationRequestByCustomV2(params, request)) {
             return false;
         }
         return true;
     }
 
-    int NotificationManagerImpl::Publish(CNotificationRequest cjRequest)
+    static bool ParseBundleOption(CNotificationBundleOptionV2 &option, NotificationBundleOption &bundleOption)
     {
-        LOGI("start make a NotificationRequest");
+        char bundle[STR_MAX_SIZE] = {0};
+        if (strcpy_s(bundle, STR_MAX_SIZE, option.bundle) != EOK) {
+            return false;
+        }
+        bundleOption.SetBundleName(std::string(bundle));
+        int32_t uid = option.uid;
+        bundleOption.SetUid(uid);
+        return true;
+    }
+
+    int NotificationManagerImplV2::Publish(CNotificationRequestV2 cjRequest)
+    {
         NotificationRequest request;
-        LOGI("start parse the parameters of NotificationRequest");
         if (!ParseParameters(cjRequest, request)) {
             return ERROR_PARAM_INVALID;
         }
@@ -646,29 +68,258 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::Cancel(int32_t id, const char* label)
+    int NotificationManagerImplV2::Cancel(int32_t id, const char* label)
     {
         int code = NotificationHelper::CancelNotification(label, id);
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::CancelAll()
+    int NotificationManagerImplV2::CancelAll()
     {
         int code = NotificationHelper::CancelAllNotifications();
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::AddSlot(int32_t type)
+    int NotificationManagerImplV2::AddSlot(int32_t type)
     {
         NotificationConstant::SlotType slot = NotificationConstant::SlotType::OTHER;
-        if (!SlotTypeCJToC(SlotType(type), slot)) {
-            return false;
+        if (!SlotTypeCJToCV2(SlotTypeV2(type), slot)) {
+            return ERROR_PARAM_INVALID;
         }
-        int code = NotificationHelper::AddNotificationSlot(slot);
+        int code = NotificationHelper::AddSlotByType(slot);
         return ErrorToExternal(code);
     }
 
-    RetDataBool NotificationManagerImpl::IsNotificationEnabled()
+    CNotificationSlotV2 NotificationManagerImplV2::GetSlot(int32_t type, int32_t &errCode)
+    {
+        CNotificationSlotV2 notificationSlot = {
+            .notificationType = 0,
+            .level = 0,
+            .desc = NULL,
+            .badgeFlag = false,
+            .bypassDnd = false,
+            .lockscreenVisibility = 0,
+            .vibrationEnabled = false,
+            .sound = NULL,
+            .lightEnabled = false,
+            .lightColor = 0,
+            .vibrationValues = { .head = NULL, .size = 0 },
+            .enabled = false
+        };
+        NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
+        if (!SlotTypeCJToCV2(SlotTypeV2(type), slotType)) {
+            errCode = ERROR_PARAM_INVALID;
+            return notificationSlot;
+        }
+
+        sptr<NotificationSlot> slot = nullptr;
+        errCode = ErrorToExternal(NotificationHelper::GetNotificationSlot(slotType, slot));
+        if (slot != nullptr && !SetNotificationSlotV2(*slot, notificationSlot)) {
+            errCode = ERROR_PARAM_INVALID;
+        }
+        return notificationSlot;
+    }
+
+    CArrayNotificationSlotsV2 NotificationManagerImplV2::GetSlots(int32_t &errCode)
+    {
+        CArrayNotificationSlotsV2 notificationSlots = { .head = nullptr, .size = 0 };
+        std::vector<sptr<NotificationSlot>> slots;
+        errCode = ErrorToExternal(NotificationHelper::GetNotificationSlots(slots));
+        CNotificationSlotV2* head =
+            reinterpret_cast<CNotificationSlotV2 *>(malloc(sizeof(CNotificationSlotV2) * slots.size()));
+        if (head == nullptr) {
+            LOGE("malloc CNotificationSlotV2 failed");
+            return notificationSlots;
+        }
+        int32_t count = 0;
+        for (auto vec : slots) {
+            if (!vec) {
+                LOGE("Invalidated NotificationSlot object ptr.");
+                continue;
+            }
+            if (!SetNotificationSlotV2(*vec, head[count])) {
+                LOGE("SetNotificationSlotV2 is nullptr.");
+                continue;
+            }
+            count++;
+        }
+        notificationSlots.size = static_cast<int64_t>(slots.size());
+        notificationSlots.head = head;
+        return notificationSlots;
+    }
+
+    int NotificationManagerImplV2::RemoveSlot(int32_t type)
+    {
+        NotificationConstant::SlotType slot = NotificationConstant::SlotType::OTHER;
+        if (!SlotTypeCJToCV2(SlotTypeV2(type), slot)) {
+            return ERROR_PARAM_INVALID;
+        }
+        int code = NotificationHelper::RemoveNotificationSlot(slot);
+        return ErrorToExternal(code);
+    }
+
+    int NotificationManagerImplV2::RemoveAllSlots()
+    {
+        int code = NotificationHelper::RemoveAllSlots();
+        return ErrorToExternal(code);
+    }
+
+    RetDataUI32 NotificationManagerImplV2::GetActiveNotificationCount()
+    {
+        RetDataUI32 ret = { .code = 0, .data = 0 };
+        uint64_t num = 0;
+        int code = NotificationHelper::GetActiveNotificationNums(num);
+        ret.code = static_cast<uint32_t>(ErrorToExternal(code));
+        ret.data = static_cast<uint32_t>(num);
+        return ret;
+    }
+
+    CArrayNotificationRequestV2 NotificationManagerImplV2::GetActiveNotifications(int32_t &errCode)
+    {
+        CArrayNotificationRequestV2 notificationRequests = { .head = nullptr, .size = 0 };
+        std::vector<sptr<NotificationRequest>> requests;
+        int code = NotificationHelper::GetActiveNotifications(requests);
+        errCode = ErrorToExternal(code);
+        if (code != ERR_OK) {
+            return notificationRequests;
+        }
+        CNotificationRequestV2** head =
+            reinterpret_cast<CNotificationRequestV2 **>(malloc(sizeof(CNotificationRequestV2*) * requests.size()));
+        if (head == nullptr) {
+            return notificationRequests;
+        }
+        notificationRequests.size = static_cast<int64_t>(requests.size());
+        int32_t count = 0;
+        for (auto vec : requests) {
+            if (!vec) {
+                LOGI("Invalid NotificationRequest object ptr");
+                continue;
+            }
+            head[count] = reinterpret_cast<CNotificationRequestV2 *>(malloc(sizeof(CNotificationRequestV2)));
+            if (head[count] == nullptr) {
+                LOGE("NotificationManagerImplV2::GetActiveNotifications malloc CNotificationRequest failed");
+                for (int32_t i = 0 ; i < count; i++) {
+                    free(head[i]);
+                }
+                free(head);
+                head = nullptr;
+                break;
+            }
+            if (!SetNotificationRequestV2(vec.GetRefPtr(), *(head[count++]))) {
+                LOGI("Set NotificationRequest object failed");
+                continue;
+            }
+        }
+        notificationRequests.head = head;
+        return notificationRequests;
+    }
+
+    int NotificationManagerImplV2::CancelGroup(const char* cGroupName)
+    {
+        std::string groupName(cGroupName);
+        int code = NotificationHelper::CancelGroup(groupName);
+        return ErrorToExternal(code);
+    }
+
+    RetDataBool NotificationManagerImplV2::IsSupportTemplate(const char* cTemplateName)
+    {
+        RetDataBool ret = { .code = 0, .data = false };
+        std::string templateName(cTemplateName);
+        bool isSupport = false;
+        int code = NotificationHelper::IsSupportTemplate(templateName, isSupport);
+        ret.code = ErrorToExternal(code);
+        ret.data = isSupport;
+        return ret;
+    }
+
+    int NotificationManagerImplV2::SetNotificationEnable(CNotificationBundleOptionV2 option, bool enable)
+    {
+        NotificationBundleOption bundleOption;
+        if (!ParseBundleOption(option, bundleOption)) {
+            return ERROR_PARAM_INVALID;
+        }
+        std::string deviceId {""};
+        int code = NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(bundleOption, deviceId, enable);
+        return ErrorToExternal(code);
+    }
+
+    int NotificationManagerImplV2::DisplayBadge(CNotificationBundleOptionV2 option, bool enable)
+    {
+        NotificationBundleOption bundleOption;
+        if (!ParseBundleOption(option, bundleOption)) {
+            return ERROR_PARAM_INVALID;
+        }
+        int code = NotificationHelper::SetShowBadgeEnabledForBundle(bundleOption, enable);
+        return ErrorToExternal(code);
+    }
+
+    RetDataBool NotificationManagerImplV2::IsBadgeDisplayed(CNotificationBundleOptionV2 option)
+    {
+        NotificationBundleOption bundleOption;
+        RetDataBool ret = { .code = 0, .data = false };
+        if (!ParseBundleOption(option, bundleOption)) {
+            ret.code = ERROR_PARAM_INVALID;
+            return ret;
+        }
+        bool enabled = false;
+        int code = NotificationHelper::GetShowBadgeEnabledForBundle(bundleOption, enabled);
+        ret.code = ErrorToExternal(code);
+        ret.data = enabled;
+        return ret;
+    }
+
+    int NotificationManagerImplV2::SetSlotFlagsByBundle(CNotificationBundleOptionV2 option, int32_t slotFlags)
+    {
+        NotificationBundleOption bundleOption;
+        if (!ParseBundleOption(option, bundleOption)) {
+            return ERROR_PARAM_INVALID;
+        }
+        int code = NotificationHelper::SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+        return ErrorToExternal(code);
+    }
+
+    RetDataUI32 NotificationManagerImplV2::GetSlotFlagsByBundle(CNotificationBundleOptionV2 option)
+    {
+        RetDataUI32 ret = { .code = 0, .data = 0 };
+        uint32_t slotFlags = 0;
+        NotificationBundleOption bundleOption;
+        if (!ParseBundleOption(option, bundleOption)) {
+            ret.code = ERROR_PARAM_INVALID;
+            return ret;
+        }
+        int code = NotificationHelper::GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+        ret.code = static_cast<uint32_t>(ErrorToExternal(code));
+        ret.data = slotFlags;
+        return ret;
+    }
+
+    RetDataUI32 NotificationManagerImplV2::GetSlotNumByBundle(CNotificationBundleOptionV2 option)
+    {
+        RetDataUI32 ret = { .code = 0, .data = 0 };
+        uint64_t num = 0;
+        NotificationBundleOption bundleOption;
+        if (!ParseBundleOption(option, bundleOption)) {
+            ret.code = ERROR_PARAM_INVALID;
+            return ret;
+        }
+        int code = NotificationHelper::GetNotificationSlotNumAsBundle(bundleOption, num);
+        ret.code = static_cast<uint32_t>(ErrorToExternal(code));
+        ret.data = static_cast<uint32_t>(num);
+        return ret;
+    }
+
+    int NotificationManagerImplV2::RemoveGroupByBundle(CNotificationBundleOptionV2 option, const char* cGroupName)
+    {
+        NotificationBundleOption bundleOption;
+        if (!ParseBundleOption(option, bundleOption)) {
+            return ERROR_PARAM_INVALID;
+        }
+        std::string groupName(cGroupName);
+        int code = NotificationHelper::RemoveGroupByBundle(bundleOption, groupName);
+        return ErrorToExternal(code);
+    }
+
+    RetDataBool NotificationManagerImplV2::IsNotificationEnabled()
     {
         RetDataBool ret = { .code = EINVAL, .data = false };
         IsEnableParams params {};
@@ -692,13 +343,13 @@ namespace CJSystemapi {
         return ret;
     }
 
-    int NotificationManagerImpl::SetBadgeNumber(int32_t badgeNumber)
+    int NotificationManagerImplV2::SetBadgeNumber(int32_t badgeNumber)
     {
         int code = NotificationHelper::SetBadgeNumber(badgeNumber);
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::RequestEnableNotification()
+    int NotificationManagerImplV2::RequestEnableNotification()
     {
         IsEnableParams params {};
         std::string deviceId {""};
@@ -712,7 +363,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    int NotificationManagerImpl::RequestEnableNotificationWithContext(sptr<AbilityRuntime::CJAbilityContext> context)
+    int NotificationManagerImplV2::RequestEnableNotificationWithContext(sptr<AbilityRuntime::CJAbilityContext> context)
     {
         IsEnableParams params {};
         sptr<IRemoteObject> callerToken = context->GetToken();
@@ -729,7 +380,7 @@ namespace CJSystemapi {
         return ErrorToExternal(code);
     }
 
-    RetDataBool NotificationManagerImpl::IsDistributedEnabled()
+    RetDataBool NotificationManagerImplV2::IsDistributedEnabled()
     {
         RetDataBool ret = { .code = EINVAL, .data = false };
         bool enable = false;

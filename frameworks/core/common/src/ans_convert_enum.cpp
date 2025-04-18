@@ -196,6 +196,30 @@ bool AnsEnumUtil::LiveViewStatusJSToC(
     return true;
 }
 
+bool AnsEnumUtil::LiveViewTypesJSToC(
+    const LiveViewTypes &inType, NotificationLocalLiveViewContent::LiveViewTypes &outType)
+{
+    switch (inType) {
+        case LiveViewTypes::LIVE_VIEW_ACTIVITY:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY;
+            break;
+        case LiveViewTypes::LIVE_VIEW_INSTANT:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT;
+            break;
+        case LiveViewTypes::LIVE_VIEW_LONG_TERM:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM;
+            break;
+        case LiveViewTypes::LIVE_VIEW_INSTANT_BANNER:
+            outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+            break;
+        default:
+            ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
+            return false;
+    }
+
+    return true;
+}
+
 bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLevel, SlotLevel &outLevel)
 {
     switch (inLevel) {
@@ -225,6 +249,9 @@ bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLe
 bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
 {
     switch (inType) {
+        case NotificationConstant::DEFAULT_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DEFAULT_REASON_DELETE);
+            break;
         case NotificationConstant::CLICK_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::CLICK_REASON_REMOVE);
             break;
@@ -255,20 +282,96 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
         case NotificationConstant::FLOW_CONTROL_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::FLOW_CONTROL_REASON_DELETE);
             break;
+        default:
+            ReasonCToJSExt(inType, outType);
+            break;
+    }
+    return true;
+}
+
+void AnsEnumUtil::ReasonCToJSExt(const int &inType, int &outType)
+{
+    switch (inType) {
         case NotificationConstant::DISABLE_SLOT_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::DISABLE_SLOT_REASON_DELETE);
             break;
         case NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::DISABLE_NOTIFICATION_REASON_DELETE);
             break;
+        case NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_AS_BUNELE_REASON_DELETE);
+            break;
+        case NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE);
+            break;
+        case NotificationConstant::APP_CANCEL_REMINDER_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REMINDER_REASON_DELETE);
+            break;
+        case NotificationConstant::APP_CANCEL_GROPU_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_GROPU_REASON_DELETE);
+            break;
+        case NotificationConstant::APP_REMOVE_GROUP_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_REMOVE_GROUP_REASON_DELETE);
+            break;
+        case NotificationConstant::APP_REMOVE_ALL_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_REMOVE_ALL_REASON_DELETE);
+            break;
+        case NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::APP_REMOVE_ALL_USER_REASON_DELETE);
+            break;
+        case NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_EIGHT_HOUR_REASON_DELETE);
+            break;
+        case NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_FOUR_HOUR_REASON_DELETE);
+            break;
+        default:
+            ReasonCToJSSecondExt(inType, outType);
+            break;
+    }
+}
+
+void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
+{
+    switch (inType) {
+        case NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_TEN_MINUTES_REASON_DELETE);
+            break;
+        case NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE);
+            break;
+        case NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_THIRTY_MINUTES_REASON_DELETE);
+            break;
+        case NotificationConstant::TRIGGER_START_ARCHIVE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_START_ARCHIVE_REASON_DELETE);
+            break;
+        case NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::TRIGGER_AUTO_DELETE_REASON_DELETE);
+            break;
+        case NotificationConstant::PACKAGE_REMOVE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::PACKAGE_REMOVE_REASON_DELETE);
+            break;
+        case NotificationConstant::SLOT_ENABLED_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::SLOT_ENABLED_REASON_DELETE);
+            break;
         case NotificationConstant::APP_CANCEL_REASON_OTHER:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
             break;
+        case NotificationConstant::RECOVER_LIVE_VIEW_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::RECOVER_LIVE_VIEW_DELETE);
+            break;
+        case NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE);
+            break;
+        case NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DISTRIBUTED_COLLABORATIVE_DELETE);
+            break;
         default:
-            ANS_LOGE("Reason %{public}d is an invalid value", inType);
-            return false;
+            outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
+            ANS_LOGW("Reason %{public}d is an invalid value", inType);
+            break;
     }
-    return true;
 }
 
 bool AnsEnumUtil::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, NotificationConstant::DoNotDisturbType &outType)
@@ -374,6 +477,29 @@ bool AnsEnumUtil::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveVie
             break;
         default:
             ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
+            return false;
+    }
+
+    return true;
+}
+bool AnsEnumUtil::LiveViewTypesCToJS(const NotificationLocalLiveViewContent::LiveViewTypes &inType,
+    LiveViewTypes &outType)
+{
+    switch (inType) {
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY:
+            outType = LiveViewTypes::LIVE_VIEW_ACTIVITY;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT:
+            outType = LiveViewTypes::LIVE_VIEW_INSTANT;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM:
+            outType = LiveViewTypes::LIVE_VIEW_LONG_TERM;
+            break;
+        case NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER:
+            outType = LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+            break;
+        default:
+            ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
             return false;
     }
 
