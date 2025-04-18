@@ -2635,6 +2635,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
         }
 
+        NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(record->request, ipcUid);
         CheckDoNotDisturbProfile(record);
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
@@ -3177,7 +3178,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
     }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem) {
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("isSubsystem is bogus.");
         return ERR_ANS_NON_SYSTEM_APP;
     }

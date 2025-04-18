@@ -26,7 +26,7 @@
       },
       {
         "name":"reason_tv",
-        "value":"Notification reminder methods include banner. You can change your preferences in Settings."
+        "value":"Notifications will be delivered as banners. You can change your notification preferences at any time in Settings."
       },
       {
           "name":"ALLOW",

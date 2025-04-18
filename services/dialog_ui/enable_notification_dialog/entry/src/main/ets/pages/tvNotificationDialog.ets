@@ -84,7 +84,7 @@ struct PermissionDialog {
           Scroll() {
             Column() {
               Row() {
-                Image($r('app.media.ic_public_ring'))
+                Image($r('app.media.bell'))
                   .width(Constants.TV_DIALOG_ICON_WIDTH)
                   .height(Constants.TV_DIALOG_ICON_WIDTH)
                   .margin({ top: Constants.TV_ICON_MARGIN_TOP })

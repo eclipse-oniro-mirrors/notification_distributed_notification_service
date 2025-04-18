@@ -87,7 +87,7 @@ struct PermissionDialog {
           Scroll() {
             Column() {
               Row() {
-                Image($r('app.media.ic_public_ring'))
+                Image($r('app.media.bell'))
                   .width(32)
                   .height(32)
                   .margin({ top: 24, bottom: 8 })
