@@ -127,6 +127,8 @@ public:
 
     static void ReportPublishSuccessEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
 
+    static void ReportSAPublishSuccessEvent(const sptr<NotificationRequest>& request, int32_t callUid);
+
     static void ReportModifyEvent(const HaMetaMessage& message);
 
     static void ReportDeleteFailedEvent(const HaMetaMessage& message);

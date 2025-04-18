@@ -409,6 +409,28 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
         request, want, eventCode, message.Build()));
 }
 
+void NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(const sptr<NotificationRequest>& request, int32_t callUid)
+{
+    ANS_LOGD("ReportPublishSuccessEvent enter");
+    if (request == nullptr) {
+        return;
+    }
+
+    EventFwk::Want want;
+    nlohmann::json ansData;
+    ansData["ownerUid"] = std::to_string(request->GetOwnerUid());
+    ansData["createUid"] = std::to_string(request->GetCreatorUid());
+    ansData["callUid"] = std::to_string(callUid);
+    ansData["slotType"] = static_cast<int32_t>(request->GetSlotType());
+    ansData["contentType"] = static_cast<int32_t>(request->GetNotificationType());
+    ansData["isAgent"] = static_cast<int32_t>(request->IsAgentNotification());
+    std::string message = ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    want.SetParam("ansData", message);
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+
+    IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
+}
+
 void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
     EventFwk::Want want, int32_t eventCode, const std::string& reason)
 {
