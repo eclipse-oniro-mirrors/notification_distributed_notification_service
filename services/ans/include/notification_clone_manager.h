@@ -58,7 +58,7 @@ private:
     void RemoveBackUpFile();
     ErrCode LoadConfig(UniqueFd &fd, std::string& config);
     ErrCode SaveConfig(const std::string& config);
-    std::map<std::string, std::shared_ptr<NotificationCloneTemplate>> cloneTemplates;
+    std::vector<std::pair<std::string, std::shared_ptr<NotificationCloneTemplate>>> cloneTemplates;
     std::shared_ptr<AncoRestoreStartEventSubscriber> restoreStartEventSubscriber_ = nullptr;
 };
 } // namespace Notification

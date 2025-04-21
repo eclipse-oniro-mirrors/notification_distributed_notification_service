@@ -23,7 +23,7 @@
 #include "notification_preferences.h"
 #include "os_account_manager_helper.h"
 
-#include "../advanced_notification_inline.cpp"
+#include "advanced_notification_inline.cpp"
 namespace OHOS {
 namespace Notification {
 ErrCode DisturbManager::HandleAddDoNotDisturbProfiles(MessageParcel &data, MessageParcel &reply)

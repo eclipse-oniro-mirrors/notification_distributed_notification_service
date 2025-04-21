@@ -54,8 +54,6 @@ ohos_unittest("ans_unit_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -94,6 +92,11 @@ ohos_unittest("ans_unit_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+  ]
+
+  public_external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
 
   if (device_usage) {
@@ -146,8 +149,6 @@ ohos_unittest("notification_preferences_database_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -181,6 +182,11 @@ ohos_unittest("notification_preferences_database_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+  ]
+
+  public_external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
 
   if (device_usage) {
@@ -235,8 +241,6 @@ ohos_unittest("notification_subscriber_manager_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -270,6 +274,11 @@ ohos_unittest("notification_subscriber_manager_test") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
+  ]
+
+  public_external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
 
   if (device_usage) {
@@ -334,7 +343,6 @@ ohos_unittest("notification_service_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -370,6 +378,8 @@ ohos_unittest("notification_service_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -431,7 +441,6 @@ ohos_unittest("notification_publish_service_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -469,6 +478,8 @@ ohos_unittest("notification_publish_service_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -528,7 +539,6 @@ ohos_unittest("notification_service_publish_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -564,6 +574,8 @@ ohos_unittest("notification_service_publish_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -616,7 +628,6 @@ ohos_unittest("notification_preferences_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -653,6 +664,8 @@ ohos_unittest("notification_preferences_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
@@ -745,7 +758,6 @@ ohos_unittest("bundle_manager_helper_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -773,6 +785,8 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "time_service:time_client",
   ]
 
+  public_external_deps = [ "googletest:gtest_main" ]
+
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
     defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
@@ -799,7 +813,6 @@ ohos_unittest("notification_dialog_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -828,6 +841,8 @@ ohos_unittest("notification_dialog_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
@@ -863,7 +878,6 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   if (distributed_notification_supported) {
@@ -897,6 +911,8 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
@@ -1002,11 +1018,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",
   ]
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
-  ]
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",
@@ -1027,12 +1039,15 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "libxml2:libxml2",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
@@ -1055,7 +1070,6 @@ ohos_unittest("push_callback_stub_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1082,6 +1096,8 @@ ohos_unittest("push_callback_stub_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
@@ -1110,7 +1126,6 @@ ohos_unittest("notification_rdb_data_mgr_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -1137,6 +1152,8 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
@@ -1163,8 +1180,6 @@ ohos_unittest("notification_config_parse_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
   ]
 
   external_deps = [
@@ -1185,12 +1200,15 @@ ohos_unittest("notification_config_parse_test") {
     "image_framework:image_native",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "libxml2:libxml2",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "time_service:time_client",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]

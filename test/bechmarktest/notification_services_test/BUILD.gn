@@ -22,9 +22,6 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
   include_dirs = [
     "include",
     "mock/include",
-    "${access_token_path}/interfaces/innerkits/token_setproc/include",
-    "${access_token_path}/interfaces/innerkits/nativetoken/include",
-    "${access_token_path}/interfaces/innerkits/accesstoken/include",
     "${services_path}/ans/include",
   ]
 
@@ -37,8 +34,6 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/benchmark:benchmark",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -56,6 +51,12 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
   ]
+
+  public_external_deps = [
+    "benchmark:benchmark",
+    "googletest:gtest_main",
+  ]
+
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }

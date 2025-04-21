@@ -324,8 +324,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "notificationBundleOption = null, agentBundle = null, creatorUserId = -1, ownerUserId = -1, "
     "receiverUserId = -1, updateDeadLine = 0, finishDeadLine = 0, sound = , distributed = 0: "
     "flag: 0, unifiedGroupInfo_ = null }, postTime = 0, "
-    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0, "
-    "isPrivileged = false }";
+    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 

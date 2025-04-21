@@ -1224,7 +1224,7 @@ public:
      * @param hashCode Unique ID of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
         const sptr<IAnsOperationCallback> &callback) override;
 
     /**
@@ -1561,7 +1561,7 @@ private:
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);
-    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid);
+    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

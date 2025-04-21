@@ -305,6 +305,7 @@ int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
     }
     auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
     if (bundleOption == nullptr) {
+        delete request;
         ANS_LOGE("Parse json string to bundle option failed, str: %{public}s.", value.c_str());
         return ERR_ANS_TASK_ERR;
     }

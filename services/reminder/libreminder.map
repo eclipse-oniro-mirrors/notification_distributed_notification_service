@@ -13,26 +13,6 @@
 
 1.0 {
   global:
-    *BundleInfo*;
-    *BundleManagerHelper*;
-    *Connect*;
-    *Delete*;
-    *Disconnect*;
-    *GetBundle*;
-    *GetDefaultUidByBundleName*;
-    *GetDoNotDisturb*;
-    *GetInstance*;
-    *Init*;
-    *IsAllowedNotify*;
-    *IsSystemApp*;
-    *Notification*;
-    *Notify*;
-    *OnRemoteDied*;
-    *Publish*;
-    *Put*;
-    *Query*;
-    *Remove*;
-    *Subscribe*;
   local:
     *;
 };

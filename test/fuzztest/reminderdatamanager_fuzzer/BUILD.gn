@@ -39,7 +39,7 @@ ohos_fuzztest("ReminderDataManagerFuzzTest") {
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
     "${frameworks_module_reminder_path}:reminder_innerkits",
-    "${services_path}/reminder:libreminder",
+    "${services_path}/reminder:libreminder_static",
   ]
 
   external_deps = [

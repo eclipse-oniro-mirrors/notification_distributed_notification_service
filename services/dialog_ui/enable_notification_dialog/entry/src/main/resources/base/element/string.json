@@ -22,11 +22,11 @@
       },
       {
         "name":"reason_zyt",
-        "value":"These may include lock screen and banner notifications as well as sounds and vibration. You can modify these settings in EasyAbroad > App management."
+        "value":"These may include lock screen notifications, banners, badges, sounds, and vibration. You can change these settings in DroiTong > App management."
       },
       {
         "name":"reason_tv",
-        "value":"Notification reminder methods include banner. You can change your preferences in Settings."
+        "value":"Notifications will be delivered as banners. You can change your notification preferences at any time in Settings."
       },
       {
           "name":"ALLOW",

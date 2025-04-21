@@ -72,6 +72,7 @@ ohos_shared_library("ans_core") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:app_context",
     "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",

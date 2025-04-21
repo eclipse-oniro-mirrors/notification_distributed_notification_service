@@ -35,7 +35,6 @@ ohos_moduletest("ans_fw_module_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${component_path}/services/ans/include",
-    "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
@@ -61,7 +60,6 @@ ohos_moduletest("ans_fw_module_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   defines = []
@@ -84,11 +82,14 @@ ohos_moduletest("ans_fw_module_test") {
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -112,7 +113,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${component_path}/services/ans/include",
-    "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
@@ -160,6 +160,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
@@ -202,7 +203,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   defines = []
@@ -227,11 +227,14 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -255,7 +258,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${frameworks_path}/ans/core/common/include",
     "${frameworks_path}/ans/core/include",
     "${component_path}/services/ans/include",
-    "//third_party/json/include",
     "${inner_api_path}",
     "${core_path}/common/include",
     "${core_path}/include",
@@ -275,7 +277,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
-    "//third_party/googletest:gtest_main",
   ]
 
   defines = []
@@ -300,11 +301,14 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "hilog:libhilog",
     "image_framework:image_native",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  public_external_deps = [ "googletest:gtest_main" ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

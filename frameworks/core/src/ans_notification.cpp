@@ -656,7 +656,9 @@ ErrCode AnsNotification::SubscribeNotification(
         ANS_LOGE("Failed to subscribe with SubscriberImpl null ptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
+    if (!subscribeInfo.GetDeviceType().empty()) {
+        subscriberSptr->subscriber_.SetDeviceType(subscribeInfo.GetDeviceType());
+    }
     return proxy->Subscribe(subscriberSptr, sptrInfo);
 }
 
@@ -752,7 +754,7 @@ ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<Notificatio
         ANS_LOGE("Failed to subscribe due to create subscriber listener failed.");
         return ERR_ANS_NO_MEMORY;
     }
-    if (subscribeInfo != nullptr) {
+    if (subscribeInfo != nullptr && !subscribeInfo->GetDeviceType().empty()) {
         subscriber->SetDeviceType(subscribeInfo->GetDeviceType());
     }
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
@@ -1886,6 +1888,9 @@ ErrCode AnsNotification::SetBadgeNumberForDhByBundle(
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ANS_LOGI("SetBadgeNumberForDhByBundle, info:%{public}s %{public}d %{public}d",
+        bundleOption.GetBundleName().c_str(), bundleOption.GetUid(), badgeNumber);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {

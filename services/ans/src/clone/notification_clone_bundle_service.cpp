@@ -81,7 +81,7 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
         bundlesInfo_.clear();
     }
     for (const auto &profile : jsonObject) {
-        NotificationCloneBundleInfo cloneBundleInfo;;
+        NotificationCloneBundleInfo cloneBundleInfo;
         cloneBundleInfo.FromJson(profile);
         bundlesInfo_.emplace_back(cloneBundleInfo);
     }

@@ -486,6 +486,10 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
 void NotificationSubscriberManager::NotifyConsumedInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
+    if (notification == nullptr) {
+        ANS_LOGE("[OnConsumed] fail: notification is nullptr.");
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
 
@@ -583,7 +587,11 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
     if (!currNotifications.empty()) {
         ANS_LOGD("OnConsumedList currNotifications size = <%{public}zu>", currNotifications.size());
         if (record->subscriber != nullptr) {
-            record->subscriber->OnConsumedList(currNotifications, notificationMap);
+            if (notificationMap != nullptr) {
+                record->subscriber->OnConsumedList(currNotifications, notificationMap);
+            } else {
+                record->subscriber->OnConsumedList(currNotifications);
+            }
         }
     }
 }
@@ -591,6 +599,10 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<s
 void NotificationSubscriberManager::NotifyCanceledInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
+    if (notification == nullptr) {
+        ANS_LOGE("[OnCanceled] fail: notification is nullptr.");
+        return;
+    }
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
@@ -623,7 +635,6 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return false;
     }
     auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
-    ANS_LOGI("slotTypecount:%{public}d", (int)record->slotTypes.size());
     auto slotIter = std::find(record->slotTypes.begin(), record->slotTypes.end(), soltType);
     bool isSubscribedSlotType = (record->slotTypes.size() == 0) || (slotIter != record->slotTypes.end());
     if (!isSubscribedSlotType) {
@@ -714,8 +725,13 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         }
         if (!currNotifications.empty()) {
             ANS_LOGD("onCanceledList currNotifications size = <%{public}zu>", currNotifications.size());
-            if (record->subscriber != nullptr) {
+            if (record->subscriber == nullptr) {
+                return;
+            }
+            if (notificationMap != nullptr) {
                 record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
+            } else {
+                record->subscriber->OnCanceledList(currNotifications, deleteReason);
             }
         }
     }
@@ -723,6 +739,10 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
 
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
 {
+    if (notificationMap == nullptr) {
+        ANS_LOGE("[OnUpdated] fail: notificationMap is nullptr.");
+        return;
+    }
     for (auto record : subscriberRecordList_) {
         record->subscriber->OnUpdated(notificationMap);
     }
@@ -731,6 +751,10 @@ void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSo
 void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const int32_t &userId,
     const sptr<NotificationDoNotDisturbDate> &date)
 {
+    if (date == nullptr) {
+        ANS_LOGE("[OnDoNotDisturbDateChange] fail: date is nullptr.");
+        return;
+    }
     for (auto record : subscriberRecordList_) {
         if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
             IsSystemUser(userId) || record->userId == userId) {
@@ -742,6 +766,10 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const int
 void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    if (callbackData == nullptr) {
+        ANS_LOGE("[OnBadgeEnabledChanged] fail: callbackData is nullptr.");
+        return;
+    }
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
     for (auto record : subscriberRecordList_) {
@@ -760,6 +788,10 @@ bool NotificationSubscriberManager::IsSystemUser(int32_t userId)
 void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
+    if (callbackData == nullptr) {
+        ANS_LOGE("[OnEnabledNotificationChanged] fail: callbackData is nullptr.");
+        return;
+    }
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
     for (auto record : subscriberRecordList_) {
@@ -772,8 +804,8 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
 {
-    if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+    if (notificationSubQueue_ == nullptr || badgeData == nullptr) {
+        ANS_LOGE("queue or badgeData is nullptr");
         return;
     }
     std::function<void()> setBadgeNumberFunc = [this, badgeData] () {

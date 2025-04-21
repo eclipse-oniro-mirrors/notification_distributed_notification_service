@@ -238,6 +238,7 @@ const static std::string KEY_REMOVED_FLAG = "1";
 
 const static std::string KEY_SECOND_REMOVED_FLAG = "2";
 
+constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 /**
  * Indicates hashCode rule.
  */
@@ -2633,8 +2634,22 @@ uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
     return result;
 }
 
+static std::string GetBundleRemoveFlagKey(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
+{
+    std::string key;
+    if (sourceType == CLEAR_SLOT_FROM_AVSEESAION) {
+        key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
+            KEY_UNDER_LINE + std::to_string(slotType);
+    } else {
+        key = KEY_REMOVE_SLOT_FLAG + std::to_string(sourceType) + KEY_UNDER_LINE + bundleOption->GetBundleName() +
+            std::to_string(bundleOption->GetUid()) + KEY_UNDER_LINE + std::to_string(slotType);
+    }
+    return key;
+}
+
 bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
-    const NotificationConstant::SlotType &slotType)
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
 {
     if (bundleOption == nullptr) {
         ANS_LOGW("Current bundle option is null");
@@ -2652,14 +2667,13 @@ bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<Notificatio
         ANS_LOGE("RdbStore is nullptr.");
         return false;
     }
-    std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
-        KEY_UNDER_LINE + std::to_string(slotType);
+    std::string key = GetBundleRemoveFlagKey(bundleOption, slotType, sourceType);
     int32_t result = rdbDataManager_->InsertData(key, KEY_SECOND_REMOVED_FLAG, userId);
     return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
-    const NotificationConstant::SlotType &slotType)
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
 {
     if (bundleOption == nullptr) {
         ANS_LOGW("Current bundle option is null");
@@ -2673,8 +2687,7 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
         return true;
     }
 
-    std::string key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
-        KEY_UNDER_LINE + std::to_string(slotType);
+    std::string key = GetBundleRemoveFlagKey(bundleOption, slotType, sourceType);
     bool existFlag = true;
     std::string result;
     GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {

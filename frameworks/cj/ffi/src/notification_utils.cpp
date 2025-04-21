@@ -34,6 +34,18 @@ namespace Notification {
         }
         return std::char_traits<char>::copy(res, origin.c_str(), len);
     }
+    void freeCArrString(CArrString& arrStr)
+    {
+        if (arrStr.head == nullptr) {
+            return;
+        }
+        for (int64_t i = 0; i < arrStr.size; i++) {
+            free(arrStr.head[i]);
+        }
+        free(arrStr.head);
+        arrStr.head = nullptr;
+        arrStr.size = 0;
+    }
 
     bool GetNotificationSupportDisplayDevicesV2(
         CDistributedOptionsV2* distributedOption,
@@ -1350,14 +1362,13 @@ namespace Notification {
                 return false;
             }
             for (auto vec : iconsVec) {
-                if (!vec) {
-                    continue;
-                }
                 // buttonIcon
                 auto native = FFIData::Create<Media::PixelMapImpl>(vec);
                 if (native == nullptr) {
                     LOGE("Invalid object pixelMap of buttonIcons.");
-                    return false; // memory free at cj
+                    free(icons.head);
+                    freeCArrString(cButton.names);
+                    return false;
                 }
                 icons.head[iconCount++] = native->GetID();
             }

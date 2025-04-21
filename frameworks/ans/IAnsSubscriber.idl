@@ -20,23 +20,33 @@ sequenceable OHOS.Notification.EnabledNotificationCallbackData;
 sequenceable OHOS.Notification.BadgeNumberCallbackData;
 sequenceable OHOS.Notification.NotificationOperationInfo;
 interface OHOS.Notification.IAnsSubscriber {
-    void OnConnected();
-    void OnDisconnected();
-    void OnConsumed([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap);
-    void OnConsumed([in] sptr<Notification> notification);
-    [ipcincapacity 520] void OnConsumedWithMaxCapacity([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap);
-    [ipcincapacity 520] void OnConsumedWithMaxCapacity([in] sptr<Notification> notification);
-    void OnConsumedList([in] sptr<Notification>[] notifications, [in] sptr<NotificationSortingMap> notificationMap);
-    void OnCanceled([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
-    void OnCanceled([in] sptr<Notification> notification, [in] int deleteReason);
-    [ipcincapacity 520] void OnCanceledWithMaxCapacity([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
-    [ipcincapacity 520] void OnCanceledWithMaxCapacity([in] sptr<Notification> notification, [in] int deleteReason);
-    void OnCanceledList([in] sptr<Notification>[] notifications, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
-    void OnUpdated([in] sptr<NotificationSortingMap> notificationMap);
-    void OnDoNotDisturbDateChange([in] sptr<NotificationDoNotDisturbDate> date);
-    void OnEnabledNotificationChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
-    void OnBadgeChanged([in] sptr<BadgeNumberCallbackData> badgeData);
-    void OnBadgeEnabledChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
-    void OnApplicationInfoNeedChanged([in] String bundleName);
+    [oneway] void OnConnected();
+
+    [oneway] void OnDisconnected();
+
+    [oneway] void OnConsumed([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap);
+    [oneway] void OnConsumed([in] sptr<Notification> notification);
+
+    [ipcincapacity 520, oneway] void OnConsumedWithMaxCapacity([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap);
+    [ipcincapacity 520, oneway] void OnConsumedWithMaxCapacity([in] sptr<Notification> notification);
+
+    [ipcincapacity 520, oneway] void OnConsumedList([in] sptr<Notification>[] notifications, [in] sptr<NotificationSortingMap> notificationMap);
+    [ipcincapacity 520, oneway] void OnConsumedList([in] sptr<Notification>[] notifications);
+
+    [oneway] void OnCanceled([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
+    [oneway] void OnCanceled([in] sptr<Notification> notification, [in] int deleteReason);
+
+    [ipcincapacity 520, oneway] void OnCanceledWithMaxCapacity([in] sptr<Notification> notification, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
+    [ipcincapacity 520, oneway] void OnCanceledWithMaxCapacity([in] sptr<Notification> notification, [in] int deleteReason);
+
+    [ipcincapacity 520, oneway] void OnCanceledList([in] sptr<Notification>[] notifications, [in] sptr<NotificationSortingMap> notificationMap, [in] int deleteReason);
+    [ipcincapacity 520, oneway] void OnCanceledList([in] sptr<Notification>[] notifications, [in] int deleteReason);
+
+    [oneway] void OnUpdated([in] sptr<NotificationSortingMap> notificationMap);
+    [oneway] void OnDoNotDisturbDateChange([in] sptr<NotificationDoNotDisturbDate> date);
+    [oneway] void OnEnabledNotificationChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
+    [oneway] void OnBadgeChanged([in] sptr<BadgeNumberCallbackData> badgeData);
+    [oneway] void OnBadgeEnabledChanged([in] sptr<EnabledNotificationCallbackData> callbackData);
+    [oneway] void OnApplicationInfoNeedChanged([in] String bundleName);
     int OnOperationResponse([in] sptr<NotificationOperationInfo> operationInfo);
 }

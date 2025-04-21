@@ -254,6 +254,7 @@ int32_t DistributedRdbHelper::QueryDataBeginWithKey(
     if (ret != NativeRdb::E_OK) {
         ANS_LOGD("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
+        absSharedResultSet->Close();
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
 
@@ -262,6 +263,7 @@ int32_t DistributedRdbHelper::QueryDataBeginWithKey(
         ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Failed to GetString key from %{public}s table.", tableName.c_str());
+            absSharedResultSet->Close();
             return NativeRdb::E_ERROR;
         }
 
@@ -269,6 +271,7 @@ int32_t DistributedRdbHelper::QueryDataBeginWithKey(
         ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("GetString value failed from %{public}s table", tableName.c_str());
+            absSharedResultSet->Close();
             return NativeRdb::E_ERROR;
         }
         values.emplace(resultKey, resultValue);
@@ -294,6 +297,7 @@ int32_t DistributedRdbHelper::QueryData(const std::string tableName, const std::
     if (ret != NativeRdb::E_OK) {
         ANS_LOGW("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
             tableName.c_str(), key.c_str());
+        absSharedResultSet->Close();
         return NativeRdb::E_EMPTY_VALUES_BUCKET;
     }
     ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, value);
@@ -302,6 +306,7 @@ int32_t DistributedRdbHelper::QueryData(const std::string tableName, const std::
     }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("GetString value failed from %{public}s table.", tableName.c_str());
+        absSharedResultSet->Close();
         return NativeRdb::E_ERROR;
     }
     absSharedResultSet->Close();
