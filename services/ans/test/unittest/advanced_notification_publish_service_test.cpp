@@ -294,7 +294,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00007, Function | SmallTest | Level1)
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request->SetOwnerUid(1);
     request->SetIsAgentNotification(true);
-    request->SetIsSkipDoNotDisturbMode(true);
+    request->SetIsDoNotDisturbByPassed(true);
     MockIsOsAccountExists(true);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);

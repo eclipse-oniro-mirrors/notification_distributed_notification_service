@@ -381,7 +381,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             return;
         }
 
-        if (!request->IsSkipDoNotDisturbMode()) {
+        if (!request->IsDoNotDisturbByPassed()) {
             CheckDoNotDisturbProfile(record);
         }
         ChangeNotificationByControlFlags(record, isAgentController);
@@ -2627,7 +2627,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
         }
 
-        if (!request->IsSkipDoNotDisturbMode()) {
+        if (!request->IsDoNotDisturbByPassed()) {
             CheckDoNotDisturbProfile(record);
         }
         ChangeNotificationByControlFlags(record, isAgentController);
