@@ -1255,6 +1255,10 @@ public:
 
     void SetIsSystemApp(bool isSystemApp);
 
+    bool IsSkipDoNotDisturbMode() const;
+
+    void SetIsSkipDoNotDisturbMode(bool isSkipDoNotDisturbMode);
+
     bool IsCommonLiveView() const;
 
     bool IsSystemLiveView() const;
@@ -1595,6 +1599,7 @@ private:
     bool forceDistributed_ {false};
     bool notDistributed_ {false};
     bool isSystemApp_ {false};
+    bool isSkipDoNotDisturbMode_ {false};
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};
