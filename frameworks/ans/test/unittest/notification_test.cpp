@@ -314,7 +314,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "isCountdown = false, inProgress = false, groupOverview = false, isRemoveAllowed = true, "
     "progressIndeterminate = false, unremovable = false, floatingIcon = false, onlyLocal = false, "
     "permitted = true, isAgent = false, updateOnly = false, isForceDistributed = false, "
-    "isNotDistributed = false, isDoNotDisturbByPassed = isDoNotDisturbByPassed_, "
+    "isNotDistributed = false, isDoNotDisturbByPassed = false, "
     "removalWantAgent = null, maxScreenWantAgent = null, "
     "additionalParams = null, littleIcon = null, bigIcon = null, overlayIcon = null, "
     "notificationContent = null, notificationTemplate = null, actionButtons = empty, "
