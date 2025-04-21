@@ -477,9 +477,14 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
         }
 
         GenerateSlotReminderMode(slot, bundleOption);
-        std::vector<sptr<NotificationSlot>> slots;
-        slots.push_back(slot);
-        result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption, slots);
+        if (record->request->IsSystemLiveView()) {
+            ANS_LOGI("System live view no need add sloty.");
+            result = ERR_OK;
+        } else {
+            std::vector<sptr<NotificationSlot>> slots;
+            slots.push_back(slot);
+            result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundleOption, slots);
+        }
     }
     if (result == ERR_OK) {
         std::string bundleName = bundleOption->GetBundleName();

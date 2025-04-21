@@ -78,6 +78,8 @@ const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
 const static std::string BUNDLE_NAME_ABROAD = "com.easy.transfer.abroad";
 const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
 constexpr int32_t BADGE_NUM_LIMIT = 0;
+constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
+constexpr int32_t CLEAR_SLOT_FROM_RSS = 2;
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -2431,6 +2433,43 @@ void AdvancedNotificationService::UpdateUnifiedGroupInfo(const std::string &key,
     });
 }
 
+void AdvancedNotificationService::ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid,
+    int32_t sourceType)
+{
+    if (request == nullptr || (sourceType != CLEAR_SLOT_FROM_AVSEESAION && sourceType != CLEAR_SLOT_FROM_RSS)) {
+        return;
+    }
+
+    if (sourceType == CLEAR_SLOT_FROM_AVSEESAION) {
+        if (callingUid != AVSEESAION_PID ||
+            request->GetSlotType() != NotificationConstant::SlotType::LIVE_VIEW) {
+            return;
+        }
+    }
+    if (sourceType == CLEAR_SLOT_FROM_RSS) {
+        if (request->GetCreatorUid() != RSS_PID || !request->IsSystemLiveView()) {
+            return;
+        }
+    }
+
+    int32_t uid = request->GetOwnerUid();
+    std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(uid);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Notification get bundle failed %{public}d", uid);
+        return;
+    }
+
+    if (NotificationPreferences::GetInstance()->GetBundleRemoveFlag(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW, sourceType)) {
+        return;
+    }
+    NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW);
+    NotificationPreferences::GetInstance()->SetBundleRemoveFlag(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW, sourceType);
+}
+
 ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -2551,6 +2590,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             if (result == ERR_OK) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
             }
+            ClearSlotTypeData(record->request, ipcUid, CLEAR_SLOT_FROM_RSS);
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());

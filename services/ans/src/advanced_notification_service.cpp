@@ -914,6 +914,10 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
             slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         }
     }
+    if (record->request->IsSystemLiveView()) {
+        ANS_LOGI("System live view no need add sloty.");
+        return ERR_OK;
+    }
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     result = NotificationPreferences::GetInstance()->AddNotificationSlots(record->bundleOption, slots);
