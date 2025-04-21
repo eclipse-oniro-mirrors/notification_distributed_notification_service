@@ -98,8 +98,6 @@ ohos_shared_library("reminderagentmanager") {
   include_dirs = [
     "../../include",
     "../../include/manager",
-    "//third_party/node/src",
-    "//third_party/libuv/include",
   ]
 
   configs = [ ":native_module_config" ]
@@ -132,7 +130,9 @@ ohos_shared_library("reminderagentmanager") {
     "hilog:libhilog",
     "image_framework:image",
     "ipc:ipc_single",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "relational_store:native_rdb",
   ]
 
