@@ -32,7 +32,10 @@ const int32_t PASSITIVE_DELETE = 1;
 static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/"
     "USER_SETTINGSDATA_SECURE_100?Proxy=true&key=unified_group_enable";
-ExtensionWrapper::ExtensionWrapper() = default;
+ExtensionWrapper::ExtensionWrapper()
+{
+    InitExtentionWrapper();
+}
 ExtensionWrapper::~ExtensionWrapper() = default;
 
 

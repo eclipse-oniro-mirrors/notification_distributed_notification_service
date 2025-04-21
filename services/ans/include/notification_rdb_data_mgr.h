@@ -149,6 +149,7 @@ public:
     int32_t DropUserTable(const int32_t userId);
 
 private:
+    std::shared_ptr<NativeRdb::RdbStore> GetConnection();
     int32_t GetUserTableName(const int32_t &userId, std::string &tableName);
     std::vector<std::string> GenerateOperatedTables(const int32_t &userId);
     int32_t DeleteData(const std::string tableName, const std::string key, int32_t &rowId);
@@ -157,13 +158,11 @@ private:
     int32_t QueryDataBeginWithKey(const std::string tableName, const std::string key,
         std::unordered_map<std::string, std::string> &values);
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
-    int32_t InitCreatedTables();
+    int32_t InitCreatedTables(std::shared_ptr<NativeRdb::RdbStore> rdbConnection);
     int32_t RestoreForMasterSlaver();
 
 private:
     NotificationRdbConfig notificationRdbConfig_;
-    std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
-    mutable std::mutex rdbStorePtrMutex_;
     std::set<std::string> createdTables_;
     mutable std::mutex createdTableMutex_;
 };

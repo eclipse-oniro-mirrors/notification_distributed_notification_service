@@ -51,11 +51,6 @@ void AdvancedNotificationServiceAbility::OnStart()
         return;
     }
 
-#ifdef ENABLE_ANS_EXT_WRAPPER
-    EXTENTION_WRAPPER->InitExtentionWrapper();
-#else
-    ANS_LOGI("Not enabled ans_ext");
-#endif
     AddSystemAbilityListener(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID);
     AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
@@ -64,7 +59,6 @@ void AdvancedNotificationServiceAbility::OnStart()
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
 #endif
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
-    LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
 }
 
 void AdvancedNotificationServiceAbility::OnStop()
