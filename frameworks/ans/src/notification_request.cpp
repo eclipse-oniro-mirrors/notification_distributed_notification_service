@@ -804,6 +804,7 @@ std::string NotificationRequest::Dump()
             ", updateOnly = " + (updateOnly_ ? "true" : "false") +
             ", isForceDistributed = " + (forceDistributed_ ? "true" : "false") +
             ", isNotDistributed = " + (notDistributed_ ? "true" : "false") +
+            ", isDoNotDisturbByPassed = " + (isDoNotDisturbByPassed_ ? "true" : "false") +
             ", removalWantAgent = " + (removalWantAgent_ ? "not null" : "null") +
             ", maxScreenWantAgent = " + (maxScreenWantAgent_ ? "not null" : "null") +
             ", additionalParams = " + (additionalParams_ ? "not null" : "null") +
@@ -1243,6 +1244,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(isDoNotDisturbByPassed_)) {
+        ANS_LOGE("Failed to write flag notDistributed");
+        return false;
+    }
+
     // write objects which managed by std::shared_ptr
     bool valid {false};
 
@@ -1667,6 +1673,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     isRemoveAllowed_ = parcel.ReadBool();
     forceDistributed_ = parcel.ReadBool();
     notDistributed_ = parcel.ReadBool();
+    isDoNotDisturbByPassed_ = parcel.ReadBool();
 
     bool valid {false};
 
@@ -1970,6 +1977,16 @@ void NotificationRequest::SetIsSystemApp(bool isSystemApp)
     isSystemApp_ = isSystemApp;
 }
 
+bool NotificationRequest::IsDoNotDisturbByPassed() const
+{
+    return isDoNotDisturbByPassed_;
+}
+
+void NotificationRequest::SetIsDoNotDisturbByPassed(bool isDoNotDisturbByPassed)
+{
+    isDoNotDisturbByPassed_ = isDoNotDisturbByPassed;
+}
+
 void NotificationRequest::CopyBase(const NotificationRequest &other)
 {
     this->notificationId_ = other.notificationId_;
@@ -1997,6 +2014,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->forceDistributed_ = other.forceDistributed_;
     this->notDistributed_ = other.notDistributed_;
     this->isSystemApp_ = other.isSystemApp_;
+    this->isDoNotDisturbByPassed_ = other.isDoNotDisturbByPassed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->isUpdateByOwnerAllowed_ = other.isUpdateByOwnerAllowed_;
     this->distributedCollaborate_ = other.distributedCollaborate_;
