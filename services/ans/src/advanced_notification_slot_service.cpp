@@ -499,8 +499,7 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
     if (result == ERR_OK) {
         std::string bundleName = bundleOption->GetBundleName();
         if (slot != nullptr &&
-            (bundleName == CALL_UI_BUNDLE || slot->GetEnable() ||
-            (record->request->GetAgentBundle() != nullptr && record->request->IsSystemLiveView()) ||
+            (bundleName == CALL_UI_BUNDLE || slot->GetEnable() || record->request->IsSystemLiveView() ||
             (slot->GetType() == NotificationConstant::SlotType::LIVE_VIEW &&
             DelayedSingleton<NotificationConfigParse>::GetInstance()->IsLiveViewEnabled(bundleName)))) {
             record->slot = slot;
