@@ -15,26 +15,12 @@
 
 #include "rdb_errno.h"
 #include "rdb_helper.h"
-#include "rdb_store.h"
-using namespace OHOS::NativeRdb;
-
-namespace {
-    std::shared_ptr<RdbStore> g_mockRdbStore = nullptr;
-}
-
-void MockRdbStore(std::shared_ptr<RdbStore> rdbStore)
-{
-    g_mockRdbStore = rdbStore;
-}
 
 namespace OHOS {
 namespace NativeRdb {
 std::shared_ptr<RdbStore> RdbHelper::GetRdbStore(
     const RdbStoreConfig &config, int version, RdbOpenCallback &openCallback, int &errCode)
 {
-    if (g_mockRdbStore) {
-        return g_mockRdbStore;
-    }
     return nullptr;
 }
 

@@ -37,8 +37,6 @@ extern void MockGetString(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::NativeRdb;
-extern void MockRdbStore(std::shared_ptr<RdbStore> rdbStore);
-
 namespace OHOS {
 namespace Notification {
 class RdbStoreDataCallBackNotificationStorageTest : public testing::Test {
@@ -404,7 +402,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00500
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     ASSERT_EQ(notificationDataMgr->Destroy(), NativeRdb::E_ERROR);
 }
 
@@ -418,7 +416,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00600
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     std::string value = "<value>";
     ASSERT_EQ(notificationDataMgr->InsertData(key, value, -1), NativeRdb::E_ERROR);
@@ -434,7 +432,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00700
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::string key = "<key>";
     std::string value = "<value>";
     ASSERT_EQ(notificationDataMgr->InsertData(key, value, -1), NativeRdb::E_ERROR);
@@ -450,7 +448,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00800
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::unordered_map<std::string, std::string> values;
     ASSERT_EQ(notificationDataMgr->InsertBatchData(values, -1), NativeRdb::E_ERROR);
 }
@@ -465,7 +463,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00900
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::unordered_map<std::string, std::string> values = {
         { "--help", "--help"},
         { "--all", "--all"},
@@ -487,7 +485,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01000
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     ASSERT_EQ(notificationDataMgr->DeleteData(key, -1), NativeRdb::E_ERROR);
 }
@@ -502,7 +500,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01100
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::string key = "<key>";
     ASSERT_EQ(notificationDataMgr->DeleteData(key, -1), NativeRdb::E_ERROR);
 }
@@ -517,7 +515,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01200
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::vector<std::string> keys;
     ASSERT_EQ(notificationDataMgr->DeleteBatchData(keys, -1), NativeRdb::E_ERROR);
 }
@@ -532,7 +530,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01300
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::vector<std::string> keys;
     std::string key = "<key>";
     keys.emplace_back(key);
@@ -549,7 +547,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01400
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     std::string value = "<value>";
     ASSERT_EQ(notificationDataMgr->QueryData(key, value, -1), NativeRdb::E_ERROR);
@@ -565,7 +563,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01500
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::string key = "<key>";
     std::string value = "<value>";
     g_mockQueryRet = true;
@@ -582,7 +580,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01600
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     std::string key = "<key>";
     std::string value = "<value>";
     g_mockQueryRet = false;
@@ -602,7 +600,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01700
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::string key = "<key>";
     std::unordered_map<std::string, std::string> values;
     ASSERT_EQ(notificationDataMgr->QueryDataBeginWithKey(key, values, -1), NativeRdb::E_ERROR);
@@ -618,7 +616,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01800
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = true;
     std::string key = "<key>";
     std::unordered_map<std::string, std::string> values;
@@ -635,7 +633,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_01900
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = false;
     MockHasBlock(true);
     MockGoToFirstRow(true);
@@ -655,7 +653,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02000
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-
+    notificationDataMgr->rdbStore_ = nullptr;
     std::unordered_map<std::string, std::string> datas;
     ASSERT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_ERROR);
 }
@@ -670,7 +668,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02100
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = true;
     std::unordered_map<std::string, std::string> datas;
     ASSERT_EQ(notificationDataMgr->QueryAllData(datas, -1), NativeRdb::E_ERROR);
@@ -686,7 +684,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02200
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = false;
     MockHasBlock(true);
     MockGoToFirstRow(false);
@@ -704,7 +702,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02300
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = false;
     MockHasBlock(true);
     MockGoToFirstRow(true);
@@ -723,7 +721,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02400
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     g_mockQueryRet = false;
     MockHasBlock(true);
     MockGoToFirstRow(true);
@@ -742,7 +740,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoWreDataCallBack_0250
     NotificationRdbConfig notificationRdbConfig;
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
-    MockRdbStore(std::make_shared<RdbStoreTest>());
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
     ASSERT_EQ(notificationDataMgr->DropUserTable(-1), NativeRdb::E_OK);
 }
 
