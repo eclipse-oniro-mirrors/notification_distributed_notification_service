@@ -674,7 +674,7 @@ HWTEST_F(AnsPublishServiceTest, RequestEnableNotification_00005, Function | Smal
     MockIsVerfyPermisson(true);
     ret = advancedNotificationService_->RequestEnableNotification(bundleName, uid);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
-    bundleName = "com.easy.transfer.abroad";
+    bundleName = "com.easy.abroad";
     ret = advancedNotificationService_->RequestEnableNotification(bundleName, uid);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 }
@@ -691,7 +691,7 @@ HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00001, Function 
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bool innerLake = true;
     auto ret = advancedNotificationService_->
-        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundleOption, innerLake);
+        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundleOption, innerLake, false);
     ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
 }
 
@@ -711,7 +711,7 @@ HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00002, Function 
     auto ret = advancedNotificationService_->SetNotificationsEnabledForAllBundles(std::string(), true);
     ASSERT_EQ(ret, (int)ERR_OK);
     ret = advancedNotificationService_->
-        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundle, innerLake);
+        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundle, innerLake, false);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -728,7 +728,7 @@ HWTEST_F(AnsPublishServiceTest, CommonRequestEnableNotification_00003, Function 
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     bool innerLake = true;
     auto ret = advancedNotificationService_->
-        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundle, innerLake);
+        CommonRequestEnableNotification(deviceId, nullptr, nullptr, bundle, innerLake, false);
     ASSERT_EQ(ret, (int)ERROR_INTERNAL_ERROR);
 }
 

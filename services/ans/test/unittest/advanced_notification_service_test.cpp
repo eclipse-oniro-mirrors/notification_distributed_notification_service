@@ -4273,7 +4273,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | L
         "test", 1), (int)ERROR_INTERNAL_ERROR);
 
     auto ret = advancedNotificationService_->dialogManager_
-        ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true);
+        ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true, false);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
@@ -4284,7 +4284,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00001, Function | SmallTest | L
     ASSERT_EQ(advancedNotificationService_->dialogManager_->AddDialogInfoIfNotExist(bundleOption, nullptr), false);
 
     ret = advancedNotificationService_->dialogManager_
-        ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true);
+        ->RequestEnableNotificationDailog(bundleOption, nullptr, client, true, false);
     ASSERT_EQ(ret, (int)ERR_ANS_DIALOG_IS_POPPING);
 
     ASSERT_EQ(advancedNotificationService_->dialogManager_->OnBundleEnabledStatusChanged(DialogStatus::ALLOW_CLICKED,
