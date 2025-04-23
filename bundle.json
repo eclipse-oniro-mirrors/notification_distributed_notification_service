@@ -105,6 +105,7 @@
         "zlib",
         "libuv",
         "json",
+        "libxml2",
         "node"
       ],
       "third_party": [

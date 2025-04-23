@@ -299,7 +299,6 @@ ohos_shared_library("libans") {
     "../ans:ans.para.dac",
     "../ans:external.json",
     "//third_party/icu/icu4c:shared_icuuc",
-    "//third_party/libxml2:libxml2",
   ]
 
   if (distributed_notification_supported) {
@@ -330,6 +329,7 @@ ohos_shared_library("libans") {
     "image_framework:image_native",
     "init:libbegetutil",
     "kv_store:distributeddata_inner",
+    "libxml2:libxml2",
     "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
