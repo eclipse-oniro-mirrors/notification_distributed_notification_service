@@ -852,8 +852,8 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t remo
 ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bundleOption,
     const int32_t notificationId, const std::string &label, int32_t removeReason)
 {
-    ANS_LOGI("enter RemoveNotification,bundle:%{public}s,Id:%{public}d,reason:%{public}d",
-        bundleOption.GetBundleName().c_str(), notificationId, removeReason);
+    ANS_LOGI("enter RemoveNotification,bundle:%{public}s,Id:%{public}d,reason:%{public}d label:%{public}s",
+        bundleOption.GetBundleName().c_str(), notificationId, removeReason, label.c_str());
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");

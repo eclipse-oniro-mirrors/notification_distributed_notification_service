@@ -1831,7 +1831,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
         std::string message = "remove notificaiton error";
-        ANS_LOGE("%{public}s", message.c_str());
+        ANS_LOGE("%{public}s %{public}d", message.c_str(), result);
     }
     SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
     return result;
