@@ -124,6 +124,13 @@ private:
     void InitBaseInfo(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
         sptr<ReminderRequest>& reminder);
 
+    /**
+     * @brief Calendar database version1
+     */
+    void BuildReminderV1(const std::shared_ptr<DataShare::DataShareResultSet>& result,
+        sptr<ReminderRequest>& reminder);
+    void BuildReminderV1(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
+        sptr<ReminderRequest>& reminder);
 private:
     // Singleton
     ReminderDataShareHelper();
@@ -138,6 +145,7 @@ private:
     int32_t curUserId_ {0};
     int32_t uid_ {0};  // calendar
     int32_t dataUid_ {0};  // calendardata
+    bool isNewRdbVer_ = false;  // is new calendar rdb version
     std::atomic<bool> insertTask_ {false};
     std::atomic<bool> updateTask_ {false};
     std::atomic<int64_t> insertTime_ {0};

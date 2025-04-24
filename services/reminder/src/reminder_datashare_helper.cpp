@@ -116,7 +116,7 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
     std::string proxy = ReminderCalendarShareTable::PROXY;
     proxy.append("?user=").append(std::to_string(curUserId_));
     Uri uri(proxy);
-    static std::vector<std::string> columns = GetColumns();
+    std::vector<std::string> columns = GetColumns();
     DataShare::DataSharePredicates predicates;
     predicates.NotEqualTo(ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::STATE_DISMISSED);
     predicates.And();
@@ -185,6 +185,21 @@ void ReminderDataShareHelper::UpdateCalendarUid()
         curUserId_);
     dataUid_ = ReminderBundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(
         ReminderCalendarShareTable::DATA_NAME, curUserId_);
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!ReminderBundleManagerHelper::GetInstance()->GetBundleInfo(ReminderCalendarShareTable::DATA_NAME,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, dataUid_, bundleInfo)) {
+        ANSR_LOGE("GetBundleInfo failed.");
+        return;
+    }
+    for (const auto& moduleInfo : bundleInfo.hapModuleInfos) {
+        for (const auto& metaData : moduleInfo.metadata) {
+            if (metaData.name == "hmos.calendardata.reminderDbVersion") {
+                isNewRdbVer_ = true;
+                ANSR_LOGI("New calendar rdb version.");
+                return;
+            }
+        }
+    }
 }
 
 std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::GetCacheReminders()
@@ -297,14 +312,29 @@ bool ReminderDataShareHelper::ReleaseDataShareHelper(const std::shared_ptr<DataS
 
 std::vector<std::string> ReminderDataShareHelper::GetColumns() const
 {
-    return std::vector<std::string> {
-        ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
-        ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
-        ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::TITLE,
-        ReminderCalendarShareTable::CONTENT, ReminderCalendarShareTable::WANT_AGENT,
-        ReminderCalendarShareTable::BUTTONS, ReminderCalendarShareTable::SLOT_TYPE,
-        ReminderCalendarShareTable::IDENTIFIER
-    };
+    if (isNewRdbVer_) {
+        return std::vector<std::string> {
+            ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
+            ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
+            ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::TITLE,
+            ReminderCalendarShareTable::CONTENT, ReminderCalendarShareTable::WANT_AGENT,
+            ReminderCalendarShareTable::BUTTONS, ReminderCalendarShareTable::SLOT_TYPE,
+            ReminderCalendarShareTable::IDENTIFIER, ReminderCalendarShareTable::TIME_INTERVAL,
+            ReminderCalendarShareTable::SNOOZE_TIMES, ReminderCalendarShareTable::RING_DURATION,
+            ReminderCalendarShareTable::SNOOZE_SLOT_TYPE, ReminderCalendarShareTable::SNOOZE_CONTENT,
+            ReminderCalendarShareTable::EXPIRED_CONTENT, ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT,
+            ReminderCalendarShareTable::CUSTOM_RING_URI
+        };
+    } else {
+        return std::vector<std::string> {
+            ReminderCalendarShareTable::ID, ReminderCalendarShareTable::EVENT_ID,
+            ReminderCalendarShareTable::END, ReminderCalendarShareTable::ALARM_TIME,
+            ReminderCalendarShareTable::STATE, ReminderCalendarShareTable::TITLE,
+            ReminderCalendarShareTable::CONTENT, ReminderCalendarShareTable::WANT_AGENT,
+            ReminderCalendarShareTable::BUTTONS, ReminderCalendarShareTable::SLOT_TYPE,
+            ReminderCalendarShareTable::IDENTIFIER
+        };
+    }
 }
 
 sptr<ReminderRequest> ReminderDataShareHelper::CreateReminder(
@@ -312,6 +342,7 @@ sptr<ReminderRequest> ReminderDataShareHelper::CreateReminder(
 {
     sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
     InitNormalInfo(reminder);
+    BuildReminderV1(result, reminder);
     uint64_t triggerTime = 0;
     GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::ALARM_TIME, triggerTime);
     reminder->SetTriggerTimeInMilli(triggerTime);
@@ -371,6 +402,7 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::CreateRemi
             reminder->SetTriggerTimeInMilli(triggerTime);
         }
         InitBaseInfo(values, reminder);
+        BuildReminderV1(values, reminder);
         uint64_t endDateTime = 0;
         iter = values.find(ReminderCalendarShareTable::END);
         if (iter != values.end()) {
@@ -443,6 +475,79 @@ void ReminderDataShareHelper::InitBaseInfo(const DataShare::DataShareObserver::C
     iter = info.find(ReminderCalendarShareTable::IDENTIFIER);
     if (iter != info.end()) {
         reminder->SetIdentifier(std::get<std::string>(iter->second));
+    }
+}
+
+void ReminderDataShareHelper::BuildReminderV1(const std::shared_ptr<DataShare::DataShareResultSet>& result,
+    sptr<ReminderRequest>& reminder)
+{
+    if (!isNewRdbVer_) {
+        return;
+    }
+    uint64_t timeInterval = 0;
+    GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::TIME_INTERVAL, timeInterval);
+    reminder->SetTimeInterval(timeInterval);
+    uint8_t snoozeTimes = 0;
+    GetRdbValue<uint8_t>(result, ReminderCalendarShareTable::SNOOZE_TIMES, snoozeTimes);
+    reminder->SetSnoozeTimes(snoozeTimes);
+    uint64_t ringDuration = 0;
+    GetRdbValue<uint64_t>(result, ReminderCalendarShareTable::RING_DURATION, ringDuration);
+    reminder->SetRingDuration(ringDuration);
+    int32_t snoozeSlotType = 0;
+    GetRdbValue<int32_t>(result, ReminderCalendarShareTable::SNOOZE_SLOT_TYPE, snoozeSlotType);
+    reminder->SetSnoozeSlotType(NotificationConstant::SlotType(snoozeSlotType));
+    std::string snoozeContent;
+    GetRdbValue<std::string>(result, ReminderCalendarShareTable::SNOOZE_CONTENT, snoozeContent);
+    reminder->SetSnoozeContent(snoozeContent);
+    std::string expiredContent;
+    GetRdbValue<std::string>(result, ReminderCalendarShareTable::EXPIRED_CONTENT, expiredContent);
+    reminder->SetExpiredContent(expiredContent);
+    std::string maxScreenWantAgent;
+    GetRdbValue<std::string>(result, ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT, maxScreenWantAgent);
+    reminder->DeserializeWantAgent(maxScreenWantAgent, 1);
+    std::string customRingUri;
+    GetRdbValue<std::string>(result, ReminderCalendarShareTable::CUSTOM_RING_URI, customRingUri);
+    reminder->SetCustomRingUri(customRingUri);
+}
+
+void ReminderDataShareHelper::BuildReminderV1(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
+    sptr<ReminderRequest>& reminder)
+{
+    if (!isNewRdbVer_) {
+        return;
+    }
+    auto iter = info.find(ReminderCalendarShareTable::TIME_INTERVAL);
+    if (iter != info.end()) {
+        reminder->SetTimeInterval(static_cast<uint64_t>(std::get<double>(iter->second)));
+    }
+    iter = info.find(ReminderCalendarShareTable::SNOOZE_TIMES);
+    if (iter != info.end()) {
+        reminder->SetSnoozeTimes(static_cast<uint8_t>(std::get<double>(iter->second)));
+    }
+    iter = info.find(ReminderCalendarShareTable::RING_DURATION);
+    if (iter != info.end()) {
+        reminder->SetRingDuration(static_cast<uint64_t>(std::get<double>(iter->second)));
+    }
+    iter = info.find(ReminderCalendarShareTable::SNOOZE_SLOT_TYPE);
+    if (iter != info.end()) {
+        reminder->SetSnoozeSlotType(
+            NotificationConstant::SlotType(static_cast<int32_t>(std::get<double>(iter->second))));
+    }
+    iter = info.find(ReminderCalendarShareTable::SNOOZE_CONTENT);
+    if (iter != info.end()) {
+        reminder->SetSnoozeContent(std::get<std::string>(iter->second));
+    }
+    iter = info.find(ReminderCalendarShareTable::EXPIRED_CONTENT);
+    if (iter != info.end()) {
+        reminder->SetExpiredContent(std::get<std::string>(iter->second));
+    }
+    iter = info.find(ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT);
+    if (iter != info.end()) {
+        reminder->DeserializeWantAgent(std::get<std::string>(iter->second), 1);
+    }
+    iter = info.find(ReminderCalendarShareTable::CUSTOM_RING_URI);
+    if (iter != info.end()) {
+        reminder->SetCustomRingUri(std::get<std::string>(iter->second));
     }
 }
 

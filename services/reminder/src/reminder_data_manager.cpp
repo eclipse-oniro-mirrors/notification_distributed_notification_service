@@ -1606,13 +1606,11 @@ std::string ReminderDataManager::GetFullPath(const std::string& oriPath)
 void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
-        ANSR_LOGE("Play sound and vibration failed as reminder is null.");
         return;
     }
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
-    ANSR_LOGD("Play sound and vibration, reminderId=%{public}d", reminder->GetReminderId());
 #ifdef PLAYER_FRAMEWORK_ENABLE
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
@@ -1633,6 +1631,10 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         Uri defaultSound(defaultPath);
         soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
         ANSR_LOGI("Play default sound.");
+    } else if (customRingUri.find("file://") == 0) {
+        Uri systemSound(customRingUri);
+        soundPlayer_->SetSource(systemSound.GetSchemeSpecificPart());
+        ANSR_LOGI("Play system sound.");
     } else {
         Global::Resource::ResourceManager::RawFileDescriptor desc;
         if (GetCustomRingFileDesc(reminder, desc)) {

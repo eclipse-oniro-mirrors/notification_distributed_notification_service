@@ -33,6 +33,14 @@ public:
     static constexpr const char* SLOT_TYPE = "slotType";
     static constexpr const char* KEEP_HEADSUP = "keepHeadsUp";
     static constexpr const char* IDENTIFIER = "identifier";
+    static constexpr const char* TIME_INTERVAL = "timeInterval";
+    static constexpr const char* SNOOZE_TIMES = "snoozeTimes";
+    static constexpr const char* RING_DURATION = "ringDuration";
+    static constexpr const char* SNOOZE_SLOT_TYPE = "snoozeSlotType";
+    static constexpr const char* SNOOZE_CONTENT = "snoozeContent";
+    static constexpr const char* EXPIRED_CONTENT = "expiredContent";
+    static constexpr const char* MAX_SCREEN_WANT_AGENT = "maxScreenWantAgent";
+    static constexpr const char* CUSTOM_RING_URI = "customRingUri";
 
     static constexpr const char* PROXY = "datashareproxy://com.ohos.calendardata/CalendarAlerts";
     static constexpr const char* NAME = "com.ohos.calendar";

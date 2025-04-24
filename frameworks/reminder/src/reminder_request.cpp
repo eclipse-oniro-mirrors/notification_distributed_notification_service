@@ -888,7 +888,12 @@ void ReminderRequest::SetReminderTimeInMilli(const uint64_t reminderTimeInMilli)
 
 ReminderRequest& ReminderRequest::SetRingDuration(const uint64_t ringDurationInSeconds)
 {
-    uint64_t ringDuration = ringDurationInSeconds * MILLI_SECONDS;
+    uint64_t ringDuration = 0;
+    if (ringDurationInSeconds > (UINT64_MAX / MILLI_SECONDS)) {
+        ringDuration = 0;
+    } else {
+        ringDuration = ringDurationInSeconds * MILLI_SECONDS;
+    }
     ringDurationInMilli_ = std::min(ringDuration, MAX_RING_DURATION);
     return *this;
 }

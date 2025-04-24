@@ -927,6 +927,20 @@ HWTEST_F(ReminderRequestTest, SetRingDuration_00003, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: SetRingDuration_00004
+ * @tc.desc: Test SetRingDuration parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTest, SetRingDuration_00004, Function | SmallTest | Level1)
+{
+    uint64_t ringDurationInSeconds = UINT64_MAX - 1;
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    rrc->SetRingDuration(ringDurationInSeconds);
+    EXPECT_EQ(rrc->GetRingDuration(), 0);
+}
+
+/**
  * @tc.name: Unmarshalling_00001
  * @tc.desc: Test Unmarshalling parameters.
  * @tc.type: FUNC
