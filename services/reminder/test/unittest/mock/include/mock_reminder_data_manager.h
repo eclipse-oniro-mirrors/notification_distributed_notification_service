@@ -22,6 +22,7 @@ namespace OHOS::Notification {
 class MockReminderDataManager {
 public:
     static void MockPublishReminder(const int32_t ret);
+    static void MockUpdateReminder(const int32_t ret);
     static void MockCancelReminder(const int32_t ret);
     static void MockCancelAllReminders(const int32_t ret);
     static void MockAddExcludeDate(const int32_t ret);

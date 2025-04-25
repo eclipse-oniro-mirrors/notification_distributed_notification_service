@@ -259,5 +259,59 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
         serviceQueue_->submit(callback, taskAttr);
     }
 }
+
+ErrCode ReminderDataManager::UpdateReminder(const sptr<ReminderRequest>& reminder, const int32_t callingUid)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    sptr<ReminderRequest> reminderOld = FindReminderRequestLocked(reminder->GetReminderId(), false);
+    bool existInMemory = true;
+    if (nullptr != reminderOld) {
+        if (reminderOld->IsShowing()) {
+            ANSR_LOGW("Reminder already showing, update reminder failed.");
+            return ERR_REMINDER_NOT_EXIST;
+        }
+    } else {
+        existInMemory = false;
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+        if (!store_->IsReminderExist(reminder->GetReminderId(), reminder->GetCreatorUid())) {
+            ANSR_LOGW("Reminder not find, update reminder failed.");
+            return ERR_REMINDER_NOT_EXIST;
+        }
+    }
+    uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
+    if (callerTokenId == 0) {
+        ANSR_LOGE("pushlish failed, callerTokenId is 0");
+        return ERR_REMINDER_CALLER_TOKEN_INVALID;
+    }
+    if (!IsActionButtonDataShareValid(reminder, callerTokenId)) {
+        return ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED;
+    }
+
+    UpdateAndSaveReminderLocked(reminder, existInMemory);
+    queue_->submit([this, reminder]() {
+        StartRecentReminder();
+    });
+    return ERR_OK;
+}
+
+void ReminderDataManager::UpdateAndSaveReminderLocked(const sptr<ReminderRequest>& reminder, const bool isInMemory)
+{
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    if (reminder->GetTriggerTimeInMilli() == ReminderRequest::INVALID_LONG_LONG_VALUE) {
+        ANSR_LOGW("now publish reminder is expired. reminder is =%{public}s", reminder->Dump().c_str());
+        reminder->SetExpired(true);
+    }
+    if (isInMemory) {
+        for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
+            if (reminder->GetReminderId() == (*it)->GetReminderId() && !(*it)->IsShare()) {
+                *it = reminder;
+                break;
+            }
+        }
+    } else {
+        reminderVector_.push_back(reminder);
+    }
+    store_->UpdateOrInsert(reminder);
+}
 }
 }
