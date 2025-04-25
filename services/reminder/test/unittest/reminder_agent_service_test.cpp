@@ -437,4 +437,43 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_016, Function | Smal
     MockReminderBundleManagerHelper::MockGetBundleNameByUid("");
     EXPECT_EQ(reminderAgentService_->GetClientBundleName(1), "");
 }
+
+/**
+ * @tc.name: ReminderAgentServiceTest_017
+ * @tc.desc: Test UpdateReminder function
+ * @tc.type: FUNC
+ * @tc.require: issueI5S4VP
+ */
+HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_017, Function | SmallTest | Level1)
+{
+    // test CreateReminderRequest
+    int32_t reminderId = 0;
+    ReminderRequest reminder;
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, reminder), ERR_REMINDER_INVALID_PARAM);
+    
+    // test CheckReminderPermission
+    MockAccesstokenKit::MockIsVerifyPermisson(false);
+    ReminderRequestAlarm alarm;
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), ERR_REMINDER_PERMISSION_DENIED);
+    MockAccesstokenKit::MockIsVerifyPermisson(true);
+
+    // test InitReminderRequest
+    auto wantInfo = alarm.GetMaxScreenWantAgentInfo();
+    alarm.SetMaxScreenWantAgentInfo(nullptr);
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), ERR_REMINDER_INVALID_PARAM);
+    alarm.SetMaxScreenWantAgentInfo(wantInfo);
+
+    // test ReminderDataManager::GetInstance()
+    ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), ERR_NO_INIT);
+    alarm.SetSystemApp(true);
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), ERR_NO_INIT);
+    ReminderDataManager::InitInstance();
+
+    // test ReminderDataManager::UpdateReminder
+    MockReminderDataManager::MockUpdateReminder(1);
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), 1);
+    MockReminderDataManager::MockUpdateReminder(0);
+    EXPECT_EQ(reminderAgentService_->UpdateReminder(reminderId, alarm), 0);
+}
 }  // namespace OHOS::Notification

@@ -1179,10 +1179,6 @@ void ReminderDataManager::StartRecentReminder()
         SetActiveReminder(reminder);
         return;
     }
-    if (activeReminderId_ == reminder->GetReminderId()) {
-        ANSR_LOGW("Recent reminder has already run, no need to start again.");
-        return;
-    }
     if (activeReminderId_ != -1) {
         {
             std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);

@@ -33,6 +33,7 @@ static const int32_t GET_VALID_PARAM_LEN = 1;
 static const int32_t ADD_SLOT_PARAM_LEN = 2;
 static constexpr int32_t ADD_EXCLUDE_DATE_PARAM_LEN = 2;
 static constexpr int32_t DEL_EXCLUDE_DATE_PARAM_LEN = 1;
+static constexpr int32_t UPDATE_REMINDER_PARAM_LEN = 2;
 
 struct AsyncCallbackInfo {
     explicit AsyncCallbackInfo(napi_env napiEnv) : env(napiEnv) {}
@@ -1401,6 +1402,96 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
             ANSR_LOGI("GetExcludeDates napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
+    NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
+    callbackPtr.release();
+
+    return isCallback ? NotificationNapi::Common::NapiGetNull(env) : promise;
+}
+
+napi_value ParseUpdateReminderParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
+{
+    ANSR_LOGD("ParseUpdateReminderParameter");
+    size_t argc = UPDATE_REMINDER_PARAM_LEN;
+    napi_value argv[UPDATE_REMINDER_PARAM_LEN] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    if (argc < UPDATE_REMINDER_PARAM_LEN) {
+        ANSR_LOGE("Wrong number of arguments");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+
+    // argv[0]: reminder id
+    int32_t reminderId = -1;
+    if (!ReminderCommon::GetInt32(env, argv[0], nullptr, reminderId, true)) {
+        ANSR_LOGE("Parse reminder id failed.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    if (reminderId < 0) {
+        ANSR_LOGE("Param reminder id is illegal.");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    if (ReminderCommon::GetReminderRequest(env, argv[1], params.reminder) == nullptr) {
+        ANSR_LOGE("UpdateReminder returns nullptr");
+        ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
+        return nullptr;
+    }
+    params.reminderId = reminderId;
+    return NotificationNapi::Common::NapiGetNull(env);
+}
+
+napi_value UpdateReminder(napi_env env, napi_callback_info info)
+{
+    ANSR_LOGD("Call UpdateReminder");
+    AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
+    if (!asynccallbackinfo) {
+        ANSR_LOGE("Low memory.");
+        return NotificationNapi::Common::NapiGetNull(env);
+    }
+    std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+    // param
+    Parameters params;
+    if (ParseUpdateReminderParameter(env, info, params) == nullptr) {
+        return DealErrorReturn(env, asynccallbackinfo->callback, NotificationNapi::Common::NapiGetNull(env), true);
+    }
+
+    // promise
+    napi_value promise = nullptr;
+    SetAsynccallbackinfo(env, *asynccallbackinfo, promise);
+    asynccallbackinfo->reminderId = params.reminderId;
+    asynccallbackinfo->reminder = params.reminder;
+    asynccallbackinfo->isThrow = true;
+
+    // resource name
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "updateReminder", NAPI_AUTO_LENGTH, &resourceName);
+
+    bool isCallback = asynccallbackinfo->info.isCallback;
+    // create and queue async work
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANSR_LOGI("UpdateReminder napi_create_async_work start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = ReminderHelper::UpdateReminder(asynccallbackinfo->reminderId,
+                    *(asynccallbackinfo->reminder));
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANSR_LOGI("UpdateReminder napi_create_async_work complete start");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfo *>(data);
+            std::unique_ptr<AsyncCallbackInfo> callbackPtr { asynccallbackinfo };
+
+            ReminderCommon::ReturnCallbackPromise(
+                env, asynccallbackinfo->info, NotificationNapi::Common::NapiGetNull(env), asynccallbackinfo->isThrow);
+            ANSR_LOGI("UpdateReminder napi_create_async_work complete end");
+        },
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
     NAPI_CALL(env, napi_queue_async_work(env, asynccallbackinfo->asyncWork));
     callbackPtr.release();
 

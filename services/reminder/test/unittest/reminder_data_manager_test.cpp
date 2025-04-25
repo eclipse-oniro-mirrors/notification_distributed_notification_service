@@ -1303,5 +1303,29 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_029, Level1)
     EXPECT_TRUE(manager != nullptr);
     sleep(1);
 }
+
+/**
+ * @tc.name: ReminderDataManagerTest_030
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
+{
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->triggerTimeInMilli_ = 0;
+    manager->UpdateAndSaveReminderLocked(calendar, false);
+    EXPECT_TRUE(calendar->isExpired_ == true);
+    calendar->triggerTimeInMilli_ = ::time(nullptr) * 1000 + 30 * 60 * 1000;
+    manager->UpdateAndSaveReminderLocked(calendar, true);
+    calendar->reminderId_ = 301;
+    manager->UpdateAndSaveReminderLocked(calendar, true);
+    calendar->reminderId_ = 300;
+    calendar->isShare_ = true;
+    manager->UpdateAndSaveReminderLocked(calendar, true);
+    calendar->isShare_ = false;
+    manager->UpdateAndSaveReminderLocked(calendar, true);
+    EXPECT_TRUE(manager != nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS
