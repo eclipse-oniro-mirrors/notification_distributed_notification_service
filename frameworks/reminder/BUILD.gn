@@ -58,8 +58,6 @@ ohos_shared_library("reminder_innerkits") {
   public_configs = [
     ":reminder_innerkits_public_config",
     "${frameworks_path}/ans:ans_innerkits_config",
-    "${frameworks_path}/ans:ans_subscriber_local_live_view_config",
-    "${frameworks_path}/ans:ans_subscriber_config",
   ]
   output_values = get_target_outputs(":reminder_service_interface")
   sources = [
