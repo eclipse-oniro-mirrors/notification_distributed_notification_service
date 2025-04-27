@@ -1580,7 +1580,7 @@ void ReminderDataManager::LoadReminderFromDb()
     }
     std::vector<sptr<ReminderRequest>> existReminders = store_->GetHalfHourReminders();
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    reminderVector_ = existReminders;
+    UpdateReminderFromDb(existReminders);
     totalCount_ = static_cast<int16_t>(reminderVector_.size());
     ReminderRequest::GLOBAL_ID = store_->GetMaxId() + 1;
 }

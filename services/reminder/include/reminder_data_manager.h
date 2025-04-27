@@ -681,6 +681,8 @@ private:
     bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
         sptr<ReminderRequest>& reminder);
 
+    void UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb);
+
    /**
     * Single instance.
     */
