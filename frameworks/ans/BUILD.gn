@@ -42,7 +42,6 @@ config("ans_innerkits_public_config") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${target_gen_dir}",
-    "//third_party/json/single_include",
   ]
   configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
 }
