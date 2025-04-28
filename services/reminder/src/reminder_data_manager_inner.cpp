@@ -259,5 +259,28 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
         serviceQueue_->submit(callback, taskAttr);
     }
 }
+
+void ReminderDataManager::UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb)
+{
+    std::map<int32_t, sptr<ReminderRequest>> reminders;
+    for (const auto& reminder : remindersFromDb) {
+        reminders[reminder->GetReminderId()] = reminder;
+    }
+    // Only alerts that do not exist in memory are processed
+    for (const auto& reminder : reminderVector_) {
+        if (reminder->IsShare()) {
+            continue;
+        }
+        int32_t reminderId = reminder->GetReminderId();
+        auto iter = reminders.find(reminderId);
+        if (iter != reminders.end()) {
+            reminders.erase(iter);
+        }
+    }
+    // new reminder
+    for (auto& each : reminders) {
+        reminderVector_.push_back(each.second);
+    }
+}
 }
 }
