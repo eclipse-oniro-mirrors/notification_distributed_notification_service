@@ -253,6 +253,7 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
     }
 
     vsize = parcel.ReadUint64();
+    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
     for (uint64_t it = 0; it < vsize; ++it) {
         std::vector<std::string> iconsResource  = {};
         if (!parcel.ReadStringVector(&iconsResource)) {
