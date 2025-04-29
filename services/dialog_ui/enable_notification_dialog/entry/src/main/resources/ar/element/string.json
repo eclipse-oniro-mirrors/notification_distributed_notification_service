@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"السماح لتطبيق %s بإرسال الإشعارات إليك؟",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"سماح",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"رفض",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

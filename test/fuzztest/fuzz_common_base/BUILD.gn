@@ -13,7 +13,12 @@
 
 import("//base/notification/distributed_notification_service/notification.gni")
 
+config("public_config") {
+  include_dirs = [ "${component_path}/test/fuzztest/fuzz_common_base" ]
+}
+
 static_library("fuzz_common_base") {
+  public_configs = [ ":public_config" ]
   sources = [ "fuzz_common_base.cpp" ]
   cflags = [
     "-g",
@@ -21,5 +26,12 @@ static_library("fuzz_common_base") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  public_deps = [ "${commonlibrary_utils_path}/base:utils" ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+  ]
+
+  public_external_deps = [ "c_utils:utils" ]
 }

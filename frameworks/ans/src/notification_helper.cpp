@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "notification_helper.h"
 #include "ans_notification.h"
 #include "singleton.h"
+#include <memory>
 
 namespace OHOS {
 namespace Notification {
@@ -72,29 +73,41 @@ ErrCode NotificationHelper::SetNotificationSlotFlagsAsBundle(const NotificationB
     return DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
 }
 
-ErrCode NotificationHelper::PublishNotification(const NotificationRequest &request)
+ErrCode NotificationHelper::PublishNotification(const NotificationRequest &request,
+    std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(request);
+    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+        request, instanceKey);
 }
 
-ErrCode NotificationHelper::PublishNotification(const std::string &label, const NotificationRequest &request)
+ErrCode NotificationHelper::PublishNotification(const std::string &label,
+    const NotificationRequest &request, std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(label, request);
+    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+        label, request, instanceKey);
 }
 
-ErrCode NotificationHelper::CancelNotification(int32_t notificationId)
+ErrCode NotificationHelper::PublishNotificationForIndirectProxy(const NotificationRequest &request)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(notificationId);
+    return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotificationForIndirectProxy(request);
 }
 
-ErrCode NotificationHelper::CancelNotification(const std::string &label, int32_t notificationId)
+ErrCode NotificationHelper::CancelNotification(int32_t notificationId, std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(label, notificationId);
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
+        notificationId, instanceKey);
 }
 
-ErrCode NotificationHelper::CancelAllNotifications()
+ErrCode NotificationHelper::CancelNotification(const std::string &label, int32_t notificationId,
+    std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications();
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
+        label, notificationId, instanceKey);
+}
+
+ErrCode NotificationHelper::CancelAllNotifications(std::string instanceKey)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications(instanceKey);
 }
 
 ErrCode NotificationHelper::CancelAsBundle(
@@ -104,7 +117,8 @@ ErrCode NotificationHelper::CancelAsBundle(
         notificationId, representativeBundle, userId);
 }
 
-ErrCode NotificationHelper::CancelAsBundle(const NotificationBundleOption &bundleOption, int32_t notificationId)
+ErrCode NotificationHelper::CancelAsBundle(
+    const NotificationBundleOption &bundleOption, int32_t notificationId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
         bundleOption, notificationId);
@@ -115,19 +129,11 @@ ErrCode NotificationHelper::GetActiveNotificationNums(uint64_t &num)
     return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationNums(num);
 }
 
-ErrCode NotificationHelper::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request)
+ErrCode NotificationHelper::GetActiveNotifications(
+    std::vector<sptr<NotificationRequest>> &request, std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(request);
-}
-
-ErrCode NotificationHelper::SetNotificationAgent(const std::string &agent)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationAgent(agent);
-}
-
-ErrCode NotificationHelper::GetNotificationAgent(std::string &agent)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationAgent(agent);
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(
+        request, instanceKey);
 }
 
 ErrCode NotificationHelper::CanPublishNotificationAsBundle(const std::string &representativeBundle, bool &canPublish)
@@ -162,12 +168,30 @@ ErrCode NotificationHelper::IsAllowedNotifySelf(bool &allowed)
     return DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
 }
 
+ErrCode NotificationHelper::CanPopEnableNotificationDialog(sptr<AnsDialogHostClient> &hostClient,
+    bool &canPop, std::string &bundleName)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CanPopEnableNotificationDialog(
+        hostClient, canPop, bundleName);
+}
+
+ErrCode NotificationHelper::RemoveEnableNotificationDialog()
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+}
+
 ErrCode NotificationHelper::RequestEnableNotification(std::string &deviceId,
     sptr<AnsDialogHostClient> &hostClient,
     sptr<IRemoteObject> &callerToken)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
         deviceId, hostClient, callerToken);
+}
+
+ErrCode NotificationHelper::RequestEnableNotification(const std::string bundleName, const int32_t uid)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
+        bundleName, uid);
 }
 
 ErrCode NotificationHelper::HasNotificationPolicyAccessPermission(bool &hasPermission)
@@ -185,7 +209,17 @@ ErrCode NotificationHelper::SubscribeNotification(const NotificationSubscriber &
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber);
 }
 
+ErrCode NotificationHelper::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber, nullptr);
+}
+
 ErrCode NotificationHelper::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(subscriber);
+}
+
+ErrCode NotificationHelper::SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(subscriber);
 }
@@ -202,13 +236,30 @@ ErrCode NotificationHelper::SubscribeNotification(
     return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber, subscribeInfo);
 }
 
+ErrCode NotificationHelper::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(subscriber, subscribeInfo);
+}
+
 ErrCode NotificationHelper::UnSubscribeNotification(NotificationSubscriber &subscriber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber);
+}
+
+ErrCode NotificationHelper::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber);
 }
 
 ErrCode NotificationHelper::UnSubscribeNotification(
     NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber, subscribeInfo);
+}
+
+ErrCode NotificationHelper::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
+    const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(subscriber, subscribeInfo);
 }
@@ -276,6 +327,12 @@ ErrCode NotificationHelper::GetAllActiveNotifications(std::vector<sptr<Notificat
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(notification);
 }
 
+ErrCode NotificationHelper::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    const NotificationConstant::SlotType slotType)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationsBySlotType(notifications, slotType);
+}
+
 ErrCode NotificationHelper::GetAllActiveNotifications(
     const std::vector<std::string> key, std::vector<sptr<Notification>> &notification)
 {
@@ -325,9 +382,10 @@ ErrCode NotificationHelper::GetShowBadgeEnabled(bool &enabled)
     return DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabled(enabled);
 }
 
-ErrCode NotificationHelper::CancelGroup(const std::string &groupName)
+ErrCode NotificationHelper::CancelGroup(const std::string &groupName, std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(groupName);
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(
+        groupName, instanceKey);
 }
 
 ErrCode NotificationHelper::RemoveGroupByBundle(
@@ -360,6 +418,11 @@ ErrCode NotificationHelper::RemoveDoNotDisturbProfiles(
 ErrCode NotificationHelper::DoesSupportDoNotDisturbMode(bool &doesSupport)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(doesSupport);
+}
+
+ErrCode NotificationHelper::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsNeedSilentInDoNotDisturbMode(phoneNumber, callerType);
 }
 
 ErrCode NotificationHelper::IsDistributedEnabled(bool &enabled)
@@ -464,9 +527,9 @@ ErrCode NotificationHelper::GetSyncNotificationEnabledWithoutApp(const int32_t u
         userId, enabled);
 }
 
-ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber)
+ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber, std::string instanceKey)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber, instanceKey);
 }
 
 ErrCode NotificationHelper::SetBadgeNumberByBundle(const NotificationBundleOption &bundleOption, int32_t badgeNumber)
@@ -474,9 +537,26 @@ ErrCode NotificationHelper::SetBadgeNumberByBundle(const NotificationBundleOptio
     return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberByBundle(bundleOption, badgeNumber);
 }
 
+ErrCode NotificationHelper::SetBadgeNumberForDhByBundle(
+    const NotificationBundleOption &bundleOption, int32_t badgeNumber)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberForDhByBundle(bundleOption, badgeNumber);
+}
+
 ErrCode NotificationHelper::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(bundleOption);
+}
+
+ErrCode NotificationHelper::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllLiveViewEnabledBundles(bundleOption);
+}
+
+ErrCode NotificationHelper::GetAllDistribuedEnabledBundles(const std::string& deviceType,
+    std::vector<NotificationBundleOption> &bundleOption)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetAllDistribuedEnabledBundles(deviceType, bundleOption);
 }
 
 ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &pushCallback,
@@ -489,11 +569,6 @@ ErrCode NotificationHelper::RegisterPushCallback(const sptr<IRemoteObject> &push
 ErrCode NotificationHelper::UnregisterPushCallback()
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
-}
-
-ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
 }
 
 ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
@@ -515,20 +590,46 @@ ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceTyp
     return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);
 }
 
-ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
-{
-    return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);
-}
-
 ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType, bool &enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
-ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status)
+ErrCode NotificationHelper::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
 }
+
+ErrCode NotificationHelper::IsDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
+}
+
+ErrCode NotificationHelper::CancelAsBundleWithAgent(const NotificationBundleOption &bundleOption, const int32_t id)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(bundleOption, id);
+}
+
+ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std::string &value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(key, value);
+}
+
+ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const std::string deveiceId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, deveiceId);
+}
+
+ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag, const std::string deveiceId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, controlFlag,
+        deveiceId);
+}
+
 ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)
 {
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -536,6 +637,48 @@ ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool,
 #else
     return ERR_OK;
 #endif
+}
+ErrCode NotificationHelper::GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(id, profile);
+}
+
+ErrCode NotificationHelper::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<IAnsOperationCallback> &callback)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(operationInfo, callback);
+}
+
+ErrCode NotificationHelper::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationRequestByHashCode(
+        hashCode, notificationRequest);
+}
+
+ErrCode NotificationHelper::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->ReplyDistributeOperation(hashCode, result);
+}
+
+ErrCode NotificationHelper::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationTimerByUid(uid, isPaused);
+}
+
+ErrCode NotificationHelper::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->AllowUseReminder(bundleName, isAllowUseReminder);
+}
+
+ErrCode NotificationHelper::DisableNotificationFeature(const NotificationDisable &notificationDisable)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(notificationDisable);
+}
+
+ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetHashCodeRule(type);
 }
 }  // namespace Notification
 }  // namespace OHOS

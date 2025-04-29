@@ -133,32 +133,22 @@ public:
     void SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref);
 
     /**
-     * @brief Sets the callback information by type.
+     * @brief Sets threadsafe_function.
      *
-     * @param type Indicates the type of callback.
-     * @param env Indicates the environment that the API is invoked under.
-     * @param ref Indicates the napi_ref of callback.
      * @param tsfn Indicates the napi_threadsafe_function of callback.
      */
-    void SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref,
-        const napi_threadsafe_function &tsfn);
+    void SetThreadSafeFunction(const napi_threadsafe_function &tsfn);
 
 private:
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
-    void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
-
     void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
 
     void SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
 
-    void SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
-
     void SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
-
-    void SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref, const napi_threadsafe_function &tsfn);
 
     void SetDieCallbackInfo(const napi_env &env, const napi_ref &ref);
 
@@ -180,9 +170,8 @@ private:
     struct CallbackInfo {
         napi_env env = nullptr;
         napi_ref ref = nullptr;
-        napi_threadsafe_function tsfn = nullptr;
     };
-
+    napi_threadsafe_function tsfn_ = nullptr;
     CallbackInfo canceCallbackInfo_;
     CallbackInfo consumeCallbackInfo_;
     CallbackInfo updateCallbackInfo_;
@@ -200,34 +189,51 @@ private:
 
 struct SubscriberInstancesInfo {
     napi_ref ref = nullptr;
-    SubscriberInstance *subscriber = nullptr;
+    std::shared_ptr<SubscriberInstance> subscriber = nullptr;
 };
 
 struct AsyncCallbackInfoSubscribe {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     CallbackPromiseInfo info;
+};
+
+struct OperationInfo {
+    bool withOperationInfo = false;
+    std::string actionName;
+    std::string userInput;
+};
+
+struct AsyncOperationCallbackInfo {
+    napi_env env;
+    napi_value thisVar = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_async_work asyncWork = nullptr;
+    std::string hashCode;
+    OperationInfo operationInfo;
 };
 
 static std::mutex mutex_;
 static thread_local std::vector<SubscriberInstancesInfo> subscriberInstances_;
 
 static std::mutex delMutex_;
-static std::vector<SubscriberInstance*> DeletingSubscriber;
+static std::vector<std::shared_ptr<SubscriberInstance>> DeletingSubscriber;
 
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo);
 bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesInfo &subscriberInfo);
-bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber);
+bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<SubscriberInstance> subscriber);
 
-bool AddDeletingSubscriber(SubscriberInstance *subscriber);
-void DelDeletingSubscriber(SubscriberInstance *subscriber);
+bool AddDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber);
+void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber);
 
 napi_value Subscribe(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
-    NotificationSubscribeInfo &subscriberInfo, SubscriberInstance *&subscriber, napi_ref &callback);
+    NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode,
+    napi_value& thisVar, OperationInfo& operationInfo);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_SUBSCRIBE_H

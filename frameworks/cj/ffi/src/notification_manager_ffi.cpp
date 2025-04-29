@@ -14,6 +14,7 @@
  */
 
 #include "notification_manager_ffi.h"
+#include "notification_manager_impl.h"
 #include "macro.h"
 
 using namespace OHOS::FFI;
@@ -23,96 +24,172 @@ namespace CJSystemapi {
 namespace Notification {
 
 extern "C" {
-int32_t FfiOHOSNotificationManagerPublish(CNotificationRequest request)
+int32_t FfiOHOSNotificationManagerPublishV2(CNotificationRequestV2 request)
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerPublish start");
-    auto code = NotificationManagerImpl::Publish(request);
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerPublish success");
+    auto code = NotificationManagerImplV2::Publish(request);
     return code;
 }
 
-int32_t FfiOHOSNotificationManagerCancel(int32_t id, const char* label)
+int32_t FfiOHOSNotificationManagerCancelV2(int32_t id, const char* label)
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerCancel start");
-    auto code = NotificationManagerImpl::Cancel(id, label);
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerCancel success");
+    auto code = NotificationManagerImplV2::Cancel(id, label);
     return code;
 }
 
-int32_t FfiOHOSNotificationManagerCancelAll()
+int32_t FfiOHOSNotificationManagerCancelAllV2()
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerCancelAll start");
-    auto code = NotificationManagerImpl::CancelAll();
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerCancelAll success");
+    auto code = NotificationManagerImplV2::CancelAll();
     return code;
 }
 
-int32_t FfiOHOSNotificationManagerAddSlot(int32_t type)
+int32_t FfiOHOSNotificationManagerAddSlotV2(int32_t type)
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerAddSlot start");
-    auto code = NotificationManagerImpl::AddSlot(type);
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerAddSlot success");
+    auto code = NotificationManagerImplV2::AddSlot(type);
     return code;
 }
 
-RetDataBool FfiOHOSNotificationManagerIsNotificationEnabled()
+CNotificationSlotV2 FfiOHOSNotificationManagerGetSlot(int32_t type, int32_t* errCode)
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsNotificationEnabled start");
+    CNotificationSlotV2 ret = NotificationManagerImplV2::GetSlot(type, *errCode);
+    return ret;
+}
+
+CArrayNotificationSlotsV2 FfiOHOSNotificationManagerGetSlots(int32_t* errCode)
+{
+    CArrayNotificationSlotsV2 ret = NotificationManagerImplV2::GetSlots(*errCode);
+    return ret;
+}
+
+int32_t FfiOHOSNotificationManagerRemoveSlot(int32_t type)
+{
+    auto code = NotificationManagerImplV2::RemoveSlot(type);
+    return code;
+}
+
+int32_t FfiOHOSNotificationManagerRemoveAllSlots()
+{
+    auto code = NotificationManagerImplV2::RemoveAllSlots();
+    return code;
+}
+
+RetDataUI32 FfiOHOSNotificationManagerGetActiveNotificationCount()
+{
+    RetDataUI32 ret = NotificationManagerImplV2::GetActiveNotificationCount();
+    return ret;
+}
+
+CArrayNotificationRequestV2 FfiOHOSNotificationManagerGetActiveNotifications(int32_t* errCode)
+{
+    CArrayNotificationRequestV2 ret = NotificationManagerImplV2::GetActiveNotifications(*errCode);
+    return ret;
+}
+
+int32_t FfiOHOSNotificationManagerCancelGroup(const char* cGroupName)
+{
+    auto code = NotificationManagerImplV2::CancelGroup(cGroupName);
+    return code;
+}
+
+RetDataBool FfiOHOSNotificationManagerIsSupportTemplate(const char* cTemplateName)
+{
+    RetDataBool ret =  NotificationManagerImplV2::IsSupportTemplate(cTemplateName);
+    return ret;
+}
+
+int32_t FfiOHOSNotificationManagerSetNotificationEnable(CNotificationBundleOptionV2 option, bool enable)
+{
+    auto code = NotificationManagerImplV2::SetNotificationEnable(option, enable);
+    return code;
+}
+
+int32_t FfiOHOSNotificationManagerDisplayBadge(CNotificationBundleOptionV2 option, bool enable)
+{
+    auto code = NotificationManagerImplV2::DisplayBadge(option, enable);
+    return code;
+}
+
+RetDataBool FfiOHOSNotificationManagerIsBadgeDisplayed(CNotificationBundleOptionV2 option)
+{
+    RetDataBool ret =  NotificationManagerImplV2::IsBadgeDisplayed(option);
+    return ret;
+}
+
+int32_t FfiOHOSNotificationManagerSetSlotFlagsByBundle(
+    CNotificationBundleOptionV2 option,
+    int32_t slotFlags)
+{
+    auto code = NotificationManagerImplV2::SetSlotFlagsByBundle(option, slotFlags);
+    return code;
+}
+
+RetDataUI32 FfiOHOSNotificationManagerGetSlotFlagsByBundle(CNotificationBundleOptionV2 option)
+{
+    RetDataUI32 ret = NotificationManagerImplV2::GetSlotFlagsByBundle(option);
+    return ret;
+}
+
+RetDataUI32 FfiOHOSNotificationManagerGetSlotNumByBundle(CNotificationBundleOptionV2 option)
+{
+    RetDataUI32 ret = NotificationManagerImplV2::GetSlotNumByBundle(option);
+    return ret;
+}
+
+int32_t FfiOHOSNotificationManagerRemoveGroupByBundle(
+    CNotificationBundleOptionV2 option,
+    const char* cGroupName)
+{
+    auto code = NotificationManagerImplV2::RemoveGroupByBundle(option, cGroupName);
+    return code;
+}
+
+RetDataBool FfiOHOSNotificationManagerIsNotificationEnabledV2()
+{
     RetDataBool ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
-    auto [status, enabledStatus] = NotificationManagerImpl::IsNotificationEnabled();
+    auto [status, enabledStatus] = NotificationManagerImplV2::IsNotificationEnabled();
     if (status != SUCCESS_CODE) {
         LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsNotificationEnabled error");
         ret.code = status;
         ret.data = false;
         return ret;
     }
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsNotificationEnabled success");
     ret.code = status;
     ret.data = enabledStatus;
     return ret;
 }
 
-int32_t FfiOHOSNotificationManagerSetBadgeNumber(int32_t badgeNumber)
+int32_t FfiOHOSNotificationManagerSetBadgeNumberV2(int32_t badgeNumber)
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerSetBadgeNumber start");
-    auto code = NotificationManagerImpl::SetBadgeNumber(badgeNumber);
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerSetBadgeNumber success");
+    auto code = NotificationManagerImplV2::SetBadgeNumber(badgeNumber);
     return code;
 }
 
-int32_t FfiOHOSNotificationManagerRequestEnableNotification()
+int32_t FfiOHOSNotificationManagerRequestEnableNotificationV2()
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotification start");
-    auto code = NotificationManagerImpl::RequestEnableNotification();
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotification success");
+    auto code = NotificationManagerImplV2::RequestEnableNotification();
     return code;
 }
 
-int32_t FfiOHOSNotificationManagerRequestEnableNotificationWithContext(int64_t id)
+int32_t FfiOHOSNotificationManagerRequestEnableNotificationWithContextV2(int64_t id)
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotificationWithContext start");
     auto context = FFIData::GetData<AbilityRuntime::CJAbilityContext>(id);
     if (context == nullptr) {
         LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotificationWithContext error");
         return ERROR_PARAM_INVALID;
     }
-    auto code = NotificationManagerImpl::RequestEnableNotificationWithContext(context);
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerRequestEnableNotificationWithContext success");
+    auto code = NotificationManagerImplV2::RequestEnableNotificationWithContext(context);
     return code;
 }
 
-RetDataBool FfiOHOSNotificationManagerIsDistributedEnabled()
+RetDataBool FfiOHOSNotificationManagerIsDistributedEnabledV2()
 {
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsDistributedEnabled start");
     RetDataBool ret = { .code = ERR_INVALID_INSTANCE_CODE, .data = 0 };
-    auto [status, enabledStatus] = NotificationManagerImpl::IsDistributedEnabled();
+    auto [status, enabledStatus] = NotificationManagerImplV2::IsDistributedEnabled();
     if (status != SUCCESS_CODE) {
         LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsDistributedEnabled error");
         ret.code = status;
         ret.data = false;
         return ret;
     }
-    LOGI("NOTIFICATION_TEST::FfiOHOSNotificationManagerIsDistributedEnabled success");
     ret.code = status;
     ret.data = enabledStatus;
     return ret;

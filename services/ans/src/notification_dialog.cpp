@@ -21,32 +21,21 @@
 #include "bundle_manager_helper.h"
 #include "in_process_call_wrapper.h"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "system_dialog_connect_stb.h"
 #include "extension_manager_client.h"
+#include <thread>
+#include <chrono>
 
 namespace OHOS {
 namespace Notification {
 constexpr int32_t DEFAULT_VALUE = -1;
-int32_t NotificationDialog::GetActiveUserId()
-{
-    std::vector<int32_t> activeUserId;
-    auto errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(activeUserId);
-    if (errCode != ERR_OK) {
-        ANS_LOGE("Query active accountIds failed with %{public}d.", errCode);
-        return AppExecFwk::Constants::ANY_USERID;
-    }
-
-    if (activeUserId.empty()) {
-        ANS_LOGE("Active accountIds is empty.");
-        return AppExecFwk::Constants::ANY_USERID;
-    }
-
-    return activeUserId.front();
-}
+const int32_t SLEEP_TIME = 200;
 
 int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
 {
-    auto userId = NotificationDialog::GetActiveUserId();
+    int32_t userId = AppExecFwk::Constants::ANY_USERID;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     return IN_PROCESS_CALL(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId));
 }
 
@@ -54,10 +43,28 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const std::string &serviceBundleName,
     const std::string &serviceAbilityName,
     int32_t uid,
-    const sptr<IRemoteObject> &callerToken)
+    std::string appBundleName,
+    const sptr<IRemoteObject> &callerToken,
+    const bool innerLake)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-    auto appBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+
+    auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    if (topBundleName != appBundleName) {
+        ANS_LOGW("Current application isn't in foreground, top is %{public}s.", topBundleName.c_str());
+        if (!innerLake) {
+            return ERR_ANS_INVALID_BUNDLE;
+        } else {
+            ANS_LOGW("get top ability again");
+            std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+            topBundleName = IN_PROCESS_CALL(
+                AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+            if (topBundleName != appBundleName) {
+                ANS_LOGW("get top ability again failed");
+                return ERR_ANS_INVALID_BUNDLE;
+            }
+        }
+    }
     
     AAFwk::Want want;
     
@@ -67,8 +74,10 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 
     nlohmann::json root;
     std::string uiExtensionType = "sysDialog/common";
-    root["from"] = appBundleName;
+    root["bundleName"] = appBundleName;
+    root["bundleUid"] = uid;
     root["ability.want.params.uiExtensionType"] = uiExtensionType;
+    root["innerLake"] = innerLake;
     std::string command  = root.dump();
     
     auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));

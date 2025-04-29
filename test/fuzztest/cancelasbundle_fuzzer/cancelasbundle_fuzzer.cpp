@@ -14,15 +14,16 @@
  */
 
 #include "cancelasbundle_fuzzer.h"
-
+#include "ans_permission_def.h"
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string representativeBundle(data);
-        int32_t notificationId = static_cast<int32_t>(GetU32Data(data));
-        int32_t userId = static_cast<int32_t>(GetU32Data(data));
+        std::string representativeBundle = fdp->ConsumeRandomLengthString();
+        int32_t notificationId = fdp->ConsumeIntegral<int32_t>();
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
         return Notification::NotificationHelper::CancelAsBundle(
             notificationId, representativeBundle, userId) == ERR_OK;
     }
@@ -32,11 +33,13 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    SystemHapTokenGet(requestPermission);
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

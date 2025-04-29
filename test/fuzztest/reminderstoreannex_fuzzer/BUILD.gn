@@ -21,18 +21,24 @@ ohos_fuzztest("ReminderStoreAnnexFuzzTest") {
   module_out_path = service_fuzz_test_path
   fuzz_config_file = "${component_path}/test/fuzztest/reminderstoreannex_fuzzer"
 
-  include_dirs = [ "${component_path}/test/fuzztest/fuzz_common_base" ]
+  include_dirs = [
+    "${component_path}/test/fuzztest/fuzz_common_base",
+    "${component_path}/services/reminder/include",
+  ]
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+    "-Dprotected=public",
   ]
   sources = [ "reminderstoreannex_fuzzer.cpp" ]
 
   deps = [
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
-    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+    "${services_path}/reminder:libreminder_static",
   ]
 
   external_deps = [

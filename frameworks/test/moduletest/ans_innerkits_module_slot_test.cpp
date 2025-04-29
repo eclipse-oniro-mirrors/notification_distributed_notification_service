@@ -356,7 +356,7 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_NotificationSlot_00800, Fu
     EXPECT_EQ("", slot.GetSound().ToString());
     EXPECT_FALSE(slot.CanVibrate());
     EXPECT_EQ(0U, slot.GetVibrationStyle().size());
-    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_LOW, slot.GetLevel());
+    EXPECT_EQ(NotificationSlot::NotificationLevel::LEVEL_MIN, slot.GetLevel());
 }
 
 /**

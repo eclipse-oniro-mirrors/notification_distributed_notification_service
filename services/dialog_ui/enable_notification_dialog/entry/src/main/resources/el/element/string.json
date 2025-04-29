@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Να επιτραπεί στην εφαρμογή %s η αποστολή ειδοποιήσεων σε εσάς;",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Να επιτραπεί",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Άρνηση",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

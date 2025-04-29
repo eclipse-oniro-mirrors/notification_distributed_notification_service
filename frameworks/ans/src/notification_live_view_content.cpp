@@ -16,6 +16,7 @@
 #include "notification_live_view_content.h"
 #include <string>
 #include "ans_image_util.h"
+#include "ans_ipc_common_utils.h"
 #include "ans_log_wrapper.h"
 #include "want_params_wrapper.h"
 #include "ans_const_define.h"
@@ -219,7 +220,7 @@ bool NotificationLiveViewContent::Marshalling(Parcel &parcel) const
     }
     if (valid) {
         if (!parcel.WriteParcelable(extraInfo_.get())) {
-            ANS_LOGE("Failed to write additionalParams");
+            ANS_LOGE("Failed to write extraInfo");
             return false;
         }
     }
@@ -266,7 +267,7 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
     }
 
     isOnlyLocalUpdate_ = parcel.ReadBool();
-    
+
     uint64_t len = parcel.ReadUint64();
     if (len > MAX_PARCELABLE_VECTOR_NUM) {
         ANS_LOGE("Size exceeds the range.");
@@ -274,15 +275,10 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
     }
     for (uint64_t i = 0; i < len; i++) {
         auto key = parcel.ReadString();
-        std::vector<std::string> strVec;
-        if (!parcel.ReadStringVector(&strVec)) {
+        std::vector<std::shared_ptr<Media::PixelMap>> pixelMapVec;
+        if (!AnsIpcCommonUtils::ReadParcelableVector(pixelMapVec, parcel)) {
             ANS_LOGE("Failed to read extraInfo vector string.");
             return false;
-        }
-        std::vector<std::shared_ptr<Media::PixelMap>> pixelMapVec;
-        pixelMapVec.reserve(strVec.size());
-        for (const auto &str : strVec) {
-            pixelMapVec.emplace_back(AnsImageUtil::UnPackImage(str));
         }
         pictureMap_[key] = pixelMapVec;
     }
@@ -292,62 +288,23 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
 
 bool NotificationLiveViewContent::MarshallingPictureMap(Parcel &parcel) const
 {
-    if (!pictureMarshallingMap_.empty()) {
-        ANS_LOGD("Write pictureMap by pictureMarshallingMap.");
-        for (const auto &picture : pictureMarshallingMap_) {
-            if (!parcel.WriteString(picture.first)) {
-                ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
-                return false;
-            }
-
-            if (!parcel.WriteStringVector(picture.second)) {
-                ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
-                return false;
-            }
-        }
-        return true;
-    }
-
     for (const auto &picture : pictureMap_) {
         if (!parcel.WriteString(picture.first)) {
             ANS_LOGE("Failed to write picture map key %{public}s.", picture.first.c_str());
             return false;
         }
-        std::vector<std::string> pixelVec;
-        pixelVec.reserve(picture.second.size());
-        for (const auto &pixel : picture.second) {
-            pixelVec.emplace_back(AnsImageUtil::PackImage(pixel));
-        }
-        if (!parcel.WriteStringVector(pixelVec)) {
+        
+        if (!AnsIpcCommonUtils::WriteParcelableVector(picture.second, parcel)) {
             ANS_LOGE("Failed to write picture vector of key %{public}s.", picture.first.c_str());
             return false;
         }
     }
-
     return true;
 }
 
-void NotificationLiveViewContent::FillPictureMarshallingMap()
+void NotificationLiveViewContent::ClearPictureMap()
 {
-    pictureMarshallingMap_.clear();
-    for (const auto &picture : pictureMap_) {
-        std::vector<std::string> pixelVec;
-        pixelVec.reserve(picture.second.size());
-        for (const auto &pixel : picture.second) {
-            pixelVec.emplace_back(AnsImageUtil::PackImage(pixel));
-        }
-        pictureMarshallingMap_[picture.first] = pixelVec;
-    }
-}
-
-void NotificationLiveViewContent::ClearPictureMarshallingMap()
-{
-    pictureMarshallingMap_.clear();
-}
-
-PictureMarshallingMap NotificationLiveViewContent::GetPictureMarshallingMap() const
-{
-    return pictureMarshallingMap_;
+    return pictureMap_.clear();
 }
 
 }  // namespace Notification

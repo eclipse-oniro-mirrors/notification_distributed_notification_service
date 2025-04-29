@@ -66,6 +66,16 @@ public:
     int32_t GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId);
 
     /**
+     * @brief Obtains the default uid.
+     *
+     * @param bundle Indicates the bundle name.
+     * @param userId Indicates the user id.
+     * @param appIndex Indicates the app Index.
+     * @return Returns the uid.
+     */
+    int32_t GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId, const int32_t appIndex);
+
+    /**
      * @brief Obtains the bundle info.
      *
      * @param bundle Indicates the bundle name.
@@ -97,7 +107,7 @@ public:
      */
     bool GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
         int32_t userId, AppExecFwk::BundleInfo &bundleInfo);
-    
+
     /**
      * @brief Obtains BundleInfo of all bundles available in the system through the proxy object.
      * @param flag Indicates the flag used to specify information contained in the BundleInfo that will be returned.
@@ -107,6 +117,33 @@ public:
      */
     bool GetBundleInfos(
         const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
+
+    /**
+     * @brief Obtains the app index by uid.
+     * @param uid Indicates uid.
+     * @return Returns the query result if succeed, retrun 0(main index) otherwise.
+     */
+    int32_t GetAppIndexByUid(const int32_t uid);
+
+    /**
+     * @brief Check API compatibility.
+     *
+     * @param bundleName Indicates the bundle name.
+     * @param uid Indicates the bundle uid.
+     * @return Returns the check result.
+     */
+    bool CheckApiCompatibility(const std::string &bundleName, const int32_t &uid);
+
+    /**
+     * @brief GetBundleInfoV9.
+     * @param bundle bundle name.
+     * @param flag query condation.
+     * @param bundleInfo bundle info.
+     * @param userId userId.
+     * @return Returns the query result if succeed, retrun 0(main index) otherwise.
+     */
+    bool GetBundleInfoV9(const std::string bundle, const int32_t flag,
+        AppExecFwk::BundleInfo &bundleInfo, const int32_t userId);
 
 private:
     void Connect();
@@ -123,5 +160,4 @@ private:
 };
 }  // namespace Notification
 }  // namespace OHOS
-
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_BUNDLE_MANAGER_HELPER_H

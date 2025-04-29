@@ -14,19 +14,19 @@
 import("//base/notification/distributed_notification_service/notification.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "${component_name}/moduletest"
+module_output_path =
+    "${component_name}/distributed_notification_service/moduletest"
 
 ohos_moduletest("ans_module_test") {
   module_out_path = module_output_path
   include_dirs = [
     "include",
     "${services_path}/ans/include",
+    "${services_path}/ans/include/disturb_manager",
     "${services_path}/ans/test/unittest",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/test/moduletest/mock/include",
-    "${ffrt_path}/interfaces/kits",
   ]
 
   sources = [
@@ -70,7 +70,6 @@ ohos_moduletest("ans_module_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "player_framework:media_client",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
@@ -81,6 +80,11 @@ ohos_moduletest("ans_module_test") {
   if (device_usage) {
     external_deps += [ "device_usage_statistics:usagestatsinner" ]
     defines += [ "DEVICE_USAGE_STATISTICS_ENABLE" ]
+  }
+
+  if (player_framework) {
+    external_deps += [ "player_framework:media_client" ]
+    defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
 
   if (distributed_notification_supported) {

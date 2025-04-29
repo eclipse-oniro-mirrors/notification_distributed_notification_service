@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,13 +29,15 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+const uint32_t MAX_PARAM_NUM = 5;
+
 namespace {
 static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
     {ERROR_NOT_SYSTEM_APP, "The application isn't system application"},
     {ERROR_PARAM_INVALID, "Invalid parameter"},
     {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
-    {ERROR_INTERNAL_ERROR, "Internal error"},
+    {ERROR_INTERNAL_ERROR, "Internal error. Possible cause: 1.IPC communication failed. 2.Memory operation error"},
     {ERROR_IPC_ERROR, "Marshalling or unmarshalling error"},
     {ERROR_SERVICE_CONNECT_ERROR, "Failed to connect to the service"},
     {ERROR_NOTIFICATION_CLOSED, "Notification disabled"},
@@ -46,9 +48,19 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_MESSAGE {
     {ERROR_OVER_MAX_NUM_PER_SECOND, "The notification sending frequency reaches the upper limit"},
     {ERROR_DISTRIBUTED_OPERATION_FAILED, "Distributed operation failed"},
     {ERROR_READ_TEMPLATE_CONFIG_FAILED, "Failed to read the template configuration"},
-    {ERROR_NO_MEMORY, "No memory space"},
+    {ERROR_NO_MEMORY, "Memory operation failed"},
     {ERROR_BUNDLE_NOT_FOUND, "The specified bundle name was not found"},
     {ERROR_NO_AGENT_SETTING, "There is no corresponding agent relationship configuration"},
+    {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
+    {ERROR_SETTING_WINDOW_EXIST, "The notification settings window is already displayed"},
+    {ERROR_NO_PROFILE_TEMPLATE, "Not exit noNotDisturb profile template"},
+    {ERROR_REPEAT_SET, "Repeat create or end"},
+    {ERROR_NO_RIGHT, "The specified process does not have the permission"},
+    {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
+    {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
+    {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION,
+        "The application is not allowed to publish notifications due to permission control settings"},
+    {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
 };
 }
 
@@ -180,8 +192,12 @@ void Common::SetCallback(
     napi_value results[ARGS_TWO] = {nullptr};
     results[PARAM0] = CreateErrorValue(env, errorCode, newType);
     results[PARAM1] = result;
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout));
-    ANS_LOGD("end");
+    napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_TWO, &results[PARAM0], &resultout);
+    if (napi_result != napi_ok) {
+        ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_result);
+    ANS_LOGI("end");
 }
 
 void Common::SetCallback(
@@ -194,8 +210,12 @@ void Common::SetCallback(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout));
-    ANS_LOGD("end");
+    napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_ONE, &result, &resultout);
+    if (napi_result != napi_ok) {
+        ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_result);
+    ANS_LOGI("end");
 }
 
 void Common::SetCallbackArg2(
@@ -209,8 +229,12 @@ void Common::SetCallbackArg2(
     napi_value callback = nullptr;
     napi_value resultout = nullptr;
     napi_get_reference_value(env, callbackIn, &callback);
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, result, &resultout));
-    ANS_LOGD("end");
+    napi_status napi_result = napi_call_function(env, undefined, callback, ARGS_TWO, result, &resultout);
+    if (napi_result != napi_ok) {
+        ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
+    }
+    NAPI_CALL_RETURN_VOID(env, napi_result);
+    ANS_LOGI("end");
 }
 
 void Common::SetPromise(const napi_env &env,
@@ -293,6 +317,9 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
         {ERR_ANS_PARCELABLE_FAILED, ERROR_IPC_ERROR},
         {ERR_ANS_TRANSACT_FAILED, ERROR_IPC_ERROR},
         {ERR_ANS_REMOTE_DEAD, ERROR_IPC_ERROR},
+        {ERR_INVALID_VALUE, ERROR_IPC_ERROR},
+        {ERR_INVALID_DATA, ERROR_IPC_ERROR},
+        {DEAD_OBJECT, ERROR_IPC_ERROR},
         {ERR_ANS_SERVICE_NOT_READY, ERROR_SERVICE_CONNECT_ERROR},
         {ERR_ANS_SERVICE_NOT_CONNECTED, ERROR_SERVICE_CONNECT_ERROR},
         {ERR_ANS_NOT_ALLOWED, ERROR_NOTIFICATION_CLOSED},
@@ -313,7 +340,11 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
         {ERR_ANS_PUSH_CHECK_FAILED, ERROR_NO_RIGHT},
         {ERR_ANS_PUSH_CHECK_UNREGISTERED, ERROR_NO_RIGHT},
         {ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE, ERROR_NETWORK_UNREACHABLE},
-        {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING}
+        {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING},
+        {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING},
+        {ERR_ANS_NO_PROFILE_TEMPLATE, ERROR_NO_PROFILE_TEMPLATE},
+        {ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, ERROR_REJECTED_WITH_DISABLE_NOTIFICATION},
+        {ERR_ANS_OPERATION_TIMEOUT, ERROR_DISTRIBUTED_OPERATION_TIMEOUT},
     };
 
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;
@@ -326,6 +357,72 @@ int32_t Common::ErrorToExternal(uint32_t errCode)
 
     ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
     return ExternalCode;
+}
+
+napi_value Common::NapiReturnCapErrCb(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_PARAM_NUM;
+    napi_value argv[MAX_PARAM_NUM] = {nullptr};
+    napi_value thisVar = nullptr;
+    napi_ref callback = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    for (size_t i = 0; i < argc && i < MAX_PARAM_NUM; ++i) {
+        napi_valuetype valuetype = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, argv[i], &valuetype));
+        if (valuetype == napi_function) {
+            napi_create_reference(env, argv[i], 1, &callback);
+            SetCallback(env, callback, ERROR_SYSTEM_CAP_ERROR, nullptr, false);
+            napi_delete_reference(env, callback);
+            return NapiGetNull(env);
+        }
+    }
+
+    return NapiReturnCapErr(env, info);
+}
+
+napi_value Common::NapiReturnCapErr(napi_env env, napi_callback_info info)
+{
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+    SetPromise(env, deferred, ERROR_SYSTEM_CAP_ERROR, Common::NapiGetNull(env), false);
+    return promise;
+}
+
+napi_value Common::NapiReturnFalseCb(napi_env env, napi_callback_info info)
+{
+    return Common::NapiReturnFalseCbInner(env, info, false);
+}
+
+napi_value Common::NapiReturnFalseCbNewType(napi_env env, napi_callback_info info)
+{
+    return Common::NapiReturnFalseCbInner(env, info, true);
+}
+
+napi_value Common::NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType)
+{
+    size_t argc = ONLY_CALLBACK_MAX_PARA;
+    napi_value argv[ONLY_CALLBACK_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    napi_ref callback = nullptr;
+    napi_value result = nullptr;
+    napi_get_boolean(env, false, &result);
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc >= ONLY_CALLBACK_MIN_PARA) {
+        napi_valuetype valuetype = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+        if (valuetype == napi_function) {
+            napi_create_reference(env, argv[PARAM0], 1, &callback);
+            SetCallback(env, callback, 0, result, true);
+            napi_delete_reference(env, callback);
+            return NapiGetNull(env);
+        }
+    }
+    napi_value promise = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_create_promise(env, &deferred, &promise);
+    SetPromise(env, deferred, 0, result, false);
+    return promise;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

@@ -24,6 +24,7 @@
 #include "refbase.h"
 #include "want_agent_helper.h"
 #include "want_params_wrapper.h"
+#include "notification_action_button.h"
 #include <memory>
 
 namespace OHOS {
@@ -51,6 +52,8 @@ const uint32_t NotificationRequest::COLOR_MASK {0xFF000000};
 const std::size_t NotificationRequest::MAX_USER_INPUT_HISTORY {5};
 const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
+
+constexpr int32_t MAX_MAP_SIZE = 1000;
 
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
@@ -233,7 +236,7 @@ void NotificationRequest::SetIsAgentNotification(bool isAgent)
 void NotificationRequest::AddMessageUser(const std::shared_ptr<MessageUser> &messageUser)
 {
     if (!messageUser) {
-        ANS_LOGI("messageUser can not be null");
+        ANS_LOGE("messageUser can not be null");
         return;
     }
 
@@ -310,6 +313,11 @@ void NotificationRequest::SetBigIcon(const std::shared_ptr<Media::PixelMap> &big
     bigIcon_ = bigIcon;
 }
 
+void NotificationRequest::ResetBigIcon() const
+{
+    bigIcon_ = nullptr;
+}
+
 const std::shared_ptr<Media::PixelMap> NotificationRequest::GetBigIcon() const
 {
     return bigIcon_;
@@ -356,20 +364,20 @@ bool NotificationRequest::IsColorEnabled() const
 
     // no valid content
     if (!notificationContent_) {
-        ANS_LOGI("no valid notification content");
+        ANS_LOGE("no valid notification content");
         return false;
     }
 
     // not a media content
     if (NotificationContent::Type::MEDIA != notificationContentType_) {
-        ANS_LOGI("not a media notification content");
+        ANS_LOGE("not a media notification content");
         return false;
     }
 
     auto basicContent = notificationContent_->GetNotificationContent();
     auto mediaContent = std::static_pointer_cast<NotificationMediaContent>(basicContent);
     if (!mediaContent->GetAVToken()) {
-        ANS_LOGI("AVToken has not been attached");
+        ANS_LOGE("AVToken has not been attached");
         return false;
     }
 
@@ -717,6 +725,16 @@ int32_t NotificationRequest::GetCreatorInstanceKey() const
     return creatorInstanceKey_;
 }
 
+void NotificationRequest::SetAppInstanceKey(const std::string &key)
+{
+    appInstanceKey_ = key;
+}
+ 
+std::string NotificationRequest::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
+}
+
 void NotificationRequest::SetOwnerUserId(int32_t userId)
 {
     ownerUserId_ = userId;
@@ -725,6 +743,26 @@ void NotificationRequest::SetOwnerUserId(int32_t userId)
 int32_t NotificationRequest::GetOwnerUserId() const
 {
     return ownerUserId_;
+}
+
+void NotificationRequest::SetHashCodeGenerateType(uint32_t type)
+{
+    hashCodeGenerateType_ = type;
+}
+
+uint32_t NotificationRequest::GetHashCodeGenerateType() const
+{
+    return hashCodeGenerateType_;
+}
+
+void NotificationRequest::SetCollaboratedReminderFlag(uint32_t reminderFlag)
+{
+    collaboratedReminderFlag_ = reminderFlag;
+}
+
+uint32_t NotificationRequest::GetCollaboratedReminderFlag() const
+{
+    return collaboratedReminderFlag_;
 }
 
 std::string NotificationRequest::Dump()
@@ -763,6 +801,10 @@ std::string NotificationRequest::Dump()
             ", floatingIcon = " + (floatingIcon_ ? "true" : "false") +
             ", onlyLocal = " + (onlyLocal_ ? "true" : "false") + ", permitted = " + (permitted_ ? "true" : "false") +
             ", isAgent = " + (isAgent_ ? "true" : "false") +
+            ", updateOnly = " + (updateOnly_ ? "true" : "false") +
+            ", isForceDistributed = " + (forceDistributed_ ? "true" : "false") +
+            ", isNotDistributed = " + (notDistributed_ ? "true" : "false") +
+            ", isDoNotDisturbByPassed = " + (isDoNotDisturbByPassed_ ? "true" : "false") +
             ", removalWantAgent = " + (removalWantAgent_ ? "not null" : "null") +
             ", maxScreenWantAgent = " + (maxScreenWantAgent_ ? "not null" : "null") +
             ", additionalParams = " + (additionalParams_ ? "not null" : "null") +
@@ -782,7 +824,8 @@ std::string NotificationRequest::Dump()
             ", creatorUserId = " + std::to_string(creatorUserId_) + ", ownerUserId = " + std::to_string(ownerUserId_) +
             ", receiverUserId = " + std::to_string(receiverUserId_) + ", updateDeadLine = " +
             std::to_string(updateDeadLine_) + ", finishDeadLine = " + std::to_string(finishDeadLine_) +
-            ", sound = " + sound_ + ", unifiedGroupInfo_ = " +
+            ", sound = " + sound_ + ", distributed = " + std::to_string(distributedCollaborate_) + ":" +
+            distributedHashCode_ + " flag: " + std::to_string(collaboratedReminderFlag_)  + ", unifiedGroupInfo_ = " +
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
 }
 
@@ -816,6 +859,8 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["isUnremovable"]    = unremovable_;
     jsonObject["isAgent"]          = isAgent_;
     jsonObject["isFloatingIcon"]   = floatingIcon_;
+    jsonObject["updateOnly"]   = updateOnly_;
+    jsonObject["distributedCollaborate"]    = distributedCollaborate_;
 
     jsonObject["creatorBundleName"] = creatorBundleName_;
     jsonObject["creatorUid"]        = creatorUid_;
@@ -825,9 +870,13 @@ bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
     jsonObject["ownerUid"]          = ownerUid_;
     jsonObject["receiverUserId"]    = receiverUserId_;
     jsonObject["creatorInstanceKey"]    = creatorInstanceKey_;
+    jsonObject["appInstanceKey"]    = appInstanceKey_;
     jsonObject["notificationControlFlags"] = notificationControlFlags_;
     jsonObject["updateDeadLine"]     = updateDeadLine_;
     jsonObject["finishDeadLine"]     = finishDeadLine_;
+    jsonObject["hashCodeGenerateType"]    = hashCodeGenerateType_;
+    jsonObject["collaboratedReminderFlag"]    = collaboratedReminderFlag_;
+    jsonObject["distributedHashCode"]    = distributedHashCode_;
 
     if (!ConvertObjectsToJson(jsonObject)) {
         ANS_LOGE("Cannot convert objects to JSON");
@@ -865,7 +914,12 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
 
     if (jsonObject.find("wantAgent") != jsonEnd && jsonObject.at("wantAgent").is_string()) {
         auto wantAgentValue  = jsonObject.at("wantAgent").get<std::string>();
-        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue);
+        int32_t targetUid = -1;
+        if (pRequest->GetOwnerUid() != DEFAULT_UID) {
+            targetUid = pRequest->GetOwnerUid();
+        }
+        ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
+        pRequest->wantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(wantAgentValue, targetUid);
     }
 
     if (!ConvertJsonToNotificationContent(pRequest, jsonObject)) {
@@ -907,6 +961,8 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
         pRequest = nullptr;
         return nullptr;
     }
+
+    ConvertJsonToAgentBundle(pRequest, jsonObject);
 
     return pRequest;
 }
@@ -999,7 +1055,22 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteUint32(hashCodeGenerateType_)) {
+        ANS_LOGE("Failed to write hash code generatetype");
+        return false;
+    }
+
+    if (!parcel.WriteUint32(collaboratedReminderFlag_)) {
+        ANS_LOGE("Failed to write collaborated reminderflag");
+        return false;
+    }
+
     // write std::string
+    if (!parcel.WriteString(appInstanceKey_)) {
+        ANS_LOGE("Failed to write instance key");
+        return false;
+    }
+
     if (!parcel.WriteString(settingsText_)) {
         ANS_LOGE("Failed to write settings text");
         return false;
@@ -1052,6 +1123,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(sound_)) {
         ANS_LOGE("Failed to write sound");
+        return false;
+    }
+
+    if (!parcel.WriteString(distributedHashCode_)) {
+        ANS_LOGE("Failed to write distributedHashCode");
         return false;
     }
 
@@ -1155,6 +1231,21 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteBool(isRemoveAllowed_)) {
         ANS_LOGE("Failed to write flag isRemoveAllowed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(forceDistributed_)) {
+        ANS_LOGE("Failed to write flag forceDistributed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(notDistributed_)) {
+        ANS_LOGE("Failed to write flag notDistributed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(isDoNotDisturbByPassed_)) {
+        ANS_LOGE("Failed to write flag notDistributed");
         return false;
     }
 
@@ -1288,6 +1379,16 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteBool(distributedCollaborate_)) {
+        ANS_LOGE("Failed to write distributedCollaborate_");
+        return false;
+    }
+
+    if (!parcel.WriteBool(updateOnly_)) {
+        ANS_LOGE("Failed to write updateOnly_");
+        return false;
+    }
+
     if (!parcel.WriteUint64(messageUsers_.size())) {
         ANS_LOGE("Failed to write the size of messageUsers");
         return false;
@@ -1377,7 +1478,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         ANS_LOGE("Failed to write bundleOption for the notification");
         return false;
     }
-
+ 
     if (valid) {
         if (!parcel.WriteParcelable(notificationBundleOption_.get())) {
             ANS_LOGE("Failed to write notification bundleOption");
@@ -1442,6 +1543,13 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     creatorInstanceKey_ = parcel.ReadInt32();
     notificationControlFlags_ = parcel.ReadUint32();
     publishDelayTime_ = parcel.ReadUint32();
+    hashCodeGenerateType_ = parcel.ReadUint32();
+    collaboratedReminderFlag_ = parcel.ReadUint32();
+
+    if (!parcel.ReadString(appInstanceKey_)) {
+        ANS_LOGE("Failed to read Instance key");
+        return false;
+    }
 
     if (!parcel.ReadString(settingsText_)) {
         ANS_LOGE("Failed to read settings text");
@@ -1498,11 +1606,55 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         return false;
     }
 
-    slotType_ = static_cast<NotificationConstant::SlotType>(parcel.ReadInt32());
-    groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(parcel.ReadInt32());
-    visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(parcel.ReadInt32());
-    badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(parcel.ReadInt32());
-    notificationContentType_ = static_cast<NotificationContent::Type>(parcel.ReadInt32());
+    if (!parcel.ReadString(distributedHashCode_)) {
+        ANS_LOGE("Failed to read distributedHashCode");
+        return false;
+    }
+
+    int32_t slotTypeValue = parcel.ReadInt32();
+    if (slotTypeValue < 0 ||
+        slotTypeValue >= static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid SlotType:%{public}d. It should be in [0 , %{public}d).",
+            slotTypeValue, static_cast<int>(NotificationConstant::SlotType::ILLEGAL_TYPE));
+        return false;
+    }
+    slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
+    int32_t groupAlertTypeValue = parcel.ReadInt32();
+    if (groupAlertTypeValue < 0 ||
+        groupAlertTypeValue >= static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid GroupAlertType:%{public}d. It should be in [0 , %{public}d).",
+            groupAlertTypeValue, static_cast<int>(NotificationRequest::GroupAlertType::ILLEGAL_TYPE));
+        return false;
+    }
+    groupAlertType_ = static_cast<NotificationRequest::GroupAlertType>(groupAlertTypeValue);
+    int32_t visiblenessTypeValue = parcel.ReadInt32();
+    if (visiblenessTypeValue < 0 ||
+        visiblenessTypeValue >= static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid VisiblenessType:%{public}d. It should be in [0 , %{public}d).",
+            visiblenessTypeValue, static_cast<int>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE));
+        return false;
+    }
+    visiblenessType_ = static_cast<NotificationConstant::VisiblenessType>(visiblenessTypeValue);
+    int32_t badgeStyleValue = parcel.ReadInt32();
+    if (badgeStyleValue < 0) {
+        ANS_LOGE("Invalid badgeStyle:%{public}d. It should be greater than 0.", badgeStyleValue);
+        return false;
+    }
+    if (badgeStyleValue >= static_cast<int>(NotificationRequest::BadgeStyle::ILLEGAL_TYPE)) {
+        badgeStyleValue = static_cast<int>(NotificationRequest::BadgeStyle::NONE);
+        ANS_LOGE("The badge style value is too large, set it to the default enumeration value: %{public}d.",
+            static_cast<int>(NotificationRequest::BadgeStyle::NONE));
+    }
+    badgeStyle_ = static_cast<NotificationRequest::BadgeStyle>(badgeStyleValue);
+    int32_t notificationContentTypeValue = parcel.ReadInt32();
+    if (notificationContentTypeValue <= static_cast<int>(NotificationContent::Type::NONE) ||
+        notificationContentTypeValue >= static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid notificationContent:%{public}d. It should be in (%{public}d , %{public}d)",
+            notificationContentTypeValue, static_cast<int>(NotificationContent::Type::NONE),
+            static_cast<int>(NotificationContent::Type::ILLEGAL_TYPE));
+        return false;
+    }
+    notificationContentType_ = static_cast<NotificationContent::Type>(notificationContentTypeValue);
 
     showDeliveryTime_ = parcel.ReadBool();
     tapDismissed_ = parcel.ReadBool();
@@ -1519,6 +1671,9 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     permitted_ = parcel.ReadBool();
     isAgent_ = parcel.ReadBool();
     isRemoveAllowed_ = parcel.ReadBool();
+    forceDistributed_ = parcel.ReadBool();
+    notDistributed_ = parcel.ReadBool();
+    isDoNotDisturbByPassed_ = parcel.ReadBool();
 
     bool valid {false};
 
@@ -1564,10 +1719,6 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     valid = parcel.ReadBool();
     if (valid) {
         littleIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
-        if (!littleIcon_) {
-            ANS_LOGE("Failed to read littleIcon");
-            return false;
-        }
     }
 
     valid = parcel.ReadBool();
@@ -1612,6 +1763,8 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     isCoverActionButtons_ = parcel.ReadBool();
     isUpdateByOwnerAllowed_ = parcel.ReadBool();
+    distributedCollaborate_ = parcel.ReadBool();
+    updateOnly_ = parcel.ReadBool();
 
     vsize = parcel.ReadUint64();
     vsize = (vsize < NotificationRequest::MAX_MESSAGE_USERS) ? vsize : NotificationRequest::MAX_MESSAGE_USERS;
@@ -1662,6 +1815,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         notificationFlagsOfDevices_ = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
         int32_t mapSize = parcel.ReadInt32();
+        mapSize = (mapSize < MAX_MAP_SIZE) ? mapSize : MAX_MAP_SIZE;
         for (int32_t seq = 0; seq < mapSize; seq++) {
             std::string deviceType = parcel.ReadString();
             std::shared_ptr<NotificationFlags> notificationFlags =
@@ -1793,6 +1947,46 @@ void NotificationRequest::SetRemoveAllowed(bool isRemoveAllowed)
     isRemoveAllowed_ = isRemoveAllowed;
 }
 
+bool NotificationRequest::IsForceDistributed() const
+{
+    return forceDistributed_;
+}
+
+void NotificationRequest::SetForceDistributed(bool forceDistributed)
+{
+    forceDistributed_ = forceDistributed;
+}
+
+bool NotificationRequest::IsNotDistributed() const
+{
+    return notDistributed_;
+}
+
+void NotificationRequest::SetNotDistributed(bool notDistributed)
+{
+    notDistributed_ = notDistributed;
+}
+
+bool NotificationRequest::IsSystemApp() const
+{
+    return isSystemApp_;
+}
+
+void NotificationRequest::SetIsSystemApp(bool isSystemApp)
+{
+    isSystemApp_ = isSystemApp;
+}
+
+bool NotificationRequest::IsDoNotDisturbByPassed() const
+{
+    return isDoNotDisturbByPassed_;
+}
+
+void NotificationRequest::SetIsDoNotDisturbByPassed(bool isDoNotDisturbByPassed)
+{
+    isDoNotDisturbByPassed_ = isDoNotDisturbByPassed;
+}
+
 void NotificationRequest::CopyBase(const NotificationRequest &other)
 {
     this->notificationId_ = other.notificationId_;
@@ -1814,10 +2008,17 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->ownerUserId_ = other.ownerUserId_;
     this->receiverUserId_ = other.receiverUserId_;
     this->creatorInstanceKey_ = other.creatorInstanceKey_;
+    this->appInstanceKey_ = other.appInstanceKey_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
+    this->forceDistributed_ = other.forceDistributed_;
+    this->notDistributed_ = other.notDistributed_;
+    this->isSystemApp_ = other.isSystemApp_;
+    this->isDoNotDisturbByPassed_ = other.isDoNotDisturbByPassed_;
     this->isCoverActionButtons_ = other.isCoverActionButtons_;
     this->isUpdateByOwnerAllowed_ = other.isUpdateByOwnerAllowed_;
+    this->distributedCollaborate_ = other.distributedCollaborate_;
+    this->updateOnly_ = other.updateOnly_;
 
     this->slotType_ = other.slotType_;
     this->settingsText_ = other.settingsText_;
@@ -1831,6 +2032,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->classification_ = other.classification_;
     this->appMessageId_ = other.appMessageId_;
     this->sound_ = other.sound_;
+    this->distributedHashCode_ = other.distributedHashCode_;
 
     this->groupAlertType_ = other.groupAlertType_;
     this->visiblenessType_ = other.visiblenessType_;
@@ -1871,12 +2073,13 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
 
     this->notificationTemplate_ = other.notificationTemplate_;
     this->notificationFlags_ = other.notificationFlags_;
-    this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
-    this->notificationBundleOption_ = other.notificationBundleOption_;
     this->agentBundle_ = other.agentBundle_;
     this->unifiedGroupInfo_ = other.unifiedGroupInfo_;
-
+    this->notificationBundleOption_ = other.notificationBundleOption_;
+    this->notificationFlagsOfDevices_ = other.notificationFlagsOfDevices_;
     this->publishDelayTime_ = other.publishDelayTime_;
+    this->hashCodeGenerateType_ = other.hashCodeGenerateType_;
+    this->collaboratedReminderFlag_ = other.collaboratedReminderFlag_;
 }
 
 bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
@@ -1914,7 +2117,6 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
         extraInfoStr = wWrapper.ToString();
     }
     jsonObject["extraInfo"] = extraInfoStr;
-
     jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
     jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";
@@ -2031,6 +2233,14 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
     if (jsonObject.find("badgeNumber") != jsonEnd && jsonObject.at("badgeNumber").is_number_integer()) {
         target->badgeNumber_ = jsonObject.at("badgeNumber").get<uint32_t>();
     }
+    if (jsonObject.find("hashCodeGenerateType") != jsonEnd &&
+        jsonObject.at("hashCodeGenerateType").is_number_integer()) {
+        target->hashCodeGenerateType_ = jsonObject.at("hashCodeGenerateType").get<uint32_t>();
+    }
+    if (jsonObject.find("collaboratedReminderFlag") != jsonEnd &&
+        jsonObject.at("collaboratedReminderFlag").is_number_integer()) {
+        target->collaboratedReminderFlag_ = jsonObject.at("collaboratedReminderFlag").get<uint32_t>();
+    }
 
     ConvertJsonToNumExt(target, jsonObject);
 }
@@ -2043,6 +2253,10 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
     }
 
     const auto &jsonEnd = jsonObject.cend();
+
+    if (jsonObject.find("appInstanceKey") != jsonEnd && jsonObject.at("appInstanceKey").is_string()) {
+        target->appInstanceKey_ = jsonObject.at("appInstanceKey").get<std::string>();
+    }
 
     if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
@@ -2066,6 +2280,10 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
 
     if (jsonObject.find("creatorBundleName") != jsonEnd && jsonObject.at("creatorBundleName").is_string()) {
         target->creatorBundleName_ = jsonObject.at("creatorBundleName").get<std::string>();
+    }
+
+    if (jsonObject.find("distributedHashCode") != jsonEnd && jsonObject.at("distributedHashCode").is_string()) {
+        target->distributedHashCode_ = jsonObject.at("distributedHashCode").get<std::string>();
     }
 }
 
@@ -2140,6 +2358,14 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
         target->floatingIcon_ = jsonObject.at("isFloatingIcon").get<bool>();
     }
 
+    if (jsonObject.find("updateOnly") != jsonEnd && jsonObject.at("updateOnly").is_boolean()) {
+        target->updateOnly_ = jsonObject.at("updateOnly").get<bool>();
+    }
+
+    if (jsonObject.find("distributedCollaborate") != jsonEnd && jsonObject.at("distributedCollaborate").is_boolean()) {
+        target->distributedCollaborate_ = jsonObject.at("distributedCollaborate").get<bool>();
+    }
+
     ConvertJsonToBoolExt(target, jsonObject);
 }
 
@@ -2162,7 +2388,7 @@ void NotificationRequest::ConvertJsonToPixelMap(NotificationRequest *target, con
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("smallIcon") != jsonEnd && jsonObject.at("smallIcon").is_string()) {
-        auto littleIconStr    = jsonObject.at("smallIcon").get<std::string>();
+        auto littleIconStr = jsonObject.at("smallIcon").get<std::string>();
         target->littleIcon_ = AnsImageUtil::UnPackImage(littleIconStr);
     }
 
@@ -2210,13 +2436,18 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
         ANS_LOGE("Invalid input parameter");
         return false;
     }
+    int32_t targetUid = -1;
+    if (target->GetOwnerUid() != DEFAULT_UID) {
+        targetUid = target->GetOwnerUid();
+    }
+    ANS_LOGI("wantAgent Fromjson, uid = %{public}d ", targetUid);
 
     const auto &jsonEnd = jsonObject.cend();
 
     if (jsonObject.find("actionButtons") != jsonEnd) {
         auto buttonArr = jsonObject.at("actionButtons");
         for (auto &btnObj : buttonArr) {
-            auto pBtn = NotificationJsonConverter::ConvertFromJson<NotificationActionButton>(btnObj);
+            auto pBtn = NotificationActionButton::ConvertNotificationActionButton(targetUid, btnObj);
             if (pBtn == nullptr) {
                 ANS_LOGE("Failed to parse actionButton!");
                 return false;
@@ -2249,6 +2480,7 @@ bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
             }
 
             target->distributedOptions_ = *pOpt;
+            delete pOpt;
         }
     }
 
@@ -2391,7 +2623,6 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
                 GetCreatorBundleName().c_str(), GetNotificationId());
             return ERR_ANS_NOTIFICATION_NOT_EXISTS;
         }
-
         return ERR_OK;
     }
 
@@ -2447,6 +2678,7 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     if (newExtraInfo == nullptr) {
         newLiveViewContent->SetExtraInfo(oldExtraInfo);
     } else if (oldExtraInfo != nullptr) {
+        newExtraInfo->Remove("eventControl");
         auto oldKeySet = oldExtraInfo->KeySet();
         for (const auto &key : oldKeySet) {
             if (!newExtraInfo->HasParam(key)) {
@@ -2461,9 +2693,8 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
 
     auto newPicture = newLiveViewContent->GetPicture();
-    auto oldPicture = oldLiveViewContent->GetPicture();
     bool isSet = false;
-    for (const auto &pictureRecord : oldPicture) {
+    for (const auto &pictureRecord : oldLiveViewContent->GetPicture()) {
         if (newPicture.find(pictureRecord.first) != newPicture.end()) {
             continue;
         }
@@ -2479,15 +2710,27 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
 {
     const char *keySpliter = "_";
 
+    if (distributedCollaborate_) {
+        ANS_LOGI("NotificationRequest use collaborate!");
+        return label_ + distributedHashCode_;
+    }
+
     std::stringstream stream;
+    uint32_t hashCodeGeneratetype = GetHashCodeGenerateType();
     if (IsAgentNotification()) {
-        stream << deviceId << keySpliter << ownerUserId_ << keySpliter <<
-            ownerUid_ << keySpliter << ownerBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+        if (hashCodeGeneratetype ==  1) {
+            stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
+                creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
+                ownerUserId_ << keySpliter << label_ << keySpliter << notificationId_;
+        } else {
+            stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
+                ownerUserId_ << keySpliter << ownerUid_ << keySpliter <<
+                ownerBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
+        }
     } else {
-        stream << deviceId << keySpliter << creatorUserId_ << keySpliter <<
-            creatorUid_ << keySpliter << creatorBundleName_ << keySpliter <<
-            label_ << keySpliter << notificationId_;
+        stream << appInstanceKey_ << keySpliter << deviceId << keySpliter <<
+            creatorUserId_ << keySpliter << creatorUid_ << keySpliter <<
+            creatorBundleName_ << keySpliter << label_ << keySpliter << notificationId_;
     }
     return stream.str();
 }
@@ -2497,6 +2740,14 @@ std::string NotificationRequest::GetKey()
     std::stringstream stream;
     const char *keySpliter = "_";
     stream << REQUEST_STORAGE_KEY_PREFIX << keySpliter << GetBaseKey("");
+    return stream.str();
+}
+
+std::string NotificationRequest::GetSecureKey()
+{
+    std::stringstream stream;
+    const char *keySpliter = "_";
+    stream << REQUEST_STORAGE_SECURE_KEY_PREFIX << keySpliter << GetBaseKey("");
     return stream.str();
 }
 
@@ -2602,6 +2853,16 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
     }
 }
 
+bool NotificationRequest::HasUserInputButton()
+{
+    for (std::shared_ptr<NotificationActionButton> button : actionButtons_) {
+        if (button->GetUserInput() != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void NotificationRequest::SetIsCoverActionButtons(bool isCoverActionButtons)
 {
     isCoverActionButtons_ = isCoverActionButtons;
@@ -2642,10 +2903,10 @@ std::string NotificationRequest::GenerateUniqueKey()
 
     std::stringstream stream;
     if (IsAgentNotification()) {
-        stream << ownerUserId_ << keySpliter << ownerBundleName_ << keySpliter <<
+        stream << ownerUid_ << keySpliter << ownerBundleName_ << keySpliter << ownerUserId_ << keySpliter <<
             typeFlag << keySpliter << appMessageId_;
     } else {
-        stream << creatorUserId_ << keySpliter << creatorBundleName_ << keySpliter <<
+        stream << creatorUid_ << keySpliter << creatorBundleName_ << keySpliter << creatorUserId_ << keySpliter <<
             typeFlag << keySpliter << appMessageId_;
     }
     return stream.str();
@@ -2689,6 +2950,52 @@ void NotificationRequest::SetUpdateByOwnerAllowed(bool isUpdateByOwnerAllowed)
 bool NotificationRequest::IsUpdateByOwnerAllowed() const
 {
     return isUpdateByOwnerAllowed_;
+}
+
+void NotificationRequest::SetUpdateOnly(bool updateOnly)
+{
+    updateOnly_ = updateOnly;
+}
+
+bool NotificationRequest::IsUpdateOnly() const
+{
+    return updateOnly_;
+}
+
+const std::string NotificationRequest::GetLittleIconType() const
+{
+    return littleIconType_;
+}
+
+bool NotificationRequest::GetDistributedCollaborate() const
+{
+    return distributedCollaborate_;
+}
+
+void NotificationRequest::SetDistributedCollaborate(bool distributedCollaborate)
+{
+    distributedCollaborate_ = distributedCollaborate;
+}
+
+const std::string NotificationRequest::GetDistributedHashCode() const
+{
+    return distributedHashCode_;
+}
+
+void NotificationRequest::SetDistributedHashCode(const std::string hashCode)
+{
+    distributedHashCode_ = hashCode;
+}
+
+void NotificationRequest::AdddeviceStatu(const std::string &deviceType,
+    const std::string deviceStatu)
+{
+    deviceStatus_[deviceType] = deviceStatu;
+}
+
+const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() const
+{
+    return deviceStatus_;
 }
 }  // namespace Notification
 }  // namespace OHOS

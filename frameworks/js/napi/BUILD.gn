@@ -61,14 +61,7 @@ ohos_shared_library("notification") {
   }
   branch_protector_ret = "pac_ret"
 
-  include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_napi_path}/inner/napi_common",
-    "include",
-    "//third_party/node/src",
-    "//third_party/libuv/include",
-    "//third_party/json/single_include",
-  ]
+  include_dirs = [ "include" ]
 
   configs = [ ":native_module_config" ]
 
@@ -82,6 +75,7 @@ ohos_shared_library("notification") {
     "src/common_convert_request.cpp",
     "src/common_utils.cpp",
     "src/constant.cpp",
+    "src/disable_notification.cpp",
     "src/display_badge.cpp",
     "src/distributed.cpp",
     "src/disturb_mode.cpp",
@@ -96,7 +90,32 @@ ohos_shared_library("notification") {
     "src/unsubscribe.cpp",
   ]
 
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_reminder_path}:reminder_innerkits",
+  ]
+
+  defines = []
+
+  if (distributed_notification_service_feature_badge_manager) {
+    defines += [ "ANS_FEATURE_BADGE_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_local_liveview) {
+    defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
+  }
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "ANS_FEATURE_DISTRIBUTED_DB" ]
+  }
+
+  if (distributed_notification_service_feature_disturb_manager) {
+    defines += [ "ANS_FEATURE_DISTURB_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_slot_manager) {
+    defines += [ "ANS_FEATURE_SLOT_MANAGER" ]
+  }
 
   external_deps = [
     "ability_base:want",
@@ -105,12 +124,17 @@ ohos_shared_library("notification") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
     "ability_runtime:napi_common",
+    "ability_runtime:napi_wantagent_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
+    "json:nlohmann_json_static",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "relational_store:native_rdb",
+    "resource_management:global_resmgr",
   ]
 
   relative_install_dir = "module"

@@ -133,7 +133,7 @@ int32_t JSPushCallBack::OnCheckNotification(
     AbilityRuntime::HandleEscape handleEscape(env_);
 
     std::string pkgName;
-    auto checkInfo = new (std::nothrow) NotificationCheckInfo {};
+    auto checkInfo = std::make_shared<NotificationCheckInfo>();
     checkInfo->ConvertJsonStringToValue(notificationData);
 
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
@@ -283,7 +283,7 @@ int32_t JSPushCallBack::ConvertFunctionResult(napi_env env, napi_value funcResul
         return false;
     }
 
-    ANS_LOGI("code : %{public}d ,message : %{public}s", code, message.c_str());
+    ANS_LOGI("code:%{public}d, message:%{public}s", code, message.c_str());
     return code;
 }
 } // namespace Notification

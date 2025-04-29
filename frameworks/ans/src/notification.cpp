@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,7 @@ Notification::Notification(const Notification &other)
     updateTimerId_ = other.updateTimerId_;
     finishTimerId_ = other.finishTimerId_;
     archiveTimerId_ = other.archiveTimerId_;
+    isPrivileged_ = other.isPrivileged_;
 }
 
 Notification::~Notification()
@@ -135,6 +136,11 @@ int32_t Notification::GetId() const
 std::string Notification::GetKey() const
 {
     return key_;
+}
+
+void Notification::SetKey(const std::string& key)
+{
+    key_ = key;
 }
 
 NotificationRequest Notification::GetNotificationRequest() const
@@ -241,12 +247,17 @@ int32_t Notification::GetRecvUserId() const
     return request_->GetReceiverUserId();
 }
 
-int32_t Notification::GetInstanceKey() const
+std::string Notification::GetInstanceKey() const
 {
     if (request_ == nullptr) {
-        return 0;
+        return "";
     }
-    return request_->GetCreatorInstanceKey();
+    return request_->GetAppInstanceKey();
+}
+
+bool Notification::GetPrivileged() const
+{
+    return isPrivileged_;
 }
 
 bool Notification::MarshallingBool(Parcel &parcel) const
@@ -268,6 +279,11 @@ bool Notification::MarshallingBool(Parcel &parcel) const
 
     if (!parcel.WriteBool(isRemoveAllowed_)) {
         ANS_LOGE("Can't write isRemoveAllowed");
+        return false;
+    }
+
+    if (!parcel.WriteBool(isPrivileged_)) {
+        ANS_LOGE("Can't write isPrivileged");
         return false;
     }
 
@@ -299,7 +315,7 @@ bool Notification::MarshallingString(Parcel &parcel) const
 bool Notification::MarshallingInt32(Parcel &parcel) const
 {
     if (!parcel.WriteInt32(ledLightColor_)) {
-        ANS_LOGE("Can't write ledLigthColor");
+        ANS_LOGE("Can't write ledLightColor");
         return false;
     }
 
@@ -403,6 +419,9 @@ void Notification::ReadFromParcelBool(Parcel &parcel)
 
     // Read isRemoveAllowed_
     isRemoveAllowed_ = parcel.ReadBool();
+
+    // Read isPrivileged_
+    isPrivileged_ = parcel.ReadBool();
 }
 
 void Notification::ReadFromParcelString(Parcel &parcel)
@@ -533,6 +552,11 @@ void Notification::SetRemoveAllowed(bool removeAllowed)
     isRemoveAllowed_ = removeAllowed;
 }
 
+void Notification::SetPrivileged(const bool &isPrivileged)
+{
+    isPrivileged_ = isPrivileged;
+}
+
 void Notification::SetSourceType(NotificationConstant::SourceType sourceType)
 {
     sourceType_ = sourceType;
@@ -560,6 +584,7 @@ std::string Notification::Dump() const
             ", updateTimer = " + std::to_string(updateTimerId_) +
             ", finishTimer = " + std::to_string(finishTimerId_) +
             ", archiveTimer = " + std::to_string(archiveTimerId_) +
+            ", isPrivileged = " + (isPrivileged_ ? "true" : "false") +
             " }";
 }
 
@@ -591,6 +616,16 @@ void Notification::SetArchiveTimer(uint64_t archiveTimerId)
 uint64_t Notification::GetArchiveTimer() const
 {
     return archiveTimerId_;
+}
+
+void Notification::SetAutoDeletedTimer(uint64_t autoDeletedTimerId)
+{
+    autoDeletedTimerId_ = autoDeletedTimerId;
+}
+
+uint64_t Notification::GetAutoDeletedTimer() const
+{
+    return autoDeletedTimerId_;
 }
 }  // namespace Notification
 }  // namespace OHOS

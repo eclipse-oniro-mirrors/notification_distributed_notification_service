@@ -27,9 +27,9 @@ BadgeNumberCallbackData::BadgeNumberCallbackData(const std::string &bundle, int3
     : bundle_(bundle), uid_(uid), badgeNumber_(badgeNumber)
 {}
 
-BadgeNumberCallbackData::BadgeNumberCallbackData(const std::string &bundle, int32_t uid,
-    int32_t badgeNumber, int32_t instanceKey)
-    : bundle_(bundle), uid_(uid), badgeNumber_(badgeNumber), instanceKey_(instanceKey)
+BadgeNumberCallbackData::BadgeNumberCallbackData(const std::string &bundle, const std::string &appInstanceKey,
+    int32_t uid, int32_t badgeNumber, int32_t instanceKey)
+    : bundle_(bundle), appInstanceKey_(appInstanceKey), uid_(uid), badgeNumber_(badgeNumber), instanceKey_(instanceKey)
 {}
 
 void BadgeNumberCallbackData::SetBundle(const std::string &bundle)
@@ -72,13 +72,23 @@ int32_t BadgeNumberCallbackData::GetInstanceKey() const
     return instanceKey_;
 }
 
+void BadgeNumberCallbackData::SetAppInstanceKey(const std::string &key)
+{
+    appInstanceKey_ = key;
+}
+ 
+std::string BadgeNumberCallbackData::GetAppInstanceKey() const
+{
+    return appInstanceKey_;
+}
+
 std::string BadgeNumberCallbackData::Dump()
 {
     return "BadgeNumberCallbackData{ "
             "bundle = " + bundle_ +
             ", uid = " + std::to_string(uid_) +
             ", badgeNumber = " + std::to_string(badgeNumber_) +
-            ", instanceKey = " + std::to_string(instanceKey_) +
+            ", instanceKey = " + appInstanceKey_ +
             " }";
 }
 
@@ -86,6 +96,11 @@ bool BadgeNumberCallbackData::Marshalling(Parcel &parcel) const
 {
     if (!parcel.WriteString16(Str8ToStr16(bundle_))) {
         ANS_LOGE("Failed to write bundle name");
+        return false;
+    }
+
+    if (!parcel.WriteString(appInstanceKey_)) {
+        ANS_LOGE("Failed to write app instance Key name");
         return false;
     }
 
@@ -121,6 +136,7 @@ BadgeNumberCallbackData *BadgeNumberCallbackData::Unmarshalling(Parcel &parcel)
 bool BadgeNumberCallbackData::ReadFromParcel(Parcel &parcel)
 {
     bundle_ = Str16ToStr8(parcel.ReadString16());
+    appInstanceKey_ = parcel.ReadString();
     uid_ = parcel.ReadInt32();
     badgeNumber_ = parcel.ReadInt32();
     instanceKey_ = parcel.ReadInt32();

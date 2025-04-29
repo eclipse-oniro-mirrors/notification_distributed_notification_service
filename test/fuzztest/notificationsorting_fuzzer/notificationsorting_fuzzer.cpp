@@ -19,27 +19,25 @@
 #undef private
 #undef protected
 #include "notificationsorting_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationSorting notificationSorting;
         sptr<Notification::NotificationSlot> slot = nullptr;
         notificationSorting.SetSlot(slot);
         notificationSorting.SetGroupKeyOverride(stringData);
         notificationSorting.Dump();
         notificationSorting.SetKey(stringData);
-        int32_t importance = static_cast<int32_t>(GetU32Data(data));
+        int32_t importance = fdp->ConsumeIntegral<int32_t>();
         notificationSorting.SetImportance(importance);
         uint64_t ranking = 1;
         notificationSorting.SetRanking(ranking);
         notificationSorting.SetVisiblenessOverride(importance);
-        notificationSorting.SetDisplayBadge(*data % ENABLE);
-        notificationSorting.SetHiddenNotification(*data % ENABLE);
+        notificationSorting.SetDisplayBadge(fdp->ConsumeBool());
+        notificationSorting.SetHiddenNotification(fdp->ConsumeBool());
         Parcel parcel;
         return notificationSorting.Marshalling(parcel);
     }
@@ -49,11 +47,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

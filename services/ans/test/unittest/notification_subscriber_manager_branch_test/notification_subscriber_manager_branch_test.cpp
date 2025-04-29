@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@
 extern void MockGetUserId(bool mockRet);
 extern void MockGetBundleName(bool mockRet);
 extern void MockGetNotificationSlotRet(bool mockRet);
-extern void MockQueryActiveOsAccountIds(bool mockRet, uint8_t mockCase);
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 
 using namespace OHOS::Security::AccessToken;
 using namespace testing::ext;
@@ -108,7 +108,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
     ASSERT_NE(nullptr, notificationSubscriberManager);
     sptr<NotificationDoNotDisturbDate> date = nullptr;
     notificationSubscriberManager->notificationSubQueue_ = nullptr;
-    notificationSubscriberManager->NotifyDoNotDisturbDateChanged(date);
+    notificationSubscriberManager->NotifyDoNotDisturbDateChanged(0, date);
 }
 
 /**
@@ -164,27 +164,9 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00800, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<AnsSubscriberInterface> subscriber = nullptr;
+    sptr<IAnsSubscriber> subscriber = nullptr;
     sptr<NotificationSubscribeInfo> subscribeInfo = nullptr;
     ASSERT_EQ(ERR_ANS_INVALID_PARAM, notificationSubscriberManager.RemoveSubscriberInner(subscriber, subscribeInfo));
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_00100
- * @tc.name    : AdvancedNotificationService_00100
- * @tc.desc    : test ActiveNotificationDump function and record->notification == nullptr record->request == nullptr
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00100, Function | SmallTest | Level1)
-{
-    std::string bundle = "<bundle>";
-    int32_t userId = 1;
-    std::vector<std::string> dumpInfo;
-    AdvancedNotificationService advancedNotificationService;
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->notification = nullptr;
-    record->request = nullptr;
-    advancedNotificationService.notificationList_.push_back(record);
-    ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 
 /**
@@ -226,6 +208,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.number  : AdvancedNotificationService_00400
  * @tc.name    : AdvancedNotificationService_00400
@@ -288,6 +271,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     record->request->SetOwnerUid(uid);
     record->deviceId = "";
     advancedNotificationService.notificationList_.push_back(record);
+    std::shared_ptr<NotificationRecord> record1 = std::make_shared<NotificationRecord>();
+    record1->notification = new Notification();
+    record1->request = new NotificationRequest();
+    record1->request->SetOwnerUid(uid);
+    record1->request->SetReceiverUserId(0);
+    advancedNotificationService.notificationList_.push_back(record1);
     MockGetUserId(false);
     MockGetBundleName(false);
     ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
@@ -306,6 +295,26 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_00
     AdvancedNotificationService advancedNotificationService;
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->notification = nullptr;
+    advancedNotificationService.notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_01300
+ * @tc.name    : AdvancedNotificationService_01300
+ * @tc.desc    : test DistributedNotificationDump function and recvUserId != record->notification->GetRecvUserId().
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01300, Function | SmallTest | Level1)
+{
+    std::string bundle = "<bundle>";
+    int32_t userId = 1;
+    std::vector<std::string> dumpInfo;
+    AdvancedNotificationService advancedNotificationService;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = new Notification();
+    record->request = new NotificationRequest();
+    record->request->SetReceiverUserId(2);
+    MockGetUserId(false);
     advancedNotificationService.notificationList_.push_back(record);
     ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
@@ -412,21 +421,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     advancedNotificationService.notificationList_.push_back(record);
     ASSERT_EQ(advancedNotificationService.DistributedNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
-
-/**
- * @tc.number  : AdvancedNotificationService_01300
- * @tc.name    : AdvancedNotificationService_01300
- * @tc.desc    : Test CheckPermission function and result is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01300, Function | SmallTest | Level1)
-{
-    std::string permission = "<permission>";
-    AdvancedNotificationService advancedNotificationService;
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    MockIsVerfyPermisson(false);
-    ASSERT_EQ(advancedNotificationService.CheckPermission(permission), false);
-}
+#endif
 
 /**
  * @tc.number  : AdvancedNotificationService_01400
@@ -567,7 +562,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
 
-    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -603,7 +598,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02400, Function | SmallTest | Level1)
 {
-    sptr<AnsSubscriberInterface> subscriber = nullptr;
+    sptr<IAnsSubscriber> subscriber = nullptr;
     sptr<NotificationSubscribeInfo> info = nullptr;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -671,7 +666,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     std::string deviceId = "<deviceId>";
     bool enabled = true;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    MockQueryActiveOsAccountIds(false, 1);
+    MockQueryForgroundOsAccountId(false, 1);
 
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.SetNotificationsEnabledForAllBundles(deviceId, enabled),
@@ -686,7 +681,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02900, Function | SmallTest | Level1)
 {
     std::string deviceId = "<deviceId>";
-    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -721,7 +716,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
     bool enabled = true;
 
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    MockQueryActiveOsAccountIds(false, 1);
+    MockQueryForgroundOsAccountId(false, 1);
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.IsAllowedNotify(enabled), ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
@@ -767,7 +762,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_03400, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
-    MockQueryActiveOsAccountIds(false, 1);
+    MockQueryForgroundOsAccountId(false, 1);
     bool allowed = true;
 
     int32_t uid = 2;
@@ -933,81 +928,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04
 }
 
 /**
- * @tc.number  : AdvancedNotificationService_04400
- * @tc.name    : AdvancedNotificationService_04400
- * @tc.desc    : Test SetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04400, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04500
- * @tc.name    : AdvancedNotificationService_04500
- * @tc.desc    : Test SetDoNotDisturbDate function and GetActiveUserId is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04500, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    MockQueryActiveOsAccountIds(false, 1);
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetDoNotDisturbDate(date), ERR_ANS_GET_ACTIVE_USER_FAILED);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04600
- * @tc.name    : AdvancedNotificationService_04600
- * @tc.desc    : Test GetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04600, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04700
- * @tc.name    : AdvancedNotificationService_04700
- * @tc.desc    : Test GetDoNotDisturbDate function and GetActiveUserId is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04700, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-    MockQueryActiveOsAccountIds(false, 1);
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetDoNotDisturbDate(date), ERR_ANS_GET_ACTIVE_USER_FAILED);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_04800
- * @tc.name    : AdvancedNotificationService_04800
- * @tc.desc    : Test DoesSupportDoNotDisturbMode function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_04800, Function | SmallTest | Level1)
-{
-    bool doesSupport = true;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.DoesSupportDoNotDisturbMode(doesSupport), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
  * @tc.number  : AdvancedNotificationService_04900
  * @tc.name    : AdvancedNotificationService_04900
  * @tc.desc    : Test EnableDistributed function and CheckPermission is false
@@ -1095,8 +1015,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05400, Function | SmallTest | Level1)
 {
-    NotificationConstant::RemindType remindType = NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND;
-
+    int32_t remindType = -1;
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
@@ -1136,45 +1055,13 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05
 }
 
 /**
- * @tc.number  : AdvancedNotificationService_05700
- * @tc.name    : AdvancedNotificationService_05700
- * @tc.desc    : Test SetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05700, Function | SmallTest | Level1)
-{
-    int32_t userId = 1;
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.SetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
- * @tc.number  : AdvancedNotificationService_05800
- * @tc.name    : AdvancedNotificationService_05800
- * @tc.desc    : Test GetDoNotDisturbDate function and CheckPermission is false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05800, Function | SmallTest | Level1)
-{
-    int32_t userId = 1;
-    sptr<NotificationDoNotDisturbDate> date = nullptr;
-
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    AdvancedNotificationService advancedNotificationService;
-    ASSERT_EQ(advancedNotificationService.GetDoNotDisturbDate(userId, date), ERR_ANS_NON_SYSTEM_APP);
-}
-
-/**
  * @tc.number  : AdvancedNotificationService_05900
  * @tc.name    : AdvancedNotificationService_05900
  * @tc.desc    : Test SetEnabledForBundleSlot function and CheckPermission is false
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_05900, Function | SmallTest | Level1)
 {
-    sptr<NotificationBundleOption> bundleOption = nullptr;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption();
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::OTHER;
     bool enabled = true;
     bool isForceControl = false;
@@ -1336,7 +1223,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 /**
  * @tc.number  : AdvancedNotificationService_06800
  * @tc.name    : AdvancedNotificationService_06800
- * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false 
+ * @tc.desc    : Test GetEnabledForBundleSlotSelf function and GetNotificationSlot false
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06800, Function | SmallTest | Level1)
 {
@@ -1346,6 +1233,41 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
     MockGetNotificationSlotRet(false);
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.GetEnabledForBundleSlotSelf(slotType, enabled), ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.number  : AdvancedNotificationService_06900
+ * @tc.name    : AdvancedNotificationService_06900
+ * @tc.desc    : Test IsNeedSilentInDoNotDisturbMode function and CheckPermission is false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06900, Function | SmallTest | Level1)
+{
+    std::string phoneNumber = "11111111111";
+    int32_t callerType = 0;
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    AdvancedNotificationService advancedNotificationService;
+    ASSERT_EQ(advancedNotificationService.IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType), ERR_ANS_GET_ACTIVE_USER_FAILED);
+}
+
+/**
+ * @tc.number  : ActiveNotificationDump_0009
+ * @tc.name    : ActiveNotificationDump
+ * @tc.desc    : test ActiveNotificationDump function and record->notification == nullptr.
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ActiveNotificationDump_0009, Function | SmallTest | Level1)
+{
+    std::string bundle = "<bundle>";
+    int32_t userId = 1;
+    std::vector<std::string> dumpInfo;
+    AdvancedNotificationService advancedNotificationService;
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = new (std::nothrow) Notification();
+    record->request = nullptr;
+    advancedNotificationService.notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService.ActiveNotificationDump(bundle, userId, 0, dumpInfo), ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -26,6 +26,8 @@ public:
     StringUtils() {};
     virtual ~StringUtils() {};
 
+    constexpr static const char* SPLIT_CHAR = "|";
+    
     static void Split(const std::string &str, const std::string &splitFlag, std::vector<std::string> &res);
 };
 }  // namespace Notification

@@ -21,11 +21,9 @@
 #include "advanced_datashare_observer.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
- 
+
 #include "common_event_subscriber.h"
 #include "system_event_observer.h"
-#include "interface_system_event.h"
-#include "system_event_subscriber.h"
 
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
@@ -34,7 +32,10 @@ const int32_t PASSITIVE_DELETE = 1;
 static constexpr const char *SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/"
     "USER_SETTINGSDATA_SECURE_100?Proxy=true&key=unified_group_enable";
-ExtensionWrapper::ExtensionWrapper() = default;
+ExtensionWrapper::ExtensionWrapper()
+{
+    InitExtentionWrapper();
+}
 ExtensionWrapper::~ExtensionWrapper() = default;
 
 
@@ -60,30 +61,40 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
 
     syncAdditionConfig_ = (SYNC_ADDITION_CONFIG)dlsym(extensionWrapperHandle_, "SyncAdditionConfig");
-    getUnifiedGroupInfo_ = (GET_UNIFIED_GROUP_INFO)dlsym(extensionWrapperHandle_, "GetUnifiedGroupInfo");
-    updateByCancel_ = (UPDATE_BY_CANCEL)dlsym(extensionWrapperHandle_, "UpdateByCancel");
-    setLocalSwitch_ = (SET_LOCAL_SWITCH)dlsym(extensionWrapperHandle_, "SetlocalSwitch");
-    initSummary_ = (INIT_SUMMARY)dlsym(extensionWrapperHandle_, "InitSummary");
+    if (syncAdditionConfig_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     localControl_ = (LOCAL_CONTROL)dlsym(extensionWrapperHandle_, "LocalControl");
-    if (syncAdditionConfig_ == nullptr
-        || getUnifiedGroupInfo_ == nullptr
-        || updateByCancel_ == nullptr
-        || initSummary_ == nullptr
-        || localControl_ == nullptr) {
+    reminderControl_ = (REMINDER_CONTROL)dlsym(extensionWrapperHandle_, "ReminderControl");
+    bannerControl_ = (BANNER_CONTROL)dlsym(extensionWrapperHandle_, "BannerControl");
+    if (bannerControl_ == nullptr || localControl_ == nullptr || reminderControl_ == nullptr) {
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
 
-    std::string ctrlConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
+    std::string ctrlConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("NOTIFICATION_CTL_LIST_PKG");
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
     }
-
-    std::string aggregateConfig = NotificationPreferences::GetInstance().GetAdditionalConfig("AGGREGATE_CONFIG");
+#endif
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    modifyReminderFlags_ = (MODIFY_REMINDER_FLAGS)dlsym(extensionWrapperHandle_, "ModifyReminderFlags");
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("extension wrapper modifyReminderFlags symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+#endif
+#ifdef ENABLE_ANS_AGGREGATION
+    std::string aggregateConfig = NotificationPreferences::GetInstance()->GetAdditionalConfig("AGGREGATE_CONFIG");
     if (!aggregateConfig.empty()) {
         syncAdditionConfig_("AGGREGATE_CONFIG", aggregateConfig);
     }
-    initSummary_(UpdateUnifiedGroupInfo);
+    if (initSummary_ != nullptr) {
+        initSummary_(UpdateUnifiedGroupInfo);
+    }
+#endif
     ANS_LOGD("extension wrapper init success");
 }
 
@@ -91,7 +102,6 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
 {
     ANS_LOGD("CheckIfSetlocalSwitch enter");
     if (extensionWrapperHandle_ == nullptr) {
-        ANS_LOGE("CheckIfSetlocalSwitch extension wrapper symbol failed");
         return;
     }
     if (!isRegisterDataSettingObserver) {
@@ -106,7 +116,6 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
 void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 {
     if (setLocalSwitch_ == nullptr) {
-        ANS_LOGE("SetlocalSwitch wrapper symbol failed");
         return;
     }
     bool status = (enable == "false" ? false : true);
@@ -116,16 +125,17 @@ void ExtensionWrapper::SetlocalSwitch(std::string &enable)
 void ExtensionWrapper::RegisterDataSettingObserver()
 {
     ANS_LOGD("ExtensionWrapper::RegisterDataSettingObserver enter");
-    if (aggregationRoamingObserver_ == nullptr) {
-        aggregationRoamingObserver_ = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
+    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver;
+    if (aggregationRoamingObserver == nullptr) {
+        aggregationRoamingObserver = new (std::nothrow) AdvancedAggregationDataRoamingObserver();
     }
 
-    if (aggregationRoamingObserver_ == nullptr) {
+    if (aggregationRoamingObserver == nullptr) {
         return;
     }
-    
+
     Uri dataEnableUri(SETTINGS_DATA_UNIFIED_GROUP_ENABLE_URI);
-    AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver_);
+    AdvancedDatashareObserver::GetInstance().RegisterSettingsObserver(dataEnableUri, aggregationRoamingObserver);
 }
 
 ErrCode ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::string& value)
@@ -140,7 +150,6 @@ ErrCode ExtensionWrapper::SyncAdditionConfig(const std::string& key, const std::
 void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason)
 {
     if (updateByCancel_ == nullptr) {
-        ANS_LOGE("updateUnifiedGroupByCancel wrapper symbol failed");
         return;
     }
     int32_t deleteType = convertToDelType(deleteReason);
@@ -150,13 +159,41 @@ void ExtensionWrapper::UpdateByCancel(const std::vector<sptr<Notification>>& not
 ErrCode ExtensionWrapper::GetUnifiedGroupInfo(const sptr<NotificationRequest> &request)
 {
     if (getUnifiedGroupInfo_ == nullptr) {
-        ANS_LOGE("getUnifiedGroupInfo wrapper symbol failed");
         return 0;
     }
     return getUnifiedGroupInfo_(request);
 }
 
-int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
+int32_t ExtensionWrapper::ReminderControl(const std::string &bundleName)
+{
+    if (reminderControl_ == nullptr) {
+        ANS_LOGE("ReminderControl wrapper symbol failed");
+        return 0;
+    }
+    return reminderControl_(bundleName);
+}
+
+int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
+{
+    if (bannerControl_ == nullptr) {
+        ANS_LOGE("ReminderControl wrapper symbol failed");
+        return -1;
+    }
+    return bannerControl_(bundleName);
+}
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+bool ExtensionWrapper::ModifyReminderFlags(const sptr<NotificationRequest> &request)
+{
+    if (modifyReminderFlags_ == nullptr) {
+        ANS_LOGE("ModifyReminderFlags wrapper symbol failed");
+        return false;
+    }
+    return modifyReminderFlags_(request);
+}
+#endif
+
+__attribute__((no_sanitize("cfi"))) int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
 {
     if (localControl_ == nullptr) {
         ANS_LOGE("LocalControl wrapper symbol failed");
@@ -165,11 +202,19 @@ int32_t ExtensionWrapper::LocalControl(const sptr<NotificationRequest> &request)
     return localControl_(request);
 }
 
+void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteReason)
+{
+    if (updateByBundle_ == nullptr) {
+        return;
+    }
+    int32_t deleteType = convertToDelType(deleteReason);
+    updateByBundle_(bundleName, deleteType);
+}
+
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
 {
     int32_t delType = ACTIVE_DELETE;
     switch (deleteReason) {
-        case NotificationConstant::APP_CANCEL_ALL_REASON_DELETE:
         case NotificationConstant::PACKAGE_CHANGED_REASON_DELETE:
         case NotificationConstant::USER_REMOVED_REASON_DELETE:
         case NotificationConstant::DISABLE_SLOT_REASON_DELETE:

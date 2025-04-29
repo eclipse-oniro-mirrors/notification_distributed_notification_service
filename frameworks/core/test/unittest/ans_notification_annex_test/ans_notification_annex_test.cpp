@@ -25,9 +25,6 @@
 #include "ans_inner_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
-#include "reminder_request_alarm.h"
-#include "reminder_request_calendar.h"
-#include "reminder_request_timer.h"
 #include "singleton.h"
 #include "notification_subscriber.h"
 
@@ -52,7 +49,7 @@ public:
 
     void TearDown();
     std::shared_ptr<AnsNotification> ans_;
-    sptr<AnsManagerInterface> ansManagerProxy_{nullptr};
+    sptr<IAnsManager> ansManagerProxy_{nullptr};
 };
 
 void AnsNotificationUnitAnnexTest::SetUpTestCase() {}
@@ -258,54 +255,6 @@ HWTEST_F(AnsNotificationUnitAnnexTest, PublishContinuousTaskNotification_0200, F
     request.SetContent(content);
     ErrCode ret1 = ans_->PublishContinuousTaskNotification(request);
     EXPECT_EQ(ret1, ERR_ANS_NOT_SYSTEM_SERVICE);
-}
-
-/*
- * @tc.name: PublishReminder_0100
- * @tc.desc: test PublishReminder ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0100, Function | MediumTest | Level1)
-{
-    uint64_t countDownTimeInSeconds = 0;
-    ReminderRequestTimer reminder = ReminderRequestTimer(countDownTimeInSeconds);
-    ErrCode ret = ans_->PublishReminder(reminder);
-    int errorcode = 201;
-    EXPECT_EQ(ret, errorcode);
-}
-
-/*
- * @tc.name: PublishReminder_0200
- * @tc.desc: test PublishReminder ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0200, Function | MediumTest | Level1)
-{
-    std::vector<uint8_t> daysOfWeek;
-    ReminderRequestAlarm reminder = ReminderRequestAlarm(0, 0, daysOfWeek);
-    ErrCode ret = ans_->PublishReminder(reminder);
-    int errorcode = 201;
-    EXPECT_EQ(ret, errorcode);
-}
-
-/*
- * @tc.name: PublishReminder_0300
- * @tc.desc: test PublishReminder ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitAnnexTest, PublishReminder_0300, Function | MediumTest | Level1)
-{
-    tm dateTime {};
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    ReminderRequestCalendar reminder = ReminderRequestCalendar(dateTime, repeatMonths, repeatDays, daysOfWeek);
-    ErrCode ret = ans_->PublishReminder(reminder);
-    int errorcode = 201;
-    EXPECT_EQ(ret, errorcode);
 }
 
 /*

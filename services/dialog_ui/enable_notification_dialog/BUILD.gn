@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("./signature/enableNotificationDialog.gni")
 
 ohos_hap("enable_notification_dialog_hap") {
   hap_profile = "entry/src/main/module.json"
@@ -20,12 +21,19 @@ ohos_hap("enable_notification_dialog_hap") {
     ":enable_notification_dialog_js_assets",
     ":enable_notification_dialog_resources",
   ]
+  publicity_file = "publicity.xml"
 
   certificate_profile = "signature/openharmony_sx.p7b"
   hap_name = "enable_notification_dialog"
-  subsystem_name = "application"
-  part_name = "prebuilt_hap"
+  subsystem_name = "notification"
+  part_name = "distributed_notification_service"
   module_install_dir = "app/com.ohos.notificationdialog"
+  if (defined(sign_hap_py_path)) {
+    certificate_profile = "${certificate_profile_path}"
+    key_alias = "HOS NotificationDialog Release"
+    private_key_path = "HOS NotificationDialog Release"
+    compatible_version = "9"
+  }
 }
 
 ohos_js_assets("enable_notification_dialog_js_assets") {

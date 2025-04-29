@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <sstream>
 
 #include "accesstoken_kit.h"
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "errors.h"
@@ -35,16 +36,21 @@
 #endif
 
 #include "advanced_notification_inline.cpp"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
 
+ErrCode AdvancedNotificationService::Subscribe(const sptr<IAnsSubscriber> &subscriber)
+{
+    return Subscribe(subscriber, nullptr);
+}
+
 ErrCode AdvancedNotificationService::Subscribe(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
-
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
@@ -59,33 +65,36 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
 
-        if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             errCode = ERR_ANS_PERMISSION_DENIED;
             break;
         }
-        
-        if (info) {
+
+        if (info != nullptr && info->GetAppUserId() != SUBSCRIBE_USER_ALL) {
             errCode = CheckUserIdParams(info->GetAppUserId());
             if (errCode != ERR_OK) {
                 break;
             }
         }
-        
+
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, info);
         if (errCode != ERR_OK) {
             break;
         }
     } while (0);
-
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
     return errCode;
 }
 
-ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber)
+ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
+    if (sptrInfo == nullptr) {
+        ANS_LOGE("Failed to create sptrInfo");
+        return ERR_ANS_NO_MEMORY;
+    }
     ErrCode errCode = ERR_OK;
     do {
         if (subscriber == nullptr) {
@@ -118,31 +127,46 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<AnsSubscriberInter
     } while (0);
 
     if (errCode == ERR_OK) {
-        LivePublishProcess::GetInstance()->AddLiveViewSubscriber();
+        int32_t callingUid = IPCSkeleton::GetCallingUid();
+        ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+            LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
+        }));
+        notificationSvrQueue_->wait(handler);
     }
     SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
     return errCode;
 }
 
+ErrCode AdvancedNotificationService::Unsubscribe(const sptr<IAnsSubscriber> &subscriber)
+{
+    return Unsubscribe(subscriber, nullptr);
+}
+
 ErrCode AdvancedNotificationService::Unsubscribe(
-    const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &info)
+    const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);
-
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Client is not a system app or subsystem");
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_NON_SYSTEM_APP));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_PERMISSION_DENIED));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_PERMISSION_DENIED;
     }
 
     if (subscriber == nullptr) {
+        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_INVALID_PARAM));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
 

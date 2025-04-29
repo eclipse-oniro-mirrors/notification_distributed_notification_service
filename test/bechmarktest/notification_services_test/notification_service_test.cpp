@@ -30,7 +30,6 @@
 #include "token_setproc.h"
 #include "ans_permission_def.h"
 
-
 using namespace OHOS;
 using namespace OHOS::Notification;
 using namespace OHOS::AbilityRuntime;
@@ -111,7 +110,7 @@ public:
     }
     void TearDown(const ::benchmark::State &state) override
     {}
- 
+
 protected:
     const int32_t repetitions = 3;
     const int32_t iterations = 100;
@@ -244,7 +243,7 @@ BENCHMARK_F(BenchmarkNotificationService, CancelNotificationTestCase001)(benchma
         if (errCode != ERR_OK) {
             state.SkipWithError("CancelNotificationTestCase001 publish failed.");
         }
-        advancedNotificationService_->Cancel(id, label, 0);
+        advancedNotificationService_->Cancel(id, label, "");
     }
 }
 

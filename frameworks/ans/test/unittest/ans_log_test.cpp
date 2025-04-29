@@ -42,43 +42,6 @@ void AnsLogTest::TearDown()
 {}
 
 /*
- * @tc.name: AnsLogTest_001
- * @tc.desc: test GetBriefFileName function
- * @tc.type: FUNC
- * @tc.require: issueI5UI8T
- */
-HWTEST_F(AnsLogTest, AnsLogTest_001, TestSize.Level1)
-{
-    std::string fileName = "../function/EventFwk/test.cpp";
-    std::string exceptStr = "test.cpp";
-
-    std::string result = AnsLogWrapper::GetBriefFileName(fileName.c_str());
-    EXPECT_EQ(exceptStr, result);
-}
-
-/*
- * @tc.name: AnsLogTest_002
- * @tc.desc: test GetBriefFileName function
- * @tc.type: FUNC
- * @tc.require: issueI5UI8T
- */
-HWTEST_F(AnsLogTest, AnsLogTest_002, TestSize.Level1)
-{
-    std::string fileName = "test.cpp";
-    std::string exceptStr = "";
-
-    std::string result = AnsLogWrapper::GetBriefFileName(fileName.c_str());
-    EXPECT_EQ(exceptStr, result);
-
-    fileName = "";
-    result = AnsLogWrapper::GetBriefFileName(fileName.c_str());
-    EXPECT_EQ(exceptStr, result);
-
-    result = AnsLogWrapper::GetBriefFileName(nullptr);
-    EXPECT_EQ(exceptStr, result);
-}
-
-/*
  * @tc.name: AnsConvertTest_001
  * @tc.desc: test ContentTypeJSToC function
  * @tc.type: FUNC
@@ -300,7 +263,10 @@ HWTEST_F(AnsLogTest, AnsConvertTest_007, TestSize.Level1)
 HWTEST_F(AnsLogTest, AnsConvertTest_008, TestSize.Level1)
 {
     int outType;
-    int inType = NotificationConstant::CLICK_REASON_DELETE;
+    int inType = NotificationConstant::DEFAULT_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DEFAULT_REASON_DELETE));
+    inType = NotificationConstant::CLICK_REASON_DELETE;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::CLICK_REASON_REMOVE));
     inType = NotificationConstant::CANCEL_REASON_DELETE;
@@ -336,6 +302,68 @@ HWTEST_F(AnsLogTest, AnsConvertTest_008, TestSize.Level1)
     inType = NotificationConstant::DISABLE_NOTIFICATION_REASON_DELETE;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISABLE_NOTIFICATION_REASON_DELETE));
+    inType = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_AS_BUNELE_REASON_DELETE));
+    inType = NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType,
+        static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE));
+    inType = NotificationConstant::APP_CANCEL_REMINDER_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_REMINDER_REASON_DELETE));
+    inType = NotificationConstant::APP_CANCEL_GROPU_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_GROPU_REASON_DELETE));
+    inType = NotificationConstant::APP_REMOVE_GROUP_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_REMOVE_GROUP_REASON_DELETE));
+    inType = NotificationConstant::APP_REMOVE_ALL_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_REMOVE_ALL_REASON_DELETE));
+    inType = NotificationConstant::APP_REMOVE_ALL_USER_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_REMOVE_ALL_USER_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_EIGHT_HOUR_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_EIGHT_HOUR_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_FOUR_HOUR_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_FOUR_HOUR_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_TEN_MINUTES_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_TEN_MINUTES_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_FIFTEEN_MINUTES_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_THIRTY_MINUTES_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_THIRTY_MINUTES_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_START_ARCHIVE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_START_ARCHIVE_REASON_DELETE));
+    inType = NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_AUTO_DELETE_REASON_DELETE));
+    inType = NotificationConstant::PACKAGE_REMOVE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::PACKAGE_REMOVE_REASON_DELETE));
+    inType = NotificationConstant::SLOT_ENABLED_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::SLOT_ENABLED_REASON_DELETE));
+    inType = NotificationConstant::APP_CANCEL_REASON_OTHER;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_REASON_OTHER));
+    inType = NotificationConstant::RECOVER_LIVE_VIEW_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::RECOVER_LIVE_VIEW_DELETE));
+    inType = NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType,
+        static_cast<int32_t>(NotificationNapi::RemoveReason::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE));
+    inType = NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_COLLABORATIVE_DELETE));
     inType = NotificationConstant::APP_CANCEL_REASON_OTHER;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_REASON_OTHER));
@@ -451,6 +479,53 @@ HWTEST_F(AnsLogTest, AnsConvertTest_013, TestSize.Level1)
     inType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
     NotificationNapi::AnsEnumUtil::LiveViewStatusCToJS(inType, outType);
     EXPECT_EQ(outType, NotificationNapi::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+}
+
+/*
+ * @tc.name: AnsConvertTest_014
+ * @tc.desc: test LiveViewTypesJSToC function
+ * @tc.type: FUNC
+ * @tc.require: issueI5UI8T
+ */
+HWTEST_F(AnsLogTest, AnsConvertTest_014, TestSize.Level1)
+{
+    NotificationLocalLiveViewContent::LiveViewTypes outType;
+    NotificationNapi::LiveViewTypes inType = NotificationNapi::LiveViewTypes::LIVE_VIEW_ACTIVITY;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesJSToC(inType, outType);
+    EXPECT_EQ(outType, NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY);
+    inType = NotificationNapi::LiveViewTypes::LIVE_VIEW_INSTANT;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesJSToC(inType, outType);
+    EXPECT_EQ(outType, NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT);
+    inType = NotificationNapi::LiveViewTypes::LIVE_VIEW_LONG_TERM;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesJSToC(inType, outType);
+    EXPECT_EQ(outType, NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM);
+    inType = NotificationNapi::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesJSToC(inType, outType);
+    EXPECT_EQ(outType, NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER);
+}
+
+/*
+ * @tc.name: AnsConvertTest_015
+ * @tc.desc: test LiveViewTypesCToJS function
+ * @tc.type: FUNC
+ * @tc.require: issueI5UI8T
+ */
+HWTEST_F(AnsLogTest, AnsConvertTest_015, TestSize.Level1)
+{
+    NotificationNapi::LiveViewTypes outType;
+    NotificationLocalLiveViewContent::LiveViewTypes inType =
+        NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_ACTIVITY;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesCToJS(inType, outType);
+    EXPECT_EQ(outType, NotificationNapi::LiveViewTypes::LIVE_VIEW_ACTIVITY);
+    inType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesCToJS(inType, outType);
+    EXPECT_EQ(outType, NotificationNapi::LiveViewTypes::LIVE_VIEW_INSTANT);
+    inType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_LONG_TERM;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesCToJS(inType, outType);
+    EXPECT_EQ(outType, NotificationNapi::LiveViewTypes::LIVE_VIEW_LONG_TERM);
+    inType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
+    NotificationNapi::AnsEnumUtil::LiveViewTypesCToJS(inType, outType);
+    EXPECT_EQ(outType, NotificationNapi::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER);
 }
 }
 }

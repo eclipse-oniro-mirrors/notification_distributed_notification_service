@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,10 +48,14 @@
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
 #endif
+#include "notification_clone_bundle_info.h"
 
 namespace OHOS {
 namespace Notification {
-class AdvancedNotificationService final : public AnsManagerStub {
+
+static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
+class AdvancedNotificationService final : public AnsManagerStub,
+    public std::enable_shared_from_this<AdvancedNotificationService> {
 public:
     struct NotificationRequestDb {
         sptr<NotificationRequest> request {nullptr};
@@ -87,6 +91,19 @@ public:
      */
     std::shared_ptr<ffrt::queue> GetNotificationSvrQueue();
 
+    /**
+     * @brief Submit an async task into notification_svr_queue.
+     *
+     * @param func Indicates the function.
+     */
+    void SubmitAsyncTask(const std::function<void()>& func);
+    /**
+     * @brief Submit a sync task into notification_svr_queue.
+     *
+     * @param func Indicates the function.
+     */
+    void SubmitSyncTask(const std::function<void()>& func);
+
     // AnsManagerStub
 
     /**
@@ -101,6 +118,21 @@ public:
      */
     ErrCode Publish(const std::string &label, const sptr<NotificationRequest> &request) override;
 
+    ErrCode PublishWithMaxCapacity(const std::string& label, const sptr<NotificationRequest>& request) override;
+
+    /**
+     * @brief Publishes a notification.
+     * @note If a notification with the same ID has been published by the current application and has not been deleted,
+     *       this method will update the notification.
+     *
+     * @param notification Indicates the NotificationRequest object for setting the notification content.
+     *                This parameter must be specified.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request) override;
+
+    ErrCode PublishNotificationForIndirectProxyWithMaxCapacity(const sptr<NotificationRequest> &request) override;
+
     /**
      * @brief Cancels a published notification matching the specified label and notificationId.
      *
@@ -109,7 +141,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns cancel notification result.
      */
-    ErrCode Cancel(int32_t notificationId, const std::string &label, int32_t instanceKey) override;
+    ErrCode Cancel(int32_t notificationId, const std::string &label, const std::string &instanceKey) override;
 
     /**
      * @brief Cancels all the published notifications.
@@ -117,7 +149,7 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelAll(int32_t instanceKey) override;
+    ErrCode CancelAll(const std::string &instanceKey) override;
 
     /**
      * @brief Cancels a published agent notification.
@@ -162,7 +194,7 @@ public:
      * @param slotType Indicates the notification slot type to be added.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode AddSlotByType(NotificationConstant::SlotType slotType) override;
+    ErrCode AddSlotByType(int32_t slotTypeInt) override;
 
     /**
      * @brief Creates multiple notification slots.
@@ -179,7 +211,7 @@ public:
      *                 This parameter must be specified.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RemoveSlotByType(const NotificationConstant::SlotType &slotType) override;
+    ErrCode RemoveSlotByType(int32_t slotTypeInt) override;
 
     /**
      * @brief Deletes all notification slots.
@@ -196,7 +228,7 @@ public:
      * @param slot Indicates the created NotificationSlot.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetSlotByType(const NotificationConstant::SlotType &slotType, sptr<NotificationSlot> &slot) override;
+    ErrCode GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot) override;
 
     /**
      * @brief Obtains all notification slots of this application.
@@ -222,7 +254,8 @@ public:
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications, int32_t instanceKey) override;
+    ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &notifications,
+        const std::string &instanceKey) override;
 
     /**
      * @brief Obtains the number of active notifications of the current application in the system.
@@ -231,6 +264,16 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetActiveNotificationNums(uint64_t &num) override;
+
+    /**
+     * @brief Obtains all active notifications by slot type in the current system. The caller must have system
+     * permissions to call this method.
+     *
+     * @param notification Indicates all active notifications of this application.
+     * @return Returns get all active notifications
+     */
+    ErrCode GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+        int32_t slotTypeInt) override;
 
     /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
@@ -255,26 +298,8 @@ public:
         const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications) override;
 
     ErrCode GetActiveNotificationByFilter(
-        const sptr<NotificationBundleOption> &bundleOption, const int32_t notificationId, const std::string &label,
-        const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &request) override;
-
-    /**
-     * @brief Allows another application to act as an agent to publish notifications in the name of your application
-     * bundle.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetNotificationAgent(const std::string &agent) override;
-
-    /**
-     * @brief Obtains the name of the application bundle that can publish notifications in the name of your application.
-     *
-     * @param agent Indicates the name of the application bundle that can publish notifications for your application if
-     * any; returns null otherwise.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetNotificationAgent(std::string &agent) override;
+        const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
+        const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request) override;
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -299,7 +324,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PublishAsBundle(
-        const sptr<NotificationRequest> notification, const std::string &representativeBundle) override;
+        const sptr<NotificationRequest>& notification, const std::string &representativeBundle) override;
+
+    ErrCode PublishAsBundleWithMaxCapacity(
+        const sptr<NotificationRequest>& notification, const std::string &representativeBundle) override;
 
     /**
      * @brief Sets the number of active notifications of the current application as the number to be displayed on the
@@ -362,11 +390,8 @@ public:
     ErrCode RemoveAllNotificationsForDisable(const sptr<NotificationBundleOption> &bundleOption);
 
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
-  
-    ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
-    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
-        const sptr<NotificationSlot> &slot);
+    ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
     /**
      * @brief Delete notification based on key.
@@ -412,7 +437,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetSlotByBundle(
-        const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType,
+        const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt,
         sptr<NotificationSlot> &slot) override;
 
     /**
@@ -432,8 +457,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestEnableNotification(const std::string &deviceId,
-        const sptr<AnsDialogCallback> &callback,
+        const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken) override;
+
+    ErrCode RequestEnableNotification(const std::string &deviceId,
+        const sptr<IAnsDialogCallback> &callback) override;
+
+    /**
+     * @brief Allow application to publish notifications.
+     *
+     * @param bundleName bundle name.
+     * @param uid uid.
+     * @return Returns set notifications enabled for the bundle result.
+     */
+    ErrCode RequestEnableNotification(const std::string& bundleName, int32_t uid) override;
 
     /**
      * @brief Set whether to allow the specified deviceId to send notifications for current bundle.
@@ -496,8 +533,10 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode Subscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
+
+    ErrCode Subscribe(const sptr<IAnsSubscriber> &subscriber) override;
 
     /**
      * @brief Subscribes notifications self.
@@ -505,7 +544,7 @@ public:
      * @param subscriber Indicates the subscriber.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SubscribeSelf(const sptr<AnsSubscriberInterface> &subscriber) override;
+    ErrCode SubscribeSelf(const sptr<IAnsSubscriber> &subscriber) override;
 
     /**
      * @brief Subscribes notifications.
@@ -514,8 +553,10 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SubscribeLocalLiveView(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &info, const bool isNative) override;
+
+    ErrCode SubscribeLocalLiveView(const sptr<IAnsSubscriberLocalLiveView> &subscriber, const bool isNative) override;
 
     /**
      * @brief Unsubscribes notifications.
@@ -524,8 +565,10 @@ public:
      * @param info Indicates the NotificationSubscribeInfo object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode Unsubscribe(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode Unsubscribe(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &info) override;
+
+    ErrCode Unsubscribe(const sptr<IAnsSubscriber> &subscriber) override;
 
     /**
      * @brief Checks whether this device is allowed to publish notifications.
@@ -542,6 +585,24 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode IsAllowedNotifySelf(bool &allowed) override;
+
+    /**
+     * @brief Checks whether this application can pop enable notification dialog.
+     *
+     * @param  canPop True if can pop enable notification dialog
+     * @return Returns is canPop result.
+     */
+    ErrCode CanPopEnableNotificationDialog(const sptr<IAnsDialogCallback> &callback,
+        bool &canPop, std::string &bundleName) override;
+
+    /**
+     * @brief remove enable notification dialog.
+     *
+     * @return Returns remove dialog result.
+     */
+    ErrCode RemoveEnableNotificationDialog() override;
+
+    ErrCode RemoveEnableNotificationDialog(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief Checks whether notifications are allowed for a specific bundle.
@@ -593,13 +654,21 @@ public:
     ErrCode DoesSupportDoNotDisturbMode(bool &doesSupport) override;
 
     /**
+     * @brief Is coming call need silent in do not disturb mode.
+     *
+     * @param phoneNumber the calling format number.
+     * @return Returns silent in do not disturb mode.
+     */
+    ErrCode IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber, int32_t callerType) override;
+
+    /**
      * @brief Cancel notifications according to group.
      *
      * @param groupName Indicates the group name.
      * @param instanceKey Indicates the application instance key.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode CancelGroup(const std::string &groupName, int32_t instanceKey) override;
+    ErrCode CancelGroup(const std::string &groupName, const std::string &instanceKey) override;
 
     /**
      * @brief Delete notifications according to bundle and group.
@@ -659,7 +728,7 @@ public:
      * @param remindType Reminder type for the device.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDeviceRemindType(NotificationConstant::RemindType &remindType) override;
+    ErrCode GetDeviceRemindType(int32_t& remindTypeInt) override;
 
     /**
      * @brief Publishes a continuous notification.
@@ -684,63 +753,6 @@ public:
     bool CheckReminderPermission();
 
     /**
-     * @brief Publishes a reminder notification.
-     *
-     * @param reminder Identifies the reminder notification request that needs to be published.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode PublishReminder(sptr<ReminderRequest> &reminder) override;
-
-    /**
-     * @brief Cancel a reminder notifications.
-     *
-     * @param reminderId Identifies the reminders id that needs to be canceled.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode CancelReminder(const int32_t reminderId) override;
-
-    /**
-     * @brief Get all valid reminder notifications.
-     *
-     * @param reminders Identifies the list of all valid notifications.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &reminders) override;
-
-    /**
-     * @brief Cancel all reminder notifications.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode CancelAllReminders() override;
-
-    /**
-     * @brief Add exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param date exclude date
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date) override;
-
-    /**
-     * @brief Clear exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode DelExcludeDates(const int32_t reminderId) override;
-
-    /**
-     * @brief Get exclude date for reminder
-     *
-     * @param reminderId Identifies the reminders id.
-     * @param dates exclude dates
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates) override;
-
-    /**
      * @brief Checks whether this device is support template.
      *
      * @param templateName Identifies the template name for searching as a condition.
@@ -756,7 +768,7 @@ public:
      * @param allowed Identifies the allowed flag.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode IsSpecialUserAllowedNotify(const int32_t &userId, bool &allowed) override;
+    ErrCode IsSpecialUserAllowedNotify(int32_t userId, bool &allowed) override;
 
     /**
      * @brief Sets whether to allow all applications to publish notifications on a specified device. The caller must
@@ -769,7 +781,7 @@ public:
      *                are not allowed.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetNotificationsEnabledByUser(const int32_t &deviceId, bool enabled) override;
+    ErrCode SetNotificationsEnabledByUser(int32_t userId, bool enabled) override;
 
     /**
      * @brief Delete all notifications by user.
@@ -777,7 +789,7 @@ public:
      * @param userId Indicates the user id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode DeleteAllByUser(const int32_t &userId) override;
+    ErrCode DeleteAllByUser(int32_t userId) override;
 
     /**
      * @brief Set do not disturb date by user.
@@ -786,7 +798,7 @@ public:
      * @param date Indicates NotificationDoNotDisturbDate object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetDoNotDisturbDate(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date) override;
+    ErrCode SetDoNotDisturbDate(int32_t userId, const sptr<NotificationDoNotDisturbDate> &date) override;
 
     /**
      * @brief Get the do not disturb date by user.
@@ -795,12 +807,15 @@ public:
      * @param date Indicates the NotificationDoNotDisturbDate object.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode GetDoNotDisturbDate(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date) override;
+    ErrCode GetDoNotDisturbDate(int32_t userId, sptr<NotificationDoNotDisturbDate> &date) override;
+
     ErrCode SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl) override;
+        int32_t slotTypeInt, bool enabled, bool isForceControl) override;
+
     ErrCode GetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
-        const NotificationConstant::SlotType &slotType, bool &enabled) override;
-    ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled) override;
+        int32_t slotTypeInt, bool &enabled) override;
+
+    ErrCode GetEnabledForBundleSlotSelf(int32_t slotTypeInt, bool &enabled) override;
 
     // SystemEvent
 
@@ -810,6 +825,13 @@ public:
      * @param bundleOption Indicates the bundle info.
      */
     void OnBundleRemoved(const sptr<NotificationBundleOption> &bundleOption);
+
+    /**
+     * @brief Obtains the event of bundle batch removed.
+     *
+     * @param notifications Notification vector.
+     */
+    void ExecBatchCancel(std::vector<sptr<Notification>> &notifications, int32_t &reason);
 
     /**
      * @brief Obtains the event of user removed.
@@ -898,8 +920,9 @@ public:
      */
     void OnDistributedKvStoreDeathRecipient();
 
-    ErrCode CancelPreparedNotification(
-        int32_t notificationId, const std::string &label, const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode CancelPreparedNotification(int32_t notificationId, const std::string &label,
+        const sptr<NotificationBundleOption> &bundleOption, const int32_t reason);
+
     ErrCode PrepareNotificationInfo(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishPreparedNotification(const sptr<NotificationRequest> &request,
@@ -924,7 +947,7 @@ public:
      * @param instanceKey The application instance key.
      * @return Returns set badge number result.
      */
-    ErrCode SetBadgeNumber(int32_t badgeNumber, int32_t instanceKey) override;
+    ErrCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey) override;
 
     /**
      * @brief Set badge number by bundle.
@@ -936,12 +959,40 @@ public:
     ErrCode SetBadgeNumberByBundle(const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
 
     /**
+     * @brief Set badge number for dh by bundle.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param badgeNumber The badge number.
+     * @return Returns set badge number by bundle result.
+     */
+    ErrCode SetBadgeNumberForDhByBundle(
+        const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber) override;
+
+    /**
      * @brief Obtains allow notification application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override;
+
+    /**
+     * @brief Obtains allow liveview application list.
+     *
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption) override;
+
+    /**
+     * @brief Obtains allow distribued application list.
+     *
+     * @param deviceType Indicates device type.
+     * @param bundleOption Indicates the bundle bundleOption.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetAllDistribuedEnabledBundles(const std::string &deviceType,
+        std::vector<NotificationBundleOption> &bundleOption) override;
 
     /**
      * @brief Register Push Callback.
@@ -1011,13 +1062,48 @@ public:
     ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled) override;
 
     /**
+     * @brief Set the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns set channel switch result.
+     */
+    ErrCode SetDistributedEnabledBySlot(
+        int32_t slotTypeInt, const std::string &deviceType, bool enabled) override;
+
+    /**
+     * @brief Query the channel switch for collaborative reminders.
+       The caller must have system permissions to call this method.
+     *
+     * @param slotType Indicates the slot type of the application.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param enabled Indicates slot switch status.
+     * @return Returns channel switch result.
+     */
+    ErrCode IsDistributedEnabledBySlot(
+        int32_t slotTypeInt, const std::string &deviceType, bool &enabled) override;
+
+    /**
      * @brief Set the status of the target device.
      *
      * @param deviceType Type of the device whose status you want to set.
      * @param status The status.
      * @return Returns set result.
      */
-    ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status) override;
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+        const std::string &deveiceId) override;
+
+    /**
+     * @brief Set the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
+        uint32_t controlFlag, const std::string &deveiceId) override;
 
     /**
      * @brief clear notification when aggregate local switch close.
@@ -1076,6 +1162,15 @@ public:
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
 
     /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    ErrCode GetTargetDeviceStatus(const std::string &deviceType, int32_t &status) override;
+
+    /**
      * @brief Init publish process.
      */
     bool InitPublishProcess();
@@ -1083,7 +1178,7 @@ public:
     /**
     * @brief Recover LiveView from DB.
     */
-    void RecoverLiveViewFromDb();
+    void RecoverLiveViewFromDb(int32_t userId = -1);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**
@@ -1093,16 +1188,6 @@ public:
      * @return Returns register swing Callback result.
      */
     ErrCode RegisterSwingCallback(const sptr<IRemoteObject>& swingCallback) override;
-
-    /**
-     * @brief screen lock event callback.
-     */
-    void OnScreenLock();
-
-    /**
-     * @brief screen unlock event callback.
-     */
-    void OnScreenUnlock();
 #endif
 
     /**
@@ -1115,6 +1200,84 @@ public:
      */
     bool AllowUseReminder(const std::string& bundleName);
 
+    /**
+     * @brief Whether reminders are allowed.
+     *
+     * @param bundleName app bundleName
+     * @param isAllowUseReminder is allow use reminder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder) override;
+
+    /**
+     * @brief Get do not disturb profile by id.
+     *
+     * @param id Profile id.
+     * @param status Indicates the NotificationDoNotDisturbProfile object.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDoNotDisturbProfile(int64_t id, sptr<NotificationDoNotDisturbProfile> &profile) override;
+
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<IAnsOperationCallback> &callback) override;
+
+    /**
+     * @brief Reply distribute operation.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param result The result of the distribute operation.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ReplyDistributeOperation(const std::string& hashCode, const int32_t result) override;
+
+    /**
+     * @brief Get notificationRequest by hashCode.
+     *
+     * @param hashCode Unique ID of the notification.
+     * @param notificationRequest The request of of the notification.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationRequestByHashCode(
+        const std::string& hashCode, sptr<NotificationRequest>& notificationRequest) override;
+
+    int32_t OnBackup(MessageParcel& data, MessageParcel& reply);
+
+    int32_t OnRestore(MessageParcel& data, MessageParcel& reply);
+
+    void ResetDistributedEnabled();
+
+    ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
+
+    void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+
+    void TryStartReminderAgentService();
+
+    static sptr<NotificationBundleOption> GenerateBundleOption();
+    static sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
+
+    ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
+
+    bool IsDisableNotification(const std::string &bundleName);
+
+    bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
+
+    void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
+    ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason);
+
+    /**
+     * @brief set rule of generate hashCode.
+     *
+     * @param type generate hashCode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetHashCodeRule(const uint32_t type) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1125,6 +1288,13 @@ protected:
      */
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
+public:
+    bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
+    ErrCode SetDefaultNotificationEnabled(
+        const sptr<NotificationBundleOption> &bundleOption, bool enabled);
+    ErrCode RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationSlot> &slot, const int reason);
+    bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
 private:
     struct RecentInfo {
         std::list<std::shared_ptr<RecentNotification>> list;
@@ -1146,43 +1316,51 @@ private:
         FINISH
     };
 
+    enum ContactPolicy {
+        FORBID_EVERYONE = 1,
+        ALLOW_EVERYONE = 2,
+        ALLOW_EXISTING_CONTACTS = 3,
+        ALLOW_FAVORITE_CONTACTS = 4,
+        ALLOW_SPECIFIED_CONTACTS = 5,
+        FORBID_SPECIFIED_CONTACTS = 6,
+    };
+
     AdvancedNotificationService();
 
     void StartFilters();
     void StopFilters();
     ErrCode Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
-    void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record);
+    void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
+        const bool isAgentController);
     ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption, const std::string &label,
-        int32_t notificationId, sptr<Notification> &notification, bool isCancel = false);
+    ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason,
+        bool isCancel = false);
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
         const int32_t &userId, sptr<Notification> &notification);
-    void RemoveFromDelayedNotificationList(const std::string &key);
+    bool RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
     std::shared_ptr<NotificationRecord> GetFromDelayedNotificationList(
         const int32_t ownerUid, const int32_t notificationId);
     std::vector<std::string> GetNotificationKeys(const sptr<NotificationBundleOption> &bundleOption);
+    std::vector<std::string> GetNotificationKeysByBundle(const sptr<NotificationBundleOption> &bundleOption);
     bool IsNotificationExists(const std::string &key);
     void SortNotificationList();
     static bool NotificationCompare(
         const std::shared_ptr<NotificationRecord> &first, const std::shared_ptr<NotificationRecord> &second);
-    ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode PublishFlowControl(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode PublishInNotificationList(const std::shared_ptr<NotificationRecord> &record);
 
     sptr<NotificationSortingMap> GenerateSortingMap();
-    static sptr<NotificationBundleOption> GenerateBundleOption();
-    static sptr<NotificationBundleOption> GenerateValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
 
     std::string TimeToString(int64_t time);
-    int64_t GetNowSysTime();
     void ExtendDumpForFlags(std::shared_ptr<NotificationFlags>, std::stringstream &stream);
     ErrCode ActiveNotificationDump(const std::string& bundle, int32_t userId, int32_t recvUserId,
         std::vector<std::string> &dumpInfo);
@@ -1196,12 +1374,11 @@ private:
     void UpdateRecentNotification(sptr<Notification> &notification, bool isDelete, int32_t reason);
 
     void AdjustDateForDndTypeOnce(int64_t &beginDate, int64_t &endDate);
-    static bool CheckPermission(const std::string &permission);
     ErrCode PrepareNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode PrepareContinuousTaskNotificationRequest(const sptr<NotificationRequest> &request, const int32_t &uid);
-    static bool GetActiveUserId(int& userId);
-    void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request);
-    bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
+
+    void TriggerRemoveWantAgent(const sptr<NotificationRequest> &request, int32_t removeReason, bool isThirdParty);
+
     ErrCode IsAllowedNotifySelf(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
 
     ErrCode SetNotificationRemindType(sptr<Notification> notification, bool isLocal);
@@ -1231,7 +1408,6 @@ private:
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
     static ErrCode GetAppTargetBundle(const sptr<NotificationBundleOption> &bundleOption,
         sptr<NotificationBundleOption> &targetBundle);
-    bool PublishSlotChangeCommonEvent(const sptr<NotificationBundleOption> &bundleOption);
     void ReportInfoToResourceSchedule(const int32_t userId, const std::string &bundleName);
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     void GetDumpInfo(const std::vector<std::u16string> &args, std::string &result);
@@ -1253,9 +1429,12 @@ private:
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     ErrCode PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    ErrCode PrePublishRequest(const sptr<NotificationRequest> &request);
     ErrCode PublishNotificationBySa(const sptr<NotificationRequest> &request);
     bool IsNeedPushCheck(const sptr<NotificationRequest> &request);
     void FillExtraInfoToJson(const sptr<NotificationRequest> &request,
+        sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
+    void CreatePushCheckJson(const sptr<NotificationRequest> &request,
         sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject);
     ErrCode PushCheck(const sptr<NotificationRequest> &request);
     uint64_t StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
@@ -1264,37 +1443,44 @@ private:
     void SendNotificationsOnCanceled(std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void SetAgentNotification(sptr<NotificationRequest>& notificationRequest, std::string& bundleName);
-    ErrCode SetDefaultNotificationEnabled(
-        const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     static bool GetBundleInfoByNotificationBundleOption(
         const sptr<NotificationBundleOption> &bundleOption, AppExecFwk::BundleInfo &bundleInfo);
 
-    ErrCode GetTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
+    ErrCode GetTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
-    ErrCode GetCommonTargetRecordList(const std::string& bundleName, NotificationConstant::SlotType slotType,
+    ErrCode GetCommonTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
-    void OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
+    ErrCode OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
     static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
-    static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests);
+    static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
+        int32_t userId = -1);
+    static int32_t DoubleDeleteNotificationFromDb(const std::string &key,
+        const std::string &secureKey, const int32_t userId);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);
     void CancelTimer(uint64_t timerId);
+    void BatchCancelTimer(std::vector<uint64_t> timerIds);
     ErrCode UpdateNotificationTimerInfo(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetFinishTimer(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    ErrCode StartFinishTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expireTimePoint, const int32_t reason);
     void CancelFinishTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode SetUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record, int64_t expireTimePoint);
+    ErrCode StartUpdateTimer(const std::shared_ptr<NotificationRecord> &record,
+        int64_t expireTimePoint, const int32_t reason);
     void CancelUpdateTimer(const std::shared_ptr<NotificationRecord> &record);
     void StartArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelArchiveTimer(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode StartAutoDeletedTimer(const std::shared_ptr<NotificationRecord> &record);
     void ProcForDeleteLiveView(const std::shared_ptr<NotificationRecord> &record);
-    void QueryDoNotDisturbProfile(std::string &enable, std::string &profileId);
+    void QueryDoNotDisturbProfile(const int32_t &userId, std::string &enable, std::string &profileId);
+    void QueryIntelligentExperienceEnable(const int32_t &userId, std::string &enable);
     void CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record);
+    void ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable);
     void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
@@ -1303,19 +1489,21 @@ private:
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
     void FillActionButtons(const sptr<NotificationRequest> &request);
-    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode IsAllowedGetNotificationByFilter(const std::shared_ptr<NotificationRecord> &record,
+        const sptr<NotificationBundleOption> &bundleOption);
     ErrCode FillRequestByKeys(const sptr<NotificationRequest> &oldRequest,
         const std::vector<std::string> extraInfoKeys, sptr<NotificationRequest> &newRequest);
     ErrCode IsAllowedRemoveSlot(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType);
-    void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
+    void HandleBadgeEnabledChanged(const sptr<NotificationBundleOption> &bundleOption, bool enabled);
     ErrCode CheckBundleOptionValid(sptr<NotificationBundleOption> &bundleOption);
     bool IsNeedNotifyConsumed(const sptr<NotificationRequest> &request);
     ErrCode AddRecordToMemory(const std::shared_ptr<NotificationRecord> &record,
-        bool isSystemApp, bool isUpdateByOwner);
+        bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
     bool IsDuplicateMsg(const std::string &uniqueKey);
+    void DeleteDuplicateMsgs(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
     std::vector<AppExecFwk::BundleInfo> GetBundlesOfActiveUser();
@@ -1331,8 +1519,8 @@ private:
         const sptr<NotificationBundleOption> &bundleOption);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
     ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request, std::string bundleName);
-    void GenerateSlotReminderMode(
-        const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot = false);
+    void GenerateSlotReminderMode(const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle,
+        bool isSpecifiedSlot = false, uint32_t defaultSlotFlags = DEFAULT_SLOT_FLAGS);
     static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);
     bool IsUpdateSystemLiveviewByOwner(const sptr<NotificationRequest> &request);
     bool IsSaCreateSystemLiveViewAsBundle(const std::shared_ptr<NotificationRecord> &record, int32_t ipcUid);
@@ -1342,6 +1530,55 @@ private:
     ErrCode StartPublishDelayedNotification(const std::shared_ptr<NotificationRecord> &record);
     void StartPublishDelayedNotificationTimeOut(const int32_t ownerUid, const int32_t notificationId);
     void UpdateRecordByOwner(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
+    void StartFinishTimerForUpdate(const std::shared_ptr<NotificationRecord> &record, uint64_t process);
+    ErrCode CheckLongTermLiveView(const sptr<NotificationRequest> &request, const std::string &key);
+    void ExcuteCancelGroupCancel(const sptr<NotificationBundleOption>& bundleOption,
+        const std::string &groupName, const int32_t reason);
+    ErrCode ExcuteCancelAll(const sptr<NotificationBundleOption>& bundleOption, const int32_t reason);
+    ErrCode ExcuteDelete(const std::string &key, const int32_t removeReason);
+    ErrCode CheckNeedSilent(const std::string &phoneNumber, int32_t callerType, int32_t userId);
+    ErrCode QueryContactByProfileId(const std::string &phoneNumber, const std::string &policy, int32_t userId);
+    uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
+    bool IsSystemUser(int32_t userId);
+    ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
+    void SetCollaborateReminderFlag(const sptr<NotificationRequest> &request);
+    ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &bundle,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+    ErrCode AddSlotThenPublishEvent(
+        const sptr<NotificationSlot> &slot,
+        const sptr<NotificationBundleOption> &bundle,
+        bool enabled, bool isForceControl);
+    ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
+    void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
+    void CancelWantAgent(const sptr<Notification> &notification);
+    void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
+    void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
+    void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
+    void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode CommonRequestEnableNotification(const std::string &deviceId,
+        const sptr<IAnsDialogCallback> &callback,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<NotificationBundleOption> bundleOption,
+        const bool innerLake);
+    void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
+
+    template<typename T>
+    bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)
+    {
+        if (!data.WriteInt32(parcelableVector.size())) {
+            ANS_LOGE("Failed to write ParcelableVector size.");
+            return false;
+        }
+
+        for (auto &parcelable : parcelableVector) {
+            if (!data.WriteStrongParcelable(parcelable)) {
+                ANS_LOGE("Failed to write ParcelableVector");
+                return false;
+            }
+        }
+        return true;
+    }
 
 private:
     static sptr<AdvancedNotificationService> instance_;
@@ -1353,17 +1590,12 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
-    static std::mutex flowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> flowControlTimestampList_;
-    std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
-    static std::string supportCheckSaPermission_;
     std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
@@ -1376,6 +1608,10 @@ private:
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
     std::mutex delayNotificationMutext_;
+    static std::mutex doNotDisturbMutex_;
+    std::map<int32_t, std::string> doNotDisturbEnableRecord_;
+    bool isCachedAppAndDeviceRelationMap_ = false;
+    std::map<std::string, std::string> appAndDeviceRelationMap_;
 };
 
 /**

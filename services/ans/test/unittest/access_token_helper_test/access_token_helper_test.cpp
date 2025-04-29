@@ -130,5 +130,18 @@ HWTEST_F(AccessTokenHelperTest, IsDlpHap_00200, Function | SmallTest | Level1)
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
     EXPECT_FALSE(stub_->IsDlpHap(tokenID));
 }
+
+
+/**
+ * @tc.number  : AdvancedNotificationService_01300
+ * @tc.name    : AdvancedNotificationService_01300
+ * @tc.desc    : Test CheckPermission function and result is false
+ */
+HWTEST_F(AccessTokenHelperTest, CheckPermission_00100, Function | SmallTest | Level1)
+{
+    std::string permission = "<permission>";
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    ASSERT_EQ(stub_->CheckPermission(permission), true);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -18,5 +18,6 @@ group("ans_service") {
 
   if (distributed_notification_supported) {
     deps += [ "distributed:libans_distributed" ]
+    deps += [ "distributed:libdans" ]
   }
 }

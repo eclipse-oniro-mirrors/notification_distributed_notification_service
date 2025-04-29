@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +127,8 @@ public:
      */
     std::string GetKey() const;
 
+    void SetKey(const std::string& key);
+
     /**
      * @brief Obtains the notification request set by ANS.
      *
@@ -229,18 +231,18 @@ public:
     int32_t GetUserId() const;
 
     /**
+     * @brief Obtains the instance key of the notification creator.
+     *
+     * @return Returns the instance key of the notification creator.
+     */
+    std::string GetInstanceKey() const;
+
+    /**
      * @brief Obtains the UserId of the notification receiver.
      *
      * @return Returns the UserId of the notification receiver.
      */
     int32_t GetRecvUserId() const;
-
-    /**
-     * @brief Obtains the instance key of the notification creator.
-     *
-     * @return Returns the instance key of the notification creator.
-     */
-    int32_t GetInstanceKey() const;
 
     /**
      * @brief Dumps a string representation of the object.
@@ -307,6 +309,27 @@ public:
      */
     void SetArchiveTimer(uint64_t archiveTimerId);
 
+    /**
+     * @brief Obtains the autoDeleted timer id of notification.
+     *
+     * @return Returns the id of the notification autoDeleted timer.
+     */
+    uint64_t GetAutoDeletedTimer() const;
+
+    /**
+     * @brief Obtains the autoDeleted timer id.
+     *
+     * @param autoDeletedTimerId the id of the notification archive autoDeleted.
+     */
+    void SetAutoDeletedTimer(uint64_t autoDeletedTimerId);
+
+    /**
+     * @brief Obtains the privileged.
+     *
+     * @param Returns the privileged of the notification.
+     */
+    bool GetPrivileged() const;
+
 private:
     Notification();
     void SetEnableSound(const bool &enable);
@@ -319,6 +342,7 @@ private:
     void SetVibrationStyle(const std::vector<int64_t> &style);
     void SetRemindType(const NotificationConstant::RemindType &reminType);
     void SetRemoveAllowed(bool removeAllowed);
+    void SetPrivileged(const bool &isPrivileged);
     void SetSourceType(NotificationConstant::SourceType sourceType);
     bool ReadFromParcel(Parcel &parcel);
     void ReadFromParcelBool(Parcel &parcel);
@@ -352,6 +376,8 @@ private:
     uint64_t archiveTimerId_ {0};
     std::shared_ptr<Uri> sound_ {nullptr};
     std::vector<int64_t> vibrationStyle_ {};
+    uint64_t autoDeletedTimerId_ {0};
+    bool isPrivileged_ {false};
 
     friend class AdvancedNotificationService;
     friend class NotificationSlotFilter;

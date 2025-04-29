@@ -1,0 +1,296 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+interface OHOS.Notification.IAnsDialogCallback;
+interface OHOS.Notification.IAnsSubscriberLocalLiveView;
+interface OHOS.Notification.IAnsSubscriber;
+interface OHOS.Notification.IAnsOperationCallback;
+
+sequenceable OHOS.Notification.NotificationBundleOption;
+sequenceable OHOS.Notification.NotificationDisable;
+sequenceable OHOS.Notification.NotificationDoNotDisturbDate;
+sequenceable OHOS.Notification.NotificationDoNotDisturbProfile;
+sequenceable OHOS.Notification.NotificationRequest;
+sequenceable OHOS.Notification.NotificationSlot;
+sequenceable OHOS.Notification.NotificationSubscribeInfo;
+sequenceable OHOS.Notification.NotificationOperationInfo;
+sequenceable OHOS.Notification.Notification;
+sequenceable OHOS.Notification.NotificationButtonOption;
+sequenceable OHOS.Notification.NotificationCheckRequest;
+sequenceable OHOS.IRemoteObject;
+
+interface OHOS.Notification.IAnsManager {
+    void Publish([in] String label, [in] sptr<NotificationRequest> notification);
+    [ipcincapacity 520] void PublishWithMaxCapacity([in] String label, [in] sptr<NotificationRequest> notification);
+
+    void PublishNotificationForIndirectProxy([in] sptr<NotificationRequest> notification);
+    [ipcincapacity 520] void PublishNotificationForIndirectProxyWithMaxCapacity([in] sptr<NotificationRequest> notification);
+
+    void Cancel([in] int notificationId, [in] String label, [in] String instanceKey);
+
+    void CancelAll([in] String instanceKey);
+
+    void CancelAsBundle([in] int notificationId, [in] String representativeBundle, [in] int userId);
+
+    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId);
+
+    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] int userId);
+
+    void AddSlotByType([in] int slotTypeInt);
+
+    void AddSlots([in] sptr<NotificationSlot>[] slots);
+
+    void RemoveSlotByType([in] int slotTypeInt);
+
+    void RemoveAllSlots();
+
+    void GetSlotByType([in] int slotTypeInt, [out] null_sptr<NotificationSlot> slot);
+
+    void GetSlots([out] sptr<NotificationSlot>[] slots);
+
+    void GetSlotNumAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned long num);
+
+    void GetActiveNotifications([out] sptr<NotificationRequest>[] notifications, [in] String instanceKey);
+
+    void GetActiveNotificationNums([out] unsigned long num);
+
+    void GetAllActiveNotifications([out] sptr<Notification>[] notifications);
+
+    void GetAllNotificationsBySlotType([out] sptr<Notification>[] notifications, [in] int slotTypeInt);
+
+    void GetSpecialActiveNotifications([in] String[] key, [out] sptr<Notification>[] notifications);
+
+    [ipcoutcapacity 520] void GetActiveNotificationByFilter(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int notificationId,
+        [in] String label,
+        [in] String[] extraInfoKeys,
+        [out] null_sptr<NotificationRequest> request);
+
+    void CanPublishAsBundle([in] String representativeBundle, [out] boolean canPublish);
+
+    void PublishAsBundle([in] sptr<NotificationRequest> notification, [in] String representativeBundle);
+    [ipcincapacity 520] void PublishAsBundleWithMaxCapacity([in] sptr<NotificationRequest> notification, [in] String representativeBundle);
+
+    void SetNotificationBadgeNum([in] int num);
+
+    void GetBundleImportance([out] int importance);
+
+    void HasNotificationPolicyAccessPermission([out] boolean granted);
+
+    void TriggerLocalLiveView(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int notificationId,
+        [in] sptr<NotificationButtonOption> buttonOption);
+
+    void RemoveNotification(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int notificationId,
+        [in] String label,
+        [in] int removeReason);
+
+    void RemoveAllNotifications([in] sptr<NotificationBundleOption> bundleOption);
+
+    void RemoveNotifications([in] String[] hashcodes, [in] int removeReason);
+
+    void Delete([in] String key, [in] int removeReason);
+
+    void DeleteByBundle([in] sptr<NotificationBundleOption> bundleOption);
+
+    void DeleteAll();
+
+    void GetSlotsByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] sptr<NotificationSlot>[] slots);
+
+    void GetSlotByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int slotTypeInt,
+        [out] null_sptr<NotificationSlot> slot);
+
+    void UpdateSlots([in] sptr<NotificationBundleOption> bundleOption, [in] sptr<NotificationSlot>[] slots);
+
+    void RequestEnableNotification([in] String deviceId, [in] IAnsDialogCallback ansDialogCallback);
+    void RequestEnableNotification([in] String deviceId, [in] IAnsDialogCallback ansDialogCallback, [in] IRemoteObject callerToken);
+
+    void RequestEnableNotification([in] String bundleName, [in] int uid);
+
+    void SetNotificationsEnabledForBundle([in] String deviceId, [in] boolean enabled);
+
+    void SetNotificationsEnabledForAllBundles([in] String deviceId, [in] boolean enabled);
+
+    void SetNotificationsEnabledForSpecialBundle(
+        [in] String deviceId, [in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+
+    void SetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+
+    void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
+
+    void GetShowBadgeEnabled([out] boolean enabled);
+
+    void Subscribe([in] IAnsSubscriber subscriber);
+    void Subscribe([in] IAnsSubscriber subscriber, [in] sptr<NotificationSubscribeInfo> info);
+
+    void SubscribeSelf([in] IAnsSubscriber subscriber);
+
+    void SubscribeLocalLiveView(
+        [in] IAnsSubscriberLocalLiveView subscriber,
+        [in] boolean isNative);
+    void SubscribeLocalLiveView(
+        [in] IAnsSubscriberLocalLiveView subscriber,
+        [in] sptr<NotificationSubscribeInfo> info,
+        [in] boolean isNative);
+
+    void Unsubscribe([in] IAnsSubscriber subscriber);
+    void Unsubscribe([in] IAnsSubscriber subscriber, [in] sptr<NotificationSubscribeInfo> info);
+
+    void IsAllowedNotify([out] boolean allowed);
+
+    void IsAllowedNotifySelf([out] boolean allowed);
+
+    void CanPopEnableNotificationDialog([in] IAnsDialogCallback ansDialogCallback, [out] boolean canPop, [out] String bundleName);
+
+    void RemoveEnableNotificationDialog();
+
+    void IsSpecialBundleAllowedNotify([in] sptr<NotificationBundleOption> bundleOption, [out] boolean allowed);
+
+    void SetDoNotDisturbDate([in] sptr<NotificationDoNotDisturbDate> date);
+
+    void GetDoNotDisturbDate([out] sptr<NotificationDoNotDisturbDate> date);
+
+    void AddDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+
+    void RemoveDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+
+    void DoesSupportDoNotDisturbMode([out] boolean doesSupport);
+
+    void IsNeedSilentInDoNotDisturbMode([in] String phoneNumber, [in] int callerType);
+
+    void CancelGroup([in] String groupName, [in] String instanceKey);
+
+    void RemoveGroupByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String groupName);
+
+    void IsDistributedEnabled([out] boolean enabled);
+
+    void SetDistributedEnabledBySlot(
+        [in] int slotTypeInt, [in] String deviceType, [in] boolean enabled);
+
+    void IsDistributedEnabledBySlot(
+        [in] int slotTypeInt, [in] String deviceType, [out] boolean enabled);
+
+    void EnableDistributed([in] boolean enabled);
+
+    void EnableDistributedByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+
+    void EnableDistributedSelf([in] boolean enabled);
+
+    void IsDistributedEnableByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
+
+    void GetDeviceRemindType([out] int remindTypeInt);
+
+    void PublishContinuousTaskNotification([in] sptr<NotificationRequest> request);
+
+    void CancelContinuousTaskNotification([in] String label, [in] int notificationId);
+
+    void IsSupportTemplate([in] String templateName, [out] boolean support);
+
+    void IsSpecialUserAllowedNotify([in] int userId, [out] boolean allowed);
+
+    void SetNotificationsEnabledByUser([in] int userId, [in] boolean enabled);
+
+    void DeleteAllByUser([in] int userId);
+
+    void SetDoNotDisturbDate([in] int userId, [in] sptr<NotificationDoNotDisturbDate> date);
+
+    void GetDoNotDisturbDate([in] int userId, [out] sptr<NotificationDoNotDisturbDate> date);
+
+    void SetEnabledForBundleSlot(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int slotTypeInt,
+        [in] boolean enabled,
+        [in] boolean isForceControl);
+
+        void GetEnabledForBundleSlot(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int slotTypeInt,
+        [out] boolean enabled);
+
+    void GetEnabledForBundleSlotSelf([in] int slotTypeInt, [out] boolean enabled);
+
+    void ShellDump(
+        [in] String cmd,
+        [in] String bundle,
+        [in] int userId,
+        [in] int recvUserId,
+        [out] String[] dumpInfo);
+
+    void SetSyncNotificationEnabledWithoutApp([in] int userId, [in] boolean enabled);
+
+    void GetSyncNotificationEnabledWithoutApp([in] int userId, [out] boolean enabled);
+
+    void SetBadgeNumber([in] int badgeNumber, [in] String instanceKey);
+
+    void SetBadgeNumberByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int badgeNumber);
+
+    void SetBadgeNumberForDhByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int badgeNumber);
+
+    void GetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned int slotFlags);
+
+    void SetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] unsigned int slotFlags);
+
+    void GetAllNotificationEnabledBundles([out] NotificationBundleOption[] bundleOption);
+
+    void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption);
+
+    void GetAllDistribuedEnabledBundles([in] String deviceType, [out] NotificationBundleOption[] bundleOption);
+
+    void RegisterPushCallback([in] IRemoteObject pushCallback, [in] sptr<NotificationCheckRequest> notificationCheckRequest);
+
+    void UnregisterPushCallback();
+
+    void SetAdditionConfig([in] String key, [in] String value);
+
+    void SetDistributedEnabledByBundle(
+        [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled);
+
+    void IsSmartReminderEnabled([in] String deviceType, [out] boolean enabled);
+
+    void SetSmartReminderEnabled([in] String deviceType, [in] boolean enabled);
+
+    void IsDistributedEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [out] boolean enabled);
+
+    void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id);
+
+    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] String deveiceId);
+
+    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] unsigned int controlFlag, [in] String deveiceId);
+
+    void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile);
+
+    void AllowUseReminder([in] String bundleName, [out] boolean isAllowUseReminder);
+
+    [oneway] void UpdateNotificationTimerByUid([in] int uid, [in] boolean isPaused);
+
+    void DisableNotificationFeature([in] sptr<NotificationDisable> notificationDisable);
+
+    void GetTargetDeviceStatus([in] String deviceType, [out] int status);
+
+    void DistributeOperation([in] null_sptr<NotificationOperationInfo> operationInfo, [in] IAnsOperationCallback operationCallback);
+
+    void ReplyDistributeOperation([in] String hashCode, [in] int resultCode);
+
+    void GetNotificationRequestByHashCode(
+        [in] String hashCode, [out] null_sptr<NotificationRequest> notificationRequest);
+
+    void SetHashCodeRule([in] unsigned int type);
+
+    [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
+}

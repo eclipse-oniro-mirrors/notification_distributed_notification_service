@@ -24,6 +24,18 @@ namespace Notification {
 namespace {
 bool g_isNonBundleName = false;
 bool g_isEnable = true;
+bool g_setBundleInfoEnabled = false;
+bool g_getBundleInfoFailed = false;
+}
+
+void MockSetBundleInfoFailed(bool getFail)
+{
+    g_getBundleInfoFailed = getFail;
+}
+
+void MockSetBundleInfoEnabled(bool enabled)
+{
+    g_setBundleInfoEnabled = enabled;
 }
 
 void MockIsNonBundleName(bool isNonBundleName)
@@ -49,6 +61,12 @@ ErrCode BundleMgrProxy::GetNameForUid(const int uid, std::string &name)
 bool BundleMgrProxy::GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo,
     int32_t userId)
 {
+    if (Notification::g_getBundleInfoFailed) {
+        return false;
+    }
+    if (Notification::g_setBundleInfoEnabled) {
+        bundleInfo.applicationInfo.allowEnableNotification = true;
+    }
     return true;
 }
 
@@ -68,5 +86,23 @@ bool BundleMgrProxy::GetApplicationInfo(
     return true;
 }
 
+bool BundleMgrProxy::GetBundleInfos(const BundleFlag  flags, std::vector<BundleInfo> &bundleInfos, int32_t userId)
+{
+    if (Notification::g_setBundleInfoEnabled) {
+        int i = 1;
+        BundleInfo info;
+        info.applicationInfo.allowEnableNotification = true;
+        info.applicationInfo.bundleName = "test";
+        info.uid = i;
+        bundleInfos.push_back(info);
+        BundleInfo info1;
+        info1.applicationInfo.allowEnableNotification = false;
+        info1.applicationInfo.bundleName = "test1";
+        info1.uid = i+1;
+        bundleInfos.push_back(info);
+        return true;
+    }
+    return false;
+}
 } // namespace AppExecFwk
 } // namespace OHOS

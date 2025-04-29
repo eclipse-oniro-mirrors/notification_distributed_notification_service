@@ -16,14 +16,15 @@
 #include "getnotificationslotnumasbundle_fuzzer.h"
 
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         Notification::NotificationBundleOption bundleOption;
-        std::string bundleName (data);
+        std::string bundleName = fdp->ConsumeRandomLengthString();
+        int32_t uid = fdp->ConsumeIntegral<int32_t>();
         bundleOption.SetBundleName(bundleName);
-        int32_t uid = static_cast<int32_t>(GetU32Data(data));
         bundleOption.SetUid(uid);
         uint64_t num;
         return Notification::NotificationHelper::GetNotificationSlotNumAsBundle(bundleOption, num) == ERR_OK;
@@ -34,11 +35,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

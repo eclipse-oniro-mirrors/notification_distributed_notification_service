@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,12 +50,23 @@ bool NotificationSubscriber::ProcessSyncDecision(
         ANS_LOGE("No need to consume cause invalid reqeuest.");
         return false;
     }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    if (notification->GetPrivileged()) {
+        ANS_LOGI("No need to consume cause privileged reqeuest.")
+        return true;
+    }
+#endif
+
     auto flagsMap = request->GetDeviceFlags();
     if (flagsMap == nullptr || flagsMap->size() <= 0) {
         return true;
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter \
+            flags = %{public}d, deviceType:%{public}s",
+            request->GetKey().c_str(), flagIter->second->GetReminderFlags(), deviceType.c_str());
         std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
         tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
         tempFlags->SetVibrationEnabled(
@@ -67,12 +78,15 @@ bool NotificationSubscriber::ProcessSyncDecision(
         tempFlags->SetLightScreenEnabled(
             tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
         request->SetFlags(tempFlags);
+        ANS_LOGI("SetFlags-after filte, notificationKey = %{public}s flags = %{public}d",
+            request->GetKey().c_str(), tempFlags->GetReminderFlags());
         return true;
     }
     if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
         return true;
     }
-    ANS_LOGD("No need to consume cause cannot find deviceFlags. deviceType: %{public}s.", deviceType.c_str());
+    ANS_LOGE("Cannot find deviceFlags,notificationKey = %{public}s, deviceType: %{public}s.",
+        request->GetKey().c_str(), deviceType.c_str());
     return false;
 }
 
@@ -100,50 +114,77 @@ NotificationSubscriber::SubscriberImpl::SubscriberImpl(NotificationSubscriber &s
     recipient_ = new (std::nothrow) DeathRecipient(*this);
 };
 
-void NotificationSubscriber::SubscriberImpl::OnConnected()
+ErrCode NotificationSubscriber::SubscriberImpl::OnConnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (GetAnsManagerProxy()) {
-        proxy_->AsObject()->AddDeathRecipient(recipient_);
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (proxy != nullptr) {
+        proxy->AsObject()->AddDeathRecipient(recipient_);
         ANS_LOGD("%s, Add death recipient.", __func__);
     }
     subscriber_.OnConnected();
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnDisconnected()
+ErrCode NotificationSubscriber::SubscriberImpl::OnDisconnected()
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    if (GetAnsManagerProxy()) {
-        proxy_->AsObject()->RemoveDeathRecipient(recipient_);
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (proxy != nullptr) {
+        proxy->AsObject()->RemoveDeathRecipient(recipient_);
         ANS_LOGD("%s, Remove death recipient.", __func__);
     }
     subscriber_.OnDisconnected();
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnConsumed(
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     if (!subscriber_.ProcessSyncDecision(subscriber_.GetDeviceType(), sharedNotification)) {
-        return;
+        return ERR_OK;
     }
 #endif
     subscriber_.OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(const sptr<Notification> &notification)
+{
+    return OnConsumed(notification, nullptr);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedWithMaxCapacity(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
+{
+    return OnConsumed(notification, notificationMap);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedWithMaxCapacity(const sptr<Notification> &notification)
+{
+    return OnConsumed(notification, nullptr);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     for (auto notification : notifications) {
         OnConsumed(notification, notificationMap);
     }
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnCanceled(
+ErrCode NotificationSubscriber::SubscriberImpl::OnConsumedList(const std::vector<sptr<Notification>> &notifications)
+{
+    return OnConsumedList(notifications, nullptr);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -154,6 +195,25 @@ void NotificationSubscriber::SubscriberImpl::OnCanceled(
         subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }
+    return ERR_OK;
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceled(
+    const sptr<Notification> &notification, int32_t deleteReason)
+{
+    return OnCanceled(notification, nullptr, deleteReason);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledWithMaxCapacity(
+    const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
+{
+    return OnCanceled(notification, notificationMap, deleteReason);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledWithMaxCapacity(
+    const sptr<Notification> &notification, int32_t deleteReason)
+{
+    return OnCanceled(notification, nullptr, deleteReason);
 }
 
 void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<sptr<Notification>> &notifications,
@@ -166,81 +226,102 @@ void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<s
     if (notificationMap == nullptr) {
         subscriber_.OnBatchCanceled(notificationList,
             std::make_shared<NotificationSortingMap>(), deleteReason);
-    } else if (notificationMap != nullptr) {
+    } else {
         subscriber_.OnBatchCanceled(notificationList,
             std::make_shared<NotificationSortingMap>(*notificationMap), deleteReason);
     }
 }
 
 
-void NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     if (subscriber_.HasOnBatchCancelCallback()) {
         OnBatchCanceled(notifications, notificationMap, deleteReason);
-        return;
+        return ERR_OK;
     }
     for (auto notification : notifications) {
         OnCanceled(notification, notificationMap, deleteReason);
     }
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
+ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledList(
+    const std::vector<sptr<Notification>> &notifications, int32_t deleteReason)
+{
+    return OnCanceledList(notifications, nullptr, deleteReason);
+}
+
+ErrCode NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     subscriber_.OnUpdate(std::make_shared<NotificationSortingMap>(*notificationMap));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
+ErrCode NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
 {
     subscriber_.OnDoNotDisturbDateChange(std::make_shared<NotificationDoNotDisturbDate>(*date));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
+ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
+ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
+    return ERR_OK;
 }
 
-void NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
+ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     subscriber_.OnBadgeEnabledChanged(callbackData);
+    return ERR_OK;
 }
 
-bool NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
+ErrCode NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
+    const std::string& bundleName)
 {
-    if (proxy_ == nullptr) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (proxy_ == nullptr) {
-            sptr<ISystemAbilityManager> systemAbilityManager =
-                SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-            if (!systemAbilityManager) {
-                return false;
-            }
+    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    subscriber_.OnApplicationInfoNeedChanged(bundleName);
+    return ERR_OK;
+}
 
-            sptr<IRemoteObject> remoteObject =
-                systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
-            if (!remoteObject) {
-                return false;
-            }
+ErrCode NotificationSubscriber::SubscriberImpl::OnOperationResponse(
+    const sptr<NotificationOperationInfo> &operationInfo, int32_t& funcResult)
+{
+    return subscriber_.OnOperationResponse(std::make_shared<NotificationOperationInfo>(*operationInfo));
+}
 
-            proxy_ = iface_cast<AnsManagerInterface>(remoteObject);
-            if ((proxy_ == nullptr) || (proxy_->AsObject() == nullptr)) {
-                return false;
-            }
-        }
+sptr<IAnsManager> NotificationSubscriber::SubscriberImpl::GetAnsManagerProxy()
+{
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        return nullptr;
     }
 
-    return true;
+    sptr<IRemoteObject> remoteObject =
+        systemAbilityManager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
+    if (!remoteObject) {
+        return nullptr;
+    }
+
+    sptr<IAnsManager> proxy = iface_cast<IAnsManager>(remoteObject);
+    if ((proxy == nullptr) || (proxy->AsObject() == nullptr)) {
+        return nullptr;
+    }
+
+    return proxy;
 }
 
 NotificationSubscriber::SubscriberImpl::DeathRecipient::DeathRecipient(SubscriberImpl &subscriberImpl)
@@ -250,7 +331,6 @@ NotificationSubscriber::SubscriberImpl::DeathRecipient::~DeathRecipient() {};
 
 void NotificationSubscriber::SubscriberImpl::DeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
-    subscriberImpl_.proxy_ = nullptr;
     subscriberImpl_.subscriber_.OnDied();
 }
 }  // namespace Notification

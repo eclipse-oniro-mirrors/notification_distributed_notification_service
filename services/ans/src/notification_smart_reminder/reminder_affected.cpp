@@ -15,6 +15,7 @@
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_affected.h"
+#include "string_utils.h"
 
 #include "distributed_device_status.h"
 #include "notification_config_parse.h"
@@ -84,22 +85,27 @@ bool ReminderAffected::ValidStatus(const nlohmann::json &root, std::string &stat
         ANS_LOGD("ValidStatus failed as status json is not string.");
         return false;
     }
-    std::string strStatus = statusJson.get<std::string>();
-    if (strStatus.size() <= 0) {
+    std::string strStatusArray = statusJson.get<std::string>();
+    if (strStatusArray.size() <= 0) {
         return true;
     }
-    if (strStatus.size() != DistributedDeviceStatus::STATUS_SIZE) {
+
+    std::vector<std::string> statusVector;
+    StringUtils::Split(strStatusArray, StringUtils::SPLIT_CHAR, statusVector);
+    for (std::string strStatus : statusVector) {
+        if (strStatus.size() != DistributedDeviceStatus::STATUS_SIZE) {
         ANS_LOGD("ValidStatus failed as invalid status size.");
         return false;
-    }
-    for (int32_t seq = 0; seq < DistributedDeviceStatus::STATUS_SIZE; seq++) {
-        if (strStatus.at(seq) != STATUS_DEFAULT &&
-            strStatus.at(seq) != STATUS_ENABLE && strStatus.at(seq) != STATUS_DISABLE) {
-            ANS_LOGD("ValidStatus failed as invalid status value.");
-            return false;
+        }
+        for (int32_t seq = 0; seq < DistributedDeviceStatus::STATUS_SIZE; seq++) {
+            if (strStatus.at(seq) != STATUS_DEFAULT &&
+                strStatus.at(seq) != STATUS_ENABLE && strStatus.at(seq) != STATUS_DISABLE) {
+                ANS_LOGD("ValidStatus failed as invalid status value.");
+                return false;
+            }
         }
     }
-    status = strStatus;
+    status = strStatusArray;
     return true;
 }
 }  // namespace Notification

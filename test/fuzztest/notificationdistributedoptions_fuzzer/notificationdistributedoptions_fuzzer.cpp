@@ -15,15 +15,13 @@
 
 #include "notification_distributed_options.h"
 #include "notificationdistributedoptions_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData(data);
-        bool distribute = *data % ENABLE;
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        bool distribute = fdp->ConsumeBool();
         std::vector<std::string> dvsDisplay;
         std::vector<std::string> dvsOperate;
         dvsDisplay.emplace_back(stringData);
@@ -47,11 +45,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

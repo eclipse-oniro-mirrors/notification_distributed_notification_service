@@ -35,13 +35,13 @@ bool ParseRemoveReason(const napi_env &env, const napi_value &value, RemoveParam
     napi_valuetype valueType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, value, &valueType), false);
     if (valueType != napi_number) {
-        ANS_LOGW("RemoveReason valueType unexpected.");
+        ANS_LOGE("RemoveReason valueType unexpected.");
         return false;
     }
     int32_t removeReason = 0;
     napi_get_value_int32(env, value, &removeReason);
     if (!Common::IsValidRemoveReason(removeReason)) {
-        ANS_LOGW("RemoveReason value unexpected.");
+        ANS_LOGE("RemoveReason value unexpected.");
         return false;
     }
     params.removeReason = removeReason;
@@ -54,7 +54,7 @@ bool ParseCallbackFunc(const napi_env &env, const napi_value &value,
     napi_valuetype valueType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, value, &valueType), false);
     if (valueType != napi_function) {
-        ANS_LOGW("Callback is not function excute promise.");
+        ANS_LOGE("Callback is not function excute promise.");
         return true;
     }
     napi_create_reference(env, value, 1, &params.callback);
@@ -71,7 +71,7 @@ bool ParseHashcodeTypeParams(
         std::vector<std::string> hashcodes;
         auto retValue = Common::GetHashCodes(env, argv[PARAM0], hashcodes);
         if (retValue == nullptr) {
-            ANS_LOGW("GetHashCodes failed.");
+            ANS_LOGE("GetHashCodes failed.");
             return false;
         }
         params.hashcodes = hashcodes;
@@ -105,7 +105,7 @@ bool ParseHashcodeTypeParams(
 bool ParseBundleOptionTypeParams(const napi_env &env, napi_value* argv, size_t argc, RemoveParams &params)
 {
     if (argc < REMOVE_BY_BUNDLE_AND_KEY_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGE("Wrong number of arguments.");
         return false;
     }
     BundleAndKeyInfo bundleInfo {};
@@ -137,7 +137,7 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
     napi_value thisVar = nullptr;
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
     if (argc < REMOVE_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGE("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return false;
     }
@@ -147,7 +147,7 @@ bool ParseParameters(const napi_env &env, const napi_callback_info &info, Remove
     NAPI_CALL_BASE(env, napi_typeof(env, argv[PARAM0], &valueType), false);
     if ((valueType != napi_string) && (valueType != napi_object) &&
         (valueType != napi_number) && (valueType != napi_boolean) && !isArray) {
-        ANS_LOGW("Wrong argument type. String or object expected.");
+        ANS_LOGE("Wrong argument type. String or object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object or string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return false;
@@ -175,14 +175,14 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if ((valuetype != napi_object) && (valuetype != napi_number) && (valuetype != napi_function)) {
-        ANS_LOGW("Wrong argument type. Function or object expected. Excute promise.");
+        ANS_LOGE("Wrong argument type. Function or object expected. Excute promise.");
         return Common::NapiGetNull(env);
     }
     if (valuetype == napi_object) {
         BundleAndKeyInfo bundleandKeyInfo {};
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], bundleandKeyInfo.option);
         if (retValue == nullptr) {
-            ANS_LOGW("GetBundleOption failed.");
+            ANS_LOGE("GetBundleOption failed.");
             Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
@@ -198,7 +198,7 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
     if (argc >= REMOVE_ALL_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Callback is not function excute promise.");
+            ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
@@ -218,7 +218,7 @@ napi_value ParseParameters(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < REMOVE_GROUP_BY_BUNDLE_MIN_PARA) {
-        ANS_LOGW("Error number of arguments.");
+        ANS_LOGE("Error number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -226,7 +226,7 @@ napi_value ParseParameters(
     // argv[0]: bundle
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Valuetype is not object.");
+        ANS_LOGE("Valuetype is not object.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -241,7 +241,7 @@ napi_value ParseParameters(
     // argv[1]: groupName: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGW("Error argument type. String number boolean anticipate.");
+        ANS_LOGE("Error argument type. String number boolean anticipate.");
         std::string msg = "Incorrect parameter types.The type of param must be string or number or boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -276,7 +276,6 @@ napi_value ParseParameters(
 
 void RemoveExecuteCallback(napi_env env, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work start");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -296,7 +295,6 @@ void RemoveExecuteCallback(napi_env env, void *data)
 
 void RemoveCompleteCallback(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("Remove napi_create_async_work end");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;

@@ -30,10 +30,12 @@ class DistributedDeviceStatus : public DelayedSingleton<DistributedDeviceStatus>
 public:
     DistributedDeviceStatus();
     ~DistributedDeviceStatus();
-    ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status);
+    ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const uint32_t controlFlag);
 
     uint32_t GetDeviceStatus(const std::string &deviceType);
 private:
+    std::mutex mapLock_;
     SafeMap<std::string, uint32_t> deviceStatus_;
 
 public:
@@ -42,6 +44,7 @@ public:
     static constexpr int32_t LOCK_FLAG = 1;
     static constexpr int32_t OWNER_FLAG = 2;
     static constexpr int32_t DISTURB_MODE_FLAG = 3;
+    static constexpr int32_t DISTURB_DEFAULT_FLAG = 13;
 };
 }  // namespace Notification
 }  // namespace OHOS

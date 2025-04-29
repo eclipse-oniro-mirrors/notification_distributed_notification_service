@@ -67,6 +67,11 @@ public:
     uint32_t GetReminderFlags();
 
     /**
+     * Set reminder flags.
+     */
+    void SetReminderFlags(const uint32_t reminderFlag);
+
+    /**
      * Sets the notification whether enable lock screen.
      * @param visblenessEnabled whether enable lock screen.
      */

@@ -16,6 +16,7 @@
 #include "notification_local_live_view_button.h"
 
 #include <cstdint>
+#include <sstream>
 #include <string>             // for basic_string, operator+, basic_string<>...
 #include <memory>             // for shared_ptr, shared_ptr<>::element_type
 #include <vector>
@@ -31,6 +32,11 @@
 namespace OHOS {
 namespace Notification {
 const uint32_t BUTTON_MAX_SIZE = 3;
+const uint32_t BUTTON_RESOURCE_SIZE = 3;
+const uint32_t RESOURCE_BUNDLENAME_INDEX = 0;
+const uint32_t RESOURCE_MODULENAME_INDEX = 1;
+const uint32_t RESOURCE_ID_INDEX = 2;
+using ResourceVectorPtr = std::vector<std::shared_ptr<ResourceManager::Resource>>;
 
 std::vector<std::string> NotificationLocalLiveViewButton::GetAllButtonNames() const
 {
@@ -62,6 +68,22 @@ void NotificationLocalLiveViewButton::addSingleButtonIcon(std::shared_ptr<Media:
     buttonIcons_.emplace_back(icon);
 }
 
+ResourceVectorPtr NotificationLocalLiveViewButton::GetAllButtonIconResource() const
+{
+    return buttonIconsResource_;
+}
+
+void NotificationLocalLiveViewButton::addSingleButtonIconResource(
+    std::shared_ptr<ResourceManager::Resource> &iconResource)
+{
+    if (buttonIcons_.size() >= BUTTON_MAX_SIZE) {
+        ANS_LOGW("already added 3 buttonIcon");
+        return;
+    }
+
+    buttonIconsResource_.emplace_back(iconResource);
+}
+
 std::string NotificationLocalLiveViewButton::Dump()
 {
     return "";
@@ -83,7 +105,44 @@ bool NotificationLocalLiveViewButton::ToJson(nlohmann::json &jsonObject) const
     }
     jsonObject["icons"] = iconsArr;
 
+    nlohmann::json iconResourceArr = nlohmann::json::array();
+    for (const auto &resource : buttonIconsResource_) {
+        if (!resource) {
+            continue;
+        }
+        nlohmann::json resourceObj;
+        resourceObj["id"] = resource->id;
+        resourceObj["bundleName"] = resource->bundleName;
+        resourceObj["moduleName"] = resource->moduleName;
+        iconResourceArr.emplace_back(resourceObj);
+    }
+    jsonObject["iconResources"] = iconResourceArr;
+
     return true;
+}
+
+bool NotificationLocalLiveViewButton::ResourceFromJson(const nlohmann::json &resource,
+    std::shared_ptr<ResourceManager::Resource>& resourceObj)
+{
+    const auto &jsonEnd = resource.cend();
+    int resourceCount = BUTTON_RESOURCE_SIZE;
+    if (resource.find("bundleName") != jsonEnd && resource.at("bundleName").is_string()) {
+        resourceCount--;
+        resourceObj->bundleName = resource.at("bundleName").get<std::string>();
+    }
+    if (resource.find("moduleName") != jsonEnd && resource.at("moduleName").is_string()) {
+        resourceCount--;
+        resourceObj->moduleName = resource.at("moduleName").get<std::string>();
+    }
+    if (resource.find("id") != jsonEnd && resource.at("id").is_number_integer()) {
+        resourceCount--;
+        resourceObj->id = static_cast<uint32_t>(resource.at("id").get<int32_t>());
+    }
+    if (resourceCount == 0) {
+        return true;
+    }
+    ANS_LOGE("Resource from json failed.");
+    return false;
 }
 
 NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const nlohmann::json &jsonObject)
@@ -114,9 +173,20 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
             auto pIcon = AnsImageUtil::UnPackImage(iconObj.get<std::string>());
             if (pIcon == nullptr) {
                 ANS_LOGE("Failed to parse button icon");
+                delete button;
                 return nullptr;
             }
             button->buttonIcons_.emplace_back(pIcon);
+        }
+    }
+
+    if (jsonObject.find("iconResources") != jsonEnd) {
+        auto resourcesArr = jsonObject.at("iconResources");
+        for (auto &resource : resourcesArr) {
+            auto resourceObj = std::make_shared<Global::Resource::ResourceManager::Resource>();
+            if (ResourceFromJson(resource, resourceObj)) {
+                button->buttonIconsResource_.emplace_back(resourceObj);
+            }
         }
     }
 
@@ -138,6 +208,23 @@ bool NotificationLocalLiveViewButton::Marshalling(Parcel &parcel) const
     for (auto it = buttonIcons_.begin(); it != buttonIcons_.end(); ++it) {
         if (!parcel.WriteParcelable(it->get())) {
             ANS_LOGE("Failed to write buttonIcons");
+            return false;
+        }
+    }
+
+    if (!parcel.WriteUint64(buttonIconsResource_.size())) {
+        ANS_LOGE("Failed to write the size of buttonIcons");
+        return false;
+    }
+
+    for (auto it = buttonIconsResource_.begin(); it != buttonIconsResource_.end(); ++it) {
+        std::vector<std::string> iconsResource  = {};
+        // Insertion cannot be changed, Marshalling and Unmarshalling need to match
+        iconsResource.push_back((*it)->bundleName);
+        iconsResource.push_back((*it)->moduleName);
+        iconsResource.push_back(std::to_string((*it)->id));
+        if (!parcel.WriteStringVector(iconsResource)) {
+            ANS_LOGE("Failed to write button icon resource");
             return false;
         }
     }
@@ -165,6 +252,30 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
         buttonIcons_.emplace_back(member);
     }
 
+    vsize = parcel.ReadUint64();
+    for (uint64_t it = 0; it < vsize; ++it) {
+        std::vector<std::string> iconsResource  = {};
+        if (!parcel.ReadStringVector(&iconsResource)) {
+            ANS_LOGE("Failed to read button names");
+            return false;
+        }
+        if (iconsResource.size() < BUTTON_RESOURCE_SIZE) {
+            ANS_LOGE("Invalid input for button icons resource");
+            return false;
+        }
+        auto resource = std::make_shared<ResourceManager::Resource>();
+        resource->bundleName = iconsResource[RESOURCE_BUNDLENAME_INDEX];
+        resource->moduleName = iconsResource[RESOURCE_MODULENAME_INDEX];
+        std::stringstream sin(iconsResource[RESOURCE_ID_INDEX]);
+        int32_t checknum;
+        if (!(sin >> checknum)) {
+            ANS_LOGE("Invalid input for button icons resource");
+            return false;
+        }
+        resource->id = atoi(iconsResource[RESOURCE_ID_INDEX].c_str());
+        buttonIconsResource_.emplace_back(resource);
+    }
+
     return true;
 }
 
@@ -178,6 +289,16 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::Unmarshalling(
     }
 
     return button;
+}
+
+void NotificationLocalLiveViewButton::ClearButtonIcons()
+{
+    buttonIcons_.clear();
+}
+
+void NotificationLocalLiveViewButton::ClearButtonIconsResource()
+{
+    buttonIconsResource_.clear();
 }
 }  // namespace Notification
 }  // namespace OHOS

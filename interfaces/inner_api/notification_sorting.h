@@ -20,6 +20,7 @@
 #include "notification_slot.h"
 #include "parcel.h"
 #include "uri.h"
+#include <cstddef>
 
 namespace OHOS {
 namespace Notification {
@@ -74,9 +75,16 @@ public:
      *
      * @return Returns the NotificationSlot of the notification.
      */
-    inline NotificationSlot GetSlot() const
+    inline NotificationSlot* GetSlot()
     {
-        return *slot_;
+        if (!slot_) {
+            slot_ = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::OTHER);
+            if (!slot_) {
+                ANS_LOGE("Failed to create NotificationSlot");
+                slot_ = nullptr;
+            }
+        }
+        return slot_;
     };
 
     /**

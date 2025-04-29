@@ -20,8 +20,10 @@
 #include "iservice_registry.h"
 #include "message_parcel.h"
 #include "os_account_manager.h"
+#include "os_account_manager_helper.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
+#include <string>
 
 namespace OHOS {
 namespace Notification {
@@ -88,13 +90,9 @@ bool AdvancedDatashareHelperExt::Query(Uri &uri, const std::string &key, std::st
 
 std::string AdvancedDatashareHelperExt::GetUnifiedGroupEnableUri() const
 {
-    std::vector<int32_t> accountIds;
-    OHOS::AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountIds);
-    std::string userId = "100";
-    if (!accountIds.empty()) {
-        userId = std::to_string(accountIds[0]);
-    }
-    return USER_SETTINGS_DATA_SECURE_URI + userId + UNIFIED_GROUP_ENABLE_URI;
+    int32_t userId = 100;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    return USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + UNIFIED_GROUP_ENABLE_URI;
 }
 } // namespace Notification
 } // namespace OHOS
