@@ -83,25 +83,17 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             auto notificationData = data.ReadString();
             int32_t checkResult = ERR_ANS_TASK_ERR;
 
-            std::shared_ptr<EventHandler> handler = std::make_shared<EventHandler>(EventRunner::GetMainEventRunner());
-            wptr<PushCallBackStub> weak = this;
             std::shared_ptr<PushCallBackParam> pushCallBackParam = std::make_shared<PushCallBackParam>();
-            std::unique_lock<std::mutex> uniqueLock(pushCallBackParam->callBackMutex);
-            if (handler) {
-                handler->PostTask([weak, notificationData, pushCallBackParam]() {
-                    auto pushCallBackStub = weak.promote();
-                    if (pushCallBackStub == nullptr) {
-                        ANS_LOGE("pushCallBackStub is nullptr!");
-                        return;
-                    }
-                    pushCallBackStub->OnCheckNotification(notificationData, pushCallBackParam);
-                });
-            }
+            checkResult = this->OnCheckNotification(notificationData, pushCallBackParam);
+            checkResult = ConvertPushCheckCodeToErrCode(checkResult);
+            ANS_LOGI("Push check result:%{public}d,eventControl:%{public}s",
+                checkResult, pushCallBackParam->eventControl.c_str());
 
-            pushCallBackParam->callBackCondition.wait(uniqueLock, [=]() {return pushCallBackParam->ready; });
-            checkResult = ConvertPushCheckCodeToErrCode(pushCallBackParam->result);
-            ANS_LOGD("Push check result:%{public}d", checkResult);
             if (!reply.WriteInt32(checkResult)) {
+                ANS_LOGE("Failed to write reply ");
+                return ERR_INVALID_REPLY;
+            }
+            if (!reply.WriteString(pushCallBackParam->eventControl)) {
                 ANS_LOGE("Failed to write reply ");
                 return ERR_INVALID_REPLY;
             }
