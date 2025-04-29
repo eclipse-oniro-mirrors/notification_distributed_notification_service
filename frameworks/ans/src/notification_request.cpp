@@ -2849,7 +2849,10 @@ bool NotificationRequest::HasUserInputButton()
 {
     for (std::shared_ptr<NotificationActionButton> button : actionButtons_) {
         if (button->GetUserInput() != nullptr) {
-            return true;
+            std::string inputKey = button->GetUserInput()->GetInputKey();
+            if (!inputKey.empty()) {
+                return true;
+            }
         }
     }
     return false;

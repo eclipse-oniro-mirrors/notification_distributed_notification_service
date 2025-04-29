@@ -141,6 +141,8 @@ public:
 
     static void ReportSkipFailedEvent(const HaMetaMessage& message);
 
+    static void ReportPublishWithUserInput(const sptr<NotificationRequest>& request);
+
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);

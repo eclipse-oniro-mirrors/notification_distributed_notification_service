@@ -29,8 +29,10 @@ public:
     bool IsLiveViewEnabled() const;
     bool IsBannerEnabled() const;
     bool IsReminderEnabled() const;
+    bool IsDistributedReplyEnabled() const;
 
 private:
+    static constexpr int32_t DISTRIBUTED_REPLY_SEQ = 4;
     static constexpr int32_t REMINDER_ENABLED_SEQ = 2;
     static constexpr int32_t BANNER_ENABLED_SEQ = 1;
     static constexpr int32_t LIVE_VIEW_ENABLED_SEQ = 0;
