@@ -434,7 +434,9 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
     }
     napi_ref callback = nullptr;
     if (ParseGetLiveViewParams(env, info, asyncLiveViewCallBackInfo->filter, callback) == nullptr) {
-        ANS_LOGD("ParseGetLiveViewParams is nullptr.");
+        ANS_LOGE("ParseGetLiveViewParams is nullptr.");
+        delete asyncLiveViewCallBackInfo;
+        asyncLiveViewCallBackInfo = nullptr;
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
