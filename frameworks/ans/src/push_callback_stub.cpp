@@ -86,7 +86,7 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             std::shared_ptr<PushCallBackParam> pushCallBackParam = std::make_shared<PushCallBackParam>();
             checkResult = this->OnCheckNotification(notificationData, pushCallBackParam);
             checkResult = ConvertPushCheckCodeToErrCode(checkResult);
-            ANS_LOGI("Push check result:%{public}d,eventControl:%{public}d",
+            ANS_LOGI("Push check result:%{public}d,eventControl:%{public}s",
                 checkResult, pushCallBackParam->eventControl.c_str());
 
             if (!reply.WriteInt32(checkResult)) {
