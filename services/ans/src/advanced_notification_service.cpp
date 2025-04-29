@@ -2208,6 +2208,10 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
 {
     ANS_LOGD("start.");
     if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            return ERR_OK;
+        }
         return ERR_ANS_PUSH_CHECK_UNREGISTERED;
     }
     sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
@@ -2233,16 +2237,15 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
 
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
-    if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
-        result != ERR_OK) {
-        ANS_LOGI("The application with the permission fails to pushcheck.");
-        result = ERR_OK;
-    }
     if (result != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
             .ErrorCode(result).Message("Push OnCheckNotification failed.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            ANS_LOGI("The application with the permission fails to pushcheck.");
+            result = ERR_OK;
+        }
     }
     if (pushCallBackParam != nullptr && !pushCallBackParam->eventControl.empty() && extroInfo != nullptr) {
         extroInfo->SetParam("eventControl", AAFwk::String::Box(pushCallBackParam->eventControl));
