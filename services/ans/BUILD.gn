@@ -131,12 +131,6 @@ ohos_source_set("ans_service_sources") {
     "src/utils/notifictaion_load_utils.cpp",
   ]
 
-  sources += [
-    "src/slot_manager/AddSlots.cpp",
-    "src/slot_manager/setNotificationEnableSlot.cpp",
-    "src/slot_manager/slot_manager.cpp",
-  ]
-
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_ans_path}:ans_manager_stub",
