@@ -47,12 +47,8 @@ ohos_shared_library("notificationsubscribe") {
   branch_protector_ret = "pac_ret"
 
   include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_napi_path}/inner/napi_common",
     "../../include",
     "../../include/subscribe",
-    "//third_party/node/src",
-    "//third_party/libuv/include",
   ]
 
   configs = [ ":native_module_config" ]
@@ -65,9 +61,11 @@ ohos_shared_library("notificationsubscribe") {
     "../common_convert_request.cpp",
     "../common_utils.cpp",
     "../constant.cpp",
+    "../distributed_operation_callback.cpp",
     "../remove.cpp",
     "../subscribe.cpp",
     "../unsubscribe.cpp",
+    "../uv_queue.cpp",
     "init_module.cpp",
     "napi_remove.cpp",
     "napi_subscribe.cpp",
@@ -80,11 +78,15 @@ ohos_shared_library("notificationsubscribe") {
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
     "ability_runtime:napi_common",
+    "ability_runtime:napi_wantagent_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image",
+    "ipc:ipc_single",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "relational_store:native_rdb",
   ]
 

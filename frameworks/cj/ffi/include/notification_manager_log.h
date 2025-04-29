@@ -20,7 +20,7 @@
 
 #undef LOG_DOMAIN
 #undef LOG_TAG
-#define LOG_DOMAIN 0xD001200
+#define LOG_DOMAIN 0xD001203
 #define LOG_TAG "NotificationManagerFFI"
 
 #undef LOGI

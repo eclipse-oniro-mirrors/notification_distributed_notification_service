@@ -19,22 +19,20 @@
 #undef private
 #undef protected
 #include "notificationconversationalcontent_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 #define DISABLE_FUZZ
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         Notification::MessageUser messageUser;
         Notification::NotificationConversationalContent NotificationConversationalContent(messageUser);
         NotificationConversationalContent.GetMessageUser();
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         NotificationConversationalContent.SetConversationTitle(stringData);
         NotificationConversationalContent.GetConversationTitle();
         NotificationConversationalContent.IsConversationGroup();
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         NotificationConversationalContent.SetConversationGroup(enabled);
         int64_t timestamp = 1;
         NotificationConversationalContent.AddConversationalMessage(stringData, timestamp, messageUser);
@@ -53,13 +51,9 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
+    FuzzedDataProvider fdp(data, size);
 #ifndef DISABLE_FUZZ
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
+        OHOS::DoSomethingInterestingWithMyAPI(&fdp);
 #endif
-        free(ch);
-        ch = nullptr;
-    }
     return 0;
 }

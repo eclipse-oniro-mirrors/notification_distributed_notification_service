@@ -25,8 +25,6 @@
 #include "notification_unified_group_Info.h"
 #include "singleton.h"
 #include "advanced_aggregation_data_roaming_observer.h"
-#include "system_ability_definition.h"
-#include "system_ability_status_change_stub.h"
 
 namespace OHOS::Notification {
 class ExtensionWrapper final {
@@ -41,6 +39,13 @@ public:
     typedef void (*INIT_SUMMARY)(UPDATE_GROUP_INFO func);
     typedef void (*SET_LOCAL_SWITCH)(bool status);
     typedef int32_t (*LOCAL_CONTROL)(const sptr<NotificationRequest> &request);
+    typedef void (*UPDATE_BY_BUNDLE)(const std::string bundleName, int deleteType);
+    typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
+    typedef int32_t (*BANNER_CONTROL)(const std::string &bundleName);
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    typedef bool (*MODIFY_REMINDER_FLAGS)(const sptr<NotificationRequest> &request);
+#endif
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
     void UpdateByCancel(const std::vector<sptr<Notification>>& notifications, int deleteReason);
@@ -49,6 +54,13 @@ public:
     void SetlocalSwitch(std::string &enable);
     void CheckIfSetlocalSwitch();
     int32_t LocalControl(const sptr<NotificationRequest> &request);
+    void UpdateByBundle(const std::string bundleName, int deleteType);
+    int32_t ReminderControl(const std::string &bundleName);
+    int32_t BannerControl(const std::string &bundleName);
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    bool ModifyReminderFlags(const sptr<NotificationRequest> &request);
+#endif
 
 private:
     static int32_t convertToDelType(int32_t deleteReason);
@@ -60,8 +72,14 @@ private:
     INIT_SUMMARY initSummary_ = nullptr;
     SET_LOCAL_SWITCH setLocalSwitch_ = nullptr;
     LOCAL_CONTROL localControl_ = nullptr;
-    sptr<AdvancedAggregationDataRoamingObserver> aggregationRoamingObserver_;
+    UPDATE_BY_BUNDLE updateByBundle_ = nullptr;
+    REMINDER_CONTROL reminderControl_ = nullptr;
+    BANNER_CONTROL bannerControl_ = nullptr;
     bool isRegisterDataSettingObserver = false;
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    MODIFY_REMINDER_FLAGS modifyReminderFlags_ = nullptr;
+#endif
 };
 
 #define EXTENTION_WRAPPER ::OHOS::DelayedSingleton<ExtensionWrapper>::GetInstance()

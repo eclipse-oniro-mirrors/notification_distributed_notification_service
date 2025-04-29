@@ -21,6 +21,11 @@ namespace OHOS {
 namespace NotificationNapi {
 using namespace OHOS::Notification;
 
+struct GetDoNotDisturbProfileParams {
+    int64_t profileId = INVALID_PROFILE_ID;
+    napi_ref callback = nullptr;
+};
+
 struct SetDoNotDisturbDateParams {
     NotificationDoNotDisturbDate date;
     bool hasUserId = false;
@@ -64,12 +69,21 @@ struct AsyncCallbackInfoSupportDoNotDisturb {
     CallbackPromiseInfo info;
 };
 
+struct AsyncCallbackInfoGetDoNotDisturbProfile {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    GetDoNotDisturbProfileParams params;
+    sptr<NotificationDoNotDisturbProfile> data;
+    CallbackPromiseInfo info;
+};
+
 napi_value SetDoNotDisturbDate(napi_env env, napi_callback_info info);
 napi_value GetDoNotDisturbDate(napi_env env, napi_callback_info info);
 napi_value SupportDoNotDisturbMode(napi_env env, napi_callback_info info);
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetDoNotDisturbDateParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbDateParams &params);
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetDoNotDisturbProfileParams &params);
 bool ParseProfilesParameters(
     const napi_env &env, const napi_callback_info &info, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
 bool AnalyseTrustlist(const napi_env &env, const napi_value &value, sptr<NotificationDoNotDisturbProfile> &profile);

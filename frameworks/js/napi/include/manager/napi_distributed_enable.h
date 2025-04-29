@@ -46,9 +46,24 @@ struct AsyncCallbackSmartReminderEnabled {
     SmartReminderEnabledParams params;
     CallbackPromiseInfo info;
 };
+
+struct DistributedEnableBySlotParams {
+    NotificationConstant::SlotType slot;
+    std::string deviceType;
+    bool enable = false;
+};
+
+struct AsyncCallbackDistributedEnableBySlot {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    DistributedEnableBySlotParams params;
+    CallbackPromiseInfo info;
+};
 napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info info);
 napi_value NapiSetSmartReminderEnabled(napi_env env, napi_callback_info info);
 napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info);
+napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info);
+napi_value NapiIsDistributedEnabledBySlot(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

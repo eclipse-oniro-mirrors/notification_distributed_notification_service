@@ -636,13 +636,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_00100 start ==========>";
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_00100::SubscribeInfo:" << info.Dump();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     EXPECT_NE(mediaContent, nullptr);
@@ -700,7 +700,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -716,12 +716,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00200, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     EXPECT_NE(mediaContent, nullptr);
@@ -762,7 +762,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00200, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -778,12 +778,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00300, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
     EXPECT_NE(mediaContent, nullptr);
@@ -815,7 +815,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00300, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -831,12 +831,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00400, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     MessageUser messageUser, sender;
     messageUser.SetKey("key");
@@ -868,7 +868,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00400, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -882,12 +882,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00500, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationMultiLineContent> multiLineContent = std::make_shared<NotificationMultiLineContent>();
@@ -907,7 +907,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00500, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -921,12 +921,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00600, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationPictureContent> pictureContent = std::make_shared<NotificationPictureContent>();
@@ -946,7 +946,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00600, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -960,12 +960,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00700, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationLongTextContent> longTextContent =
@@ -986,7 +986,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00700, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -1001,9 +1001,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00800, Function
 {
     NotificationSlot slot(NotificationConstant::CONTENT_INFORMATION);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1030,7 +1030,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00800, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1045,9 +1045,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00900, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1078,7 +1078,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00900, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1093,10 +1093,10 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_01000, Function
 {
     NotificationSlot slot(NotificationConstant::SERVICE_REMINDER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     // Wait OnSubscribeResult
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1111,7 +1111,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_01000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
     sleep(SLEEP_TIME);
 }
@@ -1127,9 +1127,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_02000, Function
 {
     NotificationSlot slot(NotificationConstant::SOCIAL_COMMUNICATION);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1144,7 +1144,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_02000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1159,9 +1159,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_03000, Function
 {
     NotificationSlot slot(NotificationConstant::CUSTOM);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1177,7 +1177,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_03000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1193,9 +1193,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_07000, Function
     NotificationSlot slot(NotificationConstant::SOCIAL_COMMUNICATION);
     slot.EnableBypassDnd(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
     MessageUser messageUser;
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1213,7 +1213,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_07000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1274,9 +1274,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
 
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
 
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1331,7 +1331,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
     g_onCanceledReceived = false;
 
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -1345,12 +1345,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_04000, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
 
     std::shared_ptr<NotificationTemplate> notiTemplate = std::make_shared<NotificationTemplate>();
@@ -1378,7 +1378,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_04000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -1460,12 +1460,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_05000, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
 
     std::shared_ptr<NotificationFlags> notiFlags = std::make_shared<NotificationFlags>();
@@ -1485,7 +1485,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_05000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -1499,12 +1499,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_06000, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
 
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1519,7 +1519,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_06000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -1612,12 +1612,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
 {
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
 
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -1654,7 +1654,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));
     WaitOnConsumed();
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 
@@ -1669,9 +1669,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
 {
     NotificationSlot slot(NotificationConstant::LIVE_VIEW);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
 
     MessageUser messageUser;
@@ -1690,7 +1690,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
     EXPECT_EQ(ERR_ANS_INVALID_PARAM, NotificationHelper::PublishNotification(req));
 
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1706,9 +1706,9 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function
 {
     NotificationSlot slot(NotificationConstant::LIVE_VIEW);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber));
     WaitOnSubscribeResult();
 
     auto systemLiveViewSubscriber = TestLocalLiveViewSubscriber();
@@ -1742,7 +1742,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10002, Function
     WaitOnResponse(notificationId, buttonName);
 
     g_unsubscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
     WaitOnUnsubscribeResult();
 }
 
@@ -1765,19 +1765,19 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00100, F
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_SetBadgeNumber_00200, Function | MediumTest | Level1)
 {
-    auto subscriber = TestAnsSubscriber();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
     g_subscribe_mtx.lock();
-    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::SubscribeNotification(*subscriber, info));
     WaitOnSubscribeResult();
 
     EXPECT_EQ(NotificationHelper::SetBadgeNumber(BADGE_NUMBER), (int)ERR_OK);
     sleep(SLEEP_TIME);
     EXPECT_EQ(g_onBadgeNumberReceived, true);
 
-    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(subscriber, info));
+    EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber, info));
     WaitOnUnsubscribeResult();
 }
 }  // namespace Notification

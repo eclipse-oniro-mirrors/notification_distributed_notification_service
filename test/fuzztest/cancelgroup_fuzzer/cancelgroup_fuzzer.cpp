@@ -14,23 +14,21 @@
  */
 
 #include "cancelgroup_fuzzer.h"
-
+#include "ans_permission_def.h"
 #include "notification_helper.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    namespace {
-        constexpr uint8_t ENABLE = 2;
-    }
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         // test GetShowBadgeEnabled function
-        bool enabled = *data % ENABLE;
+        bool enabled = fdp->ConsumeBool();
         Notification::NotificationHelper::GetShowBadgeEnabled(enabled);
         // test CancelGroup function
-        std::string stringData(data);
+        std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::NotificationHelper::CancelGroup(stringData);
         // test SetDoNotDisturbDate function
-        uint32_t type = GetU32Data(data);
+        uint32_t type = fdp->ConsumeIntegral<uint32_t>();
         Notification::NotificationDoNotDisturbDate disturb;
         Notification::NotificationConstant::DoNotDisturbType disturbType =
             Notification::NotificationConstant::DoNotDisturbType(type);
@@ -49,11 +47,13 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size > GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    SystemHapTokenGet(requestPermission);
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

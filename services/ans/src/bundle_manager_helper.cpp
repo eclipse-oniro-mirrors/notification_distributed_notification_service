@@ -22,6 +22,7 @@
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -79,12 +80,21 @@ bool BundleManagerHelper::IsSystemApp(int32_t uid)
 
 bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr");
+        return false;
+    }
+    return CheckApiCompatibility(bundleOption->GetBundleName(), bundleOption->GetUid());
+}
+
+bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
+{
     AppExecFwk::BundleInfo bundleInfo;
     int32_t callingUserId;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), callingUserId);
-    if (!GetBundleInfoByBundleName(bundleOption->GetBundleName(), callingUserId, bundleInfo)) {
-        ANS_LOGW("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
-            bundleOption->GetBundleName().c_str());
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
+    if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
+        ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
+            bundleName.c_str());
         return false;
     }
 
@@ -190,7 +200,7 @@ bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const App
     std::lock_guard<std::mutex> lock(connectionMutex_);
 
     Connect();
-    
+
     if (bundleMgr_ == nullptr) {
         return false;
     }
@@ -214,6 +224,55 @@ bool BundleManagerHelper::GetBundleInfos(
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     bool ret = bundleMgr_->GetBundleInfos(flag, bundleInfos, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return ret;
+}
+
+int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
+{
+    int32_t appIndex = 0;
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (nullptr == bundleMgr_) {
+        return appIndex;
+    }
+    std::string bundleName;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return appIndex;
+}
+
+int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId,
+    const int32_t appIndex)
+{
+    int32_t uid = -1;
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ != nullptr) {
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        uid = bundleMgr_->GetUidByBundleName(bundle, userId, appIndex);
+        if (uid < 0) {
+            ANS_LOGW("get invalid uid of bundle %{public}s in userId %{public}d", bundle.c_str(), userId);
+        }
+        IPCSkeleton::SetCallingIdentity(identity);
+    }
+    return uid;
+}
+
+bool BundleManagerHelper::GetBundleInfoV9(
+    const std::string bundle, const int32_t flag,
+    AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
+{
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+
+    if (bundleMgr_ == nullptr) {
+        return false;
+    }
+    bool ret = false;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    ret = bundleMgr_->GetBundleInfoV9(bundle, flag, bundleInfo, userId);
     IPCSkeleton::SetCallingIdentity(identity);
     return ret;
 }

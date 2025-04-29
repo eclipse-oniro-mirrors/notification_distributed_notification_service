@@ -38,7 +38,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < ENABLE_NOTIFICATION_MIN_PARA) {
-        ANS_LOGW("Wrong number of arguments.");
+        ANS_LOGE("Wrong number of arguments.");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -47,7 +47,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGW("Parameter type error. Object expected.");
+        ANS_LOGE("Parameter type error. Object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -62,7 +62,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: enable
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
     if (valuetype != napi_boolean) {
-        ANS_LOGW("Wrong argument type. Bool expected.");
+        ANS_LOGE("Wrong argument type. Bool expected.");
         std::string msg = "Incorrect parameter types.The type of param must be boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -73,7 +73,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= ENABLE_NOTIFICATION_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Callback is not function excute promise.");
+            ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM2], 1, &params.callback);
@@ -99,7 +99,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if ((valuetype != napi_object) && (valuetype != napi_number) && (valuetype != napi_function)) {
-        ANS_LOGW("Parameter type error. Function or object expected. Excute promise.");
+        ANS_LOGE("Parameter type error. Function or object expected. Excute promise.");
         return Common::NapiGetNull(env);
     }
     if (valuetype == napi_object) {
@@ -121,7 +121,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     if (argc >= IS_NOTIFICATION_ENABLE_MAX_PARA) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_function) {
-            ANS_LOGW("Callback is not function excute promise.");
+            ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);

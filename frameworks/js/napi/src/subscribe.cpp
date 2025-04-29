@@ -22,6 +22,8 @@ namespace OHOS {
 namespace NotificationNapi {
 const int32_t SUBSRIBE_MAX_PARA = 3;
 const int32_t NO_DELETE_REASON = -1;
+const int32_t DISTRIBUTE_JUMP_PARA = 1;
+const int32_t DISTRIBUTE_REPLY_PARA = 2;
 const std::string CONSUME = "onConsume";
 const std::string CANCEL = "onCancel";
 const std::string UPDATE = "onUpdate";
@@ -36,6 +38,22 @@ const std::string BADGE_CHANGED = "OnBadgeChanged";
 const std::string BADGE_ENABLED_CHANGED = "OnBadgeEnabledChanged";
 const std::string BATCH_CANCEL = "onBatchCancel";
 
+enum class Type {
+    UNKNOWN,
+    CANCEL,
+    BATCH_CANCEL,
+    CONSUME,
+    UPDATE,
+    CONNECTED,
+    DIS_CONNECTED,
+    DIE,
+    DISTURB_DATE_CHANGE,
+    DISTURB_CHANGED,
+    ENABLE_NOTIFICATION_CHANGED,
+    BADGE_CHANGED,
+    BADGE_ENABLED_CHANGED
+};
+
 struct NotificationReceiveDataWorker {
     napi_env env = nullptr;
     napi_ref ref = nullptr;
@@ -48,7 +66,8 @@ struct NotificationReceiveDataWorker {
     int32_t deleteReason = 0;
     int32_t result = 0;
     int32_t disturbMode = 0;
-    SubscriberInstance *subscriber = nullptr;
+    std::shared_ptr<SubscriberInstance> subscriber = nullptr;
+    Type type;
 };
 
 napi_value SetSubscribeCallbackData(const napi_env &env,
@@ -62,7 +81,7 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     }
 
     if (sortingMap == nullptr) {
-        ANS_LOGE("sortingMap is null");
+        ANS_LOGD("sortingMap is null");
         return Common::NapiGetBoolean(env, false);
     }
 
@@ -126,6 +145,9 @@ SubscriberInstance::SubscriberInstance()
 
 SubscriberInstance::~SubscriberInstance()
 {
+    if (tsfn_ != nullptr) {
+        napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+    }
     if (canceCallbackInfo_.ref != nullptr) {
         napi_delete_reference(canceCallbackInfo_.env, canceCallbackInfo_.ref);
     }
@@ -155,26 +177,23 @@ SubscriberInstance::~SubscriberInstance()
     }
 }
 
-void UvQueueWorkOnCanceled(uv_work_t *work, int status)
+void ThreadSafeOnCancel(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("OnCanceled uv_work_t start");
+    ANS_LOGI("OnCanceled thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null");
-        return;
-    }
-
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("Create dataWorkerData failed.");
-        delete work;
-        work = nullptr;
         return;
     }
 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!SetSubscribeCallbackData(dataWorkerData->env,
         dataWorkerData->request,
@@ -189,7 +208,6 @@ void UvQueueWorkOnCanceled(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
 }
 
 void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
@@ -211,17 +229,9 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("sortingMap is null");
         return;
     }
-    ANS_LOGI("OnCanceled NotificationId = %{public}d", request->GetNotificationRequest().GetNotificationId());
-    ANS_LOGI("OnCanceled sortingMap size = %{public}zu", sortingMap->GetKey().size());
-    ANS_LOGI("OnCanceled deleteReason = %{public}d", deleteReason);
-
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(canceCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
+    ANS_LOGI("OnCanceled NotificationKey = %{public}s. sortingMap size = %{public}zu. deleteReason = %{public}d",
+        request->GetKey().c_str(), sortingMap->GetKey().size(), deleteReason);
+    ANS_LOGD("SubscriberInstance::OnCanceled instanceKey: %{public}s", request->GetInstanceKey().c_str());
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("DataWorker is nullptr.");
@@ -233,47 +243,30 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
     dataWorker->deleteReason = deleteReason;
     dataWorker->env = canceCallbackInfo_.env;
     dataWorker->ref = canceCallbackInfo_.ref;
+    dataWorker->type = Type::CANCEL;
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-
-    work->data = reinterpret_cast<void *>(dataWorker);
-
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnCanceled, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnBatchCanceled(uv_work_t *work, int status)
+void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("OnBatchCancel uv_work_t start");
+    ANS_LOGI("OnBatchCancel thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null");
-        return;
-    }
-
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("Create dataWorkerData failed.");
-        delete work;
-        work = nullptr;
         return;
     }
 
     napi_value resultArray = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_array(dataWorkerData->env, &resultArray);
     int index = 0;
     for (auto request : dataWorkerData->requestList) {
@@ -296,13 +289,11 @@ void UvQueueWorkOnBatchCanceled(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
 }
 
 void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS::Notification::Notification>>
     &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
-    ANS_LOGI("OnBatchCancel");
     if (batchCancelCallbackInfo_.ref == nullptr || batchCancelCallbackInfo_.env == nullptr) {
         ANS_LOGI("batchCancelCallbackInfo_ callback or env unset");
         return;
@@ -315,14 +306,14 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
         ANS_LOGE("sortingMap is null");
         return;
     }
-    ANS_LOGI("OnBatchCancel sortingMap size = %{public}zu", sortingMap->GetKey().size());
-    ANS_LOGI("OnBatchCancel deleteReason = %{public}d", deleteReason);
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(batchCancelCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
+    ANS_LOGI("OnBatchCancel deleteReason = %{public}d, sortingMap size = %{public}zu",
+        deleteReason, sortingMap->GetKey().size());
+    std::string notificationKeys = "";
+    for (auto notification : requestList) {
+        notificationKeys.append(notification->GetKey()).append("-");
     }
+    ANS_LOGI("OnBatchCancel. cancel keys = %{public}s", notificationKeys.c_str());
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("DataWorker is nullptr.");
@@ -333,22 +324,11 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
     dataWorker->deleteReason = deleteReason;
     dataWorker->env = batchCancelCallbackInfo_.env;
     dataWorker->ref = batchCancelCallbackInfo_.ref;
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-    work->data = reinterpret_cast<void *>(dataWorker);
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnBatchCanceled, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    dataWorker->type = Type::BATCH_CANCEL;
+
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
     return;
 }
 
@@ -373,6 +353,10 @@ void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, vo
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!SetSubscribeCallbackData(dataWorkerData->env,
         dataWorkerData->request,
@@ -399,7 +383,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         return;
     }
 
-    if (consumeCallbackInfo_.tsfn == nullptr) {
+    if (tsfn_ == nullptr) {
         ANS_LOGI("consume tsfn is null");
         return;
     }
@@ -413,10 +397,13 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("sortingMap is nullptr.");
         return;
     }
-    ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu",
-        request->GetKey().c_str(), sortingMap->GetKey().size());
+    auto notificationFlags = request->GetNotificationRequest().GetFlags();
+    ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu, notificationFlag = %{public}s",
+        request->GetKey().c_str(), sortingMap->GetKey().size(),
+        notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
     ANS_LOGD("OnConsumed Notification info is %{public}s", request->GetNotificationRequest().Dump().c_str());
-    
+    ANS_LOGD("OnConsumed instanceKey: %{public}s", request->GetInstanceKey().c_str());
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -427,30 +414,28 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
     dataWorker->sortingMap = sortingMap;
     dataWorker->env = consumeCallbackInfo_.env;
     dataWorker->ref = consumeCallbackInfo_.ref;
-
-    napi_acquire_threadsafe_function(consumeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(consumeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(consumeCallbackInfo_.tsfn, napi_tsfn_release);
+    dataWorker->type = Type::CONSUME;
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnUpdate(uv_work_t *work, int status)
+void ThreadSafeOnUpdate(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("OnUpdate uv_work_t start");
+    ANS_LOGI("OnUpdate thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null");
-        return;
-    }
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is nullptr");
-        delete work;
-        work = nullptr;
         return;
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!Common::SetNotificationSortingMap(dataWorkerData->env, dataWorkerData->sortingMap, result)) {
         ANS_LOGE("Failed to convert data to JS");
@@ -461,7 +446,6 @@ void UvQueueWorkOnUpdate(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
 }
 
 void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
@@ -479,13 +463,6 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
     }
     ANS_LOGI("OnUpdate sortingMap size = %{public}zu", sortingMap->GetKey().size());
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(updateCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -495,25 +472,11 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
     dataWorker->sortingMap = sortingMap;
     dataWorker->env = updateCallbackInfo_.env;
     dataWorker->ref = updateCallbackInfo_.ref;
+    dataWorker->type = Type::UPDATE;
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-
-    work->data = reinterpret_cast<void *>(dataWorker);
-
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnUpdate, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnConnected(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -540,11 +503,11 @@ void SubscriberInstance::OnConnected()
         return;
     }
 
-    if (subscribeCallbackInfo_.tsfn == nullptr) {
+    if (tsfn_ == nullptr) {
         ANS_LOGI("subscribe tsfn is null");
         return;
     }
-    
+
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -553,10 +516,11 @@ void SubscriberInstance::OnConnected()
 
     dataWorker->env = subscribeCallbackInfo_.env;
     dataWorker->ref = subscribeCallbackInfo_.ref;
+    dataWorker->type = Type::CONNECTED;
 
-    napi_acquire_threadsafe_function(subscribeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(subscribeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(subscribeCallbackInfo_.tsfn, napi_tsfn_release);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
 void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -569,8 +533,14 @@ void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context
         return;
     }
 
-    Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, Common::NapiGetNull(dataWorkerData->env));
+    if (dataWorkerData->ref == nullptr) {
+        ANS_LOGI("unsubscribe callback unset");
+        DelSubscriberInstancesInfo(dataWorkerData->env, dataWorkerData->subscriber);
+        return;
+    }
 
+    Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, Common::NapiGetNull(dataWorkerData->env));
+    DelSubscriberInstancesInfo(dataWorkerData->env, dataWorkerData->subscriber);
     delete dataWorkerData;
     dataWorkerData = nullptr;
 }
@@ -579,12 +549,7 @@ void SubscriberInstance::OnDisconnected()
 {
     ANS_LOGD("enter");
 
-    if (unsubscribeCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("unsubscribe callback unset");
-        return;
-    }
-
-    if (unsubscribeCallbackInfo_.tsfn == nullptr) {
+    if (tsfn_ == nullptr) {
         ANS_LOGI("unsubscribe tsfn is null");
         return;
     }
@@ -597,27 +562,21 @@ void SubscriberInstance::OnDisconnected()
 
     dataWorker->env = unsubscribeCallbackInfo_.env;
     dataWorker->ref = unsubscribeCallbackInfo_.ref;
-    dataWorker->subscriber = this;
+    dataWorker->subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
+    dataWorker->type = Type::DIS_CONNECTED;
 
-    napi_acquire_threadsafe_function(unsubscribeCallbackInfo_.tsfn);
-    napi_call_threadsafe_function(unsubscribeCallbackInfo_.tsfn, dataWorker, napi_tsfn_nonblocking);
-    napi_release_threadsafe_function(unsubscribeCallbackInfo_.tsfn, napi_tsfn_abort);
-    DelSubscriberInstancesInfo(dataWorker->env, dataWorker->subscriber);
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnDied(uv_work_t *work, int status)
+void ThreadSafeOnDestroy(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("OnDied uv_work_t start");
+    ANS_LOGI("OnDied thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null.");
-        return;
-    }
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
-        delete work;
-        work = nullptr;
         return;
     }
 
@@ -626,7 +585,6 @@ void UvQueueWorkOnDied(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
 }
 
 void SubscriberInstance::OnDied()
@@ -638,13 +596,6 @@ void SubscriberInstance::OnDied()
         return;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(dieCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -653,47 +604,30 @@ void SubscriberInstance::OnDied()
 
     dataWorker->env = dieCallbackInfo_.env;
     dataWorker->ref = dieCallbackInfo_.ref;
+    dataWorker->type = Type::DIE;
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-
-    work->data = reinterpret_cast<void *>(dataWorker);
-
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnDied, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
+void ThreadSafeOnDoNotDisturbDateChange(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("OnDoNotDisturbDateChange uv_work_t start");
+    ANS_LOGI("OnDoNotDisturbDateChange thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null");
-        return;
-    }
-
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("Data worker data is null.");
-        delete work;
-        work = nullptr;
         return;
     }
 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetDoNotDisturbDate(dataWorkerData->env, dataWorkerData->date, result)) {
@@ -705,7 +639,6 @@ void UvQueueWorkOnDoNotDisturbDateChange(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
 }
 
 void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date)
@@ -724,13 +657,6 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
         return;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(disturbDateCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -740,25 +666,38 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
     dataWorker->date = *date;
     dataWorker->env = disturbDateCallbackInfo_.env;
     dataWorker->ref = disturbDateCallbackInfo_.ref;
+    dataWorker->type = Type::DISTURB_DATE_CHANGE;
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+}
+
+
+void ThreadSafeOnDoNotDisturbChanged(napi_env env, napi_value jsCallback, void* context, void* data)
+{
+    ANS_LOGI("OnDoNotDisturbChanged thread safe start");
+
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+    if (dataWorkerData == nullptr) {
+        ANS_LOGE("Data worker data is null.");
         return;
     }
 
-    work->data = reinterpret_cast<void *>(dataWorker);
+    napi_value result = nullptr;
+    napi_handle_scope scope;
+    napi_open_handle_scope(dataWorkerData->env, &scope);
+    napi_create_object(dataWorkerData->env, &result);
 
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnDoNotDisturbDateChange, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
+    if (!Common::SetDoNotDisturbDate(dataWorkerData->env, dataWorkerData->date, result)) {
+        result = Common::NapiGetNull(dataWorkerData->env);
     }
+
+    Common::SetCallback(dataWorkerData->env, dataWorkerData->ref, result);
+    napi_close_handle_scope(dataWorkerData->env, scope);
+
+    delete dataWorkerData;
+    dataWorkerData = nullptr;
 }
 
 void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<NotificationDoNotDisturbDate>& date)
@@ -775,13 +714,6 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
         return;
     }
 
-    uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(disturbChangedCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
     NotificationReceiveDataWorker* dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -791,47 +723,30 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
     dataWorker->date = *date;
     dataWorker->env = disturbChangedCallbackInfo_.env;
     dataWorker->ref = disturbChangedCallbackInfo_.ref;
+    dataWorker->type = Type::DISTURB_CHANGED;
 
-    uv_work_t* work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-
-    work->data = reinterpret_cast<void*>(dataWorker);
-
-    int ret = uv_queue_work_with_qos(
-        loop, work, [](uv_work_t* work) {}, UvQueueWorkOnDoNotDisturbDateChange, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
+void ThreadSafeOnEnabledNotificationChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("OnEnabledNotificationChanged uv_work_t start");
+    ANS_LOGI("OnEnabledNotificationChanged thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null.");
-        return;
-    }
-
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("Data worker data is null.");
-        delete work;
-        work = nullptr;
         return;
     }
 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetEnabledNotificationCallbackData(dataWorkerData->env, dataWorkerData->callbackData, result)) {
@@ -843,7 +758,6 @@ void UvQueueWorkOnEnabledNotificationChanged(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
 }
 
 void SubscriberInstance::OnEnabledNotificationChanged(
@@ -861,13 +775,6 @@ void SubscriberInstance::OnEnabledNotificationChanged(
         return;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(enabledNotificationCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
@@ -877,47 +784,30 @@ void SubscriberInstance::OnEnabledNotificationChanged(
     dataWorker->callbackData = *callbackData;
     dataWorker->env = enabledNotificationCallbackInfo_.env;
     dataWorker->ref = enabledNotificationCallbackInfo_.ref;
+    dataWorker->type = Type::ENABLE_NOTIFICATION_CHANGED;
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-
-    work->data = reinterpret_cast<void *>(dataWorker);
-
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnEnabledNotificationChanged, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
+void ThreadSafeOnBadgeChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("UvQueueWorkOnBadgeChanged uv_work_t start");
+    ANS_LOGI("OnBadgeChanged thread safe start");
 
-    if (work == nullptr) {
-        ANS_LOGE("work is null");
-        return;
-    }
-
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null");
-        delete work;
-        work = nullptr;
         return;
     }
 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
 
     if (!Common::SetBadgeCallbackData(dataWorkerData->env, dataWorkerData->badge, result)) {
@@ -929,8 +819,6 @@ void UvQueueWorkOnBadgeChanged(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnBadgeChanged(
@@ -947,62 +835,39 @@ void SubscriberInstance::OnBadgeChanged(
         return;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(setBadgeCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
-        return;
-    }
-
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("new dataWorker failed");
         return;
     }
-
+    ANS_LOGD("SubscriberInstance::OnBadgeChanged instanceKey:%{public}s", badgeData->GetAppInstanceKey().c_str());
     dataWorker->badge = *badgeData;
     dataWorker->env = setBadgeCallbackInfo_.env;
     dataWorker->ref = setBadgeCallbackInfo_.ref;
+    dataWorker->type = Type::BADGE_CHANGED;
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("new work failed");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
-
-    work->data = reinterpret_cast<void *>(dataWorker);
-
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnBadgeChanged, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
 }
 
-void UvQueueWorkOnBadgeEnabledChanged(uv_work_t *work, int status)
+void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("Enter.");
-    if (work == nullptr) {
-        ANS_LOGE("Work is null.");
-        return;
-    }
+    ANS_LOGI("OnBadgeEnabledChanged thread safe start.");
 
-    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(work->data);
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("Data worker is null.");
-        delete work;
-        work = nullptr;
         return;
     }
 
     napi_value result = nullptr;
     napi_handle_scope scope;
     napi_open_handle_scope(dataWorkerData->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("Scope is null");
+        return;
+    }
     napi_create_object(dataWorkerData->env, &result);
     if (!Common::SetEnabledNotificationCallbackData(dataWorkerData->env, dataWorkerData->callbackData, result)) {
         result = Common::NapiGetNull(dataWorkerData->env);
@@ -1013,8 +878,6 @@ void UvQueueWorkOnBadgeEnabledChanged(uv_work_t *work, int status)
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
-    delete work;
-    work = nullptr;
 }
 
 void SubscriberInstance::OnBadgeEnabledChanged(
@@ -1029,12 +892,6 @@ void SubscriberInstance::OnBadgeEnabledChanged(
         return;
     }
 
-    uv_loop_s *loop = nullptr;
-    napi_get_uv_event_loop(setBadgeEnabledCallbackInfo_.env, &loop);
-    if (loop == nullptr) {
-        ANS_LOGE("Loop instance is null.");
-        return;
-    }
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
         ANS_LOGE("Create new data worker failed.");
@@ -1044,23 +901,16 @@ void SubscriberInstance::OnBadgeEnabledChanged(
     dataWorker->callbackData = *callbackData;
     dataWorker->env = setBadgeEnabledCallbackInfo_.env;
     dataWorker->ref = setBadgeEnabledCallbackInfo_.ref;
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        ANS_LOGE("Create new work failed.");
-        delete dataWorker;
-        dataWorker = nullptr;
-        return;
-    }
+    dataWorker->type = Type::BADGE_ENABLED_CHANGED;
 
-    work->data = reinterpret_cast<void *>(dataWorker);
-    int ret = uv_queue_work_with_qos(loop, work, [](uv_work_t *work) {},
-        UvQueueWorkOnBadgeEnabledChanged, uv_qos_user_initiated);
-    if (ret != 0) {
-        delete dataWorker;
-        dataWorker = nullptr;
-        delete work;
-        work = nullptr;
-    }
+    napi_acquire_threadsafe_function(tsfn_);
+    napi_call_threadsafe_function(tsfn_, dataWorker, napi_tsfn_nonblocking);
+    napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+}
+
+void SubscriberInstance::SetThreadSafeFunction(const napi_threadsafe_function &tsfn)
+{
+    tsfn_ = tsfn;
 }
 
 void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -1075,14 +925,6 @@ void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_
     consumeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    consumeCallbackInfo_.env = env;
-    consumeCallbackInfo_.ref = ref;
-    consumeCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     updateCallbackInfo_.env = env;
@@ -1095,26 +937,10 @@ void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const nap
     subscribeCallbackInfo_.ref = ref;
 }
 
-void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    subscribeCallbackInfo_.env = env;
-    subscribeCallbackInfo_.ref = ref;
-    subscribeCallbackInfo_.tsfn = tsfn;
-}
-
 void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     unsubscribeCallbackInfo_.env = env;
     unsubscribeCallbackInfo_.ref = ref;
-}
-
-void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    unsubscribeCallbackInfo_.env = env;
-    unsubscribeCallbackInfo_.ref = ref;
-    unsubscribeCallbackInfo_.tsfn = tsfn;
 }
 
 void SubscriberInstance::SetDieCallbackInfo(const napi_env &env, const napi_ref &ref)
@@ -1152,6 +978,7 @@ void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_re
     setBadgeCallbackInfo_.env = env;
     setBadgeCallbackInfo_.ref = ref;
 }
+
 
 void SubscriberInstance::SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
@@ -1198,41 +1025,6 @@ void SubscriberInstance::SetCallbackInfo(const napi_env &env, const std::string 
     }
 }
 
-
-void SubscriberInstance::SetCallbackInfo(const std::string &type, const napi_env &env, const napi_ref &ref,
-    const napi_threadsafe_function &tsfn)
-{
-    if (type == CONSUME) {
-        SetConsumeCallbackInfo(env, ref, tsfn);
-    } else if (type == CANCEL) {
-        SetCancelCallbackInfo(env, ref);
-    } else if (type == UPDATE) {
-        SetUpdateCallbackInfo(env, ref);
-    } else if (type == CONNECTED) {
-        SetSubscribeCallbackInfo(env, ref, tsfn);
-    } else if (type == DIS_CONNECTED) {
-        SetUnsubscribeCallbackInfo(env, ref, tsfn);
-    } else if (type == DIE) {
-        SetDieCallbackInfo(env, ref);
-    } else if (type == DISTURB_MODE_CHANGE) {
-        SetDisturbModeCallbackInfo(env, ref);
-    } else if (type == DISTURB_DATE_CHANGE) {
-        SetDisturbDateCallbackInfo(env, ref);
-    } else if (type == DISTURB_CHANGED) {
-        SetDisturbChangedCallbackInfo(env, ref);
-    } else if (type == ENABLE_NOTIFICATION_CHANGED) {
-        SetEnabledNotificationCallbackInfo(env, ref);
-    } else if (type == BADGE_CHANGED) {
-        SetBadgeCallbackInfo(env, ref);
-    } else if (type == BADGE_ENABLED_CHANGED) {
-        SetBadgeEnabledCallbackInfo(env, ref);
-    } else if (type == BATCH_CANCEL) {
-        SetBatchCancelCallbackInfo(env, ref);
-    } else {
-        ANS_LOGW("type is error");
-    }
-}
-
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo)
 {
     std::lock_guard<std::mutex> lock(mutex_);
@@ -1254,6 +1046,52 @@ void ThreadFinished(napi_env env, void* data, [[maybe_unused]] void* context)
     ANS_LOGD("ThreadFinished");
 }
 
+void ThreadSafeCommon(napi_env env, napi_value jsCallback, void* context, void* data)
+{
+    ANS_LOGI("common thread safe start");
+    auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+    switch (dataWorkerData->type) {
+        case Type::CANCEL:
+            ThreadSafeOnCancel(env, jsCallback, context, data);
+            break;
+        case Type::BATCH_CANCEL:
+            ThreadSafeOnBatchCancel(env, jsCallback, context, data);
+            break;
+        case Type::CONSUME:
+            ThreadSafeOnConsumed(env, jsCallback, context, data);
+            break;
+        case Type::UPDATE:
+            ThreadSafeOnUpdate(env, jsCallback, context, data);
+            break;
+        case Type::CONNECTED:
+            ThreadSafeOnConnected(env, jsCallback, context, data);
+            break;
+        case Type::DIS_CONNECTED:
+            ThreadSafeOnDisconnected(env, jsCallback, context, data);
+            break;
+        case Type::DIE:
+            ThreadSafeOnDestroy(env, jsCallback, context, data);
+            break;
+        case Type::DISTURB_DATE_CHANGE:
+            ThreadSafeOnDoNotDisturbDateChange(env, jsCallback, context, data);
+            break;
+        case Type::DISTURB_CHANGED:
+            ThreadSafeOnDoNotDisturbChanged(env, jsCallback, context, data);
+            break;
+        case Type::ENABLE_NOTIFICATION_CHANGED:
+            ThreadSafeOnEnabledNotificationChanged(env, jsCallback, context, data);
+            break;
+        case Type::BADGE_CHANGED:
+            ThreadSafeOnBadgeChanged(env, jsCallback, context, data);
+            break;
+        case Type::BADGE_ENABLED_CHANGED:
+            ThreadSafeOnBadgeEnabledChanged(env, jsCallback, context, data);
+            break;
+        default:
+            break;
+    }
+}
+
 napi_value GetNotificationSubscriber(
     const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo)
 {
@@ -1262,7 +1100,7 @@ napi_value GetNotificationSubscriber(
     napi_valuetype valuetype = napi_undefined;
     napi_ref result = nullptr;
 
-    subscriberInfo.subscriber = new (std::nothrow) SubscriberInstance();
+    subscriberInfo.subscriber = std::make_shared<SubscriberInstance>();
     if (subscriberInfo.subscriber == nullptr) {
         ANS_LOGE("subscriber is null");
         std::string msg = "Mandatory parameters are left unspecified. subscriber is null";
@@ -1271,6 +1109,13 @@ napi_value GetNotificationSubscriber(
     }
 
     napi_create_reference(env, value, 1, &subscriberInfo.ref);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "tsfn", NAPI_AUTO_LENGTH, &resourceName);
+    napi_threadsafe_function tsfn = nullptr;
+    napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
+        ThreadFinished, nullptr, ThreadSafeCommon, &tsfn);
+    subscriberInfo.subscriber->SetThreadSafeFunction(tsfn);
 
     // onConsume?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConsume", &hasProperty));
@@ -1285,13 +1130,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnConsumed, 1, &result);
-
-        napi_value resourceName = nullptr;
-        napi_create_string_latin1(env, "onConsume", NAPI_AUTO_LENGTH, &resourceName);
-        napi_threadsafe_function tsfn = nullptr;
-        napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
-            ThreadFinished, nullptr, ThreadSafeOnConsumed, &tsfn);
-        subscriberInfo.subscriber->SetCallbackInfo(CONSUME, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, CONSUME, result);
     }
     // onCancel?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onCancel", &hasProperty));
@@ -1336,13 +1175,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnConnected, 1, &result);
-
-        napi_value resourceName = nullptr;
-        napi_create_string_latin1(env, "onConnect", NAPI_AUTO_LENGTH, &resourceName);
-        napi_threadsafe_function tsfn = nullptr;
-        napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
-            ThreadFinished, nullptr, ThreadSafeOnConnected, &tsfn);
-        subscriberInfo.subscriber->SetCallbackInfo(CONNECTED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, CONNECTED, result);
     }
     // onDisconnect?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDisconnect", &hasProperty));
@@ -1357,13 +1190,7 @@ napi_value GetNotificationSubscriber(
             return nullptr;
         }
         napi_create_reference(env, nOnDisConnect, 1, &result);
-
-        napi_value resourceName = nullptr;
-        napi_create_string_latin1(env, "onDisconnect", NAPI_AUTO_LENGTH, &resourceName);
-        napi_threadsafe_function tsfn = nullptr;
-        napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
-            ThreadFinished, nullptr, ThreadSafeOnDisconnected, &tsfn);
-        subscriberInfo.subscriber->SetCallbackInfo(DIS_CONNECTED, env, result, tsfn);
+        subscriberInfo.subscriber->SetCallbackInfo(env, DIS_CONNECTED, result);
     }
     // onDestroy?:() => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onDestroy", &hasProperty));
@@ -1512,7 +1339,7 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const SubscriberInstancesIn
     return true;
 }
 
-bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *subscriber)
+bool DelSubscriberInstancesInfo(const napi_env &env, const std::shared_ptr<SubscriberInstance> subscriber)
 {
     ANS_LOGD("enter");
     if (subscriber == nullptr) {
@@ -1527,8 +1354,6 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *s
                 napi_delete_reference(env, (*it).ref);
             }
             DelDeletingSubscriber((*it).subscriber);
-            delete (*it).subscriber;
-            (*it).subscriber = nullptr;
             subscriberInstances_.erase(it);
             return true;
         }
@@ -1536,7 +1361,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const SubscriberInstance *s
     return false;
 }
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
-    NotificationSubscribeInfo &subscriberInfo, SubscriberInstance *&subscriber, napi_ref &callback)
+    NotificationSubscribeInfo &subscriberInfo, std::shared_ptr<SubscriberInstance> &subscriber, napi_ref &callback)
 {
     ANS_LOGD("enter");
 
@@ -1565,18 +1390,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     if (!HasNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo)) {
         if (GetNotificationSubscriber(env, argv[PARAM0], subscriberInstancesInfo) == nullptr) {
             ANS_LOGE("NotificationSubscriber parse failed");
-            if (subscriberInstancesInfo.subscriber) {
-                delete subscriberInstancesInfo.subscriber;
-                subscriberInstancesInfo.subscriber = nullptr;
-            }
             return nullptr;
         }
         if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
             ANS_LOGE("AddSubscriberInstancesInfo add failed");
-            if (subscriberInstancesInfo.subscriber) {
-                delete subscriberInstancesInfo.subscriber;
-                subscriberInstancesInfo.subscriber = nullptr;
-            }
             return nullptr;
         }
     }
@@ -1618,14 +1435,10 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     ANS_LOGD("enter");
 
     napi_ref callback = nullptr;
-    SubscriberInstance *objectInfo = nullptr;
+    std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
     if (ParseParameters(env, info, subscriberInfo, objectInfo, callback) == nullptr) {
         ANS_LOGD("ParseParameters is nullptr.");
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         return Common::NapiGetUndefined(env);
     }
 
@@ -1634,10 +1447,6 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     };
     if (!asynccallbackinfo) {
         ANS_LOGD("Asynccallbackinfo is nullptr.");
-        if (objectInfo) {
-            delete objectInfo;
-            objectInfo = nullptr;
-        }
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -1660,15 +1469,21 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->subscriberInfo.hasSubscribeInfo) {
                     ANS_LOGD("Subscribe with NotificationSubscribeInfo excute.");
-                    OHOS::Notification::NotificationSubscribeInfo subscribeInfo;
-                    subscribeInfo.AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
-                    subscribeInfo.AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
+                    sptr<OHOS::Notification::NotificationSubscribeInfo> subscribeInfo =
+                        new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
+                    if (subscribeInfo == nullptr) {
+                        ANS_LOGE("Invalid subscribeInfo!");
+                        asynccallbackinfo->info.errorCode = OHOS::Notification::ErrorCode::ERR_ANS_NO_MEMORY;
+                        return;
+                    }
+                    subscribeInfo->AddAppNames(asynccallbackinfo->subscriberInfo.bundleNames);
+                    subscribeInfo->AddAppUserId(asynccallbackinfo->subscriberInfo.userId);
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo), subscribeInfo);
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
                     ANS_LOGD("SubscribeNotification execute.");
                     asynccallbackinfo->info.errorCode =
-                        NotificationHelper::SubscribeNotification(*(asynccallbackinfo->objectInfo));
+                        NotificationHelper::SubscribeNotification(asynccallbackinfo->objectInfo);
                 }
             }
         },
@@ -1704,7 +1519,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
     }
 }
 
-bool AddDeletingSubscriber(SubscriberInstance *subscriber)
+bool AddDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
 {
     std::lock_guard<std::mutex> lock(delMutex_);
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
@@ -1716,13 +1531,104 @@ bool AddDeletingSubscriber(SubscriberInstance *subscriber)
     return true;
 }
 
-void DelDeletingSubscriber(SubscriberInstance *subscriber)
+void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
 {
     std::lock_guard<std::mutex> lock(delMutex_);
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
     if (iter != DeletingSubscriber.end()) {
         DeletingSubscriber.erase(iter);
     }
+}
+
+napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content, OperationInfo& operationInfo)
+{
+    operationInfo.withOperationInfo = true;
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, content, &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type for arg1. object expected.");
+        std::string msg = "Incorrect parameter type. The type of operationInfo must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    size_t strLen = 0;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, content, "actionName", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, content, "actionName", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of actionName must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+        operationInfo.actionName = str;
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, content, "userInput", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, content, "userInput", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_string) {
+            ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of userInput must be string.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        char str[LONG_STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, LONG_STR_MAX_SIZE - 1, &strLen));
+        operationInfo.userInput = str;
+    }
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode,
+    napi_value& thisVar, OperationInfo& operationInfo)
+{
+    ANS_LOGD("enter");
+
+    size_t argc = DISTRIBUTE_REPLY_PARA;
+    napi_value argv[DISTRIBUTE_REPLY_PARA] = {nullptr};
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < DISTRIBUTE_JUMP_PARA) {
+        ANS_LOGE("Wrong number of arguments");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype == napi_string) {
+        size_t strLen = 0;
+        char str[STR_MAX_SIZE] = {0};
+        NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
+        hashCode = str;
+    } else {
+        ANS_LOGE("Wrong argument type for arg0. string expected.");
+        std::string msg = "Incorrect parameter type. The type of hashcode must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    if (hashCode.empty()) {
+        ANS_LOGE("Wrong argument type for arg0. not empty expected.");
+        std::string msg = "Incorrect parameter type. The type of hashcode must be not null.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    if (argc > DISTRIBUTE_JUMP_PARA) {
+        if (GetParamOperationInfo(env, argv[PARAM1], operationInfo) == nullptr) {
+            return Common::NapiGetUndefined(env);
+        }
+    }
+
+    return Common::NapiGetNull(env);
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

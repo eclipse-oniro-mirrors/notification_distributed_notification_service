@@ -24,6 +24,7 @@
 #include "notification_bundle_option.h"
 #include "token_setproc.h"
 #include "singleton.h"
+#include "ans_convert_enum.h"
 
 namespace OHOS {
 namespace Notification {
@@ -67,12 +68,16 @@ constexpr char DUMP_HELP_MSG[] =
     "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
     "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
-constexpr char SETTING_SHORT_OPTIONS[] = "c:e:d:";
+constexpr char SETTING_SHORT_OPTIONS[] = "c:e:d:k:b:o:g:";
 const struct option SETTING_LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"recent-count", required_argument, nullptr, 'c'},
     {"enable-notification", required_argument, nullptr, 'e'},
     {"set-device-status", required_argument, nullptr, 'd'},
+    {"collaboration-switch", required_argument, nullptr, 'k'},
+    {"collaboration-switch-bundle", required_argument, nullptr, 'b'},
+    {"collaboration-switch-slot", required_argument, nullptr, 'o'},
+    {"get-device-status", required_argument, nullptr, 'g'},
 };
 constexpr char SETTING_HELP_MSG[] =
     "usage: anm setting [<options>]\n"
@@ -80,8 +85,17 @@ constexpr char SETTING_HELP_MSG[] =
     "  --help, -h                   help menu\n"
     "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
     "  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle, eg: -e com.example:10100:1\n"
-    "  --set-device-status -d <device:status> set device status, eg: -d device:1\n";
+    "  --set-device-status -d <device:status> set device status, eg: -d device:1\n"
+    "  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
+    "  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+    "      eg: -b wearable:example:10100:1\n"
+    "  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+    "  --get-device-status -o <device> set device status\n"
+    "      eg: -o wearable:0:1\n";
 }  // namespace
+
+const int PARAM_NUM_TWO = 2;
+const int PARAM_NUM_THREE = 3;
 
 NotificationShellCommand::NotificationShellCommand(int argc, char *argv[]) : ShellCommand(argc, argv, "anm_dump")
 {}
@@ -277,6 +291,14 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
             resultReceiver_.append("error: option 'e' requires a value.\n");
         } else if (optopt == 'd') {
             resultReceiver_.append("error: option 'd' requires a value.\n");
+        } else if (optopt == 'k') {
+            resultReceiver_.append("error: option 'k' requires a value.\n");
+        } else if (optopt == 'b') {
+            resultReceiver_.append("error: option 'b' requires a value.\n");
+        } else if (optopt == 'o') {
+            resultReceiver_.append("error: option 'o' requires a value.\n");
+        } else if (optopt == 'g') {
+            resultReceiver_.append("error: option 'g' requires a value.\n");
         } else {
             resultReceiver_.append("error: unknown option.\n");
         }
@@ -301,7 +323,18 @@ ErrCode NotificationShellCommand::RunAsSettingCommand()
     if (option == 'd') {
         return RunSetDeviceStatusCmd();
     }
-
+    if (option == 'k') {
+        return RunSetSmartReminderEnabledCmd();
+    }
+    if (option == 'b') {
+        return RunSetDistributedEnabledByBundleCmd();
+    }
+    if (option == 'o') {
+        return RunSetDistributedEnabledBySlotCmd();
+    }
+    if (option == 'g') {
+        return RunGetDeviceStatusCmd();
+    }
     resultReceiver_.append(SETTING_HELP_MSG);
     return ERR_INVALID_VALUE;
 }
@@ -337,6 +370,31 @@ ErrCode NotificationShellCommand::RunSetEnableCmd()
     return ret;
 }
 
+ErrCode NotificationShellCommand::RunGetDeviceStatusCmd()
+{
+    if (ans_ == nullptr) {
+        resultReceiver_.append("error: object is null\n");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::string info = std::string(optarg);
+    if (info.empty()) {
+        resultReceiver_.append("error: getting information error\n");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t status = 0;
+    ErrCode ret = ans_->GetTargetDeviceStatus(info, status);
+    if (ret == ERR_OK) {
+        resultReceiver_.append("Get device status success: ");
+        resultReceiver_.append(std::to_string(status));
+        resultReceiver_.append("\n");
+    } else {
+        resultReceiver_.append("Get device status failed\n");
+    }
+    return ret;
+}
+
 ErrCode NotificationShellCommand::RunSetDeviceStatusCmd()
 {
     if (ans_ == nullptr) {
@@ -362,6 +420,111 @@ ErrCode NotificationShellCommand::RunSetDeviceStatusCmd()
         resultReceiver_.append("set device status success\n");
     } else {
         resultReceiver_.append("set device status failed\n");
+    }
+    return ret;
+}
+
+ErrCode NotificationShellCommand::RunSetSmartReminderEnabledCmd()
+{
+    if (ans_ == nullptr) {
+        resultReceiver_.append("error: object is null\n");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::string deviceType;
+    std::string info = std::string(optarg);
+    if (std::count(info.begin(), info.end(), ':') != 1) {  // 1 (deviceType:status)
+        resultReceiver_.append("error: setting information error\n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+
+    size_t pos = info.find(':');
+    deviceType = info.substr(0, pos);
+    bool enable = atoi(info.substr(pos + 1).c_str());
+
+    ErrCode ret = ans_->SetSmartReminderEnabled(deviceType, enable);
+    if (ret == ERR_OK) {
+        resultReceiver_.append("set collaboration switch success\n");
+    } else {
+        resultReceiver_.append("set collaboration switch failed\n");
+    }
+    return ret;
+}
+
+ErrCode NotificationShellCommand::RunSetDistributedEnabledByBundleCmd()
+{
+    if (ans_ == nullptr) {
+        resultReceiver_.append("error: object is null\n");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::string deviceType;
+    NotificationBundleOption bundleOption;
+    std::string info = std::string(optarg);
+    if (std::count(info.begin(), info.end(), ':') != PARAM_NUM_THREE) {  // 4 (deviceType:bundleName:uid:status)
+        resultReceiver_.append("error: setting information error\n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+
+    size_t pos = info.find(':');
+    deviceType = info.substr(0, pos);
+
+    info = info.substr(pos + 1);
+    pos = info.find(':');
+    bundleOption.SetBundleName(info.substr(0, pos));
+
+    info = info.substr(pos + 1);
+    pos = info.find(':');
+    bundleOption.SetUid(atoi(info.substr(0, pos).c_str()));
+
+    bool enable = atoi(info.substr(pos + 1).c_str());
+
+    ErrCode ret = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, enable);
+    if (ret == ERR_OK) {
+        resultReceiver_.append("set bundle collaboration switch success\n");
+    } else {
+        resultReceiver_.append("set bundle collaboration switch failed\n");
+    }
+    return ret;
+}
+
+ErrCode NotificationShellCommand::RunSetDistributedEnabledBySlotCmd()
+{
+    if (ans_ == nullptr) {
+        resultReceiver_.append("error: object is null\n");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::string deviceType;
+    int32_t slotType;
+    std::string info = std::string(optarg);
+    if (std::count(info.begin(), info.end(), ':') != PARAM_NUM_TWO) {  //3(deviceType:slotType:status)
+        resultReceiver_.append("error: setting information error\n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+
+    size_t pos = info.find(':');
+    deviceType = info.substr(0, pos);
+
+    info = info.substr(pos + 1);
+    pos = info.find(':');
+    slotType = atoi(info.substr(0, pos).c_str());
+    NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+    if (!NotificationNapi::AnsEnumUtil::SlotTypeJSToC(NotificationNapi::SlotType(slotType), outType)) {
+        resultReceiver_.append("error: slotType information error\n");
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+    bool enable = atoi(info.substr(pos + 1).c_str());
+
+    ErrCode ret = ans_->SetDistributedEnabledBySlot(outType, deviceType, enable);
+    if (ret == ERR_OK) {
+        resultReceiver_.append("set slot collaboration switch success\n");
+    } else {
+        resultReceiver_.append("set slot collaboration switch failed\n");
     }
     return ret;
 }

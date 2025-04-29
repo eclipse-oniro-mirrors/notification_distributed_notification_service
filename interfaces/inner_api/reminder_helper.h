@@ -20,6 +20,7 @@
 
 #include "notification_slot.h"
 #include "reminder_request.h"
+#include "reminder_request_adaptation.h"
 
 namespace OHOS {
 namespace Notification {
@@ -48,7 +49,7 @@ public:
      *                 Reminder id will be set with a number >= 0 if publishing the reminder successfully, Otherwise
      *                 reminder id is -1. You can call reminder.GetReminderId() to get the reminder id.
      */
-    static ErrCode PublishReminder(ReminderRequest &reminder);
+    static ErrCode PublishReminder(const ReminderRequest &reminder, int32_t& reminderId);
 
     /**
      * Cancels a specified reminder.
@@ -72,7 +73,7 @@ public:
      * @param[out] validReminders Indicates an initial vector to receive the result.
      * @return Returns an array list containing all valid reminder notifications set by the current application.
      */
-    static ErrCode GetValidReminders(std::vector<sptr<ReminderRequest>> &validReminders);
+    static ErrCode GetValidReminders(std::vector<ReminderRequestAdaptation> &validReminders);
 
     /**
      * Creates a NotificationSlot.
@@ -104,7 +105,7 @@ public:
      * @param date exclude date
      * @return Returns ERR_OK on success, others on failure.
      */
-    static ErrCode AddExcludeDate(const int32_t reminderId, const uint64_t date);
+    static ErrCode AddExcludeDate(const int32_t reminderId, const int64_t date);
 
     /**
      * @brief Clear exclude date for reminder
@@ -121,7 +122,9 @@ public:
      * @param dates exclude dates
      * @return Returns ERR_OK on success, others on failure.
      */
-    static ErrCode GetExcludeDates(const int32_t reminderId, std::vector<uint64_t>& dates);
+    static ErrCode GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates);
+
+    static void StartReminderAgentService();
 
 private:
     static bool CheckPermission();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,95 +53,6 @@ void AnsSubscriberProxyUnitTest::TearDownTestCase() {}
 void AnsSubscriberProxyUnitTest::SetUp() {}
 
 void AnsSubscriberProxyUnitTest::TearDown() {}
-
-/*
- * @tc.name: InnerTransactTest_0100
- * @tc.desc: test if AnsSubscriberProxy's InnerTransact function executed as expected in normal case.
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, InnerTransactTest_0100, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).WillOnce(DoAll(Return(NO_ERROR)));
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_OK, res);
-}
-
-/*
- * @tc.name: InnerTransactTest_0200
- * @tc.desc: test AnsSubscriberProxy's InnerTransact function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0200, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, InnerTransactTest_0200, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).WillOnce(DoAll(Return(DEAD_OBJECT)));
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_DEAD_OBJECT, res);
-}
-
-/*
- * @tc.name: InnerTransactTest_0300
- * @tc.desc: test AnsSubscriberProxy's InnerTransact function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, InnerTransactTest_0300, TestSize.Level1";
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).WillOnce(DoAll(Return(-1)));
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_ANS_TRANSACT_FAILED, res);
-}
-
-/*
- * @tc.name: InnerTransactTest_0400
- * @tc.desc: test AnsSubscriberProxy's InnerTransact function
- * @tc.type: FUNC
- * @tc.require: #I5SJ62
- */
-HWTEST_F(AnsSubscriberProxyUnitTest, InnerTransactTest_0400, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO)
-        << "AnsSubscriberProxyUnitTest, InnerTransactTest_0400, TestSize.Level1";
-    std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(nullptr);
-    ASSERT_NE(nullptr, proxy);
-    uint32_t code = 0;
-    MessageOption flags;
-    MessageParcel data;
-    MessageParcel reply;
-    ErrCode res = proxy->InnerTransact(static_cast<NotificationInterfaceCode>(code), flags, data, reply);
-    EXPECT_EQ(ERR_DEAD_OBJECT, res);
-}
 
 /*
  * @tc.name: OnConsumed_0400
@@ -207,7 +118,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumed_0600, Function | MediumTest | Le
         << "AnsSubscriberProxyUnitTest, OnConsumed_0600, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
@@ -250,7 +161,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0100, Function | MediumTest 
         << "AnsSubscriberProxyBranchTest, OnConsumedList_0100, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
@@ -268,7 +179,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0200, Function | MediumTest 
         << "AnsSubscriberProxyBranchTest, OnConsumedList_0200, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<OHOS::Notification::NotificationRequest> request =
@@ -291,7 +202,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnConsumedList_0300, Function | MediumTest 
         << "AnsSubscriberProxyBranchTest, OnConsumedList_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
@@ -388,7 +299,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnCanceled_0600, Function | MediumTest | Le
         << "AnsSubscriberProxyUnitTest, OnCanceled_0600, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
@@ -473,7 +384,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnOnUpdated_0300, Function | MediumTest | L
         << "AnsSubscriberProxyUnitTest, OnOnUpdated_0300, TestSize.Level1";
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0);
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1);
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     proxy->OnUpdated(nullptr);
@@ -697,7 +608,7 @@ HWTEST_F(AnsSubscriberProxyUnitTest, OnBadgeEnabledChanged_0200, TestSize.Level1
 {
     sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
     ASSERT_NE(nullptr, iremoteObject);
-    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(0).WillRepeatedly(DoAll(Return(NO_ERROR)));
+    EXPECT_CALL(*iremoteObject, SendRequest(_, _, _, _)).Times(1).WillRepeatedly(DoAll(Return(NO_ERROR)));
     std::shared_ptr<AnsSubscriberProxy> proxy = std::make_shared<AnsSubscriberProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<EnabledNotificationCallbackData> callbackData = nullptr;

@@ -54,6 +54,7 @@ enum class SlotLevel {
 };
 
 enum class RemoveReason {
+    DEFAULT_REASON_DELETE = 0,
     CLICK_REASON_REMOVE = 1,
     CANCEL_REASON_REMOVE = 2,
     CANCEL_ALL_REASON_REMOVE = 3,
@@ -67,6 +68,25 @@ enum class RemoveReason {
     FLOW_CONTROL_REASON_DELETE = 11,
     DISABLE_SLOT_REASON_DELETE = 12,
     DISABLE_NOTIFICATION_REASON_DELETE = 13,
+    APP_CANCEL_AS_BUNELE_REASON_DELETE = 14,
+    APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE = 15,
+    APP_CANCEL_REMINDER_REASON_DELETE = 16,
+    APP_CANCEL_GROPU_REASON_DELETE = 17,
+    APP_REMOVE_GROUP_REASON_DELETE = 18,
+    APP_REMOVE_ALL_REASON_DELETE = 19,
+    APP_REMOVE_ALL_USER_REASON_DELETE = 20,
+    TRIGGER_EIGHT_HOUR_REASON_DELETE = 21,
+    TRIGGER_FOUR_HOUR_REASON_DELETE = 22,
+    TRIGGER_TEN_MINUTES_REASON_DELETE = 23,
+    TRIGGER_FIFTEEN_MINUTES_REASON_DELETE = 24,
+    TRIGGER_THIRTY_MINUTES_REASON_DELETE = 25,
+    TRIGGER_START_ARCHIVE_REASON_DELETE = 26,
+    TRIGGER_AUTO_DELETE_REASON_DELETE = 27,
+    PACKAGE_REMOVE_REASON_DELETE = 28,
+    SLOT_ENABLED_REASON_DELETE = 29,
+    RECOVER_LIVE_VIEW_DELETE = 30,
+    DISABLE_NOTIFICATION_FEATURE_REASON_DELETE = 31,
+    DISTRIBUTED_COLLABORATIVE_DELETE = 32,
     APP_CANCEL_REASON_OTHER = 100,
 };
 
@@ -103,6 +123,13 @@ enum class LiveViewStatus {
     LIVE_VIEW_END,
     LIVE_VIEW_FULL_UPDATE,
     LIVE_VIEW_BUTT
+};
+
+enum class LiveViewTypes {
+    LIVE_VIEW_ACTIVITY,
+    LIVE_VIEW_INSTANT,
+    LIVE_VIEW_LONG_TERM,
+    LIVE_VIEW_INSTANT_BANNER
 };
 
 class AnsEnumUtil {
@@ -162,6 +189,15 @@ public:
     static bool LiveViewStatusJSToC(const LiveViewStatus &inType, NotificationLiveViewContent::LiveViewStatus &outType);
 
     /**
+     * @brief Converts liveview types from js to native
+     *
+     * @param in Indicates a js liveview type object
+     * @param out Indicates a liveview type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool LiveViewTypesJSToC(const LiveViewTypes &in, NotificationLocalLiveViewContent::LiveViewTypes &out);
+
+    /**
      * @brief Converts slot level from native to js
      *
      * @param inType Indicates a js NotificationLevel object
@@ -178,6 +214,24 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool ReasonCToJS(const int32_t &inType, int32_t &outType);
+
+    /**
+     * @brief Converts reason type from native to js
+     *
+     * @param inType Indicates a native reason type
+     * @param outType Indicates a js reason type
+     * @return Returns true if success, returns false otherwise
+     */
+    static void ReasonCToJSExt(const int32_t &inType, int32_t &outType);
+
+    /**
+     * @brief Converts reason type from native to js
+     *
+     * @param inType Indicates a native reason type
+     * @param outType Indicates a js reason type
+     * @return Returns true if success, returns false otherwise
+     */
+    static void ReasonCToJSSecondExt(const int32_t &inType, int32_t &outType);
 
     /**
      * @brief Converts do-not-disturb type from js to native
@@ -223,6 +277,15 @@ public:
      * @return Returns true if success, returns false otherwise
      */
     static bool LiveViewStatusCToJS(const NotificationLiveViewContent::LiveViewStatus &inType, LiveViewStatus &outType);
+
+    /**
+     * @brief Converts liveview type from native to js
+     *
+     * @param in Indicates a native liveview type object
+     * @param out Indicates a js liveview type object
+     * @return Returns true if success, returns false otherwise
+     */
+    static bool LiveViewTypesCToJS(const NotificationLocalLiveViewContent::LiveViewTypes &in, LiveViewTypes &out);
 };
 }
 }

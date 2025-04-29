@@ -111,36 +111,21 @@ napi_value Common::SetNotification(
     napi_get_boolean(env, notification->IsFloatingIcon(), &value);
     napi_set_named_property(env, result, "isFloatingIcon", value);
 
-    if (notification->GetNotificationRequest().IsAgentNotification()) {
-        // Agent notification, replace creator with owner
-        // readonly creatorBundleName?: string
-        napi_create_string_utf8(
-            env, notification->GetNotificationRequest().GetOwnerBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
-        napi_set_named_property(env, result, "creatorBundleName", value);
+    // readonly creatorBundleName?: string
+    napi_create_string_utf8(
+        env, notification->GetBundleName().c_str(), NAPI_AUTO_LENGTH, &value);
+    napi_set_named_property(env, result, "creatorBundleName", value);
 
-        // readonly creatorUid?: number
-        napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUid(), &value);
-        napi_set_named_property(env, result, "creatorUid", value);
+    // readonly creatorUid?: number
+    napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUid(), &value);
+    napi_set_named_property(env, result, "creatorUid", value);
 
-        // readonly creatorUserId?: number
-        napi_create_int32(env, notification->GetNotificationRequest().GetOwnerUserId(), &value);
-        napi_set_named_property(env, result, "creatorUserId", value);
-    } else {
-        // readonly creatorBundleName?: string
-        napi_create_string_utf8(env, notification->GetCreateBundle().c_str(), NAPI_AUTO_LENGTH, &value);
-        napi_set_named_property(env, result, "creatorBundleName", value);
-
-        // readonly creatorUid?: number
-        napi_create_int32(env, notification->GetUid(), &value);
-        napi_set_named_property(env, result, "creatorUid", value);
-
-        // readonly creatorUserId?: number
-        napi_create_int32(env, notification->GetUserId(), &value);
-        napi_set_named_property(env, result, "creatorUserId", value);
-    }
+    // readonly creatorUserId?: number
+    napi_create_int32(env, notification->GetRecvUserId(), &value);
+    napi_set_named_property(env, result, "creatorUserId", value);
 
     // readonly creatorInstanceKey?: number
-    napi_create_int32(env, notification->GetInstanceKey(), &value);
+    napi_create_int32(env, -1, &value);
     napi_set_named_property(env, result, "creatorInstanceKey", value);
 
     // readonly creatorPid?: number
@@ -171,6 +156,10 @@ napi_value Common::SetNotification(
     napi_create_string_utf8(env, notification->GetDeviceId().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, "deviceId", value);
 
+    // notificationControlFlags?: number
+    napi_create_int32(env, notification->GetNotificationRequest().GetNotificationControlFlags(), &value);
+    napi_set_named_property(env, result, "notificationControlFlags", value);
+
     return NapiGetBoolean(env, true);
 }
 
@@ -190,6 +179,8 @@ napi_value Common::GetNotificationRequestDistributedOptions(const napi_env &env,
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of distributedOption must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
 
@@ -228,6 +219,8 @@ napi_value Common::GetNotificationIsDistributed(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_boolean) {
             ANS_LOGE("Wrong argument type. Bool expected.");
+            std::string msg = "Incorrect parameter types. The type of isDistributed must be bool.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_value_bool(env, result, &isDistributed);

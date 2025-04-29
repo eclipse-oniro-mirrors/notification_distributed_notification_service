@@ -75,7 +75,12 @@ public:
          * Indicates notifications that include a live view.
          * Such notifications are created using NotificationLiveViewContent.
          */
-        LIVE_VIEW
+        LIVE_VIEW,
+        /**
+         * invalid type
+         * It is used as the upper limit of the enumerated value.
+         */
+        ILLEGAL_TYPE
     };
 
     /**

@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"به %s اجازه می‌دهید برایتان اعلان ارسال کند؟",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"اجازه دادن",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"غیرمجاز کردن",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

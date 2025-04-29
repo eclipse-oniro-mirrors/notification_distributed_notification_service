@@ -90,6 +90,12 @@ void AdvancedNotificationService::SendPublishHiSysEvent(const sptr<NotificationR
     eventInfo.contentType = static_cast<int32_t>(request->GetNotificationType());
     eventInfo.bundleName = request->GetCreatorBundleName();
     eventInfo.userId = request->GetCreatorUserId();
+    eventInfo.slotType = request->GetSlotType();
+    eventInfo.classification = request->GetClassification();
+    if (request->GetFlags() != nullptr) {
+        eventInfo.reminderFlags = request->GetFlags()->GetReminderFlags();
+    }
+    eventInfo.notificationControlFlags = request->GetNotificationControlFlags();
     if (errCode != ERR_OK) {
         eventInfo.errCode = errCode;
         EventReport::SendHiSysEvent(PUBLISH_ERROR, eventInfo);
@@ -102,7 +108,7 @@ void AdvancedNotificationService::SendCancelHiSysEvent(int32_t notificationId, c
     const sptr<NotificationBundleOption> &bundleOption, ErrCode errCode)
 {
     if (bundleOption == nullptr || errCode != ERR_OK) {
-        ANS_LOGD("bundleOption is nullptr.");
+        ANS_LOGD("bundleOption is nullptr or not ok %{public}d.", errCode);
         return;
     }
 

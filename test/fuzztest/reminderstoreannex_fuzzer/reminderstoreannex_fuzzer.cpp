@@ -13,19 +13,16 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "reminder_store.h"
-#undef private
-#undef protected
 #include "reminderstoreannex_fuzzer.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
+    bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
         Notification::ReminderStore reminderStore;
         // test GetReminders function
-        std::string queryCondition(data);
+        std::string queryCondition = fdp->ConsumeRandomLengthString();
         reminderStore.GetReminders(queryCondition);
         // test GetAllValidReminders function
         reminderStore.GetAllValidReminders();
@@ -33,13 +30,11 @@ namespace OHOS {
         reminderStore.Query(queryCondition);
         // test GetInt32Val function
         std::shared_ptr<NativeRdb::ResultSet> resultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
-        std::string name(data);
-        int32_t value = static_cast<int32_t>(GetU32Data(data));
+        std::string name = fdp->ConsumeRandomLengthString();
+        int32_t value = fdp->ConsumeIntegral<int32_t>();
         reminderStore.GetInt32Val(resultSet, name, value);
-        std::string value1(data);
+        std::string value1 = fdp->ConsumeRandomLengthString();
         reminderStore.GetStringVal(resultSet, name, value1);
-        // test BuildReminder function
-        reminderStore.BuildReminder(resultSet);
         return true;
     }
 }
@@ -48,11 +43,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    char *ch = ParseData(data, size);
-    if (ch != nullptr && size >= GetU32Size()) {
-        OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-        free(ch);
-        ch = nullptr;
-    }
+    FuzzedDataProvider fdp(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

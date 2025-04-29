@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@
 #include "refbase.h"
 #include "singleton.h"
 
-#include "ans_subscriber_interface.h"
+#include "ians_subscriber.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_request.h"
@@ -48,7 +48,7 @@ public:
      * @param subscribeInfo Indicates the NotificationSubscribeInfo object.
      * @return Indicates the result code.
      */
-    ErrCode AddSubscriber(const sptr<AnsSubscriberInterface> &subscriber,
+    ErrCode AddSubscriber(const sptr<IAnsSubscriber> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -59,7 +59,7 @@ public:
      * @return Indicates the result code.
      */
     ErrCode RemoveSubscriber(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
      * @brief Notify all subscribers on counsumed.
@@ -94,9 +94,10 @@ public:
     /**
      * @brief Notify all subscribers on dnd date changed.
      *
+     * @param userId Indicates which user need consume the update nofitication
      * @param date Indicates the NotificationDoNotDisturbDate object.
      */
-    void NotifyDoNotDisturbDateChanged(const sptr<NotificationDoNotDisturbDate> &date);
+    void NotifyDoNotDisturbDateChanged(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
 
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
 
@@ -128,28 +129,44 @@ public:
      */
     void ResetFfrtQueue();
 
+    /**
+     * @brief Distribution operation based on hashCode.
+     *
+     * @param notification Indicates the Notification object.
+     */
+    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo);
+
     void RegisterOnSubscriberAddCallback(std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback);
 
     void UnRegisterOnSubscriberAddCallback();
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
 
+    void IsDeviceFlag(const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification,
+        bool &wearableFlag, bool &headsetFlag, bool &keyNodeFlag);
+
+    void TrackCodeLog(const sptr<Notification> &notification, const bool &wearableFlag, const bool &headsetFlag,
+        const bool &keyNodeFlag);
+
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();
+    bool IsDeviceTypeSubscriberd(const std::string deviceType);
 #endif
+    void NotifyApplicationInfoNeedChanged(const std::string& bundleName);
 
 private:
+    void NotifyApplicationInfochangedInner(const std::string& bundleName);
     std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
-    std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
-    std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<AnsSubscriberInterface> &subscriber);
+    std::shared_ptr<SubscriberRecord> FindSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);
+    std::shared_ptr<SubscriberRecord> CreateSubscriberRecord(const sptr<IAnsSubscriber> &subscriber);
     void AddRecordInfo(
         std::shared_ptr<SubscriberRecord> &record, const sptr<NotificationSubscribeInfo> &subscribeInfo);
     void RemoveRecordInfo(
         std::shared_ptr<SubscriberRecord> &record, const sptr<NotificationSubscribeInfo> &subscribeInfo);
     ErrCode AddSubscriberInner(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
     ErrCode RemoveSubscriberInner(
-        const sptr<AnsSubscriberInterface> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
+        const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     void NotifyConsumedInner(
         const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap);
@@ -160,21 +177,20 @@ private:
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap);
-    void NotifyDoNotDisturbDateChangedInner(const sptr<NotificationDoNotDisturbDate> &date);
+    void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
     bool IsSubscribedBysubscriber(
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    bool ConsumeRecordFilter(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
 
 private:
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    void UpdateCrossDeviceNotificationStatus();
-#endif
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};
-    sptr<AnsSubscriberInterface> ansSubscriberProxy_ {};
+    sptr<IAnsSubscriber> ansSubscriberProxy_ {};
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;

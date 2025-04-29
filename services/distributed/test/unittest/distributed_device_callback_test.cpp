@@ -65,6 +65,7 @@ HWTEST_F(DistributedDeviceCallbackTest, DistributedDeviceCallback_00100, Functio
     DistributedHardware::DmDeviceInfo info;
     strcpy_s(info.deviceId, sizeof(info.deviceId) - 1, "device1");
     deviceCallback_->OnDeviceOnline(info);
+    EXPECT_NE(deviceCallback_, nullptr);
 }
 
 /**
@@ -85,6 +86,7 @@ HWTEST_F(DistributedDeviceCallbackTest, DistributedDeviceCallback_00200, Functio
     deviceCallback_->OnDeviceOffline(info);
     deviceCallback_->OnDeviceChanged(info);
     deviceCallback_->OnDeviceReady(info);
+    EXPECT_NE(deviceCallback_, nullptr);
 }
 }  // namespace Notification
 }  // namespace OHOS

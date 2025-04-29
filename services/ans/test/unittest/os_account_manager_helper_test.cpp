@@ -90,7 +90,7 @@ HWTEST_F(OsAccountManagerHelperTest, CheckUserExists_00200, Function | SmallTest
 /**
  * @tc.number    : IsSystemAccount_0100
  * @tc.name      : IsSystemAccount_0100
- * @tc.desc      : test IsSystemAccount function, 100 is true(100 <= userId <= 1099)
+ * @tc.desc      : test IsSystemAccount function, 100 is true(100 <= userId <= 10736)
  */
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0100, Function | SmallTest | Level1)
 {
@@ -101,18 +101,18 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0100, Function | SmallTest 
 /**
  * @tc.number    : IsSystemAccount_0200
  * @tc.name      : IsSystemAccount_0200
- * @tc.desc      : test IsSystemAccount function, 1100 is false(100 <= userId <= 1099)
+ * @tc.desc      : test IsSystemAccount function, 1100 is false(100 <= userId <= 10736)
  */
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0200, Function | SmallTest | Level1)
 {
-    int32_t userId = 1100;
+    int32_t userId = 10737;
     ASSERT_EQ(false, OsAccountManagerHelper::IsSystemAccount(userId));
 }
 
 /**
  * @tc.number    : IsSystemAccount_0300
  * @tc.name      : IsSystemAccount_0300
- * @tc.desc      : test IsSystemAccount function, 0 is false(100 <= userId <= 1099)
+ * @tc.desc      : test IsSystemAccount function, 0 is false(100 <= userId <= 10736)
  */
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0300, Function | SmallTest | Level1)
 {
@@ -123,11 +123,11 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0300, Function | SmallTest 
 /**
  * @tc.number    : IsSystemAccount_0400
  * @tc.name      : IsSystemAccount_0400
- * @tc.desc      : test IsSystemAccount function, 1099 is true(100 <= userId <= 1099)
+ * @tc.desc      : test IsSystemAccount function, 1099 is true(100 <= userId <= 10736)
  */
 HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0400, Function | SmallTest | Level1)
 {
-    int32_t userId = 1099;
+    int32_t userId = 10736;
     ASSERT_EQ(true, OsAccountManagerHelper::IsSystemAccount(userId));
 }
 }

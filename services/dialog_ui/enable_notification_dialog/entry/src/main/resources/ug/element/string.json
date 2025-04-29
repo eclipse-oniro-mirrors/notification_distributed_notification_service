@@ -1,32 +1,49 @@
 {
-  "string": [
-    {
-      "name": "entry_desc",
-      "value": "description"
-    },
-    {
-      "name": "NotificationServiceExtAbility_desc",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "NotificationServiceExtAbility_label",
-      "value": "NotificationDialog"
-    },
-    {
-      "name": "reason",
-      "value": "بالداق ئۇقتۇرۇش، قۇلۇپ ئېكرانى ئۇقتۇرۇشى ۋە ئۇقتۇرۇش ئاۋازى قاتارلىقلار شۇنىڭ ئىچىدە. تەڭشەك > ئۇقتۇرۇش ۋە ھالەت بالدىقى دېگەن ئورۇندىن ئۆزگەرتەلەيسىز."
-    },
-    {
-      "name": "ALLOW",
-      "value": "رۇخسەت"
-    },
-    {
-      "name": "BAN",
-      "value": "چەكلەش"
-    },
-    {
-      "name": "group_label_notification",
-      "value": "\\u200f«%s» نىڭ ئۇقتۇرۇش يوللىشىغا رۇخسەتمۇ؟"
-    }
+  "string":[
+      {
+          "name":"entry_desc",
+          "value":"description"
+      },
+      {
+          "name":"NotificationServiceExtAbility_desc",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"NotificationServiceExtAbility_label",
+          "value":"NotificationDialog"
+      },
+      {
+          "name":"reason",
+          "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. تەڭشەكتىن ئۆزگەرتەلەيسىز."
+      },
+      {
+          "name":"reason_simple",
+          "value":"بالداق ئۇقتۇرۇش، تامغا ۋە سايراپ ئۇقتۇرۇش قاتارلىقلار شۇنىڭ ئىچىدە، بۇ تاللانمىنى تەڭشەكتىن ئۆزگەرتەلەيسىز."
+      },
+      {
+        "name":"reason_zyt",
+        "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. DroiTong > ئەپ باشقۇرۇش دېگەن ئورۇندىن ئۆزگەرتەلەيسىز."
+      },
+      {
+          "name":"ALLOW",
+          "value":"رۇخسەت",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"BAN",
+          "value":"چەكلەش",
+          "attr":{
+              "priority":"LT"
+          }
+      },
+      {
+          "name":"group_label_notification",
+          "value":"\u200f«%s» نىڭ ئۇقتۇرۇش يوللىشىغا رۇخسەتمۇ؟",
+          "attr":{
+              "priority":"LT"
+          }
+      }
   ]
 }

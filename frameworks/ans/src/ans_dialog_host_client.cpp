@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
     if (instance_ != nullptr) {
+        result = instance_;
         return false;
     }
     AnsDialogHostClient::instance_ = new (std::nothrow) AnsDialogHostClient();
@@ -54,18 +55,18 @@ bool AnsDialogHostClient::SetDialogCallbackInterface(
     return true;
 }
 
-void AnsDialogHostClient::OnDialogStatusChanged(const DialogStatusData& statusData)
+ErrCode AnsDialogHostClient::OnDialogStatusChanged(const DialogStatusData& statusData)
 {
     ANS_LOGD("enter");
     if (dialogCallbackInterface_ == nullptr) {
         ANS_LOGE("AnsDialogCallbackNativeInterface is null.");
-        return;
+        return ERR_OK;
     }
     if (hasBeenCalled.exchange(true)) {
         ANS_LOGE("Has been called.");
-        return;
+        return ERR_INVALID_DATA;
     }
     dialogCallbackInterface_->ProcessDialogStatusChanged(statusData);
-    AnsDialogHostClient::Destroy();
+    return ERR_OK;
 }
 } // namespace OHOS::Notification

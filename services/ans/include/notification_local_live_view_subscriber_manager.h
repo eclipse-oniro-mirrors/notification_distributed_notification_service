@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,12 @@
 #include "event_handler.h"
 #include "event_runner.h"
 #include "ffrt.h"
+#include "ians_subscriber_local_live_view.h"
 #include "nocopyable.h"
 #include "refbase.h"
 #include "singleton.h"
 
-#include "ans_subscriber_local_live_view_interface.h"
+#include "notification.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
 #include "notification_request.h"
@@ -46,7 +47,7 @@ public:
      * @param subscribeInfo Indicates the NotificationSubscribeInfo object.
      * @return Indicates the result code.
      */
-    ErrCode AddLocalLiveViewSubscriber(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    ErrCode AddLocalLiveViewSubscriber(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -56,7 +57,7 @@ public:
      * @param subscribeInfo Indicates the NotificationSubscribeInfo object.
      * @return Indicates the result code.
      */
-    ErrCode RemoveLocalLiveViewSubscriber(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    ErrCode RemoveLocalLiveViewSubscriber(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     /**
@@ -85,14 +86,14 @@ private:
 
     std::shared_ptr<LocalLiveViewSubscriberRecord> FindSubscriberRecord(const wptr<IRemoteObject> &object);
     std::shared_ptr<LocalLiveViewSubscriberRecord> FindSubscriberRecord(
-        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber);
+        const sptr<IAnsSubscriberLocalLiveView> &subscriber);
     std::shared_ptr<LocalLiveViewSubscriberRecord> CreateSubscriberRecord(
-        const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+        const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationBundleOption> &bundleOption);
     
-    ErrCode AddSubscriberInner(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    ErrCode AddSubscriberInner(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationBundleOption> &bundleOption);
-    ErrCode RemoveSubscriberInner(const sptr<AnsSubscriberLocalLiveViewInterface> &subscriber,
+    ErrCode RemoveSubscriberInner(const sptr<IAnsSubscriberLocalLiveView> &subscriber,
         const sptr<NotificationSubscribeInfo> &subscribeInfo);
 
     void NotifyTriggerResponseInner(const sptr<Notification> &notification,
@@ -103,7 +104,7 @@ private:
     std::list<std::shared_ptr<LocalLiveViewSubscriberRecord>> buttonRecordList_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ {};
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ {};
-    sptr<AnsSubscriberLocalLiveViewInterface> ansSubscriberProxy_ {};
+    sptr<IAnsSubscriberLocalLiveView> ansSubscriberProxy_ {};
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationButtonQueue_ = nullptr;
 

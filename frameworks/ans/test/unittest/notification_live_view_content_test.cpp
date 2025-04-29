@@ -216,15 +216,6 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallConvert_00001, Function | Smal
 {
     auto rrc = std::make_shared<NotificationLiveViewContent>();
 
-    PictureMap pictureMap;
-    std::vector<std::shared_ptr<Media::PixelMap>> pixelVec;
-    pixelVec.push_back(std::make_shared<Media::PixelMap>());
-    auto picture = std::make_pair(std::string{"picture"}, pixelVec);
-    pictureMap.insert(picture);
-    auto image = std::make_pair(std::string{"image"}, pixelVec);
-    pictureMap.insert(image);
-    rrc->SetPicture(pictureMap);
-
     auto extraInfo = std::make_shared<AAFwk::WantParams>();
     rrc->SetExtraInfo(extraInfo);
 
@@ -250,7 +241,7 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallConvert_00001, Function | Smal
     EXPECT_EQ(ptr->GetLiveViewStatus(), NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END);
     EXPECT_EQ(ptr->GetVersion(), version);
     EXPECT_NE(ptr->GetExtraInfo(), nullptr);
-    EXPECT_EQ(ptr->GetPicture().size(), 2);
+    EXPECT_EQ(ptr->GetPicture().size(), 0);
     EXPECT_EQ(ptr->GetIsOnlyLocalUpdate(), true);
     delete ptr;
 }
@@ -291,15 +282,9 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00001, Function 
 HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00002, Function | SmallTest | Level1)
 {
     PictureMap pictureMap;
-    std::vector<std::shared_ptr<Media::PixelMap>> pixelVec;
-    pixelVec.push_back(std::make_shared<Media::PixelMap>());
-    auto picture = std::make_pair(std::string{"test"}, pixelVec);
-    pictureMap.insert(picture);
 
     auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
     liveViewContent->SetPicture(pictureMap);
-    bool isEmptyMarshallingMap = liveViewContent->GetPictureMarshallingMap().empty();
-    EXPECT_EQ(isEmptyMarshallingMap, true);
 
     Parcel parcel;
     bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);
@@ -315,16 +300,9 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00002, Function 
 HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00003, Function | SmallTest | Level1)
 {
     PictureMap pictureMap;
-    std::vector<std::shared_ptr<Media::PixelMap>> pixelVec;
-    pixelVec.push_back(std::make_shared<Media::PixelMap>());
-    auto picture = std::make_pair(std::string{"test"}, pixelVec);
-    pictureMap.insert(picture);
 
     auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
     liveViewContent->SetPicture(pictureMap);
-    liveViewContent->FillPictureMarshallingMap();
-    bool isEmptyMarshallingMap = liveViewContent->GetPictureMarshallingMap().empty();
-    EXPECT_EQ(isEmptyMarshallingMap, false);
 
     Parcel parcel;
     bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);

@@ -165,11 +165,13 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
             .env = env, .asyncWork = nullptr,
     };
     if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
 
     if (ParseTriggerParameters(env, info, asynccallbackinfo, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        delete asynccallbackinfo;
         return Common::NapiGetUndefined(env);
     }
 

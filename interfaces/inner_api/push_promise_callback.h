@@ -27,6 +27,8 @@ struct PushCallBackParam {
     std::condition_variable callBackCondition;
     bool ready = false;
     int32_t result;
+    std::string event;
+    std::string eventControl;
 };
 
 class PromiseCallbackInfo {

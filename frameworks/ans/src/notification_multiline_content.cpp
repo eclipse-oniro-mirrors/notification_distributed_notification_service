@@ -58,6 +58,17 @@ std::vector<std::string> NotificationMultiLineContent::GetAllLines() const
     return allLines_;
 }
 
+void NotificationMultiLineContent::SetLineWantAgents(
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents)
+{
+    lineWantAgents_ = lineWantAgents;
+}
+
+std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> NotificationMultiLineContent::GetLineWantAgents()
+{
+    return lineWantAgents_;
+}
+
 std::string NotificationMultiLineContent::Dump()
 {
     std::string lines {};
@@ -141,6 +152,18 @@ bool NotificationMultiLineContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    std::uint8_t lineWantAgentsLength = lineWantAgents_.size();
+    if (!parcel.WriteUint8(lineWantAgentsLength)) {
+        ANS_LOGE("Failed to write lineWantAgentsLength");
+        return false;
+    }
+    for (auto it = lineWantAgents_.begin(); it != lineWantAgents_.end(); ++it) {
+        if (!parcel.WriteParcelable(it->get())) {
+            ANS_LOGE("Fail to write wantAgent of lineWantAgent.");
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -175,6 +198,16 @@ bool NotificationMultiLineContent::ReadFromParcel(Parcel &parcel)
     if (!parcel.ReadStringVector(&allLines_)) {
         ANS_LOGE("Failed to read all lines");
         return false;
+    }
+    std::uint8_t lineWantAgentsLength = 0;
+    if (!parcel.ReadUint8(lineWantAgentsLength)) {
+        ANS_LOGE("Failed to read lineWantAgentsLength");
+        return false;
+    }
+    for (std::uint8_t i = 0; i < lineWantAgentsLength; i++) {
+        auto wantAgent = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
+            parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
+        lineWantAgents_.push_back(wantAgent);
     }
 
     return true;

@@ -24,7 +24,7 @@
 #include "notification_live_view_content.h"
 #include "os_account_manager_helper.h"
 
-#include "../advanced_notification_inline.cpp"
+#include "advanced_notification_inline.cpp"
 
 namespace OHOS {
 namespace Notification {
@@ -47,16 +47,16 @@ std::shared_ptr<LivePublishProcess> LivePublishProcess::GetInstance()
 
 ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     if (!CheckLocalLiveViewAllowed(request, isUpdateByOwnerAllowed)) {
+        message.BranchId(EventBranchId::BRANCH_3).ErrorCode(ERR_ANS_NON_SYSTEM_APP)
+            .Message("CheckLocalLiveViewAllowed is false", true);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!CheckLocalLiveViewSubscribed(request, isUpdateByOwnerAllowed)) {
-        return ERR_ANS_INVALID_PARAM;
-    }
-
     if (!request->IsRemoveAllowed()) {
-        if (!CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
         }
     }
@@ -65,7 +65,9 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
         !AccessTokenHelper::IsSystemApp();
     if (isUpdateByOwnerAllowed && isHap) {
         if (request->GetTemplate() == nullptr) {
-            ANS_LOGE("Owner must has template to update.");
+            message.BranchId(EventBranchId::BRANCH_4).ErrorCode(ERR_ANS_INVALID_PARAM)
+                .Message("Owner must has template to update", true);
+            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
             return ERR_ANS_INVALID_PARAM;
         }
     }
@@ -93,17 +95,17 @@ ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequ
 }
 
 bool LivePublishProcess::CheckLocalLiveViewSubscribed(
-    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
+    const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed, int32_t uid)
 {
     if (request->GetNotificationType() == NotificationContent::Type::LOCAL_LIVE_VIEW) {
-        return GetLiveViewSubscribeState(IPCSkeleton::GetCallingUid()) || isUpdateByOwnerAllowed;
+        return GetLiveViewSubscribeState(uid) || isUpdateByOwnerAllowed;
     }
     if (request->IsCommonLiveView()) {
         std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
         liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
             request->GetContent()->GetNotificationContent());
         if (liveViewContent != nullptr && liveViewContent->GetIsOnlyLocalUpdate() &&
-            !GetLiveViewSubscribeState(IPCSkeleton::GetCallingUid())) {
+            !GetLiveViewSubscribeState(uid)) {
             ANS_LOGE("Not subscribe common live view.");
             return false;
         }
@@ -126,11 +128,9 @@ bool LivePublishProcess::CheckLocalLiveViewAllowed(
     return true;
 }
 
-void LivePublishProcess::AddLiveViewSubscriber()
+void LivePublishProcess::AddLiveViewSubscriber(int32_t uid)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
-    localLiveViewSubscribedList_.emplace(callingUid);
+    localLiveViewSubscribedList_.emplace(uid);
 }
 
 void LivePublishProcess::EraseLiveViewSubsciber(int32_t uid)
