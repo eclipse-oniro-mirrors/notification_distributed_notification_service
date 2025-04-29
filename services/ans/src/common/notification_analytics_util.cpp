@@ -431,6 +431,31 @@ void NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(const sptr<Notificat
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
 }
 
+void NotificationAnalyticsUtil::ReportPublishWithUserInput(const sptr<NotificationRequest>& request)
+{
+    ANS_LOGD("ReportPublishSuccessEvent enter");
+    if (request == nullptr || !request->HasUserInputButton()) {
+        return;
+    }
+
+    EventFwk::Want want;
+    nlohmann::json ansData;
+    if (!request->GetOwnerBundleName().empty()) {
+        ansData["ownerBundleName"] = request->GetOwnerBundleName();
+    }
+    if (!request->GetCreatorBundleName().empty()) {
+        ansData["createBundleName"] = request->GetCreatorBundleName();
+    }
+    ansData["userInput"] = true;
+    ansData["slotType"] = static_cast<int32_t>(request->GetSlotType());
+    ansData["contentType"] = static_cast<int32_t>(request->GetNotificationType());
+    std::string message = ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    want.SetParam("ansData", message);
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+
+    IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
+}
+
 void NotificationAnalyticsUtil::ReportNotificationEvent(const sptr<NotificationRequest>& request,
     EventFwk::Want want, int32_t eventCode, const std::string& reason)
 {

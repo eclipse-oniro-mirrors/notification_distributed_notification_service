@@ -184,6 +184,15 @@ bool NotificationConfigParse::IsReminderEnabled(const std::string& bundleName) c
     return appPrivileges->IsReminderEnabled();
 }
 
+bool NotificationConfigParse::IsDistributedReplyEnabled(const std::string& bundleName) const
+{
+    std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
+    if (appPrivileges == nullptr) {
+        return false;
+    }
+    return appPrivileges->IsDistributedReplyEnabled();
+}
+
 bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) const
 {
     std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
