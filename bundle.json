@@ -106,7 +106,9 @@
         "libuv",
         "json",
         "libxml2",
-        "node"
+        "node",
+        "googletest",
+        "icu"
       ],
       "third_party": [
         "libuv",

@@ -298,7 +298,6 @@ ohos_shared_library("libans") {
     "../ans:ans.para",
     "../ans:ans.para.dac",
     "../ans:external.json",
-    "//third_party/icu/icu4c:shared_icuuc",
   ]
 
   if (distributed_notification_supported) {
@@ -326,6 +325,7 @@ ohos_shared_library("libans") {
     "device_manager:devicemanagersdk",
     "ffrt:libffrt",
     "i18n:intl_util",
+    "icu:shared_icuuc",
     "image_framework:image_native",
     "init:libbegetutil",
     "kv_store:distributeddata_inner",

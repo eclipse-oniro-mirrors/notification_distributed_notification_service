@@ -47,14 +47,10 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
-  ]
-
-  public_external_deps = [
-    "benchmark:benchmark",
-    "googletest:gtest_main",
   ]
 
   subsystem_name = "${subsystem_name}"

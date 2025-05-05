@@ -38,8 +38,6 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "${component_path}/test/fuzztest/fuzz_common_base:fuzz_common_base",
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:ans_service_sources",
-    "//third_party/icu/icu4c:shared_icuuc",
-    "//third_party/libxml2:libxml2",
   ]
 
   if (is_double_framework) {
@@ -78,9 +76,11 @@ ohos_fuzztest("AdvancedNotificationServiceFuzzTest") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "i18n:intl_util",
+    "icu:shared_icuuc",
     "image_framework:image_native",
     "init:libbegetutil",
     "kv_store:distributeddata_inner",
+    "libxml2:libxml2",
     "openssl:libcrypto_shared",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
