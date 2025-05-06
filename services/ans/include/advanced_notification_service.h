@@ -1560,7 +1560,8 @@ private:
         const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
-        const bool innerLake);
+        const bool innerLake,
+        const bool easyAbroad);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
     bool GetSystemBoolParameter(const std::string &key, const bool defaultValue);
 

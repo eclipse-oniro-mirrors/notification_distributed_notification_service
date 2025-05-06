@@ -75,8 +75,9 @@ constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
-const static std::string BUNDLE_NAME_ABROAD = "com.easy.transfer.abroad";
+const static std::string BUNDLE_NAME_ABROAD = "com.easy.abroad";
 const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
+constexpr int32_t ZERO_USER_ID = 0;
 constexpr int32_t BADGE_NUM_LIMIT = 0;
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 constexpr int32_t CLEAR_SLOT_FROM_RSS = 2;
@@ -1067,7 +1068,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         ANS_LOGE("bundleOption is nullptr.");
         return ERROR_INTERNAL_ERROR;
     }
-    return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false);
+    return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false, false);
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string& bundleName, int32_t uid)
@@ -1082,24 +1083,28 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, 1, bundleInfo, 0);
+    bool ret = BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        bundleInfo, ZERO_USER_ID);
+    bool easyAbroad = false;
     if (bundleInfo.applicationInfo.installSource == INSTALL_SOURCE_EASYABROAD) {
         ANS_LOGI("RequestEnableNotification abroad app");
-        return ERR_ANS_NOT_ALLOWED;
+        easyAbroad = true;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption is nullptr.");
         return ERROR_INTERNAL_ERROR;
     }
-    return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true);
+    return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true, easyAbroad);
 }
 
 ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::string &deviceId,
     const sptr<IAnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken,
     const sptr<NotificationBundleOption> bundleOption,
-    const bool innerLake)
+    const bool innerLake,
+    const bool easyAbroad)
 {
     ANS_LOGI("%{public}s", __FUNCTION__);
     ErrCode result = ERR_OK;
@@ -1152,7 +1157,8 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         return ERROR_INTERNAL_ERROR;
     }
 
-    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken, innerLake);
+    result = dialogManager_->RequestEnableNotificationDailog(bundleOption,
+        callback, callerToken, innerLake, easyAbroad);
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }

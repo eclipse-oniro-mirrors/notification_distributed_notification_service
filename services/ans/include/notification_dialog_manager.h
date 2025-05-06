@@ -85,7 +85,8 @@ public:
         const sptr<NotificationBundleOption>& bundle,
         const sptr<IAnsDialogCallback>& callback,
         const sptr<IRemoteObject>& callerToken,
-        const bool innerLake
+        const bool innerLake,
+        const bool easyAbroad
     );
 
     /*

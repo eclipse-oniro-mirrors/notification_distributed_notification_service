@@ -75,6 +75,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00300, Function | SmallTest 
         uid,
         bundleName,
         callerToken,
+        false,
         false);
     ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
@@ -101,6 +102,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00400, Function | SmallTest 
         uid,
         bundleName,
         callerToken,
+        false,
         false);
     ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
@@ -127,7 +129,8 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00500, Function | SmallTest 
         uid,
         bundleName,
         callerToken,
-        true);
+        true,
+        false);
     ASSERT_EQ(result3, ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -150,7 +153,8 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00600, Function | SmallTest 
         uid,
         bundleName,
         callerToken,
-        true);
+        true,
+        false);
     ASSERT_EQ(result, (int)ERR_OK);
 }
 }  // namespace Notification

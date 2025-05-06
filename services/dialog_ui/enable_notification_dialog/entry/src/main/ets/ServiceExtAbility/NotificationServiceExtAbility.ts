@@ -98,8 +98,9 @@ export class EnableNotificationDialog {
   subWindow: window.Window;
   initSubWindowSize: boolean;
   innerLake: boolean;
+  easyAbroad: boolean;
 
-  constructor(id: number, want: Want, stageModel: boolean, innerLake: boolean) {
+  constructor(id: number, want: Want, stageModel: boolean, innerLake: boolean, easyAbroad: boolean) {
     this.id = id;
     this.want = want;
     this.stageModel = stageModel;
@@ -107,6 +108,7 @@ export class EnableNotificationDialog {
     this.extensionWindow = undefined;
     this.initSubWindowSize = false;
     this.innerLake = innerLake;
+    this.easyAbroad = easyAbroad;
   }
 
 
@@ -298,6 +300,7 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       let bundleName = want.parameters['ohos.aafwk.param.callerBundleName'];
       let bundleUid = want.parameters['ohos.aafwk.param.callerUid'];
       let innerLake = false;
+      let easyAbroad = false;
       if (bundleName !== EnableNotificationDialog.SCENEBOARD_BUNDLE &&
         bundleName !== EnableNotificationDialog.SYSTEMUI_BUNDLE) {
         want.parameters.bundleName = bundleName;
@@ -307,11 +310,12 @@ class NotificationDialogServiceExtensionAbility extends UIExtensionAbility {
       } else {
         stageModel = false;
         innerLake = Boolean(want.parameters.innerLake);
-        console.log(TAG, ` un stage model innerLake = , ${innerLake}`);
+        easyAbroad = Boolean(want.parameters.easyAbroad);
+        console.log(TAG, ` un stage model innerLake = ${innerLake},  easyAbroad = ${easyAbroad}`);
       }
       console.log(TAG, `UIExtAbility onSessionCreate bundleName ${want.parameters.bundleName}` +
         `uid ${want.parameters.bundleUid}`);    
-      let dialog = new EnableNotificationDialog(1, want, stageModel, innerLake);
+        let dialog = new EnableNotificationDialog(1, want, stageModel, innerLake, easyAbroad);
       await dialog.createUiExtensionWindow(session, stageModel);
       AppStorage.setOrCreate('dialog', dialog);
     } catch (err) {
