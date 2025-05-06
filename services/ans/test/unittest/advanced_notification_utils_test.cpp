@@ -1084,5 +1084,17 @@ HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0001, Function | SmallTest | Le
         NotificationContent::Type::LIVE_VIEW, recordList);
     ASSERT_EQ(recordList.size(), 1);
 }
+
+/**
+ * @tc.name: GetSystemBoolParameter_0001
+ * @tc.desc: Test GetSystemBoolParameter_0001
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetSystemBoolParameter_0001, Function | SmallTest | Level1)
+{
+    bool result = advancedNotificationService_->GetSystemBoolParameter("const.dfx.enable_retail", false);
+    ASSERT_EQ(result, false);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -80,6 +80,7 @@ const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
 constexpr int32_t BADGE_NUM_LIMIT = 0;
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 constexpr int32_t CLEAR_SLOT_FROM_RSS = 2;
+constexpr const char *SAMPLE_MEACHINE =  "const.dfx.enable_retail";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1140,6 +1141,9 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
+    if (GetSystemBoolParameter(SAMPLE_MEACHINE, false)) {
+        return ERR_ANS_NOT_ALLOWED;
+    }
 
     if (!CreateDialogManager()) {
         ANS_LOGE("Create dialog manager failed.");
@@ -1363,7 +1367,10 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
-
+    if (GetSystemBoolParameter(SAMPLE_MEACHINE, false)) {
+        return ERR_ANS_NOT_ALLOWED;
+    }
+    
     if (!CreateDialogManager()) {
         ANS_LOGE("Create dialog manager failed.");
         message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Create dialog failed");

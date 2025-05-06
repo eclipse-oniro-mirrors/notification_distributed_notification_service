@@ -1562,6 +1562,7 @@ private:
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
+    bool GetSystemBoolParameter(const std::string &key, const bool defaultValue);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

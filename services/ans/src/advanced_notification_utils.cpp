@@ -52,6 +52,7 @@
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
 #include "advanced_notification_flow_control_service.h"
+#include "parameters.h"
 
 #define CHECK_BUNDLE_OPTION_IS_INVALID(option)                              \
     if (option == nullptr || option->GetBundleName().empty()) {             \
@@ -2219,6 +2220,13 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             }
         }
     }));
+}
+
+bool AdvancedNotificationService::GetSystemBoolParameter(const std::string &key, const bool defaultValue)
+{
+    bool result = OHOS::system::GetBoolParameter(key, defaultValue);
+    ANS_LOGI("GetBoolParameter key = %{public}s result = %{public}d",  key.c_str(), result);
+    return result;
 }
 }  // namespace Notification
 }  // namespace OHOS
