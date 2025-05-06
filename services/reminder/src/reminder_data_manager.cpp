@@ -16,6 +16,7 @@
 #include "reminder_data_manager.h"
 
 #include "ability_manager_client.h"
+#include "ans_convert_enum.h"
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
@@ -888,6 +889,8 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     int32_t uid = reminder->GetUid();
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
     NotificationRequest notificationRequest(reminder->GetNotificationId());
+    notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
+        NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
     reminder->UpdateNotificationRequest(notificationRequest, false);
     IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(
         ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
@@ -1098,6 +1101,11 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     reminder->UpdateNotificationRequest(notificationRequest, false);
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
+    }
+    if (toPlaySound) {
+        // close notification default sound.
+        notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
+            NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
     }
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL,
         notificationRequest));
