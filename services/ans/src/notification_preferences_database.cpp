@@ -312,13 +312,17 @@ bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
 bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_0);
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return false;
     }
 
+    message.Message(bundleInfo.GetBundleName() + "_" +std::to_string(bundleInfo.GetBundleUid()));
     if (!CheckRdbStore()) {
         ANS_LOGE("RdbStore is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_1));
         return false;
     }
     std::string values;
@@ -360,8 +364,11 @@ bool NotificationPreferencesDatabase::IsNotificationSlotFlagsExists(const sptr<N
 bool NotificationPreferencesDatabase::PutShowBadge(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enable)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_2);
+    message.Message("en:" + std::to_string(enable));
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return false;
     }
     ANS_LOGI("bundelName:%{public}s, uid:%{public}d, showBadge[%{public}d]",
@@ -380,8 +387,12 @@ bool NotificationPreferencesDatabase::PutShowBadge(
 bool NotificationPreferencesDatabase::PutImportance(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &importance)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_3);
+    message.Message("im:" + std::to_string(importance));
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is empty.");
+        message.Message("Bundle name is null");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return false;
     }
     ANS_LOGI("bundelName:%{public}s, uid:%{public}d, importance[%{public}d]",
@@ -400,8 +411,10 @@ bool NotificationPreferencesDatabase::PutImportance(
 bool NotificationPreferencesDatabase::PutTotalBadgeNums(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &totalBadgeNum)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_4);
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is blank.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return false;
     }
     ANS_LOGI("bundelName:%{public}s, uid:%{public}d, totalBadgeNum[%{public}d]",
@@ -419,8 +432,10 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_5);
     if (bundleInfo.GetBundleName().empty()) {
         ANS_LOGE("Bundle name is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return false;
     }
 

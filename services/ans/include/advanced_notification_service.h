@@ -1456,7 +1456,6 @@ private:
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
-    static int32_t GetNotificationRequestFromDb(const std::string &key, NotificationRequestDb &requestDb);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
         int32_t userId = -1);
     static int32_t DoubleDeleteNotificationFromDb(const std::string &key,
@@ -1562,6 +1561,7 @@ private:
         const sptr<NotificationBundleOption> bundleOption,
         const bool innerLake);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
+    ErrCode RegisterPushCallbackTokenCheck();
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

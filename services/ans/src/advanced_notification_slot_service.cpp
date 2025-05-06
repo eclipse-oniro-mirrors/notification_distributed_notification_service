@@ -348,6 +348,8 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d", slotType);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_15, EventBranchId::BRANCH_0);
+    message.Message("st:" + std::to_string(slotType) + "en:" + std::to_string(enabled));
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -375,7 +377,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
         enabled = slot->GetEnable();
     }));
     notificationSvrQueue_->wait(handler);
-
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
 }
 

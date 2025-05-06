@@ -158,26 +158,12 @@ HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00001, Function | Sm
 }
 
 /**
- * @tc.name: GetNotificationRequestFromDb_00001
- * @tc.desc: Test GetNotificationRequestFromDb
+ * @tc.name: SetNotificationRequestToDb_00002
+ * @tc.desc: Test SetNotificationRequestToDb
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00001, Function | SmallTest | Level1)
-{
-    AdvancedNotificationService::NotificationRequestDb requestsdb;
-    std::string key = "ans_live_view_001";
-    auto ret = advancedNotificationService_->GetNotificationRequestFromDb(key, requestsdb);
-    EXPECT_NE(ret, (int)ERR_OK);
-}
-
-/**
- * @tc.name: GetNotificationRequestFromDb_00002
- * @tc.desc: Test GetNotificationRequestFromDb
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsLiveViewServiceTest, GetNotificationRequestFromDb_00002, Function | SmallTest | Level1)
+HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00002, Function | SmallTest | Level1)
 {
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
