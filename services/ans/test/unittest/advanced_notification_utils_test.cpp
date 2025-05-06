@@ -450,5 +450,17 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     cloneBundleInfo.SetSlotFlags(63);
     advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
 }
+
+/**
+ * @tc.name: GetSystemBoolParameter_0001
+ * @tc.desc: Test GetSystemBoolParameter_0001
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetSystemBoolParameter_0001, Function | SmallTest | Level1)
+{
+    bool result = advancedNotificationService_->GetSystemBoolParameter("const.dfx.enable_retail", false);
+    ASSERT_EQ(result, false);
+}
 }  // namespace Notification
 }  // namespace OHOS
