@@ -1559,9 +1559,11 @@ private:
         const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken,
         const sptr<NotificationBundleOption> bundleOption,
-        const bool innerLake);
+        const bool innerLake,
+        const bool easyAbroad);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
     ErrCode RegisterPushCallbackTokenCheck();
+    bool GetSystemBoolParameter(const std::string &key, const bool defaultValue);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

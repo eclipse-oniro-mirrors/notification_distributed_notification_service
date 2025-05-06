@@ -45,7 +45,8 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     int32_t uid,
     std::string appBundleName,
     const sptr<IRemoteObject> &callerToken,
-    const bool innerLake)
+    const bool innerLake,
+    const bool easyAbroad)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
 
@@ -78,6 +79,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     root["bundleUid"] = uid;
     root["ability.want.params.uiExtensionType"] = uiExtensionType;
     root["innerLake"] = innerLake;
+    root["easyAbroad"] = easyAbroad;
     std::string command  = root.dump();
     
     auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
