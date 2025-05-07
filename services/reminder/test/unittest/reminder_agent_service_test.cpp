@@ -423,18 +423,4 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_015, Function | Smal
     MockAccesstokenKit::MockIsSystemApp(true);
     EXPECT_EQ(reminderAgentService_->IsSystemApp(), true);
 }
-
-/**
- * @tc.name: ReminderAgentServiceTest_016
- * @tc.desc: Test GetClientBundleName function
- * @tc.type: FUNC
- * @tc.require: issueI5S4VP
- */
-HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_016, Function | SmallTest | Level1)
-{
-    MockReminderBundleManagerHelper::MockGetBundleNameByUid("test");
-    EXPECT_EQ(reminderAgentService_->GetClientBundleName(1), "test");
-    MockReminderBundleManagerHelper::MockGetBundleNameByUid("");
-    EXPECT_EQ(reminderAgentService_->GetClientBundleName(1), "");
-}
 }  // namespace OHOS::Notification

@@ -26,7 +26,6 @@
 #include "ipc_skeleton.h"
 #include "notification_slot.h"
 #include "os_account_manager.h"
-#include "reminder_os_account_manager_helper.h"
 #include "reminder_event_manager.h"
 #include "time_service_client.h"
 #include "singleton.h"
@@ -919,7 +918,7 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
     }
     int32_t reminderId = reminder->GetReminderId();
     int32_t userId = -1;
-    ReminderOsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(reminder->GetUid(), userId);
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(reminder->GetUid(), userId);
     if (currentUserId_ != userId) {
         ANSR_LOGD("The reminder (reminderId=%{public}d) is silent for not in active user, " \
             "current user id: %{private}d, reminder user id: %{private}d", reminderId, currentUserId_, userId);
@@ -1469,7 +1468,7 @@ void ReminderDataManager::CheckReminderTime(std::vector<sptr<ReminderRequest>>& 
 void ReminderDataManager::InitUserId()
 {
     currentUserId_ = MAIN_USER_ID;
-    ReminderOsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId_);
+    AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(currentUserId_);
 }
 
 bool ReminderDataManager::RegisterConfigurationObserver()
@@ -1528,7 +1527,7 @@ bool ReminderDataManager::CheckIsSameApp(const sptr<ReminderRequest> &reminder,
     std::string bundleName = reminder->GetCreatorBundleName();
     int32_t uid = reminder->GetCreatorUid();
     if (uid == -1) {
-        uid = ReminderBundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, reminder->GetUserId());
+        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, reminder->GetUserId());
     }
     return uid == callingUid;
 }
@@ -1538,9 +1537,9 @@ bool ReminderDataManager::IsBelongToSameApp(const int32_t uidSrc,
 {
     bool result = uidSrc == uidTar;
     int32_t userIdSrc = -1;
-    ReminderOsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uidSrc, userIdSrc);
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uidSrc, userIdSrc);
     int32_t userIdTar = -1;
-    ReminderOsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uidTar, userIdTar);
+    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uidTar, userIdTar);
     result = result && (userIdSrc == userIdTar);
     return result;
 }
@@ -1949,7 +1948,7 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     abilityWant.SetElement(element);
     abilityWant.SetUri(wantInfo->uri);
     abilityWant.SetParams(wantInfo->parameters);
-    int32_t appIndex = ReminderBundleManagerHelper::GetInstance()->GetAppIndexByUid(reminder->GetUid());
+    int32_t appIndex = ReminderBundleManagerHelper::GetInstance().GetAppIndexByUid(reminder->GetUid());
     abilityWant.SetParam("ohos.extra.param.key.appCloneIndex", appIndex);
 
     auto client = AppExecFwk::AbilityManagerClient::GetInstance();
@@ -1968,7 +1967,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ReminderDataManager::GetResou
     const int32_t uid)
 {
     AppExecFwk::BundleInfo bundleInfo;
-    if (!ReminderBundleManagerHelper::GetInstance()->GetBundleInfo(bundleName,
+    if (!ReminderBundleManagerHelper::GetInstance().GetBundleInfo(bundleName,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, uid, bundleInfo)) {
         ANSR_LOGE("GetBundleInfo[%{public}s][%{public}d] fail.", bundleName.c_str(), uid);
         return nullptr;

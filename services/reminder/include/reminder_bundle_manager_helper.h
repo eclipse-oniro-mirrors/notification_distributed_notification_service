@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,28 +16,26 @@
 #ifndef NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_BUNDLE_MANAGER_HELPER_H
 #define NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_BUNDLE_MANAGER_HELPER_H
 
-#include <memory>
 #include <mutex>
 #include <string>
 
-#include "bundle_mgr_interface.h"
-#include "ipc_skeleton.h"
-#include "iremote_object.h"
-#include "refbase.h"
-#include "remote_death_recipient.h"
 #include "singleton.h"
+#include "bundle_mgr_interface.h"
+#include "remote_death_recipient.h"
 
-namespace OHOS {
-namespace Notification {
-class ReminderBundleManagerHelper : public DelayedSingleton<ReminderBundleManagerHelper> {
+namespace OHOS::Notification {
+class ReminderBundleManagerHelper : public DelayedRefSingleton<ReminderBundleManagerHelper> {
 public:
+    ReminderBundleManagerHelper();
+    ~ReminderBundleManagerHelper();
+
     /**
      * @brief Obtains the bundle name base on the specified uid.
      *
      * @param uid Indicates the specified uid.
      * @return Returns the bundle name.
      */
-    std::string GetBundleNameByUid(int32_t uid);
+    std::string GetBundleNameByUid(const int32_t uid);
 
     /**
      * @brief Obtains the default uid.
@@ -46,22 +44,23 @@ public:
      * @param userId Indicates the user id.
      * @return Returns the uid.
      */
-    int32_t GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId);
+    int32_t GetDefaultUidByBundleName(const std::string& bundle, const int32_t userId);
 
     /**
      * @brief Obtains bundle info by bundle name.
      *
      * @param bundleName Indicates the bundle name.
      * @param flag Indicates the bundle flag.
-     * @param bundleInfo Indicates the bundle info.
      * @param userId Indicates the user id.
+     * @param bundleInfo Indicates the bundle info.
      * @return Returns the check result.
      */
-    bool GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
-        int32_t userId, AppExecFwk::BundleInfo &bundleInfo);
+    bool GetBundleInfo(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
+        const int32_t userId, AppExecFwk::BundleInfo& bundleInfo);
 
     /**
      * @brief Obtains the app index by uid.
+     *
      * @param uid Indicates uid.
      * @return Returns the query result if succeed, retrun 0(main index) otherwise.
      */
@@ -70,16 +69,12 @@ public:
 private:
     void Connect();
     void Disconnect();
-
-    void OnRemoteDied(const wptr<IRemoteObject> &object);
+    void OnRemoteDied(const wptr<IRemoteObject>& object);
 
 private:
-    sptr<AppExecFwk::IBundleMgr> bundleMgr_ = nullptr;
-    std::mutex connectionMutex_;
-    sptr<RemoteDeathRecipient> deathRecipient_ = nullptr;
-
-    DECLARE_DELAYED_SINGLETON(ReminderBundleManagerHelper)
+    std::mutex mutex_;  // for bundleMgr_
+    sptr<AppExecFwk::IBundleMgr> bundleMgr_ {nullptr};
+    sptr<RemoteDeathRecipient> deathRecipient_ {nullptr};
 };
-}  // namespace Notification
-}  // namespace OHOS
+}  // namespace OHOS::Notification
 #endif  // NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_BUNDLE_MANAGER_HELPER_H

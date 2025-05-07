@@ -51,7 +51,6 @@ ohos_source_set("reminder_service_sources") {
   defines = []
 
   sources = [
-    "src/reminder_access_token_helper.cpp",
     "src/reminder_agent_service.cpp",
     "src/reminder_agent_service_ability.cpp",
     "src/reminder_bundle_manager_helper.cpp",
@@ -60,7 +59,6 @@ ohos_source_set("reminder_service_sources") {
     "src/reminder_data_manager_inner.cpp",
     "src/reminder_datashare_helper.cpp",
     "src/reminder_event_manager.cpp",
-    "src/reminder_os_account_manager_helper.cpp",
     "src/reminder_store.cpp",
     "src/reminder_store_strategy.cpp",
     "src/reminder_table.cpp",

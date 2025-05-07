@@ -181,12 +181,12 @@ void ReminderDataShareHelper::StartDataExtension(const int32_t reason)
 
 void ReminderDataShareHelper::UpdateCalendarUid()
 {
-    uid_ = ReminderBundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(ReminderCalendarShareTable::NAME,
+    uid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(ReminderCalendarShareTable::NAME,
         curUserId_);
-    dataUid_ = ReminderBundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(
+    dataUid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(
         ReminderCalendarShareTable::DATA_NAME, curUserId_);
     AppExecFwk::BundleInfo bundleInfo;
-    if (!ReminderBundleManagerHelper::GetInstance()->GetBundleInfo(ReminderCalendarShareTable::DATA_NAME,
+    if (!ReminderBundleManagerHelper::GetInstance().GetBundleInfo(ReminderCalendarShareTable::DATA_NAME,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, dataUid_, bundleInfo)) {
         ANSR_LOGE("GetBundleInfo failed.");
         return;

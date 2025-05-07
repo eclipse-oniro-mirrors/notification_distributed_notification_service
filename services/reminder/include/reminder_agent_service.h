@@ -126,11 +126,6 @@ private:
      */
     bool IsSystemApp();
 
-    /**
-     * @brief Get client bundle name.
-     */
-    std::string GetClientBundleName(const int32_t callingUid);
-
 private:
     std::mutex unloadMutex_;  // for tryUnloadTask_
     ffrt::task_handle tryUnloadTask_ {nullptr};

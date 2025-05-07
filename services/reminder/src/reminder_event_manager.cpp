@@ -242,7 +242,7 @@ int32_t ReminderEventManager::ReminderEventSubscriber::GetUid(
     OHOS::AppExecFwk::ElementName ele = want.GetElement();
     std::string bundleName = ele.GetBundleName();
     int32_t userId = want.GetIntParam(OHOS::AppExecFwk::Constants::USER_ID, -1);
-    int32_t uid = ReminderBundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
+    int32_t uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, userId);
     ANSR_LOGD("bundleName=%{public}s, userId=%{private}d, uid=%{public}d", bundleName.c_str(), userId, uid);
     return uid;
 }

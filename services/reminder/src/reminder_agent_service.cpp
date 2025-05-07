@@ -74,7 +74,7 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
         return ERR_REMINDER_PERMISSION_DENIED;
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    std::string bundleName = GetClientBundleName(callingUid);
+    std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
     bool isAllowUseReminder = false;
     NotificationHelper::AllowUseReminder(bundleName, isAllowUseReminder);
     if (!isAllowUseReminder) {
@@ -135,7 +135,7 @@ ErrCode ReminderAgentService::CancelAllReminders()
         return ERR_NO_INIT;
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    std::string bundleName = GetClientBundleName(callingUid);
+    std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
     int32_t userId = -1;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     ErrCode ret = rdm->CancelAllReminders(bundleName, userId, callingUid);
@@ -236,7 +236,7 @@ void ReminderAgentService::TryUnloadService()
         tryUnloadTask_ = nullptr;
         return;
     }
-    ANSR_LOGD("do unload task");
+    ANSR_LOGD("call.");
     ChangeReminderAgentLoadConfig(REMINDER_AGENT_SERVICE_UNLOAD_STATE);
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
@@ -308,19 +308,14 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
         ANSR_LOGE("Failed to get active user id.");
         return ERR_REMINDER_INVALID_PARAM;
     }
-    std::shared_ptr<ReminderBundleManagerHelper> bundleMgr = ReminderBundleManagerHelper::GetInstance();
-    if (nullptr == bundleMgr) {
-        ANSR_LOGE("Failed to bundle manager.");
-        return ERR_REMINDER_INVALID_PARAM;
-    }
     std::string bundleName = bundle;
     int32_t uid = callingUid;
     if (wantAgentName != bundle && wantAgentName != "") {
         bundleName = wantAgentName;
-        uid = bundleMgr->GetDefaultUidByBundleName(bundleName, activeUserId);
+        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, activeUserId);
     } else if (maxWantAgentName != bundle && maxWantAgentName != "") {
         bundleName = maxWantAgentName;
-        uid = bundleMgr->GetDefaultUidByBundleName(bundleName, activeUserId);
+        uid = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(bundleName, activeUserId);
     }
     // Only system applications can proxy other applications to send notifications
     bool isSystemApp = IsSystemApp();
@@ -354,15 +349,5 @@ bool ReminderAgentService::IsSystemApp()
     }
     uint64_t fullTokenId = IPCSkeleton::GetCallingFullTokenID();
     return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
-}
-
-std::string ReminderAgentService::GetClientBundleName(const int32_t callingUid)
-{
-    std::string bundleName;
-    std::shared_ptr<ReminderBundleManagerHelper> bundleMgr = ReminderBundleManagerHelper::GetInstance();
-    if (bundleMgr != nullptr) {
-        bundleName = bundleMgr->GetBundleNameByUid(callingUid);
-    }
-    return bundleName;
 }
 }  // namespace OHOS::Notification
