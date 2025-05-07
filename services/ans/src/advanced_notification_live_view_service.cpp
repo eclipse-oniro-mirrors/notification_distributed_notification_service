@@ -286,38 +286,6 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     return result;
 }
 
-int32_t AdvancedNotificationService::GetNotificationRequestFromDb(
-    const std::string &key, NotificationRequestDb &requestDb)
-{
-    std::string value;
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
-    int32_t result = NotificationPreferences::GetInstance()->GetKvFromDb(key, value, userId);
-    if (result != ERR_OK) {
-        ANS_LOGE("Get notification request failed, key %{public}s.", key.c_str());
-        return result;
-    }
-    auto jsonObject = nlohmann::json::parse(value);
-    auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
-    if (request == nullptr) {
-        ANS_LOGE("Parse json string to request failed, str: %{public}s.", value.c_str());
-        return ERR_ANS_TASK_ERR;
-    }
-    auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
-    if (bundleOption == nullptr) {
-        delete request;
-        ANS_LOGE("Parse json string to bundle option failed, str: %{public}s.", value.c_str());
-        return ERR_ANS_TASK_ERR;
-    }
-
-    if (GetLockScreenPictureFromDb(request) != ERR_OK) {
-        ANS_LOGE("Get request lock screen picture failed, key %{public}s.", key.c_str());
-    }
-    requestDb.request = request;
-    requestDb.bundleOption = bundleOption;
-    return ERR_OK;
-}
-
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
     std::vector<NotificationRequestDb> &requests, int32_t userId)
 {
@@ -483,10 +451,17 @@ ErrCode AdvancedNotificationService::SetLockScreenPictureToDb(const sptr<Notific
 
 ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequest *request)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_12, EventBranchId::BRANCH_0);
+    if (request == nullptr) {
+        ANS_LOGE("Request is nullptr");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM));
+        return ERR_ANS_INVALID_PARAM;
+    }
     std::string key = LOCK_SCREEN_PICTURE_TAG + request->GetKey();
     std::vector<uint8_t> pixelsVec;
     uint32_t res = NotificationPreferences::GetInstance()->GetByteFromDb(key, pixelsVec, request->GetReceiverUserId());
     if (res != ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(res).BranchId(BRANCH_1));
         ANS_LOGE("Failed to get lock screen picture from db, res is %{public}d.", res);
         return res;
     }
@@ -495,6 +470,7 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
     auto imageSource = Media::ImageSource::CreateImageSource((const uint8_t *)pixelsVec.data(), pixelsVec.size(),
         sourceOptions, res);
     if (res != ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(res).BranchId(BRANCH_2));
         ANS_LOGE("Failed to create image source, res is %{public}d.", res);
         return res;
     }
@@ -502,6 +478,7 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
     Media::DecodeOptions decodeOpts;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, res);
     if (res != ERR_OK) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(res).BranchId(BRANCH_3));
         ANS_LOGE("Failed to create pixel map, res is %{public}d.", res);
         return res;
     }
@@ -571,6 +548,7 @@ uint64_t AdvancedNotificationService::StartDelayPublishTimer(
 {
     ANS_LOGD("Enter");
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_12, EventBranchId::BRANCH_4);
     wptr<AdvancedNotificationService> wThis = this;
     auto timeoutFunc = [wThis, ownerUid, notificationId] {
         sptr<AdvancedNotificationService> sThis = wThis.promote();
@@ -584,6 +562,7 @@ uint64_t AdvancedNotificationService::StartDelayPublishTimer(
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
         ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(NotificationConstant::INVALID_TIMER_ID));
         return NotificationConstant::INVALID_TIMER_ID;
     }
 

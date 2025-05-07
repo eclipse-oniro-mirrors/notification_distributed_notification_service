@@ -122,12 +122,15 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_0);
     std::string bundle = GetClientBundleName();
     if (bundle.empty()) {
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
         return ERR_ANS_INVALID_BUNDLE;
     }
     if (request == nullptr) {
-        ANSR_LOGE("NotificationRequest object is nullptr");
+        ANS_LOGE("NotificationRequest object is nullptr");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE).BranchId(BRANCH_1));
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -150,11 +153,15 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
                 request->GetOwnerUserId());
             }
             if (uid < 0) {
+                message.ErrorCode(ERR_ANS_INVALID_UID).BranchId(BRANCH_2);
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
                 return ERR_ANS_INVALID_UID;
             }
         } else {
             int32_t userId = SUBSCRIBE_USER_INIT;
             if (request->GetOwnerUid() < DEFAULT_UID) {
+                message.ErrorCode(ERR_ANS_GET_ACTIVE_USER_FAILED).BranchId(BRANCH_3);
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
                 return ERR_ANS_GET_ACTIVE_USER_FAILED;
             }
             if (request->GetOwnerUid() == DEFAULT_UID) {
@@ -171,6 +178,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             bundle = GetClientBundleName();
             if (bundle.empty()) {
                 ANS_LOGE("Failed to GetClientBundleName");
+                message.ErrorCode(ERR_ANS_INVALID_BUNDLE).BranchId(BRANCH_4);
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
                 return ERR_ANS_INVALID_BUNDLE;
             }
         }
@@ -191,6 +200,8 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
             ANS_LOGD("There is agent relationship between %{public}s and %{public}s",
                 bundle.c_str(), sourceBundleName.c_str());
             if (request->GetBundleOption()->GetUid() < DEFAULT_UID) {
+                message.ErrorCode(ERR_ANS_INVALID_UID).BranchId(BRANCH_5);
+                NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
                 return ERR_ANS_INVALID_UID;
             }
             int32_t uid = -1;
@@ -604,8 +615,10 @@ ErrCode AdvancedNotificationService::StartAutoDeletedTimer(const std::shared_ptr
 ErrCode AdvancedNotificationService::FillNotificationRecord(
     const NotificationRequestDb &requestdbObj, std::shared_ptr<NotificationRecord> record)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_6);
     if (requestdbObj.request == nullptr || requestdbObj.bundleOption == nullptr || record == nullptr) {
         ANS_LOGE("Invalid param.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_PARAM));
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -819,8 +832,10 @@ void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &u
 void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_7);
     if (record == nullptr || record->notification == nullptr || record->bundleOption == nullptr) {
         ANS_LOGE("Make notification record failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return;
     }
     int32_t userId = record->notification->GetRecvUserId();
@@ -855,10 +870,14 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoll(profileId.c_str()), userId, profile) !=
         ERR_OK) {
         ANS_LOGE("profile failed. pid: %{public}s, userid: %{public}d", profileId.c_str(), userId);
+        //ceshi
+        message.Message("profileid:" + profileId + ",userid:" + std::to_string(userId));
+        NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_8));
         return;
     }
     if (profile == nullptr) {
         ANS_LOGE("The do not disturb profile is nullptr.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_9));
         return;
     }
     auto uid = record->bundleOption->GetUid();
@@ -877,13 +896,16 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
 void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record)
 {
     ANS_LOGD("Called.");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_10);
     if (record == nullptr || record->request == nullptr || record->notification == nullptr) {
         ANS_LOGE("Make notification record failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return;
     }
     auto flags = record->request->GetFlags();
     if (flags == nullptr) {
         ANS_LOGE("The flags is nullptr.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message.BranchId(BRANCH_11));
         return;
     }
     flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
@@ -954,8 +976,8 @@ bool AdvancedNotificationService::IsNotificationExists(const std::string &key)
 
 ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_12);
     ErrCode result = ERR_OK;
-
     if (!isRecover) {
         auto oldRecord = GetFromNotificationList(record->notification->GetKey());
         result = record->request->CheckNotificationRequest((oldRecord == nullptr) ? nullptr : oldRecord->request);
@@ -963,8 +985,7 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
             bool liveView = record->request->IsCommonLiveView();
             int32_t slotType = liveView ? NotificationConstant::SlotType::LIVE_VIEW :
                 NotificationConstant::SlotType::ILLEGAL_TYPE;
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_5)
-                .ErrorCode(result).SlotType(slotType).Message("CheckNotificationRequest failed: ");
+            message.ErrorCode(result).SlotType(slotType);
             NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
             ANS_LOGE("Notification(key %{public}s) isn't ready on publish failed with %{public}d.",
                 record->notification->GetKey().c_str(), result);
@@ -974,6 +995,8 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
 
     if (permissonFilter_ == nullptr || notificationSlotFilter_ == nullptr) {
         ANS_LOGE("Filter is invalid.");
+        message.ErrorCode(ERR_ANS_INVALID_PARAM).BranchId(BRANCH_13);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -996,8 +1019,11 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
     const bool isAgentController)
 {
     ANS_LOGD("Called.");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_14).
+    Message("iAC:" + std::to_string(isAgentController));
     if (record == nullptr || record->request == nullptr || record->notification == nullptr) {
         ANS_LOGE("Make notification record failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return;
     }
     uint32_t notificationControlFlags = record->request->GetNotificationControlFlags();
@@ -1013,6 +1039,7 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
     auto flags = record->request->GetFlags();
     if (flags == nullptr) {
         ANS_LOGE("The flags is nullptr.");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message.BranchId(BRANCH_15));
         return;
     }
 
@@ -1943,8 +1970,12 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDate(int32_t userId,
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_16);
+    message.Message("userId:" + std::to_string(userId));
     if (userId <= SUBSCRIBE_USER_INIT) {
         ANS_LOGE("Input userId is invalidity.");
+        message.ErrorCode(ERR_ANS_INVALID_PARAM);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -2079,8 +2110,7 @@ void AdvancedNotificationService::ResetPushCallbackProxy()
     pushCallBacks_.clear();
 }
 
-ErrCode AdvancedNotificationService::RegisterPushCallback(
-    const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
+ErrCode AdvancedNotificationService::RegisterPushCallbackTokenCheck()
 {
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
@@ -2097,14 +2127,26 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         ANS_LOGW("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
         return ERR_ANS_PERMISSION_DENIED;
     }
+    return ERR_OK;
+}
 
+ErrCode AdvancedNotificationService::RegisterPushCallback(
+    const sptr<IRemoteObject> &pushCallback, const sptr<NotificationCheckRequest> &notificationCheckRequest)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_17);
+    ErrCode result = RegisterPushCallbackTokenCheck();
+    if (result != ERR_OK) {
+        return result;
+    }
     if (pushCallback == nullptr) {
         ANS_LOGW("pushCallback is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_INVALID_VALUE));
         return ERR_INVALID_VALUE;
     }
 
     if (notificationCheckRequest == nullptr) {
         ANS_LOGW("notificationCheckRequest is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_INVALID_VALUE).BranchId(BRANCH_18));
         return ERR_INVALID_VALUE;
     }
 
@@ -2121,6 +2163,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
 
     if (pushCallBacks_.find(slotType) != pushCallBacks_.end()) {
         if (checkRequests_[slotType]->GetUid() != uid) {
+            NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERROR_INTERNAL_ERROR).BranchId(BRANCH_18));
             return ERROR_INTERNAL_ERROR;
         }
     }
@@ -2140,6 +2183,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
 
 ErrCode AdvancedNotificationService::UnregisterPushCallback()
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_13);
     if (!AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app!");
         return ERR_ANS_NON_SYSTEM_APP;
@@ -2157,6 +2201,7 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
 
     if (pushCallBacks_.empty()) {
         ANS_LOGE("The registration callback has not been processed yet.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_INVALID_OPERATION));
         return ERR_INVALID_OPERATION;
     }
 

@@ -36,9 +36,19 @@ enum EventSceneId {
     SCENE_9 = 9,
     SCENE_10 = 10,
     SCENE_11 = 11,
+    SCENE_12 = 12,
+    SCENE_13 = 13,
+    SCENE_14 = 14,
+    SCENE_15 = 15,
+    SCENE_16 = 16,
+    SCENE_17 = 17,
+    SCENE_18 = 18,
+    SCENE_19 = 19,
     SCENE_20 = 20,
     SCENE_21 = 21,
     SCENE_22 = 22,
+    SCENE_23 = 23,
+    SCENE_24 = 24,
 };
 
 enum EventBranchId {
@@ -51,6 +61,18 @@ enum EventBranchId {
     BRANCH_6 = 6,
     BRANCH_7 = 7,
     BRANCH_8 = 8,
+    BRANCH_9 = 9,
+    BRANCH_10 = 10,
+    BRANCH_11 = 11,
+    BRANCH_12 = 12,
+    BRANCH_13 = 13,
+    BRANCH_14 = 14,
+    BRANCH_15 = 15,
+    BRANCH_16 = 16,
+    BRANCH_17 = 17,
+    BRANCH_18 = 18,
+    BRANCH_19 = 19,
+    BRANCH_20 = 20,
 };
 class HaMetaMessage {
 public:

@@ -20,6 +20,7 @@
 #include "common_event_manager.h"
 #include "advanced_notification_service.h"
 #include "notification_bundle_option.h"
+#include "notification_analytics_util.h"
 
 constexpr int32_t SIGNAL_NUM = 3;
 
@@ -29,6 +30,7 @@ namespace Notification {
 void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int32_t resultCode)
 {
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_23, EventBranchId::BRANCH_0);
     ANS_LOGI("on ability connected");
     MessageParcel data;
     MessageParcel reply;
@@ -47,19 +49,23 @@ void SystemDialogConnectStb::OnAbilityConnectDone(const AppExecFwk::ElementName 
         ANS_LOGE("send Request to SytemDialog fail");
         if (commandStr_.empty() || !nlohmann::json::accept(commandStr_)) {
             ANS_LOGE("Invalid JSON");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
             return;
         }
         nlohmann::json root = nlohmann::json::parse(commandStr_);
         if (root.is_null() or !root.is_object()) {
             ANS_LOGE("Invalid JSON object");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_1));
             return;
         }
         if (!root.contains("bundleName") || !root.contains("bundleUid")) {
             ANS_LOGE("not found jsonKey from");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_2));
             return;
         }
         if (!root["bundleName"].is_string() || !root["bundleUid"].is_number_integer()) {
             ANS_LOGE("value type is not right");
+            NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_3));
             return;
         }
         std::string bundleName = root["bundleName"];
