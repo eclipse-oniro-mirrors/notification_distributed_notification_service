@@ -48,9 +48,11 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "common_event_service:cesfwk_innerkits",
     "ffrt:libffrt",
     "googletest:gtest_main",
+    "hilog:libhilog",
     "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
+    "selinux_adapter:librestorecon",
   ]
 
   subsystem_name = "${subsystem_name}"

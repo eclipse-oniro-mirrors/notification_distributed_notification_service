@@ -77,6 +77,7 @@ ohos_unittest("notification_shell_command_dump_test") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "relational_store:native_rdb",
+    "selinux_adapter:librestorecon",
   ]
 }
 

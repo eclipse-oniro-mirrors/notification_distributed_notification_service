@@ -43,7 +43,6 @@ config("ans_innerkits_public_config") {
     "${core_path}/include",
     "${target_gen_dir}",
   ]
-  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
 }
 
 config("ans_innerkits_config") {
@@ -56,7 +55,6 @@ config("ans_innerkits_config") {
     "${core_path}/include",
     "${target_gen_dir}",
   ]
-  configs = [ "${multimedia_path}/interfaces/innerkits:image_external_config" ]
 }
 
 ohos_shared_library("ans_innerkits") {
@@ -158,6 +156,7 @@ ohos_shared_library("ans_innerkits") {
     "ability_runtime:appkit_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson_static",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hicollie:libhicollie",
