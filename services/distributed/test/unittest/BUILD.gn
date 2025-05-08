@@ -79,6 +79,7 @@ ohos_unittest("ans_distributed_unit_test") {
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -86,8 +87,6 @@ ohos_unittest("ans_distributed_unit_test") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
   ]
-
-  public_external_deps = [ "googletest:gtest_main" ]
 
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -115,7 +114,6 @@ ohos_unittest("distributed_preferences_database_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -126,6 +124,7 @@ ohos_unittest("distributed_preferences_database_test") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -161,7 +160,6 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -172,6 +170,7 @@ ohos_unittest("distributed_screen_status_manager_branch_test") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -207,7 +206,6 @@ ohos_unittest("distributed_database_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -218,6 +216,7 @@ ohos_unittest("distributed_database_branch_test") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -247,7 +246,6 @@ ohos_unittest("distributed_preferences_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -258,6 +256,7 @@ ohos_unittest("distributed_preferences_branch_test") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -284,7 +283,6 @@ ohos_unittest("distributed_device_callback_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -295,6 +293,7 @@ ohos_unittest("distributed_device_callback_test") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -321,7 +320,6 @@ ohos_unittest("distributed_database_callback_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -331,6 +329,7 @@ ohos_unittest("distributed_database_callback_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -357,7 +356,6 @@ ohos_unittest("distributed_flow_control_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -367,6 +365,7 @@ ohos_unittest("distributed_flow_control_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -396,7 +395,6 @@ ohos_unittest("distributed_notification_manager_branch_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -408,6 +406,7 @@ ohos_unittest("distributed_notification_manager_branch_test") {
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
