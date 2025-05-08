@@ -42,6 +42,7 @@ constexpr uint8_t PARAM1 = 1;
 constexpr uint8_t PARAM2 = 2;
 constexpr uint8_t PARAM3 = 3;
 constexpr uint8_t PARAM4 = 4;
+constexpr float MAX_PIXEL_SIZE = 128.0f;
 
 enum class SemanticActionButton {
     NONE_ACTION_BUTTON,
@@ -1852,6 +1853,7 @@ public:
         const std::string& value);
     static napi_value SetObjectUint32Property(const napi_env &env, napi_value& object, const std::string& key,
         uint32_t value);
+    static void PictureScale(std::shared_ptr<Media::PixelMap> pixelMap);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;
