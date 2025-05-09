@@ -788,6 +788,7 @@ napi_value Common::GetNotificationSmallIcon(const napi_env &env, const napi_valu
             ANS_LOGE("Invalid object pixelMap");
             return nullptr;
         }
+        Common::PictureScale(pixelMap);
         request.SetLittleIcon(pixelMap);
     }
 
@@ -818,6 +819,7 @@ napi_value Common::GetNotificationLargeIcon(const napi_env &env, const napi_valu
             ANS_LOGE("Invalid object pixelMap");
             return nullptr;
         }
+        Common::PictureScale(pixelMap);
         request.SetBigIcon(pixelMap);
     }
 
@@ -849,6 +851,7 @@ napi_value Common::GetNotificationOverlayIcon(
             ANS_LOGE("Invalid object pixelMap");
             return nullptr;
         }
+        Common::PictureScale(pixelMap);
         request.SetOverlayIcon(pixelMap);
     }
 
@@ -2045,6 +2048,18 @@ napi_value Common::GetNotificationControlFlags(
     }
 
     return NapiGetNull(env);
+}
+
+void Common::PictureScale(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    int32_t size = pixelMap->GetByteCount();
+    if (size <= MAX_ICON_SIZE) {
+        return;
+    }
+    int32_t width = pixelMap->GetWidth();
+    int32_t height = pixelMap->GetHeight();
+    float Axis = MAX_PIXEL_SIZE / std::max(width, height);
+    pixelMap->scale(Axis, Axis, Media::AntiAliasingOption::HIGH);
 }
 }
 }
