@@ -108,7 +108,10 @@
         "libxml2",
         "node",
         "googletest",
-        "icu"
+        "icu",
+        "node",
+        "cJSON",
+        "selinux_adapter"
       ],
       "third_party": [
         "libuv",

@@ -17,7 +17,6 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_CANCEL_H
 
 #include "common.h"
-#include "commonlibrary/utils_lite/include/ohos_types.h"
 
 namespace OHOS {
 namespace NotificationNapi {
