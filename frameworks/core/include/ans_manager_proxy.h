@@ -783,6 +783,14 @@ public:
     ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags) override;
 
     /**
+     * @brief Obtains the number of slotFlags.
+     *
+     * @param slotFlags Indicates the slogFlags of slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetNotificationSettings(uint32_t &slotFlags) override;
+
+    /**
      * @brief Set the slotFlags of slot.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.

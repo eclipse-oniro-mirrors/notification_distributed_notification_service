@@ -402,6 +402,10 @@ int32_t AnsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
             result = HandleGetSlotFlagsAsBundle(data, reply);
             break;
         }
+        case static_cast<uint32_t>(NotificationInterfaceCode::GET_NOTIFICATION_SETTING): {
+            result = HandleGetNotificationSettings(data, reply);
+            break;
+        }
         case static_cast<uint32_t>(NotificationInterfaceCode::SET_NOTIFICATION_AGENT_RELATIONSHIP): {
             result = HandleSetAdditionConfig(data, reply);
             break;
@@ -778,6 +782,23 @@ ErrCode AnsManagerStub::HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageP
 
     if (!reply.WriteUint32(slotFlags)) {
         ANS_LOGE("[HandleGetSlotFlagsAsBundle] fail: write enabled failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AnsManagerStub::HandleGetNotificationSettings(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t slotFlags = 0;
+    ErrCode result = GetNotificationSettings(slotFlags);
+    if (!reply.WriteInt32(result)) {
+        ANS_LOGE("[HandleGetNotificationSettings] fail: write result failed, ErrCode=%{public}d", result);
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.WriteUint32(slotFlags)) {
+        ANS_LOGE("[HandleGetNotificationSettings] fail: write enabled failed, ErrCode=%{public}d", result);
         return ERR_ANS_PARCELABLE_FAILED;
     }
 

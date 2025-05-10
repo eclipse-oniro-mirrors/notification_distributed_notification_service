@@ -556,6 +556,35 @@ ErrCode AnsManagerProxy::GetSlotFlagsAsBundle(const sptr<NotificationBundleOptio
     return result;
 }
 
+ErrCode AnsManagerProxy::GetNotificationSettings(uint32_t& slotFlags)
+{
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(AnsManagerProxy::GetDescriptor())) {
+        ANS_LOGE("[GetNotificationSettings] fail: write interface token failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    MessageParcel reply;
+    MessageOption option = {MessageOption::TF_SYNC};
+    ErrCode result = InnerTransact(NotificationInterfaceCode::GET_NOTIFICATION_SETTING, option, data, reply);
+    if (result != ERR_OK) {
+        ANS_LOGE("fail: transact ErrCode=%{public}d", result);
+        return ERR_ANS_TRANSACT_FAILED;
+    }
+
+    if (!reply.ReadInt32(result)) {
+        ANS_LOGE("fail: read result failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    if (!reply.ReadUint32(slotFlags)) {
+        ANS_LOGE("[GetNotificationSettings] fail: read enabled failed.");
+        return ERR_ANS_PARCELABLE_FAILED;
+    }
+
+    return result;
+}
+
 ErrCode AnsManagerProxy::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,  uint32_t slotFlags)
 {
     if (bundleOption == nullptr) {

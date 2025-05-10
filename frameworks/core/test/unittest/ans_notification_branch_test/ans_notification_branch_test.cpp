@@ -499,6 +499,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetNotificationSettings(uint32_t &slotFlags) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t slotFlags) override
     {
         return ERR_ANS_INVALID_PARAM;

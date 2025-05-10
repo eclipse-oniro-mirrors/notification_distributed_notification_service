@@ -783,6 +783,14 @@ public:
     virtual ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
         uint32_t &slotFlags) override;
 
+    /**
+     * @brief Obtains the number of slotFlags.
+     *
+     * @param slotFlags Indicates the slogFlags of slot.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode GetNotificationSettings(uint32_t &slotFlags) override;
+
    /**
      * @brief Set slotFlags.
      *
@@ -1125,6 +1133,7 @@ private:
     ErrCode HandleSubscribeSelf(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetAllNotificationEnableStatus(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleGetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
+    ErrCode HandleGetNotificationSettings(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetSlotFlagsAsBundle(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetAdditionConfig(MessageParcel &data, MessageParcel &reply);
     ErrCode HandleSetDistributedEnabledByBundle(MessageParcel &data, MessageParcel &reply);

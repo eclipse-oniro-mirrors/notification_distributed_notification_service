@@ -546,5 +546,24 @@ HWTEST_F(AnsSlotServiceTest, GetConfigSlotReminderModeByType_00001, Function | S
         DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slotType);
     ASSERT_EQ(reminderMode, (int)0b111111);
 }
+
+/**
+ * @tc.name: GetNotificationSettings_00001
+ * @tc.desc: Test GetNotificationSettings
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+
+    uint32_t flag = 0xff;
+    auto ret = advancedNotificationService_->GetNotificationSettings(flag);
+    ASSERT_EQ(ret, ERR_OK);
+    // invalid outside of the 0th and 4th position
+    uint32_t result = flag & 0xee;
+    EXPECT_EQ(result, 0);
+}
 }  // namespace Notification
 }  // namespace OHOS
