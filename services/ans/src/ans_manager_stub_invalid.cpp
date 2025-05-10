@@ -183,6 +183,12 @@ ErrCode AnsManagerStub::GetSlotFlagsAsBundle(const sptr<NotificationBundleOption
     return ERR_INVALID_OPERATION;
 }
 
+ErrCode AnsManagerStub::GetNotificationSettings(uint32_t &slotFlags)
+{
+    ANS_LOGE("AnsManagerStub::GetNotificationSettings called!");
+    return ERR_INVALID_OPERATION;
+}
+
 ErrCode AnsManagerStub::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags)
 {
     ANS_LOGE("AnsManagerStub::SetSlotFlagsAsBundle called!");

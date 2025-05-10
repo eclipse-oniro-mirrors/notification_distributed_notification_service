@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+uint32_t NOTIFICATION_SETTING_SOUND_ENABLE_BIT = 4;
 napi_value NapiAddSlot(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
@@ -986,6 +987,72 @@ napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+void AsyncCompleteCallbackNapiGetNotificationSettings(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("enter");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    auto asynccallbackinfo = static_cast<AsyncCallbackInfoGetNotificationSettings *>(data);
+    if (asynccallbackinfo) {
+        napi_value result = Common::NapiGetNull(env);
+        napi_create_object(env, &result);
+        bool vibrationEnabled = (asynccallbackinfo->slotFlags >> 0) & 1;
+        bool soundEnabled = (asynccallbackinfo->slotFlags >> NOTIFICATION_SETTING_SOUND_ENABLE_BIT) & 1;
+        napi_value vibrationValue;
+        napi_value soundValue;
+        napi_get_boolean(env, vibrationEnabled, &vibrationValue);
+        napi_get_boolean(env, soundEnabled, &soundValue);
+
+        napi_set_named_property(env, result, "vibrationEnabled", vibrationValue);
+        napi_set_named_property(env, result, "soundEnabled", soundValue);
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete NapiGetNotificationSettings callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+    ANS_LOGD("NapiGetNotificationSettings work complete end.");
+}
+
+napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    AsyncCallbackInfoGetNotificationSettings *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoGetNotificationSettings {.env = env, .asyncWork = nullptr};
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getNotificationSetting", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("getNotificationSettings work excute.");
+            auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetNotificationSettings *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::GetNotificationSettings(
+                    asynccallbackinfo->slotFlags);
+            }
+        },
+        AsyncCompleteCallbackNapiGetNotificationSettings,
+        (void *)asynccallbackinfo,
+        &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+
+    return asynccallbackinfo->info.isCallback ? Common::NapiGetNull(env) : promise;
 }
 
 }  // namespace NotificationNapi

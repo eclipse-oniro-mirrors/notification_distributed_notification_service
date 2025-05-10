@@ -1620,5 +1620,23 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0100, Func
     ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
     EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: GetNotificationSettings_0100
+ * @tc.desc: test GetNotificationSetting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    uint32_t slotFlags = 0;
+    ErrCode result = ans_->GetNotificationSettings(slotFlags);
+    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
 }  // namespace Notification
 }  // namespace OHOS
