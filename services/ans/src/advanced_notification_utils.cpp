@@ -1792,7 +1792,8 @@ ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRe
     if (!InitPublishProcess()) {
         return ERR_ANS_NO_MEMORY;
     }
-    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, false);
+    ErrCode result = ansStatus.GetErrCode();
     if (result != ERR_OK) {
         message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);

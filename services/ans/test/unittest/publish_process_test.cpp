@@ -162,7 +162,7 @@ HWTEST_F(PublishProcessTest, LivePublishPreWork_00001, Function | SmallTest | Le
     LivePublishProcess progress;
     auto res = progress.PublishPreWork(request, true);
     ASSERT_EQ(request->IsRemoveAllowed(), true);
-    ASSERT_EQ(res, ERR_OK);
+    ASSERT_EQ(res.GetErrCode(), ERR_OK);
 }
 
 /**
@@ -178,7 +178,7 @@ HWTEST_F(PublishProcessTest, LivePublishPreWork_00002, Function | SmallTest | Le
     
     LivePublishProcess progress;
     auto res = progress.PublishPreWork(request, true);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -200,7 +200,7 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00001, Function | Smal
    
     LivePublishProcess progress;
     auto res = progress.PublishPreWork(request, false);
-    ASSERT_EQ(res, ERR_ANS_NON_SYSTEM_APP);
+    ASSERT_EQ(res.GetErrCode(), ERR_ANS_NON_SYSTEM_APP);
 }
 
 /**
