@@ -101,7 +101,6 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
         reminderId = tarReminder->GetReminderId();
         ChangeReminderAgentLoadConfig(REMINDER_AGENT_SERVICE_LOAD_STATE);
     }
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
@@ -118,7 +117,6 @@ ErrCode ReminderAgentService::CancelReminder(const int32_t reminderId)
         return ERR_NO_INIT;
     }
     ErrCode ret = rdm->CancelReminder(reminderId, IPCSkeleton::GetCallingUid());
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
@@ -139,7 +137,6 @@ ErrCode ReminderAgentService::CancelAllReminders()
     int32_t userId = -1;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     ErrCode ret = rdm->CancelAllReminders(bundleName, userId, callingUid);
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
@@ -157,7 +154,6 @@ ErrCode ReminderAgentService::GetValidReminders(std::vector<ReminderRequestAdapt
     }
     reminders.clear();
     rdm->GetValidReminders(IPCSkeleton::GetCallingUid(), reminders);
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ERR_OK;
 }
 
@@ -174,7 +170,6 @@ ErrCode ReminderAgentService::AddExcludeDate(const int32_t reminderId, const int
         return ERR_NO_INIT;
     }
     ErrCode ret = rdm->AddExcludeDate(reminderId, date, IPCSkeleton::GetCallingUid());
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
@@ -191,7 +186,6 @@ ErrCode ReminderAgentService::DelExcludeDates(const int32_t reminderId)
         return ERR_NO_INIT;
     }
     ErrCode ret = rdm->DelExcludeDates(reminderId, IPCSkeleton::GetCallingUid());
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
@@ -208,7 +202,6 @@ ErrCode ReminderAgentService::GetExcludeDates(const int32_t reminderId, std::vec
         return ERR_NO_INIT;
     }
     ErrCode ret = rdm->GetExcludeDates(reminderId, IPCSkeleton::GetCallingUid(), dates);
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
