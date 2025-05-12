@@ -46,7 +46,6 @@ int32_t DistributedManager::InitLocalDevice(const std::string &deviceId, uint16_
     const DistributedDeviceConfig config)
 {
     ANS_LOGI("InitLocalDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));
-    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
     DistributedLocalConfig::GetInstance().SetLocalDevice(config);
     return DistributedService::GetInstance().InitService(deviceId, deviceType);
 }
@@ -64,7 +63,6 @@ void DistributedManager::AddDevice(const std::string &deviceId, uint16_t deviceT
 void DistributedManager::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
 {
     ANS_LOGI("ReleaseDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));
-    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->CloseExtentionWrapper();
     DistributedClient::GetInstance().ReleaseDevice(deviceId, deviceType);
     DistributedService::GetInstance().UnSubscribeNotifictaion(deviceId, deviceType);
 }
