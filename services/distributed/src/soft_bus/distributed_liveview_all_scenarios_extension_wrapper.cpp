@@ -20,8 +20,15 @@
 
 namespace OHOS::Notification {
 const std::string DISTRIBUTED_EXTENTION_LIVEVIEW_ALL_SCENARIOS_PATH = "libliveview.z.so";
-DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveviewAllScenariosExtensionWrapper() = default;
-DistributedLiveviewAllScenariosExtensionWrapper::~DistributedLiveviewAllScenariosExtensionWrapper() = default;
+DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveviewAllScenariosExtensionWrapper()
+{
+    InitExtentionWrapper();
+}
+
+DistributedLiveviewAllScenariosExtensionWrapper::~DistributedLiveviewAllScenariosExtensionWrapper()
+{
+    CloseExtentionWrapper();
+}
 
 void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
 {
@@ -60,7 +67,11 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
     if (ExtensionHandle_ != nullptr) {
         dlclose(ExtensionHandle_);
         ExtensionHandle_ = nullptr;
+        triggerHandler_ = nullptr;
+        updateLiveviewEncodeContent_ = nullptr;
+        updateLiveviewDecodeContent_ = nullptr;
     }
+    ANS_LOGI("distributed liveview all scenarios extension wrapper close success");
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewEncodeContent(

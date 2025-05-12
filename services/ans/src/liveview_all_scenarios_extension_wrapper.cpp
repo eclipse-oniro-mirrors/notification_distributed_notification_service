@@ -20,8 +20,14 @@
 
 namespace OHOS::Notification {
 const std::string EXTENTION_LIVEVIEW_ALL_SCENARIOS_PATH = "libliveview.z.so";
-LiveviewAllScenariosExtensionWrapper::LiveviewAllScenariosExtensionWrapper() = default;
-LiveviewAllScenariosExtensionWrapper::~LiveviewAllScenariosExtensionWrapper() = default;
+LiveviewAllScenariosExtensionWrapper::LiveviewAllScenariosExtensionWrapper()
+{
+    InitExtentionWrapper();
+}
+LiveviewAllScenariosExtensionWrapper::~LiveviewAllScenariosExtensionWrapper()
+{
+    CloseExtentionWrapper();
+}
 
 void LiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
 {
@@ -55,7 +61,10 @@ void LiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
     if (ExtensionHandle_ != nullptr) {
         dlclose(ExtensionHandle_);
         ExtensionHandle_ = nullptr;
+        updateLiveviewReminderFlags_ = nullptr;
+        updateLiveviewVoiceContent_ = nullptr;
     }
+    ANS_LOGI("liveview all scenarios extension wrapper close success");
 }
 
 ErrCode LiveviewAllScenariosExtensionWrapper::UpdateLiveviewReminderFlags(const sptr<NotificationRequest> &request)
