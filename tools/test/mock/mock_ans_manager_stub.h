@@ -507,6 +507,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetNotificationSettings(uint32_t& slotFlags) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode RegisterPushCallback(const sptr<IRemoteObject>& pushCallback,
         const sptr<NotificationCheckRequest>& notificationCheckRequest) override
     {

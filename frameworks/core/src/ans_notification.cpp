@@ -174,6 +174,17 @@ ErrCode AnsNotification::GetNotificationSlotFlagsAsBundle(const NotificationBund
     return proxy->GetSlotFlagsAsBundle(bo, slotFlags);
 }
 
+ErrCode AnsNotification::GetNotificationSettings(uint32_t &slotFlags)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetNotificationSettings(slotFlags);
+}
+
 ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
     uint32_t slotFlags)
 {

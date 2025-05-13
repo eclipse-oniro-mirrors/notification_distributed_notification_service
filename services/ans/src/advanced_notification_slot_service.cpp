@@ -45,6 +45,7 @@ namespace {
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
+    constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
 }
 
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
@@ -412,6 +413,34 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
             result = ERR_OK;
             slotFlags = DEFAULT_SLOT_FLAGS;
         }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGD("Failed to generateBundleOption.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ErrCode result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_OK;
+            slotFlags = DEFAULT_SLOT_FLAGS;
+        }
+        slotFlags = slotFlags & NOTIFICATION_SETTING_FLAG_BASE;
     }));
     notificationSvrQueue_->wait(handler);
 

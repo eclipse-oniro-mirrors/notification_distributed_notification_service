@@ -67,6 +67,11 @@ ErrCode NotificationHelper::GetNotificationSlotFlagsAsBundle(const NotificationB
     return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
 }
 
+ErrCode NotificationHelper::GetNotificationSettings(uint32_t &slotFlags)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(slotFlags);
+}
+
 ErrCode NotificationHelper::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
     uint32_t slotFlags)
 {

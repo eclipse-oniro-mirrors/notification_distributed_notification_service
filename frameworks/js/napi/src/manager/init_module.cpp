@@ -99,6 +99,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("disableNotificationFeature", NapiDisableNotificationFeature),
         DECLARE_NAPI_FUNCTION("setTargetDeviceStatus", NapiSetTargetDeviceStatus),
         DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),
+        DECLARE_NAPI_FUNCTION("getNotificationSetting", NapiGetNotificationSettings),
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),
