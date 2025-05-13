@@ -18,6 +18,7 @@
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
+#include "sts_request.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -36,5 +37,48 @@ ani_double AniGetActiveNotificationCount(ani_env *env)
     }
     return retNum;
 }
+
+ani_object AniGetAllActiveNotifications(ani_env *env)
+{
+    ANS_LOGD("sts AniGetAllActiveNotifications call");
+    std::vector<sptr<NotificationSts::NotificationSts>> notifications;
+    int returncode = OHOS::Notification::NotificationHelper::GetAllActiveNotifications(notifications);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != 0) {
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        return nullptr;
+    }
+    ani_object arrayRequestObj = NotificationSts::GetAniNotificationRequestArrayByNotifocations(env, notifications);
+    if (arrayRequestObj == nullptr) {
+        OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
+    }
+    ANS_LOGD("sts AniGetAllActiveNotifications end");
+    return arrayRequestObj;
+}
+
+ani_object AniGetActiveNotifications(ani_env *env)
+{
+    ANS_LOGD("sts AniGetAllActiveNotifications call");
+    std::vector<sptr<NotificationSts::NotificationRequest>> requests;
+    int returncode = OHOS::Notification::NotificationHelper::GetActiveNotifications(requests);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != 0) {
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        return nullptr;
+    }
+    ani_object arrayRequestObj = NotificationSts::GetAniNotificationRequestArray(env, requests);
+    if (arrayRequestObj == nullptr) {
+        OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
+    }
+    ANS_LOGD("sts AniGetAllActiveNotifications end");
+    return arrayRequestObj;
+}
+
 } // namespace NotificationManagerSts
 } // namespace OHOS

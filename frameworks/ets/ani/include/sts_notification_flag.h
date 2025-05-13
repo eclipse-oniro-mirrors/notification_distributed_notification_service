@@ -20,7 +20,8 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<Notification::NotificationFlags> &flags,
+using NotificationFlags = OHOS::Notification::NotificationFlags;
+bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags> &flags,
     ani_object &flagsObject);
 } // namespace NotificationSts
 } // OHOS

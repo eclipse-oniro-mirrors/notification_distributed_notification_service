@@ -943,5 +943,32 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
     }
     return arrayObj;
 }
+
+ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests)
+{
+    if (requests.empty()) {
+        ANS_LOGE("actionButtons is empty");
+        return nullptr;
+    }
+    ani_object arrayObj = newArrayClass(env, requests.size());
+    if (arrayObj == nullptr) {
+        ANS_LOGE("arrayObj is nullptr");
+        return nullptr;
+    }
+    ani_size index = 0;
+    for (auto &request : requests) {
+        ani_class requestCls;
+        ani_object requestObj;
+        RETURN_NULL_IF_FALSE(WarpNotificationRequest(
+            env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj));
+        RETURN_NULL_IF_NULL(requestObj);
+        if(ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)){
+            std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
+            return nullptr;
+        }   
+        index ++;
+    }
+    return arrayObj;
+}
 } // namespace NotificationSts
 } // OHOS

@@ -19,13 +19,14 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
+ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj);
+void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj);
+
 ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption);
+ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type);
 void AniSetNotificationEnableSlotSync(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable);
 void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable,
     ani_object isForceControl);
-ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type);
-ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj);
-void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

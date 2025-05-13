@@ -16,11 +16,13 @@
 #ifndef OHOS_DISTRIBUTED_NOTIFICATION_SERVER_STS_REQUEST_H
 #define OHOS_DISTRIBUTED_NOTIFICATION_SERVER_STS_REQUEST_H
 #include "ani.h"
+#include "notification.h"
 #include "notification_request.h"
 
 namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::Notification;
+using NotificationSts = OHOS::Notification::Notification;
 
 struct StsDistributedOptions {
     bool isDistributed = false;
@@ -38,6 +40,7 @@ ani_status UnWarpNotificationRequest(
 bool WarpNotificationRequest(
     ani_env *env, const NotificationRequest *notificationRequest, ani_class &cls, ani_object &outAniObj);
 ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests);
+ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests);
 } // namespace NotificationSts
 } // OHOS
 #endif

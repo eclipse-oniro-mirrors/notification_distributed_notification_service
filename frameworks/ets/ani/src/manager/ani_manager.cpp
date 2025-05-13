@@ -34,58 +34,67 @@ void AniNotificationManagerRegistryInit(ani_env *env)
     if (env->ResetError() != ANI_OK) {
         ANS_LOGD("ResetError failed");
     }
-
     ani_namespace ns;
     status = env->FindNamespace("L@ohos/notificationManager/notificationManager;", &ns);
     if (status != ANI_OK) {
         ANS_LOGD("FindNamespace notificationManager failed status : %{public}d", status);
         return;
     }
-
     std::array kitFunctions = {
+        ani_native_function {"nativeCancelAll", nullptr, reinterpret_cast<void *>(AniCancelAll)},
+        ani_native_function {"nativeCancelWithId", nullptr, reinterpret_cast<void *>(AniCancelWithId)},
+        ani_native_function {"nativeCancelWithIdLabel", nullptr, reinterpret_cast<void *>(AniCancelWithIdLabel)},
+        ani_native_function {"nativeCancelWithBundle", nullptr, reinterpret_cast<void *>(AniCancelWithBundle)},
+
         ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
         ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
+
         ani_native_function {"nativeGetActiveNotificationCount", ":D",
             reinterpret_cast<void *>(AniGetActiveNotificationCount)},
+        ani_native_function {"nativeGetActiveNotifications", nullptr,
+            reinterpret_cast<void *>(AniGetActiveNotifications)},
+        ani_native_function {"nativeGetAllActiveNotifications", nullptr,
+            reinterpret_cast<void *>(AniGetAllActiveNotifications)},
+
+        ani_native_function {"nativeaddDoNotDisturbProfile", nullptr,
+            reinterpret_cast<void *>(AniAddDoNotDisturbProfile)},
+        ani_native_function {"nativeremoveDoNotDisturbProfile", nullptr,
+            reinterpret_cast<void *>(AniRemoveDoNotDisturbProfile)},
+
+        ani_native_function {"nativeSubscribeSystemLiveView", nullptr,
+            reinterpret_cast<void *>(AniSubscribeSystemLiveView)},
+        ani_native_function {"nativeAniTriggerSystemLiveView", nullptr,
+            reinterpret_cast<void *>(AniTriggerSystemLiveView)},
+
         ani_native_function {"nativeIsNotificationEnabled", nullptr,
             reinterpret_cast<void *>(AniIsNotificationEnabled)},
         ani_native_function {"nativeIsNotificationEnabledWithId", nullptr,
             reinterpret_cast<void *>(AniIsNotificationEnabledWithId)},
         ani_native_function {"nativeIsNotificationEnabledWithBundleOption", nullptr,
             reinterpret_cast<void *>(AniIsNotificationEnabledWithBundleOption)},
-        ani_native_function {"nativeGetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotFlagsByBundle)},
-        ani_native_function {"nativeSetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(AniSetSlotFlagsByBundle)},
-        ani_native_function {"nativeSetNotificationEnable", nullptr, reinterpret_cast<void *>(AniSetNotificationEnable)},
         ani_native_function {"nativeisNotificationSlotEnabled", nullptr,
             reinterpret_cast<void *>(AniIsNotificationSlotEnabled)},
-        ani_native_function {"nativeCancelWithId", nullptr, reinterpret_cast<void *>(AniCancelWithId)},
-        ani_native_function {"nativeCancelWithIdLabel", nullptr, reinterpret_cast<void *>(AniCancelWithIdLabel)},
-        ani_native_function {"nativeCancelWithBundle", nullptr, reinterpret_cast<void *>(AniCancelWithBundle)},
-        ani_native_function {"nativeCancelAll", nullptr, reinterpret_cast<void *>(AniCancelAll)},
-        ani_native_function {"nativeGetSlotsByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotsByBundle)},
-        ani_native_function {"nativeaddDoNotDisturbProfile", nullptr, reinterpret_cast<void *>(AniAddDoNotDisturbProfile)},
-        ani_native_function {"nativeremoveDoNotDisturbProfile", nullptr, reinterpret_cast<void *>(AniRemoveDoNotDisturbProfile)},
-        ani_native_function {"nativeSetNotificationEnableSlotWithForce", nullptr,
-            reinterpret_cast<void *>(AniSetNotificationEnableSlotWithForce)},
-        ani_native_function {"nativeSetNotificationEnableSlotSync", nullptr,
-            reinterpret_cast<void *>(AniSetNotificationEnableSlotSync)},
+
         ani_native_function {"nativePublishWithUserId", nullptr, reinterpret_cast<void *>(AniPublishWithId)},
         ani_native_function {"nativePublish", nullptr, reinterpret_cast<void *>(AniPublish)},
-        ani_native_function {"nativeSubscribeSystemLiveView", nullptr,
-            reinterpret_cast<void *>(AniSubscribeSystemLiveView)},
-        ani_native_function {"nativeAniTriggerSystemLiveView", nullptr,
-            reinterpret_cast<void *>(AniTriggerSystemLiveView)},
+
+        ani_native_function {"nativeGetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotFlagsByBundle)},
+        ani_native_function {"nativeSetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(AniSetSlotFlagsByBundle)},
+        ani_native_function {"nativeGetSlotsByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotsByBundle)},
+        ani_native_function {"nativeSetNotificationEnable", nullptr, reinterpret_cast<void *>(AniSetNotificationEnable)},
+        ani_native_function {"nativeSetNotificationEnableSlotSync", nullptr,
+            reinterpret_cast<void *>(AniSetNotificationEnableSlotSync)},
+        ani_native_function {"nativeSetNotificationEnableSlotWithForce", nullptr,
+            reinterpret_cast<void *>(AniSetNotificationEnableSlotWithForce)},
     };
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
     if (status != ANI_OK) {
         ANS_LOGD("Namespace_BindNativeFunctions failed status : %{public}d", status);
     }
-
     if (env->ResetError() != ANI_OK) {
         ANS_LOGD("ResetError failed");
     }
-
     ANS_LOGD("StsNotificationManagerRegistryInit end");
 }
 } // namespace NotificationManagerSts

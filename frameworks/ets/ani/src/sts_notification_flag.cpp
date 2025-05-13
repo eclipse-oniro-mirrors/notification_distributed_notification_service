@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<Notification::NotificationFlags> &flags,
+bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags> &flags,
     ani_object &flagsObject)
 {
     if (flags == nullptr) {
