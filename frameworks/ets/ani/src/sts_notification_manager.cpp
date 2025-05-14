@@ -367,5 +367,38 @@ ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonO
     RETURN_NULL_IF_FALSE(CallSetter(env, optCls, optObj, "buttonName", stringValue));
     return optObj;
 }
+
+bool WarpNotificationDoNotDisturbDate(
+    ani_env *env, const std::shared_ptr<NotificationDoNotDisturbDate> &date, ani_object &outObj)
+{
+    ani_class cls;
+    ani_object obj;
+    ani_enum_item stsEnumValue;
+    const char *className = "L@ohos/notificationManager/notificationManager/DoNotDisturbDateInner;";
+    if (!CreateClassObjByClassName(env, className, cls, obj)) {
+        ANS_LOGD("CreateClassObjByClassName faild");
+        return false;
+    }
+    if (!EnumConvertNativeToAni(
+        env, "L@ohos/notificationManager/notificationManager/DoNotDisturbType;",
+            date->GetDoNotDisturbType(), stsEnumValue)) {
+        ANS_LOGD("EnumConvert_NativeToSts faild");
+        return false;
+    }
+    if (!CallSetter(env, cls, obj, "type", stsEnumValue)) {
+        ANS_LOGD("set type faild.");
+        return false;
+    }
+    if (!CallSetter(env, cls, obj, "begin", date->GetBeginDate())) {
+        ANS_LOGD("SetDate 'begin' faild.");
+        return false;
+    }
+    if (!CallSetter(env, cls, obj, "end", date->GetBeginDate())) {
+        ANS_LOGD("SetDate 'begin' faild.");
+        return false;
+    }
+    outObj = obj;
+    return true;
+}
 } // namespace NotificationSts
 } // OHOS

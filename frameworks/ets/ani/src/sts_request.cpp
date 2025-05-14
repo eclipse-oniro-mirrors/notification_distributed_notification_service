@@ -41,14 +41,14 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
 
     std::vector<std::string> supportDisplayDevices = {};
     isUndefined = ANI_TRUE;
-    if(GetStringArray(env, obj, "supportDisplayDevices", isUndefined, supportDisplayDevices) == ANI_OK
+    if(GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, supportDisplayDevices) == ANI_OK
         && isUndefined == ANI_FALSE) {
         distributedOptions.supportDisplayDevices = supportDisplayDevices;
     }
 
     std::vector<std::string> supportOperateDevices = {};
     isUndefined = ANI_TRUE;
-    if(GetStringArray(env, obj, "supportOperateDevices", isUndefined, supportOperateDevices) == ANI_OK
+    if(GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, supportOperateDevices) == ANI_OK
         && isUndefined == ANI_FALSE) {
         distributedOptions.supportOperateDevices = supportOperateDevices;
     }

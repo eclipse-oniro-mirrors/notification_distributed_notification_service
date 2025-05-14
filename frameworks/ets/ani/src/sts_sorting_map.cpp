@@ -1,0 +1,87 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "sts_sorting_map.h"
+
+#include "sts_common.h"
+#include "sts_sorting.h"
+
+namespace OHOS {
+namespace NotificationSts {
+bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj)
+{
+    ani_class cls;
+    ani_object recordObj;
+    ani_class recordCls;
+    ani_object arrayObj;
+    ani_status status;
+    if (sortingMap == nullptr) {
+        ANS_LOGD("sortingMap is nullptr");
+        return false;
+    }
+
+    if (!CreateClassObjByClassName(env, "Lnotification/notificationSortingMap/NotificationSortingMapInner;", cls, outObj)) {
+        ANS_LOGD("CreateClassObjByClassName faild.");
+        return false;
+    }
+
+    if (!CreateClassObjByClassName(env, "Lescompat/Record;", recordCls, recordObj)) {
+        ANS_LOGD("Create recordObj faild.");
+        return false;
+    }
+
+    std::vector<std::string> keys = sortingMap->GetKey();
+    for (auto &it : keys) {
+        Notification::NotificationSorting sorting;
+        if (sortingMap->GetNotificationSorting(it, sorting)) {
+            ani_string keyString;
+            if (ANI_OK != GetAniStringByString(env, it, keyString)) {
+                ANS_LOGD("GetAniStringByString faild. key: %{public}s", it.c_str());
+                continue;
+            }
+            ani_object sortingObj;
+            if (!WarpNotificationSorting(env, sorting, sortingObj)) {
+                ANS_LOGD("WarpNotificationSorting faild. key: %{public}s", it.c_str());
+                continue;
+            }
+
+            if (keyString == nullptr) {
+                ANS_LOGD("GetAniString faild. key: %{public}s", it.c_str());
+                continue;
+            }
+
+            if (ANI_OK != (status = env->Object_CallMethodByName_Void(
+                    recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
+                ANS_LOGD("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
+                continue;
+            }
+        }
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortings", recordObj))) {
+        ANS_LOGD("Object_SetPropertyByName_Ref sortings faild. status %{public}d", status);
+        return false;
+    }
+    arrayObj = GetAniStringArrayByVectorString(env, keys);
+    if (arrayObj == nullptr) {
+        ANS_LOGD("WarpVectorStringToSts sortedHashCode faild");
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortedHashCode", arrayObj))) {
+        ANS_LOGD("Object_SetPropertyByName_Ref sortedHashCode faild. status %{public}d", status);
+        return false;
+    }
+    return true;
+}
+} // namespace NotificationSts
+} // OHOS

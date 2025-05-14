@@ -30,6 +30,7 @@ using SlotType = OHOS::Notification::NotificationConstant::SlotType;
 using SlotLevel = OHOS::Notification::NotificationSlot::NotificationLevel;
 using ContentType = OHOS::Notification::NotificationContent::Type;
 using ButtonOption = OHOS::Notification::NotificationButtonOption;
+using NotificationDoNotDisturbDate = OHOS::Notification::NotificationDoNotDisturbDate;
 enum STSSlotType {
     UNKNOWN_TYPE = 0,
     SOCIAL_COMMUNICATION = 1,
@@ -135,6 +136,8 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption);
 ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonOption);
+bool WarpNotificationDoNotDisturbDate(
+    ani_env *env, const std::shared_ptr<NotificationDoNotDisturbDate> &date, ani_object &outObj);
 } // namespace NotificationSts
 } // OHOS
 #endif

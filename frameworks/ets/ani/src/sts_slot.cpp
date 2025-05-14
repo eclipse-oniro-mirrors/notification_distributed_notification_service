@@ -14,8 +14,10 @@
  */
 #include "sts_slot.h"
 
+#include "ans_log_wrapper.h"
 #include "sts_notification_manager.h"
 #include "sts_common.h"
+
 
 namespace OHOS {
 namespace NotificationSts {

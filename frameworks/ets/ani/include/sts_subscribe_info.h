@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-export interface NotificationUserInput {
-  inputKey: string;
-}
+#ifndef OHOS_DISTRIBUTED_NOTIFICATION_SERVER_STS_SORTING_H
+#define OHOS_DISTRIBUTED_NOTIFICATION_SERVER_STS_SORTING_H
+#include "ani.h"
+#include "notification_subscribe_info.h"
 
-class NotificationUserInputInner implements NotificationUserInput {
-  inputKey: string = "";
-}
+namespace OHOS {
+namespace NotificationSts {
+using NotificationSubscribeInfo = OHOS::Notification::NotificationSubscribeInfo;
+
+bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info);
+} // namespace NotificationSts
+} // OHOS
+#endif

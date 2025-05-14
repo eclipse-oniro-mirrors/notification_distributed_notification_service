@@ -68,7 +68,7 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
 
 inline void ThrowStsErroWithLog(ani_env *env, std::string logMsg) {
     OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
-        NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
     ANS_LOGE("%{public}s", logMsg.c_str());
 }
 } // namespace NotificationSts

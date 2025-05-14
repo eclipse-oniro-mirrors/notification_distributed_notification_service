@@ -13,10 +13,14 @@
  * limitations under the License.
  */
 
-export interface NotificationUserInput {
-  inputKey: string;
+#ifndef OHOS_DISTRIBUTED_NOTIFICATION_SERVER_ANI_SUBSCRIBE_REMOVE_H
+#define OHOS_DISTRIBUTED_NOTIFICATION_SERVER_ANI_SUBSCRIBE_REMOVE_H
+#include "ani.h"
+namespace OHOS {
+namespace NotificationSubScribeSts {
+void AniRemoveForBundle(ani_env *env, ani_object bundle, ani_object notificationKey, ani_object reasonEnum);
+void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEnum);
+void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reasonEnum);
 }
-
-class NotificationUserInputInner implements NotificationUserInput {
-  inputKey: string = "";
 }
+#endif

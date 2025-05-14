@@ -24,7 +24,7 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj);
 
 ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption);
 ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type);
-void AniSetNotificationEnableSlotSync(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable);
+void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable);
 void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable,
     ani_object isForceControl);
 } // namespace NotificationManagerSts

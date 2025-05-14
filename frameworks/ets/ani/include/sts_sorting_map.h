@@ -13,10 +13,16 @@
  * limitations under the License.
  */
 
-export interface NotificationUserInput {
-  inputKey: string;
-}
+#ifndef OHOS_DISTRIBUTED_NOTIFICATION_SERVER_FRAMEWORKS_ETS_ANI_INCLUDE_STS_SORTING_MAP_H
+#define OHOS_DISTRIBUTED_NOTIFICATION_SERVER_FRAMEWORKS_ETS_ANI_INCLUDE_STS_SORTING_MAP_H
+#include "ani.h"
+#include "notification_sorting_map.h"
 
-class NotificationUserInputInner implements NotificationUserInput {
-  inputKey: string = "";
-}
+namespace OHOS {
+namespace NotificationSts {
+using NotificationSortingMap = OHOS::Notification::NotificationSortingMap;
+
+bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj);
+} // namespace NotificationSts
+} // OHOS
+#endif

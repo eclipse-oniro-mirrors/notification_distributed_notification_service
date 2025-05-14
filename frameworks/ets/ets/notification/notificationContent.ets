@@ -328,13 +328,13 @@ export interface NotificationTime {
 
 class NotificationTimeInner implements NotificationTime {
 
-  initialTime?: number;
+  initialTime?: number | undefined;
 
-  isCountDown?: boolean;
+  isCountDown?: boolean | undefined;
 
-  isPaused?: boolean;
+  isPaused?: boolean | undefined;
 
-  isInTitle?: boolean;
+  isInTitle?: boolean | undefined;
 }
 
 export interface NotificationProgress {

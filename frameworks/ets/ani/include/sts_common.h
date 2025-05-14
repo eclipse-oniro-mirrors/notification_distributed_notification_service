@@ -23,10 +23,12 @@
 
 namespace OHOS {
 namespace NotificationSts {
+bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string &aniStr);
 ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
+bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString);
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs);
 ani_object newArrayClass(ani_env *env, int length);
 ani_object newRecordClass(ani_env *env);
@@ -40,7 +42,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_double &outvalue);
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_ref &outRef);
-ani_status GetStringArray(ani_env *env, ani_object param, const char *name,
+ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<std::string> &res);
 
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
@@ -80,7 +82,7 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object object, const cha
     }
     if constexpr (std::is_same_v<valueType, ani_byte> || std::is_same_v<valueType, ani_short> ||
                   std::is_same_v<valueType, ani_int> || std::is_same_v<valueType, uint32_t> ||
-                  std::is_same_v<valueType, ani_long> ||
+                  std::is_same_v<valueType, ani_long> || std::is_same_v<valueType, int32_t> ||
                   std::is_same_v<valueType, ani_float> || std::is_same_v<valueType, ani_double>) {
         status = env->Object_CallMethod_Void(object, setter, static_cast<double>(value));
     } else {

@@ -61,6 +61,100 @@ ohos_prebuilt_etc("notification_template_etc") {
 }
 # end : notification/notificationTemplate.ets
 
+
+
+# start : notification/notificationSubscriber.ets
+generate_static_abc("notification_subscriber_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSubscriber.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_subscriber.abc"
+  out_puts = [ "$target_out_dir/notification_subscriber.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_subscriber.abc"
+}
+
+ohos_prebuilt_etc("notification_subscriber_etc") {
+  source = "$target_out_dir/notification_subscriber.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_subscriber_abc" ]
+}
+# end : notification/notificationSubscriber.ets
+
+# start : notification/notificationSubscribeInfo.ets
+generate_static_abc("notification_subscribe_info_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSubscribeInfo.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_subscribe_info.abc"
+  out_puts = [ "$target_out_dir/notification_subscribe_info.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_subscribe_info.abc"
+}
+
+ohos_prebuilt_etc("notification_subscribe_info_etc") {
+  source = "$target_out_dir/notification_subscribe_info.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_subscribe_info_abc" ]
+}
+# end : notification/notificationSubscribeInfo.ets
+
+# start : notification/notificationSortingMap.ets
+generate_static_abc("notification_sorting_map_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSortingMap.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_sorting_map.abc"
+  out_puts = [ "$target_out_dir/notification_sorting_map.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_sorting_map.abc"
+}
+
+ohos_prebuilt_etc("notification_sorting_map_etc") {
+  source = "$target_out_dir/notification_sorting_map.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_sorting_map_abc" ]
+}
+# end : notification/notificationSortingMap.ets
+
+# start : notification/notificationSorting.ets
+generate_static_abc("notification_sorting_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSorting.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_sorting.abc"
+  out_puts = [ "$target_out_dir/notification_sorting.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_sorting.abc"
+}
+
+ohos_prebuilt_etc("notification_sorting_etc") {
+  source = "$target_out_dir/notification_sorting.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_sorting_abc" ]
+}
+# end : notification/notificationSorting.ets
+
 # start : notification/notificationSlot.ets
 generate_static_abc("notification_slot_abc") {
   base_url = "./"
@@ -223,12 +317,43 @@ ohos_prebuilt_etc("notification_manager_etc") {
 }
 # end : @ohos.notificationManager.ets
 
+# start : @ohos.notificationSubscribe.ets
+generate_static_abc("notification_subscribe_abc") {
+  base_url = "./"
+  files = [
+      "./@ohos.notificationSubscribe.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_subscribe.abc"
+  out_puts = [ "$target_out_dir/notification_subscribe.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_subscribe.abc"
+}
+
+ohos_prebuilt_etc("notification_subscribe_etc") {
+  source = "$target_out_dir/notification_subscribe.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_subscribe_abc" ]
+}
+# end : @ohos.notificationSubscribe.ets
+
 group("ets_files") {
   deps = [
     ":notification_user_input_abc",
     ":notification_user_input_etc",
     ":notification_template_abc",
     ":notification_template_etc",
+    ":notification_subscriber_abc",
+    ":notification_subscriber_etc",
+    ":notification_subscribe_info_abc",
+    ":notification_subscribe_info_etc",
+    ":notification_sorting_map_abc",
+    ":notification_sorting_map_etc",
+    ":notification_sorting_abc",
+    ":notification_sorting_etc",
     ":notification_slot_abc",
     ":notification_slot_etc",
     ":notification_request_abc",
@@ -243,5 +368,7 @@ group("ets_files") {
     ":notification_action_button_etc",
     ":notification_manager_abc",
     ":notification_manager_etc",
+    ":notification_subscribe_abc",
+    ":notification_subscribe_etc",
   ]
 }

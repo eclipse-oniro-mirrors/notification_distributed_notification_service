@@ -21,6 +21,16 @@ namespace NotificationSts {
 constexpr const char* CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 
+bool IsUndefine(ani_env *env, const ani_object &obj)
+{
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(obj,&isUndefined)) {
+        ANS_LOGD("Reference_IsUndefined  faild");
+        return true;
+    }
+    return (isUndefined == ANI_TRUE) ? true : false;
+}
+
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string& aniStr)
 {
     ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
@@ -46,6 +56,31 @@ ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res)
     }
     res.resize(sz);
     return status;
+}
+
+bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString)
+{
+    ani_double length;
+    ani_status status = env->Object_GetPropertyByName_Double(ani_obj, "length", &length);
+    if (status != ANI_OK) {
+        ANS_LOGD("Object_GetPropertyByName_Double faild. status %{public}d", status);
+        return false;
+    }
+    for (int i = 0; i < int(length); i++) {
+        ani_ref stringEntryRef;
+        status = env->Object_CallMethodByName_Ref(ani_obj,
+            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i);
+        if (status != ANI_OK) {
+                ANS_LOGD("status : %{public}d", status);
+            }
+        std::string std_string;
+        if (!GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string)) {
+            ANS_LOGD("GetStdString faild");
+            return false;
+        }
+        stdVString.emplace_back(std_string);
+    }
+    return true;
 }
 
 ani_status GetPropertyString(ani_env *env, ani_object obj, const char *name,
@@ -141,7 +176,7 @@ ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_bo
     return status;
 }
 
-ani_status GetStringArray(ani_env *env, ani_object param, const char *name,
+ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<std::string> &res)
 {
     ani_ref arrayObj = nullptr;

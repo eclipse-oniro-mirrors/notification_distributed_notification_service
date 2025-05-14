@@ -56,17 +56,17 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
     return outAniObj;
 }
 
-void AniSetNotificationEnableSlotSync(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable)
+void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable)
 {
-    ANS_LOGD("SetNotificationEnableSlotByOld enter ");
+    ANS_LOGD("AniSetNotificationEnableSlot enter ");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowStsErroWithLog(env, "sts AniSetNotificationEnableSlotSync ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithLog(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
         return;
     }
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
-        NotificationSts::ThrowStsErroWithLog(env, "sts AniSetNotificationEnableSlotSync ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithLog(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = 0;
@@ -77,10 +77,10 @@ void AniSetNotificationEnableSlotSync(ani_env *env, ani_object bundleOption, ani
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
         AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniSetNotificationEnableSlot error, errorCode: %{public}d", externalCode);
         return;
     }
-    ANS_LOGD("sts AniSetNotificationEnableSlotSync end");
+    ANS_LOGD("AniSetNotificationEnableSlot end");
 }
 
 void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable,

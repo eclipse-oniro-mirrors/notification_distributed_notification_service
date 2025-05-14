@@ -278,7 +278,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
 {
     std::vector<std::string> names = {};
     ani_boolean isUndefined = ANI_TRUE;
-    if(GetStringArray(env, obj, "names", isUndefined, names) == ANI_OK && isUndefined == ANI_FALSE) {
+    if(GetPropertyStringArray(env, obj, "names", isUndefined, names) == ANI_OK && isUndefined == ANI_FALSE) {
         for(auto name: names) {
             button.addSingleButtonName(name);
         }
@@ -571,7 +571,7 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
 
     std::vector<std::string> lines = {};
     isUndefined = ANI_TRUE;
-    if((status = GetStringArray(env, obj, "lines", isUndefined, lines)) != ANI_OK
+    if((status = GetPropertyStringArray(env, obj, "lines", isUndefined, lines)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         return ANI_INVALID_ARGS;
     }

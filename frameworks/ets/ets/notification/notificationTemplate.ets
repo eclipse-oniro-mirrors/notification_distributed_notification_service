@@ -17,3 +17,8 @@
   name: string;
   data: Record<string, Object>;
 }
+
+class NotificationTemplateInner implements NotificationTemplate {
+  name: string = "";
+  data: Record<string, Object> = {};
+}

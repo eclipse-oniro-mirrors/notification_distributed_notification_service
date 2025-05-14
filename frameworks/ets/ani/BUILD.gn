@@ -86,3 +86,80 @@ ohos_shared_library("notification_manager_ani") {
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
+
+ohos_shared_library("notification_subscribe_ani") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
+  include_dirs = [
+    "./include",
+    "./include/subscribe",
+    "${core_path}/common/include",
+    "${inner_api_path}",
+    "${frameworks_path}/cj/ffi/include",
+  ]
+
+  configs = [
+    "${frameworks_module_ans_path}:ans_innerkits_public_config",
+  ]
+
+  sources = [
+   "./src/sts_common.cpp",
+    "./src/sts_convert_other.cpp",
+    "./src/sts_bundle_option.cpp",
+    "./src/sts_notification_flag.cpp",
+    "./src/sts_user_input.cpp",
+    "./src/sts_action_button.cpp",
+    "./src/sts_notification_manager.cpp",
+    "./src/sts_slot.cpp",
+    "./src/sts_disturb_mode.cpp",
+    "./src/sts_notification_content.cpp",
+    "./src/sts_template.cpp",
+    "./src/sts_request.cpp",
+    "./src/sts_sorting.cpp",
+    "./src/sts_subscribe.cpp",
+    "./src/sts_subscriber.cpp",
+    "./src/sts_sorting_map.cpp",
+    "./src/sts_subscribe_info.cpp",
+    "./src/subscribe/ani_remove.cpp",
+    "./src/subscribe/ani_subscribe.cpp",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_path}/cj/ffi:cj_notification_manager_ffi",
+   ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "runtime_core:ani",
+    "ipc:ipc_core",
+    "ability_base:zuri",
+    "ability_base:want",
+    "image_framework:image",
+    "ability_runtime:wantagent_innerkits",
+    "ability_runtime:ani_common",
+    "ability_runtime:runtime",
+    "napi:ace_napi",
+    "ability_runtime:ani_common",
+    "ability_runtime:ani_wantagent_common",
+    "image_framework:image_native",
+    "image_framework:image_ani",
+    "resource_management:global_resmgr",
+  ]
+
+  innerapi_tags = [ "platformsdk" ]
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+}

@@ -257,7 +257,7 @@ ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::R
     ani_class resourceCls = nullptr;
     ani_object resourceObject = nullptr;
     RETURN_NULL_IF_FALSE(CreateClassObjByClassName(env,
-        "Lglobal/resource/ResourceInner;", resourceCls, resourceObject));
+        "Lglobal/resourceInner/ResourceInner;", resourceCls, resourceObject));
     // bundleName: string;
     ani_string stringValue = nullptr;
     RETURN_NULL_IF_FALSE(GetAniStringByString(env, resource->bundleName, stringValue));
