@@ -282,8 +282,8 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
         case NotificationConstant::FLOW_CONTROL_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::FLOW_CONTROL_REASON_DELETE);
             break;
-        case NotificationConstant::USER_CANCELED_REASON_DELETE:
-            outType = static_cast<int32_t>(RemoveReason::USER_CANCELED_REASON_DELETE);
+        case NotificationConstant::USER_LOGOUT_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::USER_LOGOUT_REASON_DELETE);
             break;
         default:
             ReasonCToJSExt(inType, outType);

@@ -885,7 +885,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
 #endif
             sptr<Notification> notification = nullptr;
 
-            result = RemoveFromNotificationListForDeleteAll(key, activeUserId, notification, reason);
+            result = RemoveFromNotificationListForDeleteAll(key, activeUserId, notification);
             if ((result != ERR_OK) || (notification == nullptr)) {
                 continue;
             }

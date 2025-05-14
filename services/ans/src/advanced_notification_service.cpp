@@ -1477,7 +1477,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
-    const std::string &key, const int32_t &userId, sptr<Notification> &notification, int32_t deleteReason)
+    const std::string &key, const int32_t &userId, sptr<Notification> &notification, bool removeAll = false)
 {
     for (auto record : notificationList_) {
         if ((record->notification->GetKey() == key) &&

@@ -2650,6 +2650,31 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20600,
 }
 
 /**
+ * @tc.number    : OnUserStopped_0100
+ * @tc.name      : OnUserStopped_0100
+ * @tc.desc      : Test OnUserStopped function
+ * @tc.require   : #I61RF2
+ */
+HWTEST_F(AdvancedNotificationServiceTest, OnUserStopped_0100, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "OnResourceRemove_0100 test start";
+    int32_t userId = 2;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUserId(userId);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->PublishInNotificationList(record);
+
+    MockIsSystemApp(true);
+    advancedNotificationService_->OnUserStopped(userId);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+
+    GTEST_LOG_(INFO) << "OnResourceRemove_0100 test end";
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_20700
  * @tc.name      : OnBundleDataCleared_0100
  * @tc.desc      : Test OnBundleDataCleared function

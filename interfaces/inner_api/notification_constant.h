@@ -310,7 +310,7 @@ public:
     /**
      * Indicates that a notification is deleted because this user is removed.
      */
-    static const int32_t USER_CANCELED_REASON_DELETE = 33;
+    static const int32_t USER_LOGOUT_REASON_DELETE = 33;
 
     /**
      * Indicates that a notification is deleted for other reasons.
