@@ -40,6 +40,7 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
 #endif
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_STOPPED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
@@ -132,6 +133,15 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
         if (callbacks_.onResourceRemove != nullptr) {
             callbacks_.onResourceRemove(userId);
+        }
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_STOPPED) {
+        int32_t userId = data.GetCode();
+        if (userId <= SUBSCRIBE_USER_INIT) {
+            ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
+            return;
+        }
+        if (callbacks_.OnUserStopped != nullptr) {
+            callbacks_.OnUserStopped(userId);
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED) {
         if (callbacks_.onBundleDataCleared != nullptr) {

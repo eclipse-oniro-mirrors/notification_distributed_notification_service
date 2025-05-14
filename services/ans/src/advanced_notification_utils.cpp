@@ -1442,6 +1442,19 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
     DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE, true);
 }
 
+void AdvancedNotificationService::OnUserStopped(int32_t userId)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        std::string message = "not system app.";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(6, 11)
+            .ErrorCode(ERR_ANS_NON_SYSTEM_APP);
+        ReportDeleteFailedEventPush(haMetaMessage, NotificationConstant::USER_REMOVED_REASON_DELETE, message);
+        ANS_LOGE("%{public}s", message.c_str());
+    }
+    DeleteAllByUserInner(userId, NotificationConstant::USER_CANCELED_REASON_DELETE, true);
+}
+
 ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -1493,7 +1506,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
 #endif
             sptr<Notification> notification = nullptr;
 
-            *result = RemoveFromNotificationListForDeleteAll(key, userId, notification);
+            *result = RemoveFromNotificationListForDeleteAll(key, userId, notification, deleteReason);
             if ((*result != ERR_OK) || (notification == nullptr)) {
                 continue;
             }

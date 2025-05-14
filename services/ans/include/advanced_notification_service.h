@@ -892,6 +892,7 @@ public:
     void OnScreenOff();
 #endif
     void OnResourceRemove(int32_t userId);
+    void OnUserStopped(int32_t userId);
     void OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
@@ -1344,7 +1345,7 @@ private:
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
-        const int32_t &userId, sptr<Notification> &notification);
+        const int32_t &userId, sptr<Notification> &notification, int32_t deleteReason);
     bool RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);

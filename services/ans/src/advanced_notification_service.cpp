@@ -336,6 +336,7 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnScreenOff, this),
 #endif
         std::bind(&AdvancedNotificationService::OnResourceRemove, this, std::placeholders::_1),
+        std::bind(&AdvancedNotificationService::OnUserStopped, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataCleared, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataAdd, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataUpdate, this, std::placeholders::_1),
@@ -1476,15 +1477,17 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
-    const std::string &key, const int32_t &userId, sptr<Notification> &notification)
+    const std::string &key, const int32_t &userId, sptr<Notification> &notification, int32_t deleteReason)
 {
     for (auto record : notificationList_) {
         if ((record->notification->GetKey() == key) &&
             (record->notification->GetUserId() == userId)) {
-            if (!record->notification->IsRemoveAllowed()) {
+            if (!record->notification->IsRemoveAllowed() &&
+                deleteReason != NotificationConstant::USER_CANCELED_REASON_DELETE) {
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
-            if (record->request->IsUnremovable()) {
+            if (record->request->IsUnremovable() &&
+                deleteReason != NotificationConstant::USER_CANCELED_REASON_DELETE) {
                 return ERR_ANS_NOTIFICATION_IS_UNREMOVABLE;
             }
 
