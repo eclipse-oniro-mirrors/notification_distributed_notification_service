@@ -1466,7 +1466,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId, int32_t deleteReason,
-    bool isAsync, bool removeAll = false)
+    bool isAsync, bool removeAll)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
