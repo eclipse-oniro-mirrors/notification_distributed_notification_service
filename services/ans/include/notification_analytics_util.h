@@ -85,6 +85,7 @@ public:
     HaMetaMessage& BranchId(uint32_t branchId);
     HaMetaMessage& ErrorCode(uint32_t errorCode);
     HaMetaMessage& Message(const std::string& message, bool print = false);
+    HaMetaMessage& Path(const std::string path);
     HaMetaMessage& Append(const std::string& message);
     HaMetaMessage& BundleName(const std::string& bundleName_);
     HaMetaMessage& AgentBundleName(const std::string& agentBundleName);
@@ -114,6 +115,7 @@ public:
     uint32_t branchId_;
     uint32_t errorCode_ = ERR_OK;
     std::string message_;
+    std::string path_;
     bool checkfailed_ = true;
     int32_t deleteReason_ = -1;
     static int32_t syncWatch_;

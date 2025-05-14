@@ -23,6 +23,7 @@
 #include "notification_content.h"
 #include "notification_live_view_content.h"
 #include "os_account_manager_helper.h"
+#include "ans_status.h"
 
 #include "advanced_notification_inline.cpp"
 
@@ -45,14 +46,12 @@ std::shared_ptr<LivePublishProcess> LivePublishProcess::GetInstance()
     return instance_;
 }
 
-ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
+AnsStatus LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     if (!CheckLocalLiveViewAllowed(request, isUpdateByOwnerAllowed)) {
-        message.BranchId(EventBranchId::BRANCH_3).ErrorCode(ERR_ANS_NON_SYSTEM_APP)
-            .Message("CheckLocalLiveViewAllowed is false", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_NON_SYSTEM_APP;
+        return AnsStatus(ERR_ANS_NON_SYSTEM_APP, "CheckLocalLiveViewAllowed is false",
+            EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
     }
 
     if (!request->IsRemoveAllowed()) {
@@ -65,13 +64,11 @@ ErrCode LivePublishProcess::PublishPreWork(const sptr<NotificationRequest> &requ
         !AccessTokenHelper::IsSystemApp();
     if (isUpdateByOwnerAllowed && isHap) {
         if (request->GetTemplate() == nullptr) {
-            message.BranchId(EventBranchId::BRANCH_4).ErrorCode(ERR_ANS_INVALID_PARAM)
-                .Message("Owner must has template to update", true);
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            return ERR_ANS_INVALID_PARAM;
+            return AnsStatus::InvalidParam("Owner must has template to update",
+                EventSceneId::SCENE_1, EventBranchId::BRANCH_4);
         }
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
 ErrCode LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRequest> &request)

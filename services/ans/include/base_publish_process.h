@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_BASE_PUBLISH_PROCESS_H
 
 #include "notification_request.h"
+#include "ans_status.h"
 
 namespace OHOS {
 namespace Notification {
@@ -24,7 +25,7 @@ class BasePublishProcess {
 public:
     BasePublishProcess() = default;
     ~BasePublishProcess() = default;
-    virtual ErrCode PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
+    virtual AnsStatus PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
     virtual ErrCode PublishNotificationByApp(const sptr<NotificationRequest> &request) = 0;
     ErrCode CommonPublishCheck(const sptr<NotificationRequest> &request);
     ErrCode CommonPublishProcess(const sptr<NotificationRequest> &request);

@@ -133,15 +133,17 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     }
 
     request->SetCreateTime(GetCurrentTime());
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
+    
     bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
-    ErrCode result = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
-    if (result != ERR_OK) {
-        message.BranchId(EventBranchId::BRANCH_0).ErrorCode(result).Message("publish prework failed", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
+    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
+    if (!ansStatus.Ok()) {
+        ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0, "publish prework failed");
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
+        return ansStatus.GetErrCode();
     }
-    result = CheckUserIdParams(request->GetReceiverUserId());
+
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
+    ErrCode result = CheckUserIdParams(request->GetReceiverUserId());
     if (result != ERR_OK) {
         message.SceneId(EventSceneId::SCENE_3).ErrorCode(result).Message("User is invalid", true);
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);

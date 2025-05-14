@@ -48,7 +48,7 @@ constexpr const int32_t REPORT_CACHE_MAX_SIZE = 50;
 constexpr const int32_t SUCCESS_REPORT_CACHE_MAX_SIZE = 60;
 constexpr const int32_t REPORT_CACHE_INTERVAL_TIME = 30;
 constexpr const int32_t SUCCESS_REPORT_CACHE_INTERVAL_TIME = 1800;
-constexpr const int32_t REASON_MAX_LENGTH = 127;
+constexpr const int32_t REASON_MAX_LENGTH = 255;
 constexpr const int32_t SUB_CODE = 100;
 constexpr const int32_t MAX_TIME = 43200000;
 constexpr const int32_t NOTIFICATION_MAX_DATA = 100;
@@ -128,6 +128,12 @@ HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool print)
     if (print) {
         ANSR_LOGE("%{public}s, %{public}d", message.c_str(), errorCode_);
     }
+    return *this;
+}
+
+HaMetaMessage& HaMetaMessage::Path(const std::string path)
+{
+    path_ = path;
     return *this;
 }
 

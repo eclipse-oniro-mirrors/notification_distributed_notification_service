@@ -24,18 +24,19 @@
 #include "ipc_skeleton.h"
 #include "parameters.h"
 #include "notification_analytics_util.h"
+#include "ans_status.h"
 
 namespace OHOS {
 namespace Notification {
 
-ErrCode BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
+AnsStatus BasePublishProcess::PublishPreWork(const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed)
 {
     if (!request->IsRemoveAllowed()) {
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION)) {
             request->SetRemoveAllowed(true);
         }
     }
-    return ERR_OK;
+    return AnsStatus();
 }
 
 ErrCode BasePublishProcess::CommonPublishCheck(const sptr<NotificationRequest> &request)
