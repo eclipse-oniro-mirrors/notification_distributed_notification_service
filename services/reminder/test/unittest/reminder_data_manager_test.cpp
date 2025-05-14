@@ -109,7 +109,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_001, Level1)
     manager->CancelAllReminders("", -1, -1);
     manager->CancelAllReminders(-1);
     manager->IsMatched(reminder, -1, -1, true);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -131,7 +131,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_002, Level1)
     reminder->SetReminderId(10);
     manager->AddToShowedReminders(reminder);
     manager->AddToShowedReminders(reminder);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -156,7 +156,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_003, Level1)
     manager->OnUserRemove(0);
     manager->OnBundleMgrServiceStart();
     manager->OnAbilityMgrServiceStart();
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -180,7 +180,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_004, Level1)
     manager->FindReminderRequestLocked(10, false);
     manager->FindReminderRequestLocked(10, false);
     manager->FindReminderRequestLocked(10, false);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -208,7 +208,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_005, Level1)
     reminder->SetReminderId(4);
     reminder->SetGroupId("");
     manager->CloseReminder(reminder, true);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -226,7 +226,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_006, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->activeReminder_ = reminder;
     manager->RefreshRemindersDueToSysTimeChange(1);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -250,7 +250,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_007, Level1)
     manager->activeReminder_ = reminder;
     manager->ShowActiveReminder(want);
     manager->CloseReminder(want, true);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -268,7 +268,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_008, Level1)
     manager->TerminateAlerting(reminder, "");
     reminder->state_ = 2;
     manager->TerminateAlerting(reminder, "");
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -287,7 +287,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_009, Level1)
     manager->ShouldAlert(nullptr);
     manager->currentUserId_ = 0;
     manager->ShouldAlert(reminder);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -305,7 +305,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_010, Level1)
     manager->SetActiveReminder(reminder);
     manager->SetAlertingReminder(nullptr);
     manager->SetAlertingReminder(reminder);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -327,7 +327,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
     manager->ShowReminder(reminder, true, true, true, true);
     manager->alertingReminderId_ = -1;
     manager->ShowReminder(reminder, true, true, true, true);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -344,7 +344,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_012, Level1)
     manager->activeReminder_ = reminder;
     reminder->SetReminderId(10);
     manager->activeReminderId_ = 1;
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -360,7 +360,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_013, Level1)
     manager->activeReminderId_ = 10;
     manager->activeReminder_ = reminder;
     reminder->SetReminderId(10);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -383,7 +383,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_014, Level1)
     reminder->SetReminderId(1);
     manager->StopAlertingReminder(reminder);
     manager->Dump();
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -407,7 +407,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     manager->IsAllowedNotify(reminder);
     manager->IsAllowedNotify(nullptr);
     manager->IsReminderAgentReady();
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -490,7 +490,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_017, Level1)
     manager->PublishReminder(reminder2, callingUid);
     manager->PublishReminder(reminder3, callingUid);
     manager->CloseRemindersByGroupId(1, "test", "123");
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(reminder2->isExpired_);
 }
 
@@ -573,7 +573,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_001, Level1)
     want.SetAction(CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     data.SetWant(want);
     subscriber->OnReceiveEvent(data);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -589,7 +589,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_002, Level1)
         = std::make_shared<ReminderEventManager::SystemAbilityStatusChangeListener>(manager);
     statusChangeListener->OnAddSystemAbility(0, "");
     statusChangeListener->OnRemoveSystemAbility(0, "");
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -610,7 +610,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_003, Level1)
     timeInfo->OnTrigger();
     timeInfo->action_ = ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT;
     timeInfo->OnTrigger();
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -628,7 +628,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
     manager->reminderVector_.push_back(reminder);
     want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 10);
     manager->HandleCustomButtonClick(want);
-    system("rm -rf /data/service/el1/public/notification/");
+    remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
 
@@ -931,7 +931,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_005, Level1)
     want.SetAction(ReminderRequest::REMINDER_EVENT_CLICK_ALERT);
     data.SetWant(want);
     subscriber->OnReceiveEvent(data);
-    system("rm -rf /data/service/el1/public/notification/");
     EXPECT_TRUE(manager != nullptr);
 }
 

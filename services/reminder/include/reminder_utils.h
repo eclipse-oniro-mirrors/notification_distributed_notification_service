@@ -16,36 +16,15 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_UTILS_H
 
 #include "ans_log_wrapper.h"
-#include "reminder_bundle_manager_helper.h"
-#include <memory>
-
 
 namespace OHOS {
 namespace Notification {
-inline std::string GetClientBundleNameByUid(int32_t callingUid)
-{
-    std::string bundle;
-
-    std::shared_ptr<ReminderBundleManagerHelper> bundleManager = ReminderBundleManagerHelper::GetInstance();
-    if (bundleManager != nullptr) {
-        bundle = bundleManager->GetBundleNameByUid(callingUid);
-    }
-
-    return bundle;
-}
-
-inline std::string GetClientBundleName()
-{
-    return GetClientBundleNameByUid(IPCSkeleton::GetCallingUid());
-}
-
 inline int64_t GetCurrentTime()
 {
     auto now = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
 }
-
 }  // namespace Notification
 }  // namespace OHOS
 #endif
