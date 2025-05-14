@@ -447,6 +447,7 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTes
     reminder->reminderId_ = 999;
     reminder->reminderType_ = ReminderRequest::ReminderType::TIMER;
     reminder->customButtonUri_ = "customButtonUri_";
+    reminder->ringChannel_ = ReminderRequest::RingChannel::MEDIA;
     if (reminder->wantAgentInfo_ == nullptr) {
         reminder->InitServerObj();
     }
@@ -467,6 +468,7 @@ HWTEST_F(ReminderStoreTest, ReminderTimerStrategyTest_00003, Function | SmallTes
         }
 
         EXPECT_EQ(reminder->customButtonUri_, each->customButtonUri_);
+        EXPECT_EQ(reminder->ringChannel_, each->ringChannel_);
         EXPECT_EQ(reminder->wantAgentInfo_->pkgName, each->wantAgentInfo_->pkgName);
         EXPECT_EQ(reminder->wantAgentInfo_->abilityName, each->wantAgentInfo_->abilityName);
         EXPECT_EQ(reminder->wantAgentInfo_->uri, each->wantAgentInfo_->uri);

@@ -187,6 +187,8 @@ public:
      */
     static const std::string CREATOR_UID;
 
+    static const std::string RING_CHANNEL;
+
 public:
     static void InitDbColumns();
 

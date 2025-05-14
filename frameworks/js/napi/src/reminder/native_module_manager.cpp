@@ -71,9 +71,19 @@ napi_value ConstantInit(napi_env env, napi_value exports)
         napi_set_named_property(env, objButtonType, "ACTION_BUTTON_TYPE_CUSTOM", prop);
     }
 
+    napi_value objRingChannel = nullptr;
+    napi_create_object(env, &objRingChannel);
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::RingChannel::MEDIA), &prop) == napi_ok) {
+        napi_set_named_property(env, objRingChannel, "RING_CHANNEL_MEDIA", prop);
+    }
+    if (napi_create_int32(env, static_cast<int32_t>(ReminderRequest::RingChannel::ALARM), &prop) == napi_ok) {
+        napi_set_named_property(env, objRingChannel, "RING_CHANNEL_ALARM", prop);
+    }
+
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("ReminderType", objReminderType),
         DECLARE_NAPI_PROPERTY("ActionButtonType", objButtonType),
+        DECLARE_NAPI_PROPERTY("RingChannel", objRingChannel),
     };
 
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);

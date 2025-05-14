@@ -71,6 +71,7 @@ void ReminderStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,
     values.PutLong(ReminderBaseTable::AUTO_DELETED_TIME, reminder->GetAutoDeletedTime());
     values.PutString(ReminderBaseTable::GROUP_ID, reminder->GetGroupId());
     values.PutString(ReminderBaseTable::CUSTOM_RING_URI, reminder->GetCustomRingUri());
+    values.PutInt(ReminderBaseTable::RING_CHANNEL, static_cast<int32_t>(reminder->GetRingChannel()));
     values.PutString(ReminderBaseTable::CREATOR_BUNDLE_NAME, reminder->GetCreatorBundleName());
     values.PutInt(ReminderBaseTable::CREATOR_UID, reminder->GetCreatorUid());
 }
@@ -388,6 +389,10 @@ void ReminderStrategy::RecoverFromDb(sptr<ReminderRequest>& reminder,
     std::string tapDismissed;
     ReminderStrategy::GetRdbValue<std::string>(resultSet, ReminderBaseTable::TAP_DISMISSED, tapDismissed);
     reminder->SetTapDismissed(tapDismissed == "true" ? true : false);
+
+    int32_t ringChannel;
+    ReminderStrategy::GetRdbValue<int32_t>(resultSet, ReminderBaseTable::RING_CHANNEL, ringChannel);
+    reminder->SetRingChannel(static_cast<ReminderRequest::RingChannel>(ringChannel));
 }
 
 void ReminderTimerStrategy::AppendValuesBucket(const sptr<ReminderRequest>& reminder,

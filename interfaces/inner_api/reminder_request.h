@@ -200,6 +200,14 @@ public:
         HM
     };
 
+    /**
+     * @brief audio stream type
+     */
+    enum class RingChannel : uint8_t {
+        ALARM,
+        MEDIA,
+    };
+
     struct ButtonWantAgent {
         std::string pkgName = "";
         std::string abilityName = "";
@@ -455,6 +463,12 @@ public:
     {
         snoozeContentResourceId_ = snoozeContentResourceId;
     }
+
+    /**
+     * @brief Set/Get ring channel.
+     */
+    void SetRingChannel(const RingChannel channel);
+    RingChannel GetRingChannel() const;
 
     int32_t GetUserId() const;
     int32_t GetUid() const;
@@ -1154,6 +1168,7 @@ private:
     uint8_t snoozeTimes_ {0};
     uint8_t snoozeTimesDynamic_ {0};
     uint8_t state_ {0};
+    RingChannel ringChannel_ {RingChannel::ALARM};
     int32_t notificationId_ {0};
     std::string groupId_ {};
     int32_t reminderId_ {-1};

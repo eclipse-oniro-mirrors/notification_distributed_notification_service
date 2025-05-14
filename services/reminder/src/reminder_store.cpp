@@ -33,14 +33,15 @@
 namespace OHOS {
 namespace Notification {
 namespace {
-const int32_t REMINDER_RDB_VERSION_V1 = 1;
-const int32_t REMINDER_RDB_VERSION_V2 = 2;
-const int32_t REMINDER_RDB_VERSION_V3 = 3;
-const int32_t REMINDER_RDB_VERSION_V4 = 4;
-const int32_t REMINDER_RDB_VERSION_V5 = 5;
-const int32_t REMINDER_RDB_VERSION_V6 = 6;
-const int32_t REMINDER_RDB_VERSION_V7 = 7;
-const int32_t REMINDER_RDB_VERSION = 8;
+constexpr int32_t REMINDER_RDB_VERSION_V1 = 1;
+constexpr int32_t REMINDER_RDB_VERSION_V2 = 2;
+constexpr int32_t REMINDER_RDB_VERSION_V3 = 3;
+constexpr int32_t REMINDER_RDB_VERSION_V4 = 4;
+constexpr int32_t REMINDER_RDB_VERSION_V5 = 5;
+constexpr int32_t REMINDER_RDB_VERSION_V6 = 6;
+constexpr int32_t REMINDER_RDB_VERSION_V7 = 7;
+constexpr int32_t REMINDER_RDB_VERSION_V8 = 8;
+constexpr int32_t REMINDER_RDB_VERSION = 9;
 constexpr int64_t DURATION_PRELOAD_TIME = 10 * 60 * 60 * 1000;  // 10h, millisecond
 }
 
@@ -90,6 +91,9 @@ int32_t ReminderStore::ReminderStoreDataCallBack::OnUpgrade(
                     ReminderBaseTable::SNOOZE_CONTENT_RESOURCE_ID, "INT", "0");
                 AddRdbColum(store, ReminderBaseTable::TABLE_NAME,
                     ReminderBaseTable::EXPIRED_CONTENT_RESOURCE_ID, "INT", "0");
+                [[fallthrough]];
+            case REMINDER_RDB_VERSION_V8:
+                AddRdbColum(store, ReminderBaseTable::TABLE_NAME, ReminderBaseTable::RING_CHANNEL, "INT", "0");
                 [[fallthrough]];
             default:
                 break;

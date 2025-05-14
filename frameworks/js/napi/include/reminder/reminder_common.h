@@ -81,6 +81,7 @@ const char* TAPDISMISSED = "tapDismissed";
 const char* AUTODELETEDTIME = "autoDeletedTime";
 const char* GROUP_ID = "groupId";
 const char* CUSTOM_RING_URI = "customRingUri";
+const char* RING_CHANNEL = "ringChannel";
 const char* SNOOZE_SLOT_TYPE = "snoozeSlotType";
 const char* REMINDER_INFO_REMINDER_REQ = "reminderReq";
 const char* REMINDER_INFO_REMINDER_ID = "reminderId";
@@ -172,6 +173,9 @@ private:
 
     static bool GenActionButtons(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder, bool isSysApp);
+
+    static bool GenRingChannel(const napi_env& env, const napi_value& value,
+        std::shared_ptr<ReminderRequest>& reminder);
 
     static napi_value GenReminder(
         const napi_env &env, const napi_value &value, std::shared_ptr<ReminderRequest>& reminder);
