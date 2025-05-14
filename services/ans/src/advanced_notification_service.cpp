@@ -1482,12 +1482,10 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     for (auto record : notificationList_) {
         if ((record->notification->GetKey() == key) &&
             (record->notification->GetUserId() == userId)) {
-            if (!record->notification->IsRemoveAllowed() &&
-                deleteReason != NotificationConstant::USER_CANCELED_REASON_DELETE) {
+            if (!record->notification->IsRemoveAllowed() && !removeAll) {
                 return ERR_ANS_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
             }
-            if (record->request->IsUnremovable() &&
-                deleteReason != NotificationConstant::USER_CANCELED_REASON_DELETE) {
+            if (record->request->IsUnremovable() && !removeAll) {
                 return ERR_ANS_NOTIFICATION_IS_UNREMOVABLE;
             }
 
