@@ -74,14 +74,14 @@ ErrCode NotificationHelper::SetNotificationSlotFlagsAsBundle(const NotificationB
 }
 
 ErrCode NotificationHelper::PublishNotification(const NotificationRequest &request,
-    std::string instanceKey)
+    const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
         request, instanceKey);
 }
 
 ErrCode NotificationHelper::PublishNotification(const std::string &label,
-    const NotificationRequest &request, std::string instanceKey)
+    const NotificationRequest &request, const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
         label, request, instanceKey);
@@ -92,20 +92,20 @@ ErrCode NotificationHelper::PublishNotificationForIndirectProxy(const Notificati
     return DelayedSingleton<AnsNotification>::GetInstance()->PublishNotificationForIndirectProxy(request);
 }
 
-ErrCode NotificationHelper::CancelNotification(int32_t notificationId, std::string instanceKey)
+ErrCode NotificationHelper::CancelNotification(int32_t notificationId, const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
         notificationId, instanceKey);
 }
 
 ErrCode NotificationHelper::CancelNotification(const std::string &label, int32_t notificationId,
-    std::string instanceKey)
+    const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
         label, notificationId, instanceKey);
 }
 
-ErrCode NotificationHelper::CancelAllNotifications(std::string instanceKey)
+ErrCode NotificationHelper::CancelAllNotifications(const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications(instanceKey);
 }
@@ -130,7 +130,7 @@ ErrCode NotificationHelper::GetActiveNotificationNums(uint64_t &num)
 }
 
 ErrCode NotificationHelper::GetActiveNotifications(
-    std::vector<sptr<NotificationRequest>> &request, std::string instanceKey)
+    std::vector<sptr<NotificationRequest>> &request, const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(
         request, instanceKey);
@@ -382,7 +382,7 @@ ErrCode NotificationHelper::GetShowBadgeEnabled(bool &enabled)
     return DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabled(enabled);
 }
 
-ErrCode NotificationHelper::CancelGroup(const std::string &groupName, std::string instanceKey)
+ErrCode NotificationHelper::CancelGroup(const std::string &groupName, const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(
         groupName, instanceKey);
@@ -527,7 +527,7 @@ ErrCode NotificationHelper::GetSyncNotificationEnabledWithoutApp(const int32_t u
         userId, enabled);
 }
 
-ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber, std::string instanceKey)
+ErrCode NotificationHelper::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber, instanceKey);
 }

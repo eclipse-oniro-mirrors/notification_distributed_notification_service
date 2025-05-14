@@ -201,7 +201,7 @@ public:
      * @return Returns publish notification result.
      */
     static ErrCode PublishNotification(const NotificationRequest &request,
-        std::string instanceKey = "");
+        const std::string &instanceKey = "");
 
     /**
      * @brief Publishes a notification.
@@ -225,7 +225,7 @@ public:
      * @return Returns publish notification result.
      */
     static ErrCode PublishNotification(const std::string &label, const NotificationRequest &request,
-        std::string instanceKey = "");
+        const std::string &instanceKey = "");
 
     /**
      * @brief Cancels a published notification.
@@ -235,7 +235,7 @@ public:
      *                       Otherwise, this method does not take effect.
      * @return Returns cancel notification result.
      */
-    static ErrCode CancelNotification(int32_t notificationId, std::string instanceKey = "");
+    static ErrCode CancelNotification(int32_t notificationId, const std::string &instanceKey = "");
 
     /**
      * @brief Cancels a published notification matching the specified label and notificationId.
@@ -245,7 +245,7 @@ public:
      * @return Returns cancel notification result.
      */
     static ErrCode CancelNotification(const std::string &label, int32_t notificationId,
-        std::string instanceKey = "");
+        const std::string &instanceKey = "");
 
     /**
      * @brief Cancels all the published notifications.
@@ -253,7 +253,7 @@ public:
      * @note To cancel a specified notification, see CancelNotification(int32_t).
      * @return Returns cancel all notifications result.
      */
-    static ErrCode CancelAllNotifications(std::string instanceKey = "");
+    static ErrCode CancelAllNotifications(const std::string &instanceKey = "");
 
     /**
      * @brief Cancels a published agent notification.
@@ -293,7 +293,7 @@ public:
      * @return Returns get active notifications result.
      */
     static ErrCode GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request,
-        std::string instanceKey = "");
+        const std::string &instanceKey = "");
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -775,7 +775,7 @@ public:
      * @param groupName Indicates the specified group name.
      * @return Returns cancel group result.
      */
-    static ErrCode CancelGroup(const std::string &groupName, std::string instanceKey = "");
+    static ErrCode CancelGroup(const std::string &groupName, const std::string &instanceKey = "");
 
     /**
      * @brief Remove the notification of the specified group of the specified application.
@@ -996,7 +996,7 @@ public:
      * @param badgeNumber The badge number.
      * @return Returns set badge number result.
      */
-    static ErrCode SetBadgeNumber(int32_t badgeNumber, std::string instanceKey = "");
+    static ErrCode SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey = "");
 
     /**
      * @brief Set badge number by bundle.
