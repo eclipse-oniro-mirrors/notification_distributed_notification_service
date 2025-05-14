@@ -133,8 +133,7 @@ export default namespace notificationManager {
 
     export native function nativeIsNotificationEnabled(): boolean;
     export native function nativeIsNotificationEnabledWithId(userId : number): boolean;
-    export native function nativeIsNotificationEnabledWithBundleOption(
-        userId?: number, bundleOption?: BundleOption): boolean;
+    export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
 
         export function setNotificationEnable(bundle: BundleOption, enable: boolean): Promise<void> {
@@ -428,24 +427,24 @@ export default namespace notificationManager {
 
     export function removeDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-        let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfile(templates); });
-        p.then((data: NullishType): void => {
-            resolve(undefined);
-        }, (error: Object): void => {
-            reject(error);
-        });
+            let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfile(templates); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Object): void => {
+                reject(error);
+            });
         });
         return pPromise;
     }
 
     export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-        let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
-        p.then((data: NullishType): void => {
-            resolve(undefined);
-        }, (error: Object): void => {
-            reject(error);
-        });
+            let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Object): void => {
+                reject(error);
+            });
         });
         return pPromise;
     }
@@ -457,8 +456,6 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
         }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
         })
     }
 
@@ -497,8 +494,7 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
         }, (error: Object): void => {
-            let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+
         })
     }
 
