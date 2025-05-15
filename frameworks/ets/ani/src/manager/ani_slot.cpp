@@ -84,11 +84,9 @@ void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enu
 }
 
 void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable,
-    ani_object isForceControl)
+    ani_boolean isForceControl)
 {
     ANS_LOGD("AniSetNotificationEnableSlotWithForce enter ");
-    ani_boolean isUndefined = false;
-    ani_boolean res = 0.0;
     Notification::NotificationBundleOption option;
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!(NotificationSts::SlotTypeEtsToC(env, type, slotType))
@@ -97,19 +95,10 @@ void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption
         return;
     }
     int returncode = 0;
-	env->Reference_IsUndefined(isForceControl, &isUndefined);
-	if(isUndefined) {
-        bool forceControl = false;
-	    returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
-            NotificationSts::AniBooleanToBool(enable), forceControl);
-	} else {
-        if (ANI_OK !=env->Object_CallMethodByName_Boolean(isForceControl, "booleanValue", nullptr, &res)){
-            NotificationSts::ThrowStsErroWithLog(env, "SetNotificationEnableSlot Object_CallMethodByName_Boolean Fail");
-            return;
-        }
-        returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
-            NotificationSts::AniBooleanToBool(enable), NotificationSts::AniBooleanToBool(res));
-	}
+
+    returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
+        NotificationSts::AniBooleanToBool(enable), NotificationSts::AniBooleanToBool(isForceControl));
+
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
         AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
