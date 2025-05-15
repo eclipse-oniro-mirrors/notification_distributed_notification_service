@@ -66,12 +66,16 @@ private:
         const string &deviceType,
         const map<string, vector<shared_ptr<ReminderAffected>>> &reminderFilterDevice,
         const sptr<NotificationRequest> &request,
-        set<string> &validDevices,
+        set<string> &syncDevices,
+        set<string> &smartDevices,
+        shared_ptr<NotificationFlags> defaultFlag,
+        map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
     bool HandleAffectedReminder(
         const string &deviceType,
         const shared_ptr<ReminderAffected> &reminderAffected,
-        const set<string> &validDevices,
+        const set<string> &smartDevices,
+        map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const;
     void GetReminderAffecteds(
         const map<string, vector<shared_ptr<ReminderAffected>>> &reminderFilterDevice,
@@ -80,7 +84,11 @@ private:
     void GetDeviceStatusByType(const string &deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
     bool IsNeedSynergy(const NotificationConstant::SlotType &slotType,
         const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
-    void InitValidDevices(set<string> &validDevices, const sptr<NotificationRequest> &request) const;
+    bool GetAppSwitch(const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
+    bool GetSmartSwitch(const string &deviceType) const;
+    void InitValidDevices(set<string> &syncDevices, set<string> &smartDevices,
+        map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
+        const sptr<NotificationRequest> &request) const;
     bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;
