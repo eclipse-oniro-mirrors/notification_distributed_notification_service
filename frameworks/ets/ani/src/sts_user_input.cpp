@@ -40,7 +40,7 @@ ani_object WarpUserInput(ani_env *env, std::shared_ptr<Notification::Notificatio
         "Lnotification/notificationUserInput/NotificationUserInputInner;", userInputCls, userInputObject));
     ani_string stringValue;
     RETURN_NULL_IF_FALSE(GetAniStringByString(env, userInput->GetInputKey(), stringValue));
-    RETURN_NULL_IF_FALSE(CallSetterOptional(env, userInputCls, userInputObject, "inputKey", stringValue));
+    RETURN_NULL_IF_FALSE(CallSetter(env, userInputCls, userInputObject, "inputKey", stringValue));
     return userInputObject;
 }
 }

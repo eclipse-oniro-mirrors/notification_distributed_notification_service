@@ -856,14 +856,14 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls, const OHOS::Not
     std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
     if (additionalData) {
         ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
-        RETURN_FALSE_IF_FALSE(CallSetterOptional(env, cls, object, "extraInfo", extraInfo));
+        RETURN_FALSE_IF_FALSE(CallSetter(env, cls, object, "extraInfo", extraInfo));
     }
 
     // actionButtons?: Array<NotificationActionButton>
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons = request->GetActionButtons();
     ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
     if (actionButtonsArrayObj != nullptr) {
-        RETURN_FALSE_IF_FALSE(CallSetterOptional(env, cls, object, "actionButtons", actionButtonsArrayObj));
+        RETURN_FALSE_IF_FALSE(CallSetter(env, cls, object, "actionButtons", actionButtonsArrayObj));
     }
     // template?: NotificationTemplate
     std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();

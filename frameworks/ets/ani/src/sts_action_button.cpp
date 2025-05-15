@@ -87,7 +87,7 @@ ani_object WrapNotificationActionButton(ani_env* env,
     // title: string;
     ani_string stringValue = nullptr;
     RETURN_NULL_IF_FALSE(GetAniStringByString(env, actionButton->GetTitle(), stringValue));
-    RETURN_NULL_IF_FALSE(CallSetterOptional(env, iconButtonCls, iconButtonObject, "title", stringValue));
+    RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "title", stringValue));
     // wantAgent: WantAgent;
     //napi处理过程
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
@@ -96,7 +96,7 @@ ani_object WrapNotificationActionButton(ani_env* env,
         return nullptr;
     } else {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
-        RETURN_NULL_IF_FALSE(CallSetterOptional(env, iconButtonCls, iconButtonObject, "wantAgent", wantAgent));
+        RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "wantAgent", wantAgent));
     }
 
     // need to do

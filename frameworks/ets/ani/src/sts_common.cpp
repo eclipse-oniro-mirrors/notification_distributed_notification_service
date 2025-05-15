@@ -146,7 +146,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
         ANS_LOGI("Object_GetPropertyByName_Ref fail, status: %{public}d", status);
         return status;
     }
-    if ((status = env->Reference_IsUndefined(uidRef, &isUndefined)) == ANI_OK) {
+    if ((status = env->Reference_IsUndefined(uidRef, &isUndefined)) != ANI_OK) {
         ANS_LOGI("Reference_IsUndefined failed, status : %{public}d", status);
         return status;
     }
