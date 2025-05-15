@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_NOTIFICATION_SERVER_ANI_SUBSCRIBE_REMOVE_H
-#define OHOS_DISTRIBUTED_NOTIFICATION_SERVER_ANI_SUBSCRIBE_REMOVE_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_REMOVE_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_REMOVE_H
 #include "ani.h"
+
 namespace OHOS {
 namespace NotificationSubScribeSts {
 void AniRemoveForBundle(ani_env *env, ani_object bundle, ani_object notificationKey, ani_object reasonEnum);

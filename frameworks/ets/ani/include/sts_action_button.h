@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_NOTIFICATION_SERVER_STS_ACTION_BUTTON_H
-#define OHOS_DISTRIBUTED_NOTIFICATION_SERVER_STS_ACTION_BUTTON_H
-
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_ACTION_BUTTON_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_ACTION_BUTTON_H
 #include "ani.h"
 #include "pixel_map.h"
 #include "want_params.h"
@@ -23,7 +22,6 @@
 #include "notification_constant.h"
 #include "notification_user_input.h"
 #include "notification_action_button.h"
-
 
 namespace OHOS {
 namespace NotificationSts {

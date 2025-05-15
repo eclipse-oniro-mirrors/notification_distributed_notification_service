@@ -129,7 +129,7 @@ export default namespace notificationManager {
     export native function nativeSetNotificationEnableSlot(
         bundle: BundleOption, type: SlotType, enable: boolean): void;
     export native function nativeSetNotificationEnableSlotWithForce(
-        bundle: BundleOption, type: SlotType, enable: boolean, isForceControl?: boolean): void;
+        bundle: BundleOption, type: SlotType, enable: boolean, isForceControl: boolean): void;
 
     export native function nativeIsNotificationEnabled(): boolean;
     export native function nativeIsNotificationEnabledWithId(userId : number): boolean;
