@@ -98,16 +98,22 @@ HWTEST_F(SmartReminderCenterTest, HandleAffectedReminder_00001, Function | Small
 
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
         make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    statusMap.insert(pair<string,
+        bitset<DistributedDeviceStatus::STATUS_SIZE>>("test", bitset<DistributedDeviceStatus::STATUS_SIZE>(0)));
 
     auto res = smartReminderCenter_->HandleAffectedReminder(
-        deviceType, reminderAffected, validDevices, notificationFlagsOfDevices);
+        deviceType, reminderAffected, validDevices,
+        statusMap,  notificationFlagsOfDevices);
     ASSERT_TRUE(res);
 
     auto affectedByTwo = std::make_pair("test111", "1111");
     affectedBy.push_back(affectedByTwo);
     reminderAffected->affectedBy_ = affectedBy;
     res = smartReminderCenter_->HandleAffectedReminder(
-        deviceType, reminderAffected, validDevices, notificationFlagsOfDevices);
+        deviceType, reminderAffected, validDevices,
+        statusMap,  notificationFlagsOfDevices);
     ASSERT_FALSE(res);
 }
 
@@ -167,9 +173,11 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00001, Function | SmallTest |
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
 
     set<string> validDevices;
+    set<string> smartDevices;
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
     NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
                 request->GetSlotType(), "headset", true);
-    smartReminderCenter_->InitValidDevices(validDevices, request);
+    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap,  request);
     ASSERT_EQ(request->GetNotificationControlFlags(), 0);
 }
 
@@ -199,7 +207,9 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00002, Function | SmallTest |
     ASSERT_EQ(res, 0);
 
     set<string> validDevices;
-    smartReminderCenter_->InitValidDevices(validDevices, request);
+    set<string> smartDevices;
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
     ASSERT_EQ(request->GetNotificationControlFlags(), 0);
 }
 }   //namespace Notification

@@ -554,6 +554,29 @@ bool NotificationSubscriberManager::IsDeviceTypeSubscriberd(const std::string de
     ANS_LOGE("device not subscribe, device = %{public}s", deviceType.c_str());
     return false;
 }
+
+ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
+    const std::string deviceType,
+    const sptr<NotificationRequest> &request,
+    bool &result)
+{
+    for (auto record : subscriberRecordList_) {
+        if (record->deviceType.compare(deviceType) != 0) {
+            continue;
+        }
+        sptr<Notification> notification = new (std::nothrow) Notification(request);
+        if (notification == nullptr) {
+            ANS_LOGE("Failed to create notification");
+            return ERR_ANS_NO_MEMORY;
+        }
+        if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
+            result = true;
+            return ERR_OK;
+        }
+    }
+    result = false;
+    return ERR_OK;
+}
 #endif
 
 void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,

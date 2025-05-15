@@ -151,6 +151,8 @@ public:
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();
     bool IsDeviceTypeSubscriberd(const std::string deviceType);
+    ErrCode IsDeviceTypeAffordConsume(const std::string deviceType,
+        const sptr<NotificationRequest> &request, bool &result);
 #endif
     void NotifyApplicationInfoNeedChanged(const std::string& bundleName);
 
