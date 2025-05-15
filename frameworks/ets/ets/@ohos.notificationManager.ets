@@ -257,7 +257,10 @@ export default namespace notificationManager {
 
     export function setNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean, isForceControl?: boolean): Promise<void>
     {
-        let forceControl:boolean = isForceControl != undefined ? isForceControl : false;
+        let forceControl: boolean = false;
+        if (isForceControl != undefined) {
+            forceControl = isForceControl;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, forceControl); });
             p.then((data: NullishType): void => {
