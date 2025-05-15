@@ -892,6 +892,7 @@ public:
     void OnScreenOff();
 #endif
     void OnResourceRemove(int32_t userId);
+    void OnUserStopped(int32_t userId);
     void OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
@@ -1344,7 +1345,7 @@ private:
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
-        const int32_t &userId, sptr<Notification> &notification);
+        const int32_t &userId, sptr<Notification> &notification, bool removeAll = false);
     bool RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const int32_t ownerUid, const int32_t notificationId);
@@ -1512,7 +1513,7 @@ private:
     static ErrCode SetLockScreenPictureToDb(const sptr<NotificationRequest> &request);
     static ErrCode GetLockScreenPictureFromDb(NotificationRequest *request);
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
-    ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason, bool isAsync = false);
+    ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason, bool isAsync = false, bool removeAll = false);
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
         const sptr<NotificationBundleOption> &bundleOption);

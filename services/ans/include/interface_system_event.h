@@ -30,6 +30,7 @@ struct ISystemEvent {
     std::function<void()> onScreenOff;
 #endif
     std::function<void(int32_t userId)> onResourceRemove;
+    std::function<void(int32_t userId)> OnUserStopped;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleDataCleared;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleAdd;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleUpdate;

@@ -308,6 +308,11 @@ public:
     static const int32_t DISTRIBUTED_COLLABORATIVE_DELETE = 32;
 
     /**
+     * Indicates that a notification is deleted because this user is removed.
+     */
+    static const int32_t USER_LOGOUT_REASON_DELETE = 33;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;

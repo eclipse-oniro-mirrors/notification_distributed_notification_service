@@ -1443,6 +1443,11 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
     DeleteAllByUserInner(userId, NotificationConstant::USER_REMOVED_REASON_DELETE, true);
 }
 
+void AdvancedNotificationService::OnUserStopped(int32_t userId)
+{
+    DeleteAllByUserInner(userId, NotificationConstant::USER_LOGOUT_REASON_DELETE, true, true);
+}
+
 ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -1462,7 +1467,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId, int32_t deleteReason,
-    bool isAsync)
+    bool isAsync, bool removeAll)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
@@ -1494,7 +1499,7 @@ ErrCode AdvancedNotificationService::DeleteAllByUserInner(const int32_t &userId,
 #endif
             sptr<Notification> notification = nullptr;
 
-            *result = RemoveFromNotificationListForDeleteAll(key, userId, notification);
+            *result = RemoveFromNotificationListForDeleteAll(key, userId, notification, removeAll);
             if ((*result != ERR_OK) || (notification == nullptr)) {
                 continue;
             }
