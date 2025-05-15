@@ -151,10 +151,12 @@ export default namespace notificationManager {
     export function setNotificationEnable(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void {
         let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
         p.then((data: NullishType): void => {
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
-        })
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        });
     }
 
     export function isNotificationEnabled(bundleOption: BundleOption, callback: AsyncCallback<boolean>): void
@@ -245,16 +247,19 @@ export default namespace notificationManager {
     {
         let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, isForceControl); });
         p.then((data: NullishType): void => {
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
         });
     }
 
     export function setNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean, isForceControl?: boolean): Promise<void>
     {
+        let forceControl:boolean = isForceControl != undefined ? isForceControl : false;
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, isForceControl); });
+            let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, forceControl); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
             }, (error: Object): void => {
@@ -268,9 +273,11 @@ export default namespace notificationManager {
     {
         let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlot(bundle, type, enable); });
         p.then((data: NullishType): void => {
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
         })
     }
 
@@ -293,9 +300,12 @@ export default namespace notificationManager {
         let p = taskpool.execute((): boolean => { return nativeIsNotificationSlotEnabled(bundle, type); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
         }, (error: Object): void => {
+             let ret : boolean = false;
+            let err: BusinessError = error as BusinessError;
+            callback(err, ret);
         })
     }
 
@@ -587,7 +597,7 @@ export default namespace notificationManager {
     export function cancel(id: number, label: string, callback: AsyncCallback<void>): void {
         let p = taskpool.execute((): void => { return nativeCancelWithIdLabel(id, label); });
         p.then((data: NullishType): void => {
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
         })
@@ -596,7 +606,7 @@ export default namespace notificationManager {
     export function cancel(id: number, callback: AsyncCallback<void>): void {
         let p = taskpool.execute((): void => { return nativeCancelWithId(id); });
         p.then((data: NullishType): void => {
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
         })
@@ -629,7 +639,7 @@ export default namespace notificationManager {
     export function cancelAll(callback: AsyncCallback<void>): void {
         let p = taskpool.execute((): void => { return nativeCancelAll(); });
         p.then((data: NullishType): void => {
-            let err: BusinessError = {code: 1, data: undefined};
+            let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
         })

@@ -37,7 +37,7 @@ ani_boolean AniIsNotificationEnabled(ani_env *env)
     return NotificationSts::BoolToAniBoolean(allowed);
 }
 
-ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_int userId)
+ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_double userId)
 {
     ANS_LOGD("AniIsNotificationEnabledWithId call");
     bool allowed = false;
