@@ -150,6 +150,7 @@ int32_t NotificationDataMgr::InitCreatedTables()
         createdTables_.insert(tableName);
     } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
     absSharedResultSet->Close();
+    ANS_LOGI("create tables successfully");
     return NativeRdb::E_OK;
 }
 
@@ -172,7 +173,7 @@ int32_t NotificationDataMgr::Destroy()
         ANS_LOGE("failed to destroy db store");
         return NativeRdb::E_ERROR;
     }
-    ANS_LOGD("destroy db store successfully");
+    ANS_LOGI("destroy db store successfully");
     return NativeRdb::E_OK;
 }
 
@@ -718,6 +719,10 @@ int32_t NotificationDataMgr::RestoreForMasterSlaver()
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGI("RestoreForMasterSlaver start");
     int32_t result =  rdbStore_->Restore("");
+    if (result == NativeRdb::E_SQLITE_CORRUPT) {
+        Destroy();
+        Init();
+    }
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
     return result;
 }

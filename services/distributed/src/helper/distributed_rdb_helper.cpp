@@ -112,6 +112,7 @@ int32_t DistributedRdbHelper::Init()
         ANS_LOGE("notification rdb init fail");
         return NativeRdb::E_ERROR;
     }
+    ANS_LOGI("Create rdbStore successfully");
     return NativeRdb::E_OK;
 }
 
@@ -130,7 +131,7 @@ int32_t DistributedRdbHelper::Destroy()
         ANS_LOGE("failed to destroy db store");
         return NativeRdb::E_ERROR;
     }
-    ANS_LOGD("destroy db store successfully");
+    ANS_LOGI("destroy db store successfully");
     return NativeRdb::E_OK;
 }
 
@@ -333,6 +334,10 @@ int32_t DistributedRdbHelper::RestoreForMasterSlaver()
 {
     ANS_LOGI("RestoreForMasterSlaver start");
     int32_t result = rdbStore_->Restore("");
+    if (result == NativeRdb::E_SQLITE_CORRUPT) {
+        Destroy();
+        Init();
+    }
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
     return result;
 }
