@@ -12,12 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "distributed_manager.h"
-
 #include <dlfcn.h>
 #include <cstdint>
-#include <unordered_set>
 #include <utility>
+
+#include "distributed_server.h"
+#include "distributed_client.h"
+#include "distributed_service.h"
+#include "distributed_local_config.h"
+#include "ans_log_wrapper.h"
+#include "analytics_util.h"
 
 #define SYMBOL_EXPORT __attribute__ ((visibility("default")))
 namespace OHOS {
@@ -29,41 +33,51 @@ extern "C" {
 SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
     DistributedDeviceConfig config)
 {
-    return DistributedManager::GetInstance().InitLocalDevice(deviceId, deviceType, config);
+    ANS_LOGI("InitLocalDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));
+    DistributedLocalConfig::GetInstance().SetLocalDevice(config);
+    return DistributedService::GetInstance().InitService(deviceId, deviceType);
 }
 
 SYMBOL_EXPORT void AddDevice(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId)
 {
-    DistributedManager::GetInstance().AddDevice(deviceId, deviceType, networkId);
+    ANS_LOGI("InitLocalDevice %{public}s %{public}d %{public}s.", StringAnonymous(deviceId).c_str(),
+        (int32_t)(deviceType), StringAnonymous(networkId).c_str());
+    DistributedDeviceInfo peerDevice = DistributedDeviceInfo(deviceType, deviceId, networkId);
+    DistributedClient::GetInstance().AddDevice(peerDevice);
+    DistributedService::GetInstance().AddDevice(peerDevice);
 }
 
 SYMBOL_EXPORT void ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
 {
-    DistributedManager::GetInstance().ReleaseDevice(deviceId, deviceType);
+    ANS_LOGI("ReleaseDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));
+    DistributedClient::GetInstance().ReleaseDevice(deviceId, deviceType);
+    DistributedService::GetInstance().UnSubscribeNotifictaion(deviceId, deviceType);
 }
 
 SYMBOL_EXPORT void RefreshDevice(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId)
 {
-    DistributedManager::GetInstance().RefreshDevice(deviceId, deviceType, networkId);
+    ANS_LOGI("RefreshDevice %{public}s %{public}d %{public}s.", StringAnonymous(deviceId).c_str(),
+        (int32_t)(deviceType), StringAnonymous(networkId).c_str());
+    DistributedClient::GetInstance().RefreshDevice(deviceId, deviceType, networkId);
 }
 
 SYMBOL_EXPORT void ReleaseLocalDevice()
 {
-    DistributedManager::GetInstance().ReleaseLocalDevice();
+    DistributedService::GetInstance().DestoryService();
 }
 
 SYMBOL_EXPORT void InitHACallBack(
     std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
 {
-    DistributedManager::GetInstance().InitHACallBack(callback);
+    AnalyticsUtil::GetInstance().InitHACallBack(callback);
 }
 
 SYMBOL_EXPORT void InitSendReportCallBack(
     std::function<void(int32_t, int32_t, std::string)> callback)
 {
-    DistributedManager::GetInstance().InitSendReportCallBack(callback);
+    AnalyticsUtil::GetInstance().InitSendReportCallBack(callback);
 }
 
 #ifdef __cplusplus

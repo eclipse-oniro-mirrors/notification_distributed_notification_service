@@ -55,7 +55,8 @@
       "distributed_notification_service_feature_disturb_manager",
       "distributed_notification_service_feature_slot_manager",
       "distributed_notification_service_feature_additional_config",
-      "distributed_notification_service_feature_open_notification_settings"
+      "distributed_notification_service_feature_open_notification_settings",
+      "distributed_notification_service_feature_distributed_master"
     ],
     "adapted_system_type": [
       "standard"
