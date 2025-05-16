@@ -547,8 +547,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_001, Function | 
 {
     std::shared_ptr<NotificationActionButton> actionButton =
         std::make_shared<NotificationActionButton>();
-    std::shared_ptr<NotificationUserInput> userInput =
-        std::make_shared<NotificationUserInput>();
+    std::shared_ptr<NotificationUserInput> userInput = NotificationUserInput::Create("userInput");
     actionButton->AddNotificationUserInput(userInput);
 
     sptr<NotificationRequest> request(new NotificationRequest());
@@ -576,7 +575,7 @@ HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_001, Function | 
 HWTEST_F(NotificationSubscriberManagerTest, ConsumeRecordFilter_002, Function | SmallTest | Level1)
 {
     std::shared_ptr<NotificationActionButton> actionButton = std::make_shared<NotificationActionButton>();
-    std::shared_ptr<NotificationUserInput> userInput = std::make_shared<NotificationUserInput>();
+    std::shared_ptr<NotificationUserInput> userInput = NotificationUserInput::Create("userInput");
     actionButton->AddNotificationUserInput(userInput);
 
     sptr<NotificationRequest> request(new NotificationRequest());

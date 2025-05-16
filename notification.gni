@@ -67,6 +67,7 @@ declare_args() {
   distributed_notification_service_feature_slot_manager = true
   distributed_notification_service_feature_additional_config = true
   distributed_notification_service_feature_open_notification_settings = true
+  distributed_notification_service_feature_distributed_master = true
   distributed_notification_service_disable_control = false
   notification_smart_reminder_supported = true
   ans_config_policy_enable = true

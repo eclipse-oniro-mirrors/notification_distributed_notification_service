@@ -96,25 +96,24 @@ ohos_shared_library("libdans") {
   ]
 
   sources = [
+    "src/base/distributed_client.cpp",
+    "src/base/distributed_liveview_all_scenarios_extension_wrapper.cpp",
+    "src/base/distributed_local_config.cpp",
+    "src/base/distributed_server.cpp",
+    "src/base/distributed_socket.cpp",
     "src/helper/ability_manager_helper.cpp",
     "src/helper/analytics_util.cpp",
     "src/helper/bundle_resource_helper.cpp",
     "src/helper/distributed_operation_connection.cpp",
     "src/helper/distributed_preference.cpp",
     "src/helper/distributed_rdb_helper.cpp",
-    "src/soft_bus/distributed_client.cpp",
     "src/soft_bus/distributed_cmd_service.cpp",
     "src/soft_bus/distributed_extern_intferface.cpp",
-    "src/soft_bus/distributed_liveview_all_scenarios_extension_wrapper.cpp",
-    "src/soft_bus/distributed_local_config.cpp",
-    "src/soft_bus/distributed_manager.cpp",
     "src/soft_bus/distributed_observer_service.cpp",
     "src/soft_bus/distributed_operation_service.cpp",
     "src/soft_bus/distributed_publish_service.cpp",
-    "src/soft_bus/distributed_server.cpp",
     "src/soft_bus/distributed_service.cpp",
     "src/soft_bus/distributed_service_uitls.cpp",
-    "src/soft_bus/distributed_socket.cpp",
     "src/soft_bus/distributed_subscribe_service.cpp",
     "src/soft_bus/distributed_subscriber.cpp",
     "src/tlv_box/batch_remove_box.cpp",
@@ -130,6 +129,7 @@ ohos_shared_library("libdans") {
   ]
 
   include_dirs = [
+    "${services_path}/distributed/include/base",
     "${services_path}/distributed/include/helper",
     "${services_path}/distributed/include/soft_bus",
     "${services_path}/distributed/include/tlv_box",
