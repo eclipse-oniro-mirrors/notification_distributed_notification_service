@@ -64,7 +64,6 @@ void AdvancedNotificationServiceAbility::OnStart()
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
 #endif
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
-    LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->InitExtentionWrapper();
 }
 
 void AdvancedNotificationServiceAbility::OnStop()
