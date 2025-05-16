@@ -2394,5 +2394,20 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_005, Function | SmallTest | Le
     EXPECT_EQ(invalid, nullptr);
     delete invalid;
 }
+
+/**
+ * @tc.name: ReminderRequestTest_006
+ * @tc.desc: Test StringToInt parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_006, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    child.SetRingChannel(ReminderRequest::RingChannel::ALARM);
+    EXPECT_EQ(child.GetRingChannel(), ReminderRequest::RingChannel::ALARM);
+    child.SetRingChannel(ReminderRequest::RingChannel::MEDIA);
+    EXPECT_EQ(child.GetRingChannel(), ReminderRequest::RingChannel::MEDIA);
+}
 }
 }

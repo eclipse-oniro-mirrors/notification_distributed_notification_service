@@ -149,6 +149,7 @@ ReminderRequest::ReminderRequest(const ReminderRequest &other)
     this->customButtonUri_ = other.customButtonUri_;
     this->groupId_ = other.groupId_;
     this->customRingUri_ = other.customRingUri_;
+    this->ringChannel_ = other.ringChannel_;
     this->creatorBundleName_ = other.creatorBundleName_;
     this->titleResourceId_ = other.titleResourceId_;
     this->contentResourceId_ = other.contentResourceId_;
@@ -943,6 +944,16 @@ uint64_t ReminderRequest::GetTriggerTimeInMilli() const
     return triggerTimeInMilli_;
 }
 
+void ReminderRequest::SetRingChannel(const RingChannel type)
+{
+    ringChannel_ = type;
+}
+
+ReminderRequest::RingChannel ReminderRequest::GetRingChannel() const
+{
+    return ringChannel_;
+}
+
 int32_t ReminderRequest::GetUserId() const
 {
     return userId_;
@@ -1224,6 +1235,8 @@ bool ReminderRequest::WriteParcel(Parcel &parcel) const
     WRITE_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
     WRITE_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
+    int32_t ringChannel = static_cast<int32_t>(ringChannel_);
+    WRITE_INT32_RETURN_FALSE_LOG(parcel, ringChannel, "ringChannel");
 
     if (!MarshallingActionButton(parcel)) {
         return false;
@@ -1362,6 +1375,9 @@ bool ReminderRequest::ReadFromParcel(Parcel &parcel)
     READ_INT32_RETURN_FALSE_LOG(parcel, contentResourceId_, "contentResourceId");
     READ_INT32_RETURN_FALSE_LOG(parcel, expiredContentResourceId_, "expiredContentResourceId");
     READ_INT32_RETURN_FALSE_LOG(parcel, snoozeContentResourceId_, "snoozeContentResourceId");
+    int32_t ringChannel = static_cast<int32_t>(ReminderRequest::RingChannel::ALARM);
+    READ_INT32_RETURN_FALSE_LOG(parcel, ringChannel, "ringChannel");
+    ringChannel_ = static_cast<ReminderRequest::RingChannel>(ringChannel);
     if (!ReadActionButtonFromParcel(parcel)) {
         return false;
     }

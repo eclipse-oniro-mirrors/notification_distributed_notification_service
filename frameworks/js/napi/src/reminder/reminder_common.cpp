@@ -94,6 +94,21 @@ bool ReminderCommon::GenActionButtons(
     return true;
 }
 
+bool ReminderCommon::GenRingChannel(const napi_env& env, const napi_value& value,
+    std::shared_ptr<ReminderRequest>& reminder)
+{
+    int32_t ringChannel = static_cast<int32_t>(ReminderRequest::RingChannel::ALARM);
+    if (GetInt32(env, value, ReminderAgentNapi::RING_CHANNEL, ringChannel, false)) {
+        if (!(ReminderRequest::RingChannel(ringChannel) == ReminderRequest::RingChannel::ALARM ||
+            ReminderRequest::RingChannel(ringChannel) == ReminderRequest::RingChannel::MEDIA)) {
+            ANSR_LOGE("Wrong argument type:%{public}s. ringChannel not support.", RING_CHANNEL);
+            return false;
+        }
+        reminder->SetRingChannel(static_cast<ReminderRequest::RingChannel>(ringChannel));
+    }
+    return true;
+}
+
 void ReminderCommon::HandleActionButtonTitle(const napi_env &env, const napi_value &actionButton,
     std::shared_ptr<ReminderRequest>& reminder, const char* str, int32_t buttonType)
 {
@@ -496,6 +511,11 @@ napi_value ReminderCommon::GenReminder(
 
     // actionButtons
     if (!GenActionButtons(env, value, reminder, isSysApp)) {
+        return nullptr;
+    }
+
+    // ringChannel
+    if (!GenRingChannel(env, value, reminder)) {
         return nullptr;
     }
 

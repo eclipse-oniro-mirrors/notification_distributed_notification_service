@@ -22,8 +22,6 @@ constexpr int32_t REMINDER_AGENT_SERVICE_ID = 3204;
 REGISTER_SYSTEM_ABILITY_BY_ID(ReminderAgentServiceAbility, REMINDER_AGENT_SERVICE_ID, false);
 }
 
-const std::string EXTENSION_BACKUP = "backup";
-const std::string EXTENSION_RESTORE = "restore";
 constexpr int64_t INIT_DELAY_TIME = 60 * 1000 * 1000;
 
 ReminderAgentServiceAbility::ReminderAgentServiceAbility(const int32_t systemAbilityId, bool runOnCreate)

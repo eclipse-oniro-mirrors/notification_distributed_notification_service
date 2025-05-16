@@ -793,6 +793,11 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
     napi_create_string_utf8(env, reminder.GetCustomRingUri().c_str(), NAPI_AUTO_LENGTH, &value);
     napi_set_named_property(env, result, CUSTOM_RING_URI, value);
 
+    // type
+    ReminderRequest::RingChannel channel = reminder.GetRingChannel();
+    napi_create_int32(env, static_cast<int32_t>(channel), &value);
+    napi_set_named_property(env, result, RING_CHANNEL, value);
+
     // wantAgent
     ParseWantAgent(env, reminder, result);
 

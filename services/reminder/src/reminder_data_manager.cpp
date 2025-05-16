@@ -49,6 +49,10 @@
 #include "notification_helper.h"
 #include "reminder_datashare_helper.h"
 #include "reminder_calendar_share_table.h"
+#ifdef PLAYER_FRAMEWORK_ENABLE
+#include "audio_session_manager.h"
+#include "audio_stream_info.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -1626,6 +1630,12 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
             return;
         }
     }
+    auto audioManager = AudioStandard::AudioSessionManager::GetInstance();
+    if (audioManager != nullptr && reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA) {
+        AudioStandard::AudioSessionStrategy strategy;
+        strategy.concurrencyMode = AudioStandard::AudioConcurrencyMode::PAUSE_OTHERS;
+        audioManager->ActivateAudioSession(strategy);
+    }
     std::string customRingUri = reminder->GetCustomRingUri();
     if (customRingUri.empty()) {
         // use default ring
@@ -1649,7 +1659,9 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         }
         ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
     }
-    constexpr int32_t STREAM_ALARM = 4;
+    int32_t STREAM_ALARM = reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA ?
+        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) :
+        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
     constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
     Media::Format format;
     (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
@@ -1694,6 +1706,10 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
         soundPlayer_->Stop();
         soundPlayer_->Release();
         soundPlayer_ = nullptr;
+    }
+    auto audioManager = AudioStandard::AudioSessionManager::GetInstance();
+    if (audioManager != nullptr && reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA) {
+        audioManager->DeactivateAudioSession();
     }
 #endif
     sptr<ReminderRequest> nullReminder = nullptr;
