@@ -35,6 +35,7 @@ public:
     explicit StsDistributedOperationCallback(ani_object promise, ani_resolver resolver);
     ~StsDistributedOperationCallback() override {};
     void OnOperationCallback(const int32_t operationResult) override;
+    void OnStsOperationCallback(ani_env *env, const int32_t operationResult);
     void SetVm(ani_vm *vm);
 private:
     ani_vm *etsVm_;

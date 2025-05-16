@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 #include "sts_common.h"
-
 #include "ans_log_wrapper.h"
+#include "ani_common_util.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -217,15 +217,15 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
 
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs)
 {
-    if (strs.empty()) {
-        return nullptr;
-    }
     int length = strs.size();
     ani_object arrayObj = newArrayClass(env, length);
+    if (strs.empty()) {
+        return arrayObj;
+    }
     ani_size i = 0;
     for (auto &str : strs) {
         ani_string aniStr;
-        RETURN_NULL_IF_FALSE(GetAniStringByString(env, str, aniStr) != ANI_OK);
+        RETURN_NULL_IF_FALSE((GetAniStringByString(env, str, aniStr) == ANI_OK));
         if (aniStr == nullptr) {
             return nullptr;
         }
@@ -417,14 +417,13 @@ ani_object newRecordClass(ani_env *env)
 
 ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64_t> values)
 {
-    if (values.empty()) {
-        return nullptr;
-    }
     ani_object arrayObj = newArrayClass(env, values.size());
     if (arrayObj == nullptr) {
         return nullptr;
     }
-
+    if (values.empty()) {
+        return arrayObj;
+    }
     for (size_t i = 0; i < values.size(); i++) {
         ani_object intObj = CreateDouble(env, static_cast<double>(values[i]));
         if (intObj == nullptr) {
@@ -443,9 +442,6 @@ ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64
 bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
     const std::vector<std::int64_t> &values)
 {
-    if (values.empty()) {
-        return false;
-    }
     ani_field field = nullptr;
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
     if (status != ANI_OK) {
@@ -473,6 +469,33 @@ bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &c
     ANI_FAILED_AND_RETURN(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor));
     outAniObj = {};
     ANI_FAILED_AND_RETURN(env->Object_New(cls, ctor, &outAniObj));
+    return true;
+}
+
+bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
+{
+    ani_class cls;
+    ani_status status;
+    ani_object obj;
+    ani_method ctor;
+    if (ANI_OK != (status = env->FindClass("Lescompat/Date;", &cls))) {
+        ANS_LOGD("error. not find class name 'Lescompat/Date;'. status %{public}d", status);
+        return false;
+    }
+    if (ANI_OK != (status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor))) {
+        ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
+        return false;
+    }
+    ani_object timeObj = CreateDouble(env, static_cast<double>(time));
+    if (timeObj == nullptr) {
+        ANS_LOGD("createDouble faild");
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_New(cls, ctor, &obj, timeObj))) {
+        ANS_LOGD("Object_New faild. status %{public}d", status);
+        return false;
+    }
+    outObj = obj;
     return true;
 }
 } // namespace NotificationSts

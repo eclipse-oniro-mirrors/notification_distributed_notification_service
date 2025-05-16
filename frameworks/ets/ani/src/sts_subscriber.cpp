@@ -165,7 +165,9 @@ bool WarpSubscribeCallbackDataArray(
 
 bool WarpEnabledNotificationCallbackData(ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj)
 {
+    ANS_LOGD("enter");
     ani_class cls;
+    ani_status status;
     const char *className = "Lnotification/notificationSubscriber/EnabledNotificationCallbackDataInner;";
     if (!CreateClassObjByClassName(env, className, cls, outObj)) {
         ANS_LOGD("CreateClassObjByClassName faild");
@@ -179,15 +181,17 @@ bool WarpEnabledNotificationCallbackData(ani_env *env, const std::shared_ptr<Ena
         ANS_LOGD("uid set faild.");
         return false;
     }
-    if (!SetOptionalFieldBoolean(env, cls, outObj, "enable", callbackData->GetEnable())) {
-        ANS_LOGD("Set enable faild.");
-        return false;
-    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outObj, "enable", BoolToAniBoolean(callbackData->GetEnable())))) {
+            ANS_LOGD("set enable faild. status %{public}d", status);
+            return false;
+        }
     return true;
 }
 
 bool WarpBadgeNumberCallbackData(ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj)
 {
+    ANS_LOGD("enter");
     ani_class cls;
     ani_object instanceKeyObj;
     const char *className = "Lnotification/notificationSubscriber/BadgeNumberCallbackDataInner;";

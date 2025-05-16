@@ -23,6 +23,7 @@
 #include "ani_get_active.h"
 #include "ani_publish.h"
 #include "ani_local_live_view.h"
+#include "ani_request_enable.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -86,7 +87,11 @@ void AniNotificationManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(AniIsNotificationEnabledWithId)},
         ani_native_function {"nativeIsNotificationEnabledWithBundleOption", nullptr,
             reinterpret_cast<void *>(AniIsNotificationEnabledWithBundleOption)},
-        ani_native_function {"nativeSetNotificationEnable", nullptr, reinterpret_cast<void *>(AniSetNotificationEnable)},
+        ani_native_function {"nativeSetNotificationEnable",
+            nullptr, reinterpret_cast<void *>(AniSetNotificationEnable)},
+        ani_native_function {"nativeRequestEnableNotification",
+            "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+            reinterpret_cast<void *>(AniRequestEnableNotification)},
     };
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());

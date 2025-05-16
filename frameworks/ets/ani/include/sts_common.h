@@ -26,6 +26,7 @@ namespace NotificationSts {
 bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);
+bool CreateDate(ani_env *env, int64_t time, ani_object &outObj);
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string &aniStr);
 ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
 bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString);

@@ -25,31 +25,45 @@
 
 namespace OHOS {
 namespace NotificationSubScribeSts {
+using namespace OHOS::Notification;
+
 void AniRemoveForBundle(ani_env *env, ani_object bundle, ani_object notificationKey, ani_object reasonEnum)
 {
     ANS_LOGD("AniRemoveForBundle enter");
     BundleOption option;
-    Notification::NotificationKey key;
+    NotificationKey key;
     int32_t reasonType = -1;
     if (!NotificationSts::UnwrapBundleOption(env, bundle, option)) {
         ANS_LOGD("bundle is valid");
+        std::string msg = "UnwrapBundleOption faild";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpNotificationKey(env, notificationKey, key)) {
         ANS_LOGD("notificationKey is valid");
+        std::string msg = "UnWarpNotificationKey faild";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
         ANS_LOGD("enum convert failed");
+        std::string msg = "UnWarpReasonEnum faild";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::IsValidRemoveReason(reasonType)) {
         ANS_LOGD("reasonType is valid");
+        std::string msg = "reasonType is valid";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
-    int ret = Notification::NotificationHelper::RemoveNotification(option, key.id, key.label, reasonType);
-    ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d",
-        ret, CJSystemapi::Notification::ErrorToExternal(ret));
+    int ret = NotificationHelper::RemoveNotification(option, key.id, key.label, reasonType);
+    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+    if (ret != ERR_OK) {
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+    }
 }
 
 void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEnum)
@@ -59,20 +73,30 @@ void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEn
     std::string hashCodeStd;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, hashCode, hashCodeStd)) {
         ANS_LOGD("hashCode is valid");
+        std::string msg = "hashCode is valid";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
         ANS_LOGD("enum convert failed");
+        std::string msg = "UnWarpReasonEnum faild";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::IsValidRemoveReason(reasonType)) {
         ANS_LOGD("reasonType is valid");
+        std::string msg = "reasonType is valid";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     ANS_LOGD("hashCode: %{public}s, reasonType: %{public}d", hashCodeStd.c_str(), reasonType);
-    int ret = Notification::NotificationHelper::RemoveNotification(hashCodeStd, reasonType);
-    ANS_LOGD("StsRemoveForHashCode ret %{public}d. ErrorToExternal %{public}d",
-        ret, CJSystemapi::Notification::ErrorToExternal(ret));
+    int ret = NotificationHelper::RemoveNotification(hashCodeStd, reasonType);
+    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    ANS_LOGD("StsRemoveForHashCode ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+    if (ret != ERR_OK) {
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+    }
 }
 
 void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reasonEnum)
@@ -82,19 +106,29 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
     int32_t reasonType;
     if (ANI_OK != NotificationSts::GetStringArrayByAniObj(env, hashCodes, hashCodesStd)) {
         ANS_LOGD("hashCodes is valid");
+        std::string msg = "hashCodes is valid";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
         ANS_LOGD("enum convert failed");
+        std::string msg = "UnWarpReasonEnum faild";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::IsValidRemoveReason(reasonType)) {
         ANS_LOGD("reasonType is valid");
+        std::string msg = "reasonType is valid";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
-    int ret = Notification::NotificationHelper::RemoveNotifications(hashCodesStd, reasonType);
-    ANS_LOGD("StsRemoveForHashCodes ret %{public}d. ErrorToExternal %{public}d",
-        ret, CJSystemapi::Notification::ErrorToExternal(ret));
+    int ret = NotificationHelper::RemoveNotifications(hashCodesStd, reasonType);
+    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    ANS_LOGD("StsRemoveForHashCodes ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+    if (ret != ERR_OK) {
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+    }
 }
 }
 }

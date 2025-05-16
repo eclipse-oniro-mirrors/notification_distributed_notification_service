@@ -63,9 +63,7 @@ export class NotificationSubscriberInner implements NotificationSubscriber {
 
     onConnect?: () => void;
 
-    onDisconnect?: () => void = ()=>{
-
-    };
+    onDisconnect?: () => void;
 
     onDestroy?: () => void;
 

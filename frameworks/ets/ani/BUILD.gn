@@ -54,6 +54,8 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_do_not_disturb_profile.cpp",
     "./src/manager/ani_get_active.cpp",
     "./src/manager/ani_manager.cpp",
+    "./src/manager/ani_request_enable.cpp",
+    "./src/manager/ani_ans_dialog_callback.cpp",
   ]
 
   cflags = []
@@ -80,6 +82,11 @@ ohos_shared_library("notification_manager_ani") {
     "image_framework:image_native",
     "image_framework:image_ani",
     "resource_management:global_resmgr",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ace_engine:ace_uicontent",
   ]
 
   innerapi_tags = [ "platformsdk" ]

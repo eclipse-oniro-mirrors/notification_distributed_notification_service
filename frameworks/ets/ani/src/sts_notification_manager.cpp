@@ -13,11 +13,25 @@
  * limitations under the License.
  */
 #include "sts_notification_manager.h"
-
 #include "sts_common.h"
+#include "ani_common_util.h"
 
 namespace OHOS {
 namespace NotificationSts {
+bool SetDate(ani_env *env, ani_object obj, ani_class cls, const char *name, int64_t time)
+{
+    ani_object timeObj;
+    if (!CreateDate(env, time, timeObj)) {
+        ANS_LOGD("CreateDate faild.");
+        return false;
+    }
+    if (!CallSetter(env, cls, obj, name, timeObj)) {
+        ANS_LOGD("set '%{public}s' faild.", name);
+        return false;
+    }
+    return true;
+}
+
 bool StsSlotTypeUtils::StsToC(const STSSlotType inType, SlotType &outType)
 {
     switch (inType) {
@@ -296,7 +310,7 @@ bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
     StsSlotTypeUtils::CToSts(slotType, stsSlotType);
     EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/#SlotType;", stsSlotType, enumItem);
+        "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem);
     return true;
 }
 
@@ -312,7 +326,7 @@ bool SlotLevelCToEts(ani_env *env, SlotLevel slotLevel, ani_enum_item &enumItem)
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
     StsSlotLevelUtils::CToSts(slotLevel, stsSlotLevel);
     EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/#SlotLevel;", stsSlotLevel, enumItem);
+        "L@ohos/notificationManager/notificationManager/SlotLevel;", stsSlotLevel, enumItem);
     return true;
 }
 
@@ -331,7 +345,7 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
     StsContentTypeUtils::CToSts(contentType, stsContentType);
     if(EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/#ContentType", stsContentType, enumItem)) {
+        "L@ohos/notificationManager/notificationManager/ContentType;", stsContentType, enumItem)) {
         return true;
     }
     return false;
@@ -389,12 +403,12 @@ bool WarpNotificationDoNotDisturbDate(
         ANS_LOGD("set type faild.");
         return false;
     }
-    if (!CallSetter(env, cls, obj, "begin", date->GetBeginDate())) {
+    if (!SetDate(env, obj, cls, "begin", date->GetBeginDate())) {
         ANS_LOGD("SetDate 'begin' faild.");
         return false;
     }
-    if (!CallSetter(env, cls, obj, "end", date->GetBeginDate())) {
-        ANS_LOGD("SetDate 'begin' faild.");
+    if (!SetDate(env, obj, cls, "end", date->GetEndDate())) {
+        ANS_LOGD("SetDate 'end' faild.");
         return false;
     }
     outObj = obj;

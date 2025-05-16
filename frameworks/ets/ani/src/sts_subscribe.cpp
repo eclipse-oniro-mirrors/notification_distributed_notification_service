@@ -21,6 +21,7 @@
 #include "sts_common.h"
 #include "sts_sorting_map.h"
 #include "sts_subscribe_info.h"
+#include "ani_common_util.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -33,9 +34,6 @@ void StsDistributedOperationCallback::OnOperationCallback(const int32_t operatio
 {
     std::lock_guard<std::mutex> l(lock_);
     if (isCall_) return;
-    ANS_LOGD("OnOperationCallback ENTER");
-    int32_t externalCode = OHOS::CJSystemapi::Notification::ErrorToExternal(operationResult);
-    ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalCode);
     if (etsVm_ == nullptr) {
         ANS_LOGD("etsVm_ is null");
         return;
@@ -48,27 +46,44 @@ void StsDistributedOperationCallback::OnOperationCallback(const int32_t operatio
         ANS_LOGD("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-
-    if (operationResult == 0) {
-        ANS_LOGD("OnOperationCallback Resolve");
-        ani_ref ref {};
-        if (ANI_OK != (aniResult = etsEnv->PromiseResolver_Resolve(resolver_, ref))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", aniResult);
-        }
-    } else {
-        ANS_LOGD("OnOperationCallback reject");
-        std::string errMsg = FindAnsErrMsg(externalCode);
-        ani_error rejection = static_cast<ani_error>(OHOS::AbilityRuntime::CreateStsError(etsEnv, externalCode, errMsg));
-        if (ANI_OK != (aniResult = etsEnv->PromiseResolver_Reject(resolver_, rejection))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", aniResult);
-        }
-    }
+    OnStsOperationCallback(etsEnv, operationResult);
     aniResult = etsVm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
         ANS_LOGD("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     isCall_ = true;
+}
+
+void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const int32_t operationResult)
+{
+    ANS_LOGD("ENTER");
+    if (env == nullptr) {
+        ANS_LOGD("env is nullptr");
+        return;
+    }
+    ani_status status = ANI_OK;
+    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(operationResult);
+    externalErrorCode =
+        (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? operationResult : externalErrorCode;
+    ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrorCode);
+
+    if (externalErrorCode == 0) {
+        ANS_LOGD("OnStsOperationCallback Resolve");
+        ani_object ret = OHOS::AppExecFwk::createInt(env, externalErrorCode);
+        if (ANI_OK != (status = env->PromiseResolver_Resolve(resolver_, static_cast<ani_ref>(ret)))) {
+            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            return;
+        }
+    } else {
+        ANS_LOGD("OnStsOperationCallback reject");
+        std::string errMsg = FindAnsErrMsg(externalErrorCode);
+        ani_error rejection =
+            static_cast<ani_error>(OHOS::AbilityRuntime::CreateStsError(env, externalErrorCode, errMsg));
+        if (ANI_OK != (status = env->PromiseResolver_Reject(resolver_, rejection))) {
+            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+        }
+    }
 }
 
 void StsDistributedOperationCallback::SetVm(ani_vm *vm)
@@ -86,6 +101,7 @@ void StsSubscriberInstance::OnCanceled(
     int32_t deleteReason)
 {
     ANS_LOGD("enter");
+#if 0
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -108,12 +124,14 @@ void StsSubscriberInstance::OnCanceled(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+#endif
 }
 void StsSubscriberInstance::OnConsumed(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
     ANS_LOGD("enter");
+#if 0
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -136,6 +154,7 @@ void StsSubscriberInstance::OnConsumed(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+#endif
 }
 void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
@@ -347,6 +366,7 @@ void StsSubscriberInstance::OnBatchCanceled(
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
     ANS_LOGD("enter");
+#if 0
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -369,6 +389,7 @@ void StsSubscriberInstance::OnBatchCanceled(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+#endif
 }
 bool StsSubscriberInstance::HasOnBatchCancelCallback()
 {
@@ -460,11 +481,11 @@ bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::ve
         ANS_LOGD("Object_GetFieldByName_Ref '%{public}s' error. result: %{public}d.", func, aniResult);
         return false;
     }
-    ani_boolean flag = false;
-    if (ANI_OK != env->Reference_IsUndefined(fn_ref, &flag)) {
-        ANS_LOGD("Reference_IsUndefined  faild");
+    ani_boolean IsUndefined = ANI_FALSE;
+    if (ANI_OK != env->Reference_IsUndefined(fn_ref, &IsUndefined) || IsUndefined == ANI_TRUE) {
+        ANS_LOGD("Reference_IsUndefined  faild. or IsUndefined");
+        return false;
     }
-    ANS_LOGD("[%{public}s] %{public}d. %{public}d", __func__, __LINE__, (int32_t)flag);
     ani_ref fnReturnVal;
     aniResult = env->FunctionalObject_Call(
         static_cast<ani_fn_object>(fn_ref), parm.size(), parm.data(), &fnReturnVal);
@@ -472,7 +493,6 @@ bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::ve
         ANS_LOGD("FunctionalObject_Call error. result: %{public}d.", aniResult);
         return false;
     }
-    ANS_LOGD("[%{public}s] %{public}d", __func__, __LINE__);
     return true;
 }
 
@@ -565,6 +585,8 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
         bool isInfoUndefine = IsUndefine(env, info);
         if (isSubscribeUndefine) {
             ANS_LOGD("subscriber is undefine");
+            std::string msg = "subscriber is undefine";
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
         sptr<OHOS::Notification::NotificationSubscribeInfo> SubscribeInfo =
@@ -572,6 +594,8 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
         if (!isInfoUndefine) {
             if (!UnwarpNotificationSubscribeInfo(env, info, *SubscribeInfo)) {
                 ANS_LOGD("UnwarpNotificationSubscribeInfo faild");
+                std::string msg = "UnwarpNotificationSubscribeInfo faild";
+                OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
                 return false;
             }
         }
@@ -579,10 +603,14 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
         if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
             if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
                 ANS_LOGD("GetNotificationSubscriber faild");
+                std::string msg = "GetNotificationSubscriber faild";
+                OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
                 return false;
             }
             if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
                 ANS_LOGD("AddSubscriberInstancesInfo faild");
+                std::string msg = "GetNotificationSubscriber faild";
+                OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
                 return false;
             }
         }
@@ -593,81 +621,15 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
             status = NotificationHelper::SubscribeNotification(stsSubscriber);
         }
         if (status != 0) {
+            int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
+            externalErrorCode =
+                (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
             ANS_LOGD("SubscribeNotification faild. status %{public}d ErrorToExternal %{public}d",
-                status, OHOS::CJSystemapi::Notification::ErrorToExternal(status));
+                status, externalErrorCode);
+            std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+            OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
             return false;
         }
-//        testThread = std::thread([stsSubscriber](){
-//            std::shared_ptr<NotificationDoNotDisturbDate> data = std::make_shared<NotificationDoNotDisturbDate>();
-//            std::shared_ptr<EnabledNotificationCallbackData> callbackData = std::make_shared<EnabledNotificationCallbackData>();
-//            std::shared_ptr<BadgeNumberCallbackData> badgeData = std::make_shared<BadgeNumberCallbackData>();
-//            sptr<EnabledNotificationCallbackData> callbackDataSptr = new EnabledNotificationCallbackData();
-//
-//            std::string groupKeyOverride = "GroupKeyOverride";
-//            int32_t importance = 10;
-//            uint64_t ranking = 20;
-//            int32_t visibleness =30;
-//            bool isDisplayBadge = false;
-//            bool isHiddenNotification = true;
-//            NotificationSorting sorting;
-//            sorting.SetGroupKeyOverride(groupKeyOverride);
-//            sorting.SetImportance(importance);
-//            sorting.SetRanking(ranking);
-//            sorting.SetVisiblenessOverride(visibleness);
-//            sorting.SetDisplayBadge(isDisplayBadge);
-//            sorting.SetHiddenNotification(isHiddenNotification);
-//            std::vector<NotificationSorting> VSorting;
-//            for (int i = 0; i < 5; i++) {
-//                sorting.SetKey(std::to_string(i));
-//                VSorting.emplace_back(sorting);
-//            }
-//            std::shared_ptr<NotificationSortingMap> sortingMap = std::make_shared<NotificationSortingMap>(VSorting);
-//            data->SetBeginDate(1746588038);
-//            data->SetEndDate(1746588038);
-//            data->SetDoNotDisturbType(NotificationConstant::DoNotDisturbType::DAILY);
-//            ANS_LOGD("%{public}d", __LINE__);
-//            stsSubscriber->onDoNotDisturbChanged(data);
-//            ANS_LOGD("%{public}d", __LINE__);
-//
-//            callbackData->SetBundle("hello world");
-//            callbackData->SetUid(10010);
-//            callbackData->SetEnable(true);
-//            ANS_LOGD("%{public}d", __LINE__);
-//            stsSubscriber->OnEnabledNotificationChanged(callbackData);
-//            ANS_LOGD("%{public}d", __LINE__);
-//
-//            badgeData->SetAppInstanceKey("SetAppInstanceKey");
-//            badgeData->SetBadgeNumber(10086);
-//            badgeData->SetBundle("hello world");
-//            badgeData->SetUid(100100);
-//            badgeData->SetInstanceKey(111000);
-//            ANS_LOGD("%{public}d", __LINE__);
-//            stsSubscriber->OnBadgeChanged(badgeData);
-//            ANS_LOGD("%{public}d", __LINE__);
-//
-//            callbackDataSptr->SetBundle("hello world");
-//            callbackDataSptr->SetUid(10010);
-//            callbackDataSptr->SetEnable(true);
-//            ANS_LOGD("%{public}d", __LINE__);
-//            stsSubscriber->OnBadgeEnabledChanged(callbackDataSptr);
-//            ANS_LOGD("%{public}d", __LINE__);
-//
-//            stsSubscriber->OnUpdate(sortingMap);
-//            ANS_LOGD("%{public}d", __LINE__);
-//
-//            std::shared_ptr<OHOS::Notification::Notification> request = std::make_shared<OHOS::Notification::Notification>(new NotificationRequest());
-//            request->SetRemindType(NotificationConstant::RemindType::DEVICE_IDLE_DONOT_REMIND);
-//            stsSubscriber->OnCanceled(request, sortingMap, 123);
-//            ANS_LOGD("%{public}d", __LINE__);
-//            stsSubscriber->OnConsumed(request, sortingMap);
-//
-//            ANS_LOGD("%{public}d", __LINE__);
-//            std::vector<std::shared_ptr<OHOS::Notification::Notification>> requestLists;
-//            requestLists.emplace_back(request);
-//            stsSubscriber->OnBatchCanceled(requestLists, sortingMap, 10086);
-//            ANS_LOGD("%{public}d", __LINE__);
-//        });
-//        testThread.detach();
         return true;
     }
 
@@ -687,16 +649,41 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
         if (ret) {
             int32_t status = NotificationHelper::UnSubscribeNotification(stsSubscriber);
             if (status != 0) {
-                ANS_LOGD("errorCode is not ERR_OK. %{public}d ErrorToExternal %{public}d",
-                    status, OHOS::CJSystemapi::Notification::ErrorToExternal(status));
+                int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
+                externalErrorCode =
+                    (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
+                ANS_LOGD("UnSubscribe faild. status %{public}d ErrorToExternal %{public}d",
+                    status, externalErrorCode);
+                std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+                OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
                 DelDeletingSubscriber(stsSubscriber);
             }
         } else {
-            // ERR_ANS_SUBSCRIBER_IS_DELETING
+            std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_SUBSCRIBER_IS_DELETING);
+            OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
             return false;
         }
         return true;
     }
+
+bool GetDoubleValueByClassName(ani_env *env, ani_object param, const char *className, const char *name, ani_double &value)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        ANS_LOGD("FindClass faild. %{public}s", className);
+        return false;
+    }
+    ani_method idGetter;
+    if (ANI_OK != env->Class_FindMethod(cls, name, nullptr, &idGetter)) {
+        ANS_LOGD("Class_FindMethod faild. %{public}s", className);
+        return false;
+    }
+    if (ANI_OK != env->Object_CallMethod_Double(param, idGetter, &value)) {
+        ANS_LOGD("Object_CallMethod_Double faild. %{public}s", className);
+        return false;
+    }
+    return true;
+}
 
 bool UnWarpReasonEnum(ani_env *env, const ani_object enumItem, int32_t &outEnum)
 {
@@ -725,12 +712,12 @@ bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &
 {
     ani_boolean isUndefined = ANI_TRUE;
     ani_double idDouble = 0.0;
-    if (GetPropertyDouble(env, obj, "id", isUndefined, idDouble) != ANI_OK || isUndefined == ANI_TRUE) {
-        ANS_LOGD("UnWarpNotificationKey GetPropertyDouble id fail");
+    if (!GetDoubleValueByClassName(env, obj,
+            "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKeyInner;", "<get>id", idDouble)) {
+        ANS_LOGD("GetDoubleValueByClassName id fail");
         return false;
     }
     OutObj.id = static_cast<int32_t>(idDouble);
-
     std::string label;
     if (GetPropertyString(env, obj, "label", isUndefined, label) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGD("UnWarpNotificationKey GetPropertyString label fail");

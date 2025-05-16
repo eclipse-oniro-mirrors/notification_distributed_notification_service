@@ -34,11 +34,11 @@ static const char *cRemoveForHashCodesSignature =
     "Lescompat/Array;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
 static const char *cDistributeOperationSignature =
     "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/OperationInfo;:Lstd/core/Promise;";
-//static const char *cSubscribeSignature =
-//    "Lnotification/notificationSubscriber/NotificationSubscriber;"
-//    "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
-//static const char *cUnSubscribeSignature =
-//    "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
+static const char *cSubscribeSignature =
+   "Lnotification/notificationSubscriber/NotificationSubscriber;"
+   "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
+static const char *cUnSubscribeSignature =
+   "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
@@ -69,18 +69,25 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
         return nullptr;
     }
     callback->SetVm(vm);
-    std::thread t = std::thread([noWithOperationInfo, callback, info]() {
-        sptr<NotificationSts::StsDistributedOperationCallback> callback_ = callback;
-        sptr<NotificationSts::StsNotificationOperationInfo> info_ = info;
-        int32_t result = Notification::NotificationHelper::DistributeOperation(info_, callback_);
-        ANS_LOGD("StsDistributeOperation ret %{public}d. ErrorToExternal %{public}d",
-            result, CJSystemapi::Notification::ErrorToExternal(result));
-        if (result != ERR_OK || noWithOperationInfo) {
-            callback->OnOperationCallback(result);
-        }
-    });
-    t.detach();
+    int32_t result = Notification::NotificationHelper::DistributeOperation(info, callback);
+    ANS_LOGD("StsDistributeOperation ret %{public}d. ErrorToExternal %{public}d",
+        result, CJSystemapi::Notification::ErrorToExternal(result));
+    if (result != ERR_OK || noWithOperationInfo) {
+        callback->OnStsOperationCallback(env, result);
+    }
     return aniPromise;
+}
+
+void AniSubscribe(ani_env *env, ani_object obj, ani_object info)
+{
+    ANS_LOGD("StsSubscribe enter");
+    OHOS::NotificationSts::SubscriberInstanceManager::GetInstance()->Subscribe(env, obj, info);
+}
+
+void AniUnSubscribe(ani_env *env, ani_object obj)
+{
+    ANS_LOGD("StsUnSubscribe enter");
+    OHOS::NotificationSts::SubscriberInstanceManager::GetInstance()->UnSubscribe(env, obj);
 }
 
 void AniSubScribeRegistryInit(ani_env *env)
@@ -98,8 +105,8 @@ void AniSubScribeRegistryInit(ani_env *env)
         ani_native_function {"nativeRemove", cRemoveForHashCodeSignature, reinterpret_cast<void *>(AniRemoveForHashCode)},
         ani_native_function {"nativeRemove", cRemoveForHashCodesSignature, reinterpret_cast<void *>(AniRemoveForHashCodes)},
         ani_native_function {"nativeDistributeOperation", cDistributeOperationSignature, reinterpret_cast<void *>(AniDistributeOperation)},
-//        ani_native_function {"nativeSubscribe", cSubscribeSignature, reinterpret_cast<void *>(StsSubscribe)},
-//        ani_native_function {"nativeUnSubscribe", cUnSubscribeSignature, reinterpret_cast<void *>(StsUnSubscribe)},
+        ani_native_function {"nativeSubscribe", cSubscribeSignature, reinterpret_cast<void *>(AniSubscribe)},
+        ani_native_function {"nativeUnSubscribe", cUnSubscribeSignature, reinterpret_cast<void *>(AniUnSubscribe)},
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
