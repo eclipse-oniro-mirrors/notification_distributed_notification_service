@@ -638,6 +638,12 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
             ANS_LOGI("ConsumeRecordFilter-filterType-im");
             return false;
         }
+        std::string bundleName = notification->GetBundleName();
+        if (isQuickReply && record->deviceType == DEVICE_TYPE_WEARABLE &&
+            !DelayedSingleton<NotificationConfigParse>::GetInstance()->IsDistributedReplyEnabled(bundleName)) {
+            ANS_LOGI("ConsumeRecordFilter-filterType-im bundle %{public}s", bundleName.c_str());
+            return false;
+        }
     }
 
     return true;

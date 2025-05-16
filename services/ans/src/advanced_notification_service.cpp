@@ -737,6 +737,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         if (result != ERR_OK) {
             return;
         }
+        NotificationAnalyticsUtil::ReportPublishWithUserInput(request);
         NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
     }));
     notificationSvrQueue_->wait(handler);
