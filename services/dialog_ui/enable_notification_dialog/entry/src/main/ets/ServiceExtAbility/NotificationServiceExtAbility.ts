@@ -178,7 +178,9 @@ export class EnableNotificationDialog {
           let waiteTimes = 0;
           extensionWindow.on('rectChange', uiExtension.RectChangeReason.HOST_WINDOW_RECT_CHANGE, (data):void => {
             console.info(TAG, `windowRectChange ts event ${data.rect?.left},${data.rect?.top}, ${data.rect?.width}, ${data.rect?.height}`);
-            hasDisalogRectInfo = true;
+            if(data.rect?.width > 0 && data.rect?.height > 0) {
+              hasDisalogRectInfo = true;
+            }
           });
           while(!hasDisalogRectInfo && waiteTimes < 10){
             waiteTimes ++;
@@ -203,6 +205,11 @@ export class EnableNotificationDialog {
             await subWindow.resize(windowRect?.width, windowRect?.height);
             this.initSubWindowSize = true;
           }
+        }
+        try {
+          await subWindow.setFollowParentWindowLayoutEnabled(true);
+        } catch (err) {
+          console.error(TAG, `setFollowParentWindowLayoutEnabled failed! ${err.code} ${err.message}`);
         }
         await subWindow.loadContent(path, this.storage);
         try {
