@@ -246,6 +246,8 @@ interface OHOS.Notification.IAnsManager {
 
     void SetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] unsigned int slotFlags);
 
+    void GetNotificationSettings([out] unsigned int slotFlags);
+
     void GetAllNotificationEnabledBundles([out] NotificationBundleOption[] bundleOption);
 
     void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption);

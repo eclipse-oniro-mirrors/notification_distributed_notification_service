@@ -117,6 +117,13 @@ public:
     ErrCode GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t &slotFlags);
 
     /**
+     * @brief Obtains slotFlags of bundle.
+     *
+     * @param slotFlags Indicates slotFlags of bundle.
+     * @return Returns get slotflags by bundle result.
+     */
+    ErrCode GetNotificationSettings(uint32_t &slotFlags);
+    /**
      * @brief Set slotFlags of bundle.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.

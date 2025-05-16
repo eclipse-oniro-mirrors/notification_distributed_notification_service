@@ -195,6 +195,13 @@ struct AsyncCallbackInfoGetSlotFlagsByBundle {
     uint32_t slotFlags = 0;
 };
 
+struct AsyncCallbackInfoGetNotificationSettings {
+    napi_env env;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    uint32_t slotFlags = 0;
+};
+
 napi_value NapiAddSlot(napi_env env, napi_callback_info info);
 napi_value NapiAddSlots(napi_env env, napi_callback_info info);
 napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info);
@@ -209,6 +216,7 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info);
 napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info);
 napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info);
 napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info);
+napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info);
 
 napi_value ParseParametersByAddSlot(const napi_env &env, const napi_callback_info &info, ParametersInfoAddSlot &paras);
 napi_value ParseParametersByAddSlots(
