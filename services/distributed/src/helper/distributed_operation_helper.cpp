@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "distributed_operation_service.h"
+#include "distributed_operation_helper.h"
 
 #include "screenlock_common.h"
 #include "in_process_call_wrapper.h"
