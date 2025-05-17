@@ -1,0 +1,53 @@
+/*
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef DISTRIBUTED_INCLUDE_SOFTBUS_DISTRIBUTED_DEVICE_SERVICE_H
+#define DISTRIBUTED_INCLUDE_SOFTBUS_DISTRIBUTED_DEVICE_SERVICE_H
+
+#include "distributed_device_data.h"
+
+#include "match_box.h"
+
+namespace OHOS {
+namespace Notification {
+class DistributedDeviceService {
+public:
+    static DistributedDeviceService& GetInstance();
+    static std::string DeviceTypeToTypeString(uint16_t deviceType);
+    void InitLocalDevice(const std::string &deviceId, uint16_t deviceType);
+    DistributedDeviceInfo GetLocalDevice();
+    bool IsDeviceSyncData(const std::string& deviceId);
+    void SetDeviceState(const std::string& deviceId, int32_t state);
+    void SetDeviceSyncData(const std::string& deviceId, bool syncData);
+    bool CheckDeviceExist(const std::string& deviceId);
+    bool CheckDeviceNeedSync(const std::string& deviceId);
+    void IncreaseDeviceSyncCount(const std::string& deviceId);
+    void AddDeviceInfo(DistributedDeviceInfo deviceItem);
+    void DeleteDeviceInfo(const std::string& deviceId);
+    std::map<std::string, DistributedDeviceInfo>& GetDeviceList();
+    int32_t SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    void SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage);
+#else
+    void SyncDeviceStatus(int32_t status);
+#endif
+
+private:
+    DistributedDeviceInfo localDevice_;
+    std::map<std::string, DistributedDeviceInfo> peerDevice_;
+};
+}
+}
+#endif // DISTRIBUTED_INCLUDE_SOFTBUS_DISTRIBUTED_DEVICE_SERVICE_H
