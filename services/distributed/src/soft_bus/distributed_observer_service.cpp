@@ -17,7 +17,7 @@
 #include "distributed_service.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
-#include "distributed_operation_service.h"
+#include "distributed_operation_helper.h"
 
 namespace OHOS {
 namespace Notification {

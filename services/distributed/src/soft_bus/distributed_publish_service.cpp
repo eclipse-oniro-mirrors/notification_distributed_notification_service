@@ -30,7 +30,7 @@
 #include "response_box.h"
 #include "power_mgr_client.h"
 #include "distributed_local_config.h"
-#include "distributed_operation_service.h"
+#include "distributed_operation_helper.h"
 #include "notification_sync_box.h"
 #include "ans_inner_errors.h"
 #include "ability_manager_helper.h"

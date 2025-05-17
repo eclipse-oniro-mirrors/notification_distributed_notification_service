@@ -105,12 +105,12 @@ ohos_shared_library("libdans") {
     "src/helper/analytics_util.cpp",
     "src/helper/bundle_resource_helper.cpp",
     "src/helper/distributed_operation_connection.cpp",
+    "src/helper/distributed_operation_helper.cpp",
     "src/helper/distributed_preference.cpp",
     "src/helper/distributed_rdb_helper.cpp",
     "src/soft_bus/distributed_cmd_service.cpp",
     "src/soft_bus/distributed_extern_intferface.cpp",
     "src/soft_bus/distributed_observer_service.cpp",
-    "src/soft_bus/distributed_operation_service.cpp",
     "src/soft_bus/distributed_publish_service.cpp",
     "src/soft_bus/distributed_service.cpp",
     "src/soft_bus/distributed_service_uitls.cpp",
@@ -167,6 +167,10 @@ ohos_shared_library("libdans") {
   if (ans_hitrace_usage) {
     external_deps += [ "hitrace:hitrace_meter" ]
     defines += [ "HITRACE_METER_ENABLE" ]
+  }
+
+  if (distributed_notification_service_feature_distributed_master) {
+    defines += [ "DISTRIBUTED_FEATURE_MASTER" ]
   }
 
   subsystem_name = "${subsystem_name}"
