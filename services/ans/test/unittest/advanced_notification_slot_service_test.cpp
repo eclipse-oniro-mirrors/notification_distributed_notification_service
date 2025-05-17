@@ -549,7 +549,7 @@ HWTEST_F(AnsSlotServiceTest, GetConfigSlotReminderModeByType_00001, Function | S
 
 /**
  * @tc.name: GetNotificationSettings_00001
- * @tc.desc: Test GetNotificationSettings
+ * @tc.desc: Verify that bits except for the 0th and 4th are 0
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -586,6 +586,24 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00002, Function | SmallTest
     ret = advancedNotificationService_->GetNotificationSettings(flag);
     ASSERT_EQ(ret, ERR_OK);
     EXPECT_EQ(flag , 0x11);
+}
+
+/**
+ * @tc.name: GetNotificationSettings_00003
+ * @tc.desc: Test GetNotificationSettings when notificationSvrQueue is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    std::shared_ptr<ffrt::queue> notificationSvrQueue = advancedNotificationService_->notificationSvrQueue_;
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    uint32_t flag;
+    auto ret = advancedNotificationService_->GetNotificationSettings(flag);
+    advancedNotificationService_->notificationSvrQueue_ = notificationSvrQueue;
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS
