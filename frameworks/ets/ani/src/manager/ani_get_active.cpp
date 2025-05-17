@@ -33,7 +33,7 @@ ani_double AniGetActiveNotificationCount(ani_env *env)
     if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
-        return -1;
+        return 0;
     }
     return retNum;
 }
@@ -79,6 +79,5 @@ ani_object AniGetActiveNotifications(ani_env *env)
     ANS_LOGD("sts AniGetAllActiveNotifications end");
     return arrayRequestObj;
 }
-
 } // namespace NotificationManagerSts
 } // namespace OHOS

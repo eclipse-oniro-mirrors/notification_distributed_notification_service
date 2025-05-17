@@ -57,7 +57,7 @@ ani_boolean AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bu
     int returncode = 0;
     bool allowed = false;
     BundleOption option;
-    if(NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
+    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
         returncode = Notification::NotificationHelper::IsAllowedNotify(option, allowed);
     } else {
         NotificationSts::ThrowStsErroWithLog(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");

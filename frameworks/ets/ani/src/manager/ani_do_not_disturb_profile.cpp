@@ -28,7 +28,7 @@ void AniAddDoNotDisturbProfile(ani_env *env, ani_object obj)
     ANS_LOGD("AniAddDoNotDisturbProfile call");
     int returncode = 0;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    if(NotificationSts::UnwrapArrayDoNotDisturbProfile(env, obj, profiles)) {
+    if (NotificationSts::UnwrapArrayDoNotDisturbProfile(env, obj, profiles)) {
         returncode = Notification::NotificationHelper::AddDoNotDisturbProfiles(profiles);
     } else {
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
@@ -50,7 +50,7 @@ void AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj)
     ANS_LOGD("AniRemoveDoNotDisturbProfile call");
     int returncode = 0;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
-    if(NotificationSts::UnwrapArrayDoNotDisturbProfile(env, obj, profiles)) {
+    if (NotificationSts::UnwrapArrayDoNotDisturbProfile(env, obj, profiles)) {
         returncode = Notification::NotificationHelper::RemoveDoNotDisturbProfiles(profiles);
     } else {
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,

@@ -70,7 +70,7 @@ inline ani_boolean BoolToAniBoolean(bool value)
 template<typename valueType>
 static bool CallSetter(ani_env* env, ani_class cls, ani_object object, const char* propertyName, valueType value)
 {
-    if(env == nullptr || cls == nullptr || object == nullptr) {
+    if (env == nullptr || cls == nullptr || object == nullptr) {
         return false;
     }
     std::string setterName("<set>");

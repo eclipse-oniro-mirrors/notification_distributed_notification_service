@@ -60,7 +60,7 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
 {
     auto findMsg = ERROR_CODE_TO_MESSAGE.find(errCode);
     if (findMsg == ERROR_CODE_TO_MESSAGE.end()) {
-        ANSR_LOGI("FindAnsErrMsg Inner error.");
+        ANSR_LOGE("FindAnsErrMsg Inner error.");
         return "Inner error.";
     }
     return findMsg->second;
@@ -69,7 +69,6 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
 inline void ThrowStsErroWithLog(ani_env *env, std::string logMsg) {
     OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
         FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-    ANS_LOGE("%{public}s", logMsg.c_str());
 }
 } // namespace NotificationSts
 } // OHOS

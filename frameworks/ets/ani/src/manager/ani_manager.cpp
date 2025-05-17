@@ -38,7 +38,7 @@ void AniNotificationManagerRegistryInit(ani_env *env)
     ani_namespace ns;
     status = env->FindNamespace("L@ohos/notificationManager/notificationManager;", &ns);
     if (status != ANI_OK) {
-        ANS_LOGD("FindNamespace notificationManager failed status : %{public}d", status);
+        ANS_LOGE("FindNamespace notificationManager failed status : %{public}d", status);
         return;
     }
     std::array kitFunctions = {
@@ -114,7 +114,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
-        ANS_LOGD("GetEnv failed status : %{public}d", status);
+        ANS_LOGE("GetEnv failed status : %{public}d", status);
         return ANI_NOT_FOUND;
     }
 

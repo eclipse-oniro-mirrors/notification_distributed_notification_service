@@ -31,7 +31,7 @@ void AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable)
     ANS_LOGD("DisplayBadgeAni call");
     int returncode = 0;
     BundleOption option;
-    if(NotificationSts::UnwrapBundleOption(env, obj, option)) {
+    if (NotificationSts::UnwrapBundleOption(env, obj, option)) {
         returncode = Notification::NotificationHelper::SetShowBadgeEnabledForBundle(option,
             NotificationSts::AniBooleanToBool(enable));
     } else {

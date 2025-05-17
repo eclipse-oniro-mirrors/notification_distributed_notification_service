@@ -33,7 +33,6 @@ bool SetOptionalFieldSlotLevel(ani_env *env, const ani_class cls, ani_object &ob
 bool WrapNotificationSlot(ani_env *env, sptr<NotificationSlot> slot, ani_object &outAniObj);
 bool WrapNotificationSlotArray(ani_env *env, const std::vector<sptr<NotificationSlot>>& slots,
     ani_object &outAniObj);
-
 } // namespace NotificationSts
 } // OHOS
 #endif

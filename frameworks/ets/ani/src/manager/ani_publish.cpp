@@ -38,8 +38,8 @@ void AniPublish(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniPublish error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniPublish end");
 }
@@ -47,6 +47,7 @@ void AniPublish(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj
 void AniPublishWithId(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj,
     ani_double userId)
 {
+    ANS_LOGD("AniPublishWithId start");
     //NotificationRequest request;
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
@@ -58,10 +59,10 @@ void AniPublishWithId(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_obje
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniPublishWithId error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
-    ANS_LOGD("AniPublishWithId leave");
+    ANS_LOGD("AniPublishWithId end");
 }
 } // namespace NotificationManagerSts
 } // namespace OHOS

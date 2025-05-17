@@ -34,7 +34,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
     int returncode = 0;
     std::vector<sptr<Notification::NotificationSlot>> slots;
     BundleOption option;
-    if(NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
+    if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
         returncode = Notification::NotificationHelper::GetNotificationSlotsForBundle(option, slots);
     } else {
         NotificationSts::ThrowStsErroWithLog(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
@@ -43,8 +43,8 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
 
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("sts GetSlotsByBundle error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
     ani_object outAniObj;
@@ -76,8 +76,8 @@ void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enu
 
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSetNotificationEnableSlot error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
     ANS_LOGD("AniSetNotificationEnableSlot end");
@@ -101,8 +101,8 @@ void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption
 
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 }
 
@@ -121,8 +121,8 @@ ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, 
     int returncode = Notification::NotificationHelper::GetEnabledForBundleSlot(option, slotType, isEnable);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("IsNotificationSlotEnabled -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     return isEnable ? ANI_TRUE : ANI_FALSE;
 }
@@ -139,8 +139,8 @@ ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
     int returncode = Notification::NotificationHelper::GetNotificationSlotFlagsAsBundle(option, slotFlags);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniGetSlotFlagsByBundle -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     return slotFlags;
 }
@@ -157,8 +157,8 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj)
     int returncode = Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(option, slotFlags);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSetSlotFlagsByBundle -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 }
 }

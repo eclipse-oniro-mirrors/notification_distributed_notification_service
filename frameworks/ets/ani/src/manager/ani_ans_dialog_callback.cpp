@@ -21,7 +21,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 
-bool StsAnsDialogCallback::Init(ani_env *env, std::shared_ptr<EnableNotificationInfo> info, StsAnsDialogCallbackComplete *complete)
+bool StsAnsDialogCallback::Init(
+    ani_env *env, std::shared_ptr<EnableNotificationInfo> info, StsAnsDialogCallbackComplete *complete)
 {
     if (env == nullptr || info == nullptr || complete == nullptr) {
         ANS_LOGE("invalid data");
@@ -169,6 +170,5 @@ void ModalExtensionCallback::ReleaseOrErrorHandle(int32_t code)
     ANS_LOGD("ReleaseOrErrorHandle end");
     return;
 }
-
 }
 }

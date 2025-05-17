@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "ani_request_enable.h"
+
 #include "ani_ans_dialog_callback.h"
 #include "ans_log_wrapper.h"
 #include "sts_error_utils.h"
@@ -112,7 +112,6 @@ bool CreateUIExtension(std::shared_ptr<EnableNotificationInfo> &info)
         ANS_LOGE("Get context failed");
         return false;
     }
-
     std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> abilityContext =
         OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(info->context);
     if (abilityContext == nullptr) {
@@ -124,16 +123,13 @@ bool CreateUIExtension(std::shared_ptr<EnableNotificationInfo> &info)
         ANS_LOGE("uiContent is null");
         return false;
     }
-
     AAFwk::Want want;
     std::string targetBundleName = "com.ohos.notificationdialog";
     std::string targetAbilityName = "EnableNotificationDialog";
     want.SetElementName(targetBundleName, targetAbilityName);
-
     std::string typeKey = "ability.want.params.uiExtensionType";
     std::string typeValue = "sysDialog/common";
     want.SetParam(typeKey, typeValue);
-
     auto uiExtCallback = std::make_shared<ModalExtensionCallback>();
     uiExtCallback->SetAbilityContext(abilityContext);
     uiExtCallback->SetBundleName(info->bundleName);
@@ -147,10 +143,8 @@ bool CreateUIExtension(std::shared_ptr<EnableNotificationInfo> &info)
         .onRemoteReady = std::bind(&ModalExtensionCallback::OnRemoteReady, uiExtCallback, std::placeholders::_1),
         .onDestroy = std::bind(&ModalExtensionCallback::OnDestroy, uiExtCallback),
     };
-
     OHOS::Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
-
     int32_t sessionId = uiContent->CreateModalUIExtension(want, uiExtensionCallbacks, config);
     ANS_LOGI("Create end, sessionId: %{public}d", sessionId);
     if (sessionId == 0) {
