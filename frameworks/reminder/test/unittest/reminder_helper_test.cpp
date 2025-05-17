@@ -180,5 +180,20 @@ HWTEST_F(ReminderHelperTest, GetExcludeDates_00001, Function | SmallTest | Level
     ErrCode ret = reminderHelper.GetExcludeDates(reminderId, dates);
     EXPECT_NE(ret, (int)ERR_ANS_INVALID_BUNDLE);
 }
+
+/**
+ * @tc.name: UpdateReminder_00001
+ * @tc.desc: Test UpdateReminder parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I9F24R
+ */
+HWTEST_F(ReminderHelperTest, UpdateReminder_00001, Function | SmallTest | Level1)
+{
+    ReminderRequest reminder;
+    ReminderHelper reminderHelper;
+    int32_t reminderId = 1;
+    ErrCode ret = reminderHelper.UpdateReminder(reminderId, reminder);
+    EXPECT_NE(ret, (int)ERR_OK);
+}
 }
 }

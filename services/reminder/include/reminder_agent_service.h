@@ -45,6 +45,15 @@ public:
     ErrCode PublishReminder(const ReminderRequest& reminder, int32_t& reminderId) override;
 
     /**
+     * @brief Updates a reminder request.
+     *
+     * @param reminderId Identifies the reminder id that needs to be updated.
+     * @param reminder Identifies the reminder request that needs to be updated.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder) override;
+
+    /**
      * @brief Cancel a reminder request.
      *
      * @param reminderId Identifies the reminder id that needs to be canceled.

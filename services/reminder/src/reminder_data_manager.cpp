@@ -990,31 +990,6 @@ bool ReminderDataManager::HandleSysTimeChange(const sptr<ReminderRequest> remind
     }
 }
 
-void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminder)
-{
-    if (reminder == nullptr) {
-        // activeReminder_ should not be set with null as it point to actual object.
-        activeReminderId_ = -1;
-    } else {
-        activeReminderId_ = reminder->GetReminderId();
-        std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);
-        activeReminder_ = reminder;
-    }
-    ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_.load());
-}
-
-void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &reminder)
-{
-    if (reminder == nullptr) {
-        // alertingReminder_ should not be set with null as it point to actual object.
-        alertingReminderId_ = -1;
-    } else {
-        alertingReminderId_ = reminder->GetReminderId();
-        alertingReminder_ = reminder;
-    }
-    ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
-}
-
 void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& reminder,
     std::vector<sptr<ReminderRequest>>& extensionReminders)
 {
@@ -1190,7 +1165,8 @@ void ReminderDataManager::StartRecentReminder()
         SetActiveReminder(reminder);
         return;
     }
-    if (activeReminderId_ == reminder->GetReminderId()) {
+    if (activeReminderId_ == reminder->GetReminderId() &&
+        activeTriggerTime_ == reminder->GetTriggerTimeInMilli()) {
         ANSR_LOGW("Recent reminder has already run, no need to start again.");
         return;
     }

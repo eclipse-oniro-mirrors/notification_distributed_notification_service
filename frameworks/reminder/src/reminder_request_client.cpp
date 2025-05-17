@@ -81,6 +81,17 @@ ErrCode ReminderRequestClient::PublishReminder(const ReminderRequest& reminder, 
     return proxy->PublishReminder(reminder, reminderId);
 }
 
+ErrCode ReminderRequestClient::UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder)
+{
+    AddSlotByType(reminder.GetSlotType());
+    sptr<IReminderAgentService> proxy = GetReminderServiceProxy();
+    if (!proxy) {
+        ANS_LOGE("GetReminderServiceProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->UpdateReminder(reminderId, reminder);
+}
+
 ErrCode ReminderRequestClient::CancelReminder(const int32_t reminderId)
 {
     sptr<IReminderAgentService> proxy = GetReminderServiceProxy();

@@ -20,6 +20,7 @@
 namespace OHOS::Notification {
 namespace {
 int32_t g_mockPublishReminderRet = 0;
+int32_t g_mockUpdateReminderRet = 0;
 int32_t g_mockCancelReminderRet = 0;
 int32_t g_mockCancelAllRemindersRet = 0;
 int32_t g_mockAddExcludeDateRet = 0;
@@ -31,6 +32,11 @@ int32_t g_mockQueryActiveReminderCountRet = 0;
 void MockReminderDataManager::MockPublishReminder(const int32_t ret)
 {
     g_mockPublishReminderRet = ret;
+}
+
+void MockReminderDataManager::MockUpdateReminder(const int32_t ret)
+{
+    g_mockUpdateReminderRet = ret;
 }
 
 void MockReminderDataManager::MockCancelReminder(const int32_t ret)
@@ -87,6 +93,12 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest>& remind
     const int32_t callingUid)
 {
     return g_mockPublishReminderRet;
+}
+
+ErrCode ReminderDataManager::UpdateReminder(const sptr<ReminderRequest>& reminder,
+    const int32_t callingUid)
+{
+    return g_mockUpdateReminderRet;
 }
 
 ErrCode ReminderDataManager::CancelReminder(const int32_t& reminderId, const int32_t callingUid)

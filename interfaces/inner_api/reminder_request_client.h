@@ -38,6 +38,15 @@ public:
     ErrCode PublishReminder(const ReminderRequest& reminder, int32_t& reminderId);
 
     /**
+     * @brief Updates a scheduled reminder.
+     *
+     * @param reminderId Indicates reminder Id.
+     * @param reminder Indicates a reminder.
+     * @return Returns publish result.
+     */
+    ErrCode UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder);
+
+    /**
      * @brief Cancels a specified reminder.
      *
      * @param reminderId Indicates reminder Id.

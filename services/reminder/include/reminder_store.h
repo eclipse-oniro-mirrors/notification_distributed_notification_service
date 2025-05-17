@@ -41,6 +41,7 @@ public:
     int32_t UpdateOrInsert(const sptr<ReminderRequest>& reminder);
     int32_t GetMaxId();
     int32_t QueryActiveReminderCount();
+    bool IsReminderExist(const int32_t reminderId, const int32_t uid);
     std::vector<sptr<ReminderRequest>> GetHalfHourReminders();
     std::vector<sptr<ReminderRequest>> GetAllValidReminders();
 
