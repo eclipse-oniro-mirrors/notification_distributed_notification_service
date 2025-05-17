@@ -29,16 +29,15 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
         return false;
     }
     option.SetBundleName(bundleName);
-    ANS_LOGD("WrapBundleOption bundleName: %{public}s", bundleName.c_str());
-
     ani_double result = 0.0;
-    if(GetPropertyDouble(env, obj, "uid", isUndefined, result) != ANI_OK || isUndefined == ANI_TRUE) {
+    if(GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
+        int32_t uid = static_cast<int32_t>(result);
+        option.SetUid(uid);
+    } else {
         ANS_LOGE("Wrong argument type or uid is Undefined.");
-        return false;
     }
-    int32_t uid = static_cast<int32_t>(result);
-    ANS_LOGD("WrapBundleOption bundleName: %{public}s, uid: %{public}d", bundleName.c_str(), uid);
-    option.SetUid(uid);
+    ANS_LOGD(
+        "WrapBundleOption bundleName: %{public}s uid: %{public}d", option.GetBundleName().c_str(), option.GetUid());
     return true;
 }
 
@@ -59,15 +58,21 @@ bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<Notific
             "$_get", "I:Lnotification/NotificationCommonDef/BundleOption;", &optionRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGD("status : %{public}d, index: %{public}d", status, i);
+            delete optionRef;
+            optionRef = nullptr;
             return false;
         }
 
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGD("Get BundleOption failed, index: %{public}d", i);
+            delete optionRef;
+            optionRef = nullptr;
             return false;
         }
         options.push_back(option);
         ANS_LOGD("GetOptions index: %{public}d", i);
+        delete optionRef;
+        optionRef = nullptr;
     }
     return true;
 }
@@ -90,6 +95,8 @@ bool WrapBundleOption(ani_env* env,
     // uid?: number;
     uint32_t uid = bundleOption->GetUid();
     RETURN_FALSE_IF_FALSE(CallSetterOptional(env, bundleCls, bundleObject, "uid", uid));
+    delete bundleCls;
+    bundleCls = nullptr;
     return true;
 }
 }

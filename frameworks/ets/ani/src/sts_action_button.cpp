@@ -22,37 +22,60 @@
 
 namespace OHOS {
 namespace NotificationSts {
-ani_status UnwrapNotificationActionButton(ani_env *env, ani_object param,
+void GetStsActionButtonByOther(StsActionButton &actionButton)
+{
+    actionButton.icon = nullptr;
+    actionButton.semanticActionButton = SemanticActionButton::NONE_ACTION_BUTTON;
+    actionButton.autoCreatedReplies = true;
+    actionButton.mimeTypeOnlyInputs = {};
+    actionButton.isContextual = false;
+}
+ani_status GetStsActionButtonByWantAgent(ani_env *env, ani_object param,
     StsActionButton &actionButton)
 {
-    ani_status status = ANI_ERROR;
     ani_boolean isUndefind = ANI_TRUE;
-    std::string title;
-    if((status = GetPropertyString(env, param, "title", isUndefind, title)) != ANI_OK || isUndefind == ANI_TRUE) {
-        return ANI_INVALID_ARGS;
-    }
     ani_ref wantAgentRef;
     WantAgent* pWantAgent = nullptr;
-    if(ANI_OK == GetPropertyRef(env, param, "wantAgent", isUndefind, wantAgentRef) && isUndefind == ANI_FALSE) {
+    if (ANI_OK == GetPropertyRef(env, param, "wantAgent", isUndefind, wantAgentRef) && isUndefind == ANI_FALSE) {
         UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef), reinterpret_cast<void **>(&pWantAgent));
     } else {
+        delete wantAgentRef;
+        wantAgentRef = nullptr;
+        delete pWantAgent;
+        pWantAgent = nullptr;
         return ANI_INVALID_ARGS;
     }
     if (pWantAgent == nullptr) {
-       return ANI_INVALID_ARGS;
+        return ANI_INVALID_ARGS;
     }
     std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
+    actionButton.wantAgent = wantAgent;
+    delete wantAgentRef;
+    wantAgentRef = nullptr;
+    return ANI_OK;
+}
 
-    isUndefind = ANI_TRUE;
+ani_status GetStsActionButtonByWantParams(ani_env *env, ani_object param,
+    StsActionButton &actionButton)
+{
+    ani_boolean isUndefind = ANI_TRUE;
     WantParams wantParams = {};
     ani_ref extrasRef;
-    if(ANI_OK == GetPropertyRef(env, param, "extras", isUndefind, extrasRef) && isUndefind == ANI_FALSE) {
+    if (ANI_OK == GetPropertyRef(env, param, "extras", isUndefind, extrasRef) && isUndefind == ANI_FALSE) {
         UnwrapWantParams(env, extrasRef, wantParams);
     } else {
         return ANI_INVALID_ARGS;
     }
     std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
-
+    actionButton.extras = extras;
+    delete extrasRef;
+    extrasRef = nullptr;
+    return ANI_OK;
+}
+ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
+    StsActionButton &actionButton)
+{
+    ani_boolean isUndefind = ANI_TRUE;
     std::shared_ptr<Notification::NotificationUserInput> userInput = nullptr;
     ani_ref userInputRef;
     if(ANI_OK == GetPropertyRef(env, param, "userInput", isUndefind, userInputRef) && isUndefind == ANI_FALSE) {
@@ -61,15 +84,29 @@ ani_status UnwrapNotificationActionButton(ani_env *env, ani_object param,
     if (userInput == nullptr) {
         userInput = {};
     }
-    actionButton.icon = nullptr;
-    actionButton.title = title;
-    actionButton.wantAgent = wantAgent;
-    actionButton.extras = extras;
-    actionButton.semanticActionButton = SemanticActionButton::NONE_ACTION_BUTTON;
-    actionButton.autoCreatedReplies = true;
-    actionButton.mimeTypeOnlyInputs = {};
     actionButton.userInput = userInput;
-    actionButton.isContextual = false;
+    delete userInputRef;
+    userInputRef = nullptr;
+    return ANI_OK;
+}
+
+ani_status UnwrapNotificationActionButton(ani_env *env, ani_object param,
+    StsActionButton &actionButton)
+{
+    ani_status status = ANI_ERROR;
+    ani_boolean isUndefind = ANI_TRUE;
+    std::string title;
+    if ((status = GetPropertyString(env, param, "title", isUndefind, title)) != ANI_OK || isUndefind == ANI_TRUE) {
+        return ANI_INVALID_ARGS;
+    }
+    actionButton.title = title;
+    if (ANI_OK != GetStsActionButtonByWantAgent(env, param, actionButton)) {
+        return ANI_INVALID_ARGS;
+    }
+    if (ANI_OK != GetStsActionButtonByWantParams(env, param, actionButton)) {
+        return ANI_INVALID_ARGS;
+    }
+    GetStsActionButtonByOther(actionButton);
     return status;
 }
 
@@ -89,7 +126,6 @@ ani_object WrapNotificationActionButton(ani_env* env,
     RETURN_NULL_IF_FALSE(GetAniStringByString(env, actionButton->GetTitle(), stringValue));
     RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "title", stringValue));
     // wantAgent: WantAgent;
-    //napi处理过程
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
     if (agent == nullptr) {
         ANS_LOGI("agent is null");
@@ -98,16 +134,12 @@ ani_object WrapNotificationActionButton(ani_env* env,
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
         RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "wantAgent", wantAgent));
     }
-
-    // need to do
-    // extras?: Record<string, Object>; napi中没有处理它的过程？
-    //napi位置：notification_distributed_notification_service-OpenHarmony_feature_20250328\frameworks\js\napi\src\common_convert_request.cpp  419行
-    // // icon?: image.PixelMap 未找到ETS属性
-
-    // userInput?: NotificationUserInput -> inputKey: string;
+    // extras?: Record<string, Object>
+    ani_ref extras = WrapWantParams(env, *(actionButton->GetAdditionalData().get()));
+    CallSetter(env, iconButtonCls, iconButtonObject, "extras", extras);
+    // userInput?: NotificationUserInput
     ani_object userInputObject = WarpUserInput(env, actionButton->GetUserInput());
-    RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject));
-
+    CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject);
     return iconButtonObject;
 }
 
@@ -169,8 +201,10 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
     for (auto &button : actionButtons) {
         ani_object item = WrapNotificationActionButton(env, button);
         RETURN_NULL_IF_NULL(item);
-        if(ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)){
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
+            delete arrayObj;
+            arrayObj = nullptr;
             return nullptr;
         }   
         index ++;

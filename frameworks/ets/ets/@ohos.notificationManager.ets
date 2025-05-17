@@ -136,7 +136,58 @@ export default namespace notificationManager {
     export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
 
-        export function setNotificationEnable(bundle: BundleOption, enable: boolean): Promise<void> {
+    function isInvalidParameter(bundle: BundleOption): BusinessError
+    {
+        let error: BusinessError = {
+            code: 0,
+            message: ""
+        }
+        if (bundle == null) {
+            error = {
+                code: 401,
+                message: "BundleOption must be not Null"
+            }
+            return error;
+        }
+        if (bundle.bundle == null || bundle.bundle?.length === 0) {
+            error = {
+                code: 401,
+                message: "Incorrect parameter types. The type of bundle must be string."
+            }
+            return error;
+        }
+        return error;
+    }
+
+    function isInvalidParameter(option: ButtonOptions): BusinessError
+    {
+        let error: BusinessError = {
+            code: 0,
+            message: ""
+        }
+        if (option == null) {
+            error = {
+                code: 401,
+                message: "ButtonOptions must be not Null"
+            }
+            return error;
+        }
+        if (option.buttonName == null || option.buttonName?.length === 0) {
+            error = {
+                code: 401,
+                message: "Incorrect parameter types. The type of buttonName must be string."
+            }
+            return error;
+        }
+        return error;
+    }
+
+    export function setNotificationEnable(bundle: BundleOption, enable: boolean): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
             p.then((data: NullishType): void => {
@@ -148,7 +199,17 @@ export default namespace notificationManager {
         return pPromise;
     }
     
-    export function setNotificationEnable(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void {
+    export function setNotificationEnable(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -161,6 +222,15 @@ export default namespace notificationManager {
 
     export function isNotificationEnabled(bundleOption: BundleOption, callback: AsyncCallback<boolean>): void
     {
+        let error: BusinessError = isInvalidParameter(bundleOption);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithBundleOption(bundleOption); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
@@ -175,8 +245,14 @@ export default namespace notificationManager {
 
     export function isNotificationEnabled(bundleOption: BundleOption): Promise<boolean>
     {
+        let error: BusinessError = isInvalidParameter(bundleOption);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithBundleOption(bundleOption); });
+            let p = taskpool.execute(
+                (): boolean => { return nativeIsNotificationEnabledWithBundleOption(bundleOption);
+                });
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
@@ -189,6 +265,13 @@ export default namespace notificationManager {
 
     export function isNotificationEnabled(userId: number, callback: AsyncCallback<boolean>): void
     {
+        if (callback == null) {
+            let error: BusinessError = {
+                code: 410,
+                message : "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithId(userId); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
@@ -217,6 +300,13 @@ export default namespace notificationManager {
 
     export function isNotificationEnabled(callback: AsyncCallback<boolean>): void
     {
+        if (callback == null) {
+            let error: BusinessError = {
+                code: 410,
+                message : "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabled(); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
@@ -243,9 +333,25 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean, isForceControl: boolean, callback: AsyncCallback<void>): void
+    export function setNotificationEnableSlot(
+        bundle: BundleOption,
+        type: SlotType,
+        enable: boolean,
+        isForceControl: boolean,
+        callback: AsyncCallback<void>): void
     {
-        let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, isForceControl); });
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
+        let p = taskpool.execute(
+            (): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, isForceControl);
+        });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
@@ -255,14 +361,21 @@ export default namespace notificationManager {
         });
     }
 
-    export function setNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean, isForceControl?: boolean): Promise<void>
+    export function setNotificationEnableSlot(
+        bundle: BundleOption, type: SlotType, enable: boolean, isForceControl?: boolean): Promise<void>
     {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let forceControl: boolean = false;
         if (isForceControl != undefined) {
             forceControl = isForceControl;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, forceControl); });
+            let p = taskpool.execute(
+                (): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, forceControl);
+                });
             p.then((data: NullishType): void => {
                 resolve(undefined);
             }, (error: Object): void => {
@@ -272,8 +385,18 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setNotificationEnableSlot(bundle: BundleOption, type: SlotType, enable: boolean, callback: AsyncCallback<void>): void
+    export function setNotificationEnableSlot(
+        bundle: BundleOption, type: SlotType, enable: boolean, callback: AsyncCallback<void>): void
     {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlot(bundle, type, enable); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -286,6 +409,10 @@ export default namespace notificationManager {
 
     export function isNotificationSlotEnabled(bundle: BundleOption, type: SlotType): Promise<boolean>
     {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean => { return nativeIsNotificationSlotEnabled(bundle, type); });
             p.then((data: NullishType): void => {
@@ -300,6 +427,15 @@ export default namespace notificationManager {
 
     export function isNotificationSlotEnabled(bundle: BundleOption, type: SlotType, callback: AsyncCallback<boolean>): void
     {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationSlotEnabled(bundle, type); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
@@ -312,7 +448,17 @@ export default namespace notificationManager {
         })
     }
 
-    export function getSlotsByBundle(bundle: BundleOption, callback: AsyncCallback<Array<NotificationSlot>>): void {
+    export function getSlotsByBundle(bundle: BundleOption, callback: AsyncCallback<Array<NotificationSlot>>): void
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlotsByBundle(bundle); });
         p.then((data: NullishType): void => {
             let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
@@ -325,8 +471,14 @@ export default namespace notificationManager {
         })             
     }
     
-    export function getSlotsByBundle(bundle: BundleOption): Promise<Array<NotificationSlot>> {
-        let pPromise = new Promise<Array<NotificationSlot>>((resolve: ResolveCallback<Array<NotificationSlot>>, reject: RejectCallback): void => {
+    export function getSlotsByBundle(bundle: BundleOption): Promise<Array<NotificationSlot>>
+    {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        let pPromise = new Promise<Array<NotificationSlot>>(
+            (resolve: ResolveCallback<Array<NotificationSlot>>, reject: RejectCallback): void => {
             let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlotsByBundle(bundle); });
             p.then((data: NullishType): void => {
                 let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
@@ -339,6 +491,10 @@ export default namespace notificationManager {
     }
 
     export function setSlotFlagsByBundle(bundle: BundleOption, slotFlags: number): Promise<void> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetSlotFlagsByBundle(bundle, slotFlags); });
             p.then((data: NullishType): void => {
@@ -351,6 +507,10 @@ export default namespace notificationManager {
     }
 
     export function getSlotFlagsByBundle(bundle: BundleOption): Promise<number> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback): void => {
             let p = taskpool.execute((): number => { return nativeGetSlotFlagsByBundle(bundle); });
             p.then((data: NullishType): void => {
@@ -412,6 +572,14 @@ export default namespace notificationManager {
     export function triggerSystemLiveView(
         bundle: BundleOption, notificationId: number, buttonOptions: ButtonOptions): Promise<void>
     {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        error = isInvalidParameter(buttonOptions);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {
                 return nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions); 
@@ -439,6 +607,13 @@ export default namespace notificationManager {
     }
 
     export function removeDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
+        if (!templates || templates.length === 0) {
+            let error: BusinessError = {
+                code: 401,
+                message: "templates must be not null"
+            }
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfile(templates); });
             p.then((data: NullishType): void => {
@@ -451,6 +626,13 @@ export default namespace notificationManager {
     }
 
     export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
+        if (!templates || templates.length === 0) {
+            let error: BusinessError = {
+                code: 401,
+                message: "templates must be not null"
+            }
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
             p.then((data: NullishType): void => {
@@ -463,6 +645,13 @@ export default namespace notificationManager {
     }
 
     export function getAllActiveNotifications(callback: AsyncCallback<Array<NotificationRequest>>): void {
+        if (!callback) {
+            let error: BusinessError = {
+                code: 401,
+                message: "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetAllActiveNotifications(); });
         p.then((data: NullishType): void => {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
@@ -501,6 +690,13 @@ export default namespace notificationManager {
     }
 
     export function getActiveNotifications(callback: AsyncCallback<Array<NotificationRequest>>): void {
+        if (!callback) {
+            let error: BusinessError = {
+                code: 401,
+                message: "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetActiveNotifications(); });
         p.then((data: NullishType): void => {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
@@ -525,6 +721,15 @@ export default namespace notificationManager {
     }
 
     export function displayBadge(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
         p.then((e: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -536,6 +741,10 @@ export default namespace notificationManager {
     }
     
     export function displayBadge(bundle: BundleOption, enable: boolean): Promise<void> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
             p.then((data: NullishType): void => {
@@ -548,6 +757,10 @@ export default namespace notificationManager {
     }
 
     export function isBadgeDisplayed(bundle: BundleOption, callback: AsyncCallback<boolean>): void {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let p = taskpool.execute((): boolean => { return nativeIsBadgeDisplayed(bundle); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
@@ -561,6 +774,10 @@ export default namespace notificationManager {
     }
     
     export function isBadgeDisplayed(bundle: BundleOption): Promise<boolean> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean => { return nativeIsBadgeDisplayed(bundle); });
             p.then((data: NullishType): void => {
@@ -574,6 +791,10 @@ export default namespace notificationManager {
     }
 
     export function cancel(bundle: BundleOption, id: number): Promise<void> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeCancelWithBundle(bundle, id); });
             p.then((data: NullishType): void => {
@@ -586,6 +807,13 @@ export default namespace notificationManager {
     }
 
     export function cancel(id: number, label: string): Promise<void> {
+        if (label == null || label?.length === 0) {
+            let error: BusinessError = {
+                code: 401,
+                message: "Incorrect parameter types. The type of label must be string."
+            }
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeCancelWithIdLabel(id, label); });
             p.then((data: NullishType): void => {
@@ -598,6 +826,20 @@ export default namespace notificationManager {
     }
 
     export function cancel(id: number, label: string, callback: AsyncCallback<void>): void {
+        if (label == null || label?.length === 0) {
+            let error: BusinessError = {
+                code: 401,
+                message: "Incorrect parameter types. The type of label must be string."
+            }
+            throw error;
+        }
+        if (callback == null) {
+            let error: BusinessError = {
+                code: 410,
+                message : "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativeCancelWithIdLabel(id, label); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -607,6 +849,13 @@ export default namespace notificationManager {
     }
 
     export function cancel(id: number, callback: AsyncCallback<void>): void {
+        if (callback == null) {
+            let error: BusinessError = {
+                code: 410,
+                message : "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativeCancelWithId(id); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -640,6 +889,13 @@ export default namespace notificationManager {
     }
 
     export function cancelAll(callback: AsyncCallback<void>): void {
+        if (callback == null) {
+            let error: BusinessError = {
+                code: 410,
+                message : "callback must be not null"
+            }
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativeCancelAll(); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
