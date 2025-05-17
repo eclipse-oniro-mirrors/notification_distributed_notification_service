@@ -289,12 +289,12 @@ class RdbStoreTest : public RdbStore {
             return E_ERROR;
         };
 
-        virtual int Subscribe(const SubscribeOption& option, RdbStoreObserver *observer)
+        virtual int Subscribe(const SubscribeOption& option, std::shared_ptr<RdbStoreObserver> observer)
         {
             return E_ERROR;
         };
 
-        virtual int UnSubscribe(const SubscribeOption& option, RdbStoreObserver *observer)
+        virtual int UnSubscribe(const SubscribeOption& option, std::shared_ptr<RdbStoreObserver> observer)
         {
             return E_ERROR;
         };
