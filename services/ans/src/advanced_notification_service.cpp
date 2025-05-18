@@ -724,7 +724,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance()->FlowControl(record, uid, isNotificationExists);
+        result = FlowControlService::GetInstance().FlowControl(record, uid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }

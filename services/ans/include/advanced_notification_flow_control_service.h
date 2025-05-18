@@ -25,6 +25,7 @@
 #include "singleton.h"
 #include "ans_const_define.h"
 #include "notification_record.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -35,45 +36,127 @@ struct FlowControlThreshold {
     uint32_t maxUpdateNumPerSecondPerApp = MAX_UPDATE_NUM_PERSECOND_PERAPP;
 };
 
-class FlowControlService : public DelayedSingleton<FlowControlService> {
+struct FlowControlErrMsg {
+    std::string msg;
+    EventSceneId sceneId;
+    EventBranchId EventBranchId;
+    ErrCode errCode;
+};
+
+enum FlowControlSceneType {
+    GLOBAL_SYSTEM_NORMAL_CREATE,
+    GLOBAL_SYSTEM_NORMAL_UPDATE,
+    GLOBAL_SYSTEM_LIVEVIEW_CREATE,
+    GLOBAL_SYSTEM_LIVEVIEW_UPDATE,
+    GLOBAL_THIRD_PART_NORMAL_CREATE,
+    GLOBAL_THIRD_PART_NORMAL_UPDATE,
+    GLOBAL_THIRD_PART_LIVEVIEW_CREATE,
+    GLOBAL_THIRD_PART_LIVEVIEW_UPDATE,
+    CALLER_SYSTEM_NORMAL_CREATE,
+    CALLER_SYSTEM_NORMAL_UPDATE,
+    CALLER_SYSTEM_LIVEVIEW_CREATE,
+    CALLER_SYSTEM_LIVEVIEW_UPDATE,
+    CALLER_THIRD_PART_NORMAL_CREATE,
+    CALLER_THIRD_PART_NORMAL_UPDATE,
+    CALLER_THIRD_PART_LIVEVIEW_CREATE,
+    CALLER_THIRD_PART_LIVEVIEW_UPDATE,
+};
+
+class GlobalFlowController {
 public:
+    using TimePoint = std::chrono::system_clock::time_point;
+    GlobalFlowController(const uint32_t threshold, const FlowControlErrMsg& errMsg)
+        : threshold_(threshold), errMsg_(errMsg) {}
+
+    /**
+     * @brief Flow control for all apps.
+     *
+     * @param record Notification record. User should ensure that record is not nullptr.
+     * @param now Current time.
+     * @return Returns ERR_OK when the call frequency doesn't reach the threshold.
+     */
+    ErrCode FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now);
+
+    /**
+     * @brief Add a timestamp to flow control list.
+     *
+     * @param now Current time.
+     */
+    void RecordTimestamp(const TimePoint &now);
+
+private:
+    uint32_t threshold_;
+    FlowControlErrMsg errMsg_;
+    std::mutex globalFlowControllerMutex_;
+    std::list<TimePoint> globalFlowControllerList_;
+};
+
+class CallerFlowController {
+public:
+    using TimePoint = std::chrono::system_clock::time_point;
+    CallerFlowController(const uint32_t threshold, const FlowControlErrMsg& errMsg)
+        : threshold_(threshold), errMsg_(errMsg) {}
+
+    /**
+     * @brief Flow control for specified app which owns the notification.
+     *
+     * @param record Notification record. User should ensure that record is not nullptr.
+     * @param callingUid Uid of caller.
+     * @param now Current time.
+     * @return Returns ERR_OK when the call frequency doesn't reach the threshold.
+     */
+    ErrCode FlowControl(
+        const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now);
+
+    /**
+     * @brief Add a timestamp to flow control list.
+     *
+     * @param record Notification record to acquire owner uid of notification. User should ensure that record is not nullptr.
+     * @param callingUid Uid of caller.
+     * @param now Current time.
+     */
+    void RecordTimestamp(
+        const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now);
+
+    /**
+     * @brief Remove expired appliacation record.
+     *
+     * @param now Current time.
+     */
+    void RemoveExpired(const TimePoint &now);
+private:
+    uint32_t threshold_;
+    FlowControlErrMsg errMsg_;
+    std::mutex callerFlowControllerMutex_;
+    std::map<int32_t, std::shared_ptr<std::list<TimePoint>>> callerFlowControllerMapper_;
+};
+
+class FlowControlService {
+public:
+    DISALLOW_COPY_AND_MOVE(FlowControlService);
+    static FlowControlService& GetInstance();
+
+    /**
+     * @brief Flow control total entrance.
+     *
+     * @param record Notification record. User should ensure that record is not nullptr.
+     * @param callingUid Uid of caller.
+     * @param isNotificationExists true when update notification and false when create notification.
+     */
+    ErrCode FlowControl(
+        const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, bool isNotificationExists);
+
+private:
     FlowControlService();
-    ErrCode FlowControl(const std::shared_ptr<NotificationRecord> &record,
-        const int32_t callingUid, bool isNotificationExists);
+    void InitGlobalFlowControl();
+    void InitCallerFlowControl();
+    std::pair<FlowControlSceneType, FlowControlSceneType> GetSceneTypePair(
+        const std::shared_ptr<NotificationRecord> record, bool isNotificationExists);
 
 private:
-    ErrCode PublishFlowCtrl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid);
-    ErrCode PublishGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now);
-    ErrCode PublishSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid);
-    void PublishRecordTimestamp(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid);
-    void PublishSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now);
-
-    ErrCode UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record, const int32_t callingUid);
-    ErrCode UpdateGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now);
-    ErrCode UpdateSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid);
-    void UpdateRecordTimestamp(const std::shared_ptr<NotificationRecord> &record,
-        std::chrono::system_clock::time_point now, const int32_t callingUid);
-    void UpdateSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now);
-
-private:
-    static std::mutex flowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> flowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> flowControlPublishTimestampList_;
-    static std::mutex systemFlowControlMutex_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlUpdateTimestampList_;
-    std::list<std::chrono::system_clock::time_point> systemFlowControlPublishTimestampList_;
-    static std::mutex singleAppFlowControlMutex_;
-    std::map<int32_t,
-        std::shared_ptr<std::list<std::chrono::system_clock::time_point>>> singleAppFlowControlUpdateTimestampMap_;
-    std::map<int32_t,
-        std::shared_ptr<std::list<std::chrono::system_clock::time_point>>> singleAppFlowControlPublishTimestampMap_;
-
     FlowControlThreshold threshold_;
+    std::map<FlowControlSceneType, std::shared_ptr<GlobalFlowController>> globalFlowControllerMapper_;
+    std::map<FlowControlSceneType, std::shared_ptr<CallerFlowController>> callerFlowControllerMapper_;
 };
 }  // namespace Notification
 }  // namespace OHOS

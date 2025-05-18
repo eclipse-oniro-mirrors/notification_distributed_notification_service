@@ -1013,7 +1013,7 @@ void AdvancedNotificationService::OnDistributedPublish(
         }
 
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, isNotificationExists);
+        result = FlowControlService::GetInstance().FlowControl(record, callingUid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }
@@ -1092,7 +1092,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, isNotificationExists);
+        result = FlowControlService::GetInstance().FlowControl(record, callingUid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }
