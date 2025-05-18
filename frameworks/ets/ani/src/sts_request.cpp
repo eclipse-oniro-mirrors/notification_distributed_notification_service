@@ -22,6 +22,7 @@
 #include "sts_action_button.h"
 #include "sts_bundle_option.h"
 #include "sts_template.h" 
+#include "ans_log_wrapper.h"
 #include "want_params.h"
 #include "ani_common_want.h"
 
@@ -34,28 +35,28 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
 {
     bool isDistributed = false;
     ani_boolean isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "isDistributed", isUndefined, isDistributed)
+    if (ANI_OK == GetPropertyBool(env, obj, "isDistributed", isUndefined, isDistributed)
         && isUndefined == ANI_FALSE) {
         distributedOptions.isDistributed = isDistributed;
     }
 
     std::vector<std::string> supportDisplayDevices = {};
     isUndefined = ANI_TRUE;
-    if(GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, supportDisplayDevices) == ANI_OK
+    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, supportDisplayDevices) == ANI_OK
         && isUndefined == ANI_FALSE) {
         distributedOptions.supportDisplayDevices = supportDisplayDevices;
     }
 
     std::vector<std::string> supportOperateDevices = {};
     isUndefined = ANI_TRUE;
-    if(GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, supportOperateDevices) == ANI_OK
+    if (GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, supportOperateDevices) == ANI_OK
         && isUndefined == ANI_FALSE) {
         distributedOptions.supportOperateDevices = supportOperateDevices;
     }
 
     ani_double remindType = 0.0;
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyDouble(env, obj, "remindType", isUndefined, remindType)
+    if (ANI_OK == GetPropertyDouble(env, obj, "remindType", isUndefined, remindType)
         && isUndefined == ANI_FALSE) {
         distributedOptions.remindType = static_cast<int32_t>(remindType);
     }
@@ -103,43 +104,43 @@ void GetNotificationRequestByBooleanOne(ani_env *env, ani_object obj,
     bool mbool = false;
     ani_boolean isUndefined = ANI_TRUE;
 
-    if(ANI_OK == GetPropertyBool(env, obj, "isOngoing", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isOngoing", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetInProgress(mbool);
     }
 
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "isUnremovable", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isUnremovable", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetUnremovable(mbool);
     }
 
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "updateOnly", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "updateOnly", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetUpdateOnly(mbool);
     }
 
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "tapDismissed", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "tapDismissed", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetTapDismissed(mbool);
     }
 
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "colorEnabled", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "colorEnabled", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetColorEnabled(mbool);
     }
 
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "isAlertOnce", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isAlertOnce", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetAlertOneTime(mbool);
     }
 
     isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "isStopwatch", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isStopwatch", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetShowStopwatch(mbool);
     }
@@ -221,9 +222,12 @@ void GetNotificationRequestByString(ani_env *env, ani_object obj,
 
 void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &request) {
+    ANS_LOGD("GetNotificationRequestByNumber start");
     ani_double mDouble = 0.0;
     ani_boolean isUndefined = ANI_TRUE;
-
+    if (obj == nullptr) {
+        ANS_LOGD("GetNotificationRequestByNumber obj is nullptr");
+    }
     if(ANI_OK == GetPropertyDouble(env, obj, "id", isUndefined, mDouble) && isUndefined == ANI_FALSE) {
         request->SetNotificationId(static_cast<int32_t>(mDouble));
     } else {
@@ -260,6 +264,7 @@ void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
         && isUndefined == ANI_FALSE) {
         request->SetNotificationControlFlags(static_cast<int32_t>(mDouble));
     }
+    ANS_LOGD("GetNotificationRequestByNumber end");
 }
 
 bool GetNotificationNormalContent(ani_env *env, ani_object obj, ani_ref contentRef,
@@ -357,7 +362,6 @@ bool GetNotificationContent(ani_env *env, ani_object obj, ContentType outType,
         case ContentType::LIVE_VIEW:
             return GetNotificationLiveViewContent(env, obj, contentRef, request);
         case ContentType::CONVERSATION:
-            // need to add
             break;
         default:
             break;
@@ -415,15 +419,14 @@ void GetNotificationWantAgent(ani_env *env, ani_object obj, std::shared_ptr<Noti
     ani_status status = ANI_ERROR;
     ani_ref wantAgentRef = {};
     if((status = env->Object_GetPropertyByName_Ref(obj, "wantAgent", &wantAgentRef))!= ANI_OK) {
+        deletePoint(wantAgentRef);
         return;
     }
-    WantAgent* pWantAgent = nullptr;
-    UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef), reinterpret_cast<void **>(&pWantAgent));
-    if (pWantAgent == nullptr) {
-       return;
+    std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
+    deletePoint(wantAgentRef);
+    if (wantAgent == nullptr) {
+        return;
     }
-
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
     request->SetWantAgent(wantAgent);
 }
 
@@ -448,16 +451,15 @@ void GetNotificationRemovalWantAgent(ani_env *env, ani_object obj,
 {
     ani_status status = ANI_ERROR;
     ani_ref wantAgentRef = {};
-    if((status = env->Object_GetPropertyByName_Ref(obj, "removalWantAgent", &wantAgentRef))!= ANI_OK) {
+    if ((status = env->Object_GetPropertyByName_Ref(obj, "removalWantAgent", &wantAgentRef))!= ANI_OK) {
+        deletePoint(wantAgentRef);
         return;
     }
-    WantAgent* pWantAgent = nullptr;
-    UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef), reinterpret_cast<void **>(&pWantAgent));
-    if (pWantAgent == nullptr) {
-       return;
+    std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
+    deletePoint(wantAgentRef);
+    if (wantAgent == nullptr) {
+        return;
     }
-
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
     request->SetRemovalWantAgent(wantAgent);
 }
 
@@ -613,7 +615,6 @@ ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     if(status != ANI_OK) {
         return ANI_INVALID_ARGS;
     }
-
     GetNotificationSlotType(env, obj, notificationRequest);
     GetNotificationWantAgent(env, obj, notificationRequest);
     GetNotificationExtraInfo(env, obj, notificationRequest);
@@ -626,20 +627,16 @@ ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     GetNotificationTemplate(env, obj, notificationRequest);
     GetNotificationUnifiedGroupInfo(env, obj, notificationRequest);
     GetNotificationBundleOption(env, obj, notificationRequest);
-//    // need to do GetNotificationMaxScreenWantAgent  没看明白
-//    /*
-//    // maxScreenWantAgent?: WantAgent
-//    if (GetNotificationMaxScreenWantAgent(env, value, request) == nullptr) {
-//        return nullptr;
-//    }
-//    */
-
-   return status;
+    return status;
 }
 
 ani_status UnWarpNotificationRequest(ani_env *env, ani_object obj,
     std::shared_ptr<NotificationRequest> &notificationRequest)
 {
+    ANS_LOGD("UnWarpNotificationRequest start");
+    if (env == nullptr || obj == nullptr) {
+        ANS_LOGD("UnWarpNotificationRequest has nullptr");
+    }
     ani_status status = ANI_ERROR;
     GetNotificationRequestByNumber(env, obj, notificationRequest);
     GetNotificationRequestByString(env, obj, notificationRequest);
@@ -690,11 +687,6 @@ bool SetNotificationRequestByString(ani_env* env, ani_class cls, const OHOS::Not
     if (GetAniStringByString(env, request->GetClassification(), stringValue)) {
         CallSetter(env, cls, object, "classification", stringValue);
     }
-    // need to do   ets中没有找到statusBarText属性
-    // statusBarText?: string
-    // if (StringToAniStr(env, request->GetStatusBarText(), stringValue)) {
-    //     RETURN_FALSE_IF_FALSE(CallSetterOptional(env, cls, object, STATUS_BAR_TEXT, stringValue));
-    // }
     // label?: string
     if (GetAniStringByString(env, request->GetLabel(), stringValue)) {
         CallSetter(env, cls, object, "label", stringValue);

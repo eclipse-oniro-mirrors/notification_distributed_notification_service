@@ -24,17 +24,17 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     ANS_LOGD("UnwrapBundleOption call");
     std::string bundleName;
     ani_boolean isUndefined = ANI_ERROR;    
-    if(GetPropertyString(env, obj, "bundle", isUndefined, bundleName) !=ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "bundle", isUndefined, bundleName) !=ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("get bundle failed, bundle must be string.");
         return false;
     }
     option.SetBundleName(bundleName);
     ani_double result = 0.0;
-    if(GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
+    if (GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
         int32_t uid = static_cast<int32_t>(result);
         option.SetUid(uid);
     } else {
-        ANS_LOGE("Wrong argument type or uid is Undefined.");
+        ANS_LOGD("Wrong argument type or uid is Undefined.");
     }
     ANS_LOGD(
         "WrapBundleOption bundleName: %{public}s uid: %{public}d", option.GetBundleName().c_str(), option.GetUid());
@@ -47,7 +47,7 @@ bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<Notific
     ani_double length;
     status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGD("status : %{public}d", status);
+        ANS_LOGE("status : %{public}d", status);
         return false;
     }
 
@@ -58,21 +58,18 @@ bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<Notific
             "$_get", "I:Lnotification/NotificationCommonDef/BundleOption;", &optionRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGD("status : %{public}d, index: %{public}d", status, i);
-            delete optionRef;
-            optionRef = nullptr;
+            deletePoint(optionRef);
             return false;
         }
 
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGD("Get BundleOption failed, index: %{public}d", i);
-            delete optionRef;
-            optionRef = nullptr;
+            deletePoint(optionRef);
             return false;
         }
         options.push_back(option);
         ANS_LOGD("GetOptions index: %{public}d", i);
-        delete optionRef;
-        optionRef = nullptr;
+        deletePoint(optionRef);
     }
     return true;
 }
@@ -85,18 +82,34 @@ bool WrapBundleOption(ani_env* env,
         return false;
     }
     ani_class bundleCls = nullptr;
-    RETURN_FALSE_IF_FALSE(CreateClassObjByClassName(env,
-        "Lnotification/NotificationCommonDef/BundleOptionInner;", bundleCls, bundleObject));
-    RETURN_FALSE_IF_FALSE(bundleCls != nullptr && bundleObject != nullptr);
+    if (!CreateClassObjByClassName(env,
+        "Lnotification/NotificationCommonDef/BundleOptionInner;", bundleCls, bundleObject)) {
+        deletePoint(bundleCls);
+        return false;
+    }
+    if (bundleCls == nullptr || bundleObject == nullptr) {
+        deletePoint(bundleCls);
+        deletePoint(bundleObject);
+        return false;
+    }
     // bundle: string;
     ani_string stringValue = nullptr;
-    RETURN_FALSE_IF_FALSE(GetAniStringByString(env, bundleOption->GetBundleName(), stringValue));
-    RETURN_FALSE_IF_FALSE(CallSetter(env, bundleCls, bundleObject, "bundle", stringValue));
+    if (!GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)) {
+        deletePoint(bundleCls);
+        deletePoint(bundleObject);
+        deletePoint(stringValue);
+        return false;
+    }
+    if (!CallSetter(env, bundleCls, bundleObject, "bundle", stringValue)) {
+        deletePoint(bundleCls);
+        deletePoint(bundleObject);
+        deletePoint(stringValue);
+        return false;
+    }
     // uid?: number;
     uint32_t uid = bundleOption->GetUid();
-    RETURN_FALSE_IF_FALSE(CallSetterOptional(env, bundleCls, bundleObject, "uid", uid));
-    delete bundleCls;
-    bundleCls = nullptr;
+    CallSetterOptional(env, bundleCls, bundleObject, "uid", uid);
+    deletePoint(bundleCls);
     return true;
 }
 }

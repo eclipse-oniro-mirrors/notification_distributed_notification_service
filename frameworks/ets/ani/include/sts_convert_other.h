@@ -27,7 +27,7 @@ namespace NotificationSts {
 using namespace OHOS::Media;
 using namespace OHOS::AbilityRuntime::WantAgent;
 
-void UnwrapWantAgent(ani_env *env, ani_object agent, void** result);
+std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent);
 ani_object WarpWantAgent(ani_env *env, std::shared_ptr<WantAgent> wantAgent);
 ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAgent>> wantAgents);
 

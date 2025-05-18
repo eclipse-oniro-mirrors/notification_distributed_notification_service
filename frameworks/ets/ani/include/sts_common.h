@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_STS_COMMON_H
 
 #include "ani.h"
+#include <map>
 #include <string>
 #include <vector>
 #include "ans_log_wrapper.h"
@@ -193,6 +194,43 @@ static bool EnumConvertAniToNative(ani_env *env, ani_enum_item enumItem, T &resu
         ANS_LOGD("Enum convert failed: type not supported");
         return false;
     }
+}
+
+template<class T>
+void deletePoint(T &result) {
+    delete result;
+    result = nullptr;
+}
+
+template<class T>
+void deleteVectorWithPoints(std::vector<T> &results)
+{
+    for (auto result : results) {
+        deletePoint(result);
+    }
+    results.clear();
+}
+
+template<class T>
+void deleteVectorWithSpPoints(std::vector<std::shared_ptr<T>> &results)
+{
+    for (auto result : results) {
+        result = nullptr;
+    }
+    results.clear();
+}
+
+template<class T>
+void deleteVectorWithArraySpPoints(std::map<std::string, std::vector<std::shared_ptr<T>>> &results)
+{
+    for (auto it = results.begin(); it != results.end(); ++it) {
+        auto vt = static_cast<std::vector<std::shared_ptr<T>>>(it -> second);
+        for (auto pt : vt) {
+            pt = nullptr;
+        }
+        vt.clear();
+    }
+    results.clear();
 }
 
 template<class T>

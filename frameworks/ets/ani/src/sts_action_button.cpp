@@ -35,23 +35,16 @@ ani_status GetStsActionButtonByWantAgent(ani_env *env, ani_object param,
 {
     ani_boolean isUndefind = ANI_TRUE;
     ani_ref wantAgentRef;
-    WantAgent* pWantAgent = nullptr;
-    if (ANI_OK == GetPropertyRef(env, param, "wantAgent", isUndefind, wantAgentRef) && isUndefind == ANI_FALSE) {
-        UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef), reinterpret_cast<void **>(&pWantAgent));
-    } else {
-        delete wantAgentRef;
-        wantAgentRef = nullptr;
-        delete pWantAgent;
-        pWantAgent = nullptr;
+    if (ANI_OK != GetPropertyRef(env, param, "wantAgent", isUndefind, wantAgentRef) || isUndefind == ANI_TRUE) {
+        deletePoint(wantAgentRef);
         return ANI_INVALID_ARGS;
     }
-    if (pWantAgent == nullptr) {
+    std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
+    deletePoint(wantAgentRef);
+    if (wantAgent == nullptr) {
         return ANI_INVALID_ARGS;
     }
-    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
     actionButton.wantAgent = wantAgent;
-    delete wantAgentRef;
-    wantAgentRef = nullptr;
     return ANI_OK;
 }
 
@@ -64,12 +57,11 @@ ani_status GetStsActionButtonByWantParams(ani_env *env, ani_object param,
     if (ANI_OK == GetPropertyRef(env, param, "extras", isUndefind, extrasRef) && isUndefind == ANI_FALSE) {
         UnwrapWantParams(env, extrasRef, wantParams);
     } else {
+        deletePoint(extrasRef);
         return ANI_INVALID_ARGS;
     }
     std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
     actionButton.extras = extras;
-    delete extrasRef;
-    extrasRef = nullptr;
     return ANI_OK;
 }
 ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
@@ -85,8 +77,6 @@ ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
         userInput = {};
     }
     actionButton.userInput = userInput;
-    delete userInputRef;
-    userInputRef = nullptr;
     return ANI_OK;
 }
 
@@ -110,6 +100,63 @@ ani_status UnwrapNotificationActionButton(ani_env *env, ani_object param,
     return status;
 }
 
+bool SetNotificationActionButtonByRequiredParameter(
+    ani_env *env,
+    ani_class iconButtonCls,
+    ani_object &iconButtonObject,
+    const std::shared_ptr<NotificationActionButton> &actionButton)
+{
+    ani_string stringValue;
+    // title: string;
+    if (!GetAniStringByString(env, actionButton->GetTitle(), stringValue)) {
+        deletePoint(stringValue);
+        return false;
+    }
+    if (!CallSetter(env, iconButtonCls, iconButtonObject, "title", stringValue)) {
+        deletePoint(stringValue);
+        return false;
+    }
+    // wantAgent: WantAgent;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
+    if (agent == nullptr) {
+        ANS_LOGI("agent is null");
+        deletePoint(stringValue);
+        return false;
+    } else {
+        ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
+        if (!CallSetter(env, iconButtonCls, iconButtonObject, "wantAgent", wantAgent)) {
+            deletePoint(stringValue);
+            return false;
+        }
+    }
+    return true;
+}
+
+void SetNotificationActionButtonByOptionalParameter(
+    ani_env *env,
+    ani_class iconButtonCls,
+    ani_object &iconButtonObject,
+    const std::shared_ptr<NotificationActionButton> &actionButton)
+{
+    // extras?: Record<string, Object>
+    ani_ref extras = WrapWantParams(env, *(actionButton->GetAdditionalData().get()));
+    if (!CallSetter(env, iconButtonCls, iconButtonObject, "extras", extras)) {
+        deletePoint(extras);
+    }
+    // userInput?: NotificationUserInput
+    ani_object userInputObject = WarpUserInput(env, actionButton->GetUserInput());
+    if (!CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject)) {
+        deletePoint(userInputObject);
+    }
+}
+
+void deletePointOfWrapNotificationActionButton(
+    ani_object iconButtonObject, ani_class iconButtonCls, ani_string stringValue) {
+    deletePoint(iconButtonObject);
+    deletePoint(iconButtonCls);
+    deletePoint(stringValue);
+}
+
 ani_object WrapNotificationActionButton(ani_env* env,
     const std::shared_ptr<NotificationActionButton> &actionButton)
 {
@@ -119,27 +166,17 @@ ani_object WrapNotificationActionButton(ani_env* env,
     }
     ani_object iconButtonObject = nullptr;
     ani_class iconButtonCls = nullptr;
-    RETURN_NULL_IF_FALSE(CreateClassObjByClassName(env,
-        "Lnotification/notificationActionButton/NotificationActionButtonInner;", iconButtonCls, iconButtonObject));
-    // title: string;
     ani_string stringValue = nullptr;
-    RETURN_NULL_IF_FALSE(GetAniStringByString(env, actionButton->GetTitle(), stringValue));
-    RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "title", stringValue));
-    // wantAgent: WantAgent;
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
-    if (agent == nullptr) {
-        ANS_LOGI("agent is null");
+    if (!CreateClassObjByClassName(env,
+        "Lnotification/notificationActionButton/NotificationActionButtonInner;", iconButtonCls, iconButtonObject)) {
+        deletePointOfWrapNotificationActionButton(iconButtonObject, iconButtonCls, stringValue);
         return nullptr;
-    } else {
-        ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
-        RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "wantAgent", wantAgent));
     }
-    // extras?: Record<string, Object>
-    ani_ref extras = WrapWantParams(env, *(actionButton->GetAdditionalData().get()));
-    CallSetter(env, iconButtonCls, iconButtonObject, "extras", extras);
-    // userInput?: NotificationUserInput
-    ani_object userInputObject = WarpUserInput(env, actionButton->GetUserInput());
-    CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject);
+    if (!SetNotificationActionButtonByRequiredParameter(env, iconButtonCls, iconButtonObject, actionButton)) {
+        deletePointOfWrapNotificationActionButton(iconButtonObject, iconButtonCls, stringValue);
+        return nullptr;
+    }
+    SetNotificationActionButtonByOptionalParameter(env, iconButtonCls, iconButtonObject, actionButton);
     return iconButtonObject;
 }
 
@@ -151,14 +188,15 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
     ani_status status;
     ani_double length;
     StsActionButton actionButton;
-
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGI("status : %{public}d , %{public}s :  may be undefined", status, name);
+        deletePoint(arrayObj);
         return ANI_INVALID_ARGS;
     }
     status = GetPropertyDouble(env, static_cast<ani_object>(arrayObj), "length", isUndefined, length);
     if (status != ANI_OK) {
         ANS_LOGI("status : %{public}d", status);
+        deletePoint(arrayObj);
         return status;
     }
 
@@ -167,12 +205,16 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)i);
         if (status != ANI_OK) {
+            deletePoint(arrayObj);
+            deletePoint(buttonRef);
             ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         status = UnwrapNotificationActionButton(env, static_cast<ani_object>(buttonRef), actionButton);
         if (status != ANI_OK) {
             ANS_LOGI("ActionButton failed, index: %{public}d", i);
+            deletePoint(arrayObj);
+            deletePoint(buttonRef);
             return status;
         }
         std::shared_ptr<NotificationActionButton> button
@@ -195,16 +237,21 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
     ani_object arrayObj = newArrayClass(env, actionButtons.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is empty");
+        deletePoint(arrayObj);
         return nullptr;
     }
     ani_size index = 0;
     for (auto &button : actionButtons) {
         ani_object item = WrapNotificationActionButton(env, button);
-        RETURN_NULL_IF_NULL(item);
+        if (item == nullptr) {
+            deletePoint(arrayObj);
+            deletePoint(item);
+            return nullptr;
+        }
         if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
-            delete arrayObj;
-            arrayObj = nullptr;
+            deletePoint(arrayObj);
+            deletePoint(item);
             return nullptr;
         }   
         index ++;

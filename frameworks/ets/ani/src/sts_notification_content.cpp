@@ -781,14 +781,12 @@ bool SetNotificationLongTextContent(
     RETURN_FALSE_IF_FALSE(!CreateClassObjByClassName(env,
                 "Lnotification/notificationContent/NotificationLongTextContentInner;", contentCls, contentObj));
     RETURN_FALSE_IF_FALSE(contentCls != nullptr && contentObj != nullptr);
-    std::shared_ptr<NotificationBasicContent> basicContent = nContent->GetNotificationContent();
-    RETURN_FALSE_IF_NULL(basicContent);
-    NotificationLongTextContent *content = static_cast<NotificationLongTextContent *>(basicContent.get());
+    auto content = std::reinterpret_pointer_cast<NotificationLongTextContent>(nContent->GetNotificationContent());
     if (content == nullptr) {
         ANS_LOGE("TextContent is null");
         return false;
     }
-    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content, contentObj));
+    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content.get(), contentObj));
 
     ani_string aniStr;
     if(GetAniStringByString(env, content->GetLongText(), aniStr)) {
@@ -812,14 +810,12 @@ bool SetNotificationPictureContent(
     RETURN_FALSE_IF_FALSE(!CreateClassObjByClassName(env,
                 "Lnotification/notificationContent/NotificationPictureContentInner;", contentCls, contentObj));
     RETURN_FALSE_IF_FALSE(contentCls != nullptr && contentObj != nullptr);
-    std::shared_ptr<NotificationBasicContent> basicContent = nContent->GetNotificationContent();
-    RETURN_FALSE_IF_NULL(basicContent);
-    NotificationPictureContent *content = static_cast<NotificationPictureContent *>(basicContent.get());
+    auto content = std::reinterpret_pointer_cast<NotificationPictureContent>(nContent->GetNotificationContent());
     if (content == nullptr) {
-        ANS_LOGE("TextContent is null");
+        ANS_LOGE("content is null");
         return false;
     }
-    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content, contentObj));
+    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content.get(), contentObj));
 
     ani_string aniStr;
     if(GetAniStringByString(env, content->GetBriefText(), aniStr)) {
@@ -844,14 +840,12 @@ bool SetNotificationMultiLineContent(
     RETURN_FALSE_IF_FALSE(!CreateClassObjByClassName(env,
                 "Lnotification/notificationContent/NotificationMultiLineContentInner;", contentCls, contentObj));
     RETURN_FALSE_IF_FALSE(contentCls != nullptr && contentObj != nullptr);
-    std::shared_ptr<NotificationBasicContent> basicContent = nContent->GetNotificationContent();
-    RETURN_FALSE_IF_NULL(basicContent);
-    NotificationMultiLineContent *content = static_cast<NotificationMultiLineContent *>(basicContent.get());
+    auto content = std::reinterpret_pointer_cast<NotificationMultiLineContent>(nContent->GetNotificationContent());
     if (content == nullptr) {
-        ANS_LOGE("Content is null");
+        ANS_LOGE("content is null");
         return false;
     }
-    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content, contentObj));
+    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content.get(), contentObj));
 
     ani_string aniStr;
     if(GetAniStringByString(env, content->GetBriefText(), aniStr)) {
@@ -881,14 +875,12 @@ bool SetNotificationLocalLiveViewContent(
     RETURN_FALSE_IF_FALSE(!CreateClassObjByClassName(env,
                 "Lnotification/notificationContent/NotificationSystemLiveViewContentInner;", contentCls, contentObj));
     RETURN_FALSE_IF_FALSE(contentCls != nullptr && contentObj != nullptr);
-    std::shared_ptr<NotificationBasicContent> basicContent = nContent->GetNotificationContent();
-    RETURN_FALSE_IF_NULL(basicContent);
-    NotificationLocalLiveViewContent *content = static_cast<NotificationLocalLiveViewContent *>(basicContent.get());
+    auto content = std::reinterpret_pointer_cast<NotificationLocalLiveViewContent>(nContent->GetNotificationContent());
     if (content == nullptr) {
-        ANS_LOGE("Content is null");
+        ANS_LOGE("content is null");
         return false;
     }
-    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content, contentObj));
+    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content.get(), contentObj));
     
     CallSetterOptional(env, contentCls, contentObj, "typeCode", content->GetType());
 
@@ -943,14 +935,12 @@ bool SetNotificationLiveViewContent(
     RETURN_FALSE_IF_FALSE(!CreateClassObjByClassName(env,
                 "Lnotification/notificationContent/NotificationLiveViewContentInner;", contentCls, contentObj));
     RETURN_FALSE_IF_FALSE(contentCls != nullptr && contentObj != nullptr);
-    std::shared_ptr<NotificationBasicContent> basicContent = nContent->GetNotificationContent();
-    RETURN_FALSE_IF_NULL(basicContent);
-    NotificationLiveViewContent *content = static_cast<NotificationLiveViewContent *>(basicContent.get());
+    auto content = std::reinterpret_pointer_cast<NotificationLiveViewContent>(nContent->GetNotificationContent());
     if (content == nullptr) {
-        ANS_LOGE("Content is null");
+        ANS_LOGE("content is null");
         return false;
     }
-    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content, contentObj));
+    RETURN_FALSE_IF_FALSE(SetNotificationBasicContent(env, contentCls, content.get(), contentObj));
 
     ani_object lockScreenPicObj = CreateAniPixelMap(env, content->GetLockScreenPicture());
     if (lockScreenPicObj != nullptr) {
@@ -992,22 +982,13 @@ bool SetNotificationContent(ani_env* env, std::shared_ptr<NotificationContent> n
             return SetNotificationLongTextContent(env, ncCls, ncContent, ncObj);
         case ContentType::PICTURE: // picture?: NotificationPictureContent
             return SetNotificationPictureContent(env, ncCls, ncContent, ncObj);
-        // need to do
-        //case ContentType::CONVERSATION: // conversation?: NotificationConversationalContent
-            //ret = SetNotificationConversationalContent(env, basicContent.get(), contentResult);
-        //    break;
         case ContentType::MULTILINE: // multiLine?: NotificationMultiLineContent
             return SetNotificationMultiLineContent(env, ncCls, ncContent, ncObj);
         case ContentType::LOCAL_LIVE_VIEW: // systemLiveView?: NotificationLocalLiveViewContent
             return SetNotificationLocalLiveViewContent(env, ncCls, ncContent, ncObj);
             break;
         case ContentType::LIVE_VIEW: // liveView?: NotificationLiveViewContent
-//            RETURN_FALSE_IF_FALSE(!CreateClassObjByClassName(env,
-//                "Lnotification/notificationContent/NotificationLiveViewContentInner;", clsContent, aniContext));
-//            RETURN_FALSE_IF_NULL(clsContent);
-//            RETURN_FALSE_IF_NULL(aniContext);
-//            RETURN_FALSE_IF_FALSE(SetNotificationLiveViewContent(env, clsContent, basicContent.get(), aniContext));
-//            RETURN_FALSE_IF_FALSE(CallSetter(env, cls, object, "liveView", aniContext));
+            return SetNotificationLiveViewContent(env, ncCls, ncContent, ncObj);
             break;
         default:
             ANS_LOGE("ContentType is does not exist");

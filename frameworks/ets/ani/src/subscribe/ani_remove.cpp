@@ -32,27 +32,27 @@ void AniRemoveForBundle(ani_env *env, ani_object bundle, ani_object notification
     ANS_LOGD("AniRemoveForBundle enter");
     BundleOption option;
     NotificationKey key;
-    int32_t reasonType = -1;
+    int32_t reasonType = 0;
     if (!NotificationSts::UnwrapBundleOption(env, bundle, option)) {
-        ANS_LOGD("bundle is valid");
+        ANS_LOGE("bundle is valid");
         std::string msg = "UnwrapBundleOption faild";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpNotificationKey(env, notificationKey, key)) {
-        ANS_LOGD("notificationKey is valid");
+        ANS_LOGE("notificationKey is valid");
         std::string msg = "UnWarpNotificationKey faild";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
-        ANS_LOGD("enum convert failed");
+        ANS_LOGE("enum convert failed");
         std::string msg = "UnWarpReasonEnum faild";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::IsValidRemoveReason(reasonType)) {
-        ANS_LOGD("reasonType is valid");
+        ANS_LOGE("reasonType is valid");
         std::string msg = "reasonType is valid";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
@@ -72,19 +72,19 @@ void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEn
     int32_t reasonType = -1;
     std::string hashCodeStd;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, hashCode, hashCodeStd)) {
-        ANS_LOGD("hashCode is valid");
+        ANS_LOGE("hashCode is valid");
         std::string msg = "hashCode is valid";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
-        ANS_LOGD("enum convert failed");
+        ANS_LOGE("enum convert failed");
         std::string msg = "UnWarpReasonEnum faild";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::IsValidRemoveReason(reasonType)) {
-        ANS_LOGD("reasonType is valid");
+        ANS_LOGE("reasonType is valid");
         std::string msg = "reasonType is valid";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
@@ -105,19 +105,19 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
     std::vector<std::string> hashCodesStd;
     int32_t reasonType;
     if (ANI_OK != NotificationSts::GetStringArrayByAniObj(env, hashCodes, hashCodesStd)) {
-        ANS_LOGD("hashCodes is valid");
+        ANS_LOGE("hashCodes is valid");
         std::string msg = "hashCodes is valid";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::UnWarpReasonEnum(env, reasonEnum, reasonType)) {
-        ANS_LOGD("enum convert failed");
+        ANS_LOGE("enum convert failed");
         std::string msg = "UnWarpReasonEnum faild";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
     }
     if (!NotificationSts::IsValidRemoveReason(reasonType)) {
-        ANS_LOGD("reasonType is valid");
+        ANS_LOGE("reasonType is valid");
         std::string msg = "reasonType is valid";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
         return;
