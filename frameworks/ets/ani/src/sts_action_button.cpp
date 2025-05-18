@@ -249,7 +249,6 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
-            std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
             deletePoint(arrayObj);
             deletePoint(item);
             return nullptr;

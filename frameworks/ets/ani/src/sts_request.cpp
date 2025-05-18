@@ -928,7 +928,6 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
         RETURN_NULL_IF_FALSE(WarpNotificationRequest(env, request.GetRefPtr(), requestCls, requestObj));
         RETURN_NULL_IF_NULL(requestObj);
         if(ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)){
-            std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
             return nullptr;
         }   
         index ++;
@@ -955,7 +954,6 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
             env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj));
         RETURN_NULL_IF_NULL(requestObj);
         if(ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)){
-            std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
             return nullptr;
         }   
         index ++;

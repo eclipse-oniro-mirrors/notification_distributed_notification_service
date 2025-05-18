@@ -237,7 +237,6 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
         deletePoint(arrayObj);
         return ANI_INVALID_ARGS;
     }
-
     status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
@@ -574,7 +573,6 @@ bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object object,
         ANS_LOGE("status : %{public}d", status);
         return false;
     }
-
     ani_object arrayObj = ConvertArrayDoubleToAniObj(env, values);
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr.");

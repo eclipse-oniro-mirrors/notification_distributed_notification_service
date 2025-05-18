@@ -568,7 +568,7 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
     ani_size index = 0;
     for (auto &wantAgent : wantAgents) {
         ani_object item = WarpWantAgent(env, wantAgent);
-        if(item == nullptr
+        if (item == nullptr
             || ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             ANS_LOGE("GetAniWantAgentArray : set WantAgent failed");
             deletePoint(arrayCls);

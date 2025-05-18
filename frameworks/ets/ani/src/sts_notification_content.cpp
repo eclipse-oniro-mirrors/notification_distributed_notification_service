@@ -417,7 +417,6 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
         ani_object item = WarpNotificationIconButton(env, button);
         RETURN_NULL_IF_NULL(item);
         if(ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)){
-            std::cerr << "Object_CallMethodByName_Void  $_set Faild " << std::endl;
             return nullptr;
         }   
         index ++;
