@@ -15,262 +15,364 @@
 
 #include "advanced_notification_flow_control_service.h"
 
+#include <tuple>
+#include <vector>
+
 #include "ans_inner_errors.h"
 #include "notification_config_parse.h"
-#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
-std::mutex FlowControlService::flowControlMutex_;
-std::mutex FlowControlService::systemFlowControlMutex_;
-std::mutex FlowControlService::singleAppFlowControlMutex_;
+using TimePoint = std::chrono::system_clock::time_point;
+constexpr int32_t TIME_GAP_FOR_SECOND = 1;
+
+void RemoveExpiredTimestamp(std::list<TimePoint> &list, const TimePoint &now)
+{
+    auto iter = list.begin();
+    while (iter != list.end()) {
+        if (abs(now - *iter) > std::chrono::seconds(TIME_GAP_FOR_SECOND)) {
+            iter = list.erase(iter);
+        } else {
+            break;
+        }
+    }
+}
+
+ErrCode GlobalFlowController::FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now)
+{
+    std::lock_guard<std::mutex> lock(globalFlowControllerMutex_);
+    RemoveExpiredTimestamp(globalFlowControllerList_, now);
+    if (globalFlowControllerList_.size() >= threshold_) {
+        ANS_LOGE("%{public}s", errMsg_.msg.c_str());
+        HaMetaMessage message = HaMetaMessage(errMsg_.sceneId, errMsg_.EventBranchId)
+            .ErrorCode(errMsg_.errCode).Message(errMsg_.msg);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        return errMsg_.errCode;
+    }
+    return ERR_OK;
+}
+
+void GlobalFlowController::RecordTimestamp(const TimePoint &now)
+{
+    std::lock_guard<std::mutex> lock(globalFlowControllerMutex_);
+    globalFlowControllerList_.push_back(now);
+}
+
+ErrCode CallerFlowController::FlowControl(
+    const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now)
+{
+    std::lock_guard<std::mutex> lock(callerFlowControllerMutex_);
+    auto callerFlowControlIter = callerFlowControllerMapper_.find(callingUid);
+    if (callerFlowControlIter == callerFlowControllerMapper_.end()) {
+        return ERR_OK;
+    }
+    RemoveExpiredTimestamp(*(callerFlowControlIter->second), now);
+    if (callerFlowControlIter->second->size() >= threshold_) {
+        ANS_LOGE("%{public}s", errMsg_.msg.c_str());
+        HaMetaMessage message = HaMetaMessage(errMsg_.sceneId, errMsg_.EventBranchId)
+            .ErrorCode(errMsg_.errCode).Message(errMsg_.msg);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+        return errMsg_.errCode;
+    }
+    return ERR_OK;
+}
+
+void CallerFlowController::RecordTimestamp(
+    const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now)
+{
+    std::lock_guard<std::mutex> lock(callerFlowControllerMutex_);
+    auto callerFlowControlIter = callerFlowControllerMapper_.find(callingUid);
+    if (callerFlowControlIter == callerFlowControllerMapper_.end()) {
+        callerFlowControllerMapper_[callingUid] = std::make_shared<std::list<TimePoint>>();
+        callerFlowControlIter = callerFlowControllerMapper_.find(callingUid);
+    }
+    callerFlowControlIter->second->push_back(now);
+}
+
+void CallerFlowController::RemoveExpired(const TimePoint &now)
+{
+    std::lock_guard<std::mutex> lock(callerFlowControllerMutex_);
+    for (auto iter = callerFlowControllerMapper_.begin(); iter != callerFlowControllerMapper_.end();) {
+        auto latest = iter->second->back();
+        if (std::chrono::abs(now - latest) > CALLER_FLOW_CONTRL_EXPIRE_TIME) {
+            iter = callerFlowControllerMapper_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+FlowControlService& FlowControlService::GetInstance()
+{
+    static FlowControlService flowControlService;
+    return flowControlService;
+}
 
 FlowControlService::FlowControlService()
 {
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetFlowCtrlConfigFromCCM(threshold_);
+    InitGlobalFlowControl();
+    InitCallerFlowControl();
 }
 
-ErrCode FlowControlService::FlowControl(const std::shared_ptr<NotificationRecord> &record,
-    const int32_t callingUid, bool isNotificationExists)
+void FlowControlService::InitGlobalFlowControl()
+{
+    std::vector<std::tuple<FlowControlSceneType, uint32_t, FlowControlErrMsg>> configs = {
+        {
+            FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_CREATE,
+            threshold_.maxCreateNumPerSecond,
+            {
+                .msg = "GLOBAL_SYSTEM_NORMAL_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_0,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_UPDATE,
+            threshold_.maxUpdateNumPerSecond,
+            {
+                .msg = "GLOBAL_SYSTEM_NORMAL_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_1,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_CREATE,
+            threshold_.maxCreateNumPerSecond,
+            {
+                .msg = "GLOBAL_SYSTEM_LIVEVIEW_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_2,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_UPDATE,
+            threshold_.maxUpdateNumPerSecond,
+            {
+                .msg = "GLOBAL_SYSTEM_LIVEVIEW_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_3,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_CREATE,
+            threshold_.maxCreateNumPerSecond,
+            {
+                .msg = "GLOBAL_THIRD_PART_NORMAL_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_4,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_UPDATE,
+            threshold_.maxUpdateNumPerSecond,
+            {
+                .msg = "GLOBAL_THIRD_PART_NORMAL_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_5,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_CREATE,
+            threshold_.maxCreateNumPerSecond,
+            {
+                .msg = "GLOBAL_THIRD_PART_LIVEVIEW_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_6,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_UPDATE,
+            threshold_.maxUpdateNumPerSecond,
+            {
+                .msg = "GLOBAL_THIRD_PART_LIVEVIEW_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_7,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+    };
+
+    const int sceneTypeIdx = 0, thresholdIdx = 1, errMsgIdx = 2;
+    for (auto iter = configs.cbegin(); iter != configs.cend(); ++iter) {
+        globalFlowControllerMapper_[std::get<sceneTypeIdx>(*iter)] =
+            std::make_shared<GlobalFlowController>(std::get<thresholdIdx>(*iter), std::get<errMsgIdx>(*iter));
+    }
+}
+
+void FlowControlService::InitCallerFlowControl()
+{
+    std::vector<std::tuple<FlowControlSceneType, uint32_t, FlowControlErrMsg>> configs = {
+        {
+            FlowControlSceneType::CALLER_SYSTEM_NORMAL_CREATE,
+            threshold_.maxCreateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_SYSTEM_NORMAL_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_8,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_SYSTEM_NORMAL_UPDATE,
+            threshold_.maxUpdateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_SYSTEM_NORMAL_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_9,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_CREATE,
+            threshold_.maxCreateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_SYSTEM_LIVEVIEW_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_10,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_UPDATE,
+            threshold_.maxUpdateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_SYSTEM_LIVEVIEW_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_11,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_THIRD_PART_NORMAL_CREATE,
+            threshold_.maxCreateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_THIRD_PART_NORMAL_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_12,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_THIRD_PART_NORMAL_UPDATE,
+            threshold_.maxUpdateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_THIRD_PART_NORMAL_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_13,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_CREATE,
+            threshold_.maxCreateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_THIRD_PART_LIVEVIEW_CREATE flow control", 
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_14,
+                .errCode = ERR_ANS_OVER_MAX_ACTIVE_PERSECOND
+            }
+        },
+        {
+            FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_UPDATE,
+            threshold_.maxUpdateNumPerSecondPerApp,
+            {
+                .msg = "CALLER_THIRD_PART_LIVEVIEW_UPDATE flow control",
+                .sceneId = EventSceneId::SCENE_4,
+                .EventBranchId = EventBranchId::BRANCH_15,
+                .errCode = ERR_ANS_OVER_MAX_UPDATE_PERSECOND
+            }
+        },
+    };
+
+    const int sceneTypeIdx = 0, thresholdIdx = 1, errMsgIdx = 2;
+    for (auto iter = configs.cbegin(); iter != configs.cend(); ++iter) {
+        callerFlowControllerMapper_[std::get<sceneTypeIdx>(*iter)] =
+            std::make_shared<CallerFlowController>(std::get<thresholdIdx>(*iter), std::get<errMsgIdx>(*iter));
+    }
+}
+
+ErrCode FlowControlService::FlowControl(
+    const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, bool isNotificationExists)
 {
     if (record->isNeedFlowCtrl == false) {
         return ERR_OK;
     }
+    TimePoint now = std::chrono::system_clock::now();
 
+    auto sceneTypePair = GetSceneTypePair(record, isNotificationExists);
     ErrCode result = ERR_OK;
-    if (!isNotificationExists) {
-        if (record->request->IsUpdateOnly()) {
-            ANS_LOGE("Notification not exists when update");
-            return ERR_ANS_NOTIFICATION_NOT_EXISTS;
-        }
-        result = PublishFlowCtrl(record, callingUid);
-    } else {
-        result = UpdateFlowCtrl(record, callingUid);
+    auto globalFlowController = globalFlowControllerMapper_[sceneTypePair.first];
+    result = globalFlowController->FlowControl(record, now);
+    if (result != ERR_OK) {
+        return result;
     }
 
+    auto callerFlowController = callerFlowControllerMapper_[sceneTypePair.second];
+    result = callerFlowController->FlowControl(record, callingUid, now);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    globalFlowController->RecordTimestamp(now);
+    callerFlowController->RecordTimestamp(record, callingUid, now);
+
+    auto begin = callerFlowControllerMapper_.begin();
+    auto end = callerFlowControllerMapper_.end();
+    for (auto it = begin; it != end; ++it) {
+        it->second->RemoveExpired(now);
+    }
     return result;
 }
 
-ErrCode FlowControlService::PublishFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    const int32_t callingUid)
+std::pair<FlowControlSceneType, FlowControlSceneType> FlowControlService::GetSceneTypePair(
+    const std::shared_ptr<NotificationRecord> record, bool isNotificationExists)
 {
-    if (record->isNeedFlowCtrl == false) {
-        return ERR_OK;
-    }
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    ErrCode result = ERR_OK;
-    result = PublishSingleAppFlowCtrl(record, now, callingUid);
-    if (result != ERR_OK) {
-        return result;
-    }
-    result = PublishGlobalFlowCtrl(record, now);
-    if (result != ERR_OK) {
-        return result;
-    }
-    PublishRecordTimestamp(record, now, callingUid);
-    PublishSingleAppFlowCtrlRemoveExpire(now);
-    return ERR_OK;
-}
-
-ErrCode FlowControlService::PublishGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now)
-{
-    ANS_LOGD("PublishGlobalFlowCtrl size %{public}zu,%{public}zu",
-        flowControlPublishTimestampList_.size(), systemFlowControlPublishTimestampList_.size());
-    if (record->isThirdparty == true) {
-        // Third-part flow control
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(flowControlPublishTimestampList_, now);
-        if (flowControlPublishTimestampList_.size() >= threshold_.maxCreateNumPerSecond) {
-            ANS_LOGE("Third-part PublishGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_2)
-                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("Third-part PublishGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+    bool isLiveview = record->request->IsCommonLiveView() || record->request->IsSystemLiveView();
+    if (record->isThirdparty) {
+        // Third-Part caller
+        if (isLiveview) {
+            if (isNotificationExists) {
+                return {FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_UPDATE,
+                        FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_UPDATE};
+            } else {
+                return {FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_CREATE,
+                        FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_CREATE};
             }
-            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
-        }
-    } else {
-        // System flow control
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlPublishTimestampList_, now);
-        if (systemFlowControlPublishTimestampList_.size() >= threshold_.maxCreateNumPerSecond) {
-            ANS_LOGE("System PublishGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_3)
-                .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("System PublishGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            }
-            return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
-        }
-    }
-    return ERR_OK;
-}
-
-ErrCode FlowControlService::PublishSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now, const int32_t callingUid)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    auto singleAppFlowControlIter = singleAppFlowControlPublishTimestampMap_.find(callingUid);
-    if (singleAppFlowControlIter == singleAppFlowControlPublishTimestampMap_.end()) {
-        return ERR_OK;
-    }
-    NotificationAnalyticsUtil::RemoveExpired(*(singleAppFlowControlIter->second), now);
-    if (singleAppFlowControlIter->second->size() >= threshold_.maxCreateNumPerSecondPerApp) {
-        ANS_LOGE("SingleAppPublishFlowControl failed");
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_4)
-            .ErrorCode(ERR_ANS_OVER_MAX_ACTIVE_PERSECOND).Message("SingleAppPublishFlowControl failed");
-        if (record != nullptr) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        }
-        return ERR_ANS_OVER_MAX_ACTIVE_PERSECOND;
-    }
-    return ERR_OK;
-}
-
-void FlowControlService::PublishRecordTimestamp(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now, const int32_t callingUid)
-{
-    if (record->isThirdparty == true) {
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        flowControlPublishTimestampList_.push_back(now);
-    } else {
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        systemFlowControlPublishTimestampList_.push_back(now);
-    }
-
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    auto singleAppFlowControlIter = singleAppFlowControlPublishTimestampMap_.find(callingUid);
-    if (singleAppFlowControlIter == singleAppFlowControlPublishTimestampMap_.end()) {
-        singleAppFlowControlPublishTimestampMap_[callingUid] =
-            std::make_shared<std::list<std::chrono::system_clock::time_point>>();
-        singleAppFlowControlIter = singleAppFlowControlPublishTimestampMap_.find(callingUid);
-    }
-    singleAppFlowControlIter->second->push_back(now);
-}
-
-void FlowControlService::PublishSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    for (auto iter = singleAppFlowControlPublishTimestampMap_.begin();
-        iter != singleAppFlowControlPublishTimestampMap_.end();) {
-        auto latest = iter->second->back();
-        if (std::chrono::abs(now - latest) > SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME) {
-            iter = singleAppFlowControlPublishTimestampMap_.erase(iter);
         } else {
-            ++iter;
-        }
-    }
-}
-
-ErrCode FlowControlService::UpdateFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    const int32_t callingUid)
-{
-    if (record->isNeedFlowCtrl == false) {
-        return ERR_OK;
-    }
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    ErrCode result = ERR_OK;
-    result = UpdateSingleAppFlowCtrl(record, now, callingUid);
-    if (result != ERR_OK) {
-        return result;
-    }
-    result = UpdateGlobalFlowCtrl(record, now);
-    if (result != ERR_OK) {
-        return result;
-    }
-    UpdateRecordTimestamp(record, now, callingUid);
-    UpdateSingleAppFlowCtrlRemoveExpire(now);
-    return result;
-}
-
-ErrCode FlowControlService::UpdateGlobalFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now)
-{
-    ANS_LOGD("UpdateGlobalFlowCtrl size %{public}zu,%{public}zu",
-        flowControlUpdateTimestampList_.size(), systemFlowControlUpdateTimestampList_.size());
-    if (record->isThirdparty == true) {
-        // Third-part flow control
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(flowControlUpdateTimestampList_, now);
-        if (flowControlUpdateTimestampList_.size() >= threshold_.maxUpdateNumPerSecond) {
-            ANS_LOGE("Third-part UpdateGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_3)
-                .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("Third-part updateGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
+            if (isNotificationExists) {
+                return {FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_UPDATE,
+                        FlowControlSceneType::CALLER_THIRD_PART_NORMAL_UPDATE};
+            } else {
+                return {FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_CREATE,
+                        FlowControlSceneType::CALLER_THIRD_PART_NORMAL_CREATE};
             }
-            return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
-        }
-    } else {
-        // System flow control
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        NotificationAnalyticsUtil::RemoveExpired(systemFlowControlUpdateTimestampList_, now);
-        if (systemFlowControlUpdateTimestampList_.size() >= threshold_.maxUpdateNumPerSecond) {
-            ANS_LOGE("System UpdateGlobalFlowCtrl failed");
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_4)
-                .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("System updateGlobalFlowCtrl failed");
-            if (record != nullptr) {
-                NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            }
-            return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
         }
     }
-    return ERR_OK;
-}
 
-ErrCode FlowControlService::UpdateSingleAppFlowCtrl(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now, const int32_t callingUid)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    auto singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
-    if (singleAppFlowControlIter == singleAppFlowControlUpdateTimestampMap_.end()) {
-        return ERR_OK;
-    }
-    NotificationAnalyticsUtil::RemoveExpired(*(singleAppFlowControlIter->second), now);
-    if (singleAppFlowControlIter->second->size() >= threshold_.maxUpdateNumPerSecondPerApp) {
-        ANS_LOGE("SingleAppUpdateFlowControl failed");
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_5)
-            .ErrorCode(ERR_ANS_OVER_MAX_UPDATE_PERSECOND).Message("SingleAppUpdateFlowControl failed");
-        if (record != nullptr) {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-        }
-        return ERR_ANS_OVER_MAX_UPDATE_PERSECOND;
-    }
-    return ERR_OK;
-}
-
-void FlowControlService::UpdateRecordTimestamp(const std::shared_ptr<NotificationRecord> &record,
-    std::chrono::system_clock::time_point now, const int32_t callingUid)
-{
-    if (record->isThirdparty == true) {
-        std::lock_guard<std::mutex> lock(flowControlMutex_);
-        flowControlUpdateTimestampList_.push_back(now);
-    } else {
-        std::lock_guard<std::mutex> lock(systemFlowControlMutex_);
-        systemFlowControlUpdateTimestampList_.push_back(now);
-    }
-
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    auto singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
-    if (singleAppFlowControlIter == singleAppFlowControlUpdateTimestampMap_.end()) {
-        singleAppFlowControlUpdateTimestampMap_[callingUid] =
-            std::make_shared<std::list<std::chrono::system_clock::time_point>>();
-        singleAppFlowControlIter = singleAppFlowControlUpdateTimestampMap_.find(callingUid);
-    }
-    singleAppFlowControlIter->second->push_back(now);
-}
-
-void FlowControlService::UpdateSingleAppFlowCtrlRemoveExpire(std::chrono::system_clock::time_point now)
-{
-    std::lock_guard<std::mutex> lock(singleAppFlowControlMutex_);
-    for (auto iter = singleAppFlowControlUpdateTimestampMap_.begin();
-        iter != singleAppFlowControlUpdateTimestampMap_.end();) {
-        auto latest = iter->second->back();
-        if (std::chrono::abs(now - latest) > SINGLE_APP_FLOW_CONTRL_EXPIRE_TIME) {
-            iter = singleAppFlowControlUpdateTimestampMap_.erase(iter);
+    // System caller
+    if (isLiveview) {
+        if (isNotificationExists) {
+            return {FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_UPDATE,
+                    FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_UPDATE};
         } else {
-            ++iter;
+            return {FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_CREATE,
+                    FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_CREATE};
+        }
+    } else {
+        if (isNotificationExists) {
+            return {FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_UPDATE,
+                    FlowControlSceneType::CALLER_SYSTEM_NORMAL_UPDATE};
+        } else {
+            return {FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_CREATE,
+                    FlowControlSceneType::CALLER_SYSTEM_NORMAL_CREATE};
         }
     }
 }

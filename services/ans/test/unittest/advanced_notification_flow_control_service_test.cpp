@@ -15,21 +15,15 @@
 
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
+#include <thread>
 #include "advanced_notification_flow_control_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
-#undef private
-#undef protected
 
 using namespace testing::ext;
 
 namespace OHOS {
 namespace Notification {
-namespace {
-    constexpr int32_t NON_SYSTEM_APP_UID = 1000;
-}
 class FlowControlServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -46,211 +40,493 @@ void FlowControlServiceTest::SetUp() {}
 
 void FlowControlServiceTest::TearDown() {}
 
-/**
- * @tc.number    : FlowControl_00001
- * @tc.name      : Test FlowControl
- * @tc.desc      : Test FlowControl
- */
-HWTEST_F(FlowControlServiceTest, FlowControl_00001, Function | SmallTest | Level1)
+std::shared_ptr<NotificationRecord> GetCommonNotificationRecord()
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     sptr<Notification> notification = new (std::nothrow) Notification(request);
     auto record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->notification = notification;
+    record->isNeedFlowCtrl = true;
+    return record;
+}
+
+std::shared_ptr<NotificationRecord> GetLiveviewNotificationRecord()
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->isNeedFlowCtrl = true;
+    return record;
+}
+
+/**
+ * @tc.name: FlowControl_100
+ * @tc.desc: Test FlowControl when no need to flow control
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_100, Function | SmallTest | Level1)
+{
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->isNeedFlowCtrl = false;
+    auto result = FlowControlService::GetInstance().FlowControl(record, DEFAULT_UID, false);
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: FlowControl_200
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_200, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
     record->isThirdparty = false;
-    record->isNeedFlowCtrl = true;
+    int32_t uid = 1000;
+    int32_t index = 1;
     ErrCode result = ERR_OK;
-    int32_t callingUid = DEFAULT_UID;
-
-    // create flow control
-    // single app flow control test
-    for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, false);
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        }
+        totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
+        index++;
     }
-    ASSERT_EQ(result, (int)ERR_OK);
-    result = FlowControlService::GetInstance()->FlowControl(record, callingUid, false);
-    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
 
-    // global flow control test
-    int gap = MAX_CREATE_NUM_PERSECOND - MAX_CREATE_NUM_PERSECOND_PERAPP;
-    callingUid = NON_SYSTEM_APP_UID;
+    int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
     for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, false);
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
     }
-    ASSERT_EQ(result, (int)ERR_OK);
-    result = FlowControlService::GetInstance()->FlowControl(record, callingUid, false);
-    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
-
-    // update flow control
-    // single app flow control test
-    callingUid = DEFAULT_UID;
-    for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, true);
-    }
-    ASSERT_EQ(result, (int)ERR_OK);
-    result = FlowControlService::GetInstance()->FlowControl(record, callingUid, true);
-    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
-
-    // global flow control test
-    gap = MAX_UPDATE_NUM_PERSECOND - MAX_UPDATE_NUM_PERSECOND_PERAPP;
-    callingUid = NON_SYSTEM_APP_UID;
-    for (int i = 0; i < gap; i++) {
-        result = FlowControlService::GetInstance()->FlowControl(record, callingUid, true);
-    }
-    ASSERT_EQ(result, (int)ERR_OK);
-    result = FlowControlService::GetInstance()->FlowControl(record, callingUid, true);
-    ASSERT_EQ(result, (int)ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
-}
-
-/**
- * @tc.name: FlowControl_0002
- * @tc.desc: Test FlowControl
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(FlowControlServiceTest, FlowControl_0002, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isNeedFlowCtrl = false;
-    auto result = FlowControlService::GetInstance()->FlowControl(record, DEFAULT_UID, false);
     ASSERT_EQ(result, ERR_OK);
-}
 
-/**
- * @tc.name: FlowControl_0003
- * @tc.desc: Test FlowControl
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(FlowControlServiceTest, FlowControl_0003, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isNeedFlowCtrl = true;
-
-    sptr<NotificationRequest> req(new NotificationRequest(1));
-    req->SetUpdateOnly(true);
-    record->request = req;
-
-    ErrCode result = FlowControlService::GetInstance()->FlowControl(record, DEFAULT_UID, false);
-    ASSERT_EQ(result, ERR_ANS_NOTIFICATION_NOT_EXISTS);
-}
-
-/**
- * @tc.name: PublishFlowCtrl_0001
- * @tc.desc: Test PublishFlowCtrl
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(FlowControlServiceTest, PublishFlowCtrl_0001, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isNeedFlowCtrl = false;
-    bool result = FlowControlService::GetInstance()->PublishFlowCtrl(record, DEFAULT_UID);
-    ASSERT_EQ(result, ERR_OK);
-}
-
-/**
- * @tc.name: PublishGlobalFlowCtrl_0001
- * @tc.desc: Test PublishGlobalFlowCtrl
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(FlowControlServiceTest, PublishGlobalFlowCtrl_0001, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-
-    sptr<NotificationRequest> req(new NotificationRequest(1));
-    record->isThirdparty = true;
-    record->request = req;
-
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    ErrCode result = ERR_OK;
-    for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance()->FlowControl(record, DEFAULT_UID, false);
-    }
-
-    result = FlowControlService::GetInstance()->FlowControl(record, DEFAULT_UID, false);
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
     ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 /**
- * @tc.name: PublishRecordTimestamp_0001
- * @tc.desc: Test FlowControl
+ * @tc.name: FlowControl_300
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_UPDATE
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(FlowControlServiceTest, PublishRecordTimestamp_0001, Function | SmallTest | Level1)
+HWTEST_F(FlowControlServiceTest, FlowControl_300, Function | SmallTest | Level1)
 {
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isThirdparty = true;
-
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    FlowControlService::GetInstance()->PublishRecordTimestamp(
-        record, now, DEFAULT_UID);
-    
-    auto size = FlowControlService::GetInstance()->flowControlPublishTimestampList_.size();
-    ASSERT_EQ(size, 1);
-    FlowControlService::GetInstance()->flowControlPublishTimestampList_.clear();
-}
-
-/**
- * @tc.name: UpdateFlowCtrl_0001
- * @tc.desc: Test UpdateFlowCtrl
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(FlowControlServiceTest, UpdateFlowCtrl_0001, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isNeedFlowCtrl = false;
-    auto result = FlowControlService::GetInstance()->UpdateFlowCtrl(record, DEFAULT_UID);
-    ASSERT_EQ(result, ERR_OK);
-}
-
-/**
- * @tc.name: UpdateGlobalFlowCtrl_0001
- * @tc.desc: Test UpdateGlobalFlowCtrl
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(FlowControlServiceTest, UpdateGlobalFlowCtrl_0001, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isThirdparty = true;
-
-    sptr<NotificationRequest> req(new NotificationRequest(1));
-    req->SetUpdateOnly(true);
-    record->request = req;
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    int32_t index = 1;
     ErrCode result = ERR_OK;
-    for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
-        result = FlowControlService::GetInstance()->FlowControl(record, DEFAULT_UID, true);
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        }
+        totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
+        index++;
     }
 
-    result = FlowControlService::GetInstance()->FlowControl(record, DEFAULT_UID, true);
+    int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
     ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 /**
- * @tc.name: UpdateRecordTimestamp_0001
- * @tc.desc: Test FlowControl
+ * @tc.name: FlowControl_400
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_CREATE
  * @tc.type: FUNC
  * @tc.require: issue
  */
-HWTEST_F(FlowControlServiceTest, UpdateRecordTimestamp_0001, Function | SmallTest | Level1)
+HWTEST_F(FlowControlServiceTest, FlowControl_400, Function | SmallTest | Level1)
 {
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->isThirdparty = true;
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    int32_t index = 1;
+    ErrCode result = ERR_OK;
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        }
+        totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
+        index++;
+    }
 
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    FlowControlService::GetInstance()->UpdateRecordTimestamp(
-        record, now, DEFAULT_UID);
-    
-    auto size = FlowControlService::GetInstance()->flowControlUpdateTimestampList_.size();
-    ASSERT_EQ(1, size);
-    FlowControlService::GetInstance()->flowControlUpdateTimestampList_.clear();
+    int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_500
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_SYSTEM_LIVEVIEW_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_500, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    int32_t index = 1;
+    ErrCode result = ERR_OK;
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        }
+        totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
+        index++;
+    }
+
+    int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_600
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_600, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    int32_t index = 1;
+    ErrCode result = ERR_OK;
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        }
+        totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
+        index++;
+    }
+
+    int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_700
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_THIRD_PART_NORMAL_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_700, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    int32_t index = 1;
+    ErrCode result = ERR_OK;
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        }
+        totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
+        index++;
+    }
+
+    int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_800
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_800, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    int32_t index = 1;
+    ErrCode result = ERR_OK;
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_CREATE_NUM_PERSECOND_PERAPP < MAX_CREATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+        }
+        totalCreate += MAX_CREATE_NUM_PERSECOND_PERAPP;
+        index++;
+    }
+
+    int gap = MAX_CREATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_900
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::GLOBAL_THIRD_PART_LIVEVIEW_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_900, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    int32_t index = 1;
+    ErrCode result = ERR_OK;
+    uint32_t totalCreate = 0;
+    while (totalCreate + MAX_UPDATE_NUM_PERSECOND_PERAPP < MAX_UPDATE_NUM_PERSECOND) {
+        for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+            result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+        }
+        totalCreate += MAX_UPDATE_NUM_PERSECOND_PERAPP;
+        index++;
+    }
+
+    int gap = MAX_UPDATE_NUM_PERSECOND - totalCreate;
+    for (int i = 0; i < gap; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid + index, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1000
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_SYSTEM_NORMAL_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1000, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1100
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_SYSTEM_NORMAL_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1100, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1200
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1200, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1300
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_SYSTEM_LIVEVIEW_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1300, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = false;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1400
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_THIRD_PART_NORMAL_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1400, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1500
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_THIRD_PART_NORMAL_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1500, Function | SmallTest | Level1)
+{
+    auto record = GetCommonNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1600
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_CREATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1600, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_CREATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, false);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_ACTIVE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: FlowControl_1700
+ * @tc.desc: Test FlowControl when scene type is FlowControlSceneType::CALLER_THIRD_PART_LIVEVIEW_UPDATE
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, FlowControl_1700, Function | SmallTest | Level1)
+{
+    auto record = GetLiveviewNotificationRecord();
+    record->isThirdparty = true;
+    int32_t uid = 1000;
+    ErrCode result = ERR_OK;
+
+    for (int i = 0; i < MAX_UPDATE_NUM_PERSECOND_PERAPP; i++) {
+        result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    }
+    ASSERT_EQ(result, ERR_OK);
+
+    result = FlowControlService::GetInstance().FlowControl(record, uid, true);
+    ASSERT_EQ(result, ERR_ANS_OVER_MAX_UPDATE_PERSECOND);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 }  // namespace Notification
 }  // namespace OHOS

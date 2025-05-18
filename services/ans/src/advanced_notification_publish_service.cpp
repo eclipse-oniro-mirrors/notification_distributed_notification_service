@@ -402,7 +402,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         }
 
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
+        result = FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
             message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
             return;
@@ -2679,7 +2679,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
+        result = FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
             return;
         }
