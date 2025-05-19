@@ -145,6 +145,8 @@ HWTEST_F(AnsPublishServiceTest, Publish_00001, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsPublishServiceTest, Publish_00002, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     std::string label = "";
     request->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);

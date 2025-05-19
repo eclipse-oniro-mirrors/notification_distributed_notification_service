@@ -1982,8 +1982,10 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckDistributedNotificationType_0300,
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test start";
     AdvancedNotificationService advancedNotificationService;
+
+    ASSERT_EQ(advancedNotificationService.SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("test", 1000), true), (int)ERR_OK);
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
     auto slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -1993,11 +1995,12 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19900,
     request->SetOwnerBundleName("test");
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
+
     sptr<NotificationRequest> request1 = new NotificationRequest();
     advancedNotificationService.notificationSvrQueue_ = nullptr;
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
-    GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0100 test end";
 }
 
 /**
@@ -2218,7 +2221,8 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_1100, Function | 
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0300, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedUpdate_0300 test start";
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("test", 1000), true), (int)ERR_OK);
 
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
@@ -2232,6 +2236,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0300, Function | S
     request->SetContent(content);
     advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
     MockQueryForgroundOsAccountId(false, 0);
 
     sptr<NotificationRequest> request1 = new NotificationRequest(101);
@@ -2265,8 +2270,10 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0300, Function | S
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0400, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedUpdate_0400 test start";
     AdvancedNotificationService advancedNotificationService;
+
+    ASSERT_EQ(advancedNotificationService.SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("test", 1000), true), (int)ERR_OK);
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -2279,6 +2286,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0400, Function | S
     request->SetContent(content);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 
     sptr<NotificationRequest> request1 = new NotificationRequest(101);
     request1->SetSlotType(slotType);
@@ -2310,7 +2318,8 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0400, Function | S
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedUpdate_0500 test start";
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("test", 1000), true), (int)ERR_OK);
 
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
@@ -2324,6 +2333,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | S
     request->SetContent(content);
     advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 
     sptr<NotificationRequest> request1 = new NotificationRequest(101);
     request1->SetSlotType(slotType);
@@ -2354,9 +2364,10 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | S
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test start";
- 
     AdvancedNotificationService advancedNotificationService;
+    ASSERT_EQ(advancedNotificationService.SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("test", 1000), true), (int)ERR_OK);
+
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
@@ -2369,6 +2380,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
     request->SetContent(content);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 
     advancedNotificationService.notificationSvrQueue_ = nullptr;
     sptr<NotificationRequest> request2 = new NotificationRequest(101);
@@ -2387,8 +2399,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
         record->request->GetContent()->GetNotificationContent());
         ASSERT_EQ(ct->GetTitle(), "title 1");
     }
-
-    GTEST_LOG_(INFO) << "OnDistributedUpdate_0100 test end";
 }
 
 /**
@@ -2399,7 +2409,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20000,
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0200, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedUpdate_0200 test start";
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("test", 1000), true), (int)ERR_OK);
 
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
@@ -2413,6 +2424,8 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0200, Function | S
     request->SetContent(content);
     advancedNotificationService_->OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
     sptr<NotificationRequest> request1 = new NotificationRequest(101);
     request1->SetSlotType(slotType);
     request1->SetOwnerBundleName("test");
@@ -2467,8 +2480,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20100,
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0200, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedDelete_0200 test start";
     AdvancedNotificationService advancedNotificationService;
+
+    ASSERT_EQ(advancedNotificationService.SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("BundleName", 1000), true), (int)ERR_OK);
+
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
     std::string label = "";
@@ -2488,8 +2504,6 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0200, Function | S
     advancedNotificationService.OnDistributedDelete(deviceId, bundleName, label, id);
 
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
-
-    GTEST_LOG_(INFO) << "OnDistributedDelete_0200 test end";
 }
 
 /**
@@ -2500,7 +2514,9 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0200, Function | S
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0300, Function | SmallTest | Level1)
 {
-    GTEST_LOG_(INFO) << "OnDistributedDelete_0300 test start";
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("BundleName", 1000), true), (int)ERR_OK);
+
     DistributedDatabase::DeviceInfo localDeviceInfo;
     std::string deviceId = "DeviceId";
     if (DistributedNotificationManager::GetInstance()->GetLocalDeviceInfo(localDeviceInfo) == ERR_OK) {
