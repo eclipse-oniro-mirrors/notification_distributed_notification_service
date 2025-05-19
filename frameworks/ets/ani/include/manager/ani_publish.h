@@ -19,9 +19,8 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniPublish(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj);
-void AniPublishWithId(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj,
-    ani_double userId);
+void AniPublish(ani_env *env, ani_object obj);
+void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

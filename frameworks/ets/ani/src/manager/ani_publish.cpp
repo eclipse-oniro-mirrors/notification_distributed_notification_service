@@ -26,7 +26,7 @@ namespace OHOS {
 namespace NotificationManagerSts {
 using namespace OHOS::Notification;
 
-void AniPublish(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj)
+void AniPublish(ani_env *env, ani_object obj)
 {
     ANS_LOGD("AniPublish call");
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
@@ -44,8 +44,7 @@ void AniPublish(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj
     ANS_LOGD("AniPublish end");
 }
 
-void AniPublishWithId(ani_env *env, [[maybe_unused]]ani_class aniClass, ani_object obj,
-    ani_double userId)
+void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
 {
     ANS_LOGD("AniPublishWithId start");
     //NotificationRequest request;

@@ -24,24 +24,26 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
     sptr<NotificationDoNotDisturbProfile> &profile)
 {
     ANS_LOGD("UnwrapDoNotDisturbProfile call");
+    if (env == nullptr || param == nullptr) {
+        ANS_LOGE("UnwrapDoNotDisturbProfile fail, has nullptr");
+        return false;
+    }
     ani_boolean isUndefined = ANI_TRUE;
-
     ani_double idAni = 0.0;
     if (ANI_OK != GetPropertyDouble(env, param, "id", isUndefined, idAni) || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetPropertyDouble id : failed");
+        ANS_LOGE("UnwrapDoNotDisturbProfile: get id failed");
         return false;
     }
     std::string nameStr = "";
     if (ANI_OK != GetPropertyString(env, param, "name", isUndefined, nameStr) || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetPropertyString name : failed");
+        ANS_LOGE("UnwrapDoNotDisturbProfile: get name failed");
         return false;
     }
     profile->SetProfileId(static_cast<int64_t>(idAni));
     profile->SetProfileName(nameStr);
-
     ani_ref trustlistRef;
     if (ANI_OK != GetPropertyRef(env, param, "trustlist", isUndefined, trustlistRef) || isUndefined == ANI_TRUE) {
-        ANS_LOGD("GetPropertyRef trustlist failed, maybe is isUndefined");
+        ANS_LOGE("UnwrapDoNotDisturbProfile: get trustlist failed");
     } else {
         std::vector<BundleOption> trustlist = {};
         UnwrapArrayBundleOption(env, static_cast<ani_object>(trustlistRef), trustlist);
@@ -56,32 +58,34 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
 bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
     std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
-    ani_status status;
-    ani_double length;
-
-    status = env->Object_GetPropertyByName_Double(arrayObj, "length", &length);
-    if (status != ANI_OK) {
-        ANS_LOGD("status : %{public}d", status);
+    ANS_LOGD("UnwrapArrayDoNotDisturbProfile call");
+    if (env == nullptr || arrayObj == nullptr) {
+        ANS_LOGE("UnwrapArrayDoNotDisturbProfile fail, has nullptr");
         return false;
     }
-
+    ani_status status;
+    ani_double length;
+    status = env->Object_GetPropertyByName_Double(arrayObj, "length", &length);
+    if (status != ANI_OK) {
+        ANS_LOGD("UnwrapArrayDoNotDisturbProfile: status = %{public}d", status);
+        return false;
+    }
     sptr<NotificationDoNotDisturbProfile> profile;
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int dex = 0; dex < static_cast<int>(length); dex++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "I:L@ohos/notificationManager/notificationManager/DoNotDisturbProfile;", &optionRef, (ani_int)i);
+            "I:L@ohos/notificationManager/notificationManager/DoNotDisturbProfile;", &optionRef, (ani_int)dex);
         if (status != ANI_OK) {
-            ANS_LOGD("status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, dex);
             return false;
         }
-
         if (!UnwrapDoNotDisturbProfile(env, static_cast<ani_object>(optionRef), profile)) {
-            ANS_LOGD("Get profile failed, index: %{public}d", i);
+            ANS_LOGE("Get profile failed, index: %{public}d", dex);
             return false;
         }
         profiles.push_back(profile);
-        ANS_LOGD("GetProfiles index: %{public}d", i);
     }
+    ANS_LOGD("UnwrapArrayDoNotDisturbProfile end");
     return true;
 }
 } // namespace NotificationSts
