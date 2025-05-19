@@ -27,6 +27,12 @@ ErrCode ReminderHelper::PublishReminder(const ReminderRequest& reminder, int32_t
     return DelayedSingleton<ReminderRequestClient>::GetInstance()->PublishReminder(reminder, reminderId);
 }
 
+ErrCode ReminderHelper::UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder)
+{
+    ANSR_LOGI("UpdateReminder start");
+    return DelayedSingleton<ReminderRequestClient>::GetInstance()->UpdateReminder(reminderId, reminder);
+}
+
 ErrCode ReminderHelper::CancelReminder(const int32_t reminderId)
 {
     ANSR_LOGI("CancelReminder start");

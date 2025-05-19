@@ -107,6 +107,7 @@ enum ReminderErrorCode : uint32_t {
     ERR_REMINDER_PACKAGE_NOT_EXIST,
     ERR_REMINDER_CALLER_TOKEN_INVALID,
     ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED,
+    ERR_REMINDER_PARAM_ERROR,
 };
 
 static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
@@ -117,7 +118,8 @@ static std::map<uint32_t, std::string> reminderErrCodeMsgMap = {
     { ERR_REMINDER_NOT_EXIST, "The reminder not exist." },
     { ERR_REMINDER_PACKAGE_NOT_EXIST, "The package name not exist." },
     { ERR_REMINDER_CALLER_TOKEN_INVALID, "The caller token invalid." },
-    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "The data share permission denied." }
+    { ERR_REMINDER_DATA_SHARE_PERMISSION_DENIED, "The data share permission denied." },
+    { ERR_REMINDER_PARAM_ERROR, "Parameter error." }
 };
 
 // Notification error msg

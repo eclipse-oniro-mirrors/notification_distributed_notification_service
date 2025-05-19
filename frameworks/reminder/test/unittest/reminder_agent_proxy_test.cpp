@@ -206,5 +206,49 @@ HWTEST_F(ReminderAgentServiceProxyTest, GetExcludeDates_0100, Function | MediumT
     EXPECT_EQ(ERR_OK, res);
 }
 
+/*
+ * @tc.name: UpdateReminder_0100
+ * @tc.desc: test ReminderAgentServiceProxy's UpdateReminder function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(ReminderAgentServiceProxyTest, UpdateReminder_0100, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "ReminderAgentServiceProxyTest, UpdateReminder_0100, TestSize.Level1";
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t reminderId = 0;
+    ReminderRequest reminderRequest;
+    ErrCode res = proxy->UpdateReminder(reminderId, reminderRequest);
+    EXPECT_NE(ERR_OK, res);
+}
+
+/*
+ * @tc.name: UpdateReminder_0200
+ * @tc.desc: test ReminderAgentServiceProxy's UpdateReminder function
+ * @tc.type: FUNC
+ * @tc.require: #I5XO2O
+ */
+HWTEST_F(ReminderAgentServiceProxyTest, UpdateReminder_0200, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO)
+        << "ReminderAgentServiceProxyTest, UpdateReminder_0200, TestSize.Level1";
+    MockWriteInterfaceToken(true);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+
+    int32_t reminderId = 0;
+    ReminderRequest reminderRequest;
+    reminderRequest.SetReminderType(ReminderRequest::ReminderType::TIMER);
+    ErrCode res = proxy->UpdateReminder(reminderId, reminderRequest);
+    EXPECT_EQ(ERR_OK, res);
+}
 }
 }

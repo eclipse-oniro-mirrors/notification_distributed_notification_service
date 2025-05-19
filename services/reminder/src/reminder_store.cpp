@@ -747,6 +747,21 @@ bool ReminderStore::IsReminderExist(const sptr<ReminderRequest>& reminder)
     return resultNum != 0;
 }
 
+bool ReminderStore::IsReminderExist(const int32_t reminderId, const int32_t uid)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(ReminderBaseTable::TABLE_NAME);
+    absRdbPredicates.EqualTo(ReminderBaseTable::REMINDER_ID, std::to_string(reminderId));
+    absRdbPredicates.EqualTo(ReminderBaseTable::CREATOR_UID, std::to_string(uid));
+    auto queryResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    if (queryResultSet == nullptr) {
+        ANSR_LOGE("QueryResultSet is null.");
+        return false;
+    }
+    int32_t resultNum;
+    queryResultSet->GetRowCount(resultNum);
+    return resultNum != 0;
+}
+
 std::vector<sptr<ReminderRequest>> ReminderStore::GetReminders(const std::string& queryCondition)
 {
     std::vector<sptr<ReminderRequest>> reminders;

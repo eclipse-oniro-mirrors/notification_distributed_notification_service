@@ -185,6 +185,15 @@ public:
         const int32_t callingUid);
 
     /**
+     * Updates a scheduled reminder.
+     *
+     * @param reminder Indicates the reminder.
+     * @param callingUid Indicates uid the reminder belongs to.
+     * @return ERR_OK if success, else not.
+     */
+    ErrCode UpdateReminder(const sptr<ReminderRequest> &reminder, const int32_t callingUid);
+
+    /**
      * @brief Refresh all reminders when date/time or timeZone of device changed by user.
      *
      * @param type Indicates it is triggered by dateTime change or timeZone change.
@@ -612,6 +621,7 @@ private:
      * @param reminder Indicates a reminder.
      */
     void UpdateAndSaveReminderLocked(const sptr<ReminderRequest> &reminder);
+    void UpdateAndSaveReminderLocked(const sptr<ReminderRequest>& reminder, const bool isInMemory);
 
     static bool cmp(sptr<ReminderRequest> &reminderRequest, sptr<ReminderRequest> &other);
 
@@ -741,6 +751,7 @@ private:
      * Indicates the active reminder that timing is taking effect.
      */
     std::atomic<int32_t> activeReminderId_ = -1;
+    std::atomic<uint64_t> activeTriggerTime_ = -1;
     sptr<ReminderRequest> activeReminder_ = nullptr;
 
     /**

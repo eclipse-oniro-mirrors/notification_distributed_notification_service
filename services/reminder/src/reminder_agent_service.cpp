@@ -104,6 +104,35 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
     return ret;
 }
 
+ErrCode ReminderAgentService::UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    ANSR_LOGD("call.");
+    sptr<ReminderRequest> tarReminder = CreateReminderRequest(reminder);
+    if (nullptr == tarReminder) {
+        ANSR_LOGE("Failed to create ReminderRequest.");
+        return ERR_REMINDER_INVALID_PARAM;
+    }
+    if (!CheckReminderPermission()) {
+        ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
+        return ERR_REMINDER_PERMISSION_DENIED;
+    }
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
+    ErrCode ret = InitReminderRequest(tarReminder, bundleName, callingUid);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    auto rdm = ReminderDataManager::GetInstance();
+    if (nullptr == rdm) {
+        return ERR_NO_INIT;
+    }
+    tarReminder->SetReminderId(reminderId);
+    ret = rdm->UpdateReminder(tarReminder, callingUid);
+    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
+    return ret;
+}
+
 ErrCode ReminderAgentService::CancelReminder(const int32_t reminderId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
