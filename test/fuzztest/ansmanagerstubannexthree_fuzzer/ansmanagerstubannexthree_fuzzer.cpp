@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+
 #define private public
 #define protected public
 #include "advanced_notification_service.h"
@@ -20,7 +21,9 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
-#include "ansmanagerstubannex_fuzzer.h"
+#include "ans_subscriber_local_live_view_proxy.h"
+#include "ans_subscriber_proxy.h"
+#include "ansmanagerstubannexthree_fuzzer.h"
 #include "reminder_request_timer.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "swing_call_back_proxy.h"
@@ -235,13 +238,14 @@ namespace OHOS {
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
+    /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
     std::vector<std::string> requestPermission = {
         OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
         OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
         OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
     };
-    SystemHapTokenGet(requestPermission);
+    NativeTokenGet(requestPermission);
     OHOS::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
