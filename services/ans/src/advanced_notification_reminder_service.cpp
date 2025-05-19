@@ -83,33 +83,6 @@ NotificationConstant::RemindType AdvancedNotificationService::GetRemindType()
 }
 #endif
 
-ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler =
-        notificationSvrQueue_->submit_h(std::bind([&]() { remindTypeInt = static_cast<int32_t>(GetRemindType()); }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-#else
-    return ERR_INVALID_OPERATION;
-#endif
-}
-
 ErrCode AdvancedNotificationService::SetNotificationRemindType(sptr<Notification> notification, bool isLocal)
 {
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
