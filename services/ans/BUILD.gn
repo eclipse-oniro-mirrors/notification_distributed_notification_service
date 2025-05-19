@@ -97,6 +97,7 @@ ohos_source_set("ans_service_sources") {
     "src/common/notification_config_parse.cpp",
     "src/distributed_device_status.cpp",
     "src/distributed_manager/advanced_notification_distributed_manager_service.cpp",
+    "src/disturb_manager/advanced_notification_disturb_manager_service.cpp",
     "src/disturb_manager/add_do_not_disturb_profiles.cpp",
     "src/disturb_manager/disturb_manager.cpp",
     "src/disturb_manager/does_support_do_not_disturb_mode.cpp",
