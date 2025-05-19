@@ -56,6 +56,20 @@ let storage = LocalStorage.getShared();
   .width('50%')
 }
 
+@Extend(Button) function singleRowButton() {
+  .backgroundColor(Color.Transparent)
+  .fontColor($r('app.color.button_text'))
+  .fontSize(
+    getLimitFontSize(
+      Constants.TEXT_MIDDLE_FONT_SIZE,
+      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
+  )
+  .fontWeight(FontWeight.Medium)
+  .height(Constants.BUTTON_HEIGHT)
+  .flexGrow(Constants.FLEX_GROW)
+  .width('100%')
+}
+
 @Entry(storage)
 @Component
 struct NotificationDialogPage {
@@ -94,6 +108,8 @@ struct PermissionDialog {
   controller?: CustomDialogController;
   @State titleContainerWidth: string | number = 'auto';
   @State maxHeight: string|number = '85%';
+  @State buttonVisibility: Visibility  = Visibility.Visible;
+  @State singleRowButtonVisibility: Visibility  = Visibility.None;
 
   build() {
     Row(){
@@ -190,16 +206,63 @@ struct PermissionDialog {
                     })
                     .customizeButton()
                 }
-                .margin({ left: Constants.BUTTON_MARGIN_LEFT, right: Constants.BUTTON_MARGIN_RIGHT })
+                .margin({ 
+                  left: Constants.BUTTON_MARGIN_LEFT, 
+                  right: Constants.BUTTON_MARGIN_RIGHT,
+                  bottom: Constants.DIALOG_PADDING_BOTTOM
+                 })
               }
+              .visibility(this.buttonVisibility)
+
+              Row() {
+                Flex({ justifyContent: FlexAlign.Center }) {
+                  Button($r('app.string.BAN'))
+                  .onClick(async (): Promise<void> => {
+                    await this.enableNotification(false);
+                  })
+                  .singleRowButton()
+                  .margin({ 
+                    left: Constants.MARGIN_ZERO,
+                    right: Constants.MARGIN_ZERO,
+                    bottom: Constants.BUTTON_MARGIN_ROW
+                  })
+                }
+                .margin({ 
+                  left: Constants.BUTTON_MARGIN_LEFT, 
+                  right: Constants.BUTTON_MARGIN_RIGHT 
+                })
+              }
+              .visibility(this.singleRowButtonVisibility)
+              
+              Row() {
+                Flex({ justifyContent: FlexAlign.Center }) {
+                  Button($r('app.string.ALLOW'))
+                    .onClick(async (): Promise<void> => {
+                      await this.enableNotification(true);
+                    })
+                    .singleRowButton()
+                    .margin({ 
+                      left: Constants.MARGIN_ZERO, 
+                      right: Constants.MARGIN_ZERO
+                    })
+                }
+                .margin({ 
+                  left: Constants.BUTTON_MARGIN_LEFT,
+                  right: Constants.BUTTON_MARGIN_RIGHT,
+                  bottom: Constants.DIALOG_PADDING_BOTTOM_LOW
+                })
+              }
+              .visibility(this.singleRowButtonVisibility)
             }
           }
         }
         .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
         .width(Constants.FULL_WIDTH)
-        .padding({ bottom: Constants.DIALOG_PADDING_BOTTOM })
         .clip(true)
+        .onAreaChange((oldArea: Area, newArea: Area) => {
+          this.updateButtomVisibility(newArea.width as number);
+        })
       }
     }
     .margin({
@@ -280,6 +343,44 @@ struct PermissionDialog {
       }
     } catch (err) {
       console.error(TAG, `updatemaxHeight error. Cause: ${err?.code}`);
+    }
+  }
+
+  updateButtomVisibility(dialogWidth: number): void {
+    try {
+      let buttonWidth = (dialogWidth - Constants.BUTTON_LEFT - Constants.BUTTON_RIGHT
+         - Constants.BUTTON_MARGIN_LEFT - Constants.BUTTON_MARGIN_RIGHT 
+         - Constants.BUTTON_HEIGHT) * 0.5;
+
+      let measureUtils = this.getUIContext().getMeasureUtils();
+      let denyOptions: MeasureOptions = {
+        textContent: $r('app.string.BAN'),
+        fontSize: getLimitFontSize(
+          Constants.TEXT_MIDDLE_FONT_SIZE,
+          getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX)),
+          fontWeight: FontWeight.Medium
+        };
+      let denyTextWidth = measureUtils.measureText(denyOptions);
+
+      let allowOptions: MeasureOptions = {
+        textContent: $r('app.string.ALLOW'),
+        fontSize: getLimitFontSize(
+          Constants.TEXT_MIDDLE_FONT_SIZE,
+          getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX)),
+          fontWeight: FontWeight.Medium
+        };
+      let allowTextWidth = measureUtils.measureText(allowOptions);
+
+      console.info(TAG, `updateButtomVisibility ${denyTextWidth} ${allowTextWidth}  ${vp2px(buttonWidth)}`);
+      if (denyTextWidth > vp2px(buttonWidth) || allowTextWidth > vp2px(buttonWidth)) {
+        this.buttonVisibility = Visibility.None;
+        this.singleRowButtonVisibility = Visibility.Visible;
+      } else {
+        this.buttonVisibility = Visibility.Visible;
+        this.singleRowButtonVisibility = Visibility.None;
+      }
+    } catch (err) {
+      console.error(TAG, `updateButtomVisibility error. Cause: ${err?.code}`);
     }
   }
 
