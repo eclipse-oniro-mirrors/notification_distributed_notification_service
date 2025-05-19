@@ -89,6 +89,9 @@ bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOpt
 
 bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
 {
+#ifdef ANS_DISABLE_FA_MODEL
+    return false;
+#endif
     AppExecFwk::BundleInfo bundleInfo;
     int32_t callingUserId;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
