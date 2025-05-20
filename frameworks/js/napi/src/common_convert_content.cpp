@@ -573,6 +573,8 @@ napi_value Common::GetNotificationBasicContentDetailed(
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
     if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property title is empty");
+        std::string msg = "Incorrect parameter. Property title is empty.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     basicContent->SetTitle(shortStr);
@@ -589,6 +591,8 @@ napi_value Common::GetNotificationBasicContentDetailed(
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
     if (std::strlen(commonStr) == 0) {
         ANS_LOGE("Property text is empty");
+        std::string msg = "Incorrect parameter. Property text is empty";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
     basicContent->SetText(commonStr);

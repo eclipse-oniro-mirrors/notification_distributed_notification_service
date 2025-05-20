@@ -764,6 +764,9 @@ void NotificationAnalyticsUtil::ReportPublishBadge(const sptr<NotificationReques
         return;
     }
 
+    if (request->GetBadgeNumber() <= 0) {
+        return;
+    }
     BadgeInfo badgeInfo;
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
