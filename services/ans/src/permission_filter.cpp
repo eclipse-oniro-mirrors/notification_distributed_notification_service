@@ -69,7 +69,7 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST) {
             message.ErrorCode(ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST).Message("Slot type not exist.");
             NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);
-            ANS_LOGE("Slot type not exist.");
+            ANS_LOGE("Slot type %{public}d not exist.", slotType);
         }
     }
 
