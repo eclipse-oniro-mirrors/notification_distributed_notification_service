@@ -137,7 +137,7 @@ bool WarpNotificationProgress(ani_env *env, const NotificationProgress &progress
     RETURN_FALSE_IF_FALSE(CallSetterOptional(env, progressClass, progressObject, "currentValue",
         progress.GetCurrentValue()));
     // isPercentage?: boolean;
-    RETURN_FALSE_IF_FALSE(CallSetter(env, progressClass, progressObject, "isPercentage",
+    RETURN_FALSE_IF_FALSE(CallSetterOptional(env, progressClass, progressObject, "isPercentage",
         BoolToAniBoolean(progress.GetIsPercentage())));
     return true;
 }
@@ -185,13 +185,13 @@ bool WarpNotificationTime(ani_env *env, const NotificationTime &time, bool isIni
             time.GetInitialTime()));
     }
     // isCountDown?: boolean;
-    RETURN_FALSE_IF_FALSE(CallSetter(env, timeClass, timeObject, "isCountDown",
+    RETURN_FALSE_IF_FALSE(CallSetterOptional(env, timeClass, timeObject, "isCountDown",
         BoolToAniBoolean(time.GetIsCountDown())));
     // isPaused?: boolean;
-    RETURN_FALSE_IF_FALSE(CallSetter(env, timeClass, timeObject, "isPaused",
+    RETURN_FALSE_IF_FALSE(CallSetterOptional(env, timeClass, timeObject, "isPaused",
         BoolToAniBoolean(time.GetIsPaused())));
     // isInTitle?: boolean;
-    RETURN_FALSE_IF_FALSE(CallSetter(env, timeClass, timeObject, "isInTitle",
+    RETURN_FALSE_IF_FALSE(CallSetterOptional(env, timeClass, timeObject, "isInTitle",
         BoolToAniBoolean(time.GetIsInTitle())));
     return true;
 }
@@ -384,8 +384,8 @@ ani_object WarpNotificationIconButton(ani_env *env, const NotificationIconButton
     RETURN_NULL_IF_FALSE(GetAniStringByString(env, button.GetText(), stringValue));
     RETURN_NULL_IF_FALSE(CallSetter(env, iconButtonCls, iconButtonObject, "text", stringValue));
     // hidePanel?: boolean;
-    RETURN_NULL_IF_FALSE(CallSetter(
-        env, iconButtonCls, iconButtonObject, "hidePanel", BoolToAniBoolean(button.GetHidePanel())));
+    RETURN_NULL_IF_FALSE(SetOptionalFieldBoolean(
+        env, iconButtonCls, iconButtonObject, "hidePanel", button.GetHidePanel()));
     // iconResource: IconType;    type IconType = Resource | image.PixelMap;
     std::shared_ptr<Media::PixelMap> icon = button.GetIconImage();
     if (icon) {

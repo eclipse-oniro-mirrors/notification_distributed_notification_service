@@ -743,25 +743,25 @@ bool SetNotificationRequestByBool(ani_env* env, ani_class cls, const OHOS::Notif
         return false;
     }
     // isOngoing?: boolean
-    CallSetter(env, cls, object, "isOngoing", BoolToAniBoolean(request->IsInProgress()));
+    SetOptionalFieldBoolean(env, cls, object, "isOngoing", request->IsInProgress());
     // isUnremovable?: boolean
-    CallSetter(env, cls, object, "isUnremovable", BoolToAniBoolean(request->IsUnremovable()));
+    SetOptionalFieldBoolean(env, cls, object, "isUnremovable", request->IsUnremovable());
     // tapDismissed?: boolean
-    CallSetter(env, cls, object, "tapDismissed", BoolToAniBoolean(request->IsTapDismissed()));
+    SetOptionalFieldBoolean(env, cls, object, "tapDismissed", request->IsTapDismissed());
     // colorEnabled?: boolean
-    CallSetter(env, cls, object, "colorEnabled", BoolToAniBoolean(request->IsColorEnabled()));
+    SetOptionalFieldBoolean(env, cls, object, "colorEnabled", request->IsColorEnabled());
     // isAlertOnce?: boolean
-    CallSetter(env, cls, object, "isAlertOnce", BoolToAniBoolean(request->IsAlertOneTime()));
+    SetOptionalFieldBoolean(env, cls, object, "isAlertOnce", request->IsAlertOneTime());
     // isStopwatch?: boolean
-    CallSetter(env, cls, object, "isStopwatch", BoolToAniBoolean(request->IsShowStopwatch()));
+    SetOptionalFieldBoolean(env, cls, object, "isStopwatch", request->IsShowStopwatch());
     // isCountDown?: boolean
-    CallSetter(env, cls, object, "isCountDown", BoolToAniBoolean(request->IsCountdownTimer()));
+    SetOptionalFieldBoolean(env, cls, object, "isCountDown", request->IsCountdownTimer());
     // isFloatingIcon?: boolean
-    CallSetter(env, cls, object, "isFloatingIcon", BoolToAniBoolean(request->IsFloatingIcon()));
+    SetOptionalFieldBoolean(env, cls, object, "isFloatingIcon", request->IsFloatingIcon());
     // showDeliveryTime?: boolean
-    CallSetter(env, cls, object, "showDeliveryTime", BoolToAniBoolean(request->IsShowDeliveryTime()));
+    SetOptionalFieldBoolean(env, cls, object, "showDeliveryTime", request->IsShowDeliveryTime());
     // updateOnly?: boolean
-    CallSetter(env, cls, object, "updateOnly", BoolToAniBoolean(request->IsUpdateOnly()));
+    SetOptionalFieldBoolean(env, cls, object, "updateOnly", request->IsUpdateOnly());
     return true;
 }
 
@@ -774,27 +774,27 @@ bool SetNotificationRequestByString(ani_env* env, ani_class cls, const OHOS::Not
     }
     ani_string stringValue = nullptr;
     // classification?: string
-    if (GetAniStringByString(env, request->GetClassification(), stringValue)) {
+    if (GetAniStringByString(env, request->GetClassification(), stringValue) && stringValue != nullptr) {
         CallSetter(env, cls, object, "classification", stringValue);
     }
     // label?: string
-    if (GetAniStringByString(env, request->GetLabel(), stringValue)) {
+    if (GetAniStringByString(env, request->GetLabel(), stringValue) && stringValue != nullptr) {
         CallSetter(env, cls, object, "label", stringValue);
     }
     // groupName?: string
-    if (GetAniStringByString(env, request->GetGroupName(), stringValue)) {
+    if (GetAniStringByString(env, request->GetGroupName(), stringValue) && stringValue != nullptr) {
         CallSetter(env, cls, object, "groupName", stringValue);
     }
     // readonly creatorBundleName?: string
-    if (GetAniStringByString(env, request->GetCreatorBundleName(), stringValue)) {
+    if (GetAniStringByString(env, request->GetCreatorBundleName(), stringValue) && stringValue != nullptr) {
         CallSetter(env, cls, object, "creatorBundleName", stringValue);
     }
     // readonly sound?: string
-    if (GetAniStringByString(env, request->GetSound(), stringValue)) {
+    if (GetAniStringByString(env, request->GetSound(), stringValue) && stringValue != nullptr) {
         CallSetter(env, cls, object, "sound", stringValue);
     }
     // readonly appInstanceKey?: string
-    if (GetAniStringByString(env, request->GetAppInstanceKey(), stringValue)) {
+    if (GetAniStringByString(env, request->GetAppInstanceKey(), stringValue) && stringValue != nullptr) {
         CallSetter(env, cls, object, "appInstanceKey", stringValue);
     }
     return true;
@@ -812,7 +812,7 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
     // slotType?: SlotType
     ani_enum_item slotTypeItem {};
     if(SlotTypeCToEts(env, request->GetSlotType(), slotTypeItem)) {
-        CallSetter(env, cls, object, "slotType", slotTypeItem);
+        CallSetter(env, cls, object, "notificationSlotType", slotTypeItem);
     }
     
     // deliveryTime?: number
@@ -846,25 +846,19 @@ bool SetNotificationRequestByWantAgent(ani_env* env, ani_class cls,
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = request->GetWantAgent();
     if (agent) {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
-        RETURN_FALSE_IF_FALSE(CallSetter(env, cls, object, "wantAgent", wantAgent));
-    } else {
-        RETURN_FALSE_IF_FALSE(CallSetterNull(env, cls, object, "wantAgent"));
+        CallSetter(env, cls, object, "wantAgent", wantAgent);
     }
     // removalWantAgent?: WantAgent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalAgent = request->GetRemovalWantAgent();
     if (removalAgent) {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, removalAgent.get());
-        RETURN_FALSE_IF_FALSE(CallSetter(env, cls, object, "removalWantAgent", wantAgent));
-    } else {
-        RETURN_FALSE_IF_FALSE(CallSetterNull(env, cls, object, "removalWantAgent"));
+        CallSetter(env, cls, object, "removalWantAgent", wantAgent);
     }
     // maxScreenWantAgent?: WantAgent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenAgent = request->GetMaxScreenWantAgent();
     if (maxScreenAgent) {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, maxScreenAgent.get());
-        RETURN_FALSE_IF_FALSE(CallSetter(env, cls, object, "maxScreenWantAgent", wantAgent));
-    } else {
-        RETURN_FALSE_IF_FALSE(CallSetterNull(env, cls, object, "maxScreenWantAgent"));
+        CallSetter(env, cls, object, "maxScreenWantAgent", wantAgent);
     }
     return true;
 }
@@ -990,14 +984,35 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
         ANS_LOGE("notification is null");
         return false;
     }
-    RETURN_FALSE_IF_FALSE(CreateClassObjByClassName(env,
-        "Lnotification/notificationRequest/NotificationRequestInner;", cls, outAniObj));
-    //RETURN_FALSE_IF_FALSE(SetNotificationRequestByBool(env, cls, notificationRequest, outAniObj));
-    RETURN_FALSE_IF_FALSE(SetNotificationRequestByString(env, cls, notificationRequest, outAniObj));
-    RETURN_FALSE_IF_FALSE(SetNotificationRequestByNumber(env, cls, notificationRequest, outAniObj));
-    RETURN_FALSE_IF_FALSE(SetNotificationRequestByWantAgent(env, cls, notificationRequest, outAniObj));
-    RETURN_FALSE_IF_FALSE(SetNotificationRequestByPixelMap(env, cls, notificationRequest, outAniObj));
-    RETURN_FALSE_IF_FALSE(SetNotificationRequestByCustom(env, cls, notificationRequest, outAniObj));
+    if (!CreateClassObjByClassName(env,
+        "Lnotification/notificationRequest/NotificationRequestInner;", cls, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: create class failed");
+        return false;
+    }
+    if (!SetNotificationRequestByBool(env, cls, notificationRequest, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: set bools failed");
+        return false;
+    }
+    if (!SetNotificationRequestByString(env, cls, notificationRequest, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: set strings failed");
+        return false;
+    }
+    if (!SetNotificationRequestByNumber(env, cls, notificationRequest, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: set numbers failed");
+        return false;
+    }
+    if (!SetNotificationRequestByWantAgent(env, cls, notificationRequest, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: set WantAgent failed");
+        return false;
+    }
+    if (!SetNotificationRequestByPixelMap(env, cls, notificationRequest, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: set PixelMap failed");
+        return false;
+    }
+    if (!SetNotificationRequestByCustom(env, cls, notificationRequest, outAniObj)) {
+        ANS_LOGE("WarpNotificationRequest: set Customs failed");
+        return false;
+    }
     ANS_LOGD("WarpNotificationRequest end");
     return true;
 }

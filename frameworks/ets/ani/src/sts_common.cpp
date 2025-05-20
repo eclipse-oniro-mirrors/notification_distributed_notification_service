@@ -38,8 +38,8 @@ bool IsUndefine(ani_env *env, const ani_object &obj)
 
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string& aniStr)
 {
-    if (env == nullptr || str.empty()) {
-        ANS_LOGE("GetAniStringByString fail, env is nullptr or str is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniStringByString fail, env is nullptr");
         return ANI_INVALID_ARGS;
     }
     ani_status status = env->String_NewUTF8(str.c_str(), str.size(), &aniStr);
@@ -416,34 +416,54 @@ bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
 
 ani_object CreateBoolean(ani_env *env, bool value)
 {
-    if (env == nullptr) {
-        ANS_LOGE("CreateBoolean fail, env is nullptr");
-        return nullptr;
-    }
-    ani_class boolCls;
+    ani_class persion_cls;
     ani_status status = ANI_ERROR;
-    if ((status = env->FindClass(CLASSNAME_BOOLEAN, &boolCls)) != ANI_OK) {
+    if ((status = env->FindClass(CLASSNAME_BOOLEAN, &persion_cls)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
-        deletePoint(boolCls);
         return nullptr;
     }
-    ani_method boolCtor;
-    if ((status = env->Class_FindMethod(boolCls, "<ctor>", "Z:V", &boolCtor)) != ANI_OK) {
+    ani_method personInfoCtor;
+    if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "Z:V", &personInfoCtor)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
-        deletePoint(boolCls);
         return nullptr;
     }
-    ani_object boolObj;
-    if ((status = env->Object_New(boolCls, boolCtor, &boolObj, value ? ANI_TRUE : ANI_FALSE))
-       != ANI_OK) {
+    ani_object personInfoObj;
+    if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value ? ANI_TRUE : ANI_FALSE)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
-        deletePoint(boolCls);
-        deletePoint(boolObj);
         return nullptr;
     }
-    deletePoint(boolCls);
-    return boolObj;
+    return personInfoObj;
 }
+
+// ani_object CreateBoolean(ani_env *env, bool value)
+// {
+//     if (env == nullptr) {
+//         ANS_LOGE("CreateBoolean fail, env is nullptr");
+//         return nullptr;
+//     }
+//     ani_class boolCls;
+//     ani_status status = ANI_ERROR;
+//     if ((status = env->FindClass(CLASSNAME_BOOLEAN, &boolCls)) != ANI_OK) {
+//         ANS_LOGE("status : %{public}d", status);
+//         deletePoint(boolCls);
+//         return nullptr;
+//     }
+//     ani_method boolCtor;
+//     if ((status = env->Class_FindMethod(boolCls, "<ctor>", "Z:V", &boolCtor)) != ANI_OK) {
+//         ANS_LOGE("status : %{public}d", status);
+//         deletePoint(boolCls);
+//         return nullptr;
+//     }
+//     ani_object boolObj;
+//     if ((status = env->Object_New(boolCls, boolCtor, &boolObj, value ? ANI_TRUE : ANI_FALSE))
+//        != ANI_OK) {
+//         ANS_LOGE("status : %{public}d", status);
+//         deletePoint(boolCls);
+//         deletePoint(boolObj);
+//         return nullptr;
+//     }
+//     return boolObj;
+// }
 
 ani_object CreateDouble(ani_env *env, double value)
 {
@@ -471,7 +491,6 @@ ani_object CreateDouble(ani_env *env, double value)
         deletePoint(doubleObj);
         return nullptr;
     }
-    deletePoint(doubleCls);
     return doubleObj;
 }
 
