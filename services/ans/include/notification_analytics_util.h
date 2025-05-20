@@ -19,6 +19,7 @@
 #include <string>
 #include <map>
 #include "notification_request.h"
+#include "badge_number_callback_data.h"
 
 namespace OHOS {
 namespace Notification {
@@ -143,6 +144,14 @@ struct ReportCache {
     int32_t eventCode;
 };
 
+struct BadgeInfo {
+    std::int64_t startTime;
+    std::int32_t changeCount;
+    std::string badgeNum;
+    std::string time;
+    bool isNeedReport;
+};
+
 class NotificationAnalyticsUtil {
 public:
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
@@ -169,6 +178,10 @@ public:
     static void ReportSkipFailedEvent(const HaMetaMessage& message);
 
     static void ReportPublishWithUserInput(const sptr<NotificationRequest>& request);
+
+    static void ReportPublishBadge(const sptr<NotificationRequest>& request);
+
+    static void ReportBadgeChange(const sptr<BadgeNumberCallbackData> &badgeData);
 
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
@@ -216,6 +229,12 @@ private:
     static bool DetermineWhetherToSend(uint32_t slotType);
 
     static std::string BuildAnsData(const HaMetaMessage& message);
+
+    static void AddToBadgeInfos(std::string bundle, BadgeInfo& badgeInfo);
+
+    static void CheckBadgeReport();
+
+    static void AggregateBadgeChange();
 };
 } // namespace Notification
 } // namespace OHOS

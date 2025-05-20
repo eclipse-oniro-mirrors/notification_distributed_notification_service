@@ -847,6 +847,7 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
                 record->subscriber->OnBadgeChanged(badgeData);
             }
         }
+        NotificationAnalyticsUtil::ReportBadgeChange(badgeData);
     };
     notificationSubQueue_->submit(setBadgeNumberFunc);
 }
