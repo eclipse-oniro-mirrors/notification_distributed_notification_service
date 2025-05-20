@@ -277,7 +277,7 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
     MakeNotifictaionIcon(requestBox, request, isCommonLiveView);
     MakeNotifictaionReminderFlag(requestBox, request);
     int result = IN_PROCESS_CALL(NotificationHelper::PublishNotification(*request));
-    ANS_LOGI("Dans publish message %{public}s %{public}d.", request->Dump().c_str(), result);
+    ANS_LOGD("Dans publish result = %{public}d.", result);
 }
 
 void DistributedService::RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage)

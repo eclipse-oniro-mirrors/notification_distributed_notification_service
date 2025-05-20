@@ -753,6 +753,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         }
         NotificationAnalyticsUtil::ReportPublishWithUserInput(request);
         NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
+        NotificationAnalyticsUtil::ReportPublishBadge(request);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
