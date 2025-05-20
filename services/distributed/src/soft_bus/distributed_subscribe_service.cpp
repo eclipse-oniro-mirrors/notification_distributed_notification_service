@@ -218,7 +218,8 @@ void DistributedService::SendNotifictionRequest(const std::shared_ptr<Notificati
     }
 
     auto requestPoint = request->GetNotificationRequestPoint();
-    ANS_LOGI("Dans OnConsumed %{public}s", requestPoint->Dump().c_str());
+    ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
+        requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
     requestBox->SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
     requestBox->SetFinishTime(requestPoint->GetFinishDeadLine());
     requestBox->SetNotificationHashCode(request->GetKey());
@@ -287,7 +288,9 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
             ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
             continue;
         }
-        ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
+        auto notificationFlags = notification->GetNotificationRequestPoint()->GetFlags();
+        ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", notification->GetKey().c_str(),
+            notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
         keysStream << GetNotificationKey(notification) << ' ';
         slotTypesStream << std::to_string(notification->GetNotificationRequestPoint()->GetSlotType()) << ' ';
     }
@@ -302,7 +305,7 @@ void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notif
         batchRemoveBox->SetNotificationSlotTypes(slotTypes);
 
         if (!batchRemoveBox->Serialize()) {
-            ANS_LOGW("dans OnCanceled serialize failed");
+            ANS_LOGW("Dans OnCanceled serialize failed");
             return;
         }
         DistributedClient::GetInstance().SendMessage(batchRemoveBox, TransDataType::DATA_TYPE_MESSAGE,
@@ -325,11 +328,13 @@ void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notific
     std::string notificationKey = GetNotificationKey(notification);
     std::function<void()> task = std::bind([peerDevice, notification, notificationKey]() {
         std::shared_ptr<NotificationRemoveBox> removeBox = std::make_shared<NotificationRemoveBox>();
-        ANS_LOGI("dans OnCanceled %{public}s", notification->Dump().c_str());
+        auto notificationFlags = notification->GetNotificationRequestPoint()->GetFlags();
+        ANS_LOGI("Dans OnCanceled Notification key = %{public}s, notificationFlag = %{public}s", notification->GetKey().c_str(),
+            notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
         removeBox->SetNotificationHashCode(notificationKey);
         removeBox->setNotificationSlotType(notification->GetNotificationRequestPoint()->GetSlotType());
         if (!removeBox->Serialize()) {
-            ANS_LOGW("dans OnCanceled serialize failed");
+            ANS_LOGW("Dans OnCanceled serialize failed");
             return;
         }
         DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_MESSAGE,

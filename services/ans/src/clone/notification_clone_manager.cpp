@@ -235,7 +235,7 @@ ErrCode NotificationCloneManager::LoadConfig(UniqueFd &fd, std::string& config)
     fdsan_close_with_tag(destFd, NOTIFICATION_FDSAN_TAG);
     std::ifstream fs(BACKUP_CONFIG_FILE_PATH);
     if (!fs.is_open()) {
-        ANS_LOGE("Loading config file%{public}s is_open() failed!", BACKUP_CONFIG_FILE_PATH);
+        ANS_LOGE("Loading config file is_open() failed!");
         return ANS_CLONE_ERROR;
     }
     config.clear();
@@ -253,13 +253,13 @@ ErrCode NotificationCloneManager::SaveConfig(const std::string& config)
     RemoveBackUpFile();
     FILE* fp = fopen(BACKUP_CONFIG_FILE_PATH, "w");
     if (!fp) {
-        ANS_LOGE("Save config file: %{public}s, fopen() failed!", BACKUP_CONFIG_FILE_PATH);
+        ANS_LOGE("Save config file fopen() failed!");
         return ANS_CLONE_ERROR;
     }
 
     int ret = static_cast<int>(fwrite(config.c_str(), 1, config.length(), fp));
     if (ret != (int)config.length()) {
-        ANS_LOGE("Save config file: %{public}s, fwrite %{public}d failed!", BACKUP_CONFIG_FILE_PATH, ret);
+        ANS_LOGE("Save config file, fwrite %{public}d failed!", ret);
     }
     (void)fflush(fp);
     (void)fsync(fileno(fp));
