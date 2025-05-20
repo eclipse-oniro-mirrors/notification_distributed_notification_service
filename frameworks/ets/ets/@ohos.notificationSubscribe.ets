@@ -21,11 +21,15 @@ import { NotificationSubscriber } from 'notification.notificationSubscriber';
 type ResolveCallback<T> = (data: T) => void;
 type RejectCallback = (err: Object) => void;
 
-const rejectInternalError: BusinessError<string> = {code: 160001, data: "Internal error."};
-const callbackInternalError: BusinessError = {code: 160001, data: undefined};
-const successCallbackError: BusinessError = {code: 0, data: undefined};
-// ERROR_PARAM_INVALID     = 401
-const errorParamInvalid: BusinessError<string> = {code: 401, data: "Invalid parameter"};
+const ERROR_OK = 0;
+const ERROR_PARAM_INVALID = 401;
+const ERROR_INTERNAL_ERROR = 160001;
+
+const rejectInternalError: BusinessError<string> = {code: ERROR_INTERNAL_ERROR, data: "Internal error."};
+const callbackInternalError: BusinessError = {code: ERROR_INTERNAL_ERROR, data: undefined};
+const successCallbackError: BusinessError = {code: ERROR_OK, data: undefined};
+
+const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, data: "Invalid parameter"};
 
 export default namespace notificationSubscribe {
     loadLibrary("notification_subscribe_ani.z")

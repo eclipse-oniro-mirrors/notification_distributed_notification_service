@@ -89,9 +89,9 @@ void AniNotificationManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(AniIsNotificationEnabledWithBundleOption)},
         ani_native_function {"nativeSetNotificationEnable",
             nullptr, reinterpret_cast<void *>(AniSetNotificationEnable)},
-        // ani_native_function {"nativeRequestEnableNotification",
-        //     "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
-        //     reinterpret_cast<void *>(AniRequestEnableNotification)},
+        ani_native_function {"nativeRequestEnableNotification",
+            "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+            reinterpret_cast<void *>(AniRequestEnableNotification)},
     };
 
     status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());

@@ -17,9 +17,20 @@ import { BundleOption } from 'notification.NotificationCommonDef';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import { NotificationSlot } from 'notification.notificationSlot';
 import { NotificationRequest } from 'notification.notificationRequest';
+import UIAbilityContext from 'application.UIAbilityContext';
 
 type ResolveCallback<T> = (data: T) => void;
 type RejectCallback = (err: Object) => void;
+
+const ERROR_OK = 0;
+const ERROR_PARAM_INVALID = 401;
+const ERROR_INTERNAL_ERROR = 160001;
+
+const rejectInternalError: BusinessError<string> = {code: ERROR_INTERNAL_ERROR, data: "Internal error."};
+const callbackInternalError: BusinessError = {code: ERROR_INTERNAL_ERROR, data: undefined};
+const successCallbackError: BusinessError = {code: ERROR_OK, data: undefined};
+
+const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, data: "Invalid parameter"};
 
 export default namespace notificationManager {
     loadLibrary("notification_manager_ani.z")
@@ -135,6 +146,7 @@ export default namespace notificationManager {
     export native function nativeIsNotificationEnabledWithId(userId : number): boolean;
     export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
+    export native function nativeRequestEnableNotification(content: UIAbilityContext): Promise<int>;
 
     function isInvalidParameter(bundle: BundleOption): BusinessError
     {
@@ -902,5 +914,59 @@ export default namespace notificationManager {
             callback(err, undefined);
         }, (error: Object): void => {
         })
+    }
+
+    export function requestEnableNotification(context: UIAbilityContext): Promise<void>
+    {
+        if (context == undefined) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): Promise<int> => { return nativeRequestEnableNotification(context); });
+            p.then(
+                (data: NullishType): void => {
+                    if (data == undefined) {
+                        reject(rejectInternalError);
+                    } else {
+                        let result: int = data as int;
+                        if (result == 0) {
+                            resolve(undefined);
+                        } else {
+                            reject(rejectInternalError);
+                        }
+                    }
+                },
+                (error: Object): void => {
+                    reject(error);
+                }
+            )
+        });
+        return pPromise;
+    }
+
+    export function requestEnableNotification(context: UIAbilityContext, callback: AsyncCallback<void>): void
+    {
+        if (context == undefined || callback == undefined) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): Promise<int> => { return nativeRequestEnableNotification(context); });
+        p.then(
+            (data: NullishType): void => {
+                if (data == undefined) {
+                    callback(callbackInternalError, undefined);
+                } else {
+                    let result: int = data as int;
+                    if (result == 0) {
+                        callback(successCallbackError, undefined);
+                    } else {
+                        callback(callbackInternalError, undefined);
+                    }
+                }
+            },
+            (error: Object): void => {
+                let err: BusinessError = error as BusinessError;
+                callback(err, undefined);
+            }
+        )
     }
 }
