@@ -27,6 +27,7 @@ namespace NotificationSts {
 bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);
+ani_object CreateInt(ani_env *env, int32_t value);
 bool CreateDate(ani_env *env, int64_t time, ani_object &outObj);
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string &aniStr);
 ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
@@ -55,6 +56,13 @@ bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, double value);
 bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
     const std::vector<std::int64_t> &values);
+
+// property
+bool SetPropertyOptionalByBoolean(ani_env *env, ani_object object, const char *name, bool value);
+bool SetPropertyOptionalByDouble(ani_env *env, ani_object object, const char *name, double value);
+bool SetPropertyOptionalByString(ani_env *env, ani_object object, const char *name, const std::string value);
+bool SetPropertyOptionalByInt(ani_env *env, ani_object object, const char *name, int32_t value);
+bool SetPropertyByRef(ani_env *env, ani_object object, const char *name, ani_ref value);
 
 bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &cls, ani_object &outAniObj);
 

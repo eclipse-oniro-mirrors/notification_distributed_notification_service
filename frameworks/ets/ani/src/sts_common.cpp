@@ -21,6 +21,7 @@ namespace OHOS {
 namespace NotificationSts {
 constexpr const char* CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
+constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
 
 bool IsUndefine(ani_env *env, const ani_object &obj)
 {
@@ -666,5 +667,107 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     return true;
 }
+
+ani_object CreateInt(ani_env *env, int32_t value)
+{
+    ani_class cls;
+    ani_status status = ANI_ERROR;
+    if ((status = env->FindClass(CLASSNAME_INT, &cls)) != ANI_OK) {
+        ANS_LOGE("FindClass '%{public}s' faild. status %{public}d", CLASSNAME_INT, status);
+        return nullptr;
+    }
+    ani_method ctor;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+        ANS_LOGE("Class_FindMethod '%{public}s' faild. status %{public}d", CLASSNAME_INT, status);
+        return nullptr;
+    }
+    ani_object outObj;
+    if ((status = env->Object_New(cls, ctor, &outObj, value)) != ANI_OK) {
+        ANS_LOGE("Object_New '%{public}s' faild. status %{public}d", CLASSNAME_INT, status);
+        return nullptr;
+    }
+    return outObj;
+}
+
+bool SetPropertyOptionalByBoolean(ani_env *env, ani_object object, const char *name, bool value)
+{
+    ANS_LOGD("enter SetPropertyOptionalByBoolean");
+    if (env == nullptr || object == nullptr || name == nullptr) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+    ani_ref boolObj = CreateBoolean(env, value);
+    if (boolObj == nullptr) {
+        ANS_LOGE("CreateBoolean faild");
+        return false;
+    }
+    return SetPropertyByRef(env, object, name, boolObj);
+}
+
+bool SetPropertyOptionalByDouble(ani_env *env, ani_object object, const char *name, double value)
+{
+    ANS_LOGD("enter SetPropertyOptionalByDouble");
+    if (env == nullptr || object == nullptr || name == nullptr) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+    ani_ref doubleObj = CreateDouble(env, value);
+    if (doubleObj == nullptr) {
+        ANS_LOGE("CreateDouble faild");
+        return false;
+    }
+    return SetPropertyByRef(env, object, name, doubleObj);
+}
+
+bool SetPropertyOptionalByString(ani_env *env, ani_object object, const char *name, const std::string value)
+{
+    ANS_LOGD("enter SetPropertyOptionalByString");
+    if (env == nullptr || object == nullptr || name == nullptr) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+    ani_string stringObj;
+    ani_status status = ANI_OK;
+    if (ANI_OK != (status = GetAniStringByString(env, value, stringObj))) {
+        ANS_LOGE("GetAniStringByString faild. status %{public}d", status);
+        return false;
+    }
+    if (stringObj == nullptr) {
+        ANS_LOGE("CreateString faild");
+        return false;
+    }
+    return SetPropertyByRef(env, object, name, static_cast<ani_ref>(stringObj));
+}
+
+bool SetPropertyOptionalByInt(ani_env *env, ani_object object, const char *name, int32_t value)
+{
+    ANS_LOGD("enter SetPropertyOptionalByInt");
+    if (env == nullptr || object == nullptr || name == nullptr) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+    ani_ref IntObj = CreateInt(env, value);
+    if (IntObj == nullptr) {
+        ANS_LOGE("CreateInt faild");
+        return false;
+    }
+    return SetPropertyByRef(env, object, name, IntObj);
+}
+
+bool SetPropertyByRef(ani_env *env, ani_object object, const char *name, ani_ref value)
+{
+    ANS_LOGD("enter SetPropertyByRef");
+    ani_status status = ANI_OK;
+    if (env == nullptr || object == nullptr || name == nullptr || value == nullptr) {
+        ANS_LOGE("The parameter is invalid.");
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(object, name, value))) {
+        ANS_LOGE("set '%{public}s' faild. status %{public}d", name, status);
+        return false;
+    }
+    return true;
+}
+
 } // namespace NotificationSts
 } // OHOS
