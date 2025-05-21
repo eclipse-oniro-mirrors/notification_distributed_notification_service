@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "sts_notification_flag.h"
-
 #include "sts_common.h"
 
 namespace OHOS {
@@ -25,24 +24,41 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
         ANS_LOGE("flags is null");
         return false;
     }
-
     ani_class flagsCls = nullptr;
-    RETURN_FALSE_IF_FALSE(CreateClassObjByClassName(env,
-        "Lnotification/notificationFlags/NotificationFlagsInner;", flagsCls, flagsObject));
+    if(!CreateClassObjByClassName(env,
+        "Lnotification/notificationFlags/NotificationFlagsInner;", flagsCls, flagsObject) ||
+        flagsObject == nullptr) {
+            ANS_LOGE("Create faild");
+            return false;
+        }
     // readonly soundEnabled?: NotificationFlagStatus;
     int32_t soundEnabled = static_cast<int32_t>(flags->IsSoundEnabled());
     ani_enum_item enumItem = nullptr;
-    RETURN_FALSE_IF_FALSE(EnumConvertNativeToAni(env, "Lnotification/notificationFlags/NotificationFlagStatus;",
-        soundEnabled, enumItem));
-    RETURN_FALSE_IF_FALSE(CallSetter(env, flagsCls, flagsObject, "soundEnabled", enumItem));
+    if (!EnumConvertNativeToAni(env, "Lnotification/notificationFlags/NotificationFlagStatus;",
+        soundEnabled, enumItem)) {
+            ANS_LOGE("EnumConvertNativeToAni 'soundEnabled' faild");
+            return false;
+        }
+    if (!SetPropertyByRef(env, flagsObject, "soundEnabled", enumItem)) {
+        ANS_LOGE("WarpNotificationFlags set 'soundEnabled' faild");
+        return false;
+    }
     // readonly vibrationEnabled?: NotificationFlagStatus;
     int32_t vibrationEnabled = static_cast<int32_t>(flags->IsVibrationEnabled());
-    RETURN_FALSE_IF_FALSE(EnumConvertNativeToAni(env, "Lnotification/notificationFlags/NotificationFlagStatus;",
-        vibrationEnabled, enumItem));
-    RETURN_FALSE_IF_FALSE(CallSetter(env, flagsCls, flagsObject, "vibrationEnabled", enumItem));
+    if (!EnumConvertNativeToAni(env, "Lnotification/notificationFlags/NotificationFlagStatus;",
+        vibrationEnabled, enumItem)) {
+            ANS_LOGE("EnumConvertNativeToAni 'vibrationEnabled' faild");
+            return false;
+        }
+    if (!SetPropertyByRef(env, flagsObject, "vibrationEnabled", enumItem)) {
+        ANS_LOGE("WarpNotificationFlags set 'vibrationEnabled' faild");
+        return false;
+    }
     // readonly reminderFlags?: number;
     uint32_t reminderFlags = flags->GetReminderFlags();
-    RETURN_FALSE_IF_FALSE(CallSetterOptional(env, flagsCls, flagsObject, "reminderFlags", reminderFlags));
+    if (SetPropertyOptionalByDouble(env, flagsObject, "reminderFlags", reminderFlags)) {
+        ANS_LOGD("WarpNotificationFlags set 'reminderFlags' faild");
+    }
     return true;
 }
 

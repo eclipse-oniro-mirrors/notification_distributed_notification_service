@@ -32,17 +32,15 @@ bool WarpSubscribeCallbackData(
     ani_object sortingMapObj;
     ani_status status;
     ani_class cls;
-    if (env == nullptr) {
-        ANS_LOGD("env is nullptr");
+    if (env == nullptr || request == nullptr || sortingMap == nullptr) {
+        ANS_LOGE("invalid parameter value");
         return false;
     }
-
     if (!CreateClassObjByClassName(
         env, "Lnotification/notificationSubscriber/SubscribeCallbackDataInner;", cls, outObj)) {
-            ANS_LOGD("CreateClassObjByClassName faild");
+            ANS_LOGE("CreateClassObjByClassName faild");
             return false;
     }
-
     // request: NotificationRequest
     ani_object requestObj;
     ani_class requestCls;
@@ -54,67 +52,61 @@ bool WarpSubscribeCallbackData(
         ANS_LOGE("requestObj is nullptr");
         return false;
     }
-
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "request", requestObj))) {
-        ANS_LOGD("set request faild. status %{public}d", status);
+        ANS_LOGE("set request faild. status %{public}d", status);
         return false;
     }
-
     // sortingMap?: NotificationSortingMap
     if (!WarpNotificationSortingMap(env, sortingMap, sortingMapObj)) {
-        ANS_LOGD("WarpNotificationSortingMap faild");
+        ANS_LOGE("WarpNotificationSortingMap faild");
         return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortingMap", sortingMapObj))) {
-        ANS_LOGD("set sortingMap faild. status %{public}d", status);
+        ANS_LOGE("set sortingMap faild. status %{public}d", status);
         return false;
     }
-
     // reason?: number
     if (deleteReason != -1) {
         ani_object reason = CreateDouble(env, static_cast<ani_double>(deleteReason));
         if (reason == nullptr) {
-            ANS_LOGD("reason Create faild");
+            ANS_LOGE("reason Create faild");
             return false;
         }
         if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "reason", reason))) {
-            ANS_LOGD("set reason faild. status %{public}d", status);
+            ANS_LOGE("set reason faild. status %{public}d", status);
             return false;
         }
     }
-
     // sound?: string
     if (request->EnableSound()) {
         std::string sound = request->GetSound().ToString();
         ani_string soundObj;
         if (ANI_OK != GetAniStringByString(env, sound, soundObj) || soundObj == nullptr) {
-            ANS_LOGD("sound create faild");
+            ANS_LOGE("sound create faild");
             return false;
         }
         if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sound", soundObj))) {
-            ANS_LOGD("set sound faild. status %{public}d", status);
+            ANS_LOGE("set sound faild. status %{public}d", status);
         }
     }
-
     // vibrationValues?: Array<number>
     if (request->EnableVibrate()) {
         ani_object vibrationValuesObj;
         const std::vector<int64_t> vibrationValues = request->GetVibrationStyle();
         vibrationValuesObj = newArrayClass(env, vibrationValues.size());
         if (vibrationValuesObj == nullptr) {
-            ANS_LOGD("CreateArray faild");
+            ANS_LOGE("CreateArray faild");
             return false;
         }
         for (size_t i = 0; i < vibrationValues.size(); i++) {
             status = env->Object_CallMethodByName_Void(vibrationValuesObj, "$_set", "ID:V", i, static_cast<ani_double>(vibrationValues[i]));
             if (status != ANI_OK) {
-                ANS_LOGD("faild. status : %{public}d", status);
+                ANS_LOGE("faild. status : %{public}d", status);
                 return false;
             }
         }
-
         if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "vibrationValues", vibrationValuesObj))) {
-            ANS_LOGD("set vibrationValuesObj faild. status %{public}d", status);
+            ANS_LOGE("set vibrationValuesObj faild. status %{public}d", status);
             return false;
         }
     }
@@ -129,26 +121,29 @@ bool WarpSubscribeCallbackDataArray(
     ani_object &outObj)
 {
     ANS_LOGD("enter");
+    if (env == nullptr || sortingMap == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
     ani_status status;
-    
     if (env == nullptr) {
-        ANS_LOGD("env is nullptr");
+        ANS_LOGE("env is nullptr");
         return false;
     }
     outObj = newArrayClass(env, requestList.size());
     if (outObj == nullptr) {
-        ANS_LOGD("CreateArray faild");
+        ANS_LOGE("CreateArray faild");
         return false;
     }
     for (size_t i = 0; i < requestList.size(); i++) {
         ani_object obj;
         if (!WarpSubscribeCallbackData(env, requestList[i], sortingMap, deleteReason, obj)) {
-            ANS_LOGD("WarpSubscribeCallbackData faild");
+            ANS_LOGE("WarpSubscribeCallbackData faild");
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(
             outObj, "$_set", "ILstd/core/Object;:V", i, obj))) {
-                ANS_LOGD("set object faild. index %{public}d status %{public}d", i, status);
+                ANS_LOGE("set object faild. index %{public}d status %{public}d", i, status);
                 return false;
             }
     }
@@ -158,24 +153,28 @@ bool WarpSubscribeCallbackDataArray(
 bool WarpEnabledNotificationCallbackData(ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj)
 {
     ANS_LOGD("enter");
+    if (env == nullptr || callbackData == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
     ani_class cls;
     ani_status status;
     const char *className = "Lnotification/notificationSubscriber/EnabledNotificationCallbackDataInner;";
     if (!CreateClassObjByClassName(env, className, cls, outObj)) {
-        ANS_LOGD("CreateClassObjByClassName faild");
+        ANS_LOGE("CreateClassObjByClassName faild");
         return false;
     }
     if (!SetFieldString(env, cls, outObj, "bundle", callbackData->GetBundle())) {
-        ANS_LOGD("SetFieldString bundle faild");
+        ANS_LOGE("SetFieldString bundle faild");
         return false;
     }
     if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_double>(callbackData->GetUid()))) {
-        ANS_LOGD("uid set faild.");
+        ANS_LOGE("uid set faild.");
         return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
         outObj, "enable", BoolToAniBoolean(callbackData->GetEnable())))) {
-            ANS_LOGD("set enable faild. status %{public}d", status);
+            ANS_LOGE("set enable faild. status %{public}d", status);
             return false;
         }
     return true;
@@ -184,33 +183,37 @@ bool WarpEnabledNotificationCallbackData(ani_env *env, const std::shared_ptr<Ena
 bool WarpBadgeNumberCallbackData(ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj)
 {
     ANS_LOGD("enter");
+    if (env == nullptr || badgeData == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
     ani_class cls;
     ani_object instanceKeyObj;
     const char *className = "Lnotification/notificationSubscriber/BadgeNumberCallbackDataInner;";
     if (!CreateClassObjByClassName(env, className, cls, outObj)) {
-        ANS_LOGD("CreateClassObjByClassName faild");
+        ANS_LOGE("CreateClassObjByClassName faild");
         return false;
     }
     if (!SetFieldString(env, cls, outObj, "bundle", badgeData->GetBundle())) {
-        ANS_LOGD("SetFieldString bundle faild");
+        ANS_LOGE("SetFieldString bundle faild");
         return false;
     }
     if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_double>(badgeData->GetUid()))) {
-        ANS_LOGD("uid set faild.");
+        ANS_LOGE("uid set faild.");
         return false;
     }
     if (!CallSetter(env, cls, outObj, "badgeNumber", static_cast<ani_double>(badgeData->GetBadgeNumber()))) {
-        ANS_LOGD("badgeNumber set faild");
+        ANS_LOGE("badgeNumber set faild");
         return false;
     }
     instanceKeyObj = CreateDouble(env, static_cast<ani_double>(badgeData->GetInstanceKey()));
     if (instanceKeyObj != nullptr) {
         if (!CallSetter(env, cls, outObj, "instanceKey", instanceKeyObj)) {
-            ANS_LOGD("instanceKey set faild.");
+            ANS_LOGE("instanceKey set faild.");
             return false;
         }
     } else {
-        ANS_LOGD("instanceKeyObj createDouble faild");
+        ANS_LOGE("instanceKeyObj createDouble faild");
     }
     if (!SetFieldString(env, cls, outObj, "appInstanceKey", badgeData->GetAppInstanceKey())) {
         ANS_LOGD("SetFieldString appInstanceKey faild");

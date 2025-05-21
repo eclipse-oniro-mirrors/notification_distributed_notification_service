@@ -101,7 +101,6 @@ void StsSubscriberInstance::OnCanceled(
     int32_t deleteReason)
 {
     ANS_LOGD("enter");
-#if 0
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -124,14 +123,12 @@ void StsSubscriberInstance::OnCanceled(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-#endif
 }
 void StsSubscriberInstance::OnConsumed(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
     ANS_LOGD("enter");
-#if 0
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -154,7 +151,6 @@ void StsSubscriberInstance::OnConsumed(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-#endif
 }
 void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
@@ -366,7 +362,6 @@ void StsSubscriberInstance::OnBatchCanceled(
     const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
     ANS_LOGD("enter");
-#if 0
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -389,7 +384,6 @@ void StsSubscriberInstance::OnBatchCanceled(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-#endif
 }
 bool StsSubscriberInstance::HasOnBatchCancelCallback()
 {

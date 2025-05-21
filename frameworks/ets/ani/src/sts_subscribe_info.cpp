@@ -21,6 +21,11 @@ namespace OHOS {
 namespace NotificationSts {
 bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info)
 {
+    ANS_LOGD("enter");
+    if (env == nullptr || value == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
     std::vector<std::string> res;
     ani_double userId = 0.0;
     ani_double filterLimit = 0.0;
@@ -29,16 +34,16 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     if (ANI_OK != GetPropertyStringArray(env, value, "bundleNames", isUndefined, res)
         || isUndefined == ANI_TRUE
         || res.empty()) {
-        ANS_LOGD("UnWarpStringArrayOrUndefinedByProperty faild");
+        ANS_LOGE("UnWarpStringArrayOrUndefinedByProperty faild");
     }
     if (ANI_OK != GetPropertyDouble(env, value, "userId", isUndefined, userId) || isUndefined == ANI_TRUE) {
-        ANS_LOGD("GetDoubleOrUndefined faild");
+        ANS_LOGE("GetDoubleOrUndefined faild");
     }
     if (ANI_OK != GetPropertyString(env, value, "deviceType", isUndefined, deviceType) || isUndefined == ANI_TRUE) {
-        ANS_LOGD("GetStringOrUndefined faild");
+        ANS_LOGE("GetStringOrUndefined faild");
     }
     if (ANI_OK != GetPropertyDouble(env, value, "filterLimit", isUndefined, filterLimit) || isUndefined == ANI_TRUE) {
-        ANS_LOGD("GetDoubleOrUndefined faild");
+        ANS_LOGE("GetDoubleOrUndefined faild");
     }
     info.AddAppNames(res);
     info.AddAppUserId(static_cast<int32_t>(userId));

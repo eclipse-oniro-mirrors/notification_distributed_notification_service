@@ -43,6 +43,7 @@ void AniNotificationManagerRegistryInit(ani_env *env)
     }
     std::array kitFunctions = {
         ani_native_function {"nativeCancelAll", nullptr, reinterpret_cast<void *>(AniCancelAll)},
+        // ani_native_function {"nativeGetActiveNotifications", nullptr, reinterpret_cast<void *>(AniCancelWithIdOptinalLabel)},
         ani_native_function {"nativeCancelWithId", nullptr, reinterpret_cast<void *>(AniCancelWithId)},
         ani_native_function {"nativeCancelWithIdLabel", nullptr, reinterpret_cast<void *>(AniCancelWithIdLabel)},
         ani_native_function {"nativeCancelWithBundle", nullptr, reinterpret_cast<void *>(AniCancelWithBundle)},

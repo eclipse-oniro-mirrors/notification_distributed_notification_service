@@ -26,19 +26,19 @@ bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<Notification
     ani_class recordCls;
     ani_object arrayObj;
     ani_status status;
-    if (sortingMap == nullptr) {
-        ANS_LOGD("sortingMap is nullptr");
+    if (sortingMap == nullptr || env == nullptr) {
+        ANS_LOGE("invalid parameter value");
         return false;
     }
 
     if (!CreateClassObjByClassName(env,
         "Lnotification/notificationSortingMap/NotificationSortingMapInner;", cls, outObj)) {
-        ANS_LOGD("CreateClassObjByClassName faild.");
+        ANS_LOGE("CreateClassObjByClassName faild.");
         return false;
     }
 
     if (!CreateClassObjByClassName(env, "Lescompat/Record;", recordCls, recordObj)) {
-        ANS_LOGD("Create recordObj faild.");
+        ANS_LOGE("Create recordObj faild.");
         return false;
     }
 
@@ -48,38 +48,36 @@ bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<Notification
         if (sortingMap->GetNotificationSorting(it, sorting)) {
             ani_string keyString;
             if (ANI_OK != GetAniStringByString(env, it, keyString)) {
-                ANS_LOGD("GetAniStringByString faild. key: %{public}s", it.c_str());
-                continue;
+                ANS_LOGE("GetAniStringByString faild. key: %{public}s", it.c_str());
+                return false;
             }
             ani_object sortingObj;
             if (!WarpNotificationSorting(env, sorting, sortingObj)) {
-                ANS_LOGD("WarpNotificationSorting faild. key: %{public}s", it.c_str());
-                continue;
+                ANS_LOGE("WarpNotificationSorting faild. key: %{public}s", it.c_str());
+                return false;
             }
-
             if (keyString == nullptr) {
-                ANS_LOGD("GetAniString faild. key: %{public}s", it.c_str());
-                continue;
+                ANS_LOGE("GetAniString faild. key: %{public}s", it.c_str());
+                return false;
             }
-
             if (ANI_OK != (status = env->Object_CallMethodByName_Void(
                     recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
-                ANS_LOGD("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
-                continue;
+                ANS_LOGE("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
+                return false;
             }
         }
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortings", recordObj))) {
-        ANS_LOGD("Object_SetPropertyByName_Ref sortings faild. status %{public}d", status);
+        ANS_LOGE("Object_SetPropertyByName_Ref sortings faild. status %{public}d", status);
         return false;
     }
     arrayObj = GetAniStringArrayByVectorString(env, keys);
     if (arrayObj == nullptr) {
-        ANS_LOGD("WarpVectorStringToSts sortedHashCode faild");
+        ANS_LOGE("WarpVectorStringToSts sortedHashCode faild");
         return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortedHashCode", arrayObj))) {
-        ANS_LOGD("Object_SetPropertyByName_Ref sortedHashCode faild. status %{public}d", status);
+        ANS_LOGE("Object_SetPropertyByName_Ref sortedHashCode faild. status %{public}d", status);
         return false;
     }
     return true;

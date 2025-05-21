@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting sorting, ani_object &outObj)
+bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &sorting, ani_object &outObj)
 {
     ani_class cls;
     ani_object obj;
@@ -29,38 +29,35 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting sor
     ani_string hashCodeObj;
     std::string hashCode;
     if (env == nullptr) {
-        ANS_LOGD("faild. env is nullptr");
+        ANS_LOGE("invalid parameter value");
         return false;
     }
     if (!CreateClassObjByClassName(env, "Lnotification/notificationSorting/NotificationSortingInner;", cls, obj)) {
-        ANS_LOGD("Create obj faild. NotificationSortingInner");
+        ANS_LOGE("Create obj faild. NotificationSortingInner");
         return false;
     }
-
-    // TODO
     // readonly slot: NotificationSlot
-    // sptr<NotificationSlot> slot = new NotificationSlot(*sorting.GetSlot());
     if (!WrapNotificationSlot(env, sorting.GetSlot(), slotObj)) {
-        ANS_LOGD("WrapNotificationSlot faild");
+        ANS_LOGE("WrapNotificationSlot faild");
         return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(obj, "slot", slotObj))) {
-        ANS_LOGD("set slot faild. status %{public}d", status);
+        ANS_LOGE("set slot faild. status %{public}d", status);
         return false;
     }
-
     hashCode = sorting.GetGroupKeyOverride();
     if (ANI_OK != GetAniStringByString(env, hashCode, hashCodeObj) || hashCodeObj == nullptr) {
+        ANS_LOGE("GetAniStringByString faild");
         return false;
     }
     // readonly hashCode: string;
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(obj, "hashCode", hashCodeObj))) {
-        ANS_LOGD("set hashCode faild. status %{public}d", status);
+        ANS_LOGE("set hashCode faild. status %{public}d", status);
         return false;
     }
     // readonly ranking: number;
     if (ANI_OK != (status = env->Object_SetPropertyByName_Double(obj, "ranking", static_cast<ani_double>(sorting.GetRanking())))) {
-        ANS_LOGD("set ranking faild. status %{public}d", status);
+        ANS_LOGE("set ranking faild. status %{public}d", status);
         return false;
     }
     outObj = obj;

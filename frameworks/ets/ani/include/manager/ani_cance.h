@@ -20,9 +20,10 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 void AniCancelAll(ani_env* env);
-void AniCancelWithId(ani_env* env, ani_int id);
-void AniCancelWithIdLabel(ani_env* env, ani_int id, ani_string label);
-void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_int id);
+void AniCancelWithId(ani_env* env, ani_double id);
+void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label);
+void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id);
+void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

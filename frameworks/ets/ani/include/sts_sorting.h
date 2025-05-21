@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting sorting, ani_object &outObj);
+bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &sorting, ani_object &outObj);
 } // namespace NotificationSts
 } // OHOS
 #endif

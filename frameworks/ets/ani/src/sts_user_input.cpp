@@ -21,26 +21,45 @@ namespace NotificationSts {
 ani_status UnwrapNotificationUserInput(ani_env *env, ani_object param,
     std::shared_ptr<Notification::NotificationUserInput> &userInput)
 {
+    if (env == nullptr || param == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return ANI_ERROR;
+    }
     ani_status status = ANI_ERROR;
     std::string inputKey;
     ani_boolean isUndefined = ANI_TRUE;
     if((status = GetPropertyString(env, param, "inputKey", isUndefined, inputKey)) != ANI_OK
         || isUndefined == ANI_TRUE) {
-        return ANI_INVALID_ARGS;
-    }
+            ANS_LOGE("GetPropertyString 'inputKey' faild");
+            return ANI_INVALID_ARGS;
+        }
     userInput = Notification::NotificationUserInput::Create(inputKey);
     return status;
 }
 
 ani_object WarpUserInput(ani_env *env, std::shared_ptr<Notification::NotificationUserInput> userInput)
 {
+    if (env == nullptr || userInput == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return nullptr;
+    }
     ani_class userInputCls = nullptr;
     ani_object userInputObject = nullptr;
-    RETURN_NULL_IF_FALSE(CreateClassObjByClassName(env,
-        "Lnotification/notificationUserInput/NotificationUserInputInner;", userInputCls, userInputObject));
+    ani_status status = ANI_OK;
+    if (!CreateClassObjByClassName(env,
+        "Lnotification/notificationUserInput/NotificationUserInputInner;", userInputCls, userInputObject)) {
+            ANS_LOGE("Create faild");
+            return nullptr;
+        }
     ani_string stringValue;
-    RETURN_NULL_IF_FALSE(GetAniStringByString(env, userInput->GetInputKey(), stringValue));
-    RETURN_NULL_IF_FALSE(CallSetter(env, userInputCls, userInputObject, "inputKey", stringValue));
+    if (ANI_OK != (status = GetAniStringByString(env, userInput->GetInputKey(), stringValue))) {
+        ANS_LOGE("GetAniStringByString faild. status %{public}d", status);
+        return nullptr;
+    }
+    if (!CallSetter(env, userInputCls, userInputObject, "inputKey", stringValue)) {
+        ANS_LOGE("set inputKey");
+        return nullptr;
+    }
     return userInputObject;
 }
 }

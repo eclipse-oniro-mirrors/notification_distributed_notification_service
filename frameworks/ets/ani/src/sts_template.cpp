@@ -25,21 +25,29 @@ using namespace OHOS::AppExecFwk;
 
 ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, NotificationTemplate& tmplate)
 {
+    if (env == nullptr || aniObj == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return ANI_ERROR;
+    }
     ani_status status = ANI_ERROR;
     ani_ref nameRef;
     if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, "<get>name",":Lstd/core/String;", &nameRef))) {
+        ANS_LOGE("Object_CallMethodByName_Ref faild. status %{public}d", status);
         return status;
     }
     std::string nameStr = "";
     if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(nameRef), nameStr))) {
+        ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
         return status;
     }
     ani_ref dataRef;
     if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(aniObj, "data", &dataRef))) {
+        ANS_LOGE("Object_GetPropertyByName_Ref 'data' faild. status %{public}d", status);
         return status;
     }
     WantParams wantParams;
     if(!UnwrapWantParams(env, dataRef, wantParams)) {
+        ANS_LOGE("UnwrapWantParams faild");
         return ANI_ERROR;
     }
     tmplate.SetTemplateName(nameStr);
@@ -49,23 +57,40 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
 
 ani_object WrapNotificationTemplate(ani_env* env, const std::shared_ptr<NotificationTemplate> &templ)
 {
-    if (templ == nullptr) {
-        ANS_LOGE("templ is null");
+    if (templ == nullptr || env == nullptr) {
+        ANS_LOGE("invalid parameter value");
         return nullptr;
     }
     ani_object templateObject = nullptr;
     ani_class templateCls = nullptr;
-    RETURN_NULL_IF_FALSE(CreateClassObjByClassName(env,
-        "Lnotification/notificationTemplate/NotificationTemplateInner;", templateCls, templateObject));
+    ani_status status = ANI_OK;
+    if (!CreateClassObjByClassName(env,
+        "Lnotification/notificationTemplate/NotificationTemplateInner;", templateCls, templateObject)) {
+            ANS_LOGE("Create faild");
+            return nullptr;
+        }
     // name: string;
     ani_string stringValue = nullptr;
-    RETURN_NULL_IF_FALSE(GetAniStringByString(env, templ->GetTemplateName(), stringValue));
-    RETURN_NULL_IF_FALSE(CallSetter(env, templateCls, templateObject, "name", stringValue));
+    if (ANI_OK != (status = GetAniStringByString(env, templ->GetTemplateName(), stringValue))) {
+        ANS_LOGE("GetAniStringByString faild. status %{public}d", status);
+        return nullptr;
+    }
+    if (!CallSetter(env, templateCls, templateObject, "name", stringValue)) {
+        ANS_LOGE("set 'name' faild.");
+        return nullptr;
+    }
     // data: Record<string, Object>;
     std::shared_ptr<AAFwk::WantParams> data = templ->GetTemplateData();
     if (data) {
         ani_ref valueRef = OHOS::AppExecFwk::WrapWantParams(env, *data);
-        RETURN_NULL_IF_FALSE(CallSetter(env, templateCls, templateObject, "data", valueRef));
+        if (valueRef == nullptr) {
+            ANS_LOGE("WrapWantParams faild");
+            return nullptr;
+        }
+        if (!CallSetter(env, templateCls, templateObject, "data", valueRef)) {
+            ANS_LOGE("set 'data' faild");
+            return nullptr;
+        }
     }
     return templateObject;
 }
