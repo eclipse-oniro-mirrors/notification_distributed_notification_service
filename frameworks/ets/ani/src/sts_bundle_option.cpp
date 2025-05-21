@@ -65,16 +65,13 @@ bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<Notific
             "$_get", "I:Lnotification/NotificationCommonDef/BundleOption;", &optionRef, (ani_int)dex);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
-            deletePoint(optionRef);
             return false;
         }
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
             ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, dex);
-            deletePoint(optionRef);
             return false;
         }
         options.push_back(option);
-        deletePoint(optionRef);
     }
     ANS_LOGD("UnwrapArrayBundleOption end");
     return true;
@@ -93,8 +90,6 @@ bool WrapBundleOption(ani_env* env,
         "Lnotification/NotificationCommonDef/BundleOptionInner;", bundleCls, bundleObject)
         || bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
-        deletePoint(bundleCls);
-        deletePoint(bundleObject);
         return false;
     }
     // bundle: string;
@@ -102,15 +97,11 @@ bool WrapBundleOption(ani_env* env,
     if (!GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
         || !CallSetter(env, bundleCls, bundleObject, "bundle", stringValue)) {
         ANS_LOGE("WrapBundleOption: set bundle failed");
-        deletePoint(bundleCls);
-        deletePoint(bundleObject);
-        deletePoint(stringValue);
         return false;
     }
     // uid?: number;
     uint32_t uid = bundleOption->GetUid();
     CallSetterOptional(env, bundleCls, bundleObject, "uid", uid);
-    deletePoint(bundleCls);
     ANS_LOGD("WrapBundleOption end");
     return true;
 }

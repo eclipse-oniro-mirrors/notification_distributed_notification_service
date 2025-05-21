@@ -45,11 +45,9 @@ ani_status GetStsActionButtonByWantAgent(ani_env *env, ani_object param,
     ani_ref wantAgentRef;
     if (ANI_OK != GetPropertyRef(env, param, "wantAgent", isUndefind, wantAgentRef) || isUndefind == ANI_TRUE) {
         ANS_LOGE("GetStsActionButtonByWantAgent: GetPropertyRef wantAgent failed");
-        deletePoint(wantAgentRef);
         return ANI_INVALID_ARGS;
     }
     std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
-    deletePoint(wantAgentRef);
     if (wantAgent == nullptr) {
         ANS_LOGE("GetStsActionButtonByWantAgent: wantAgent is nullptr");
         return ANI_INVALID_ARGS;
@@ -74,7 +72,6 @@ ani_status GetStsActionButtonByWantParams(ani_env *env, ani_object param,
         UnwrapWantParams(env, extrasRef, wantParams);
     } else {
         ANS_LOGE("GetStsActionButtonByWantParams: GetPropertyRef extras failed");
-        deletePoint(extrasRef);
         return ANI_INVALID_ARGS;
     }
     std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
@@ -150,12 +147,10 @@ bool SetNotificationActionButtonByRequiredParameter(
     ani_string stringValue;
     // title: string;
     if (!GetAniStringByString(env, actionButton->GetTitle(), stringValue)) {
-        deletePoint(stringValue);
         ANS_LOGE("SetActionButtonByRequiredParameter: Get title failed");
         return false;
     }
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "title", stringValue)) {
-        deletePoint(stringValue);
         ANS_LOGE("SetActionButtonByRequiredParameter: Set title failed");
         return false;
     }
@@ -163,20 +158,15 @@ bool SetNotificationActionButtonByRequiredParameter(
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
     if (agent == nullptr) {
         ANS_LOGE("SetActionButtonByRequiredParameter:agent is null");
-        deletePoint(stringValue);
         return false;
     } else {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
         if (wantAgent == nullptr) {
             ANS_LOGE("SetActionButtonByRequiredParameter: wantAgent is nullptr");
-            deletePoint(stringValue);
-            deletePoint(wantAgent);
             return false;
         }
         if (!CallSetter(env, iconButtonCls, iconButtonObject, "wantAgent", wantAgent)) {
             ANS_LOGE("SetActionButtonByRequiredParameter: Set wantAgent failed");
-            deletePoint(stringValue);
-            deletePoint(wantAgent);
             return false;
         }
     }
@@ -199,23 +189,13 @@ void SetNotificationActionButtonByOptionalParameter(
     ani_ref extras = WrapWantParams(env, *(actionButton->GetAdditionalData().get()));
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "extras", extras)) {
         ANS_LOGD("SetActionButtonByOptionalParameter : Set extras failed");
-        deletePoint(extras);
     }
     // userInput?: NotificationUserInput
     ani_object userInputObject = WarpUserInput(env, actionButton->GetUserInput());
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject)) {
         ANS_LOGD("SetActionButtonByOptionalParameter : Set userInput failed");
-        deletePoint(userInputObject);
     }
     ANS_LOGD("SetActionButtonByOptionalParameter end");
-}
-
-void deletePointOfWrapNotificationActionButton(
-    ani_object iconButtonObject, ani_class iconButtonCls, ani_string stringValue) {
-    ANS_LOGD("deletePointOfWrapNotificationActionButton call");
-    deletePoint(iconButtonObject);
-    deletePoint(iconButtonCls);
-    deletePoint(stringValue);
 }
 
 ani_object WrapNotificationActionButton(ani_env* env,
@@ -228,16 +208,13 @@ ani_object WrapNotificationActionButton(ani_env* env,
     }
     ani_object iconButtonObject = nullptr;
     ani_class iconButtonCls = nullptr;
-    ani_string stringValue = nullptr;
     if (!CreateClassObjByClassName(env,
         "Lnotification/notificationActionButton/NotificationActionButtonInner;", iconButtonCls, iconButtonObject)) {
         ANS_LOGE("WrapNotificationActionButton : CreateClassObjByClassName failed");
-        deletePointOfWrapNotificationActionButton(iconButtonObject, iconButtonCls, stringValue);
         return nullptr;
     }
     if (!SetNotificationActionButtonByRequiredParameter(env, iconButtonCls, iconButtonObject, actionButton)) {
         ANS_LOGE("WrapNotificationActionButton : SetRequiredParameter failed");
-        deletePointOfWrapNotificationActionButton(iconButtonObject, iconButtonCls, stringValue);
         return nullptr;
     }
     SetNotificationActionButtonByOptionalParameter(env, iconButtonCls, iconButtonObject, actionButton);
@@ -260,20 +237,16 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
     StsActionButton actionButton;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetActionButtonArray: GetPropertyRef name = %{public}s, status = %{public}d", name, status);
-        deletePoint(arrayObj);
         return ANI_INVALID_ARGS;
     }
     if (ANI_OK!= (status = GetPropertyDouble(env, static_cast<ani_object>(arrayObj), "length", isUndefined, length))) {
         ANS_LOGE("GetActionButtonArray: GetPropertyDouble name = %{public}s, status = %{public}d", name, status);
-        deletePoint(arrayObj);
         return status;
     }
     for (int dex = 0; dex < static_cast<int>(length); dex++) {
         ani_ref buttonRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)dex))) {
-            deletePoint(arrayObj);
-            deletePoint(buttonRef);
             ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, dex);
             return status;
         }
@@ -281,8 +254,6 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
             != (status = UnwrapNotificationActionButton(env, static_cast<ani_object>(buttonRef), actionButton))) {
             ANS_LOGE("GetActionButtonArray: UnwrapActionButton failed, status = %{public}d, index = %{public}d",
                 status, dex);
-            deletePoint(arrayObj);
-            deletePoint(buttonRef);
             return status;
         }
         std::shared_ptr<NotificationActionButton> button
@@ -307,7 +278,6 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
     ani_object arrayObj = newArrayClass(env, actionButtons.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
-        deletePoint(arrayObj);
         return nullptr;
     }
     ani_size index = 0;
@@ -315,14 +285,10 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
         ani_object item = WrapNotificationActionButton(env, button);
         if (item == nullptr) {
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
-            deletePoint(arrayObj);
-            deletePoint(item);
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
-            deletePoint(arrayObj);
-            deletePoint(item);
             return nullptr;
         }   
         index ++;
