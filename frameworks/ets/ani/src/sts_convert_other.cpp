@@ -145,7 +145,7 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     return status;
 }
 
-ani_status GetPixelMapArray(ani_env *env, 
+ani_status GetPixelMapArray(ani_env *env,
     ani_object param, const char *name, std::vector<std::shared_ptr<PixelMap>> &pixelMaps)
 {
     ANS_LOGD("GetPixelMapArray call");
@@ -247,14 +247,14 @@ ani_status GetPixelMapByKeys(ani_env *env, ani_object obj, std::vector<ani_strin
             return status;
         }
         std::vector<std::shared_ptr<PixelMap>> pixelMaps = {};
-        if((status = GetPixelMapArrayByRef(env, picturesArrayRef, pixelMaps)) != ANI_OK) {
+        if ((status = GetPixelMapArrayByRef(env, picturesArrayRef, pixelMaps)) != ANI_OK) {
             ANS_LOGE("GetPixelMapByKeys :  GetPixelMapArrayByRef failed");
             deleteVectorWithSpPoints(pixelMaps);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
         }
         std::string str = "";
-        if((status = GetStringByAniString(env, anikey, str)) != ANI_OK) {
+        if ((status = GetStringByAniString(env, anikey, str)) != ANI_OK) {
             ANS_LOGE("GetPixelMapByKeys :  GetStringByAniString failed");
             deleteVectorWithSpPoints(pixelMaps);
             deleteVectorWithArraySpPoints(pictureMap);
@@ -285,7 +285,7 @@ ani_status GetPixelMapByRef(
     ani_string strAni = {};
     std::vector<ani_string> keys = {};
     for (int i = 0; i < static_cast<int>(length); i++) {
-        if((status = GetKeyString(env, static_cast<ani_object>(keysStrArrayRef), i, strAni)) != ANI_OK) {
+        if ((status = GetKeyString(env, static_cast<ani_object>(keysStrArrayRef), i, strAni)) != ANI_OK) {
             ANS_LOGE("GetPixelMapByRef : GetKeyString status = %{public}d", status);
             keys.clear();
             return status;
@@ -450,7 +450,7 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
     }
     for (const auto& [key, value] : pictureMap) {
         ani_string aniKey;
-        if(GetAniStringByString(env, key, aniKey) != ANI_OK || aniKey == nullptr) {
+        if (GetAniStringByString(env, key, aniKey) != ANI_OK || aniKey == nullptr) {
             ANS_LOGE("GetAniPictrueInfo : GetAniStringByString failed");
             return false;
         }

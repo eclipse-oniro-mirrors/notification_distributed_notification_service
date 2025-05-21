@@ -71,16 +71,16 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
         return false;
     }
     sptr<NotificationDoNotDisturbProfile> profile;
-    for (int dex = 0; dex < static_cast<int>(length); dex++) {
+    for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "I:L@ohos/notificationManager/notificationManager/DoNotDisturbProfile;", &optionRef, (ani_int)dex);
+            "I:L@ohos/notificationManager/notificationManager/DoNotDisturbProfile;", &optionRef, (ani_int)i);
         if (status != ANI_OK) {
-            ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, dex);
+            ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, i);
             return false;
         }
         if (!UnwrapDoNotDisturbProfile(env, static_cast<ani_object>(optionRef), profile)) {
-            ANS_LOGE("Get profile failed, index: %{public}d", dex);
+            ANS_LOGE("Get profile failed, index: %{public}d", i);
             return false;
         }
         profiles.push_back(profile);

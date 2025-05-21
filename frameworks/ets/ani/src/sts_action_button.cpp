@@ -90,7 +90,7 @@ ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
     ani_boolean isUndefind = ANI_TRUE;
     std::shared_ptr<Notification::NotificationUserInput> userInput = nullptr;
     ani_ref userInputRef;
-    if(ANI_OK == GetPropertyRef(env, param, "userInput", isUndefind, userInputRef) && isUndefind == ANI_FALSE) {
+    if (ANI_OK == GetPropertyRef(env, param, "userInput", isUndefind, userInputRef) && isUndefind == ANI_FALSE) {
         UnwrapNotificationUserInput(env, static_cast<ani_object>(userInputRef), userInput);
     } else {
         ANS_LOGD("GetStsActionButtonByUserInput : GetPropertyRef userInput failed");
@@ -243,17 +243,17 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
         ANS_LOGE("GetActionButtonArray: GetPropertyDouble name = %{public}s, status = %{public}d", name, status);
         return status;
     }
-    for (int dex = 0; dex < static_cast<int>(length); dex++) {
+    for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref buttonRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)dex))) {
-            ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, dex);
+            "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)i))) {
+            ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, i);
             return status;
         }
         if (ANI_OK
             != (status = UnwrapNotificationActionButton(env, static_cast<ani_object>(buttonRef), actionButton))) {
             ANS_LOGE("GetActionButtonArray: UnwrapActionButton failed, status = %{public}d, index = %{public}d",
-                status, dex);
+                status, i);
             return status;
         }
         std::shared_ptr<NotificationActionButton> button
@@ -290,7 +290,7 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
         if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
             return nullptr;
-        }   
+        }
         index ++;
     }
     ANS_LOGD("GetAniArrayActionButton end");

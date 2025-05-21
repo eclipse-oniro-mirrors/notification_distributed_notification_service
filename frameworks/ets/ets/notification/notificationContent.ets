@@ -288,7 +288,7 @@ class NotificationIconButtonInner implements NotificationIconButton {
     return image.createPixelMapSync(opts);
   }
 
-  name: string = "";
+  name: string = '';
 
   iconResource: IconType = this.CreatePixelMap();
 

@@ -121,7 +121,7 @@ ani_status GetPropertyString(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Failed to check undefined for '%{public}s', status: %{public}d", name, status);
         return status;
     }
-    if(isUndefined == ANI_TRUE) {
+    if (isUndefined == ANI_TRUE) {
         ANS_LOGE("%{public}s is undefined", name);
         return status;
     }
@@ -390,7 +390,8 @@ ani_object CreateBoolean(ani_env *env, bool value)
         return nullptr;
     }
     ani_object personInfoObj;
-    if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value ? ANI_TRUE : ANI_FALSE)) != ANI_OK) {
+    if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value ? ANI_TRUE : ANI_FALSE))
+        != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return nullptr;
     }
@@ -405,7 +406,7 @@ ani_object CreateDouble(ani_env *env, double value)
     ani_class doubleCls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_DOUBLE, &doubleCls)) != ANI_OK) {
-        ANS_LOGE( "status : %{public}d", status);
+        ANS_LOGE("status : %{public}d", status);
         return nullptr;
     }
     ani_method doubleCtor;
@@ -429,17 +430,17 @@ ani_object newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ani_class arrayCls = nullptr;
-    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)){
+    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)) {
         ANS_LOGE("FindClass Lescompat/Array; Failed");
         return nullptr;
     }
     ani_method arrayCtor;
-    if (ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)){
+    if (ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) {
         ANS_LOGE("Class_FindMethod <ctor> Failed");
         return nullptr;
     }
     ani_object arrayObj = nullptr;
-    if (ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayObj, length)){
+    if (ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayObj, length)) {
         ANS_LOGE("Object_New Array Faild");
         return nullptr;
     }
@@ -532,12 +533,19 @@ bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &c
         return false;
     }
     if (ANI_OK != env->FindClass(className, &cls)) {
+        ANS_LOGE("FindClass fail");
         return false;
     }
     ani_method ctor;
-    ANI_FAILED_AND_RETURN(env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor));
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        ANS_LOGE("FindMethod fail");
+        return false;
+    }
     outAniObj = {};
-    ANI_FAILED_AND_RETURN(env->Object_New(cls, ctor, &outAniObj));
+    if (ANI_OK != env->Object_New(cls, ctor, &outAniObj)) {
+        ANS_LOGE("Object_New fail");
+        return false;
+    }
     return true;
 }
 

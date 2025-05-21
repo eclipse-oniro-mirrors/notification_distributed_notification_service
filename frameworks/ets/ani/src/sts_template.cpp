@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sts_template.h" 
+#include "sts_template.h"
 
 #include "sts_common.h"
 #include "want_params.h"

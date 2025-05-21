@@ -61,7 +61,7 @@ bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<Notification
                 return false;
             }
             if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-                    recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
+                recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
                 ANS_LOGE("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
                 return false;
             }

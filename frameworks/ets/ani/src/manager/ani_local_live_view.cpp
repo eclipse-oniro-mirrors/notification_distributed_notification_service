@@ -43,7 +43,7 @@ void AniTriggerSystemLiveView(
         return;
     }
     int returncode = OHOS::Notification::NotificationHelper::TriggerLocalLiveView(bundleOption,
-                    static_cast<int32_t>(notificationId), buttonOption);
+        static_cast<int32_t>(notificationId), buttonOption);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

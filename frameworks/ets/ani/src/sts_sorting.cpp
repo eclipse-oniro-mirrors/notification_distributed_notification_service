@@ -56,7 +56,8 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &so
         return false;
     }
     // readonly ranking: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(obj, "ranking", static_cast<ani_double>(sorting.GetRanking())))) {
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
+            obj, "ranking", static_cast<ani_double>(sorting.GetRanking())))) {
         ANS_LOGE("set ranking faild. status %{public}d", status);
         return false;
     }

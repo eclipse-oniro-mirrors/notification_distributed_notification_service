@@ -59,16 +59,16 @@ bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<Notific
         return false;
     }
     Notification::NotificationBundleOption option;
-    for (int dex = 0; dex < static_cast<int>(length); dex++) {
+    for (int32_t i = 0; i < static_cast<int>(length); i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lnotification/NotificationCommonDef/BundleOption;", &optionRef, (ani_int)dex);
+            "$_get", "I:Lnotification/NotificationCommonDef/BundleOption;", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
         }
         if (!UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
-            ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, dex);
+            ANS_LOGE("UnwrapArrayBundleOption: get option status = %{public}d, index = %{public}d", status, i);
             return false;
         }
         options.push_back(option);
@@ -101,7 +101,7 @@ bool WrapBundleOption(ani_env* env,
     }
     // uid?: number;
     uint32_t uid = bundleOption->GetUid();
-    CallSetterOptional(env, bundleCls, bundleObject, "uid", uid);
+    SetPropertyOptionalByDouble(env, bundleObject, "uid", uid);
     ANS_LOGD("WrapBundleOption end");
     return true;
 }

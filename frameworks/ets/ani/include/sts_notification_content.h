@@ -66,7 +66,7 @@ bool WarpNotificationTime(ani_env *env, const NotificationTime &time, bool isIni
 ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj,
     NotificationIconButton &iconButton);
 ani_object WarpNotificationIconButton(ani_env *env, const NotificationIconButton &button);
-ani_status GetIconButtonArray(ani_env *env, 
+ani_status GetIconButtonArray(ani_env *env,
     ani_object param, const char *name, std::vector<NotificationIconButton> &res);
 ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIconButton> buttons);
 

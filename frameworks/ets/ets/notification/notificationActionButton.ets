@@ -29,7 +29,7 @@ export interface NotificationActionButton {
 
 class NotificationActionButtonInner implements NotificationActionButton {
 
-  title: string = "";
+  title: string = '';
 
   wantAgent: WantAgent = {};
 

@@ -41,8 +41,7 @@ void AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable)
         return;
     }
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0)
-    {
+    if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("sts DisplayBadge error, errorCode: %{public}d", externalCode);
         return;
@@ -59,7 +58,7 @@ ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
         returncode = Notification::NotificationHelper::GetShowBadgeEnabled(isDisplayed);
     } else {
         BundleOption option;
-        if(NotificationSts::UnwrapBundleOption(env, obj, option)) {
+        if (NotificationSts::UnwrapBundleOption(env, obj, option)) {
             returncode = Notification::NotificationHelper::GetShowBadgeEnabledForBundle(option, isDisplayed);
         } else {
             OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
@@ -70,8 +69,7 @@ ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
     }
 
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0)
-    {
+    if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("sts IsBadgeDisplayed error, errorCode: %{public}d", externalCode);
         return NotificationSts::BoolToAniBoolean(false);
@@ -82,4 +80,3 @@ ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
 }
 }
 }
-

@@ -102,9 +102,12 @@ void AniSubScribeRegistryInit(ani_env *env)
 
     std::array methods = {
         ani_native_function {"nativeRemove", cRemoveForBundleSignature, reinterpret_cast<void *>(AniRemoveForBundle)},
-        ani_native_function {"nativeRemove", cRemoveForHashCodeSignature, reinterpret_cast<void *>(AniRemoveForHashCode)},
-        ani_native_function {"nativeRemove", cRemoveForHashCodesSignature, reinterpret_cast<void *>(AniRemoveForHashCodes)},
-        ani_native_function {"nativeDistributeOperation", cDistributeOperationSignature, reinterpret_cast<void *>(AniDistributeOperation)},
+        ani_native_function {"nativeRemove",
+            cRemoveForHashCodeSignature, reinterpret_cast<void *>(AniRemoveForHashCode)},
+        ani_native_function {"nativeRemove",
+            cRemoveForHashCodesSignature, reinterpret_cast<void *>(AniRemoveForHashCodes)},
+        ani_native_function {"nativeDistributeOperation",
+            cDistributeOperationSignature, reinterpret_cast<void *>(AniDistributeOperation)},
         ani_native_function {"nativeSubscribe", cSubscribeSignature, reinterpret_cast<void *>(AniSubscribe)},
         ani_native_function {"nativeUnSubscribe", cUnSubscribeSignature, reinterpret_cast<void *>(AniUnSubscribe)},
     };

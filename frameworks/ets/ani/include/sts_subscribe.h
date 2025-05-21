@@ -114,7 +114,7 @@ public:
     bool Subscribe(ani_env *env, ani_object subscriber, ani_object info);
     bool UnSubscribe(ani_env *env, ani_object subscriber);
 private:
-    SubscriberInstanceManager(){}
+    SubscriberInstanceManager() {}
 
     bool GetNotificationSubscriber(
         ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo);

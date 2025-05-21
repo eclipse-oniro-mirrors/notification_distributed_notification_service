@@ -89,7 +89,7 @@ void AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_boolean
     if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSetNotificationEnable -> error, errorCode: %{public}d", externalCode);
-    }    
+    }
     ANS_LOGD("AniSetNotificationEnable end");
 }
 } // namespace NotificationManagerSts

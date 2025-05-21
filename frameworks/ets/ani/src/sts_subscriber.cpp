@@ -44,12 +44,9 @@ bool WarpSubscribeCallbackData(
     // request: NotificationRequest
     ani_object requestObj;
     ani_class requestCls;
-    if (!WarpNotificationRequest(env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)) {
+    if (!WarpNotificationRequest(env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
+        || requestObj == nullptr) {
         ANS_LOGE("WarpNotificationRequest faild");
-        return false;
-    }
-    if (requestObj == nullptr) {
-        ANS_LOGE("requestObj is nullptr");
         return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "request", requestObj))) {
@@ -150,7 +147,8 @@ bool WarpSubscribeCallbackDataArray(
     return true;
 }
 
-bool WarpEnabledNotificationCallbackData(ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj)
+bool WarpEnabledNotificationCallbackData(
+    ani_env *env, const std::shared_ptr<EnabledNotificationCallbackData> &callbackData, ani_object &outObj)
 {
     ANS_LOGD("enter");
     if (env == nullptr || callbackData == nullptr) {

@@ -18,5 +18,5 @@ export interface NotificationUserInput {
 }
 
 class NotificationUserInputInner implements NotificationUserInput {
-  inputKey: string = "";
+  inputKey: string = '';
 }

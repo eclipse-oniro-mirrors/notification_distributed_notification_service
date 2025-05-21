@@ -26,7 +26,7 @@
 namespace OHOS {
 namespace NotificationSts {
 StsDistributedOperationCallback::StsDistributedOperationCallback(ani_object promise, ani_resolver resolver)
-:resolver_(resolver)
+    : resolver_(resolver)
 {
 }
 
@@ -491,174 +491,167 @@ bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::ve
 }
 
 bool SubscriberInstanceManager::HasNotificationSubscriber(
-        ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
-    {
-        ANS_LOGD("enter");
-        for (auto &iter : subscriberInstances_) {
-            if (iter->Compare(env, value)) {
-                subscriberInfo = iter;
-                return true;
-            }
+    ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
+{
+    ANS_LOGD("enter");
+    for (auto &iter : subscriberInstances_) {
+        if (iter->Compare(env, value)) {
+            subscriberInfo = iter;
+            return true;
         }
+    }
+    return false;
+}
+bool SubscriberInstanceManager::AddSubscriberInstancesInfo(
+    ani_env *env, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
+{
+    ANS_LOGD("enter");
+    if (!subscriberInfo->IsInit()) {
+        ANS_LOGE("subscriberInfo not init");
         return false;
     }
-
-    bool SubscriberInstanceManager::AddSubscriberInstancesInfo(
-        ani_env *env, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
-    {
-        ANS_LOGD("enter");
-        if (!subscriberInfo->IsInit()) {
-            ANS_LOGE("subscriberInfo not init");
-            return false;
-        }
-        std::lock_guard<std::mutex> lock(mutex_);
-        subscriberInstances_.emplace_back(subscriberInfo);
-        return true;
-    }
-
-    bool SubscriberInstanceManager::DelSubscriberInstancesInfo(
-        ani_env *env, ani_object obj)
-    {
-        ANS_LOGD("enter");
-        if (obj == nullptr) {
-            ANS_LOGE("obj is null");
-            return false;
-        }
-
-        std::lock_guard<std::mutex> lock(mutex_);
-        for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
-            if ((*it)->Compare(env, obj)) {
-                DelDeletingSubscriber((*it));
-                subscriberInstances_.erase(it);
-                return true;
-            }
-        }
+    std::lock_guard<std::mutex> lock(mutex_);
+    subscriberInstances_.emplace_back(subscriberInfo);
+    return true;
+}
+bool SubscriberInstanceManager::DelSubscriberInstancesInfo(
+    ani_env *env, ani_object obj)
+{
+    ANS_LOGD("enter");
+    if (obj == nullptr) {
+        ANS_LOGE("obj is null");
         return false;
     }
-
-    bool SubscriberInstanceManager::GetNotificationSubscriber(
-        ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
-    {
-        ANS_LOGD("enter");
-        subscriberInfo = std::make_shared<StsSubscriberInstance>();
-        if (!subscriberInfo->SetObject(env, value)) {
-            ANS_LOGD("SetObject faild");
-            return false;
-        }
-        return true;
-    }
-
-    bool SubscriberInstanceManager::AddDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber)
-    {
-        ANS_LOGD("enter");
-        std::lock_guard<std::mutex> lock(delMutex_);
-        if (subscriber == nullptr) return false;
-        auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
-        if (iter != DeletingSubscriber.end()) {
-            return false;
-        }
-
-        DeletingSubscriber.push_back(subscriber);
-        return true;
-    }
-
-    void SubscriberInstanceManager::DelDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber)
-    {
-        ANS_LOGD("enter");
-        std::lock_guard<std::mutex> lock(delMutex_);
-        auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
-        if (iter != DeletingSubscriber.end()) {
-            DeletingSubscriber.erase(iter);
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
+        if ((*it)->Compare(env, obj)) {
+            DelDeletingSubscriber((*it));
+            subscriberInstances_.erase(it);
+            return true;
         }
     }
+    return false;
+}
+bool SubscriberInstanceManager::GetNotificationSubscriber(
+    ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
+{
+    ANS_LOGD("enter");
+    subscriberInfo = std::make_shared<StsSubscriberInstance>();
+    if (!subscriberInfo->SetObject(env, value)) {
+        ANS_LOGD("SetObject faild");
+        return false;
+    }
+    return true;
+}
+bool SubscriberInstanceManager::AddDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber)
+{
+    ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(delMutex_);
+    if (subscriber == nullptr) return false;
+    auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
+    if (iter != DeletingSubscriber.end()) {
+        return false;
+    }
+    DeletingSubscriber.push_back(subscriber);
+    return true;
+}
+void SubscriberInstanceManager::DelDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber)
+{
+    ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(delMutex_);
+    auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
+    if (iter != DeletingSubscriber.end()) {
+        DeletingSubscriber.erase(iter);
+    }
+}
 
-    bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, ani_object info)
-    {
-        ANS_LOGD("enter");
-        bool isSubscribeUndefine = IsUndefine(env, subscriber);
-        bool isInfoUndefine = IsUndefine(env, info);
-        if (isSubscribeUndefine) {
-            ANS_LOGD("subscriber is undefine");
-            std::string msg = "subscriber is undefine";
+bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, ani_object info)
+{
+    ANS_LOGD("enter");
+    bool isSubscribeUndefine = IsUndefine(env, subscriber);
+    bool isInfoUndefine = IsUndefine(env, info);
+    if (isSubscribeUndefine) {
+        ANS_LOGD("subscriber is undefine");
+        std::string msg = "subscriber is undefine";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    sptr<OHOS::Notification::NotificationSubscribeInfo> SubscribeInfo =
+        new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
+    if (!isInfoUndefine) {
+        if (!UnwarpNotificationSubscribeInfo(env, info, *SubscribeInfo)) {
+            ANS_LOGD("UnwarpNotificationSubscribeInfo faild");
+            std::string msg = "UnwarpNotificationSubscribeInfo faild";
             OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
             return false;
         }
-        sptr<OHOS::Notification::NotificationSubscribeInfo> SubscribeInfo =
-            new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
-        if (!isInfoUndefine) {
-            if (!UnwarpNotificationSubscribeInfo(env, info, *SubscribeInfo)) {
-                ANS_LOGD("UnwarpNotificationSubscribeInfo faild");
-                std::string msg = "UnwarpNotificationSubscribeInfo faild";
-                OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
-                return false;
-            }
+    }
+    std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
+    if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
+        if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
+            ANS_LOGD("GetNotificationSubscriber faild");
+            std::string msg = "GetNotificationSubscriber faild";
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
+            return false;
         }
-        std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
-        if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
-            if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
-                ANS_LOGD("GetNotificationSubscriber faild");
-                std::string msg = "GetNotificationSubscriber faild";
-                OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
-                return false;
-            }
-            if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
-                ANS_LOGD("AddSubscriberInstancesInfo faild");
-                std::string msg = "GetNotificationSubscriber faild";
-                OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
-                return false;
-            }
+        if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
+            ANS_LOGD("AddSubscriberInstancesInfo faild");
+            std::string msg = "GetNotificationSubscriber faild";
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
+            return false;
         }
-        ErrCode status = 0;
-        if (!isInfoUndefine) {
-            status = NotificationHelper::SubscribeNotification(stsSubscriber, SubscribeInfo);
-        } else {
-            status = NotificationHelper::SubscribeNotification(stsSubscriber);
-        }
+    }
+    ErrCode status = 0;
+    if (!isInfoUndefine) {
+        status = NotificationHelper::SubscribeNotification(stsSubscriber, SubscribeInfo);
+    } else {
+        status = NotificationHelper::SubscribeNotification(stsSubscriber);
+    }
+    if (status != 0) {
+        int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
+        externalErrorCode =
+            (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
+        ANS_LOGD("SubscribeNotification faild. status %{public}d ErrorToExternal %{public}d",
+            status, externalErrorCode);
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+        return false;
+    }
+    return true;
+}
+
+bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
+{
+    ANS_LOGD("enter");
+    if (IsUndefine(env, subscriber)) {
+        return false;
+    }
+    std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
+    if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
+        ANS_LOGD("Subscriber not found");
+        // ERR_ANS_INVALID_PARAM
+        return false;
+    }
+    bool ret = AddDeletingSubscriber(stsSubscriber);
+    if (ret) {
+        int32_t status = NotificationHelper::UnSubscribeNotification(stsSubscriber);
         if (status != 0) {
             int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
             externalErrorCode =
                 (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
-            ANS_LOGD("SubscribeNotification faild. status %{public}d ErrorToExternal %{public}d",
+            ANS_LOGD("UnSubscribe faild. status %{public}d ErrorToExternal %{public}d",
                 status, externalErrorCode);
             std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
             OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
-            return false;
+            DelDeletingSubscriber(stsSubscriber);
         }
-        return true;
+    } else {
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_SUBSCRIBER_IS_DELETING);
+        OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
+        return false;
     }
-
-    bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
-    {
-        ANS_LOGD("enter");
-        if (IsUndefine(env, subscriber)) {
-            return false;
-        }
-        std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
-        if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
-            ANS_LOGD("Subscriber not found");
-            // ERR_ANS_INVALID_PARAM
-            return false;
-        }
-        bool ret = AddDeletingSubscriber(stsSubscriber);
-        if (ret) {
-            int32_t status = NotificationHelper::UnSubscribeNotification(stsSubscriber);
-            if (status != 0) {
-                int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
-                externalErrorCode =
-                    (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
-                ANS_LOGD("UnSubscribe faild. status %{public}d ErrorToExternal %{public}d",
-                    status, externalErrorCode);
-                std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
-                OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
-                DelDeletingSubscriber(stsSubscriber);
-            }
-        } else {
-            std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_SUBSCRIBER_IS_DELETING);
-            OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
-            return false;
-        }
-        return true;
-    }
+    return true;
+}
 
 bool GetDoubleValueByClassName(ani_env *env, ani_object param, const char *className, const char *name, ani_double &value)
 {

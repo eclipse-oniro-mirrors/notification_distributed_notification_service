@@ -21,7 +21,7 @@
 #include "sts_notification_content.h"
 #include "sts_action_button.h"
 #include "sts_bundle_option.h"
-#include "sts_template.h" 
+#include "sts_template.h"
 #include "ans_log_wrapper.h"
 #include "want_params.h"
 #include "ani_common_want.h"
@@ -184,27 +184,27 @@ void GetNotificationRequestByBooleanTwo(ani_env *env, ani_object obj,
     }
     bool mbool = false;
     ani_boolean isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyBool(env, obj, "isCountDown", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isCountDown", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetCountdownTimer(mbool);
     }
-    if(ANI_OK == GetPropertyBool(env, obj, "isFloatingIcon", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isFloatingIcon", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetFloatingIcon(mbool);
     }
-    if(ANI_OK == GetPropertyBool(env, obj, "showDeliveryTime", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "showDeliveryTime", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetShowDeliveryTime(mbool);
     }
-    if(ANI_OK == GetPropertyBool(env, obj, "isRemoveAllowed", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "isRemoveAllowed", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetRemoveAllowed(mbool);
     }
-    if(ANI_OK == GetPropertyBool(env, obj, "forceDistributed", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "forceDistributed", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetForceDistributed(mbool);
     }
-    if(ANI_OK == GetPropertyBool(env, obj, "notDistributed", isUndefined, mbool)
+    if (ANI_OK == GetPropertyBool(env, obj, "notDistributed", isUndefined, mbool)
         && isUndefined == ANI_FALSE) {
         request->SetNotDistributed(mbool);
     }
@@ -254,33 +254,33 @@ void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
     }
     ani_double mDouble = 0.0;
     ani_boolean isUndefined = ANI_TRUE;
-    if(ANI_OK == GetPropertyDouble(env, obj, "id", isUndefined, mDouble) && isUndefined == ANI_FALSE) {
+    if (ANI_OK == GetPropertyDouble(env, obj, "id", isUndefined, mDouble) && isUndefined == ANI_FALSE) {
         request->SetNotificationId(static_cast<int32_t>(mDouble));
     } else {
         request->SetNotificationId(0);
     }
-    if(ANI_OK == GetPropertyDouble(env, obj, "deliveryTime", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyDouble(env, obj, "deliveryTime", isUndefined, mDouble)
         && isUndefined == ANI_FALSE) {
         request->SetDeliveryTime(static_cast<int32_t>(mDouble));
     }
-    if(ANI_OK == GetPropertyDouble(env, obj, "autoDeletedTime", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyDouble(env, obj, "autoDeletedTime", isUndefined, mDouble)
         && isUndefined == ANI_FALSE) {
         request->SetAutoDeletedTime(static_cast<int32_t>(mDouble));
     }
-    if(ANI_OK == GetPropertyDouble(env, obj, "color", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyDouble(env, obj, "color", isUndefined, mDouble)
         && isUndefined == ANI_FALSE) {
         request->SetColor(static_cast<int32_t>(mDouble));
     }
-    if(ANI_OK == GetPropertyDouble(env, obj, "badgeIconStyle", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyDouble(env, obj, "badgeIconStyle", isUndefined, mDouble)
         && isUndefined == ANI_FALSE) {
         int32_t style = static_cast<int32_t>(mDouble);
         request->SetBadgeIconStyle(static_cast<NotificationRequest::BadgeStyle>(style));
     }
-    if(ANI_OK == GetPropertyDouble(env, obj, "badgeNumber", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyDouble(env, obj, "badgeNumber", isUndefined, mDouble)
         && isUndefined == ANI_FALSE) {
         request->SetBadgeNumber(static_cast<int32_t>(mDouble));
     }
-    if(ANI_OK == GetPropertyDouble(env, obj, "notificationControlFlags", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyDouble(env, obj, "notificationControlFlags", isUndefined, mDouble)
         && isUndefined == ANI_FALSE) {
         request->SetNotificationControlFlags(static_cast<int32_t>(mDouble));
     }
@@ -563,7 +563,7 @@ void GetNotificationActionButtons(ani_env *env, ani_object obj, std::shared_ptr<
     std::vector<std::shared_ptr<NotificationActionButton>> buttons = {};
     ani_status status = GetNotificationActionButtonArray(env, obj, "actionButtons", buttons);
     if (status == ANI_OK) {
-        for(auto button: buttons) {
+        for (auto button : buttons) {
             request->AddActionButton(button);
         }
     }
@@ -653,7 +653,7 @@ void GetNotificationUnifiedGroupInfo(ani_env *env, ani_object obj,
     status = GetPropertyRef(env, obj, "unifiedGroupInfo", isUndefind, infoRef);
     if (status != ANI_OK || isUndefind == ANI_TRUE) {
         return;
-    }    
+    }
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo = std::make_shared<NotificationUnifiedGroupInfo>();
     std::string mString = "";
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "key", isUndefind, mString)
@@ -690,13 +690,13 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
     ani_ref optionRef = {};
     ani_boolean isUndefind = ANI_TRUE;
     status = GetPropertyRef(env, obj, "representativeBundle", isUndefind, optionRef);
-    if(status != ANI_OK || isUndefind == ANI_TRUE) {
+    if (status != ANI_OK || isUndefind == ANI_TRUE) {
         ANS_LOGD("Cannot get the value of representativeBundle. status %{public}d isUndefind %{public}d",
             status, isUndefind);
         return;
     }
     OHOS::Notification::NotificationBundleOption option;
-    if(ANI_OK == UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
+    if (ANI_OK == UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
         request->SetBundleOption(std::make_shared<OHOS::Notification::NotificationBundleOption>(option));
     }
 }
@@ -705,7 +705,7 @@ ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     std::shared_ptr<OHOS::Notification::NotificationRequest> &notificationRequest)
 {
     ani_status status = GetNotificationContent(env, obj, notificationRequest);
-    if(status != ANI_OK) {
+    if (status != ANI_OK) {
         return ANI_INVALID_ARGS;
     }
     GetNotificationSlotType(env, obj, notificationRequest);
@@ -857,10 +857,9 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
     SetPropertyOptionalByDouble(env, object, "id", request->GetNotificationId());
     // slotType?: SlotType
     ani_enum_item slotTypeItem {};
-    if(SlotTypeCToEts(env, request->GetSlotType(), slotTypeItem)) {
+    if (SlotTypeCToEts(env, request->GetSlotType(), slotTypeItem)) {
         CallSetter(env, cls, object, "notificationSlotType", slotTypeItem);
     }
-    
     // deliveryTime?: number
     SetPropertyOptionalByDouble(env, object, "id", request->GetDeliveryTime());
     // autoDeletedTime?: number
@@ -1047,7 +1046,7 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls, const OHOS::Not
         }
     }
     // readonly notificationFlags?: NotificationFlags
-     std::shared_ptr<NotificationFlags> flags = request->GetFlags();
+    std::shared_ptr<NotificationFlags> flags = request->GetFlags();
     if (flags) {
         ani_object flagsObject = nullptr;
         if (!WarpNotificationFlags(env, flags, flagsObject) || flagsObject == nullptr) {
@@ -1076,7 +1075,7 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls, const OHOS::Not
     std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
     if (groupInfo) {
         ani_object infoObject = nullptr;
-        if(!WarpNotificationUnifiedGroupInfo(env, groupInfo, infoObject) || infoObject == nullptr) {
+        if (!WarpNotificationUnifiedGroupInfo(env, groupInfo, infoObject) || infoObject == nullptr) {
             ANS_LOGE("SetNotificationRequest Warp 'unifiedGroupInfo' faild");
             return false;
         }
@@ -1172,13 +1171,14 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
     for (auto &request : requests) {
         ani_class requestCls;
         ani_object requestObj;
-        if(!WarpNotificationRequest(
+        if (!WarpNotificationRequest(
             env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
             || requestObj == nullptr) {
                 ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
                 return nullptr;
             }
-        if(ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)){
+        if (ANI_OK
+            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
             ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }   

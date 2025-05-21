@@ -105,63 +105,6 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object object, const cha
     return true;
 }
 
-template<typename valueType>
-static bool CallSetterOptional(
-    ani_env* env, ani_class cls, ani_object object, const char* propertyName, valueType value)
-{
-    if(env == nullptr || cls == nullptr || object == nullptr) {
-        return false;
-    }
-    if constexpr (std::is_pointer_v<valueType> && std::is_base_of_v<__ani_ref, std::remove_pointer_t<valueType>>) {
-        return CallSetter(env, cls, object, propertyName, value);
-    }
-    const char* valueClassName = nullptr;
-    const char* ctorSig = nullptr;
-    if constexpr (std::is_same_v<valueType, ani_boolean>) {
-        valueClassName = "Lstd/core/Boolean;";
-        ctorSig = "Z:V";
-    } else if constexpr (std::is_same_v<valueType, ani_char>) {
-        valueClassName = "Lstd/core/Char;";
-        ctorSig = "C:V";
-    } else if constexpr (std::is_same_v<valueType, ani_byte> || std::is_same_v<valueType, ani_short> ||
-                         std::is_same_v<valueType, ani_int> || std::is_same_v<valueType, uint32_t> ||
-                         std::is_same_v<valueType, ani_long> ||
-                         std::is_same_v<valueType, ani_float> || std::is_same_v<valueType, ani_double>) {
-        valueClassName = "Lstd/core/Double;";
-        ctorSig = "D:V";
-    } else {
-        ANS_LOGE("Classname %{public}s Unsupported", propertyName);
-        return false;
-    }
-    ani_class valueClass = nullptr;
-    ani_status status = env->FindClass(valueClassName, &valueClass);
-    if (status != ANI_OK) {
-        ANS_LOGE("FindClass %{public}s %{public}s failed %{public}d", propertyName, valueClassName, status);
-        return false;
-    }
-    ani_method ctor = nullptr;
-    status = env->Class_FindMethod(valueClass, "<ctor>", ctorSig, &ctor);
-    if (status != ANI_OK) {
-        ANS_LOGE("Class_FindMethod <ctor> %{public}s failed %{public}d", propertyName, status);
-        return false;
-    }
-    ani_object valueObj = nullptr;
-    if constexpr (std::is_same_v<valueType, ani_byte> || std::is_same_v<valueType, ani_short> ||
-                  std::is_same_v<valueType, ani_int> || std::is_same_v<valueType, uint32_t> ||
-                  std::is_same_v<valueType, ani_long> ||
-                  std::is_same_v<valueType, ani_float> || std::is_same_v<valueType, ani_double>) {
-        status = env->Object_New(valueClass, ctor, &valueObj, static_cast<double>(value));
-    } else {
-        ANS_LOGE("Classname %{public}s Unsupported", propertyName);
-        return false;
-    }
-    if (status != ANI_OK) {
-        ANS_LOGE("Object_New %{public}s failed %{public}d", propertyName, status);
-        return false;
-    }
-    return CallSetter(env, cls, object, propertyName, valueObj);
-}
-
 [[maybe_unused]]static bool CallSetterNull(ani_env* env, ani_class cls, ani_object object, const char* propertyName)
 {
     ani_ref nullRef = nullptr;
@@ -205,7 +148,8 @@ static bool EnumConvertAniToNative(ani_env *env, ani_enum_item enumItem, T &resu
 }
 
 template<class T>
-void deletePoint(T &result) {
+void deletePoint(T &result)
+{
     delete result;
     result = nullptr;
 }
@@ -277,17 +221,6 @@ static bool EnumConvertNativeToAni(ani_env *env, const char *enumName, const T e
     return false;
 }
 
-#define ANI_FAILED_AND_RETURN(status)                                                    \
-do                                                                                       \
-{                                                                                        \
-    ani_status const local_status = (status);                                            \
-    if (ani_status::ANI_OK != local_status)                                              \
-    {                                                                                    \
-        ANS_LOGE("check status error: %{public}d", (int)local_status); \
-        return false;                                                                    \
-    }                                                                                    \
-} while (0)
-
 #define RETURN_NULL_IF_NULL(ptr)     \
     do {                             \
         if ((ptr) == nullptr) {      \
@@ -302,25 +235,11 @@ do                                                                              
             return false;            \
         }                            \
     } while (0)
-#define RETURN_NULL_IF_FALSE(condition)     \
-    do {                                    \
-        if (!(condition)) {                 \
-            ANS_LOGE("condition is false"); \
-            return nullptr;                 \
-        }                                   \
-    } while (0)
 #define RETURN_FALSE_IF_FALSE(condition)     \
     do {                                     \
         if (!(condition)) {                  \
             return false;                    \
         }                                    \
-    } while (0)
-#define RETURN_ANI_STATUS_IF_NOT_OK(res, err) \
-    do {                                      \
-        if ((res) != ANI_OK) {                \
-            ANS_LOGE(err);                    \
-            return res;                       \
-        }                                     \
     } while (0)
 
 } // namespace NotificationSts

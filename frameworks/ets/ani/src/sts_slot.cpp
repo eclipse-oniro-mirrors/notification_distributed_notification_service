@@ -41,11 +41,10 @@ bool SetOptionalFieldSlotType(ani_env *env, const ani_class cls, ani_object &obj
     }
     ani_enum_item enumItem = nullptr;
     NotificationSts::SlotTypeCToEts(env, value, enumItem);
-    if (enumItem == nullptr)
-    {
+    if (enumItem == nullptr) {
         ANS_LOGE("null enumItem");
         return false;
-    }    
+    }
     status = env->Object_SetField_Ref(object, field, enumItem);
     if (status != ANI_OK) {
         ANS_LOGE("Object_SetField_Ref failed, status=%{public}d, fieldName=%{public}s",
@@ -54,7 +53,9 @@ bool SetOptionalFieldSlotType(ani_env *env, const ani_class cls, ani_object &obj
     }
     return true;
 }
-bool WrapNotificationSlotByBoolean(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj) {
+
+bool WrapNotificationSlotByBoolean(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+{
     if (!SetPropertyOptionalByBoolean(env, outAniObj, "badgeFlag", slot->IsShowBadge())) {
         ANS_LOGE("Set badgeFlag fail");
         return false;
@@ -78,7 +79,8 @@ bool WrapNotificationSlotByBoolean(ani_env *env, sptr<Notification::Notification
     return true;
 }
 
-bool WrapNotificationSlotByString(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj) {
+bool WrapNotificationSlotByString(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+{
     if (!SetPropertyOptionalByString(env, outAniObj, "desc", slot->GetDescription())) {
         ANS_LOGE("Set desc fail");
         return false;
@@ -90,7 +92,8 @@ bool WrapNotificationSlotByString(ani_env *env, sptr<Notification::NotificationS
     return true;
 }
 
-bool WrapNotificationSlotByDouble(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj) {
+bool WrapNotificationSlotByDouble(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+{
     if (!SetPropertyOptionalByDouble(
         env, outAniObj, "lockscreenVisibility", static_cast<double>(slot->GetLockScreenVisibleness()))) {
         ANS_LOGE("Set lockscreenVisibility fail");
@@ -140,8 +143,7 @@ bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slo
         ANS_LOGE("set String params fail");
         return false;
     }
-    if (!SetOptionalFieldArrayDouble(env, cls, outAniObj, "vibrationValues", slot->GetVibrationStyle()))
-    {
+    if (!SetOptionalFieldArrayDouble(env, cls, outAniObj, "vibrationValues", slot->GetVibrationStyle())) {
         ANS_LOGE("Set vibrationValues fail");
         return false;
     }
@@ -165,11 +167,10 @@ bool SetOptionalFieldSlotLevel(ani_env *env, const ani_class cls, ani_object &ob
         return false;
     }
     ani_enum_item enumItem = nullptr;
-    if (!NotificationSts::SlotLevelCToEts(env, value, enumItem) || enumItem == nullptr)
-    {
+    if (!NotificationSts::SlotLevelCToEts(env, value, enumItem) || enumItem == nullptr) {
         ANS_LOGE("get enumItem failed");
         return false;
-    }    
+    }
     status = env->Object_SetField_Ref(object, field, enumItem);
     if (status != ANI_OK) {
         ANS_LOGE("Object_SetField_Ref failed, status=%{public}d, fieldName=%{public}s",

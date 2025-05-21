@@ -393,7 +393,7 @@ ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonO
     ani_status status = ANI_ERROR;
     ani_boolean isUndefind = ANI_TRUE;
     std::string buttonName = "";
-    if((status = GetPropertyString(env, buttonOptionObj, "buttonName", isUndefind, buttonName)) != ANI_OK
+    if ((status = GetPropertyString(env, buttonOptionObj, "buttonName", isUndefind, buttonName)) != ANI_OK
         || isUndefind == ANI_TRUE) {
         ANS_LOGE("UnWarpNotificationButtonOption: get buttonName failed");
         return ANI_INVALID_ARGS;

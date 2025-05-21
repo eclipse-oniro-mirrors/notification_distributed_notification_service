@@ -68,5 +68,3 @@ void AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj)
 }
 }
 }
-
-
