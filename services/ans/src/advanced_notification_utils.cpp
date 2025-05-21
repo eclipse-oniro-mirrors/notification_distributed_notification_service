@@ -47,7 +47,7 @@
 #include "distributed_database.h"
 #endif
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 #include "notification_analytics_util.h"
 #include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"

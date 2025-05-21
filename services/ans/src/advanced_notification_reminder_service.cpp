@@ -39,7 +39,7 @@
 #include "distributed_screen_status_manager.h"
 #endif
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 
 namespace OHOS {
 namespace Notification {

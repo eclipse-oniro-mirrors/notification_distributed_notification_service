@@ -73,7 +73,7 @@
 #include "distributed_screen_status_manager.h"
 #endif
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 #include "advanced_datashare_helper_ext.h"
 #include "notification_analytics_util.h"
 #include "advanced_notification_flow_control_service.h"

@@ -33,7 +33,7 @@
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 
 namespace OHOS {
 namespace Notification {

@@ -30,7 +30,7 @@
 #include "os_account_manager_helper.h"
 #include "time_service_client.h"
 #include "notification_timer_info.h"
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 #include <cstdint>
 #include <memory>
 #include "notification_analytics_util.h"
