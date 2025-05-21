@@ -28,6 +28,10 @@ using namespace OHOS::Notification;
 bool GetEnableNotificationInfo(ani_env *env, ani_object content, std::shared_ptr<EnableNotificationInfo> &info)
 {
     ANS_LOGD("enter");
+    if (content == nullptr) {
+        ANS_LOGD("content is null");
+        return true;
+    }
     ani_status status = ANI_OK;
     ani_boolean stageMode = ANI_FALSE;
     status = OHOS::AbilityRuntime::IsStageContext(env, content, stageMode);
@@ -187,12 +191,6 @@ void RequestEnableComplete(ani_env *env, std::shared_ptr<EnableNotificationInfo>
 ani_object AniRequestEnableNotification(ani_env *env, ani_object content)
 {
     ANS_LOGD("enter");
-    if (content == nullptr) {
-        ANS_LOGD("content is nullptr");
-        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID,
-            OHOS::NotificationSts::FindAnsErrMsg(ERROR_PARAM_INVALID));
-        return nullptr;
-    }
     std::shared_ptr<EnableNotificationInfo> info = std::make_shared<EnableNotificationInfo>();
     if (!GetEnableNotificationInfo(env, content, info)) {
         ANS_LOGD("GetEnableNotificationInfo");

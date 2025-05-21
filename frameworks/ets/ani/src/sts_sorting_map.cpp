@@ -31,7 +31,8 @@ bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<Notification
         return false;
     }
 
-    if (!CreateClassObjByClassName(env, "Lnotification/notificationSortingMap/NotificationSortingMapInner;", cls, outObj)) {
+    if (!CreateClassObjByClassName(env,
+        "Lnotification/notificationSortingMap/NotificationSortingMapInner;", cls, outObj)) {
         ANS_LOGD("CreateClassObjByClassName faild.");
         return false;
     }

@@ -269,10 +269,8 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
     ani_size i = 0;
     for (auto &str : strs) {
         ani_string aniStr;
-        if ((GetAniStringByString(env, str, aniStr) == ANI_OK)) {
-            return nullptr;
-        }
-        if (aniStr == nullptr) {
+        if ((GetAniStringByString(env, str, aniStr) != ANI_OK) || aniStr == nullptr) {
+            ANS_LOGE("GetAniStringByString faild");
             return nullptr;
         }
         ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V",

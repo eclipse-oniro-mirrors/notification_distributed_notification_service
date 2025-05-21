@@ -1026,10 +1026,12 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls, const OHOS::Not
     }
     // actionButtons?: Array<NotificationActionButton>
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons = request->GetActionButtons();
-    ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
-    if (actionButtonsArrayObj != nullptr && !SetPropertyByRef(env, object, "actionButtons", actionButtonsArrayObj)) {
-        ANS_LOGE("SetNotificationRequest set 'actionButtons' faild");
-        return false;
+    if (!actionButtons.empty()) {
+        ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
+        if (actionButtonsArrayObj != nullptr && !SetPropertyByRef(env, object, "actionButtons", actionButtonsArrayObj)) {
+            ANS_LOGE("SetNotificationRequest set 'actionButtons' faild");
+            return false;
+        }
     }
     // template?: NotificationTemplate
     std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
