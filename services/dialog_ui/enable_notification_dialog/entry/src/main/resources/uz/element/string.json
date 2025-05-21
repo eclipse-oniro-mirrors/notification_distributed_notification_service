@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"%s ilovasining sizga bildirishnomalar yuborishiga ruxsat berasizmi?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Ruxsat",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Taqiqlash",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"Дазволіць праграме «%s» адпраўляць вам апавяшчэнні?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Дазволіць",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Адмовіць",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}
