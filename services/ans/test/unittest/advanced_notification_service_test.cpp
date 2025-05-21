@@ -2685,6 +2685,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnUserStopped_0100, Function | SmallTe
 
     MockIsSystemApp(true);
     advancedNotificationService_->OnUserStopped(userId);
+    SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
     GTEST_LOG_(INFO) << "OnResourceRemove_0100 test end";
