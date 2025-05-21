@@ -56,7 +56,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
         ANS_LOGE("get distributeOperation object fail");
         return nullptr;
     }
-    sptr<NotificationSts::StsDistributedOperationCallback> callback 
+    sptr<NotificationSts::StsDistributedOperationCallback> callback
         = new (std::nothrow) NotificationSts::StsDistributedOperationCallback(aniPromise, aniResolver);
     if (callback == nullptr) {
         ANS_LOGE("create callback object fail");

@@ -94,10 +94,10 @@ private:
     std::mutex lock_;
 };
 
-class SubscriberInstanceManager
-{
+class SubscriberInstanceManager {
 public:
-    static SubscriberInstanceManager* GetInstance() {
+    static SubscriberInstanceManager* GetInstance()
+    {
         static SubscriberInstanceManager instance;
         return &instance;
     }

@@ -52,7 +52,7 @@ void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label)
     ANS_LOGD("AniCancelWithIdLabel call");
     std::string labelStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, label, labelStr)) {
-        NotificationSts::ThrowStsErroWithLog(env, "Label parse failed!");
+        NotificationSts::ThrowStsErroWithMsg(env, "Label parse failed!");
         return;
     }
     
@@ -71,7 +71,7 @@ void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id)
     ANS_LOGD("AniCancelWithBundle call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, bundleObj, option)) {
-         NotificationSts::ThrowStsErroWithLog(env, "BundleOption parse failed!");
+        NotificationSts::ThrowStsErroWithMsg(env, "BundleOption parse failed!");
         return;
     }
     
@@ -92,7 +92,7 @@ void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
     ani_boolean isUndefined = ANI_FALSE;
     env->Reference_IsUndefined(label, &isUndefined);
     int32_t ret = -1;
-    if(isUndefined) {
+    if (isUndefined) {
         ANS_LOGE("sts AniCancelWithIdOptinalLabel the label is undefined");
         ret = Notification::NotificationHelper::CancelNotification(static_cast<int32_t>(id));
     } else {

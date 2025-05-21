@@ -19,12 +19,45 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj)
+bool GetKeySToRecode(ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &recordObj)
+{
+    ani_status status = ANI_ERROR;
+    std::vector<std::string> keys = sortingMap->GetKey();
+    for (auto &it : keys) {
+        Notification::NotificationSorting sorting;
+        if (!sortingMap->GetNotificationSorting(it, sorting)) {
+            ANS_LOGE("GetNotificationSorting faild.");
+            return false;
+        }
+        ani_string keyString;
+        if (ANI_OK != GetAniStringByString(env, it, keyString)) {
+            ANS_LOGE("GetAniStringByString faild. key: %{public}s", it.c_str());
+            return false;
+        }
+        ani_object sortingObj;
+        if (!WarpNotificationSorting(env, sorting, sortingObj)) {
+            ANS_LOGE("WarpNotificationSorting faild. key: %{public}s", it.c_str());
+            return false;
+        }
+        if (keyString == nullptr) {
+            ANS_LOGE("GetAniString faild. key: %{public}s", it.c_str());
+            return false;
+        }
+        if (ANI_OK != (status = env->Object_CallMethodByName_Void(
+            recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
+            ANS_LOGE("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool WarpNotificationSortingMap(ani_env *env,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj)
 {
     ani_class cls;
     ani_object recordObj;
     ani_class recordCls;
-    ani_object arrayObj;
     ani_status status;
     if (sortingMap == nullptr || env == nullptr) {
         ANS_LOGE("invalid parameter value");
@@ -37,41 +70,20 @@ bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<Notification
         return false;
     }
 
-    if (!CreateClassObjByClassName(env, "Lescompat/Record;", recordCls, recordObj)) {
+    if (!CreateClassObjByClassName(env, "Lescompat/Record;", recordCls, recordObj) || recordObj == nullptr) {
         ANS_LOGE("Create recordObj faild.");
         return false;
     }
-
-    std::vector<std::string> keys = sortingMap->GetKey();
-    for (auto &it : keys) {
-        Notification::NotificationSorting sorting;
-        if (sortingMap->GetNotificationSorting(it, sorting)) {
-            ani_string keyString;
-            if (ANI_OK != GetAniStringByString(env, it, keyString)) {
-                ANS_LOGE("GetAniStringByString faild. key: %{public}s", it.c_str());
-                return false;
-            }
-            ani_object sortingObj;
-            if (!WarpNotificationSorting(env, sorting, sortingObj)) {
-                ANS_LOGE("WarpNotificationSorting faild. key: %{public}s", it.c_str());
-                return false;
-            }
-            if (keyString == nullptr) {
-                ANS_LOGE("GetAniString faild. key: %{public}s", it.c_str());
-                return false;
-            }
-            if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-                recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
-                ANS_LOGE("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
-                return false;
-            }
-        }
+    if (!GetKeySToRecode(env, sortingMap, recordObj)) {
+        ANS_LOGE("GetKeySToRecode failed.");
+        return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortings", recordObj))) {
         ANS_LOGE("Object_SetPropertyByName_Ref sortings faild. status %{public}d", status);
         return false;
     }
-    arrayObj = GetAniStringArrayByVectorString(env, keys);
+    std::vector<std::string> keys = sortingMap->GetKey();
+    ani_object arrayObj = GetAniStringArrayByVectorString(env, keys);
     if (arrayObj == nullptr) {
         ANS_LOGE("WarpVectorStringToSts sortedHashCode faild");
         return false;

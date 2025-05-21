@@ -37,8 +37,7 @@ void AniAddDoNotDisturbProfile(ani_env *env, ani_object obj)
         return;
     }
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0)
-    {
+    if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniAddDoNotDisturbProfile error, errorCode: %{public}d", externalCode);
     }
@@ -59,8 +58,7 @@ void AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj)
         return;
     }
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0)
-    {
+    if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniRemoveDoNotDisturbProfile error, errorCode: %{public}d", externalCode);
     }

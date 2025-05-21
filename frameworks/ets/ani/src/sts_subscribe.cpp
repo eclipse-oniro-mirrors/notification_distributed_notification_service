@@ -572,8 +572,7 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     bool isInfoUndefine = IsUndefine(env, info);
     if (isSubscribeUndefine) {
         ANS_LOGD("subscriber is undefine");
-        std::string msg = "subscriber is undefine";
-        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, "subscriber is undefine");
         return false;
     }
     sptr<OHOS::Notification::NotificationSubscribeInfo> SubscribeInfo =
@@ -581,8 +580,7 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     if (!isInfoUndefine) {
         if (!UnwarpNotificationSubscribeInfo(env, info, *SubscribeInfo)) {
             ANS_LOGD("UnwarpNotificationSubscribeInfo faild");
-            std::string msg = "UnwarpNotificationSubscribeInfo faild";
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, "UnwarpNotificationSubscribeInfo faild");
             return false;
         }
     }
@@ -590,14 +588,12 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
         if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
             ANS_LOGD("GetNotificationSubscriber faild");
-            std::string msg = "GetNotificationSubscriber faild";
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
             return false;
         }
         if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
             ANS_LOGD("AddSubscriberInstancesInfo faild");
-            std::string msg = "GetNotificationSubscriber faild";
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, msg);
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
             return false;
         }
     }
@@ -653,7 +649,8 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     return true;
 }
 
-bool GetDoubleValueByClassName(ani_env *env, ani_object param, const char *className, const char *name, ani_double &value)
+bool GetDoubleValueByClassName(
+    ani_env *env, ani_object param, const char *className, const char *name, ani_double &value)
 {
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
@@ -700,7 +697,7 @@ bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &
     ani_boolean isUndefined = ANI_TRUE;
     ani_double idDouble = 0.0;
     if (!GetDoubleValueByClassName(env, obj,
-            "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKeyInner;", "<get>id", idDouble)) {
+        "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKeyInner;", "<get>id", idDouble)) {
         ANS_LOGD("GetDoubleValueByClassName id fail");
         return false;
     }

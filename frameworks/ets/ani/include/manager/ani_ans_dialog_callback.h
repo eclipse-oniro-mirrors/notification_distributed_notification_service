@@ -27,9 +27,7 @@ namespace OHOS {
 namespace NotificationManagerSts {
 using namespace Notification;
 
-
-struct EnableNotificationInfo
-{
+struct EnableNotificationInfo {
     int32_t errorCode = ANI_OK;
     std::string bundleName {""};
     bool stageMode = false;

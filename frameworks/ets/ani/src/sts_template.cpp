@@ -31,7 +31,7 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
     }
     ani_status status = ANI_ERROR;
     ani_ref nameRef;
-    if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, "<get>name",":Lstd/core/String;", &nameRef))) {
+    if (ANI_OK != (status = env->Object_CallMethodByName_Ref(aniObj, "<get>name", ":Lstd/core/String;", &nameRef))) {
         ANS_LOGE("Object_CallMethodByName_Ref faild. status %{public}d", status);
         return status;
     }
@@ -46,7 +46,7 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
         return status;
     }
     WantParams wantParams;
-    if(!UnwrapWantParams(env, dataRef, wantParams)) {
+    if (!UnwrapWantParams(env, dataRef, wantParams)) {
         ANS_LOGE("UnwrapWantParams faild");
         return ANI_ERROR;
     }

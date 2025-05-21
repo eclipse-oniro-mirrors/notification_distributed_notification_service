@@ -26,7 +26,7 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
         return false;
     }
     ani_class flagsCls = nullptr;
-    if(!CreateClassObjByClassName(env,
+    if (!CreateClassObjByClassName(env,
         "Lnotification/notificationFlags/NotificationFlagsInner;", flagsCls, flagsObject) ||
         flagsObject == nullptr) {
             ANS_LOGE("Create faild");

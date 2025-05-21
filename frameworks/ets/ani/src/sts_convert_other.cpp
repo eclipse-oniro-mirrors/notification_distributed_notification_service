@@ -53,7 +53,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
     ani_status status = ANI_ERROR;
     std::string bundleName = "";
     ani_boolean isUndefined = ANI_TRUE;
-    if((status = GetPropertyString(env, obj, "bundleName", isUndefined, bundleName)) != ANI_OK
+    if ((status = GetPropertyString(env, obj, "bundleName", isUndefined, bundleName)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         return ANI_INVALID_ARGS;
     }
@@ -168,7 +168,7 @@ ani_status GetPixelMapArray(ani_env *env,
     return status;
 }
 
-ani_status GetResourceArray(ani_env *env, 
+ani_status GetResourceArray(ani_env *env,
     ani_object param, const char *name, std::vector<ResourceManager::Resource> &res)
 {
     ANS_LOGD("GetResourceArray call");
@@ -199,7 +199,7 @@ ani_status GetResourceArray(ani_env *env,
             return status;
         }
         ResourceManager::Resource resource;
-        if(ANI_OK != UnwrapResource(env, static_cast<ani_object>(iconRef), resource)) {
+        if (ANI_OK != UnwrapResource(env, static_cast<ani_object>(iconRef), resource)) {
             ANS_LOGE("GetResourceArray : status = %{public}d, index= %{public}d", status, i);
             res.clear();
             return status;
@@ -514,7 +514,7 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
             || ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             ANS_LOGE("GetAniWantAgentArray : set WantAgent failed");
             return nullptr;
-        }   
+        }
         index ++;
     }
     ANS_LOGD("GetAniWantAgentArray end");

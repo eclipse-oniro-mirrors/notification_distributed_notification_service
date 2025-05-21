@@ -32,7 +32,7 @@ void AniPublish(ani_env *env, ani_object obj)
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationRequest failed");
-        NotificationSts::ThrowStsErroWithLog(env, "AniPublish ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniPublish ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
@@ -51,7 +51,7 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationRequest failed");
-        NotificationSts::ThrowStsErroWithLog(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
         return;
     }
     notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));

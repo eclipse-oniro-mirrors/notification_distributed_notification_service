@@ -327,7 +327,7 @@ bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
     if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType)
         || !EnumConvertNativeToAni(
-        env, "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem)) {
+            env, "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem)) {
         ANS_LOGE("SlotTypeCToEts failed");
         return false;
     }

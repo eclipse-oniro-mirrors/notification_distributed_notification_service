@@ -48,7 +48,8 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
 ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<Media::PixelMap>> &pixelMaps);
 
 ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource resource);
-ani_status GetResourceArray(ani_env *env, ani_object param, const char *name, std::vector<ResourceManager::Resource> &res);
+ani_status GetResourceArray(ani_env *env,
+    ani_object param, const char *name, std::vector<ResourceManager::Resource> &res);
 ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::Resource> &resource);
 ani_object GetAniArrayResource(ani_env *env,
     const std::vector<std::shared_ptr<ResourceManager::Resource>> &resources);

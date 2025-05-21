@@ -27,7 +27,7 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
         return false;
     }
     std::string bundleName;
-    ani_boolean isUndefined = ANI_ERROR;    
+    ani_boolean isUndefined = ANI_TRUE;
     if (GetPropertyString(env, obj, "bundle", isUndefined, bundleName) !=ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapBundleOption Get bundle failed");
         return false;
@@ -44,7 +44,8 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     return true;
 }
 
-bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<Notification::NotificationBundleOption>& options)
+bool UnwrapArrayBundleOption(ani_env *env,
+    ani_ref arrayObj, std::vector<Notification::NotificationBundleOption>& options)
 {
     ANS_LOGD("UnwrapArrayBundleOption call");
     if (env == nullptr || arrayObj == nullptr) {

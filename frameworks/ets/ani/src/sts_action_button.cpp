@@ -258,7 +258,7 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
         }
         std::shared_ptr<NotificationActionButton> button
             = NotificationActionButton::Create(actionButton.icon,
-            actionButton.title, actionButton.wantAgent, actionButton.extras, 
+            actionButton.title, actionButton.wantAgent, actionButton.extras,
             actionButton.semanticActionButton, actionButton.autoCreatedReplies, actionButton.mimeTypeOnlyInputs,
             actionButton.userInput, actionButton.isContextual);
         res.push_back(button);

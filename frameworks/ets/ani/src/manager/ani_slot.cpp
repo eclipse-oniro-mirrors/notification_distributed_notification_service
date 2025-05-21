@@ -37,7 +37,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
     if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
         returncode = Notification::NotificationHelper::GetNotificationSlotsForBundle(option, slots);
     } else {
-        NotificationSts::ThrowStsErroWithLog(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
         return nullptr;
     }
 
@@ -49,7 +49,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
     }
     ani_object outAniObj;
     if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
-        NotificationSts::ThrowStsErroWithLog(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
+        NotificationSts::ThrowStsErroWithMsg(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
         return nullptr;
     }
     ANS_LOGD("sts GetSlotsByBundle end, ret: %{public}d", externalCode);
@@ -61,12 +61,12 @@ void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enu
     ANS_LOGD("AniSetNotificationEnableSlot enter ");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowStsErroWithLog(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
         return;
     }
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
-        NotificationSts::ThrowStsErroWithLog(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniSetNotificationEnableSlot ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = 0;
@@ -83,15 +83,15 @@ void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enu
     ANS_LOGD("AniSetNotificationEnableSlot end");
 }
 
-void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable,
-    ani_boolean isForceControl)
+void AniSetNotificationEnableSlotWithForce(ani_env *env,
+    ani_object bundleOption, ani_enum_item  type, ani_boolean enable, ani_boolean isForceControl)
 {
     ANS_LOGD("AniSetNotificationEnableSlotWithForce enter ");
     Notification::NotificationBundleOption option;
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!(NotificationSts::SlotTypeEtsToC(env, type, slotType))
         || !(NotificationSts::UnwrapBundleOption(env, bundleOption, option))) {
-        NotificationSts::ThrowStsErroWithLog(env, "SetNotificationEnableSlotWithForce ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowStsErroWithMsg(env, "SetNotificationEnableSlotWithForce ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = 0;
@@ -113,7 +113,7 @@ ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, 
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)
         || !NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
-        NotificationSts::ThrowStsErroWithLog(env, "IsNotificationSlotEnabled : erro arguments.");
+        NotificationSts::ThrowStsErroWithMsg(env, "IsNotificationSlotEnabled : erro arguments.");
         return ANI_FALSE;
     }
 
@@ -132,7 +132,7 @@ ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
     ANS_LOGD("sts getSlotFlagsByBundle call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowStsErroWithLog(env, "AniGetSlotFlagsByBundle : erro arguments.");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniGetSlotFlagsByBundle : erro arguments.");
         return ANI_FALSE;
     }
     uint32_t slotFlags = 0;
@@ -150,7 +150,7 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj)
     ANS_LOGD("sts setSlotFlagsByBundle call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowStsErroWithLog(env, "AniSetSlotFlagsByBundle : erro arguments.");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniSetSlotFlagsByBundle : erro arguments.");
         return;
     }
     uint32_t slotFlags = 0;

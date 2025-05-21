@@ -75,9 +75,7 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
     } else {
         ANS_LOGD("un stage mode");
         std::string deviceId {""};
-        info->errorCode = 
-        NotificationHelper::RequestEnableNotification(deviceId, client,
-            info->callerToken);
+        info->errorCode = NotificationHelper::RequestEnableNotification(deviceId, client, info->callerToken);
     }
     ANS_LOGI("ipcCall done, code is %{public}d.", info->errorCode);
 }

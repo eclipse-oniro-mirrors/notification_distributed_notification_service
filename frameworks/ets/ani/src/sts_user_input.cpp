@@ -28,7 +28,7 @@ ani_status UnwrapNotificationUserInput(ani_env *env, ani_object param,
     ani_status status = ANI_ERROR;
     std::string inputKey;
     ani_boolean isUndefined = ANI_TRUE;
-    if((status = GetPropertyString(env, param, "inputKey", isUndefined, inputKey)) != ANI_OK
+    if ((status = GetPropertyString(env, param, "inputKey", isUndefined, inputKey)) != ANI_OK
         || isUndefined == ANI_TRUE) {
             ANS_LOGE("GetPropertyString 'inputKey' faild");
             return ANI_INVALID_ARGS;

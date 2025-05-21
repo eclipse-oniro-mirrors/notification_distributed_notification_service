@@ -308,7 +308,7 @@ ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj, Notificati
     return status;
 }
 
-ani_status GetIconButtonArray(ani_env *env, 
+ani_status GetIconButtonArray(ani_env *env,
     ani_object param, const char *name, std::vector<NotificationIconButton> &res)
 {
     ANS_LOGD("GetIconButtonArray call");
@@ -361,7 +361,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     ani_boolean isUndefined = ANI_TRUE;
     // names?: Array<string>
     if (GetPropertyStringArray(env, obj, "names", isUndefined, names) == ANI_OK && isUndefined == ANI_FALSE) {
-        for(auto name: names) {
+        for (auto name: names) {
             button.addSingleButtonName(name);
         }
     } else {
@@ -379,7 +379,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     // iconsResource?: Array<Resource>
     std::vector<ResourceManager::Resource> resources = {};
     if (ANI_OK == GetResourceArray(env, obj, "iconsResource", resources)) {
-        for(auto res: resources) {
+        for (auto res : resources) {
             std::shared_ptr<ResourceManager::Resource> pRes = std::make_shared<ResourceManager::Resource>(res);
             button.addSingleButtonIconResource(pRes);
         }
@@ -389,7 +389,8 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     ANS_LOGD("UnWarpNotificationLocalLiveViewButton end");
 }
 
-bool WarpNotificationLocalLiveViewButton(ani_env *env, const NotificationLocalLiveViewButton &button, ani_object &buttonObject)
+bool WarpNotificationLocalLiveViewButton(
+    ani_env *env, const NotificationLocalLiveViewButton &button, ani_object &buttonObject)
 {
     ANS_LOGD("WarpNotificationLocalLiveViewButton call");
     if (env == nullptr) {
@@ -449,16 +450,16 @@ void UnWarpNotificationCapsuleByOther(ani_env *env, ani_object obj, Notification
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref iconRef = {};
-    if (GetPropertyRef(env, obj, "icon", isUndefined, iconRef) == ANI_OK
-        && isUndefined == ANI_FALSE && iconRef != nullptr) {
+    if (GetPropertyRef(env, obj, "icon", isUndefined, iconRef) != ANI_OK
+        || isUndefined == ANI_TRUE || iconRef == nullptr) {
+        ANS_LOGD("UnWarpNotificationCapsule: get icon ref failed");
+    } else {
         std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(iconRef));
         if (pixelMap != nullptr) {
             capsule.SetIcon(pixelMap);
         } else {
             ANS_LOGD("UnWarpNotificationCapsule: get icon failed");
         }
-    } else {
-        ANS_LOGD("UnWarpNotificationCapsule: get icon ref failed");
     }
     std::vector<NotificationIconButton> iconButtons = {};
     if (GetIconButtonArray(env, obj, "capsuleButtons", iconButtons) == ANI_OK && !(iconButtons.empty())) {
@@ -565,7 +566,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
         ANS_LOGE("GetAniIconButtonArray failed, env is nullptr or buttons is empty");
         return nullptr;
     }
-    ani_object arrayObj = newArrayClass(env,buttons.size());
+    ani_object arrayObj = newArrayClass(env, buttons.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("GetAniIconButtonArray failed, arrayObj is nullptr");
         return nullptr;
@@ -580,7 +581,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
         if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
             ANS_LOGE("GetAniIconButtonArray: add item failed");
             return nullptr;
-        }   
+        }
         index ++;
     }
     ANS_LOGE("GetAniIconButtonArray end");
@@ -689,7 +690,7 @@ ani_status UnWarpNotificationNormalContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationNormalContent failed, has nullptr");
         return ANI_ERROR;
     }
-    ani_status status =ANI_ERROR;
+    ani_status status = ANI_ERROR;
     if ((status = UnWarpNotificationBasicContent(env, obj, normalContent)) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationNormalContent failed");
         return status;
@@ -790,7 +791,7 @@ ani_status UnWarpNotificationPictureContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationPictureContent failed, has nullptr");
         return ANI_ERROR;
     }
-    ani_status status =ANI_ERROR;
+    ani_status status = ANI_ERROR;
     if ((status = UnWarpNotificationBasicContent(env, obj, pictureContent)) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationPictureContent: get BasicContent failed");
         return status;
@@ -812,7 +813,7 @@ ani_status UnWarpNotificationPictureContent(ani_env *env, ani_object obj,
     }
     pictureContent->SetBriefText(briefText);
     ani_ref pictureRef = {};
-    if ((status = GetPropertyRef(env, obj, "picture", isUndefined, pictureRef)) != ANI_OK 
+    if ((status = GetPropertyRef(env, obj, "picture", isUndefined, pictureRef)) != ANI_OK
         || isUndefined == ANI_TRUE || pictureRef == nullptr) {
         ANS_LOGE("UnWarpNotificationPictureContent: get briefText failed");
         return ANI_INVALID_ARGS;
@@ -828,7 +829,8 @@ ani_status UnWarpNotificationPictureContent(ani_env *env, ani_object obj,
 }
 
 void UnWarpNotificationLiveViewContentByOther(ani_env *env, ani_object obj,
-    std::shared_ptr<NotificationLiveViewContent> &liveViewContent) {
+    std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
+{
     ANS_LOGD("UnWarpNotificationLiveViewContentByOther call");
     if (env == nullptr || obj == nullptr || liveViewContent == nullptr) {
         ANS_LOGE("UnWarpNotificationLiveViewContentByOther failed, has nullptr");
@@ -849,7 +851,7 @@ void UnWarpNotificationLiveViewContentByOther(ani_env *env, ani_object obj,
         ANS_LOGD("UnWarpNotificationLiveViewContent: get extraInfo failed");
     } else {
         AAFwk::WantParams wantParams = {};
-        if(UnwrapWantParams(env, extraInfoRef, wantParams)) {
+        if (UnwrapWantParams(env, extraInfoRef, wantParams)) {
             std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<WantParams>(wantParams);
             liveViewContent->SetExtraInfo(extraInfo);
         } else {
@@ -860,10 +862,10 @@ void UnWarpNotificationLiveViewContentByOther(ani_env *env, ani_object obj,
     isUndefined = ANI_TRUE;
     if (ANI_OK != GetPropertyRef(env, obj, "pictureInfo", isUndefined, pictureInfoRef)
         || isUndefined == ANI_TRUE || pictureInfoRef == nullptr) {
-        ANS_LOGD("UnWarpNotificationLiveViewContent: get pictureInfo failed");        
+        ANS_LOGD("UnWarpNotificationLiveViewContent: get pictureInfo failed");
     } else {
         std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
-        if(GetMapOfPictureInfo(env, static_cast<ani_object>(pictureInfoRef), pictureMap) == ANI_OK) {
+        if (GetMapOfPictureInfo(env, static_cast<ani_object>(pictureInfoRef), pictureMap) == ANI_OK) {
             liveViewContent->SetPicture(pictureMap);
         } else {
             ANS_LOGD("UnWarpNotificationLiveViewContent: get pictureInfo by ref failed");
@@ -887,7 +889,7 @@ ani_status UnWarpNotificationLiveViewContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationLiveViewContent failed, has nullptr");
         return ANI_ERROR;
     }
-    ani_status status =ANI_ERROR;
+    ani_status status = ANI_ERROR;
     if ((status = UnWarpNotificationBasicContent(env, obj, liveViewContent)) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationLiveViewContent: get BasicContent failed");
         return status;
@@ -976,9 +978,9 @@ void GetLocalLiveViewContentByTwo(ani_env *env, ani_object obj,
     ani_ref liveViewTypeRef = {};
     if (GetPropertyRef(env, obj, "liveViewType", isUndefined, liveViewTypeRef) == ANI_OK
         && isUndefined == ANI_FALSE && liveViewTypeRef != nullptr) {
-        LiveViewTypes liveViewTypes = LiveViewTypes::LIVE_VIEW_ACTIVITY;
-        if (LiveViewTypesEtsToC(env, static_cast<ani_enum_item>(liveViewTypeRef), liveViewTypes)) {
-            localLiveViewContent->SetLiveViewType(liveViewTypes);
+        LiveViewTypes types = LiveViewTypes::LIVE_VIEW_ACTIVITY;
+        if (LiveViewTypesEtsToC(env, static_cast<ani_enum_item>(liveViewTypeRef), types)) {
+            localLiveViewContent->SetLiveViewType(types);
         } else {
             ANS_LOGD("GetLocalLiveViewContentByTwo: get liveViewType by ref failed");
         }
@@ -1279,9 +1281,8 @@ bool SetNotificationLiveViewContent(
     }
     ani_class contentCls;
     ani_object contentObj;
-    if (!CreateClassObjByClassName(
-        env, "Lnotification/notificationContent/NotificationLiveViewContentInner;", contentCls, contentObj)
-        || contentObj == nullptr) {
+    if (!CreateClassObjByClassName(env, "Lnotification/notificationContent/NotificationLiveViewContentInner;",
+        contentCls, contentObj) || contentObj == nullptr) {
         ANS_LOGE("SetNotificationLiveViewContent: create class failed");
         return false;
     }
@@ -1307,13 +1308,13 @@ bool SetNotificationLiveViewContent(
         ANS_LOGD("SetNotificationLiveViewContent: set version failed");
     }
     std::shared_ptr<AAFwk::WantParams> extraInfoData = content->GetExtraInfo();
-    if (extraInfoData != nullptr) {
+    if (extraInfoData == nullptr) {
+        ANS_LOGD("SetNotificationLiveViewContent: set extraInfo failed");
+    } else {
         ani_ref extraInfoObj = WrapWantParams(env, *extraInfoData);
         if (extraInfoObj == nullptr || !SetPropertyByRef(env, contentObj, "extraInfo", extraInfoObj)) {
             ANS_LOGD("SetNotificationLiveViewContent: set extraInfo by ref failed");
         }
-    } else {
-        ANS_LOGD("SetNotificationLiveViewContent: set extraInfo failed");
     }
     ani_object pictureInfoObj = nullptr;
     if (!GetAniPictrueInfo(env, content->GetPicture(), pictureInfoObj)
@@ -1331,13 +1332,11 @@ bool SetNotificationContent(ani_env* env, std::shared_ptr<NotificationContent> n
         return false;
     }
     ani_class ncCls;
-    if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationContentInner;", ncCls, ncObj)
-        || ncObj == nullptr) {
+    if (!CreateClassObjByClassName(env, "Lnotification/notificationContent/NotificationContentInner;",
+        ncCls, ncObj) || ncObj == nullptr) {
         ANS_LOGE("SetNotificationContent: create class failed");
         return false;
     }
-    // notificationContentType?: notificationManager.ContentType;
     ContentType contentType = ncContent->GetContentType();
     ani_enum_item contentTypeItem {};
     if (!ContentTypeCToEts(env, contentType, contentTypeItem)
@@ -1367,7 +1366,6 @@ bool SetNotificationContent(ani_env* env, std::shared_ptr<NotificationContent> n
             result = SetNotificationLiveViewContent(env, ncContent, ncObj);
             break;
         default:
-            ANS_LOGE("ContentType is does not exist");
             result = false;
             break;
     }

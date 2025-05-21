@@ -22,7 +22,8 @@ namespace OHOS {
 namespace NotificationSts {
 using NotificationSortingMap = OHOS::Notification::NotificationSortingMap;
 
-bool WarpNotificationSortingMap(ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj);
+bool WarpNotificationSortingMap(ani_env *env,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj);
 } // namespace NotificationSts
 } // OHOS
 #endif
