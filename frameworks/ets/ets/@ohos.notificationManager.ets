@@ -18,6 +18,16 @@ import { BusinessError, AsyncCallback } from '@ohos.base';
 import { NotificationSlot } from 'notification.notificationSlot';
 import { NotificationRequest } from 'notification.notificationRequest';
 import UIAbilityContext from 'application.UIAbilityContext';
+import { NotificationBasicContent } from 'notification.notificationContent';
+import { NotificationLongTextContent } from 'notification.notificationContent';
+import { NotificationMultiLineContent } from 'notification.notificationContent';
+import { NotificationPictureContent } from 'notification.notificationContent';
+import { NotificationSystemLiveViewContent } from 'notification.notificationContent';
+import { NotificationTemplate } from 'notification.notificationTemplate';
+import { DistributedOptions } from 'notification.notificationRequest';
+import { NotificationLiveViewContent } from 'notification.notificationContent';
+import { UnifiedGroupInfo } from 'notification.notificationRequest';
+import image from '@ohos.multimedia.image';
 
 type ResolveCallback<T> = (data: T) => void;
 type RejectCallback = (err: Object) => void;
@@ -30,7 +40,7 @@ const rejectInternalError: BusinessError<string> = {code: ERROR_INTERNAL_ERROR, 
 const callbackInternalError: BusinessError = {code: ERROR_INTERNAL_ERROR, data: undefined};
 const successCallbackError: BusinessError = {code: ERROR_OK, data: undefined};
 
-const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, data: "Invalid parameter"};
+const errorParamInvalid: BusinessError = {code: ERROR_PARAM_INVALID, message: "Invalid parameter"};
 
 export default namespace notificationManager {
     loadLibrary("notification_manager_ani.z")
@@ -113,6 +123,7 @@ export default namespace notificationManager {
     export native function nativeCancelAll(): void;
     export native function nativeCancelWithId(id: number): void;
     export native function nativeCancelWithIdLabel(id: number, label: string): void;
+    export native function nativeCancelWithIdOptionalLabel(id: number, label?: string): void;
     export native function nativeCancelWithBundle(bundle: BundleOption, id: number): void;
 
     export native function nativeDisplayBadge(bundle: BundleOption, enable: boolean): void;
@@ -190,6 +201,288 @@ export default namespace notificationManager {
                 message: "Incorrect parameter types. The type of buttonName must be string."
             }
             return error;
+        }
+        return error;
+    }
+    function isInvalidContent(normal?: NotificationBasicContent): boolean
+    {
+        if(normal === null) {
+			return false;
+		}
+		if(!normal?.title || normal?.title?.trim() === '') {
+			return false;
+		}
+		if(!normal?.text || normal?.text?.trim() === '') {
+			return false;
+		}
+		if(normal?.additionalText !== undefined && normal?.additionalText?.trim() === '') {
+			return false;
+		}
+		if(normal?.lockscreenPicture != undefined && !(normal?.lockscreenPicture instanceof image.PixelMap)) {
+			return false;
+		}
+        
+        return true;
+    }
+    function isInvalidLongText(longText?: NotificationLongTextContent): boolean
+    {
+        if(longText === null) {
+			return false;
+		}
+		if(!longText?.longText || longText?.longText?.trim() === '') {
+			return false;
+		}
+		if(!longText?.briefText || longText?.briefText?.trim() === '') {
+			return false;
+		}
+		if(!longText?.expandedTitle || longText?.expandedTitle?.trim() === '') {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidMultiLine(multiLine?: NotificationMultiLineContent): boolean
+    {
+        if(multiLine === null) {
+			return false
+		}
+		if(!multiLine?.briefText || multiLine?.briefText.trim() === '') {
+			return false;
+		}
+		if(!multiLine?.longTitle || multiLine?.longTitle.trim() === '') {
+			return false;
+		}
+		if(multiLine?.lines?.length === 0) {
+			return false;
+		}
+        
+        return true;
+    }
+    function isInvalidPicture(picture?: NotificationPictureContent): boolean
+    {
+        if(picture === null) {
+			return false;
+		}
+		if(!picture?.briefText || picture?.briefText?.trim() === '') {
+			return false;
+		}
+		if(!picture?.expandedTitle || picture?.expandedTitle?.trim() === '') {
+			return false;
+		}
+		if(!(picture?.picture instanceof image.PixelMap)) {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidSystemLiveView(systemLiveView?: NotificationSystemLiveViewContent): boolean
+    {
+        if(systemLiveView === null) {
+			return false
+		}
+		if(systemLiveView?.capsule !== undefined && systemLiveView?.capsule === null) {
+			return false
+		}
+		if(systemLiveView?.capsule?.title !== undefined && systemLiveView?.capsule?.title?.trim() === '') {
+			return false;
+		}
+		if(systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
+			return false;
+		}
+		if(systemLiveView?.capsule?.backgroundColor != undefined && systemLiveView?.capsule?.backgroundColor?.trim() === '') {
+			return false;
+		}
+		if(systemLiveView?.capsule?.content != undefined && systemLiveView?.capsule?.content?.trim() === '') {
+			return false;
+		}
+		if(systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
+			return false;
+		}
+		if(systemLiveView?.button !== undefined && systemLiveView?.button === null) {
+			return false;
+		}
+		if(systemLiveView?.button?.names != undefined && systemLiveView?.button?.names?.length === 0) {
+			return false;
+		}
+		if(systemLiveView?.button?.icons != undefined && systemLiveView?.button?.icons?.length === 0) {
+			return false;
+		}
+		if(systemLiveView?.button?.iconsResource != undefined && systemLiveView?.button?.iconsResource?.length === 0) {
+			return false;
+		}
+		
+		if(systemLiveView?.cardButtons !== undefined && systemLiveView?.cardButtons?.length === 0) {
+			return false;
+		}
+        
+        return true;
+    }
+    function isInvalidLiveView(liveView?: NotificationLiveViewContent): boolean
+    {
+        if(liveView === null) {
+			return false;
+		}
+		if(liveView?.extraInfo !== undefined && liveView?.extraInfo === null) {
+			return false;
+		}
+		if(liveView?.pictureInfo !== undefined && liveView?.pictureInfo === null) {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidTemplate(template?: NotificationTemplate): boolean
+    {
+        if(template === null) {
+			return false;
+		}
+		if(template?.name != undefined && template?.name?.trim() === '') {
+			return false;
+		}
+		if(template?.data != undefined && template?.data === null) {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidDistributedOption(distributedOption?: DistributedOptions): boolean
+    {
+        if(distributedOption === null) {
+			return false
+		}
+		if(distributedOption?.supportDisplayDevices != undefined && distributedOption?.supportDisplayDevices?.length === 0) {
+			return false;
+		}
+		if(distributedOption?.supportOperateDevices != undefined && distributedOption?.supportOperateDevices?.length === 0) {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidUnifiedGroupInfo(unifiedGroupInfo?: UnifiedGroupInfo): boolean
+    {
+        if(unifiedGroupInfo === null) {
+			return false;
+		}
+		if(unifiedGroupInfo?.key != undefined && unifiedGroupInfo?.key?.trim() === '') {
+			return false;
+		}
+		if(unifiedGroupInfo?.title != undefined && unifiedGroupInfo?.title?.trim() === '') {
+			return false;
+		}
+		if(unifiedGroupInfo?.content != undefined && unifiedGroupInfo?.content?.trim() === '') {
+			return false;
+		}
+		if(unifiedGroupInfo?.sceneName != undefined && unifiedGroupInfo?.sceneName?.trim() === '') {
+			return false;
+		}
+		if(unifiedGroupInfo?.extraInfo != undefined && unifiedGroupInfo?.extraInfo == null) {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidBundleOption(bundleOption?: BundleOption): boolean
+    {
+        if(bundleOption === null) {
+			return false;
+		}
+		if(bundleOption?.bundle != undefined && bundleOption?.bundle?.trim() === '') {
+			return false;
+		}
+        return true;
+    }
+    function isInvalidParameter(request: NotificationRequest): BusinessError
+    {
+        let error: BusinessError = {
+            code: 0,
+            message: ""
+        }
+        if (request == null) {
+            error = {
+                code: 401,
+                message: "request must be not Null"
+            }
+            return error;
+        }
+        if(request.content == null || request.content == undefined) {
+            error = {
+                code: 401,
+                message: "request.content must be not Null"
+            }
+            return error;
+        }
+        if(request.content?.normal !== undefined && !isInvalidContent(request.content.normal)) {
+            return errorParamInvalid;
+        }
+        if(request.content?.longText !== undefined && !isInvalidLongText(request.content.longText)) {
+            return errorParamInvalid;
+        }
+        if(request.content?.multiLine !== undefined && !isInvalidMultiLine(request.content.multiLine)) {
+            return errorParamInvalid;
+        }
+        if(request.content?.picture !== undefined && !isInvalidPicture(request.content.picture)) {
+            return errorParamInvalid;
+        }
+        if(request.content?.systemLiveView !== undefined && !isInvalidSystemLiveView(request.content.systemLiveView)) {
+            return errorParamInvalid;
+        }
+        if(request.content?.liveView !== undefined && !isInvalidLiveView(request.content.liveView)) {
+            return errorParamInvalid;
+        }
+        if(request?.appMessageId !== undefined && request?.appMessageId?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.wantAgent !== undefined && request.wantAgent == null) {
+            return errorParamInvalid;
+        }
+        if(request?.extraInfo !== undefined && request?.extraInfo == null) {
+            return errorParamInvalid;
+        }
+        if(request?.actionButtons !== undefined && request?.actionButtons?.length === 0) {
+            return errorParamInvalid;
+        }
+        if(request.smallIcon !== undefined && request.smallIcon == null) {
+            return errorParamInvalid;
+        }
+        if(request?.largeIcon !== undefined && request.largeIcon == null) {
+            return errorParamInvalid;
+        }
+        if(request?.overlayIcon !== undefined && request.overlayIcon == null) {
+            return errorParamInvalid;
+        }
+        if(request?.groupName !== undefined && request?.groupName?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.creatorBundleName !== undefined && request?.creatorBundleName?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.sound !== undefined && request?.sound?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.classification !== undefined && request?.classification?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.hashCode !== undefined && request?.hashCode?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.template !== undefined && !isInvalidTemplate(request.template)) {
+            return errorParamInvalid;
+        }
+        if(request?.distributedOption !== undefined && !isInvalidDistributedOption(request.distributedOption)) {
+            return errorParamInvalid;
+        }
+        if(request?.deviceId !== undefined && request?.deviceId?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if(request?.removalWantAgent !== undefined && request.removalWantAgent == null) {
+            return errorParamInvalid;
+        }
+        if(request?.representativeBundle !== undefined && !isInvalidBundleOption(request.representativeBundle)) {
+            return errorParamInvalid;
+        }
+        if(request?.agentBundle !== undefined && !isInvalidBundleOption(request.agentBundle)) {
+            return errorParamInvalid;
+        }
+        if (request?.unifiedGroupInfo !== undefined && !isInvalidUnifiedGroupInfo(request.unifiedGroupInfo)) {
+            return errorParamInvalid;
+        }
+        if(request?.appInstanceKey !== undefined && request?.appInstanceKey?.trim() === '') {
+            return errorParamInvalid;
         }
         return error;
     }
@@ -536,6 +829,15 @@ export default namespace notificationManager {
     }
 
     export function publish(request: NotificationRequest, callback: AsyncCallback<void>): void {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativePublish(request); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -547,6 +849,10 @@ export default namespace notificationManager {
     }
 
     export function publish(request: NotificationRequest): Promise<void> {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativePublish(request); });
             p.then((data: NullishType): void => {
@@ -559,6 +865,15 @@ export default namespace notificationManager {
     }
 
     export function publish(request: NotificationRequest, userId: number, callback: AsyncCallback<void>): void {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== 0) {
+            throw error;
+        }
+        if (callback == null) {
+            error.code = 401;
+            error.message = "callback must be not null";
+            throw error;
+        }
         let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
@@ -570,6 +885,10 @@ export default namespace notificationManager {
     }
     
     export function publish(request: NotificationRequest, userId: number): Promise<void> {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== 0) {
+            throw error;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
             p.then((data: NullishType): void => {
@@ -607,6 +926,9 @@ export default namespace notificationManager {
 
     export function subscribeSystemLiveView(subscriber: SystemLiveViewSubscriber): Promise<void>
     {
+        if(subscriber === null) {
+            throw errorParamInvalid;
+        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSubscribeSystemLiveView(subscriber); });
             p.then((data: NullishType): void => {
@@ -670,6 +992,9 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
         }, (error: Object): void => {
+            let retData : Array<NotificationRequest> = [];
+            let err: BusinessError = error as BusinessError;
+            callback(err, retData);
         })
     }
 
@@ -715,7 +1040,9 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
         }, (error: Object): void => {
-
+            let retData : Array<NotificationRequest> = [];
+            let err: BusinessError = error as BusinessError;
+            callback(err, retData);
         })
     }
 
@@ -818,7 +1145,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function cancel(id: number, label: string): Promise<void> {
+    export function cancel(id: number, label?: string): Promise<void> {
         if (label == null || label?.length === 0) {
             let error: BusinessError = {
                 code: 401,
@@ -827,7 +1154,7 @@ export default namespace notificationManager {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelWithIdLabel(id, label); });
+            let p = taskpool.execute((): void => { return nativeCancelWithIdOptionalLabel(id, label); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
             }, (error: Object): void => {
@@ -857,6 +1184,8 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
         })
     }
 
@@ -873,19 +1202,9 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
         })
-    }
-
-    export function cancel(id: number): Promise<void> {
-        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): void => { return nativeCancelWithId(id); });
-            p.then((data: NullishType): void => {
-                resolve(undefined);
-            }, (error: Object): void => {
-                reject(error);
-            });
-        });
-        return pPromise;
     }
 
     export function cancelAll(): Promise<void> {
@@ -913,6 +1232,8 @@ export default namespace notificationManager {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
         }, (error: Object): void => {
+    	    let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
         })
     }
 
