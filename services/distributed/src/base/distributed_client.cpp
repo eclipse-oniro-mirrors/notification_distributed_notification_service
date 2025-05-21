@@ -144,7 +144,8 @@ int32_t DistributedClient::SendMessage(const std::shared_ptr<BoxBase>& boxPtr, T
     DistributedServer::GetInstance().CheckServer();
     int32_t result = GetSocketId(deviceId, dataType, socketId);
     if (boxPtr == nullptr || boxPtr->box_ == nullptr) {
-        return ERR_OK;
+        ANS_LOGW("Dans send message failed %{public}s", StringAnonymous(deviceId).c_str());
+        return -1;
     }
     boxPtr->box_->GetMessageType(type);
     if (result != ERR_OK) {
