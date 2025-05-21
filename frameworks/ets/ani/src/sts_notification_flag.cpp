@@ -20,6 +20,7 @@ namespace NotificationSts {
 bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags> &flags,
     ani_object &flagsObject)
 {
+    ANS_LOGD("WarpNotificationFlags call");
     if (flags == nullptr) {
         ANS_LOGE("flags is null");
         return false;
@@ -61,6 +62,5 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
     }
     return true;
 }
-
 } // namespace NotificationSts
 } // OHOS

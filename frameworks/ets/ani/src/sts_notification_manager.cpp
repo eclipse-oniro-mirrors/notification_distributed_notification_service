@@ -18,17 +18,23 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool SetDate(ani_env *env, ani_object obj, ani_class cls, const char *name, int64_t time)
+bool SetDate(ani_env *env, ani_object obj, const char *name, int64_t time)
 {
+    ANS_LOGD("SetDate call");
+    if (env == nullptr || obj == nullptr || name == nullptr) {
+        ANS_LOGE("SetDate failed, has nullptr");
+        return false;
+    }
     ani_object timeObj;
     if (!CreateDate(env, time, timeObj)) {
-        ANS_LOGD("CreateDate faild.");
+        ANS_LOGE("CreateDate faild.");
         return false;
     }
-    if (!CallSetter(env, cls, obj, name, timeObj)) {
-        ANS_LOGD("set '%{public}s' faild.", name);
+    if (!SetPropertyByRef(env, obj, name, timeObj)) {
+        ANS_LOGE("set '%{public}s' faild.", name);
         return false;
     }
+    ANS_LOGD("SetDate end");
     return true;
 }
 
@@ -228,6 +234,7 @@ void StsNotificationLocalLiveViewSubscriber::OnDied()
 
 void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, sptr<ButtonOption> buttonOption)
 {
+    ANS_LOGD("OnResponse call");
     std::string functionName = "OnResponse";
     ani_env *env = GetAniEnv();
     if (env == nullptr || stsSubscriber_ == nullptr) {
@@ -237,12 +244,12 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     ani_status status = ANI_OK;
     ani_object stsSubscriberObj = reinterpret_cast<ani_object>(stsSubscriber_->aniRef);
     ani_ref funRef;
-    status = env->Object_GetPropertyByName_Ref(stsSubscriberObj, functionName.c_str(), &funRef);
-    if (status != ANI_OK) {
+    ani_boolean isUndefined = ANI_TRUE;
+    status = GetPropertyRef(env, stsSubscriberObj, functionName.c_str(), isUndefined, funRef);
+    if (status != ANI_OK || isUndefined == ANI_TRUE || funRef == nullptr) {
         ANS_LOGE("Object_GetField_Ref failed");
         return;
     }
-
     ani_object notificationIdAni = CreateDouble(env, notificationId);
     ani_object buttonOptionObj = WarpNotificationButtonOption(env, buttonOption);
     if (notificationIdAni == nullptr || buttonOptionObj == nullptr) {
@@ -254,9 +261,8 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     std::vector<ani_ref> argv;
     argv.push_back(notificationIdAni);
     argv.push_back(buttonOptionObj);
-    
     if ((status = env->FunctionalObject_Call(onFn, argv.size(), argv.data(), &resutlt)) != ANI_OK) {
-        ANS_LOGD("FunctionalObject_Call failed, status: %{public}d", status);
+        ANS_LOGE("FunctionalObject_Call failed, status: %{public}d", status);
         return;
     }
 }
@@ -264,34 +270,41 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
 void StsNotificationLocalLiveViewSubscriber::SetStsNotificationLocalLiveViewSubscriber(
     ani_env *env, ani_object &localLiveViewSubscriberObj)
 {
+    ANS_LOGD("SetStsNotificationLocalLiveViewSubscriber call");
     if (env == nullptr) {
+        ANS_LOGE("Set failed, env is nullptr");
         return;
     }
     stsSubscriber_ = std::make_unique<AbilityRuntime::STSNativeReference>();
-    ani_ref objRef = nullptr;
-    if (env->GlobalReference_Create(localLiveViewSubscriberObj, &objRef) != ANI_OK) {
+    if (stsSubscriber_ == nullptr) {
+        ANS_LOGE("stsSubscriber_ is nullptr");
         return;
     }
-
+    ani_ref objRef = nullptr;
+    if (env->GlobalReference_Create(localLiveViewSubscriberObj, &objRef) != ANI_OK) {
+        ANS_LOGE("create ref failed");
+        return;
+    }
     ani_vm *aniVM = nullptr;
     if (env->GetVM(&aniVM) != ANI_OK) {
+        ANS_LOGE("GetVM failed");
         return;
     }
     vm_ = aniVM;
-    if (stsSubscriber_ == nullptr) {
-        return;
-    }
     stsSubscriber_->aniObj = localLiveViewSubscriberObj;
     stsSubscriber_->aniRef = objRef;
 }
 
 ani_env* StsNotificationLocalLiveViewSubscriber::GetAniEnv()
 {
+    ANS_LOGD("GetAniEnv call");
     if (vm_ == nullptr) {
+        ANS_LOGE("vm_ is nullptr");
         return nullptr;
     }
     ani_env* aniEnv = nullptr;
     if (vm_->GetEnv(ANI_VERSION_1, &aniEnv) != ANI_OK) {
+        ANS_LOGE("get env failed");
         return nullptr;
     }
     return aniEnv;
@@ -299,119 +312,154 @@ ani_env* StsNotificationLocalLiveViewSubscriber::GetAniEnv()
 
 bool SlotTypeEtsToC(ani_env *env, ani_enum_item enumItem, SlotType &slotType)
 {
+    ANS_LOGD("SlotTypeEtsToC call");
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
-    EnumConvertAniToNative(env, enumItem, stsSlotType);
-    StsSlotTypeUtils::StsToC(stsSlotType, slotType);
+    if (!EnumConvertAniToNative(env, enumItem, stsSlotType) || !StsSlotTypeUtils::StsToC(stsSlotType, slotType)) {
+        ANS_LOGE("SlotTypeEtsToC failed");
+        return false;
+    }
     return true;
 }
 
 bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
 {
+    ANS_LOGD("SlotTypeCToEts call");
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
-    StsSlotTypeUtils::CToSts(slotType, stsSlotType);
-    EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem);
+    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType)
+        || !EnumConvertNativeToAni(
+        env, "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem)) {
+        ANS_LOGE("SlotTypeCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool SlotLevelEtsToC(ani_env *env, ani_enum_item enumItem, SlotLevel &slotLevel)
 {
+    ANS_LOGD("SlotLevelEtsToC call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
-    EnumConvertAniToNative(env, enumItem, stsSlotLevel);
-    StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel);
+    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel)
+        || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
+        ANS_LOGE("SlotLevelEtsToC failed");
+        return false;
+    }
     return true;
 }
 bool SlotLevelCToEts(ani_env *env, SlotLevel slotLevel, ani_enum_item &enumItem)
 {
+    ANS_LOGD("SlotLevelCToEts call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
-    StsSlotLevelUtils::CToSts(slotLevel, stsSlotLevel);
-    EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/SlotLevel;", stsSlotLevel, enumItem);
+    if (!StsSlotLevelUtils::CToSts(slotLevel, stsSlotLevel) || !EnumConvertNativeToAni(env,
+        "L@ohos/notificationManager/notificationManager/SlotLevel;", stsSlotLevel, enumItem)) {
+        ANS_LOGE("SlotLevelCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool ContentTypeEtsToC(ani_env *env, ani_enum_item enumItem, ContentType &contentType)
 {
+    ANS_LOGD("ContentTypeEtsToC call");
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
-    if(EnumConvertAniToNative(env, enumItem, stsContentType)) {
-        StsContentTypeUtils::StsToC(stsContentType, contentType);
-        return true;
+    if (!EnumConvertAniToNative(env, enumItem, stsContentType)
+        || !StsContentTypeUtils::StsToC(stsContentType, contentType)) {
+        ANS_LOGE("ContentTypeEtsToC failed");
+        return false;
     }
-    return false;
+    return true;
 }
 
 bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enumItem)
 {
+    ANS_LOGD("ContentTypeCToEts call");
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
-    StsContentTypeUtils::CToSts(contentType, stsContentType);
-    if(EnumConvertNativeToAni(env,
+    if (!StsContentTypeUtils::CToSts(contentType, stsContentType)
+        || !EnumConvertNativeToAni(env,
         "L@ohos/notificationManager/notificationManager/ContentType;", stsContentType, enumItem)) {
-        return true;
+        ANS_LOGE("ContentTypeCToEts failed");
+        return false;
     }
-    return false;
+    return true;
 }
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption)
 {
+    ANS_LOGD("UnWarpNotificationButtonOption call");
+    if (env == nullptr || buttonOptionObj == nullptr) {
+        ANS_LOGE("UnWarpNotificationButtonOption failed, has nullptr");
+        return ANI_ERROR;
+    }
     ani_status status = ANI_ERROR;
     ani_boolean isUndefind = ANI_TRUE;
     std::string buttonName = "";
     if((status = GetPropertyString(env, buttonOptionObj, "buttonName", isUndefind, buttonName)) != ANI_OK
         || isUndefind == ANI_TRUE) {
+        ANS_LOGE("UnWarpNotificationButtonOption: get buttonName failed");
         return ANI_INVALID_ARGS;
     }
     buttonOption.SetButtonName(buttonName);
+    ANS_LOGD("UnWarpNotificationButtonOption end");
     return status;
 }
 
 ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonOption)
 {
-    if (buttonOption == nullptr) {
-        ANS_LOGE("buttonOption is null");
+    ANS_LOGD("WarpNotificationButtonOption call");
+    if (env == nullptr || buttonOption == nullptr) {
+        ANS_LOGE("WarpNotificationButtonOption failed, has nullptr");
         return nullptr;
     }
     ani_object optObj = nullptr;
     ani_class optCls = nullptr;
-    RETURN_NULL_IF_FALSE(CreateClassObjByClassName(env,
-        "L@ohos/notificationManager/notificationManager/ButtonOptionsInner;", optCls, optObj));
+    if (!CreateClassObjByClassName(env,
+        "L@ohos/notificationManager/notificationManager/ButtonOptionsInner;", optCls, optObj) || optObj == nullptr) {
+        ANS_LOGE("WarpNotificationButtonOption: create class failed");
+        return nullptr;
+    }
     // title: string;
-    ani_string stringValue = nullptr;
-    RETURN_NULL_IF_FALSE(GetAniStringByString(env, buttonOption->GetButtonName(), stringValue));
-    RETURN_NULL_IF_FALSE(CallSetter(env, optCls, optObj, "buttonName", stringValue));
+    if (!SetPropertyOptionalByString(env, optObj, "buttonName", buttonOption->GetButtonName())) {
+        ANS_LOGE("WarpNotificationButtonOption: set buttonName failed");
+        return nullptr;
+    }
+    ANS_LOGD("WarpNotificationButtonOption end");
     return optObj;
 }
 
 bool WarpNotificationDoNotDisturbDate(
     ani_env *env, const std::shared_ptr<NotificationDoNotDisturbDate> &date, ani_object &outObj)
 {
+    ANS_LOGD("WarpNotificationDoNotDisturbDate call");
+    if (env == nullptr || date == nullptr) {
+        ANS_LOGE("WarpNotificationDoNotDisturbDate failed, has nullptr");
+        return false;
+    }
     ani_class cls;
-    ani_object obj;
     ani_enum_item stsEnumValue;
     const char *className = "L@ohos/notificationManager/notificationManager/DoNotDisturbDateInner;";
-    if (!CreateClassObjByClassName(env, className, cls, obj)) {
-        ANS_LOGD("CreateClassObjByClassName faild");
+    if (!CreateClassObjByClassName(env, className, cls, outObj) || outObj == nullptr) {
+        ANS_LOGE("WarpNotificationDoNotDisturbDate: create class faild");
         return false;
     }
     if (!EnumConvertNativeToAni(
         env, "L@ohos/notificationManager/notificationManager/DoNotDisturbType;",
             date->GetDoNotDisturbType(), stsEnumValue)) {
-        ANS_LOGD("EnumConvert_NativeToSts faild");
+        ANS_LOGE("EnumConvert_NativeToSts faild");
         return false;
     }
-    if (!CallSetter(env, cls, obj, "type", stsEnumValue)) {
-        ANS_LOGD("set type faild.");
+    if (!SetPropertyByRef(env, outObj, "type", stsEnumValue)) {
+        ANS_LOGE("set type faild.");
         return false;
     }
-    if (!SetDate(env, obj, cls, "begin", date->GetBeginDate())) {
-        ANS_LOGD("SetDate 'begin' faild.");
+    if (!SetDate(env, outObj, "begin", date->GetBeginDate())) {
+        ANS_LOGE("SetDate 'begin' faild.");
         return false;
     }
-    if (!SetDate(env, obj, cls, "end", date->GetEndDate())) {
-        ANS_LOGD("SetDate 'end' faild.");
+    if (!SetDate(env, outObj, "end", date->GetEndDate())) {
+        ANS_LOGE("SetDate 'end' faild.");
         return false;
     }
-    outObj = obj;
+    ANS_LOGD("WarpNotificationDoNotDisturbDate end");
     return true;
 }
 } // namespace NotificationSts
