@@ -27,7 +27,7 @@ bool IsUndefine(ani_env *env, const ani_object &obj)
 {
     if (env == nullptr || obj == nullptr) {
         ANS_LOGE("IsUndefine fail, has nullptr");
-        return false;
+        return true;
     }
     ani_boolean isUndefined;
     if (ANI_OK != env->Reference_IsUndefined(obj, &isUndefined)) {

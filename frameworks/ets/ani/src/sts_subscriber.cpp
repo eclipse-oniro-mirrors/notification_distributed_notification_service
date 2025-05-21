@@ -44,24 +44,16 @@ bool WarpSubscribeCallbackData(
     }
 
     // request: NotificationRequest
-    // TODO
-    // Warp NotificationRequest
     ani_object requestObj;
     ani_class requestCls;
     if (!WarpNotificationRequest(env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)) {
+        ANS_LOGE("WarpNotificationRequest faild");
         return false;
     }
     if (requestObj == nullptr) {
-        ANS_LOGD("WarpNotificationRequest faild");
+        ANS_LOGE("requestObj is nullptr");
         return false;
     }
-
-    // for test
-    // if (!CreateClassObjByClassName(
-    //     env, "Lnotification/notificationRequest/NotificationRequestInner;", requestCls, requestObj)) {
-    //         ANS_LOGD("create NotificationRequest faild.");
-    //         return false;
-    //     }
 
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "request", requestObj))) {
         ANS_LOGD("set request faild. status %{public}d", status);
