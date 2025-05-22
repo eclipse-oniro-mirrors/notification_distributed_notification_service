@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"group_label_notification",
+            "value":"%s хабарландырулар жіберуге рұқсат ету керек пе?",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Рұқсат ету",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Тыйым салу",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}
