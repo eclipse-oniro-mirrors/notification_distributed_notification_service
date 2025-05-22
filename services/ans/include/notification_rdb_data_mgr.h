@@ -135,6 +135,14 @@ public:
         const int32_t &userId = -1);
 
     /**
+     * @brief Query data Contains whith key in DB.
+     * @param userId Optional, Indicate which table to query data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t QueryDataContainsWithKey(const std::string &key, std::unordered_map<std::string, std::string> &values,
+        const int32_t &userId = -1);
+
+    /**
      * @brief Query all data in DB.
      * @param userId Optional, Indicate which table to query data.
      * @return Returns ERR_OK on success, others on failure.
@@ -155,6 +163,8 @@ private:
     int32_t QueryData(const std::string tableName, const std::string key, std::string &value);
     int32_t QueryData(const std::string tableName, const std::string key, std::vector<uint8_t> &value);
     int32_t QueryDataBeginWithKey(const std::string tableName, const std::string key,
+        std::unordered_map<std::string, std::string> &values);
+    int32_t QueryDataContainsWithKey(const std::string tableName, const std::string key,
         std::unordered_map<std::string, std::string> &values);
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
     int32_t InitCreatedTables();
