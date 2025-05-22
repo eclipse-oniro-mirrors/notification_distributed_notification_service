@@ -20,7 +20,7 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        uint64_t countDownTimeInSeconds = 0;
+        uint64_t countDownTimeInSeconds = fdp->ConsumeIntegral<uint64_t>();
         std::string stringData = fdp->ConsumeRandomLengthString();
         Notification::ReminderRequestTimer reminderRequestTimer(countDownTimeInSeconds);
         reminderRequestTimer.GetInitInfo();
