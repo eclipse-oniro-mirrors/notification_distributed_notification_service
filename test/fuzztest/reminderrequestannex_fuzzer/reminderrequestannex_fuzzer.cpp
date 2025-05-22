@@ -27,7 +27,7 @@ namespace OHOS {
         reminderRequest.SetSnoozeTimes(snoozeTimes);
         uint8_t snooziTimes = fdp->ConsumeIntegral<uint8_t>();
         reminderRequest.SetSnoozeTimesDynamic(snooziTimes);
-        uint64_t timeIntervalInSeconds = 1;
+        uint64_t timeIntervalInSeconds = fdp->ConsumeIntegral<uint64_t>();
         reminderRequest.SetTimeInterval(timeIntervalInSeconds);
         reminderRequest.SetTitle(stringData);
         reminderRequest.SetTriggerTimeInMilli(timeIntervalInSeconds);
@@ -44,7 +44,7 @@ namespace OHOS {
         reminderRequest.GetReminderTimeInMilli();
         reminderRequest.SetReminderId(reminderId);
         reminderRequest.SetReminderTimeInMilli(timeIntervalInSeconds);
-        uint64_t ringDurationInSeconds = 0;
+        uint64_t ringDurationInSeconds = fdp->ConsumeIntegral<uint64_t>();
         reminderRequest.SetRingDuration(ringDurationInSeconds);
         reminderRequest.GetSlotType();
         reminderRequest.GetSnoozeContent();

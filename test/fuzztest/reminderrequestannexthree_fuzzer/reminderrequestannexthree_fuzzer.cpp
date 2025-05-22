@@ -23,7 +23,7 @@ namespace OHOS {
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminderRequest(reminderId);
         reminderRequest.GetTitle();
-        uint64_t showTime = 2;
+        uint64_t showTime = fdp->ConsumeIntegral<uint64_t>();
         reminderRequest.ReminderRequest::GetShowTime(showTime);
         Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType::YEAR;
         int32_t cTime = static_cast<int32_t>(fdp->ConsumeIntegral<uint8_t>());

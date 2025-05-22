@@ -32,7 +32,7 @@ namespace OHOS {
         std::vector<Notification::ReminderRequestAdaptation> validReminders;
         validReminders.emplace_back(valid);
         Notification::ReminderHelper::GetValidReminders(validReminders);
-        uint64_t excludeDate = static_cast<int64_t>(reminderId);
+        uint64_t excludeDate = fdp->ConsumeIntegral<uint64_t>();
         Notification::ReminderHelper::AddExcludeDate(reminderId, excludeDate);
         Notification::ReminderHelper::DelExcludeDates(reminderId);
         std::vector<int64_t> dates;
