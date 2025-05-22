@@ -22,7 +22,7 @@
 namespace OHOS {
 namespace Notification {
 
-NotifticationRequestBox::NotifticationRequestBox()
+NotificationRequestBox::NotificationRequestBox()
 {
     if (box_ == nullptr) {
         return;
@@ -30,11 +30,11 @@ NotifticationRequestBox::NotifticationRequestBox()
     box_->SetMessageType(PUBLISH_NOTIFICATION);
 }
 
-NotifticationRequestBox::NotifticationRequestBox(std::shared_ptr<TlvBox> box) : BoxBase(box)
+NotificationRequestBox::NotificationRequestBox(std::shared_ptr<TlvBox> box) : BoxBase(box)
 {
 }
 
-bool NotifticationRequestBox::SetNotificationHashCode(const std::string& hasdCode)
+bool NotificationRequestBox::SetNotificationHashCode(const std::string& hasdCode)
 {
     if (box_ == nullptr) {
         return false;
@@ -42,7 +42,7 @@ bool NotifticationRequestBox::SetNotificationHashCode(const std::string& hasdCod
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hasdCode));
 }
 
-bool NotifticationRequestBox::SetSlotType(int32_t type)
+bool NotificationRequestBox::SetSlotType(int32_t type)
 {
     if (box_ == nullptr) {
         return false;
@@ -50,7 +50,7 @@ bool NotifticationRequestBox::SetSlotType(int32_t type)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_SLOT_TYPE, type));
 }
 
-bool NotifticationRequestBox::SetContentType(int32_t type)
+bool NotificationRequestBox::SetContentType(int32_t type)
 {
     if (box_ == nullptr) {
         return false;
@@ -58,7 +58,7 @@ bool NotifticationRequestBox::SetContentType(int32_t type)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT_TYPE, type));
 }
 
-bool NotifticationRequestBox::SetReminderFlag(int32_t flag)
+bool NotificationRequestBox::SetReminderFlag(int32_t flag)
 {
     if (box_ == nullptr) {
         return false;
@@ -66,7 +66,7 @@ bool NotifticationRequestBox::SetReminderFlag(int32_t flag)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_REMINDERFLAG, flag));
 }
 
-bool NotifticationRequestBox::SetCreatorBundleName(const std::string& bundleName)
+bool NotificationRequestBox::SetCreatorBundleName(const std::string& bundleName)
 {
     if (box_ == nullptr) {
         return false;
@@ -74,7 +74,7 @@ bool NotifticationRequestBox::SetCreatorBundleName(const std::string& bundleName
     return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_NAME, bundleName));
 }
 
-bool NotifticationRequestBox::SetNotificationTitle(const std::string& title)
+bool NotificationRequestBox::SetNotificationTitle(const std::string& title)
 {
     if (box_ == nullptr) {
         return false;
@@ -89,7 +89,7 @@ bool NotifticationRequestBox::SetNotificationTitle(const std::string& title)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_TITLE, title));
 }
 
-bool NotifticationRequestBox::SetNotificationText(const std::string& text)
+bool NotificationRequestBox::SetNotificationText(const std::string& text)
 {
     if (box_ == nullptr) {
         return false;
@@ -104,7 +104,7 @@ bool NotifticationRequestBox::SetNotificationText(const std::string& text)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT, text));
 }
 
-bool NotifticationRequestBox::SetNotificationAdditionalText(const std::string& text)
+bool NotificationRequestBox::SetNotificationAdditionalText(const std::string& text)
 {
     if (box_ == nullptr) {
         return false;
@@ -112,7 +112,7 @@ bool NotifticationRequestBox::SetNotificationAdditionalText(const std::string& t
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_ADDITIONAL_TEXT, text));
 }
 
-bool NotifticationRequestBox::SetNotificationBriefText(const std::string& text)
+bool NotificationRequestBox::SetNotificationBriefText(const std::string& text)
 {
     if (box_ == nullptr) {
         return false;
@@ -120,7 +120,7 @@ bool NotifticationRequestBox::SetNotificationBriefText(const std::string& text)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BRIEF_TEXT, text));
 }
 
-bool NotifticationRequestBox::SetNotificationExpandedTitle(const std::string& text)
+bool NotificationRequestBox::SetNotificationExpandedTitle(const std::string& text)
 {
     if (box_ == nullptr) {
         return false;
@@ -128,7 +128,7 @@ bool NotifticationRequestBox::SetNotificationExpandedTitle(const std::string& te
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_EXPANDED_TITLE, text));
 }
 
-bool NotifticationRequestBox::SetNotificationLongText(const std::string& text)
+bool NotificationRequestBox::SetNotificationLongText(const std::string& text)
 {
     if (box_ == nullptr) {
         return false;
@@ -136,17 +136,17 @@ bool NotifticationRequestBox::SetNotificationLongText(const std::string& text)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_LONG_TITLE, text));
 }
 
-bool NotifticationRequestBox::SetNotificationAllLines(const std::vector<std::string>& allLines)
+bool NotificationRequestBox::SetNotificationAllLines(const std::vector<std::string>& allLines)
 {
     return true;
 }
 
-bool NotifticationRequestBox::SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture)
+bool NotificationRequestBox::SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture)
 {
     return true;
 }
 
-bool NotifticationRequestBox::SetNotificationActionName(const std::string& actionName)
+bool NotificationRequestBox::SetNotificationActionName(const std::string& actionName)
 {
     if (box_ == nullptr) {
         return false;
@@ -154,7 +154,7 @@ bool NotifticationRequestBox::SetNotificationActionName(const std::string& actio
     return box_->PutValue(std::make_shared<TlvItem>(ACTION_BUTTON_NAME, actionName));
 }
 
-bool NotifticationRequestBox::SetNotificationUserInput(const std::string& userInput)
+bool NotificationRequestBox::SetNotificationUserInput(const std::string& userInput)
 {
     if (box_ == nullptr) {
         return false;
@@ -162,7 +162,7 @@ bool NotifticationRequestBox::SetNotificationUserInput(const std::string& userIn
     return box_->PutValue(std::make_shared<TlvItem>(ACTION_USER_INPUT, userInput));
 }
 
-bool NotifticationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon)
+bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon)
 {
     if (box_ == nullptr) {
         return false;
@@ -178,7 +178,7 @@ bool NotifticationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>&
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
 }
 
-bool NotifticationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon)
+bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon)
 {
     if (box_ == nullptr) {
         return false;
@@ -193,7 +193,7 @@ bool NotifticationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelM
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
 }
 
-bool NotifticationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byteSequence)
+bool NotificationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byteSequence)
 {
     if (box_ == nullptr) {
         return false;
@@ -203,7 +203,7 @@ bool NotifticationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byte
         begin, byteSequence.size()));
 }
 
-bool NotifticationRequestBox::SetFinishTime(int64_t time)
+bool NotificationRequestBox::SetFinishTime(int64_t time)
 {
     if (box_ == nullptr) {
         return false;
@@ -211,7 +211,7 @@ bool NotifticationRequestBox::SetFinishTime(int64_t time)
     return box_->PutValue(std::make_shared<TlvItem>(FINISH_DEADLINE_TIME, time));
 }
 
-bool NotifticationRequestBox::SetAutoDeleteTime(int64_t time)
+bool NotificationRequestBox::SetAutoDeleteTime(int64_t time)
 {
     if (box_ == nullptr) {
         return false;
@@ -219,7 +219,7 @@ bool NotifticationRequestBox::SetAutoDeleteTime(int64_t time)
     return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
 }
 
-bool NotifticationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
+bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
     if (box_ == nullptr) {
         return false;
@@ -227,7 +227,7 @@ bool NotifticationRequestBox::GetNotificationHashCode(std::string& hasdCode) con
     return box_->GetStringValue(NOTIFICATION_HASHCODE, hasdCode);
 }
 
-bool NotifticationRequestBox::GetSlotType(int32_t& type) const
+bool NotificationRequestBox::GetSlotType(int32_t& type) const
 {
     if (box_ == nullptr) {
         return false;
@@ -235,7 +235,7 @@ bool NotifticationRequestBox::GetSlotType(int32_t& type) const
     return box_->GetInt32Value(NOTIFICATION_SLOT_TYPE, type);
 }
 
-bool NotifticationRequestBox::GetContentType(int32_t& type) const
+bool NotificationRequestBox::GetContentType(int32_t& type) const
 {
     if (box_ == nullptr) {
         return false;
@@ -243,7 +243,7 @@ bool NotifticationRequestBox::GetContentType(int32_t& type) const
     return box_->GetInt32Value(NOTIFICATION_CONTENT_TYPE, type);
 }
 
-bool NotifticationRequestBox::GetCreatorBundleName(std::string& bundleName) const
+bool NotificationRequestBox::GetCreatorBundleName(std::string& bundleName) const
 {
     if (box_ == nullptr) {
         return false;
@@ -251,7 +251,7 @@ bool NotifticationRequestBox::GetCreatorBundleName(std::string& bundleName) cons
     return box_->GetStringValue(BUNDLE_NAME, bundleName);
 }
 
-bool NotifticationRequestBox::GetReminderFlag(int32_t& flag) const
+bool NotificationRequestBox::GetReminderFlag(int32_t& flag) const
 {
     if (box_ == nullptr) {
         return false;
@@ -259,7 +259,7 @@ bool NotifticationRequestBox::GetReminderFlag(int32_t& flag) const
     return box_->GetInt32Value(NOTIFICATION_REMINDERFLAG, flag);
 }
 
-bool NotifticationRequestBox::GetNotificationTitle(std::string& title) const
+bool NotificationRequestBox::GetNotificationTitle(std::string& title) const
 {
     if (box_ == nullptr) {
         return false;
@@ -267,7 +267,7 @@ bool NotifticationRequestBox::GetNotificationTitle(std::string& title) const
     return box_->GetStringValue(NOTIFICATION_TITLE, title);
 }
 
-bool NotifticationRequestBox::GetNotificationText(std::string& text) const
+bool NotificationRequestBox::GetNotificationText(std::string& text) const
 {
     if (box_ == nullptr) {
         return false;
@@ -275,7 +275,7 @@ bool NotifticationRequestBox::GetNotificationText(std::string& text) const
     return box_->GetStringValue(NOTIFICATION_CONTENT, text);
 }
 
-bool NotifticationRequestBox::GetNotificationAdditionalText(std::string& text) const
+bool NotificationRequestBox::GetNotificationAdditionalText(std::string& text) const
 {
     if (box_ == nullptr) {
         return false;
@@ -283,7 +283,7 @@ bool NotifticationRequestBox::GetNotificationAdditionalText(std::string& text) c
     return box_->GetStringValue(NOTIFICATION_ADDITIONAL_TEXT, text);
 }
 
-bool NotifticationRequestBox::GetNotificationBriefText(std::string& text) const
+bool NotificationRequestBox::GetNotificationBriefText(std::string& text) const
 {
     if (box_ == nullptr) {
         return false;
@@ -291,7 +291,7 @@ bool NotifticationRequestBox::GetNotificationBriefText(std::string& text) const
     return box_->GetStringValue(NOTIFICATION_BRIEF_TEXT, text);
 }
 
-bool NotifticationRequestBox::GetNotificationExpandedTitle(std::string& text) const
+bool NotificationRequestBox::GetNotificationExpandedTitle(std::string& text) const
 {
     if (box_ == nullptr) {
         return false;
@@ -299,7 +299,7 @@ bool NotifticationRequestBox::GetNotificationExpandedTitle(std::string& text) co
     return box_->GetStringValue(NOTIFICATION_EXPANDED_TITLE, text);
 }
 
-bool NotifticationRequestBox::GetNotificationLongText(std::string& text) const
+bool NotificationRequestBox::GetNotificationLongText(std::string& text) const
 {
     if (box_ == nullptr) {
         return false;
@@ -307,17 +307,17 @@ bool NotifticationRequestBox::GetNotificationLongText(std::string& text) const
     return box_->GetStringValue(NOTIFICATION_LONG_TITLE, text);
 }
 
-bool NotifticationRequestBox::GetNotificationAllLines(std::vector<std::string>& allLines) const
+bool NotificationRequestBox::GetNotificationAllLines(std::vector<std::string>& allLines) const
 {
     return true;
 }
 
-bool NotifticationRequestBox::GetNotificationBigPicture(std::shared_ptr<Media::PixelMap>& bigPicture) const
+bool NotificationRequestBox::GetNotificationBigPicture(std::shared_ptr<Media::PixelMap>& bigPicture) const
 {
     return true;
 }
 
-bool NotifticationRequestBox::GetNotificationActionName(std::string& actionName) const
+bool NotificationRequestBox::GetNotificationActionName(std::string& actionName) const
 {
     if (box_ == nullptr) {
         return false;
@@ -325,7 +325,7 @@ bool NotifticationRequestBox::GetNotificationActionName(std::string& actionName)
     return box_->GetStringValue(ACTION_BUTTON_NAME, actionName);
 }
 
-bool NotifticationRequestBox::GetNotificationUserInput(std::string& userInput) const
+bool NotificationRequestBox::GetNotificationUserInput(std::string& userInput) const
 {
     if (box_ == nullptr) {
         return false;
@@ -333,7 +333,7 @@ bool NotifticationRequestBox::GetNotificationUserInput(std::string& userInput) c
     return box_->GetStringValue(ACTION_USER_INPUT, userInput);
 }
 
-bool NotifticationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const
+bool NotificationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const
 {
     if (box_ == nullptr) {
         return false;
@@ -347,7 +347,7 @@ bool NotifticationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIc
     return true;
 }
 
-bool NotifticationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const
+bool NotificationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const
 {
     if (box_ == nullptr) {
         return false;
@@ -361,7 +361,7 @@ bool NotifticationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& o
     return true;
 }
 
-bool NotifticationRequestBox::GetCommonLiveView(std::vector<uint8_t>& byteSequence) const
+bool NotificationRequestBox::GetCommonLiveView(std::vector<uint8_t>& byteSequence) const
 {
     if (box_ == nullptr) {
         return false;
@@ -369,7 +369,7 @@ bool NotifticationRequestBox::GetCommonLiveView(std::vector<uint8_t>& byteSequen
     return box_->GetBytes(NOTIFICATION_COMMON_LIVEVIEW, byteSequence);
 }
 
-bool NotifticationRequestBox::GetFinishTime(int64_t& time) const
+bool NotificationRequestBox::GetFinishTime(int64_t& time) const
 {
     if (box_ == nullptr) {
         return false;
@@ -377,7 +377,7 @@ bool NotifticationRequestBox::GetFinishTime(int64_t& time) const
     return box_->GetInt64Value(FINISH_DEADLINE_TIME, time);
 }
 
-bool NotifticationRequestBox::GetAutoDeleteTime(int64_t& time) const
+bool NotificationRequestBox::GetAutoDeleteTime(int64_t& time) const
 {
     if (box_ == nullptr) {
         return false;

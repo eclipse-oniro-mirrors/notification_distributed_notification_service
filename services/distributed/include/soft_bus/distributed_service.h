@@ -79,17 +79,17 @@ private:
     void PublishNotifictaion(const std::shared_ptr<TlvBox>& boxMessage);
     void HandleDeviceState(const std::shared_ptr<TlvBox>& boxMessage);
     void HandleResponseSync(const std::shared_ptr<TlvBox>& boxMessage);
-    void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    void MakeNotificationContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView, int32_t contentType);
-    void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    void MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView);
-    void SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    void SetNotifictaionContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         int32_t contentType);
-    void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box, sptr<NotificationRequest>& request);
+    void MakeNotificationReminderFlag(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
-        NotificationContent::Type type, std::shared_ptr<NotifticationRequestBox>& requestBox);
+        NotificationContent::Type type, std::shared_ptr<NotificationRequestBox>& requestBox);
     void GetNeedUpdateDevice(bool updatedExit, const std::string& bundleName,
         std::vector<DistributedDeviceInfo>& updateDeviceList);
     void TriggerJumpApplication(const std::string& hashCode);
@@ -98,8 +98,8 @@ private:
     void ReplyOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox,
         OperationType operationType, uint32_t result);
     void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
-        NotificationConstant::SlotType slotType, std::shared_ptr<NotifticationRequestBox>& requestBox);
-    void MakeNotificationButtons(const NotifticationRequestBox& box, NotificationConstant::SlotType slotType,
+        NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox);
+    void MakeNotificationButtons(const NotificationRequestBox& box, NotificationConstant::SlotType slotType,
         sptr<NotificationRequest>& request);
     int32_t GetCurrentActiveUserId();
     void TriggerReplyWantAgent(const sptr<NotificationRequest> request, std::string actionName,
