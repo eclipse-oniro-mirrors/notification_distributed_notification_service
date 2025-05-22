@@ -72,6 +72,7 @@ ohos_source_set("ans_service_sources") {
     "src/advanced_notification_flow_control_service.cpp",
     "src/advanced_notification_inline.cpp",
     "src/advanced_notification_live_view_service.cpp",
+    "src/advanced_notification_manager/advanced_notification_query.cpp",
     "src/advanced_notification_publish/base_publish_process.cpp",
     "src/advanced_notification_publish/common_notification_publish_process.cpp",
     "src/advanced_notification_publish/live_publish_process.cpp",
