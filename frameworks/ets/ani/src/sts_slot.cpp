@@ -21,17 +21,31 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool SetOptionalFieldSlotType(ani_env *env, const ani_class cls, ani_object &object, const std::string fieldName,
-    const SlotType value)
+bool CheckOptionalFieldSlotTypeParam(const ani_env *env, const ani_class cls, const ani_object &object)
+{
+    if (env == nullptr) {
+        ANS_LOGE("env is null");
+        return false;
+    }
+    if (cls == nullptr) {
+        ANS_LOGE("cls is null");
+        return false;
+    }
+    if (object == nullptr) {
+        ANS_LOGE("object is null");
+        return false;
+    }
+    return true;
+}
+
+bool SetOptionalFieldSlotType(
+    ani_env *env, const ani_class cls, ani_object &object, const std::string fieldName, const SlotType value)
 {
     ANS_LOGD("WrapNotificationSlot call");
-    if (env == nullptr || cls == nullptr) {
+    if (!CheckOptionalFieldSlotTypeParam(env, cls, object)) {
         ANS_LOGE("WrapNotificationSlot failed, has nullptr");
         return false;
     }
-    RETURN_FALSE_IF_NULL(env);
-    RETURN_FALSE_IF_NULL(cls);
-    RETURN_FALSE_IF_NULL(object);
     ani_field field = nullptr;
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
     if (status != ANI_OK || field == nullptr) {

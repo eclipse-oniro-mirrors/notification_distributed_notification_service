@@ -41,8 +41,6 @@ export interface NotificationSubscriber {
 
     onDestroy?: () => void;
 
-    // // onDoNotDisturbDateChange?: (mode: notification.DoNotDisturbDate) => void;
-
     onDoNotDisturbChanged?: (mode: notificationManager.DoNotDisturbDate) => void;
 
     onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
@@ -55,29 +53,27 @@ export interface NotificationSubscriber {
 }
 
 export class NotificationSubscriberInner implements NotificationSubscriber {
-    onConsume?: (data: SubscribeCallbackData) => void;
+    public onConsume?: (data: SubscribeCallbackData) => void;
 
-    onCancel?: (data: SubscribeCallbackData) => void;
+    public onCancel?: (data: SubscribeCallbackData) => void;
 
-    onUpdate?: (data: NotificationSortingMap) => void;
+    public onUpdate?: (data: NotificationSortingMap) => void;
 
-    onConnect?: () => void;
+    public onConnect?: () => void;
 
-    onDisconnect?: () => void;
+    public onDisconnect?: () => void;
 
-    onDestroy?: () => void;
+    public onDestroy?: () => void;
 
-    // // onDoNotDisturbDateChange?: (mode: notification.DoNotDisturbDate) => void;
+    public onDoNotDisturbChanged?: (mode: notificationManager.DoNotDisturbDate) => void;
 
-    onDoNotDisturbChanged?: (mode: notificationManager.DoNotDisturbDate) => void;
+    public onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
 
-    onEnabledNotificationChanged?: (callbackData: EnabledNotificationCallbackData) => void;
+    public onBadgeChanged?: (data: BadgeNumberCallbackData) => void;
 
-    onBadgeChanged?: (data: BadgeNumberCallbackData) => void;
+    public onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
 
-    onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
-
-    onBatchCancel?: (data: Array<SubscribeCallbackData>) => void;
+    public onBatchCancel?: (data: Array<SubscribeCallbackData>) => void;
 }
 
 export interface SubscribeCallbackData {

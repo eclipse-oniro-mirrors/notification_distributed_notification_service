@@ -1004,6 +1004,115 @@ bool SetNotificationRequestByNotificationContent(ani_env* env, ani_class cls,
     return true;
 }
 
+bool SetRequestExtraInfo(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
+    if (additionalData == nullptr) {
+        ANS_LOGD("extraInfo is Undefine");
+        return true;
+    }
+    ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
+    if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extraInfo", extraInfo)) {
+        ANS_LOGE("SetNotificationRequestByCustom: set extraInfo failed");
+        return false;
+    }
+    return true;
+}
+
+bool SetRequestActionButtons(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::vector<std::shared_ptr<NotificationActionButton>> actionButtons = request->GetActionButtons();
+    if (actionButtons.empty()) {
+        ANS_LOGD("actionButtons is Undefine");
+        return true;
+    }
+    ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
+    if (actionButtonsArrayObj != nullptr
+        && !SetPropertyByRef(env, object, "actionButtons", actionButtonsArrayObj)) {
+        ANS_LOGE("SetNotificationRequest set 'actionButtons' faild");
+        return false;
+    }
+    return true;
+}
+
+bool SetRequestTemplate(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
+    if (templ == nullptr) {
+        ANS_LOGD("template is Undefine");
+        return true;
+    }
+    ani_object templateObject = WrapNotificationTemplate(env, templ);
+    if (templateObject == nullptr) {
+        ANS_LOGE("SetNotificationRequest Warp 'template' faild");
+        return false;
+    }
+    if (!SetPropertyByRef(env, object, "template", templateObject)) {
+        ANS_LOGE("SetNotificationRequest set 'template' faild");
+        return false;
+    }
+    return true;
+}
+
+bool SetRequestNotificationFlags(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<NotificationFlags> flags = request->GetFlags();
+    if (flags == nullptr) {
+        ANS_LOGD("notificationFlags is Undefine");
+        return true;
+    }
+    ani_object flagsObject = nullptr;
+    if (!WarpNotificationFlags(env, flags, flagsObject) || flagsObject == nullptr) {
+        ANS_LOGE("SetNotificationRequest Warp 'notificationFlags' faild");
+        return false;
+    }
+    if (!SetPropertyByRef(env, object, "notificationFlags", flagsObject)) {
+        ANS_LOGE("SetNotificationRequest set 'notificationFlags' faild");
+        return false;
+    }
+    return true;
+}
+
+bool SetRequestAgentBundle(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<NotificationBundleOption> agentBundle = request->GetAgentBundle();
+    if (agentBundle == nullptr) {
+        ANS_LOGD("agentBundle is Undefine");
+        return true;
+    }
+    ani_object agentBundleObject = nullptr;
+    if (!WrapBundleOption(env, agentBundle, agentBundleObject) || agentBundleObject == nullptr) {
+        ANS_LOGE("SetNotificationRequest Warp 'agentBundle' faild");
+        return false;
+    }
+    if (!SetPropertyByRef(env, object, "agentBundle", agentBundleObject)) {
+        ANS_LOGE("SetNotificationRequest set 'agentBundle' faild");
+        return false;
+    }
+    return true;
+}
+
+bool SetRequestUnifiedGroupInfo(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
+    if (groupInfo == nullptr) {
+        ANS_LOGD("unifiedGroupInfo is Undefine");
+        return true;
+    }
+    ani_object infoObject = nullptr;
+    if (!WarpNotificationUnifiedGroupInfo(env, groupInfo, infoObject) || infoObject == nullptr) {
+        ANS_LOGE("SetNotificationRequest Warp 'unifiedGroupInfo' faild");
+        return false;
+    }
+    if (!SetPropertyByRef(env, object, "unifiedGroupInfo", infoObject)) {
+        ANS_LOGE("SetNotificationRequest set 'unifiedGroupInfo' faild");
+        return false;
+    }
+    return true;
+}
+
+
+
 bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     const OHOS::Notification::NotificationRequest *request, ani_object &object)
 {
@@ -1017,75 +1126,34 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
         return false;
     }
     // extraInfo?: {[key:string] : any}
-    std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
-    if (additionalData) {
-        ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
-        if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extraInfo", extraInfo)) {
-            ANS_LOGE("SetNotificationRequestByCustom: set extraInfo failed");
-            return false;
-        }
+    if (!SetRequestExtraInfo(env, request, object)) {
+        ANS_LOGE("set extraInfo faild");
+        return false;
     }
     // actionButtons?: Array<NotificationActionButton>
-    std::vector<std::shared_ptr<NotificationActionButton>> actionButtons = request->GetActionButtons();
-    if (!actionButtons.empty()) {
-        ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
-        if (actionButtonsArrayObj != nullptr
-            && !SetPropertyByRef(env, object, "actionButtons", actionButtonsArrayObj)) {
-            ANS_LOGE("SetNotificationRequest set 'actionButtons' faild");
-            return false;
-        }
+    if (!SetRequestActionButtons(env, request, object)) {
+        ANS_LOGE("set actionButtons faild");
+        return false;
     }
     // template?: NotificationTemplate
-    std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
-    if (templ) {
-        ani_object templateObject = WrapNotificationTemplate(env, templ);
-        if (templateObject == nullptr) {
-            ANS_LOGE("SetNotificationRequest Warp 'template' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "template", templateObject)) {
-            ANS_LOGE("SetNotificationRequest set 'template' faild");
-            return false;
-        }
+    if (!SetRequestTemplate(env, request, object)) {
+        ANS_LOGE("set template faild");
+        return false;
     }
     // readonly notificationFlags?: NotificationFlags
-    std::shared_ptr<NotificationFlags> flags = request->GetFlags();
-    if (flags) {
-        ani_object flagsObject = nullptr;
-        if (!WarpNotificationFlags(env, flags, flagsObject) || flagsObject == nullptr) {
-            ANS_LOGE("SetNotificationRequest Warp 'notificationFlags' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "notificationFlags", flagsObject)) {
-            ANS_LOGE("SetNotificationRequest set 'notificationFlags' faild");
-            return false;
-        }
+    if (!SetRequestNotificationFlags(env, request, object)) {
+        ANS_LOGE("set notificationFlags faild");
+        return false;
     }
     // readonly agentBundle?: agentBundle
-    std::shared_ptr<NotificationBundleOption> agentBundle = request->GetAgentBundle();
-    if (agentBundle) {
-        ani_object agentBundleObject = nullptr;
-        if (!WrapBundleOption(env, agentBundle, agentBundleObject) || agentBundleObject == nullptr) {
-            ANS_LOGE("SetNotificationRequest Warp 'agentBundle' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "agentBundle", agentBundleObject)) {
-            ANS_LOGE("SetNotificationRequest set 'agentBundle' faild");
-            return false;
-        }
+    if (!SetRequestAgentBundle(env, request, object)) {
+        ANS_LOGE("set agentBundle faild");
+        return false;
     }
     // unifiedGroupInfo?: unifiedGroupInfo
-    std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
-    if (groupInfo) {
-        ani_object infoObject = nullptr;
-        if (!WarpNotificationUnifiedGroupInfo(env, groupInfo, infoObject) || infoObject == nullptr) {
-            ANS_LOGE("SetNotificationRequest Warp 'unifiedGroupInfo' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "unifiedGroupInfo", infoObject)) {
-            ANS_LOGE("SetNotificationRequest set 'unifiedGroupInfo' faild");
-            return false;
-        }
+    if (!SetRequestUnifiedGroupInfo(env, request, object)) {
+        ANS_LOGE("set unifiedGroupInfo faild");
+        return false;
     }
     return true;
 }

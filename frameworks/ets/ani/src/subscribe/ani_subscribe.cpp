@@ -24,20 +24,20 @@
 
 namespace OHOS {
 namespace NotificationSubScribeSts {
-static const char *cRemoveForBundleSignature =
+static const char *REMOVE_FOR_BUNDLE_SIGNATURE =
     "Lnotification/NotificationCommonDef/BundleOption;"
     "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKey;"
     "L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
-static const char *cRemoveForHashCodeSignature =
+static const char *REMOVE_FOR_HASHCODE_SIGNATURE =
     "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
-static const char *cRemoveForHashCodesSignature =
+static const char *REMOVE_FOR_HASHCODES_SIGNATURE =
     "Lescompat/Array;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
-static const char *cDistributeOperationSignature =
+static const char *DISTRIBUTE_OPERATION_SIGNATURE =
     "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/OperationInfo;:Lstd/core/Promise;";
-static const char *cSubscribeSignature =
+static const char *SUBSCRIBE_SIGNATURE =
    "Lnotification/notificationSubscriber/NotificationSubscriber;"
    "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
-static const char *cUnSubscribeSignature =
+static const char *UNSUBSCRIBE_SIGNATURE =
    "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
@@ -101,15 +101,15 @@ void AniSubScribeRegistryInit(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function {"nativeRemove", cRemoveForBundleSignature, reinterpret_cast<void *>(AniRemoveForBundle)},
+        ani_native_function {"nativeRemove", REMOVE_FOR_BUNDLE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForBundle)},
         ani_native_function {"nativeRemove",
-            cRemoveForHashCodeSignature, reinterpret_cast<void *>(AniRemoveForHashCode)},
+            REMOVE_FOR_HASHCODE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForHashCode)},
         ani_native_function {"nativeRemove",
-            cRemoveForHashCodesSignature, reinterpret_cast<void *>(AniRemoveForHashCodes)},
+            REMOVE_FOR_HASHCODES_SIGNATURE, reinterpret_cast<void *>(AniRemoveForHashCodes)},
         ani_native_function {"nativeDistributeOperation",
-            cDistributeOperationSignature, reinterpret_cast<void *>(AniDistributeOperation)},
-        ani_native_function {"nativeSubscribe", cSubscribeSignature, reinterpret_cast<void *>(AniSubscribe)},
-        ani_native_function {"nativeUnSubscribe", cUnSubscribeSignature, reinterpret_cast<void *>(AniUnSubscribe)},
+            DISTRIBUTE_OPERATION_SIGNATURE, reinterpret_cast<void *>(AniDistributeOperation)},
+        ani_native_function {"nativeSubscribe", SUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniSubscribe)},
+        ani_native_function {"nativeUnSubscribe", UNSUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniUnSubscribe)},
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);

@@ -23,159 +23,159 @@ import { WantAgent } from '@ohos.app.ability.wantAgent';
 import { BundleOption } from 'notification.NotificationCommonDef';
 
 export interface DistributedOptions {
-  isDistributed?: boolean;
-  supportDisplayDevices?: Array<string>;
-  supportOperateDevices?: Array<string>;
-  readonly remindType?: number;
+    isDistributed?: boolean;
+    supportDisplayDevices?: Array<string>;
+    supportOperateDevices?: Array<string>;
+    readonly remindType?: number;
 }
 
 class DistributedOptionsInner implements DistributedOptions {
-  isDistributed?: boolean | undefined;
-  supportDisplayDevices?: Array<string> | undefined;
-  supportOperateDevices?: Array<string> | undefined;
-  readonly remindType?: number | undefined;
+    public isDistributed?: boolean | undefined;
+    public supportDisplayDevices?: Array<string> | undefined;
+    public supportOperateDevices?: Array<string> | undefined;
+    public readonly remindType?: number | undefined;
 }
 
 export interface NotificationFilter {
-  bundle: BundleOption;
-  notificationKey: notificationSubscribe.NotificationKey;
-  extraInfoKeys?: Array<string>;
+    bundle: BundleOption;
+    notificationKey: notificationSubscribe.NotificationKey;
+    extraInfoKeys?: Array<string>;
 }
 
 class NotificationFilterInner implements NotificationFilter {
-  bundle: BundleOption = {};
-  notificationKey: notificationSubscribe.NotificationKey = {};
-  extraInfoKeys?: Array<string> | undefined;
+    public bundle: BundleOption = {};
+    public notificationKey: notificationSubscribe.NotificationKey = {};
+    public extraInfoKeys?: Array<string> | undefined;
 }
 
 export interface NotificationCheckRequest {
-  contentType: notificationManager.ContentType;
-  slotType: notificationManager.SlotType;
-  extraInfoKeys: Array<string>;
+    contentType: notificationManager.ContentType;
+    slotType: notificationManager.SlotType;
+    extraInfoKeys: Array<string>;
 }
 
 class NotificationCheckRequestInner implements NotificationCheckRequest {
-  contentType: notificationManager.ContentType = notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
-  slotType: notificationManager.SlotType = notificationManager.SlotType.OTHER_TYPES;
-  extraInfoKeys: Array<string> = {};
+    public contentType: notificationManager.ContentType = notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
+    public slotType: notificationManager.SlotType = notificationManager.SlotType.OTHER_TYPES;
+    public extraInfoKeys: Array<string> = {};
 }
 
 export interface UnifiedGroupInfo {
-  key?: string;
-  title?: string;
-  content?: string;
-  sceneName?: string;
-  extraInfo?: Record<string, Object>;
+    key?: string;
+    title?: string;
+    content?: string;
+    sceneName?: string;
+    extraInfo?: Record<string, Object>;
 }
 
 class UnifiedGroupInfoInner implements UnifiedGroupInfo {
-  key?: string | undefined;
-  title?: string | undefined;
-  content?: string | undefined;
-  sceneName?: string | undefined;
-  extraInfo?: Record<string, Object> | undefined;
+    public key?: string | undefined;
+    public title?: string | undefined;
+    public content?: string | undefined;
+    public sceneName?: string | undefined;
+    public extraInfo?: Record<string, Object> | undefined;
 }
 
 export interface NotificationRequest {
-  content: NotificationContent;
-  id?: number;
-  appMessageId?: string;
-  notificationSlotType?: notificationManager.SlotType;
-  isOngoing?: boolean;
-  isUnremovable?: boolean;
-  updateOnly?: boolean;
-  deliveryTime?: number;
-  tapDismissed?: boolean;
-  autoDeletedTime?: number;
-  wantAgent?: WantAgent;
-  extraInfo?: Record<string, Object>;
-  color?: number;
-  colorEnabled?: boolean;
-  isAlertOnce?: boolean;
-  isStopwatch?: boolean;
-  isCountDown?: boolean;
-  isFloatingIcon?: boolean;
-  label?: string;
-  badgeIconStyle?: number;
-  showDeliveryTime?: boolean;
-  actionButtons?: Array<NotificationActionButton>;
-  smallIcon?: image.PixelMap;
-  largeIcon?: image.PixelMap;
-  overlayIcon?: image.PixelMap;
-  groupName?: string;
-  readonly creatorBundleName?: string;
-  readonly creatorUid?: number;
-  readonly creatorPid?: number;
-  readonly creatorUserId?: number;
-  readonly creatorInstanceKey?: number;
-  sound?: string;
-  classification?: string;
-  readonly hashCode?: string;
-  isRemoveAllowed?: boolean;
-  readonly source?: number;
-  template?: NotificationTemplate;
-  distributedOption?: DistributedOptions;
-  readonly deviceId?: string;
-  readonly notificationFlags?: NotificationFlags;
-  removalWantAgent?: WantAgent;
-  badgeNumber?: number;
-  representativeBundle?: BundleOption;
-  readonly agentBundle?: BundleOption;
-  unifiedGroupInfo?: UnifiedGroupInfo;
-  notificationControlFlags?: number;
-  readonly appInstanceKey?: string;
-  forceDistributed?: boolean;
-  notDistributed?: boolean;
+    content: NotificationContent;
+    id?: number;
+    appMessageId?: string;
+    notificationSlotType?: notificationManager.SlotType;
+    isOngoing?: boolean;
+    isUnremovable?: boolean;
+    updateOnly?: boolean;
+    deliveryTime?: number;
+    tapDismissed?: boolean;
+    autoDeletedTime?: number;
+    wantAgent?: WantAgent;
+    extraInfo?: Record<string, Object>;
+    color?: number;
+    colorEnabled?: boolean;
+    isAlertOnce?: boolean;
+    isStopwatch?: boolean;
+    isCountDown?: boolean;
+    isFloatingIcon?: boolean;
+    label?: string;
+    badgeIconStyle?: number;
+    showDeliveryTime?: boolean;
+    actionButtons?: Array<NotificationActionButton>;
+    smallIcon?: image.PixelMap;
+    largeIcon?: image.PixelMap;
+    overlayIcon?: image.PixelMap;
+    groupName?: string;
+    readonly creatorBundleName?: string;
+    readonly creatorUid?: number;
+    readonly creatorPid?: number;
+    readonly creatorUserId?: number;
+    readonly creatorInstanceKey?: number;
+    sound?: string;
+    classification?: string;
+    readonly hashCode?: string;
+    isRemoveAllowed?: boolean;
+    readonly source?: number;
+    template?: NotificationTemplate;
+    distributedOption?: DistributedOptions;
+    readonly deviceId?: string;
+    readonly notificationFlags?: NotificationFlags;
+    removalWantAgent?: WantAgent;
+    badgeNumber?: number;
+    representativeBundle?: BundleOption;
+    readonly agentBundle?: BundleOption;
+    unifiedGroupInfo?: UnifiedGroupInfo;
+    notificationControlFlags?: number;
+    readonly appInstanceKey?: string;
+    forceDistributed?: boolean;
+    notDistributed?: boolean;
 }
 
 class NotificationRequestInner implements NotificationRequest {
-  content: NotificationContent = {};
-  id?: number | undefined;
-  appMessageId?: string | undefined;
-  notificationSlotType?: notificationManager.SlotType | undefined;
-  isOngoing?: boolean | undefined;
-  isUnremovable?: boolean | undefined;
-  updateOnly?: boolean | undefined;
-  deliveryTime?: number | undefined;
-  tapDismissed?: boolean | undefined;
-  autoDeletedTime?: number | undefined;
-  wantAgent?: WantAgent | undefined;
-  extraInfo?: Record<string, Object> | undefined;
-  color?: number | undefined;
-  colorEnabled?: boolean | undefined;
-  isAlertOnce?: boolean | undefined;
-  isStopwatch?: boolean | undefined;
-  isCountDown?: boolean | undefined;
-  isFloatingIcon?: boolean | undefined;
-  label?: string | undefined;
-  badgeIconStyle?: number | undefined;
-  showDeliveryTime?: boolean | undefined;
-  actionButtons?: Array<NotificationActionButton> | undefined;
-  smallIcon?: image.PixelMap | undefined;
-  largeIcon?: image.PixelMap | undefined;
-  overlayIcon?: image.PixelMap | undefined;
-  groupName?: string | undefined;
-  readonly creatorBundleName?: string | undefined;
-  readonly creatorUid?: number | undefined;
-  readonly creatorPid?: number | undefined;
-  readonly creatorUserId?: number | undefined;
-  readonly creatorInstanceKey?: number | undefined;
-  sound?: string | undefined;
-  classification?: string | undefined;
-  readonly hashCode?: string | undefined;
-  isRemoveAllowed?: boolean | undefined;
-  readonly source?: number | undefined;
-  template?: NotificationTemplate | undefined;
-  distributedOption?: DistributedOptions | undefined;
-  readonly deviceId?: string | undefined;
-  readonly notificationFlags?: NotificationFlags | undefined;
-  removalWantAgent?: WantAgent | undefined;
-  badgeNumber?: number | undefined;
-  representativeBundle?: BundleOption | undefined;
-  readonly agentBundle?: BundleOption | undefined;
-  unifiedGroupInfo?: UnifiedGroupInfo | undefined;
-  notificationControlFlags?: number | undefined;
-  readonly appInstanceKey?: string | undefined;
-  forceDistributed?: boolean | undefined;
-  notDistributed?: boolean | undefined;
+    public content: NotificationContent = {};
+    public id?: number | undefined;
+    public appMessageId?: string | undefined;
+    public notificationSlotType?: notificationManager.SlotType | undefined;
+    public isOngoing?: boolean | undefined;
+    public isUnremovable?: boolean | undefined;
+    public updateOnly?: boolean | undefined;
+    public deliveryTime?: number | undefined;
+    public tapDismissed?: boolean | undefined;
+    public autoDeletedTime?: number | undefined;
+    public wantAgent?: WantAgent | undefined;
+    public extraInfo?: Record<string, Object> | undefined;
+    public color?: number | undefined;
+    public colorEnabled?: boolean | undefined;
+    public isAlertOnce?: boolean | undefined;
+    public isStopwatch?: boolean | undefined;
+    public isCountDown?: boolean | undefined;
+    public isFloatingIcon?: boolean | undefined;
+    public label?: string | undefined;
+    public badgeIconStyle?: number | undefined;
+    public showDeliveryTime?: boolean | undefined;
+    public actionButtons?: Array<NotificationActionButton> | undefined;
+    public smallIcon?: image.PixelMap | undefined;
+    public largeIcon?: image.PixelMap | undefined;
+    public overlayIcon?: image.PixelMap | undefined;
+    public groupName?: string | undefined;
+    public readonly creatorBundleName?: string | undefined;
+    public readonly creatorUid?: number | undefined;
+    public readonly creatorPid?: number | undefined;
+    public readonly creatorUserId?: number | undefined;
+    public readonly creatorInstanceKey?: number | undefined;
+    public sound?: string | undefined;
+    public classification?: string | undefined;
+    public readonly hashCode?: string | undefined;
+    public isRemoveAllowed?: boolean | undefined;
+    public readonly source?: number | undefined;
+    public template?: NotificationTemplate | undefined;
+    public distributedOption?: DistributedOptions | undefined;
+    public readonly deviceId?: string | undefined;
+    public readonly notificationFlags?: NotificationFlags | undefined;
+    public removalWantAgent?: WantAgent | undefined;
+    public badgeNumber?: number | undefined;
+    public representativeBundle?: BundleOption | undefined;
+    public readonly agentBundle?: BundleOption | undefined;
+    public unifiedGroupInfo?: UnifiedGroupInfo | undefined;
+    public notificationControlFlags?: number | undefined;
+    public readonly appInstanceKey?: string | undefined;
+    public forceDistributed?: boolean | undefined;
+    public notDistributed?: boolean | undefined;
 }

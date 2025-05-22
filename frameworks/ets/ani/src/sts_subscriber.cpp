@@ -21,27 +21,9 @@
 
 namespace OHOS {
 namespace NotificationSts {
-bool WarpSubscribeCallbackData(
-    ani_env *env,
-    const std::shared_ptr<NotificationSts> &request,
-    const std::shared_ptr<NotificationSortingMap> &sortingMap,
-    int32_t deleteReason,
-    ani_object &outObj)
+bool SetNotificationRequest(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj)
 {
-    ANS_LOGD("enter");
-    ani_object sortingMapObj;
-    ani_status status;
-    ani_class cls;
-    if (env == nullptr || request == nullptr || sortingMap == nullptr) {
-        ANS_LOGE("invalid parameter value");
-        return false;
-    }
-    if (!CreateClassObjByClassName(
-        env, "Lnotification/notificationSubscriber/SubscribeCallbackDataInner;", cls, outObj)) {
-            ANS_LOGE("CreateClassObjByClassName faild");
-            return false;
-    }
-    // request: NotificationRequest
+    ani_status status = ANI_OK;
     ani_object requestObj;
     ani_class requestCls;
     if (!WarpNotificationRequest(env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
@@ -53,7 +35,14 @@ bool WarpSubscribeCallbackData(
         ANS_LOGE("set request faild. status %{public}d", status);
         return false;
     }
-    // sortingMap?: NotificationSortingMap
+    return true;
+}
+
+bool SetNotificationSortingMap(
+    ani_env *env, const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &outObj)
+{
+    ani_status status = ANI_OK;
+    ani_object sortingMapObj;
     if (!WarpNotificationSortingMap(env, sortingMap, sortingMapObj)) {
         ANS_LOGE("WarpNotificationSortingMap faild");
         return false;
@@ -62,7 +51,12 @@ bool WarpSubscribeCallbackData(
         ANS_LOGE("set sortingMap faild. status %{public}d", status);
         return false;
     }
-    // reason?: number
+    return true;
+}
+
+bool SetReason(ani_env *env, const int32_t deleteReason, ani_object &outObj)
+{
+    ani_status status = ANI_OK;
     if (deleteReason != -1) {
         ani_object reason = CreateDouble(env, static_cast<ani_double>(deleteReason));
         if (reason == nullptr) {
@@ -74,7 +68,12 @@ bool WarpSubscribeCallbackData(
             return false;
         }
     }
-    // sound?: string
+    return true;
+}
+
+bool SetSound(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj)
+{
+    ani_status status = ANI_OK;
     if (request->EnableSound()) {
         std::string sound = request->GetSound().ToString();
         ani_string soundObj;
@@ -86,7 +85,12 @@ bool WarpSubscribeCallbackData(
             ANS_LOGE("set sound faild. status %{public}d", status);
         }
     }
-    // vibrationValues?: Array<number>
+    return true;
+}
+
+bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj)
+{
+    ani_status status = ANI_OK;
     if (request->EnableVibrate()) {
         ani_object vibrationValuesObj;
         const std::vector<int64_t> vibrationValues = request->GetVibrationStyle();
@@ -96,7 +100,8 @@ bool WarpSubscribeCallbackData(
             return false;
         }
         for (size_t i = 0; i < vibrationValues.size(); i++) {
-            status = env->Object_CallMethodByName_Void(vibrationValuesObj, "$_set", "ID:V", i, static_cast<ani_double>(vibrationValues[i]));
+            status = env->Object_CallMethodByName_Void(
+                vibrationValuesObj, "$_set", "ID:V", i, static_cast<ani_double>(vibrationValues[i]));
             if (status != ANI_OK) {
                 ANS_LOGE("faild. status : %{public}d", status);
                 return false;
@@ -106,6 +111,52 @@ bool WarpSubscribeCallbackData(
             ANS_LOGE("set vibrationValuesObj faild. status %{public}d", status);
             return false;
         }
+    }
+    return true;
+}
+
+bool WarpSubscribeCallbackData(
+    ani_env *env,
+    const std::shared_ptr<NotificationSts> &request,
+    const std::shared_ptr<NotificationSortingMap> &sortingMap,
+    int32_t deleteReason,
+    ani_object &outObj)
+{
+    ANS_LOGD("enter");
+    ani_class cls;
+    if (env == nullptr || request == nullptr || sortingMap == nullptr) {
+        ANS_LOGE("invalid parameter value");
+        return false;
+    }
+    if (!CreateClassObjByClassName(
+        env, "Lnotification/notificationSubscriber/SubscribeCallbackDataInner;", cls, outObj)) {
+            ANS_LOGE("CreateClassObjByClassName faild");
+            return false;
+    }
+    // request: NotificationRequest
+    if (!SetNotificationRequest(env, request, outObj)) {
+        ANS_LOGE("SetNotificationRequest faild");
+        return false;
+    }
+    // sortingMap?: NotificationSortingMap
+    if (!SetNotificationSortingMap(env, sortingMap, outObj)) {
+        ANS_LOGE("SetNotificationSortingMap faild");
+        return false;
+    }
+    // reason?: number
+    if (!SetReason(env, deleteReason, outObj)) {
+        ANS_LOGE("SetReason faild");
+        return false;
+    }
+    // sound?: string
+    if (!SetSound(env, request, outObj)) {
+        ANS_LOGE("SetSound faild");
+        return false;
+    }
+    // vibrationValues?: Array<number>
+    if (!SetVibrationValues(env, request, outObj)) {
+        ANS_LOGE("SetSound faild");
+        return false;
     }
     return true;
 }
@@ -178,7 +229,8 @@ bool WarpEnabledNotificationCallbackData(
     return true;
 }
 
-bool WarpBadgeNumberCallbackData(ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj)
+bool WarpBadgeNumberCallbackData(
+    ani_env *env, const std::shared_ptr<BadgeNumberCallbackData> &badgeData, ani_object &outObj)
 {
     ANS_LOGD("enter");
     if (env == nullptr || badgeData == nullptr) {

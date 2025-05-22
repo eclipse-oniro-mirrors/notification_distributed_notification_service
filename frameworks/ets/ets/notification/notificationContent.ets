@@ -32,359 +32,359 @@ class RecordTools {
 
 export interface NotificationBasicContent {
 
-  title: string;
+    title: string;
 
-  text: string;
+    text: string;
 
-  additionalText?: string;
+    additionalText?: string;
 
-  lockscreenPicture?: image.PixelMap;
+    lockscreenPicture?: image.PixelMap;
 }
 
 class NotificationBasicContentInner implements NotificationBasicContent {
 
-  title: string = "";
+    public title: string = '';
 
-  text: string = "";
+    public text: string = '';
 
-  additionalText?: string | undefined;
+    public additionalText?: string | undefined;
 
-  lockscreenPicture?: image.PixelMap | undefined;
+    public lockscreenPicture?: image.PixelMap | undefined;
 }
 
 export interface NotificationLongTextContent extends NotificationBasicContent {
 
-  longText: string;
+    longText: string;
 
-  briefText: string;
+    briefText: string;
 
-  expandedTitle: string;
+    expandedTitle: string;
 }
 
 class NotificationLongTextContentInner implements NotificationLongTextContent {
 
-  title: string = "";
+  public title: string = '';
 
-  text: string = "";
+  public text: string = '';
 
-  additionalText?: string;
+  public additionalText?: string;
 
-  lockscreenPicture?: image.PixelMap | undefined;
+  public lockscreenPicture?: image.PixelMap | undefined;
 
-  longText: string = "";
+  public longText: string = '';
 
-  briefText: string = "";
+  public briefText: string = '';
 
-  expandedTitle: string = "";
+  public expandedTitle: string = '';
 }
 
 export enum LiveViewStatus {
 
-  LIVE_VIEW_CREATE = 0,
+    LIVE_VIEW_CREATE = 0,
 
-  LIVE_VIEW_INCREMENTAL_UPDATE = 1,
+    LIVE_VIEW_INCREMENTAL_UPDATE = 1,
 
-  LIVE_VIEW_END = 2,
+    LIVE_VIEW_END = 2,
 
-  LIVE_VIEW_FULL_UPDATE = 3
+    LIVE_VIEW_FULL_UPDATE = 3
 }
 
 export enum LiveViewTypes {
 
-  LIVE_VIEW_ACTIVITY = 0,
+    LIVE_VIEW_ACTIVITY = 0,
 
-  LIVE_VIEW_INSTANT = 1,
+    LIVE_VIEW_INSTANT = 1,
 
-  LIVE_VIEW_LONG_TERM = 2
+    LIVE_VIEW_LONG_TERM = 2
 }
 
 export interface NotificationLiveViewContent extends NotificationBasicContent {
 
-  status: LiveViewStatus;
+    status: LiveViewStatus;
 
-  version?: number;
+    version?: number;
 
-  extraInfo?: Record<string, Object>;
+    extraInfo?: Record<string, Object>;
 
-  pictureInfo?: Record<string, Array<image.PixelMap>>;
+    pictureInfo?: Record<string, Array<image.PixelMap>>;
 
-  isLocalUpdateOnly?: boolean;
+    isLocalUpdateOnly?: boolean;
 }
 
 class NotificationLiveViewContentInner implements NotificationLiveViewContent {
 
-  title: string = "";
+    public title: string = '';
 
-  text: string = "";
+    public text: string = '';
 
-  additionalText?: string | undefined;
+    public additionalText?: string | undefined;
 
-  lockscreenPicture?: image.PixelMap | undefined;
+    public lockscreenPicture?: image.PixelMap | undefined;
 
-  status: LiveViewStatus = LiveViewStatus.LIVE_VIEW_CREATE;
+    public status: LiveViewStatus = LiveViewStatus.LIVE_VIEW_CREATE;
 
-  version?: number | undefined;
+    public version?: number | undefined;
 
-  extraInfo?: Record<string, Object> | undefined;
+    public extraInfo?: Record<string, Object> | undefined;
 
-  pictureInfo?: Record<string, Array<image.PixelMap>> | undefined;
+    public pictureInfo?: Record<string, Array<image.PixelMap>> | undefined;
 
-  isLocalUpdateOnly?: boolean | undefined;
+    public isLocalUpdateOnly?: boolean | undefined;
 }
 
 export interface NotificationMultiLineContent extends NotificationBasicContent {
 
-  briefText: string;
+    briefText: string;
 
-  longTitle: string;
+    longTitle: string;
 
-  lines: Array<string>;
+    lines: Array<string>;
 }
 
 class NotificationMultiLineContentInner implements NotificationMultiLineContent {
 
-  title: string = "";
+    public title: string = '';
 
-  text: string = "";
+    public text: string = '';
 
-  additionalText?: string | undefined;
+    public additionalText?: string | undefined;
 
-  lockscreenPicture?: image.PixelMap | undefined;
+    public lockscreenPicture?: image.PixelMap | undefined;
 
-  briefText: string = "";
+    public briefText: string = '';
 
-  longTitle: string = "";
+    public longTitle: string = '';
 
-  lines: Array<string> = {};
+    public lines: Array<string> = {};
 }
 
 export interface NotificationPictureContent extends NotificationBasicContent {
 
-  briefText: string;
+    briefText: string;
 
-  expandedTitle: string;
+    expandedTitle: string;
 
-  picture: image.PixelMap;
+    picture: image.PixelMap;
 }
 
 class NotificationPictureContentInner implements NotificationPictureContent {
-  private CreatePixelMap() : image.PixelMap {
-    let opts: image.InitializationOptions = { size: { height: 4, width: 6 } }
-    return image.createPixelMapSync(opts);
-  }
+    private CreatePixelMap() : image.PixelMap {
+      let opts: image.InitializationOptions = { size: { height: 4, width: 6 } }
+      return image.createPixelMapSync(opts);
+    }
 
-  title: string = "";
+    public title: string = '';
 
-  text: string = "";
+    public text: string = '';
 
-  additionalText?: string | undefined;
+    public additionalText?: string | undefined;
 
-  lockscreenPicture?: image.PixelMap | undefined;
+    public lockscreenPicture?: image.PixelMap | undefined;
 
-  briefText: string = "";
+    public briefText: string = '';
 
-  expandedTitle: string = "";
+    public expandedTitle: string = '';
 
-  picture: image.PixelMap = this.CreatePixelMap();
+    public picture: image.PixelMap = this.CreatePixelMap();
 }
 
 export interface NotificationSystemLiveViewContent extends NotificationBasicContent {
 
-  typeCode: number;
+    typeCode: number;
 
-  capsule?: NotificationCapsule;
+    capsule?: NotificationCapsule;
 
-  button?: NotificationButton;
+    button?: NotificationButton;
 
-  cardButtons?: Array<NotificationIconButton>;
+    cardButtons?: Array<NotificationIconButton>;
 
-  time?: NotificationTime;
+    time?: NotificationTime;
 
-  progress?: NotificationProgress;
+    progress?: NotificationProgress;
 
-  liveViewType?: LiveViewTypes;
+    liveViewType?: LiveViewTypes;
 }
 
 class NotificationSystemLiveViewContentInner implements NotificationSystemLiveViewContent {
-  private CreatePixelMap() : image.PixelMap {
-    let opts: image.InitializationOptions = { size: { height: 4, width: 6 } }
-    return image.createPixelMapSync(opts);
-  }
+    private CreatePixelMap() : image.PixelMap {
+      let opts: image.InitializationOptions = { size: { height: 4, width: 6 } }
+      return image.createPixelMapSync(opts);
+    }
 
-  title: string = "";
+    public title: string = '';
 
-  text: string = "";
+    public text: string = '';
 
-  additionalText?: string | undefined;
+    public additionalText?: string | undefined;
 
-  lockscreenPicture?: image.PixelMap | undefined;
+    public lockscreenPicture?: image.PixelMap | undefined;
 
-  briefText: string = "";
+    public briefText: string = '';
 
-  expandedTitle: string = "";
+    public expandedTitle: string = '';
 
-  picture: image.PixelMap = this.CreatePixelMap();
+    public picture: image.PixelMap = this.CreatePixelMap();
 
-  typeCode: number = 0;
+    public typeCode: number = 0;
 
-  capsule?: NotificationCapsule | undefined;
+    public capsule?: NotificationCapsule | undefined;
 
-  button?: NotificationButton | undefined;
+    public button?: NotificationButton | undefined;
 
-  cardButtons?: Array<NotificationIconButton> | undefined;
+    public cardButtons?: Array<NotificationIconButton> | undefined;
 
-  time?: NotificationTime | undefined;
+    public time?: NotificationTime | undefined;
 
-  progress?: NotificationProgress | undefined;
+    public progress?: NotificationProgress | undefined;
 
-  liveViewType?: LiveViewTypes | undefined;
+    public liveViewType?: LiveViewTypes | undefined;
 }
 
 export interface NotificationCapsule {
 
-  title?: string;
+    title?: string;
 
-  icon?: image.PixelMap;
+    icon?: image.PixelMap;
 
-  backgroundColor?: string;
+    backgroundColor?: string;
 
-  content?: string;
+    content?: string;
 
-  time?: number;
+    time?: number;
 
-  capsuleButtons?: Array<NotificationIconButton>;
+    capsuleButtons?: Array<NotificationIconButton>;
 }
 
 class NotificationCapsuleInner implements NotificationCapsule {
 
-  title?: string | undefined;
+    public title?: string | undefined;
 
-  icon?: image.PixelMap | undefined;
+    public icon?: image.PixelMap | undefined;
 
-  backgroundColor?: string | undefined;
+    public backgroundColor?: string | undefined;
 
-  content?: string | undefined;
+    public content?: string | undefined;
 
-  time?: number | undefined;
+    public time?: number | undefined;
 
-  capsuleButtons?: Array<NotificationIconButton> | undefined;
+    public capsuleButtons?: Array<NotificationIconButton> | undefined;
 }
 
 export interface NotificationIconButton {
 
-  name: string;
+    name: string;
 
-  iconResource: IconType;
+    iconResource: IconType;
 
-  text?: string;
+    text?: string;
 
-  hidePanel?: boolean;
+    hidePanel?: boolean;
 }
 
 class NotificationIconButtonInner implements NotificationIconButton {
 
-  private CreatePixelMap() : image.PixelMap {
-    let opts: image.InitializationOptions = { size: { height: 4, width: 4 } }
-    return image.createPixelMapSync(opts);
-  }
+    private CreatePixelMap() : image.PixelMap {
+      let opts: image.InitializationOptions = { size: { height: 4, width: 4 } }
+      return image.createPixelMapSync(opts);
+    }
 
-  name: string = '';
+    public name: string = '';
 
-  iconResource: IconType = this.CreatePixelMap();
+    public iconResource: IconType = this.CreatePixelMap();
 
-  text?: string | undefined;
+    public text?: string | undefined;
 
-  hidePanel?: boolean | undefined;
+    public hidePanel?: boolean | undefined;
 }
 
 export interface NotificationButton {
 
-  names?: Array<string>;
+    names?: Array<string>;
 
-  icons?: Array<image.PixelMap>;
+    icons?: Array<image.PixelMap>;
 
-  iconsResource?: Array<Resource>;
+    iconsResource?: Array<Resource>;
 }
 
 class NotificationButtonInner implements NotificationButton {
 
-  names?: Array<string> | undefined;
+    public names?: Array<string> | undefined;
 
-  icons?: Array<image.PixelMap> | undefined;
+    public icons?: Array<image.PixelMap> | undefined;
 
-  iconsResource?: Array<Resource> | undefined;
+    public iconsResource?: Array<Resource> | undefined;
 }
 
 export interface NotificationTime {
 
-  initialTime?: number;
+    initialTime?: number;
 
-  isCountDown?: boolean;
+    isCountDown?: boolean;
 
-  isPaused?: boolean;
+    isPaused?: boolean;
 
-  isInTitle?: boolean;
+    isInTitle?: boolean;
 }
 
 class NotificationTimeInner implements NotificationTime {
 
-  initialTime?: number | undefined;
+    public initialTime?: number | undefined;
 
-  isCountDown?: boolean | undefined;
+    public isCountDown?: boolean | undefined;
 
-  isPaused?: boolean | undefined;
+    public isPaused?: boolean | undefined;
 
-  isInTitle?: boolean | undefined;
+    public isInTitle?: boolean | undefined;
 }
 
 export interface NotificationProgress {
 
-  maxValue?: number;
+    maxValue?: number;
 
-  currentValue?: number;
+    currentValue?: number;
 
-  isPercentage?: boolean;
+    isPercentage?: boolean;
 }
 
 class NotificationProgressInner implements NotificationProgress {
 
-  maxValue?: number | undefined;
+    public maxValue?: number | undefined;
 
-  currentValue?: number | undefined;
+    public currentValue?: number | undefined;
 
-  isPercentage?: boolean | undefined;
+    public isPercentage?: boolean | undefined;
 }
 
 export interface NotificationContent {
 
-  notificationContentType?: notificationManager.ContentType;
+    notificationContentType?: notificationManager.ContentType;
 
-  normal?: NotificationBasicContent;
+    normal?: NotificationBasicContent;
 
-  longText?: NotificationLongTextContent;
+    longText?: NotificationLongTextContent;
 
-  multiLine?: NotificationMultiLineContent;
+    multiLine?: NotificationMultiLineContent;
 
-  picture?: NotificationPictureContent;
+    picture?: NotificationPictureContent;
 
-  systemLiveView?: NotificationSystemLiveViewContent;
+    systemLiveView?: NotificationSystemLiveViewContent;
 
-  liveView?: NotificationLiveViewContent;
+    liveView?: NotificationLiveViewContent;
 }
 
 class NotificationContentInner implements NotificationContent {
 
-  notificationContentType?: notificationManager.ContentType | undefined;
+    public notificationContentType?: notificationManager.ContentType | undefined;
 
-  normal?: NotificationBasicContent | undefined;
+    public normal?: NotificationBasicContent | undefined;
 
-  longText?: NotificationLongTextContent | undefined;
+    public longText?: NotificationLongTextContent | undefined;
 
-  multiLine?: NotificationMultiLineContent | undefined;
+    public multiLine?: NotificationMultiLineContent | undefined;
 
-  picture?: NotificationPictureContent | undefined;
+    public picture?: NotificationPictureContent | undefined;
 
-  systemLiveView?: NotificationSystemLiveViewContent | undefined;
+    public systemLiveView?: NotificationSystemLiveViewContent | undefined;
 
-  liveView?: NotificationLiveViewContent | undefined;
+    public liveView?: NotificationLiveViewContent | undefined;
 }

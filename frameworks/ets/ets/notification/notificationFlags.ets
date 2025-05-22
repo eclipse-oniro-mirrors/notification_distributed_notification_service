@@ -13,29 +13,29 @@
  * limitations under the License.
  */
 
- export enum NotificationFlagStatus {
+export enum NotificationFlagStatus {
 
-  TYPE_NONE = 0,
+    TYPE_NONE = 0,
 
-  TYPE_OPEN = 1,
+    TYPE_OPEN = 1,
 
-  TYPE_CLOSE = 2
+    TYPE_CLOSE = 2
 }
 
 export interface NotificationFlags {
 
-  readonly soundEnabled?: NotificationFlagStatus;
+    readonly soundEnabled?: NotificationFlagStatus;
 
-  readonly vibrationEnabled?: NotificationFlagStatus;
+    readonly vibrationEnabled?: NotificationFlagStatus;
 
-  readonly reminderFlags?: number;
+    readonly reminderFlags?: number;
 }
 
 class NotificationFlagsInner implements NotificationFlags {
 
-  soundEnabled?: NotificationFlagStatus | undefined;
+    public soundEnabled?: NotificationFlagStatus | undefined;
 
-  vibrationEnabled?: NotificationFlagStatus| undefined;
+    public vibrationEnabled?: NotificationFlagStatus| undefined;
 
-  reminderFlags?: number | undefined;
+    public reminderFlags?: number | undefined;
 }

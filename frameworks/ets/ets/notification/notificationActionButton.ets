@@ -18,22 +18,22 @@ import { WantAgent } from '@ohos.app.ability.wantAgent';
 
 export interface NotificationActionButton {
 
-  title: string;
+    title: string;
 
-  wantAgent: WantAgent;
+    wantAgent: WantAgent;
 
-  extras?: Record<string, Object>;
+    extras?: Record<string, Object>;
 
-  userInput?: NotificationUserInput;
+    userInput?: NotificationUserInput;
 }
 
 class NotificationActionButtonInner implements NotificationActionButton {
 
-  title: string = '';
+    public title: string = '';
 
-  wantAgent: WantAgent = {};
+    public wantAgent: WantAgent = {};
 
-  extras?: Record<string, Object> | undefined;
+    public extras?: Record<string, Object> | undefined;
 
-  userInput?: NotificationUserInput | undefined;
+    public userInput?: NotificationUserInput | undefined;
 }

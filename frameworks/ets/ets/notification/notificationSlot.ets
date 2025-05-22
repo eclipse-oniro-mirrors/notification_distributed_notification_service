@@ -15,35 +15,35 @@
 import type notificationManager from '@ohos.notificationManager';
 
 export interface NotificationSlot {
-  notificationType?: notificationManager.SlotType;
-  notificationLevel?: notificationManager.SlotLevel;
-  desc?: string;
-  badgeFlag?: boolean;
-  bypassDnd?: boolean;
-  lockscreenVisibility?: number;
-  vibrationEnabled?: boolean;
-  sound?: string;
-  lightEnabled?: boolean;
-  lightColor?: number;
-  vibrationValues?: Array<number>;
-  readonly enabled?: boolean;
-  readonly reminderMode?: number;
-  readonly authorizedStatus?: number;
+    notificationType?: notificationManager.SlotType;
+    notificationLevel?: notificationManager.SlotLevel;
+    desc?: string;
+    badgeFlag?: boolean;
+    bypassDnd?: boolean;
+    lockscreenVisibility?: number;
+    vibrationEnabled?: boolean;
+    sound?: string;
+    lightEnabled?: boolean;
+    lightColor?: number;
+    vibrationValues?: Array<number>;
+    readonly enabled?: boolean;
+    readonly reminderMode?: number;
+    readonly authorizedStatus?: number;
 }
 
 class NotificationSlotInner implements NotificationSlot {
-  notificationType?: notificationManager.SlotType;
-  notificationLevel?: notificationManager.SlotLevel;
-  desc?: string;
-  badgeFlag?: boolean;
-  bypassDnd?: boolean;
-  lockscreenVisibility?: number;
-  vibrationEnabled?: boolean;
-  sound?: string;
-  lightEnabled?: boolean;
-  lightColor?: number;
-  vibrationValues?: Array<number>;
-  readonly enabled?: boolean;
-  readonly reminderMode?: number;
-  readonly authorizedStatus?: number;
+    public notificationType?: notificationManager.SlotType;
+    public notificationLevel?: notificationManager.SlotLevel;
+    public desc?: string;
+    public badgeFlag?: boolean;
+    public bypassDnd?: boolean;
+    public lockscreenVisibility?: number;
+    public vibrationEnabled?: boolean;
+    public sound?: string;
+    public lightEnabled?: boolean;
+    public lightColor?: number;
+    public vibrationValues?: Array<number>;
+    public readonly enabled?: boolean;
+    public readonly reminderMode?: number;
+    public readonly authorizedStatus?: number;
 }

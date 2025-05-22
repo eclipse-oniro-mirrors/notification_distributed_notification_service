@@ -14,11 +14,11 @@
  */
 
  export interface NotificationTemplate {
-  name: string;
-  data: Record<string, Object>;
+    name: string;
+    data: Record<string, Object>;
 }
 
 class NotificationTemplateInner implements NotificationTemplate {
-  name: string = "";
-  data: Record<string, Object> = {};
+    public name: string = '';
+    public data: Record<string, Object> = {};
 }

@@ -27,21 +27,7 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-
-void AniNotificationManagerRegistryInit(ani_env *env)
-{
-    ANS_LOGD("StsNotificationManagerRegistryInit call");
-    ani_status status = ANI_ERROR;
-    if (env->ResetError() != ANI_OK) {
-        ANS_LOGD("ResetError failed");
-    }
-    ani_namespace ns;
-    status = env->FindNamespace("L@ohos/notificationManager/notificationManager;", &ns);
-    if (status != ANI_OK) {
-        ANS_LOGE("FindNamespace notificationManager failed status : %{public}d", status);
-        return;
-    }
-    std::array kitFunctions = {
+static std::array kitManagerFunctions = {
         ani_native_function {"nativeCancelAll", nullptr, reinterpret_cast<void *>(AniCancelAll)},
         ani_native_function {"nativeCancelWithIdOptionalLabel", nullptr,
             reinterpret_cast<void *>(AniCancelWithIdOptinalLabel)},
@@ -96,7 +82,20 @@ void AniNotificationManagerRegistryInit(ani_env *env)
             reinterpret_cast<void *>(AniRequestEnableNotification)},
     };
 
-    status = env->Namespace_BindNativeFunctions(ns, kitFunctions.data(), kitFunctions.size());
+void AniNotificationManagerRegistryInit(ani_env *env)
+{
+    ANS_LOGD("StsNotificationManagerRegistryInit call");
+    ani_status status = ANI_ERROR;
+    if (env->ResetError() != ANI_OK) {
+        ANS_LOGD("ResetError failed");
+    }
+    ani_namespace ns;
+    status = env->FindNamespace("L@ohos/notificationManager/notificationManager;", &ns);
+    if (status != ANI_OK) {
+        ANS_LOGE("FindNamespace notificationManager failed status : %{public}d", status);
+        return;
+    }
+    status = env->Namespace_BindNativeFunctions(ns, kitManagerFunctions.data(), kitManagerFunctions.size());
     if (status != ANI_OK) {
         ANS_LOGD("Namespace_BindNativeFunctions failed status : %{public}d", status);
     }

@@ -221,27 +221,6 @@ static bool EnumConvertNativeToAni(ani_env *env, const char *enumName, const T e
     return false;
 }
 
-#define RETURN_NULL_IF_NULL(ptr)     \
-    do {                             \
-        if ((ptr) == nullptr) {      \
-            ANS_LOGE("ptr is null"); \
-            return nullptr;          \
-        }                            \
-    } while (0)
-#define RETURN_FALSE_IF_NULL(ptr)    \
-    do {                             \
-        if ((ptr) == nullptr) {      \
-            ANS_LOGE("ptr is null"); \
-            return false;            \
-        }                            \
-    } while (0)
-#define RETURN_FALSE_IF_FALSE(condition)     \
-    do {                                     \
-        if (!(condition)) {                  \
-            return false;                    \
-        }                                    \
-    } while (0)
-
 } // namespace NotificationSts
 } // OHOS
 #endif
