@@ -60,7 +60,7 @@ struct TransferNotification {
     std::string expandedTitle;
 };
 
-void ConvertBoxToLongContent(const TransferNotification& notificationItem, const NotifticationRequestBox& box,
+void ConvertBoxToLongContent(const TransferNotification& notificationItem, const NotificationRequestBox& box,
     sptr<NotificationRequest>& request)
 {
     auto pContent = std::make_shared<NotificationLongTextContent>();
@@ -76,7 +76,7 @@ void ConvertBoxToLongContent(const TransferNotification& notificationItem, const
     request->SetContent(content);
 }
 
-void ConvertBoxToMultileContent(const TransferNotification& notificationItem, const NotifticationRequestBox& box,
+void ConvertBoxToMultileContent(const TransferNotification& notificationItem, const NotificationRequestBox& box,
     sptr<NotificationRequest>& request)
 {
     auto pContent = std::make_shared<NotificationMultiLineContent>();
@@ -94,7 +94,7 @@ void ConvertBoxToMultileContent(const TransferNotification& notificationItem, co
     request->SetContent(content);
 }
 
-void ConvertBoxToPictureContent(const TransferNotification& notificationItem, const NotifticationRequestBox& box,
+void ConvertBoxToPictureContent(const TransferNotification& notificationItem, const NotificationRequestBox& box,
     sptr<NotificationRequest>& request)
 {
     auto pContent = std::make_shared<NotificationPictureContent>();
@@ -110,7 +110,7 @@ void ConvertBoxToPictureContent(const TransferNotification& notificationItem, co
     request->SetContent(content);
 }
 
-void DistributedService::SetNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+void DistributedService::SetNotifictaionContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
     int32_t contentType)
 {
     TransferNotification notificationItem;
@@ -161,7 +161,7 @@ void DistributedService::SetNotifictaionContent(const NotifticationRequestBox& b
     }
 }
 
-void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+void DistributedService::MakeNotificationContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
     bool isCommonLiveView, int32_t contentType)
 {
     if (isCommonLiveView) {
@@ -193,7 +193,7 @@ void DistributedService::MakeNotifictaionContent(const NotifticationRequestBox& 
     SetNotifictaionContent(box, request, contentType);
 }
 
-void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+void DistributedService::MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
     bool isCommonLiveView)
 {
     std::shared_ptr<Media::PixelMap> icon;
@@ -218,7 +218,7 @@ void DistributedService::MakeNotifictaionIcon(const NotifticationRequestBox& box
     }
 }
 
-void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequestBox& box,
+void DistributedService::MakeNotificationReminderFlag(const NotificationRequestBox& box,
     sptr<NotificationRequest>& request)
 {
     int32_t type = 0;
@@ -240,7 +240,7 @@ void DistributedService::MakeNotifictaionReminderFlag(const NotifticationRequest
     request->SetLabel(DISTRIBUTED_LABEL);
 }
 
-void DistributedService::MakeNotificationButtons(const NotifticationRequestBox& box,
+void DistributedService::MakeNotificationButtons(const NotificationRequestBox& box,
     NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request)
 {
     if (request != nullptr && slotType == NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
@@ -265,7 +265,7 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
     }
     int32_t slotType = 0;
     int32_t contentType = 0;
-    NotifticationRequestBox requestBox = NotifticationRequestBox(boxMessage);
+    NotificationRequestBox requestBox = NotificationRequestBox(boxMessage);
     bool isCommonLiveView = false;
     if (requestBox.GetSlotType(slotType) && requestBox.GetContentType(contentType)) {
         isCommonLiveView =
@@ -273,9 +273,9 @@ void DistributedService::PublishNotifictaion(const std::shared_ptr<TlvBox>& boxM
             (static_cast<NotificationConstant::SlotType>(slotType) == NotificationConstant::SlotType::LIVE_VIEW);
     }
     MakeNotificationButtons(requestBox, static_cast<NotificationConstant::SlotType>(slotType), request);
-    MakeNotifictaionContent(requestBox, request, isCommonLiveView, contentType);
-    MakeNotifictaionIcon(requestBox, request, isCommonLiveView);
-    MakeNotifictaionReminderFlag(requestBox, request);
+    MakeNotificationContent(requestBox, request, isCommonLiveView, contentType);
+    MakeNotificationIcon(requestBox, request, isCommonLiveView);
+    MakeNotificationReminderFlag(requestBox, request);
     int result = IN_PROCESS_CALL(NotificationHelper::PublishNotification(*request));
     ANS_LOGD("Dans publish result = %{public}d.", result);
 }

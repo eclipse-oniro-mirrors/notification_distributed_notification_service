@@ -24,8 +24,8 @@ namespace Notification {
 class DistributedSubscribeService {
 public:
     static DistributedSubscribeService& GetInstance();
-    void SubscribeNotifictaion(const DistributedDeviceInfo peerDevice);
-    void UnSubscribeNotifictaion(const std::string &deviceId);
+    void SubscribeNotification(const DistributedDeviceInfo peerDevice);
+    void UnSubscribeNotification(const std::string &deviceId);
 private:
     std::map<std::string, std::shared_ptr<DistribuedSubscriber>> subscriberMap_;
 };

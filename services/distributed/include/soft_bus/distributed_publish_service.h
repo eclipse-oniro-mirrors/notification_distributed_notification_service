@@ -42,22 +42,22 @@ private:
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
         const DistributedDeviceInfo& peerDevice, bool isSyncNotification);
     void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
-        NotificationConstant::SlotType slotType, std::shared_ptr<NotifticationRequestBox>& requestBox);
+        NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
-        NotificationContent::Type type, std::shared_ptr<NotifticationRequestBox>& requestBox);
+        NotificationContent::Type type, std::shared_ptr<NotificationRequestBox>& requestBox);
 #else
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);
 private:
-    void MakeNotificationButtons(const NotifticationRequestBox& box,
+    void MakeNotificationButtons(const NotificationRequestBox& box,
         NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request);
-    void MakeNotifictaionContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    void MakeNotificationContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView, int32_t contentType);
-    void MakeNotifictaionIcon(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    void MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView);
-    void MakeNotifictaionReminderFlag(const NotifticationRequestBox& box,
+    void MakeNotificationReminderFlag(const NotificationRequestBox& box,
         sptr<NotificationRequest>& request);
-    void MakeNotifictaionBasicContent(const NotifticationRequestBox& box, sptr<NotificationRequest>& request,
+    void MakeNotificationBasicContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         int32_t contentType);
 #endif
 };

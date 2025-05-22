@@ -25,10 +25,10 @@
 
 namespace OHOS {
 namespace Notification {
-class NotifticationRequestBox : public BoxBase {
+class NotificationRequestBox : public BoxBase {
 public:
-    NotifticationRequestBox();
-    NotifticationRequestBox(std::shared_ptr<TlvBox> box);
+    NotificationRequestBox();
+    NotificationRequestBox(std::shared_ptr<TlvBox> box);
     bool SetNotificationHashCode(const std::string& hasdCode);
     bool SetSlotType(int32_t type);
     bool SetContentType(int32_t type);

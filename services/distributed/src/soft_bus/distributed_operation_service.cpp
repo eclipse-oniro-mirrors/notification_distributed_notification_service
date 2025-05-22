@@ -263,7 +263,7 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
 #else
 
 int32_t DistributedOperationService::OnOperationResponse(
-    const std::shared_ptr<NotificationOperationInfo> & operationInfo, const DistributedDeviceInfo& device)
+    const std::shared_ptr<NotificationOperationInfo>& operationInfo, const DistributedDeviceInfo& device)
 {
     std::shared_ptr<NotificationResponseBox> responseBox = std::make_shared<NotificationResponseBox>();
     ANS_LOGI("dans OnResponse %{public}s", operationInfo->Dump().c_str());

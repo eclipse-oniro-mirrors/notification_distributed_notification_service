@@ -128,7 +128,7 @@ void DistributedService::UnSubscribeNotifictaion(const std::string &deviceId, ui
 }
 
 void DistributedService::SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
-    NotificationContent::Type type, std::shared_ptr<NotifticationRequestBox>& requestBox)
+    NotificationContent::Type type, std::shared_ptr<NotificationRequestBox>& requestBox)
 {
     if (content == nullptr || content->GetNotificationContent() == nullptr) {
         return;
@@ -182,7 +182,7 @@ void DistributedService::SetNotificationContent(const std::shared_ptr<Notificati
 }
 
 void DistributedService::SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
-    NotificationConstant::SlotType slotType, std::shared_ptr<NotifticationRequestBox>& requestBox)
+    NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox)
 {
     if (notificationRequest == nullptr) {
         return;
@@ -212,7 +212,7 @@ void DistributedService::SetNotificationButtons(const sptr<NotificationRequest> 
 void DistributedService::SendNotifictionRequest(const std::shared_ptr<Notification> request,
     const DistributedDeviceInfo& peerDevice, bool isSyncNotification)
 {
-    std::shared_ptr<NotifticationRequestBox> requestBox = std::make_shared<NotifticationRequestBox>();
+    std::shared_ptr<NotificationRequestBox> requestBox = std::make_shared<NotificationRequestBox>();
     if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
         return;
     }

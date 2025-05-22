@@ -58,7 +58,7 @@ DistributedSubscribeService& DistributedSubscribeService::GetInstance()
     return distributedSubscribeService;
 }
 
-void DistributedSubscribeService::SubscribeNotifictaion(const DistributedDeviceInfo peerDevice)
+void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceInfo peerDevice)
 {
     if (DistributedDeviceService::GetInstance().CheckDeviceExist(peerDevice.deviceId_)) {
         ANS_LOGI("Local device no %{public}s .", StringAnonymous(peerDevice.deviceId_).c_str());
@@ -95,7 +95,7 @@ void DistributedSubscribeService::SubscribeNotifictaion(const DistributedDeviceI
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId, result);
 }
 
-void DistributedSubscribeService::UnSubscribeNotifictaion(const std::string &deviceId)
+void DistributedSubscribeService::UnSubscribeNotification(const std::string &deviceId)
 {
     DistributedDeviceService::GetInstance().DeleteDeviceInfo(deviceId);
     auto iter = subscriberMap_.find(deviceId);
