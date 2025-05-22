@@ -55,7 +55,8 @@ export interface NotificationCheckRequest {
 }
 
 class NotificationCheckRequestInner implements NotificationCheckRequest {
-    public contentType: notificationManager.ContentType = notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
+    public contentType: notificationManager.ContentType =
+        notificationManager.ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
     public slotType: notificationManager.SlotType = notificationManager.SlotType.OTHER_TYPES;
     public extraInfoKeys: Array<string> = {};
 }

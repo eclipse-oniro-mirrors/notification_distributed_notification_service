@@ -1054,7 +1054,8 @@ bool SetRequestTemplate(ani_env *env, const OHOS::Notification::NotificationRequ
     return true;
 }
 
-bool SetRequestNotificationFlags(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+bool SetRequestNotificationFlags(
+    ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
 {
     std::shared_ptr<NotificationFlags> flags = request->GetFlags();
     if (flags == nullptr) {
@@ -1092,7 +1093,8 @@ bool SetRequestAgentBundle(ani_env *env, const OHOS::Notification::NotificationR
     return true;
 }
 
-bool SetRequestUnifiedGroupInfo(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+bool SetRequestUnifiedGroupInfo(
+    ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
 {
     std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
     if (groupInfo == nullptr) {
@@ -1110,8 +1112,6 @@ bool SetRequestUnifiedGroupInfo(ani_env *env, const OHOS::Notification::Notifica
     }
     return true;
 }
-
-
 
 bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     const OHOS::Notification::NotificationRequest *request, ani_object &object)

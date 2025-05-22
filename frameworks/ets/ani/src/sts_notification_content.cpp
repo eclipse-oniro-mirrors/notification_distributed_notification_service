@@ -1262,14 +1262,8 @@ bool SetNotificationMultiLineContent(
     return SetPropertyByRef(env, ncObj, "multiLine", contentObj);
 }
 
-bool WarpLocalLiveViewContentWithFalg(
-    ani_env* env, std::shared_ptr<NotificationContent> nContent, ani_object &contentObj)
+void SetCapsule(ani_env *env, std::shared_ptr<NotificationLocalLiveViewContent> &content, ani_object &contentObj)
 {
-    auto content = std::reinterpret_pointer_cast<NotificationLocalLiveViewContent>(nContent->GetNotificationContent());
-    if (content == nullptr) {
-        ANS_LOGE("SetNotificationMultiLineContent: get LocalLiveViewContent failed");
-        return false;
-    }
     if (content->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::CAPSULE)) {
         ani_object capsuleObject = nullptr;
         if (!WarpNotificationCapsule(env, content->GetCapsule(), capsuleObject)
@@ -1277,6 +1271,10 @@ bool WarpLocalLiveViewContentWithFalg(
             ANS_LOGD("SetNotificationMultiLineContent: set capsule failed");
         }
     }
+}
+
+void SetButton(ani_env *env, std::shared_ptr<NotificationLocalLiveViewContent> &content, ani_object &contentObj)
+{
     if (content->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::BUTTON)) {
         ani_object buttonObject = nullptr;
         if (!WarpNotificationLocalLiveViewButton(env, content->GetButton(), buttonObject)
@@ -1284,6 +1282,10 @@ bool WarpLocalLiveViewContentWithFalg(
             ANS_LOGD("SetNotificationMultiLineContent: set button failed");
         }
     }
+}
+
+void SetCardButtons(ani_env *env, std::shared_ptr<NotificationLocalLiveViewContent> &content, ani_object &contentObj)
+{
     if (content->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::CARD_BUTTON)) {
         std::vector<NotificationIconButton> buttons = content->GetCardButton();
         ani_object buttonsObjectArray = GetAniIconButtonArray(env, buttons);
@@ -1291,6 +1293,10 @@ bool WarpLocalLiveViewContentWithFalg(
             ANS_LOGD("SetNotificationMultiLineContent: set cardButtons failed");
         }
     }
+}
+
+void SetProgress(ani_env *env, std::shared_ptr<NotificationLocalLiveViewContent> &content, ani_object &contentObj)
+{
     if (content->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::PROGRESS)) {
         ani_object progressObject = nullptr;
         if (!WarpNotificationProgress(env, content->GetProgress(), progressObject)
@@ -1298,6 +1304,10 @@ bool WarpLocalLiveViewContentWithFalg(
             ANS_LOGD("SetNotificationMultiLineContent: set progress failed");
         }
     }
+}
+
+void SetTime(ani_env *env, std::shared_ptr<NotificationLocalLiveViewContent> &content, ani_object &contentObj)
+{
     if (content->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::TIME)) {
         bool flag = content->isFlagExist(NotificationLocalLiveViewContent::LiveViewContentInner::INITIAL_TIME);
         ani_object timeObject = nullptr;
@@ -1306,6 +1316,21 @@ bool WarpLocalLiveViewContentWithFalg(
             ANS_LOGD("SetNotificationMultiLineContent: set time failed");
         }
     }
+}
+
+bool WarpLocalLiveViewContentWithFalg(
+    ani_env* env, std::shared_ptr<NotificationContent> nContent, ani_object &contentObj)
+{
+    auto content = std::reinterpret_pointer_cast<NotificationLocalLiveViewContent>(nContent->GetNotificationContent());
+    if (content == nullptr) {
+        ANS_LOGE("SetNotificationMultiLineContent: get LocalLiveViewContent failed");
+        return false;
+    }
+    SetCapsule(env, content, contentObj);
+    SetButton(env, content, contentObj);
+    SetCardButtons(env, content, contentObj);
+    SetProgress(env, content, contentObj);
+    SetTime(env, content, contentObj);
     return true;
 }
 
