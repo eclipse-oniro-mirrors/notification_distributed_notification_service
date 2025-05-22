@@ -1903,6 +1903,23 @@ int32_t NotificationPreferencesDatabase::GetBatchKvsFromDb(
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::GetBatchKvsFromDbContainsKey(
+    const std::string &key, std::unordered_map<std::string, std::string>  &values, const int32_t &userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    int32_t result = rdbDataManager_->QueryDataContainsWithKey(key, values, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("QueryDataContainsWithKey failed, key %{public}s, result %{public}d.", key.c_str(), result);
+        return NativeRdb::E_ERROR;
+    }
+    ANS_LOGD("Key:%{public}s.", key.c_str());
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationPreferencesDatabase::DeleteKvFromDb(const std::string &key, const int32_t &userId)
 {
     if (!CheckRdbStore()) {

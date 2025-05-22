@@ -187,6 +187,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         }
     } while (0);
 
+    NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled();
     SendPublishHiSysEvent(request, result);
     return result;
 }
