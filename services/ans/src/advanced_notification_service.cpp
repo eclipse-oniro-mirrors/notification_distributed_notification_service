@@ -1264,11 +1264,6 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)
-{
-    return ERR_INVALID_OPERATION;
-}
-
 ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
