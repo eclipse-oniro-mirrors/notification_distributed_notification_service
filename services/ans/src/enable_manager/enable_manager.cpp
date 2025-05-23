@@ -30,6 +30,7 @@
 #include "notification_bundle_option.h"
 #include "notification_analytics_util.h"
 #include "os_account_manager_helper.h"
+#include "notification_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -39,7 +40,6 @@ const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
 const static std::string BUNDLE_NAME_ABROAD = "com.easy.abroad";
 const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
 constexpr int32_t ZERO_USER_ID = 0;
-constexpr const char *SAMPLE_MEACHINE =  "const.dfx.enable_retail";
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string &deviceId,
     const sptr<IAnsDialogCallback> &callback)
@@ -143,7 +143,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
-    if (GetSystemBoolParameter(SAMPLE_MEACHINE, false)) {
+    if (!EXTENTION_WRAPPER->NotificationDialogControl()) {
         return ERR_ANS_NOT_ALLOWED;
     }
 
@@ -328,7 +328,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
-    if (GetSystemBoolParameter(SAMPLE_MEACHINE, false)) {
+    if (!EXTENTION_WRAPPER->NotificationDialogControl()) {
         return ERR_ANS_NOT_ALLOWED;
     }
     

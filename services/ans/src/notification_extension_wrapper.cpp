@@ -95,6 +95,11 @@ void ExtensionWrapper::InitExtentionWrapper()
         initSummary_(UpdateUnifiedGroupInfo);
     }
 #endif
+    notificationDialogControl_ = (NOTIFICATIONDIALOGCONTROL)dlsym(extensionWrapperHandle_, "NotificationDialogControl");
+    if (notificationDialogControl_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
     ANS_LOGD("extension wrapper init success");
 }
 
@@ -209,6 +214,17 @@ void ExtensionWrapper::UpdateByBundle(const std::string bundleName, int deleteRe
     }
     int32_t deleteType = convertToDelType(deleteReason);
     updateByBundle_(bundleName, deleteType);
+}
+
+bool ExtensionWrapper::NotificationDialogControl()
+{
+    if (notificationDialogControl_ == nullptr) {
+        ANS_LOGE("isSampleDevice_ is null");
+        return true;
+    }
+    bool result = notificationDialogControl_();
+    ANS_LOGI("notificationDialogControl_ result = %{public}d", result);
+    return result;
 }
 
 int32_t ExtensionWrapper::convertToDelType(int32_t deleteReason)
