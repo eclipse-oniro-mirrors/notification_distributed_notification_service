@@ -863,7 +863,7 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
         CallSetter(env, cls, object, "notificationSlotType", slotTypeItem);
     }
     // deliveryTime?: number
-    SetPropertyOptionalByDouble(env, object, "id", request->GetDeliveryTime());
+    SetPropertyOptionalByDouble(env, object, "deliveryTime", request->GetDeliveryTime());
     // autoDeletedTime?: number
     SetPropertyOptionalByDouble(env, object, "autoDeletedTime", request->GetAutoDeletedTime());
     // color ?: number

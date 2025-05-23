@@ -620,12 +620,16 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
 {
     ANS_LOGD("enter");
     if (IsUndefine(env, subscriber)) {
+        ANS_LOGD("Subscriber is undefine");
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_INVALID_PARAM);
+        OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_INVALID_PARAM, msg);
         return false;
     }
     std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
     if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
         ANS_LOGD("Subscriber not found");
-        // ERR_ANS_INVALID_PARAM
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_INVALID_PARAM);
+        OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_INVALID_PARAM, msg);
         return false;
     }
     bool ret = AddDeletingSubscriber(stsSubscriber);
