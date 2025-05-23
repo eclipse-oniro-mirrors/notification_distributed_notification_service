@@ -1980,11 +1980,5 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
     }));
 }
 
-bool AdvancedNotificationService::GetSystemBoolParameter(const std::string &key, const bool defaultValue)
-{
-    bool result = OHOS::system::GetBoolParameter(key, defaultValue);
-    ANS_LOGI("GetBoolParameter key = %{public}s result = %{public}d",  key.c_str(), result);
-    return result;
-}
 }  // namespace Notification
 }  // namespace OHOS
