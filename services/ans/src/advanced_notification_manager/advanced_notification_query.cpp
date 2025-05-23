@@ -1,0 +1,281 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "advanced_notification_service.h"
+
+#include "ans_log_wrapper.h"
+#include "ans_permission_def.h"
+#include "access_token_helper.h"
+
+#include "ipc_skeleton.h"
+
+namespace OHOS {
+namespace Notification {
+constexpr int32_t RSS_UID = 3051;
+
+inline bool IsContained(const std::vector<std::string> &vec, const std::string &target)
+{
+    bool isContained = false;
+
+    auto iter = vec.begin();
+    while (iter != vec.end()) {
+        if (*iter == target) {
+            isContained = true;
+            break;
+        }
+        iter++;
+    }
+
+    return isContained;
+}
+
+ErrCode AdvancedNotificationService::GetActiveNotifications(
+    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    bundleOption->SetAppInstanceKey(instanceKey);
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidated.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
+                notifications.push_back(record->request);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("BundleOption is nullptr.");
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        size_t count = 0;
+        for (auto record : notificationList_) {
+            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+                (record->bundleOption->GetUid() == bundleOption->GetUid())) {
+                count += 1;
+            }
+        }
+        num = static_cast<uint64_t>(count);
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if (record->notification != nullptr && record->notification->request_ != nullptr) {
+                notifications.push_back(record->notification);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
+    int32_t slotTypeInt)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        notifications.clear();
+        for (auto record : notificationList_) {
+            if (record->notification != nullptr && record->notification->request_ != nullptr &&
+                record->notification->request_->GetSlotType() == slotType) {
+                notifications.push_back(record->notification);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
+    const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        for (auto record : notificationList_) {
+            if (IsContained(key, record->notification->GetKey())) {
+                notifications.push_back(record->notification);
+            }
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
+    const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+    // get other bundle notification need controller permission
+    if (bundle->GetUid() == IPCSkeleton::GetCallingUid()) {
+        ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
+            bundle->GetUid(), IPCSkeleton::GetCallingUid());
+    } else {
+        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+            ANS_LOGE("Get live view by filter failed because check permission is false.");
+            return ERR_ANS_PERMISSION_DENIED;
+        }
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalidity.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+
+        auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(), label, bundle->GetBundleName());
+        if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
+            return;
+        }
+        result = IsAllowedGetNotificationByFilter(record, bundle);
+        if (result != ERR_OK) {
+            return;
+        }
+
+        if (extraInfoKeys.empty()) {
+            // return all liveViewExtraInfo because no extraInfoKeys
+            request = record->request;
+            return;
+        }
+        // obtain extraInfo by extraInfoKeys
+        if (FillRequestByKeys(record->request, extraInfoKeys, request) != ERR_OK) {
+            return;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
+    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Check permission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        auto record = GetFromNotificationList(hashCode);
+        if (record != nullptr) {
+            notificationRequest = record->request;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+} // Notification
+} // OHOS

@@ -278,60 +278,6 @@ ErrCode AdvancedNotificationService::IsAllowedGetNotificationByFilter(
     return ERR_ANS_PERMISSION_DENIED;
 }
 
-ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
-    const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
-    const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    // get other bundle notification need controller permission
-    if (bundle->GetUid() == IPCSkeleton::GetCallingUid()) {
-        ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
-            bundle->GetUid(), IPCSkeleton::GetCallingUid());
-    } else {
-        if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-            ANS_LOGE("Get live view by filter failed because check permission is false.");
-            return ERR_ANS_PERMISSION_DENIED;
-        }
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-
-        auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(), label, bundle->GetBundleName());
-        if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
-            return;
-        }
-        result = IsAllowedGetNotificationByFilter(record, bundle);
-        if (result != ERR_OK) {
-            return;
-        }
-
-        if (extraInfoKeys.empty()) {
-            // return all liveViewExtraInfo because no extraInfoKeys
-            request = record->request;
-            return;
-        }
-        // obtain extraInfo by extraInfoKeys
-        if (FillRequestByKeys(record->request, extraInfoKeys, request) != ERR_OK) {
-            return;
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-
-    return result;
-}
-
 void AdvancedNotificationService::SetAgentNotification(sptr<NotificationRequest>& notificationRequest,
     std::string& bundleName)
 {
