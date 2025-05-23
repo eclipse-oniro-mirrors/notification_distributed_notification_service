@@ -24,11 +24,13 @@ namespace Notification {
 class DistributedSubscribeService {
 public:
     static DistributedSubscribeService& GetInstance();
+    void UnSubscribeAllNotification();
     void SubscribeNotification(const DistributedDeviceInfo peerDevice);
-    void UnSubscribeNotification(const std::string &deviceId);
+    void UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType);
 private:
     std::map<std::string, std::shared_ptr<DistribuedSubscriber>> subscriberMap_;
 };
 }
 }
 #endif // DISTRIBUTED_INCLUDE_SOFTBUS_DISTRIBUTED_SUBSCRIBE_SERVICE_H
+

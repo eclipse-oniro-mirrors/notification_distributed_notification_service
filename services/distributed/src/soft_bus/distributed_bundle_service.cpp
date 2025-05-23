@@ -35,6 +35,39 @@ DistributedBundleService& DistributedBundleService::GetInstance()
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
+void DistributedBundleService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t type = 0;
+    BundleIconBox iconBox = BundleIconBox(boxMessage);
+    if (!iconBox.GetIconSyncType(type)) {
+        ANS_LOGI("Dans handle bundle icon sync failed.");
+        return;
+    }
+
+    ANS_LOGI("Dans handle bundl icon type %{public}d.", type);
+    if (type == IconSyncType::REPORT_SAVED_ICON) {
+        std::string deviceId;
+        if (!iconBox.GetLocalDeviceId(deviceId)) {
+            ANS_LOGI("Dans get deviceId failed.");
+            return;
+        }
+
+        DistributedDeviceInfo device;
+        if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+            return;
+        }
+        std::set<std::string> bundleSet;
+        std::vector<std::string> bundleList;
+        iconBox.GetBundleList(bundleList);
+        for (auto bundle : bundleList) {
+            ANS_LOGI("Dans handle receive %{public}s.", bundle.c_str());
+            bundleSet.insert(bundle);
+        }
+        bundleIconCache_[device.deviceId_] = bundleSet;
+        GenerateBundleIconSync(device);
+    }
+}
+
 void DistributedBundleService::RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce)
 {
     if (!DistributedDeviceService::GetInstance().CheckDeviceExist(peerDevice.deviceId_)) {
@@ -231,6 +264,48 @@ void DistributedBundleService::GetNeedUpdateDevice(bool updatedExit, const std::
     }
 }
 #else
+void DistributedBundleService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t type = 0;
+    BundleIconBox iconBox = BundleIconBox(boxMessage);
+    if (!iconBox.GetIconSyncType(type)) {
+        ANS_LOGI("Dans handle bundle icon sync failed.");
+        return;
+    }
+
+    ANS_LOGI("Dans handle bundl icon type %{public}d.", type);
+    if (type == IconSyncType::UPDATE_BUNDLE_ICON) {
+        std::unordered_map<std::string, std::string> bundlesIcon;
+        if (!iconBox.GetBundlesIcon(bundlesIcon)) {
+            ANS_LOGI("Dans handle bundle icon get icon failed.");
+            return;
+        }
+        DistributedPreferences::GetInstance().InsertBatchBundleIcons(bundlesIcon);
+    }
+
+    if (type == IconSyncType::REQUEST_BUNDLE_ICON) {
+        std::string deviceId;
+        if (!iconBox.GetLocalDeviceId(deviceId)) {
+            ANS_LOGI("Dans get deviceId failed.");
+            return;
+        }
+
+        DistributedDeviceInfo device;
+        if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+            return;
+        }
+        ReportBundleIconList(device);
+    }
+
+    if (type == IconSyncType::REMOVE_BUNDLE_ICON) {
+        std::vector<std::string> bundleList;
+        iconBox.GetBundleList(bundleList);
+        for (auto& bundle : bundleList) {
+            DistributedPreferences::GetInstance().DeleteBundleIcon(bundle);
+        }
+    }
+}
+
 void DistributedBundleService::ReportBundleIconList(const DistributedDeviceInfo peerDevice)
 {
     std::vector<std::string> bundlesName;

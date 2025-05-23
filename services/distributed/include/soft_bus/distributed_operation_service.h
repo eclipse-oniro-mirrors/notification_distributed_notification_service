@@ -29,6 +29,7 @@ class DistributedOperationService {
 public:
     static DistributedOperationService& GetInstance();
 
+    void HandleNotificationOperation(const std::shared_ptr<TlvBox>& boxMessage);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void ReplyOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox,
         OperationType operationType, uint32_t result);

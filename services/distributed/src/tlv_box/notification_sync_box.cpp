@@ -36,6 +36,7 @@ NotificationSyncBox::NotificationSyncBox(std::shared_ptr<TlvBox> box) : BoxBase(
 {
 }
 
+#ifdef DISTRIBUTED_FEATURE_MASTER
 bool NotificationSyncBox::SetLocalDeviceId(const std::string& deviceId)
 {
     if (box_ == nullptr) {
@@ -66,6 +67,7 @@ bool NotificationSyncBox::SetNotificationEmpty(const bool empty)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE + 1, empty));
 }
 
+#else
 bool NotificationSyncBox::GetLocalDeviceId(std::string& deviceId) const
 {
     if (box_ == nullptr) {
@@ -102,5 +104,6 @@ bool NotificationSyncBox::GetNotificationEmpty(bool& empty) const
     }
     return box_->GetBoolValue(NOTIFICATION_HASHCODE + 1, empty);
 }
+#endif
 }
 }

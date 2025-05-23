@@ -56,8 +56,6 @@ constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 
-static const int32_t MAX_DATA_LENGTH = 7;
-static const int32_t START_ANONYMOUS_INDEX = 5;
 constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
 }
 

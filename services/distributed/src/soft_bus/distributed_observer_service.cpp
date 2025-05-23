@@ -32,14 +32,7 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
     auto const &want = data.GetWant();
     std::string action = want.GetAction();
     ANS_LOGI("DistributedEventSubscriber receiver event %{public}s", action.c_str());
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) {
-        DistributedService::GetInstance().SyncDeviceState(SCREEN_OFF);
-        return;
-    }
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
-        DistributedService::GetInstance().SyncDeviceState(SCREEN_ON);
-        return;
-    }
+#ifdef DISTRIBUTED_FEATURE_MASTER
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         OperationService::GetInstance().HandleScreenEvent();
         return;
@@ -55,6 +48,16 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
         DistributedService::GetInstance().HandleBundlesEvent(bundleName, action);
         return;
     }
+#else
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED) {
+        DistributedService::GetInstance().SyncDeviceStatus(SCREEN_OFF);
+        return;
+    }
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
+        DistributedService::GetInstance().SyncDeviceStatus(SCREEN_ON);
+        return;
+    }
+#endif
 }
 
 OberverService& OberverService::GetInstance()
@@ -66,15 +69,14 @@ OberverService& OberverService::GetInstance()
 void OberverService::Init(uint16_t deviceType)
 {
     EventFwk::MatchingSkills matchingSkills;
-    if (deviceType != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
-    }
-    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-    }
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+#else
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+#endif
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<DistributedEventSubscriber>(subscribeInfo);
     if (subscriber_ == nullptr) {

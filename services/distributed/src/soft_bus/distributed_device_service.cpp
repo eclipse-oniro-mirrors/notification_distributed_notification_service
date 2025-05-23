@@ -21,6 +21,7 @@
 #include "distributed_data_define.h"
 #include "distributed_device_data.h"
 #include "notification_helper.h"
+#include "distributed_observer_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -62,6 +63,11 @@ DistributedDeviceInfo DistributedDeviceService::GetLocalDevice()
     return localDevice_;
 }
 
+bool DistributedDeviceService::IsReportDataByHa()
+{
+    return localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+}
+
 bool DistributedDeviceService::IsDeviceSyncData(const std::string& deviceId)
 {
     auto iter = peerDevice_.find(deviceId);
@@ -79,7 +85,7 @@ void DistributedDeviceService::SetDeviceSyncData(const std::string& deviceId, bo
         ANS_LOGE("Dans unknown device set data %{public}s.", StringAnonymous(deviceId).c_str());
         return;
     }
-    iter->second.isSync = true;
+    iter->second.isSync = syncData;
 }
 
 void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32_t state)
@@ -98,6 +104,17 @@ bool DistributedDeviceService::CheckDeviceExist(const std::string& deviceId)
         ANS_LOGI("Dans unknown device %{public}s.", StringAnonymous(deviceId).c_str());
         return false;
     }
+    return true;
+}
+
+bool DistributedDeviceService::GetDeviceInfo(const std::string& deviceId, DistributedDeviceInfo& device)
+{
+    auto iter = peerDevice_.find(deviceId);
+    if (iter == peerDevice_.end()) {
+        ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(deviceId).c_str());
+        return false;
+    }
+    device = iter->second;
     return true;
 }
 
@@ -124,6 +141,8 @@ void DistributedDeviceService::IncreaseDeviceSyncCount(const std::string& device
         return;
     }
     iter->second.connectedTry_ = iter->second.connectedTry_ + 1;
+    ANS_LOGI("Dans sync device count %{public}s %{public}d.", StringAnonymous(deviceId).c_str(),
+        iter->second.connectedTry_);
 }
 
 void DistributedDeviceService::AddDeviceInfo(DistributedDeviceInfo deviceItem)
@@ -187,6 +206,12 @@ void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& bo
     ANS_LOGI("Dans set state %{public}s %{public}d.", deviceName.c_str(), status);
 }
 #else
+void DistributedDeviceService::InitCurrentDeviceStatus()
+{
+    int32_t status = OberverService::GetInstance().IsScreenLocked();
+    SyncDeviceStatus(status);
+}
+
 void DistributedDeviceService::SyncDeviceStatus(int32_t status)
 {
     std::shared_ptr<NotifticationStateBox> stateBox = std::make_shared<NotifticationStateBox>();
