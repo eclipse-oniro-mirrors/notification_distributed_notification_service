@@ -559,6 +559,80 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationDataMgr::QueryDataContainsWithKey(
+    const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+{
+    ANS_LOGD("QueryDataContainsWithKey start");
+    std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
+    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("notification rdb is null");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t ret = NativeRdb::E_OK;
+    for (auto tableName : operatedTables) {
+        ret = QueryDataContainsWithKey(tableName, key, values);
+        if (ret == NativeRdb::E_ERROR) {
+            return ret;
+        }
+    }
+    if (ret == NativeRdb::E_EMPTY_VALUES_BUCKET && values.empty()) {
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationDataMgr::QueryDataContainsWithKey(
+    const std::string tableName, const std::string key, std::unordered_map<std::string, std::string> &values)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_10, EventBranchId::BRANCH_9);
+    absRdbPredicates.Contains(NOTIFICATION_KEY, key);
+    auto absSharedResultSet = rdbStore_->Query(absRdbPredicates, std::vector<std::string>());
+    if (absSharedResultSet == nullptr) {
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+        return NativeRdb::E_ERROR;
+    }
+    int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret == NativeRdb::E_SQLITE_CORRUPT) {
+        RestoreForMasterSlaver();
+    }
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGD("GoToFirstRow failed from %{public}s table.It is empty!, key=%{public}s",
+            tableName.c_str(), key.c_str());
+        if (ret != NativeRdb::E_ROW_OUT_RANGE) {
+            ANS_LOGW("GoToFirstRow failed, rdb error is %{public}d.", ret);
+            message.ErrorCode(ret).Message("GoToFirstRow failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        }
+        absSharedResultSet->Close();
+        return NativeRdb::E_EMPTY_VALUES_BUCKET;
+    }
+    do {
+        std::string resultKey;
+        ret = absSharedResultSet->GetString(NOTIFICATION_KEY_INDEX, resultKey);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("Failed to GetString key from %{public}s table.", tableName.c_str());
+            message.ErrorCode(ret).Message("GetString key failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            absSharedResultSet->Close();
+            return NativeRdb::E_ERROR;
+        }
+        std::string resultValue;
+        ret = absSharedResultSet->GetString(NOTIFICATION_VALUE_INDEX, resultValue);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("GetString value failed from %{public}s table", tableName.c_str());
+            message.ErrorCode(ret).Message("GetString value failed.");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            absSharedResultSet->Close();
+            return NativeRdb::E_ERROR;
+        }
+        values.emplace(resultKey, resultValue);
+    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+    absSharedResultSet->Close();
+    return NativeRdb::E_OK;
+}
+
 int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &datas, const int32_t &userId)
 {
     ANS_LOGD("QueryAllData start");
