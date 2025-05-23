@@ -31,6 +31,7 @@ namespace NotificationSts {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
+constexpr int32_t STR_MAX_SIZE = 204;
 void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions distributedOptions)
 {
     ANS_LOGD("UnWarpDistributedOptions start");
@@ -229,15 +230,24 @@ void GetNotificationRequestByString(ani_env *env, ani_object obj,
     std::string mString = "";
     ani_boolean isUndefined = ANI_TRUE;
     if (ANI_OK == GetPropertyString(env, obj, "classification", isUndefined, mString) && isUndefined == ANI_FALSE) {
+        if (mString.length() > STR_MAX_SIZE) {
+            mString.resize(STR_MAX_SIZE);
+        }
         request->SetClassification(mString);
     }
     if (ANI_OK == GetPropertyString(env, obj, "appMessageId", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetAppMessageId(mString);
     }
     if (ANI_OK == GetPropertyString(env, obj, "label", isUndefined, mString) && isUndefined == ANI_FALSE) {
+        if (mString.length() > STR_MAX_SIZE) {
+            mString.resize(STR_MAX_SIZE);
+        }
         request->SetLabel(mString);
     }
     if (ANI_OK == GetPropertyString(env, obj, "groupName", isUndefined, mString) && isUndefined == ANI_FALSE) {
+        if (mString.length() > STR_MAX_SIZE) {
+            mString.resize(STR_MAX_SIZE);
+        }
         request->SetGroupName(mString);
     }
     if (ANI_OK == GetPropertyString(env, obj, "sound", isUndefined, mString) && isUndefined == ANI_FALSE) {
@@ -751,53 +761,43 @@ bool SetNotificationRequestByBool(ani_env* env, ani_class cls, const OHOS::Notif
     }
     // isOngoing?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "isOngoing", request->IsInProgress())) {
-        ANS_LOGE("SetNotificationRequest set 'isOngoing' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'isOngoing' faild");
     }
     // isUnremovable?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "isUnremovable", request->IsUnremovable())) {
-        ANS_LOGE("SetNotificationRequest set 'isUnremovable' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'isUnremovable' faild");
     }
     // tapDismissed?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "tapDismissed", request->IsTapDismissed())) {
-        ANS_LOGE("SetNotificationRequest set 'tapDismissed' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'tapDismissed' faild");
     }
     // colorEnabled?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "colorEnabled", request->IsColorEnabled())) {
-        ANS_LOGE("SetNotificationRequest set 'colorEnabled' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'colorEnabled' faild");
     }
     // isAlertOnce?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "isAlertOnce", request->IsAlertOneTime())) {
-        ANS_LOGE("SetNotificationRequest set 'isAlertOnce' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'isAlertOnce' faild");
     }
     // isStopwatch?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "isStopwatch", request->IsShowStopwatch())) {
-        ANS_LOGE("SetNotificationRequest set 'isStopwatch' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'isStopwatch' faild");
     }
     // isCountDown?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "isCountDown", request->IsCountdownTimer())) {
-        ANS_LOGE("SetNotificationRequest set 'isCountDown' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'isCountDown' faild");
     }
     // isFloatingIcon?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "isFloatingIcon", request->IsFloatingIcon())) {
-        ANS_LOGE("SetNotificationRequest set 'isFloatingIcon' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'isFloatingIcon' faild");
     }
     // showDeliveryTime?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "showDeliveryTime", request->IsShowDeliveryTime())) {
-        ANS_LOGE("SetNotificationRequest set 'showDeliveryTime' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'showDeliveryTime' faild");
     }
     // updateOnly?: boolean
     if (!SetPropertyOptionalByBoolean(env, object, "updateOnly", request->IsUpdateOnly())) {
-        ANS_LOGE("SetNotificationRequest set 'updateOnly' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'updateOnly' faild");
     }
     return true;
 }
@@ -810,40 +810,29 @@ bool SetNotificationRequestByString(ani_env* env, ani_class cls, const OHOS::Not
         return false;
     }
     // classification?: string
-    std::string value = request->GetClassification();
-    if (!value.empty() && !SetPropertyOptionalByString(env, object, "classification", value)) {
-        ANS_LOGE("SetNotificationRequest set '' faild");
-        return false;
+    std::string str = request->GetClassification();
+    if (!SetPropertyOptionalByString(env, object, "classification", request->GetClassification())) {
+        ANS_LOGD("SetNotificationRequest set '' faild");
     }
     // label?: string
-    value = request->GetLabel();
-    if (!value.empty() && !SetPropertyOptionalByString(env, object, "label", value)) {
-        ANS_LOGE("SetNotificationRequest set 'label' faild");
-        return false;
+    if (!SetPropertyOptionalByString(env, object, "label", request->GetLabel())) {
+        ANS_LOGD("SetNotificationRequest set 'label' faild");
     }
     // groupName?: string
-    value = request->GetGroupName();
-    if (!value.empty() && !SetPropertyOptionalByString(env, object, "groupName", value)) {
-        ANS_LOGE("SetNotificationRequest set 'groupName' faild");
-        return false;
+    if (!SetPropertyOptionalByString(env, object, "groupName", request->GetGroupName())) {
+        ANS_LOGD("SetNotificationRequest set 'groupName' faild");
     }
     // readonly creatorBundleName?: string
-    value = request->GetCreatorBundleName();
-    if (!value.empty() && !SetPropertyOptionalByString(env, object, "creatorBundleName", value)) {
-        ANS_LOGE("SetNotificationRequest set 'creatorBundleName' faild");
-        return false;
+    if (!SetPropertyOptionalByString(env, object, "creatorBundleName", request->GetCreatorBundleName())) {
+        ANS_LOGD("SetNotificationRequest set 'creatorBundleName' faild");
     }
     // readonly sound?: string
-    value = request->GetSound();
-    if (!value.empty() && !SetPropertyOptionalByString(env, object, "sound", value)) {
-        ANS_LOGE("SetNotificationRequest set 'sound' faild");
-        return false;
+    if (!SetPropertyOptionalByString(env, object, "sound", request->GetSound())) {
+        ANS_LOGD("SetNotificationRequest set 'sound' faild");
     }
     // readonly appInstanceKey?: string
-    value = request->GetAppInstanceKey();
-    if (!value.empty() && !SetPropertyOptionalByString(env, object, "appInstanceKey", value)) {
-        ANS_LOGE("SetNotificationRequest set 'appInstanceKey' faild");
-        return false;
+    if (!SetPropertyOptionalByString(env, object, "appInstanceKey", request->GetAppInstanceKey())) {
+        ANS_LOGD("SetNotificationRequest set 'appInstanceKey' faild");
     }
     return true;
 }
@@ -893,39 +882,24 @@ bool SetNotificationRequestByWantAgent(ani_env* env, ani_class cls,
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = request->GetWantAgent();
     if (agent) {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, agent.get());
-        if (wantAgent == nullptr) {
-            ANS_LOGE("SetNotificationRequest Wrap 'wantAgent' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "wantAgent", wantAgent)) {
-            ANS_LOGE("SetNotificationRequest set 'wantAgent' faild");
-            return false;
+        if (wantAgent == nullptr || !SetPropertyByRef(env, object, "wantAgent", wantAgent)) {
+            ANS_LOGD("SetNotificationRequest set 'wantAgent' faild");
         }
     }
     // removalWantAgent?: WantAgent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalAgent = request->GetRemovalWantAgent();
     if (removalAgent) {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, removalAgent.get());
-        if (wantAgent == nullptr) {
-            ANS_LOGE("SetNotificationRequest Wrap 'removalWantAgent' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "removalWantAgent", wantAgent)) {
-            ANS_LOGE("SetNotificationRequest set 'removalWantAgent' faild");
-            return false;
+        if (wantAgent == nullptr || !SetPropertyByRef(env, object, "removalWantAgent", wantAgent)) {
+            ANS_LOGD("SetNotificationRequest set 'removalWantAgent' faild");
         }
     }
     // maxScreenWantAgent?: WantAgent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenAgent = request->GetMaxScreenWantAgent();
     if (maxScreenAgent) {
         ani_object wantAgent = AppExecFwk::WrapWantAgent(env, maxScreenAgent.get());
-        if (wantAgent == nullptr) {
-            ANS_LOGE("SetNotificationRequest Wrap 'maxScreenWantAgent' faild");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "maxScreenWantAgent", wantAgent)) {
-            ANS_LOGE("SetNotificationRequest set 'maxScreenWantAgent' faild");
-            return false;
+        if (wantAgent == nullptr || !SetPropertyByRef(env, object, "maxScreenWantAgent", wantAgent)) {
+            ANS_LOGD("SetNotificationRequest set 'maxScreenWantAgent' faild");
         }
     }
     return true;
@@ -942,39 +916,24 @@ bool SetNotificationRequestByPixelMap(ani_env* env, ani_class cls, const Notific
     std::shared_ptr<Media::PixelMap> littleIcon = request->GetLittleIcon();
     if (littleIcon) {
         ani_object smallIconResult = CreateAniPixelMap(env, littleIcon);
-        if (smallIconResult == nullptr) {
-            ANS_LOGE("CreatePixelMap failed, smallIconResult is nullptr ");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "smallIcon", smallIconResult)) {
-            ANS_LOGE("SetNotificationRequest set 'smallIcon' faild");
-            return false;
+        if (smallIconResult == nullptr || !SetPropertyByRef(env, object, "smallIcon", smallIconResult)) {
+            ANS_LOGD("SetNotificationRequest set 'smallIcon' faild");
         }
     }
     // largeIcon?: image.PixelMap
     std::shared_ptr<Media::PixelMap> largeIcon = request->GetBigIcon();
     if (largeIcon) {
         ani_object largeIconResult = CreateAniPixelMap(env, largeIcon);
-        if (largeIconResult == nullptr) {
-            ANS_LOGE("CreatePixelMap failed, largeIconResult is nullptr");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "largeIcon", largeIconResult)) {
-            ANS_LOGE("SetNotificationRequest set 'largeIcon' faild");
-            return false;
+        if (largeIconResult == nullptr || !SetPropertyByRef(env, object, "largeIcon", largeIconResult)) {
+            ANS_LOGD("SetNotificationRequest set 'largeIcon' faild");
         }
     }
     // overlayIcon?: image.PixelMap
     std::shared_ptr<Media::PixelMap> overlayIcon = request->GetOverlayIcon();
     if (overlayIcon) {
         ani_object overlayIconResult = CreateAniPixelMap(env, overlayIcon);
-        if (overlayIconResult == nullptr) {
-            ANS_LOGE("CreatePixelMap failed, overlayIconResult is nullptr");
-            return false;
-        }
-        if (!SetPropertyByRef(env, object, "overlayIcon", overlayIconResult)) {
-            ANS_LOGE("SetNotificationRequest set 'overlayIcon' faild");
-            return false;
+        if (overlayIconResult == nullptr || !SetPropertyByRef(env, object, "overlayIcon", overlayIconResult)) {
+            ANS_LOGD("SetNotificationRequest set 'overlayIcon' faild");
         }
     }
     return true;
@@ -990,15 +949,15 @@ bool SetNotificationRequestByNotificationContent(ani_env* env, ani_class cls,
     std::shared_ptr<NotificationContent> content = request->GetContent();
     ani_object contentObj;
     if (!SetNotificationContent(env, content, contentObj)) {
-        ANS_LOGE("SetNotificationContent faild");
+        ANS_LOGD("SetNotificationContent faild");
         return false;
     }
     if (contentObj == nullptr) {
-        ANS_LOGE("contentObj is nullptr");
+        ANS_LOGD("contentObj is nullptr");
         return false;
     }
     if (!SetPropertyByRef(env, object, "content", contentObj)) {
-        ANS_LOGE("SetNotificationRequestByNotificationContent. set content faild");
+        ANS_LOGD("SetNotificationRequestByNotificationContent. set content faild");
         return false;
     }
     return true;
@@ -1013,8 +972,7 @@ bool SetRequestExtraInfo(ani_env *env, const OHOS::Notification::NotificationReq
     }
     ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
     if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extraInfo", extraInfo)) {
-        ANS_LOGE("SetNotificationRequestByCustom: set extraInfo failed");
-        return false;
+        ANS_LOGD("SetNotificationRequestByCustom: set extraInfo failed");
     }
     return true;
 }
@@ -1027,10 +985,9 @@ bool SetRequestActionButtons(ani_env *env, const OHOS::Notification::Notificatio
         return true;
     }
     ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
-    if (actionButtonsArrayObj != nullptr
-        && !SetPropertyByRef(env, object, "actionButtons", actionButtonsArrayObj)) {
-        ANS_LOGE("SetNotificationRequest set 'actionButtons' faild");
-        return false;
+    if (actionButtonsArrayObj == nullptr
+        || !SetPropertyByRef(env, object, "actionButtons", actionButtonsArrayObj)) {
+        ANS_LOGD("SetNotificationRequest set 'actionButtons' faild");
     }
     return true;
 }
@@ -1043,13 +1000,8 @@ bool SetRequestTemplate(ani_env *env, const OHOS::Notification::NotificationRequ
         return true;
     }
     ani_object templateObject = WrapNotificationTemplate(env, templ);
-    if (templateObject == nullptr) {
-        ANS_LOGE("SetNotificationRequest Warp 'template' faild");
-        return false;
-    }
-    if (!SetPropertyByRef(env, object, "template", templateObject)) {
-        ANS_LOGE("SetNotificationRequest set 'template' faild");
-        return false;
+    if (templateObject == nullptr || !SetPropertyByRef(env, object, "template", templateObject)) {
+        ANS_LOGD("SetNotificationRequest set 'template' faild");
     }
     return true;
 }
@@ -1103,12 +1055,10 @@ bool SetRequestUnifiedGroupInfo(
     }
     ani_object infoObject = nullptr;
     if (!WarpNotificationUnifiedGroupInfo(env, groupInfo, infoObject) || infoObject == nullptr) {
-        ANS_LOGE("SetNotificationRequest Warp 'unifiedGroupInfo' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest Warp 'unifiedGroupInfo' faild");
     }
     if (!SetPropertyByRef(env, object, "unifiedGroupInfo", infoObject)) {
-        ANS_LOGE("SetNotificationRequest set 'unifiedGroupInfo' faild");
-        return false;
+        ANS_LOGD("SetNotificationRequest set 'unifiedGroupInfo' faild");
     }
     return true;
 }
@@ -1128,32 +1078,26 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
     // extraInfo?: {[key:string] : any}
     if (!SetRequestExtraInfo(env, request, object)) {
         ANS_LOGE("set extraInfo faild");
-        return false;
     }
     // actionButtons?: Array<NotificationActionButton>
     if (!SetRequestActionButtons(env, request, object)) {
-        ANS_LOGE("set actionButtons faild");
-        return false;
+        ANS_LOGD("set actionButtons faild");
     }
     // template?: NotificationTemplate
     if (!SetRequestTemplate(env, request, object)) {
-        ANS_LOGE("set template faild");
-        return false;
+        ANS_LOGD("set template faild");
     }
     // readonly notificationFlags?: NotificationFlags
     if (!SetRequestNotificationFlags(env, request, object)) {
-        ANS_LOGE("set notificationFlags faild");
-        return false;
+        ANS_LOGD("set notificationFlags faild");
     }
     // readonly agentBundle?: agentBundle
     if (!SetRequestAgentBundle(env, request, object)) {
-        ANS_LOGE("set agentBundle faild");
-        return false;
+        ANS_LOGD("set agentBundle faild");
     }
     // unifiedGroupInfo?: unifiedGroupInfo
     if (!SetRequestUnifiedGroupInfo(env, request, object)) {
-        ANS_LOGE("set unifiedGroupInfo faild");
-        return false;
+        ANS_LOGD("set unifiedGroupInfo faild");
     }
     return true;
 }
