@@ -209,6 +209,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
             return NativeRdb::E_ERROR;
         }
     }
+    SendUserDataSizeHisysevent();
     return NativeRdb::E_OK;
 }
 
@@ -242,6 +243,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NativeRdb::E_ERROR;
     }
+    SendUserDataSizeHisysevent();
     return NativeRdb::E_OK;
 }
 
@@ -281,6 +283,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
             return NativeRdb::E_ERROR;
         }
     }
+    SendUserDataSizeHisysevent();
     return NativeRdb::E_OK;
 }
 

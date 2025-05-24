@@ -37,6 +37,11 @@ const std::string EVENT_PARAM_REASON = "REASON";
 const std::string EVENT_PARAM_CLASS = "CLASS";
 const std::string EVENT_PARAM_REMINDERFLAGS = "REMINDERFLAGS";
 const std::string EVENT_PARAM_CONTROLFLAGS = "CONTROLFLAGS";
+const std::string EVENT_PARAM_COMPONENT_NAME = "COMPONENT_NAME";
+const std::string EVENT_PARAM_PARTITION_NAME = "PARTITION_NAME";
+const std::string EVENT_PARAM_REMAIN_PARTITION_SIZE = "REMAIN_PARTITION_SIZE";
+const std::string EVENT_PARAM_FILE_OR_FOLDER_PATH = "FILE_OR_FOLDER_PATH";
+const std::string EVENT_PARAM_FILE_OR_FOLDER_SIZE = "FILE_OR_FOLDER_SIZE";
 } // namespace
 
 void EventReport::SendHiSysEvent(const std::string &eventName, const EventInfo &eventInfo)
@@ -50,6 +55,15 @@ void EventReport::SendHiSysEvent(const std::string &eventName, const EventInfo &
     }
 
     iter->second(eventInfo);
+#endif
+}
+
+void EventReport::SendHiSysEvent(const UserDataSizeInfo & userDataSizeInfo)
+{
+#ifndef HAS_HISYSEVENT_PART
+    ANS_LOGD("Hisysevent is disabled");
+#else
+    InnerSendUserDataSizeEvent(userDataSizeInfo);
 #endif
 }
 
@@ -257,10 +271,30 @@ void EventReport::InnerSendRemoveEvent(const EventInfo &eventInfo)
         EVENT_PARAM_UID, eventInfo.uid);
 }
 
+void EventReport::InnerSendUserDataSizeEvent(const UserDataSizeInfo & userDataSizeInfo)
+{
+    InnerEventWrite(
+        USER_DATA_SIZE,
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        EVENT_PARAM_COMPONENT_NAME, userDataSizeInfo.componentName,
+        EVENT_PARAM_PARTITION_NAME, userDataSizeInfo.partitionName,
+        EVENT_PARAM_REMAIN_PARTITION_SIZE, userDataSizeInfo.remainPartitionSize,
+        EVENT_PARAM_FILE_OR_FOLDER_PATH, userDataSizeInfo.folderPath,
+        EVENT_PARAM_FILE_OR_FOLDER_SIZE, userDataSizeInfo.folderSize);
+}
+
 template<typename... Types>
 void EventReport::InnerEventWrite(const std::string &eventName,
     HiviewDFX::HiSysEvent::EventType type, Types... keyValues)
 {
+    if (eventName == USER_DATA_SIZE) {
+        HiSysEventWrite(
+            HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT,
+            eventName,
+            static_cast<HiviewDFX::HiSysEvent::EventType>(type),
+            keyValues...);
+        return;
+    }
     HiSysEventWrite(
         HiviewDFX::HiSysEvent::Domain::NOTIFICATION,
         eventName,
