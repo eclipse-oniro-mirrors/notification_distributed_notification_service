@@ -52,7 +52,7 @@ SYMBOL_EXPORT void ReleaseDevice(const std::string &deviceId, uint16_t deviceTyp
 {
     ANS_LOGI("ReleaseDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));
     DistributedClient::GetInstance().ReleaseDevice(deviceId, deviceType);
-    DistributedService::GetInstance().UnSubscribeNotifictaion(deviceId, deviceType);
+    DistributedService::GetInstance().ReleaseDevice(deviceId, deviceType);
 }
 
 SYMBOL_EXPORT void RefreshDevice(const std::string &deviceId, uint16_t deviceType,

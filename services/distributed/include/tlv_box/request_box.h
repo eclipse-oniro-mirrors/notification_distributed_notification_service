@@ -29,6 +29,7 @@ class NotificationRequestBox : public BoxBase {
 public:
     NotificationRequestBox();
     NotificationRequestBox(std::shared_ptr<TlvBox> box);
+#ifdef DISTRIBUTED_FEATURE_MASTER
     bool SetNotificationHashCode(const std::string& hasdCode);
     bool SetSlotType(int32_t type);
     bool SetContentType(int32_t type);
@@ -50,6 +51,7 @@ public:
     bool SetFinishTime(int64_t time);
     bool SetAutoDeleteTime(int64_t time);
 
+#else
     bool GetNotificationHashCode(std::string& hasdCode) const;
     bool GetSlotType(int32_t& type) const;
     bool GetContentType(int32_t& type) const;
@@ -70,6 +72,7 @@ public:
     bool GetCommonLiveView(std::vector<uint8_t>& byteSequence) const;
     bool GetFinishTime(int64_t& time) const;
     bool GetAutoDeleteTime(int64_t& time) const;
+#endif
 };
 }  // namespace Notification
 }  // namespace OHOS

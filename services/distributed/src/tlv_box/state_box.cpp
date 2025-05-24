@@ -30,30 +30,7 @@ NotifticationStateBox::NotifticationStateBox(std::shared_ptr<TlvBox> box) : BoxB
 {
 }
 
-bool NotifticationStateBox::SetDeviceType(const std::string& deviceType)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_TYPE, deviceType));
-}
-
-bool NotifticationStateBox::SetDeviceId(const std::string& deviceId)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
-}
-
-bool NotifticationStateBox::SetState(int32_t state)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_STATUE, state));
-}
-
+#ifdef DISTRIBUTED_FEATURE_MASTER
 bool NotifticationStateBox::GetDeviceType(std::string& deviceType)
 {
     if (box_ == nullptr) {
@@ -75,7 +52,32 @@ bool NotifticationStateBox::GetState(int32_t& state)
     if (box_ == nullptr) {
         return false;
     }
-    return box_->GetInt32Value(LOCAL_DEVICE_STATUE, state);
+    return box_->GetInt32Value(LOCAL_DEVICE_STATUS, state);
 }
+#else
+bool NotifticationStateBox::SetDeviceType(const std::string& deviceType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_TYPE, deviceType));
+}
+
+bool NotifticationStateBox::SetDeviceId(const std::string& deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
+bool NotifticationStateBox::SetState(int32_t state)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_STATUS, state));
+}
+#endif
 }
 }

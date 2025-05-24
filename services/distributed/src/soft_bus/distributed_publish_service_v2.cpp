@@ -258,6 +258,60 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
         peerDevice.deviceId_, PUBLISH_ERROR_EVENT_CODE);
 }
 
+void DistributedPublishService::SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
+    NotificationContent::Type type, std::shared_ptr<NotificationRequestBox>& requestBox)
+{
+    if (content == nullptr || content->GetNotificationContent() == nullptr) {
+        return;
+    }
+
+    ANS_LOGI("Set Notification notification content %{public}d.", type);
+    switch (type) {
+        case NotificationContent::Type::PICTURE: {
+            auto picture = std::static_pointer_cast<NotificationPictureContent>(content->GetNotificationContent());
+            requestBox->SetNotificationTitle(picture->GetTitle());
+            requestBox->SetNotificationText(picture->GetText());
+            requestBox->SetNotificationAdditionalText(picture->GetAdditionalText());
+            requestBox->SetNotificationExpandedTitle(picture->GetExpandedTitle());
+            requestBox->SetNotificationBriefText(picture->GetBriefText());
+            requestBox->SetNotificationBigPicture(picture->GetBigPicture());
+            break;
+        }
+        case NotificationContent::Type::MULTILINE: {
+            auto multiline = std::static_pointer_cast<NotificationMultiLineContent>(content->GetNotificationContent());
+            requestBox->SetNotificationTitle(multiline->GetTitle());
+            requestBox->SetNotificationText(multiline->GetText());
+            requestBox->SetNotificationAdditionalText(multiline->GetAdditionalText());
+            requestBox->SetNotificationExpandedTitle(multiline->GetExpandedTitle());
+            requestBox->SetNotificationBriefText(multiline->GetBriefText());
+            requestBox->SetNotificationAllLines(multiline->GetAllLines());
+            break;
+        }
+        case NotificationContent::Type::LONG_TEXT: {
+            std::shared_ptr<NotificationLongTextContent> contentLong =
+                std::static_pointer_cast<NotificationLongTextContent>(content->GetNotificationContent());
+            requestBox->SetNotificationTitle(contentLong->GetTitle());
+            requestBox->SetNotificationText(contentLong->GetText());
+            requestBox->SetNotificationAdditionalText(contentLong->GetAdditionalText());
+            requestBox->SetNotificationExpandedTitle(contentLong->GetExpandedTitle());
+            requestBox->SetNotificationBriefText(contentLong->GetBriefText());
+            requestBox->SetNotificationLongText(contentLong->GetLongText());
+            break;
+        }
+        case NotificationContent::Type::LIVE_VIEW:
+        case NotificationContent::Type::LOCAL_LIVE_VIEW:
+        case NotificationContent::Type::BASIC_TEXT:
+        default: {
+            std::shared_ptr<NotificationBasicContent> contentBasic =
+                std::static_pointer_cast<NotificationBasicContent>(content->GetNotificationContent());
+            requestBox->SetNotificationTitle(contentBasic->GetTitle());
+            requestBox->SetNotificationText(contentBasic->GetText());
+            requestBox->SetNotificationAdditionalText(contentBasic->GetAdditionalText());
+            break;
+        }
+    }
+}
+
 void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
     NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox)
 {

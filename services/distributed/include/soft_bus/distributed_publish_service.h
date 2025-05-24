@@ -36,11 +36,11 @@ public:
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
+    void SendNotifictionRequest(const std::shared_ptr<Notification> request,
+        const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
 private:
     void SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
         const std::vector<std::string>& notificationList);
-    void SendNotifictionRequest(const std::shared_ptr<Notification> request,
-        const DistributedDeviceInfo& peerDevice, bool isSyncNotification);
     void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
         NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,

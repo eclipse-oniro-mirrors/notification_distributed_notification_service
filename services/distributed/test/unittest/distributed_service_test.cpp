@@ -19,6 +19,7 @@
 #define private public
 #include "batch_remove_box.h"
 #include "distributed_service.h"
+#include "distributed_publish_service.h"
 #undef private
 #include "remove_box.h"
 
@@ -45,7 +46,7 @@ void DistributedServiceTest::TearDown() {}
 HWTEST_F(DistributedServiceTest, DistributedServiceTest_00100, Function | SmallTest | Level1)
 {
     std::shared_ptr<TlvBox> boxMessage = nullptr;
-    DistributedService::GetInstance().RemoveNotification(boxMessage);
+    DistributedPublishService::GetInstance().RemoveNotification(boxMessage);
     ASSERT_EQ(boxMessage, nullptr);
 }
 
@@ -59,7 +60,7 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_00200, Function | SmallT
     NotificationRemoveBox removeBox;
     std::string notificationKey = "notificationId";
     removeBox.SetNotificationHashCode(notificationKey);
-    DistributedService::GetInstance().RemoveNotification(removeBox.box_);
+    DistributedPublishService::GetInstance().RemoveNotification(removeBox.box_);
     ASSERT_NE(removeBox.box_, nullptr);
 }
 
@@ -71,7 +72,7 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_00200, Function | SmallT
 HWTEST_F(DistributedServiceTest, DistributedServiceTest_00300, Function | SmallTest | Level1)
 {
     std::shared_ptr<TlvBox> boxMessage = nullptr;
-    DistributedService::GetInstance().RemoveNotifications(boxMessage);
+    DistributedPublishService::GetInstance().RemoveNotifications(boxMessage);
     ASSERT_EQ(boxMessage, nullptr);
 }
 
@@ -85,7 +86,7 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_00400, Function | SmallT
     BatchRemoveNotificationBox batchRemoveBox;
     std::string hashCodes = "notificationId1 notificationId2";
     batchRemoveBox.SetNotificationHashCode(hashCodes);
-    DistributedService::GetInstance().RemoveNotifications(batchRemoveBox.box_);
+    DistributedPublishService::GetInstance().RemoveNotifications(batchRemoveBox.box_);
     ASSERT_NE(batchRemoveBox.box_, nullptr);
 }
 

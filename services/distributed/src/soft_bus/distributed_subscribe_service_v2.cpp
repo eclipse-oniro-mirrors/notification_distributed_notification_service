@@ -95,7 +95,7 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId, result);
 }
 
-void DistributedSubscribeService::UnSubscribeNotification(const std::string &deviceId)
+void DistributedSubscribeService::UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType)
 {
     DistributedDeviceService::GetInstance().DeleteDeviceInfo(deviceId);
     auto iter = subscriberMap_.find(deviceId);
@@ -104,11 +104,24 @@ void DistributedSubscribeService::UnSubscribeNotification(const std::string &dev
         return;
     }
 
-    if (NotificationHelper::UnSubscribeNotification(iter->second) == 0) {
+    int32_t result = NotificationHelper::UnSubscribeNotification(iter->second);
+    if (result == ERR_OK) {
         subscriberMap_.erase(deviceId);
     }
-    ANS_LOGI("UnSubscribe notification %{public}s.", StringAnonymous(deviceId).c_str());
+    std::string message = "UnSubscribe: " + StringAnonymous(deviceId) + " type: " + std::to_string(deviceType);
+    AnalyticsUtil::GetInstance().SendHaReport(OPERATION_DELETE_BRANCH, result, BRANCH2_ID, message,
+        PUBLISH_ERROR_EVENT_CODE);
+    ANS_LOGI("UnSubscribe notification %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), deviceType);
+}
+
+void DistributedSubscribeService::UnSubscribeAllNotification()
+{
+    for (auto& subscriberInfo : subscriberMap_) {
+        int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
+        ANS_LOGI("UnSubscribe %{public}s %{public}d.", subscriberInfo.first.c_str(), result);
+    }
 }
 
 }
 }
+

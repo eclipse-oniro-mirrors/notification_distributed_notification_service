@@ -26,13 +26,15 @@ class NotifticationStateBox : public BoxBase {
 public:
     NotifticationStateBox();
     NotifticationStateBox(std::shared_ptr<TlvBox> box);
-    bool SetDeviceType(const std::string& deviceType);
-    bool SetDeviceId(const std::string& deviceId);
-    bool SetState(int32_t state);
-
+#ifdef DISTRIBUTED_FEATURE_MASTER
     bool GetDeviceType(std::string& deviceType);
     bool GetDeviceId(std::string& deviceId);
     bool GetState(int32_t& state);
+#else
+    bool SetDeviceType(const std::string& deviceType);
+    bool SetDeviceId(const std::string& deviceId);
+    bool SetState(int32_t state);
+#endif
 };
 }  // namespace Notification
 }  // namespace OHOS

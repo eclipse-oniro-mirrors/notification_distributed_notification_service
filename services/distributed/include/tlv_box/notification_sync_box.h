@@ -28,12 +28,15 @@ public:
     NotificationSyncBox();
     ~NotificationSyncBox();
     NotificationSyncBox(std::shared_ptr<TlvBox> box);
+#ifdef DISTRIBUTED_FEATURE_MASTER
     bool SetLocalDeviceId(const std::string& deviceId);
     bool SetNotificationEmpty(const bool empty);
     bool SetNotificationList(const std::vector<std::string>& notificationList);
+#else
     bool GetLocalDeviceId(std::string& deviceId) const;
     bool GetNotificationEmpty(bool& empty) const;
     bool GetNotificationList(std::unordered_set<std::string>& notificationList) const;
+#endif
 };
 }  // namespace Notification
 }  // namespace OHOS

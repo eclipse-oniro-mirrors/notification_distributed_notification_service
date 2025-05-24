@@ -25,10 +25,11 @@ namespace Notification {
 class DistributedDeviceService {
 public:
     static DistributedDeviceService& GetInstance();
-    static std::string DeviceTypeToTypeString(uint16_t deviceType);
+    bool IsReportDataByHa();
     void InitLocalDevice(const std::string &deviceId, uint16_t deviceType);
     DistributedDeviceInfo GetLocalDevice();
     bool IsDeviceSyncData(const std::string& deviceId);
+    bool GetDeviceInfo(const std::string& deviceId, DistributedDeviceInfo& device);
     void SetDeviceState(const std::string& deviceId, int32_t state);
     void SetDeviceSyncData(const std::string& deviceId, bool syncData);
     bool CheckDeviceExist(const std::string& deviceId);
@@ -41,6 +42,7 @@ public:
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage);
 #else
+    void InitCurrentDeviceStatus();
     void SyncDeviceStatus(int32_t status);
 #endif
 

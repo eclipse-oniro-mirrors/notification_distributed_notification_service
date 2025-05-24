@@ -33,8 +33,8 @@ public:
     static DistributedPreferences& GetInstance();
 
     int32_t DeleteBundleIcon(const std::string &bundleName);
-    int32_t InertBundleIcon(const std::string &bundleName, const std::string &icon);
-    int32_t InertBatchBundleIcons(std::unordered_map<std::string, std::string>  &values);
+    int32_t InsertBundleIcon(const std::string &bundleName, const std::string &icon);
+    int32_t InsertBatchBundleIcons(std::unordered_map<std::string, std::string>  &values);
     int32_t GetIconByBundleName(const std::string& bundleName, std::string &icon);
     int32_t GetSavedBundlesIcon(std::vector<std::string>& bundleNames);
 private:

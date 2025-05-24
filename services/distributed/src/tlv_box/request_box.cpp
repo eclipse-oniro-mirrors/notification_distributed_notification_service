@@ -34,6 +34,7 @@ NotificationRequestBox::NotificationRequestBox(std::shared_ptr<TlvBox> box) : Bo
 {
 }
 
+#ifdef DISTRIBUTED_FEATURE_MASTER
 bool NotificationRequestBox::SetNotificationHashCode(const std::string& hasdCode)
 {
     if (box_ == nullptr) {
@@ -219,6 +220,7 @@ bool NotificationRequestBox::SetAutoDeleteTime(int64_t time)
     return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
 }
 
+#else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
     if (box_ == nullptr) {
@@ -384,5 +386,6 @@ bool NotificationRequestBox::GetAutoDeleteTime(int64_t& time) const
     }
     return box_->GetInt64Value(AUTO_DELETE_TIME, time);
 }
+#endif
 }
 }

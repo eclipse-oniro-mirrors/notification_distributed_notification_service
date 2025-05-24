@@ -19,6 +19,7 @@
 #include <set>
 #include <map>
 
+#include "tlv_box.h"
 #include "distributed_device_data.h"
 
 namespace OHOS {
@@ -27,6 +28,7 @@ class DistributedBundleService {
 public:
     static DistributedBundleService& GetInstance();
 
+    void HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce);
     void GenerateBundleIconSync(const DistributedDeviceInfo& device);

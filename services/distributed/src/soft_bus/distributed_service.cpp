@@ -23,17 +23,22 @@
 #include "distributed_observer_service.h"
 #include "os_account_manager.h"
 #include "distributed_server.h"
+#include "common_event_support.h"
 #include "distributed_device_data.h"
+#include "distributed_bundle_service.h"
+#include "distributed_device_service.h"
+#include "distributed_operation_service.h"
+#include "distributed_publish_service.h"
+#include "distributed_subscribe_service.h"
 
 namespace OHOS {
 namespace Notification {
 
+static const std::string DISTRIBUTED_LABEL = "ans_distributed";
+
 namespace {
-static const int32_t MAX_CONNECTED_TYR = 5;
 static const int32_t ADD_DEVICE_SLEEP_TIMES_MS = 1000;  // 1s
 static const uint64_t SYNC_TASK_DELAY = 7 * 1000 * 1000;
-static const int32_t MAX_DATA_LENGTH = 7;
-static const int32_t START_ANONYMOUS_INDEX = 5;
 }
 
 DistributedService& DistributedService::GetInstance()
@@ -52,11 +57,27 @@ DistributedService::DistributedService()
     ANS_LOGI("Distributed service init successfully.");
 }
 
+std::string DistributedService::GetNotificationKey(const std::shared_ptr<Notification>& notification)
+{
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
+        return "";
+    }
+    std::string notificationKey = notification->GetKey();
+    if (notification->GetNotificationRequestPoint()->GetDistributedCollaborate()) {
+        size_t pos = notificationKey.find(DISTRIBUTED_LABEL);
+        if (pos != std::string::npos) {
+            notificationKey.erase(pos, DISTRIBUTED_LABEL.length());
+        }
+    } else {
+        notificationKey = DISTRIBUTED_LABEL + notificationKey;
+    }
+    return notificationKey;
+}
+
 int32_t DistributedService::InitService(const std::string &deviceId, uint16_t deviceType)
 {
-    int32_t userId;
-    localDevice_.deviceId_ = deviceId;
-    localDevice_.deviceType_ = deviceType;
+    DistributedDeviceService::GetInstance().InitLocalDevice(deviceId, deviceType);
     if (DistributedServer::GetInstance().InitServer(deviceId, deviceType) != 0) {
         ANS_LOGI("Distributed service init server failed.");
         return -1;
@@ -76,38 +97,27 @@ void DistributedService::DestoryService()
         DistributedClient::GetInstance().ReleaseClient();
         DistributedServer::GetInstance().ReleaseServer();
         OberverService::GetInstance().Destory();
-        for (auto& subscriberInfo : subscriberMap_) {
-            int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
-            ANS_LOGI("UnSubscribe %{public}s %{public}d.", subscriberInfo.first.c_str(), result);
-        }
+        DistributedSubscribeService::GetInstance().UnSubscribeAllNotification();
     });
     serviceQueue_->wait(handler);
 }
 
-void DistributedService::SyncConnectedDevice(DistributedDeviceInfo device)
+void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
 {
-    auto iter = peerDevice_.find(device.deviceId_);
-    if (iter == peerDevice_.end()) {
-        ANS_LOGE("SyncConnectedDevice device is valid.");
+    if (!DistributedDeviceService::GetInstance().CheckDeviceNeedSync(device.deviceId_)) {
+        ANS_LOGE("ConnectPeerDevice device is failed.");
         return;
     }
-    if (iter->second.connectedTry_ >= MAX_CONNECTED_TYR || iter->second.peerState_ != DeviceState::STATE_SYNC) {
-        ANS_LOGE("SyncConnectedDevice no need try %{public}d.", iter->second.connectedTry_);
+
+    int32_t result = DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
+    ANS_LOGI("ConnectPeerDevice try %{public}d.", result);
+    DistributedDeviceService::GetInstance().IncreaseDeviceSyncCount(device.deviceId_);
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
         return;
     }
-    int32_t result = SyncDeviceMatch(device, MatchType::MATCH_SYN);
-    ANS_LOGI("SyncConnectedDevice try %{public}d %{public}d.", iter->second.connectedTry_, result);
-    iter->second.connectedTry_ = iter->second.connectedTry_ + 1;
-    if (result != 0) {
-        if (serviceQueue_ == nullptr) {
-            ANS_LOGE("Check handler is null.");
-            return;
-        }
-        serviceQueue_->submit_h([&, device]() { SyncConnectedDevice(device); },
-            ffrt::task_attr().name("sync").delay(SYNC_TASK_DELAY));
-    } else {
-        iter->second.connectedTry_ = 0;
-    }
+    serviceQueue_->submit_h([&, device]() { ConnectPeerDevice(device); },
+        ffrt::task_attr().name("sync").delay(SYNC_TASK_DELAY));
 }
 
 void DistributedService::AddDevice(DistributedDeviceInfo device)
@@ -117,17 +127,201 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         return;
     }
     serviceQueue_->submit_h([&, device]() {
-        ANS_LOGI("Dans AddDevice %{public}s %{public}d %{public}s %{public}d.",
-            StringAnonymous(device.deviceId_).c_str(), device.deviceType_,
-            StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_);
+        ANS_LOGI("Dans AddDevice %{public}s %{public}d", StringAnonymous(device.deviceId_).c_str(),
+            device.deviceType_);
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
-        peerDevice_[deviceItem.deviceId_] = deviceItem;
+        DistributedDeviceService::GetInstance().AddDeviceInfo(deviceItem);
         // Delay linking to avoid bind failure, There is a delay in reporting the device online
         auto sleepTime = std::chrono::milliseconds(ADD_DEVICE_SLEEP_TIMES_MS);
         std::this_thread::sleep_for(sleepTime);
-        SyncConnectedDevice(device);
+        ConnectPeerDevice(device);
     });
+}
+
+void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+    std::function<void()> subscribeTask = std::bind([deviceId, deviceType]() {
+        DistributedSubscribeService::GetInstance().UnSubscribeNotification(deviceId, deviceType);
+    });
+    serviceQueue_->submit(subscribeTask);
+}
+
+void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notification,
+    const DistributedDeviceInfo& peerDevice)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("check handler is null");
+        return;
+    }
+    if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
+        return;
+    }
+    std::string notificationKey = GetNotificationKey(notification);
+    auto slotType = notification->GetNotificationRequestPoint()->GetSlotType();
+    std::function<void()> task = std::bind([peerDevice, notificationKey, slotType]() {
+        DistributedPublishService::GetInstance().OnRemoveNotification(peerDevice,
+            notificationKey, slotType);
+    });
+    serviceQueue_->submit(task);
+}
+
+void DistributedService::OnBatchCanceled(const std::vector<std::shared_ptr<Notification>>& notifications,
+    const DistributedDeviceInfo& peerDevice)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("check handler is null.");
+        return;
+    }
+
+    std::ostringstream keysStream;
+    std::ostringstream slotTypesStream;
+    for (auto notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+            ANS_LOGE("notification or GetNotificationRequestPoint is nullptr");
+            continue;
+        }
+        ANS_LOGI("dans OnBatchCanceled %{public}s", notification->Dump().c_str());
+        keysStream << GetNotificationKey(notification) << ' ';
+        slotTypesStream << std::to_string(notification->GetNotificationRequestPoint()->GetSlotType()) << ' ';
+    }
+    std::string notificationKeys = keysStream.str();
+    std::string slotTypes = slotTypesStream.str();
+    std::function<void()> task = std::bind([peerDevice, notificationKeys, slotTypes]() {
+        DistributedPublishService::GetInstance().OnRemoveNotifications(peerDevice,
+            notificationKeys, slotTypes);
+    });
+    serviceQueue_->submit(task);
+}
+
+#ifdef DISTRIBUTED_FEATURE_MASTER
+int32_t DistributedService::OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> & operationInfo,
+    const DistributedDeviceInfo& device)
+{
+    return ERR_OK;
+}
+
+void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
+    const DistributedDeviceInfo& peerDevice)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+    std::function<void()> task = std::bind([request, peerDevice]() {
+        DistributedPublishService::GetInstance().SendNotifictionRequest(request, peerDevice);
+    });
+    serviceQueue_->submit(task);
+}
+
+void DistributedService::OnApplicationInfnChanged(const std::string& bundleName)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+
+    std::function<void()> task = std::bind([&, bundleName]() {
+        DistributedBundleService::GetInstance().HandleBundleChanged(bundleName, false);
+    });
+    serviceQueue_->submit(task);
+}
+
+void DistributedService::HandleBundlesEvent(const std::string& bundleName, const std::string& action)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+
+    std::function<void()> task = std::bind([&, bundleName, action]() {
+        if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+            DistributedBundleService::GetInstance().HandleBundleChanged(bundleName, true);
+        }
+        if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
+            DistributedBundleService::GetInstance().HandleBundleRemoved(bundleName);
+        }
+        ANS_LOGI("Handle bundle event %{public}s, %{public}s.", bundleName.c_str(), action.c_str());
+    });
+    serviceQueue_->submit(task);
+}
+#else
+void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
+    const DistributedDeviceInfo& peerDevice)
+{
+    return;
+}
+
+int32_t DistributedService::OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> & operationInfo,
+    const DistributedDeviceInfo& device)
+{
+    return DistributedOperationService::GetInstance().OnOperationResponse(operationInfo, device);
+}
+
+void DistributedService::SyncDeviceStatus(int32_t status)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+    status = (static_cast<uint32_t>(status) << 1);
+    std::function<void()> task = std::bind([&, status]() {
+        DistributedDeviceService::GetInstance().SyncDeviceStatus(status);
+    });
+    serviceQueue_->submit(task);
+}
+
+void DistributedService::OnApplicationInfnChanged(const std::string& bundleName)
+{
+    return;
+}
+#endif
+
+void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t type = 0;
+    DistributedDeviceInfo peerDevice;
+    NotifticationMatchBox matchBox = NotifticationMatchBox(boxMessage);
+    if (!matchBox.GetLocalDeviceType(type)) {
+        ANS_LOGI("Dans handle match device type failed.");
+        return;
+    } else {
+        peerDevice.deviceType_ = static_cast<uint16_t>(type);
+    }
+    if (!matchBox.GetLocalDeviceId(peerDevice.deviceId_)) {
+        ANS_LOGI("Dans handle match device id failed.");
+        return;
+    }
+    int32_t matchType = 0;
+    if (!matchBox.GetMatchType(matchType)) {
+        ANS_LOGI("Dans handle match sync failed.");
+        return;
+    }
+    ANS_LOGI("Dans handle match device type %{public}d.", matchType);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    if (matchType == MatchType::MATCH_SYN) {
+        DistributedDeviceService::GetInstance().SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
+        DistributedBundleService::GetInstance().RequestBundlesIcon(peerDevice, true);
+        DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, true);
+    } else if (matchType == MatchType::MATCH_ACK) {
+        DistributedBundleService::GetInstance().RequestBundlesIcon(peerDevice, false);
+        DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
+        DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, false);
+    }
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_, true);
+#else
+    if (matchType == MatchType::MATCH_SYN) {
+        DistributedDeviceService::GetInstance().SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
+    } else if (matchType == MatchType::MATCH_ACK) {
+        DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
+        DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
+    }
+#endif
 }
 
 void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
@@ -144,31 +338,34 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
         }
         ANS_LOGI("Dans handle message type %{public}d.", type);
         switch (type) {
-            case NotificationEventType::PUBLISH_NOTIFICATION:
-                PublishNotifictaion(box);
-                break;
-            case NotificationEventType::NOTIFICATION_STATE_SYNC:
-                HandleDeviceState(box);
-                break;
             case NotificationEventType::NOTIFICATION_MATCH_SYNC:
                 HandleMatchSync(box);
                 break;
             case NotificationEventType::REMOVE_NOTIFICATION:
-                RemoveNotification(box);
+                DistributedPublishService::GetInstance().RemoveNotification(box);
                 break;
             case NotificationEventType::REMOVE_ALL_NOTIFICATIONS:
-                RemoveNotifications(box);
+                DistributedPublishService::GetInstance().RemoveNotifications(box);
                 break;
             case NotificationEventType::BUNDLE_ICON_SYNC:
-                HandleBundleIconSync(box);
-                break;
-            case NotificationEventType::SYNC_NOTIFICATION:
-                HandleNotificationSync(box);
+                DistributedBundleService::GetInstance().HandleBundleIconSync(box);
                 break;
             case NotificationEventType::NOTIFICATION_RESPONSE_SYNC:
             case NotificationEventType::NOTIFICATION_RESPONSE_REPLY_SYNC:
-                HandleResponseSync(box);
+                DistributedOperationService::GetInstance().HandleNotificationOperation(box);
                 break;
+#ifdef DISTRIBUTED_FEATURE_MASTER
+            case NotificationEventType::NOTIFICATION_STATE_SYNC:
+                DistributedDeviceService::GetInstance().SetDeviceStatus(box);
+                break;
+#else
+            case NotificationEventType::PUBLISH_NOTIFICATION:
+                DistributedPublishService::GetInstance().PublishNotification(box);
+                break;
+            case NotificationEventType::SYNC_NOTIFICATION:
+                DistributedPublishService::GetInstance().PublishSynchronousLiveView(box);
+                break;
+#endif
             default:
                 ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);
                 break;
@@ -189,18 +386,6 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
         return;
     }
     OnHandleMsg(box);
-}
-
-int64_t DistributedService::GetCurrentTime()
-{
-    auto now = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    return duration.count();
-}
-
-bool DistributedService::IsReportHa()
-{
-    return localDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE;
 }
 }
 }

@@ -43,6 +43,33 @@ DistributedOperationService& DistributedOperationService::GetInstance()
     return distributedOperationService;
 }
 
+void DistributedOperationService::HandleNotificationOperation(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t operationType = 0;
+    int32_t matchType = 0;
+    std::string hashCode;
+    NotificationResponseBox responseBox = NotificationResponseBox(boxMessage);
+    responseBox.GetOperationType(operationType);
+    responseBox.GetMatchType(matchType);
+    responseBox.GetNotificationHashCode(hashCode);
+    ANS_LOGI("handle response, hashCode: %{public}s type: %{public}d %{public}d.",
+        hashCode.c_str(), operationType, matchType);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    if (matchType == MatchType::MATCH_SYN) {
+        if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_JUMP) {
+            TriggerJumpApplication(hashCode);
+        } else if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_REPLY) {
+            ErrCode result = TriggerReplyApplication(hashCode, responseBox);
+            ReplyOperationResponse(hashCode, responseBox, OperationType::DISTRIBUTE_OPERATION_REPLY, result);
+        }
+    }
+#else
+    if (matchType == MatchType::MATCH_ACK) {
+        ResponseOperationResult(hashCode, responseBox);
+    }
+#endif
+}
+
 #ifdef DISTRIBUTED_FEATURE_MASTER
 static int64_t GetCurrentTime()
 {
