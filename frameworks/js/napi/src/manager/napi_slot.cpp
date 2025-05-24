@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace NotificationNapi {
-uint32_t NOTIFICATION_SETTING_VIBRATION_ENABLE_BIT = 4;
 napi_value NapiAddSlot(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
@@ -1000,8 +999,8 @@ void AsyncCompleteCallbackNapiGetNotificationSettings(napi_env env, napi_status 
     if (asynccallbackinfo) {
         napi_value result = Common::NapiGetNull(env);
         napi_create_object(env, &result);
-        bool soundEnabled = (asynccallbackinfo->slotFlags >> 0) & 1;
-        bool vibrationEnabled = (asynccallbackinfo->slotFlags >> NOTIFICATION_SETTING_VIBRATION_ENABLE_BIT) & 1;
+        bool soundEnabled = asynccallbackinfo->slotFlags & NotificationConstant::ReminderFlag::SOUND_FLAG;
+        bool vibrationEnabled = asynccallbackinfo->slotFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG;
         napi_value vibrationValue;
         napi_value soundValue;
         napi_get_boolean(env, vibrationEnabled, &vibrationValue);
