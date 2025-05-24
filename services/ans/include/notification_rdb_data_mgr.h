@@ -159,6 +159,9 @@ private:
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
     int32_t InitCreatedTables();
     int32_t RestoreForMasterSlaver();
+    void SendUserDataSizeHisysevent();
+    std::uint64_t GetRemainPartitionSize(const std::string &partitionName);
+    std::vector<std::uint64_t> GetFileOrFolderSize(const std::vector<std::string> &paths);
 
 private:
     NotificationRdbConfig notificationRdbConfig_;

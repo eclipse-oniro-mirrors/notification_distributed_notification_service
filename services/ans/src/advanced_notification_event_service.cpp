@@ -14,11 +14,13 @@
  */
 
 #include "advanced_notification_service.h"
+#include "notification_rdb_data_mgr.h"
 
 #include <cstdint>
 #include <functional>
 #include <iomanip>
 #include <sstream>
+#include <sys/statfs.h>
 
 #include "access_token_helper.h"
 #include "ans_inner_errors.h"
@@ -32,11 +34,21 @@
 #include "common_event_support.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
+#include "directory_ex.h"
 
 #include "advanced_notification_inline.h"
 
 namespace OHOS {
 namespace Notification {
+
+static int32_t USER_DATA_SIZE_REPORT_INTERVAL = 24 * NotificationConstant::HOUR_TO_MS;
+static int64_t lastReportTime_ = 0;
+const std::string ANS_COMPONENT_NAME = "distributed_notification_service";
+const std::string ANS_PARTITION_NAME = "/data";
+const std::vector<std::string> ANS_FOLDER_PATHS = {
+    "/data/service/el1/public/database/notification_service"
+};
+
 void AdvancedNotificationService::SendSubscribeHiSysEvent(int32_t pid, int32_t uid,
     const sptr<NotificationSubscribeInfo> &info, ErrCode errCode)
 {
@@ -202,6 +214,49 @@ void AdvancedNotificationService::SendLiveViewUploadHiSysEvent(
     eventInfo.contentType = static_cast<int32_t>(record->request->GetNotificationType());
     eventInfo.operateFlag = uploadStatus;
     EventReport::SendHiSysEvent(STATIC_LIVE_VIEW_UPLOAD, eventInfo);
+}
+
+void NotificationDataMgr::SendUserDataSizeHisysevent()
+{
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    if (lastReportTime_ != 0 && abs(now - lastReportTime_) <= USER_DATA_SIZE_REPORT_INTERVAL) {
+        ANS_LOGD("no need report");
+        return;
+    }
+
+    ANS_LOGI("user data size hisysevent report");
+    lastReportTime_ = now;
+
+    UserDataSizeInfo userDataSizeInfo;
+    userDataSizeInfo.componentName = ANS_COMPONENT_NAME;
+    userDataSizeInfo.partitionName = ANS_PARTITION_NAME;
+    userDataSizeInfo.folderPath = ANS_FOLDER_PATHS;
+    userDataSizeInfo.folderSize = GetFileOrFolderSize(ANS_FOLDER_PATHS);
+    userDataSizeInfo.remainPartitionSize = GetRemainPartitionSize(ANS_PARTITION_NAME);
+
+    EventReport::SendHiSysEvent(userDataSizeInfo);
+}
+
+std::vector<std::uint64_t> NotificationDataMgr::GetFileOrFolderSize(const std::vector<std::string> &paths)
+{
+    std::vector<std::uint64_t> folderSize;
+    for (auto path : paths) {
+        folderSize.emplace_back(OHOS::GetFolderSize(path));
+    }
+    return folderSize;
+}
+
+std::uint64_t NotificationDataMgr::GetRemainPartitionSize(const std::string &partitionName)
+{
+    struct statfs stat;
+    if (statfs(partitionName.c_str(), &stat) != 0) {
+        return -1;
+    }
+    std::uint64_t blockSize = stat.f_bsize;
+    std::uint64_t freeSize = stat.f_bfree * blockSize;
+    constexpr double units = 1024.0;
+    return freeSize/(units * units);
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -42,6 +42,7 @@ constexpr char PUBLISH[] = "PUBLISH";
 constexpr char CANCEL[] = "CANCEL";
 constexpr char REMOVE[] = "REMOVE";
 constexpr char STATIC_LIVE_VIEW_UPLOAD[] = "STATIC_LIVE_VIEW_UPLOAD";
+constexpr char USER_DATA_SIZE[] = "USER_DATA_SIZE";
 } // namespace
 
 struct EventInfo {
@@ -63,6 +64,14 @@ struct EventInfo {
     std::string classification;
 };
 
+struct UserDataSizeInfo {
+    std::string componentName;
+    std::string partitionName;
+    std::uint64_t remainPartitionSize = 0;
+    std::vector<std::string> folderPath;
+    std::vector<std::uint64_t> folderSize;
+};
+
 class EventReport {
 public:
     /**
@@ -72,6 +81,12 @@ public:
      * @param eventInfo event info
      */
     static void SendHiSysEvent(const std::string &eventName, const EventInfo &eventInfo);
+    /**
+     * @brief send fileManager hisysevent
+     *
+     * @param eventInfo event info
+     */
+    static void SendHiSysEvent(const UserDataSizeInfo &userDataSizeInfo);
 
 private:
 #ifdef HAS_HISYSEVENT_PART
@@ -94,6 +109,7 @@ private:
     static void InnerSendCancelEvent(const EventInfo &eventInfo);
     static void InnerSendRemoveEvent(const EventInfo &eventInfo);
     static void InnerSendLiveviewUploadEvent(const EventInfo &eventInfo);
+    static void InnerSendUserDataSizeEvent(const UserDataSizeInfo &userDataSizeInfo);
 
     template<typename... Types>
     static void InnerEventWrite(const std::string &eventName,
