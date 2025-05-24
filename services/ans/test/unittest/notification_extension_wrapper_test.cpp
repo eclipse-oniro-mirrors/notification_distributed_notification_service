@@ -384,5 +384,17 @@ HWTEST_F(NotificationExtensionWrapperTest, convertToDelType_DisableNotificationR
     // Assert
     ASSERT_EQ(expectedDelType, actualDelType);
 }
+
+HWTEST_F(NotificationExtensionWrapperTest, NotificationDialogControl_Test, TestSize.Level0)
+{
+    ExtensionWrapper wrapper;
+    bool result = wrapper.NotificationDialogControl();
+    EXPECT_EQ(true, result);
+
+    auto mockNotificationDialogControl = []() { return true; };
+    wrapper.notificationDialogControl_ = mockNotificationDialogControl;
+    result = wrapper.NotificationDialogControl();
+    EXPECT_EQ(true, result);
+}
 }   //namespace Notification
 }   //namespace OHOS

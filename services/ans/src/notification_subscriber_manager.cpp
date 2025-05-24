@@ -33,7 +33,7 @@
 #include "advanced_notification_service.h"
 #include "notification_analytics_util.h"
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
@@ -847,6 +847,7 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
                 record->subscriber->OnBadgeChanged(badgeData);
             }
         }
+        NotificationAnalyticsUtil::ReportBadgeChange(badgeData);
     };
     notificationSubQueue_->submit(setBadgeNumberFunc);
 }

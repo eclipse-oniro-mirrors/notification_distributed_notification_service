@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "analytics_util.h"
-#include "distributed_service.h"
+#include "distributed_device_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -37,7 +37,7 @@ void AnalyticsUtil::InitSendReportCallBack(std::function<void(int32_t, int32_t, 
 void AnalyticsUtil::SendHaReport(int32_t eventCode, int32_t errorCode, uint32_t branchId,
     const std::string& errorReason, int32_t code)
 {
-    if (haCallback_ == nullptr || !DistributedService::GetInstance().IsReportHa()) {
+    if (haCallback_ == nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
         return;
     }
     if (code == -1) {
@@ -49,14 +49,14 @@ void AnalyticsUtil::SendHaReport(int32_t eventCode, int32_t errorCode, uint32_t 
 
 void AnalyticsUtil::SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason)
 {
-    if (sendReportCallback_ != nullptr || !DistributedService::GetInstance().IsReportHa()) {
+    if (sendReportCallback_ != nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
         sendReportCallback_(messageType, errCode, errorReason);
     }
 }
 
 void AnalyticsUtil::OperationalReporting(int branchId, int32_t slotType)
 {
-    if (haCallback_ == nullptr || !DistributedService::GetInstance().IsReportHa()) {
+    if (haCallback_ == nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
         return;
     }
     std::string reason;
@@ -66,7 +66,7 @@ void AnalyticsUtil::OperationalReporting(int branchId, int32_t slotType)
 void AnalyticsUtil::AbnormalReporting(int32_t eventCode, int result, uint32_t branchId,
     const std::string &errorReason)
 {
-    if (!DistributedService::GetInstance().IsReportHa()) {
+    if (!DistributedDeviceService::GetInstance().IsReportDataByHa()) {
         return;
     }
 

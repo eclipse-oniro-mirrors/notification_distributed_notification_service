@@ -37,7 +37,7 @@ DistributedPreferences& DistributedPreferences::GetInstance()
     return distributedPreferences;
 }
 
-int32_t DistributedPreferences::InertBundleIcon(const std::string &bundleName, const std::string &icon)
+int32_t DistributedPreferences::InsertBundleIcon(const std::string &bundleName, const std::string &icon)
 {
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
@@ -65,7 +65,7 @@ int32_t DistributedPreferences::DeleteBundleIcon(const std::string &bundleName)
     return 0;
 }
 
-int32_t DistributedPreferences::InertBatchBundleIcons(std::unordered_map<std::string, std::string> &values)
+int32_t DistributedPreferences::InsertBatchBundleIcons(std::unordered_map<std::string, std::string> &values)
 {
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {

@@ -73,7 +73,7 @@
 #include "distributed_screen_status_manager.h"
 #endif
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 #include "advanced_datashare_helper_ext.h"
 #include "notification_analytics_util.h"
 #include "advanced_notification_flow_control_service.h"
@@ -753,6 +753,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         }
         NotificationAnalyticsUtil::ReportPublishWithUserInput(request);
         NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
+        NotificationAnalyticsUtil::ReportPublishBadge(request);
     }));
     notificationSvrQueue_->wait(handler);
     // live view handled in UpdateNotificationTimerInfo, ignore here.
@@ -1118,34 +1119,6 @@ void AdvancedNotificationService::AddToNotificationList(const std::shared_ptr<No
     SortNotificationList();
 }
 
-ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
-    const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
-{
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        auto record = GetFromNotificationList(hashCode);
-        if (record != nullptr) {
-            notificationRequest = record->request;
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
 ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
     auto iter = notificationList_.begin();
@@ -1202,70 +1175,6 @@ void AdvancedNotificationService::StopFilters()
     if (notificationSlotFilter_ != nullptr) {
         notificationSlotFilter_->OnStop();
     }
-}
-
-ErrCode AdvancedNotificationService::GetActiveNotifications(
-    std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-    bundleOption->SetAppInstanceKey(instanceKey);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidated.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        notifications.clear();
-        for (auto record : notificationList_) {
-            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
-                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
-                notifications.push_back(record->request);
-            }
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        ANS_LOGD("BundleOption is nullptr.");
-        return ERR_ANS_INVALID_BUNDLE;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        size_t count = 0;
-        for (auto record : notificationList_) {
-            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid())) {
-                count += 1;
-            }
-        }
-        num = static_cast<uint64_t>(count);
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)
-{
-    return ERR_INVALID_OPERATION;
 }
 
 ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
@@ -1560,119 +1469,6 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedN
     return nullptr;
 }
 
-ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGW("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        notifications.clear();
-        for (auto record : notificationList_) {
-            if (record->notification != nullptr && record->notification->request_ != nullptr) {
-                notifications.push_back(record->notification);
-            }
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
-    int32_t slotTypeInt)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGW("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        notifications.clear();
-        for (auto record : notificationList_) {
-            if (record->notification != nullptr && record->notification->request_ != nullptr &&
-                record->notification->request_->GetSlotType() == slotType) {
-                notifications.push_back(record->notification);
-            }
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
-inline bool IsContained(const std::vector<std::string> &vec, const std::string &target)
-{
-    bool isContained = false;
-
-    auto iter = vec.begin();
-    while (iter != vec.end()) {
-        if (*iter == target) {
-            isContained = true;
-            break;
-        }
-        iter++;
-    }
-
-    return isContained;
-}
-
-ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
-    const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGD("Check permission is false.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        for (auto record : notificationList_) {
-            if (IsContained(key, record->notification->GetKey())) {
-                notifications.push_back(record->notification);
-            }
-        }
-    }));
-    notificationSvrQueue_->wait(handler);
-    return ERR_OK;
-}
-
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNotificationList(
     int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName)
 {
@@ -1756,54 +1552,6 @@ ErrCode AdvancedNotificationService::PublishInNotificationList(const std::shared
     AddToNotificationList(record);
 
     return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::SetDoNotDisturbDate(int32_t userId,
-    const sptr<NotificationDoNotDisturbDate> &date)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_16);
-    message.Message("userId:" + std::to_string(userId));
-    if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Input userId is invalidity.");
-        message.ErrorCode(ERR_ANS_INVALID_PARAM);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    return SetDoNotDisturbDateByUser(userId, date);
-}
-
-ErrCode AdvancedNotificationService::GetDoNotDisturbDate(int32_t userId,
-    sptr<NotificationDoNotDisturbDate> &date)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Input userId is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
-    return GetDoNotDisturbDateByUser(userId, date);
 }
 
 ErrCode AdvancedNotificationService::GetHasPoppedDialog(

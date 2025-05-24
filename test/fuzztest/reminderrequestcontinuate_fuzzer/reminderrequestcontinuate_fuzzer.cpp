@@ -20,7 +20,6 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fdp)
     {
-        std::string stringData = fdp->ConsumeRandomLengthString();
         int32_t reminderId = fdp->ConsumeIntegral<int32_t>();
         Notification::ReminderRequest reminderRequest(reminderId);
         reminderRequest.SerializeButtonInfo();

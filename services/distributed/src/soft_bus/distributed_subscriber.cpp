@@ -127,7 +127,7 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
     ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str());
-    return DistributedService::GetInstance().OnResponse(operationInfo, peerDevice_);
+    return DistributedService::GetInstance().OnOperationResponse(operationInfo, peerDevice_);
 }
 
 void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
@@ -136,7 +136,7 @@ void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundl
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         return;
     }
-    DistributedService::GetInstance().HandleBundleChanged(bundleName, false);
+    DistributedService::GetInstance().OnApplicationInfnChanged(bundleName);
 }
 
 void DistribuedSubscriber::SetLocalDevice(DistributedDeviceInfo localDevice)

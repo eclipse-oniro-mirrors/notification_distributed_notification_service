@@ -22,6 +22,11 @@ namespace NotificationNapi {
 using namespace OHOS::Notification;
 
 class SubscriberInstance : public NotificationSubscriber {
+private:
+    struct CallbackInfo {
+        napi_env env = nullptr;
+        napi_ref ref = nullptr;
+    };
 public:
     SubscriberInstance();
     virtual ~SubscriberInstance();
@@ -133,6 +138,13 @@ public:
     void SetCallbackInfo(const napi_env &env, const std::string &type, const napi_ref &ref);
 
     /**
+     * @brief Gets the callback information by type.
+     *
+     * @param type Indicates the type of callback.
+     */
+    CallbackInfo GetCallbackInfo(const std::string &type);
+
+    /**
      * @brief Sets threadsafe_function.
      *
      * @param tsfn Indicates the napi_threadsafe_function of callback.
@@ -141,36 +153,34 @@ public:
 
 private:
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetDieCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetDisturbModeCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref);
-
     void SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
 
+    CallbackInfo GetCancelCallbackInfo();
+    CallbackInfo GetConsumeCallbackInfo();
+    CallbackInfo GetUpdateCallbackInfo();
+    CallbackInfo GetSubscribeCallbackInfo();
+    CallbackInfo GetUnsubscribeCallbackInfo();
+    CallbackInfo GetDieCallbackInfo();
+    CallbackInfo GetDisturbModeCallbackInfo();
+    CallbackInfo GetDisturbDateCallbackInfo();
+    CallbackInfo GetDisturbChangedCallbackInfo();
+    CallbackInfo GetEnabledNotificationCallbackInfo();
+    CallbackInfo GetBadgeCallbackInfo();
+    CallbackInfo GetBadgeEnabledCallbackInfo();
+    CallbackInfo GetBatchCancelCallbackInfo();
+
 private:
-    struct CallbackInfo {
-        napi_env env = nullptr;
-        napi_ref ref = nullptr;
-    };
     napi_threadsafe_function tsfn_ = nullptr;
     CallbackInfo canceCallbackInfo_;
     CallbackInfo consumeCallbackInfo_;

@@ -28,6 +28,9 @@
 #include "nlohmann/json.hpp"
 #include "bundle_manager_helper.h"
 #include "notification_config_parse.h"
+#include "notification_preferences.h"
+#include "os_account_manager_helper.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -36,6 +39,7 @@ constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
+constexpr const int32_t BADGE_CHANGE_CODE = 201;
 
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 5;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
@@ -43,14 +47,19 @@ constexpr const int32_t MODIFY_ERROR_EVENT_COUNT = 6;
 constexpr const int32_t MODIFY_ERROR_EVENT_TIME = 60;
 constexpr const int32_t MAX_NUMBER_EVERY_REPORT = 20;
 constexpr const int32_t MAX_REPORT_COUNT = 3;
+constexpr const int32_t MAX_BADGE_AGGRATE_NUM = 20;
+constexpr const int32_t MAX_NUMBER_EVERY_BADGE_DATA = 20;
 
 constexpr const int32_t REPORT_CACHE_MAX_SIZE = 50;
 constexpr const int32_t SUCCESS_REPORT_CACHE_MAX_SIZE = 60;
 constexpr const int32_t REPORT_CACHE_INTERVAL_TIME = 30;
 constexpr const int32_t SUCCESS_REPORT_CACHE_INTERVAL_TIME = 1800;
 constexpr const int32_t REASON_MAX_LENGTH = 255;
+constexpr const int32_t MAX_BADGE_NUMBER = 99;
 constexpr const int32_t SUB_CODE = 100;
 constexpr const int32_t MAX_TIME = 43200000;
+constexpr const int32_t MAX_BADGE_CHANGE_REPORT_TIME = 1800000;
+constexpr const int32_t TIMEOUT_TIME_OF_BADGE = 5400000;
 constexpr const int32_t NOTIFICATION_MAX_DATA = 100;
 constexpr const int32_t SOUND_FLAG = 1 << 10;
 constexpr const int32_t LOCKSCREEN_FLAG = 1 << 11;
@@ -65,6 +74,7 @@ static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowC
     {DELETE_ERROR_EVENT_CODE, {}},
     {ANS_CUSTOMIZE_CODE, {}},
 };
+static std::map<std::string, BadgeInfo> badgeInfos;
 
 int32_t HaMetaMessage::syncWatch_ = 0;
 int32_t HaMetaMessage::syncHeadSet_ = 0;
@@ -85,11 +95,26 @@ static std::list<ReportCache> reportCacheList;
 static bool g_reportFlag = false;
 static std::shared_ptr<ReportTimerInfo> reportTimeInfo = std::make_shared<ReportTimerInfo>();
 
+static std::mutex badgeInfosMutex_;
 static std::mutex reportSuccessCacheMutex_;
-static uint64_t reportSuccessTimerId = 0;
+static uint64_t reportAggregateTimeId = 0;
 static std::list<ReportCache> successReportCacheList;
 static bool g_successReportFlag = false;
-static std::shared_ptr<ReportTimerInfo> reportSuccessTimeInfo = std::make_shared<ReportTimerInfo>();
+static std::shared_ptr<ReportTimerInfo> reportAggregateTimeInfo = std::make_shared<ReportTimerInfo>();
+static std::list<ReportCache> reportAggList;
+
+static int32_t SLOT_REPORT_INTERVAL = 7 * 24 * NotificationConstant::HOUR_TO_MS;
+static int64_t lastReportTime_ = 0;
+static std::mutex lastReportTimeMutex_;
+static int32_t SLOT_SUB_CODE = 101;
+static int32_t SLOT_ONCE_REPORT = 10;
+static uint32_t SLOT_MAX_REPORT = 200;
+static uint64_t reportSlotEnabledTimerId_ = 0;
+static std::shared_ptr<ReportTimerInfo> slotTimeInfo = std::make_shared<ReportTimerInfo>();
+static std::list<ReportSlotMessage> slotEnabledList_;
+static std::mutex slotEnabledListMutex_;
+static bool g_reportSlotFlag = false;
+static std::mutex reportSlotEnabledMutex_;
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -713,6 +738,174 @@ void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t event
     }
 }
 
+void NotificationAnalyticsUtil::ReportBadgeChange(const sptr<BadgeNumberCallbackData> &badgeData)
+{
+    ANS_LOGD("ReportBadgeChange enter");
+    if (badgeData == nullptr) {
+        return;
+    }
+
+    BadgeInfo badgeInfo;
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    std::string bundle = badgeData->GetBundle() + "_"  + std::to_string(badgeData->GetUid());
+    int32_t badgeNumber = badgeData->GetBadgeNumber();
+    std::string badgeNumStr = (badgeNumber > MAX_BADGE_NUMBER) ? "99+" : std::to_string(badgeNumber);
+    {
+        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        auto iter = badgeInfos.find(bundle);
+        if (iter != badgeInfos.end()) {
+            badgeInfo.badgeNum = iter->second.badgeNum + "_" + badgeNumStr;
+            badgeInfo.time = iter->second.time + "_" + std::to_string(now - iter->second.startTime);
+            badgeInfo.changeCount = ++ iter->second.changeCount;
+            badgeInfo.startTime = iter->second.startTime;
+            badgeInfo.isNeedReport = iter->second.isNeedReport;
+        } else {
+            badgeInfo.badgeNum = badgeNumStr;
+            badgeInfo.startTime = now;
+            badgeInfo.time = std::to_string(now);
+            badgeInfo.changeCount = 1;
+            badgeInfo.isNeedReport = false;
+        }
+        AddToBadgeInfos(bundle, badgeInfo);
+    }
+
+    CheckBadgeReport();
+}
+
+void NotificationAnalyticsUtil::ReportPublishBadge(const sptr<NotificationRequest>& request)
+{
+    ANS_LOGD("ReportPublishBadge enter");
+    if (request == nullptr) {
+        return;
+    }
+
+    if (request->GetBadgeNumber() <= 0) {
+        return;
+    }
+    BadgeInfo badgeInfo;
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    std::string bundle = request->GetOwnerBundleName() + "_"  + std::to_string(request->GetOwnerUid());
+    int32_t badgeNumber = request->GetBadgeNumber();
+    std::string badgeNumStr = (badgeNumber > MAX_BADGE_NUMBER) ? "99+" : std::to_string(badgeNumber);
+    {
+        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        auto iter = badgeInfos.find(bundle);
+        if (iter != badgeInfos.end()) {
+            badgeInfo.badgeNum = iter->second.badgeNum + "_+" + badgeNumStr;
+            badgeInfo.time = iter->second.time + "_" + std::to_string(now - iter->second.startTime);
+            badgeInfo.changeCount = ++ iter->second.changeCount;
+            badgeInfo.startTime = iter->second.startTime;
+            badgeInfo.isNeedReport = iter->second.isNeedReport;
+        } else {
+            badgeInfo.badgeNum = "+" + badgeNumStr;
+            badgeInfo.startTime = now;
+            badgeInfo.time = std::to_string(now);
+            badgeInfo.changeCount = 1;
+            badgeInfo.isNeedReport = false;
+        }
+        AddToBadgeInfos(bundle, badgeInfo);
+    }
+
+    CheckBadgeReport();
+}
+
+void NotificationAnalyticsUtil::AddToBadgeInfos(std::string bundle, BadgeInfo& badgeInfo)
+{
+    int32_t count = 0;
+    auto iter = badgeInfos.find(bundle);
+    if (iter != badgeInfos.end() && badgeInfo.changeCount == MAX_NUMBER_EVERY_BADGE_DATA) {
+        for (const auto& pair : badgeInfos) {
+            if (pair.first.find(bundle) != std::string::npos) {
+                count++;
+            }
+        }
+        std::string newBundle = bundle + "_" + std::to_string(count);
+        badgeInfos[newBundle] = badgeInfo;
+        badgeInfos.erase(bundle);
+    } else {
+        badgeInfos[bundle] = badgeInfo;
+    }
+}
+
+void NotificationAnalyticsUtil::CheckBadgeReport()
+{
+    int32_t needReportCount = 0;
+    bool timeoutReport = false;
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    {
+        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        for (auto& pair : badgeInfos) {
+            if (pair.second.changeCount == MAX_NUMBER_EVERY_BADGE_DATA ||
+                now - pair.second.startTime > MAX_BADGE_CHANGE_REPORT_TIME) {
+                pair.second.isNeedReport = true;
+            }
+            if (pair.second.isNeedReport == true) {
+                needReportCount ++;
+            }
+            if (now - pair.second.startTime > TIMEOUT_TIME_OF_BADGE) {
+                timeoutReport = true;
+            }
+        }
+    }
+
+    if (timeoutReport || needReportCount >= MAX_BADGE_AGGRATE_NUM) {
+        AggregateBadgeChange();
+    }
+}
+
+void NotificationAnalyticsUtil::AggregateBadgeChange()
+{
+    EventFwk::Want want;
+    nlohmann::json ansData;
+    std::string badgeMessage;
+    std::vector<string> removeBundles;
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    ansData["subCode"] = std::to_string(BADGE_CHANGE_CODE);
+    {
+        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        for (const auto& pair : badgeInfos) {
+            const std::string bundle = pair.first;
+            const BadgeInfo info = pair.second;
+            if (!info.isNeedReport) {
+                continue;
+            }
+            if (!badgeMessage.empty()) {
+                badgeMessage += ",";
+            }
+            badgeMessage += bundle + ":{" + info.badgeNum + "," + info.time + "}";
+            removeBundles.emplace_back(bundle);
+        }
+        ansData["data"] = badgeMessage;
+        std::string message = ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+        want.SetParam("ansData", message);
+
+        if (reportAggregateTimeId == 0) {
+            sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
+            if (aggregateTimer == nullptr) {
+                ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+                return;
+            }
+            reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
+        }
+
+        ReportCache reportInfo;
+        reportInfo.want = want;
+        reportInfo.eventCode = ANS_CUSTOMIZE_CODE ;
+        reportAggList.emplace_back(reportInfo);
+
+        for (auto bundle : removeBundles) {
+            badgeInfos.erase(bundle);
+        }
+    }
+    
+    if (!g_successReportFlag) {
+        ExecuteSuccessCacheList();
+    }
+}
+
 void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_t eventCode)
 {
     std::lock_guard<std::mutex> lock(reportSuccessCacheMutex_);
@@ -722,13 +915,13 @@ void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_
         return;
     }
 
-    if (reportSuccessTimerId == 0) {
-        sptr<MiscServices::TimeServiceClient> successTimer = MiscServices::TimeServiceClient::GetInstance();
-        if (successTimer == nullptr) {
+    if (reportAggregateTimeId == 0) {
+        sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
+        if (aggregateTimer == nullptr) {
             ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
             return;
         }
-        reportSuccessTimerId = successTimer->CreateTimer(reportSuccessTimeInfo);
+        reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
     }
 
     ReportCache reportCache;
@@ -780,32 +973,39 @@ ReportCache NotificationAnalyticsUtil::Aggregate()
 void NotificationAnalyticsUtil::ExecuteSuccessCacheList()
 {
     if (successReportCacheList.empty()) {
-        g_successReportFlag = false;
-        ANS_LOGI("successReportCacheList is end");
-        return;
+        ANS_LOGI("successReportCacheList is empty");
+        if (reportAggList.empty()) {
+            g_successReportFlag = false;
+            ANS_LOGI("No aggregate data need report");
+            return;
+        }
+    } else {
+        while (!successReportCacheList.empty()) {
+            auto reportCache = Aggregate();
+            reportAggList.emplace_back(reportCache);
+        }
     }
 
     auto reportCount = MAX_REPORT_COUNT;
-    while (reportCount > 0) {
-        if (successReportCacheList.empty()) {
-            break;
-        }
-        auto reportCache = Aggregate();
+    while (reportCount > 0 && !reportAggList.empty()) {
+        auto reportCache = reportAggList.front();
         ReportCommonEvent(reportCache);
+        reportAggList.pop_front();
         reportCount--;
     }
+    CheckBadgeReport();
     auto triggerFunc = [] {
         std::lock_guard<std::mutex> lock(reportSuccessCacheMutex_);
         NotificationAnalyticsUtil::ExecuteSuccessCacheList();
     };
-    reportSuccessTimeInfo->SetCallbackInfo(triggerFunc);
-    sptr<MiscServices::TimeServiceClient> successTimer = MiscServices::TimeServiceClient::GetInstance();
-    if (successTimer == nullptr || reportSuccessTimerId == 0) {
+    reportAggregateTimeInfo->SetCallbackInfo(triggerFunc);
+    sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
+    if (aggregateTimer == nullptr || reportAggregateTimeId == 0) {
         g_successReportFlag = false;
         ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
         return;
     }
-    successTimer->StartTimer(reportSuccessTimerId, NotificationAnalyticsUtil::GetCurrentTime() +
+    aggregateTimer->StartTimer(reportAggregateTimeId, NotificationAnalyticsUtil::GetCurrentTime() +
         SUCCESS_REPORT_CACHE_INTERVAL_TIME * NotificationConstant::SECOND_TO_MS);
     g_successReportFlag = true;
 }
@@ -960,6 +1160,214 @@ void NotificationAnalyticsUtil::ReportSkipFailedEvent(const HaMetaMessage& messa
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
 
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, MODIFY_ERROR_EVENT_CODE));
+}
+
+bool NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled()
+{
+    if (!CheckSlotNeedReport()) {
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("userId is failed");
+        return false;
+    }
+
+    if (!CreateSlotTimerExecute(userId)) {
+        return false;
+    }
+    return true;
+}
+
+bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
+{
+    std::lock_guard<std::mutex> lock(reportSlotEnabledMutex_);
+    if (g_reportSlotFlag) {
+        ANS_LOGW("now has message is reporting");
+        return false;
+    }
+
+    sptr<MiscServices::TimeServiceClient> timer =
+        MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        g_reportSlotFlag = false;
+        return false;
+    }
+    if (reportSlotEnabledTimerId_ == 0) {
+        reportSlotEnabledTimerId_ = timer->CreateTimer(slotTimeInfo);
+    }
+
+    auto triggerFunc = [userId] {
+        ANS_LOGI("trigger is arrived, userid:%{public}d", userId);
+        GetAllSlotMessageCache(userId);
+        ExecuteSlotReportList();
+    };
+
+    slotTimeInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(reportSlotEnabledTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
+        DEFAULT_ERROR_EVENT_TIME * NotificationConstant::SECOND_TO_MS);
+    g_reportSlotFlag = true;
+    return true;
+}
+
+void NotificationAnalyticsUtil::ExecuteSlotReportList()
+{
+    std::lock_guard<std::mutex> lock(reportSlotEnabledMutex_);
+
+    if (!ReportSlotEnable()) {
+        g_reportSlotFlag = false;
+        return;
+    }
+    
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        g_reportSlotFlag = false;
+        return;
+    }
+    auto triggerFunc = [] {
+        ExecuteSlotReportList();
+    };
+
+    slotTimeInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(reportSlotEnabledTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
+        DEFAULT_ERROR_EVENT_TIME * NotificationConstant::SECOND_TO_MS);
+    g_reportSlotFlag = true;
+}
+
+bool NotificationAnalyticsUtil::ReportSlotEnable()
+{
+    std::lock_guard<std::mutex> lock(slotEnabledListMutex_);
+    if (slotEnabledList_.empty()) {
+        ANS_LOGI("report end");
+        return false;
+    }
+
+    std::list<ReportSlotMessage> slotEnabledReportList;
+    int count = SLOT_ONCE_REPORT;
+    while (count-- > 0 && !slotEnabledList_.empty()) {
+        auto slotMessage = slotEnabledList_.front();
+        slotEnabledReportList.push_back(slotMessage);
+        slotEnabledList_.pop_front();
+    }
+
+    ReportCache reportCache;
+    BuildSlotReportCache(reportCache, slotEnabledReportList);
+    ReportCommonEvent(reportCache);
+    return true;
+}
+
+bool NotificationAnalyticsUtil::BuildSlotReportCache(ReportCache &reportCache,
+    std::list<ReportSlotMessage> &slotEnabledReportList)
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(SLOT_SUB_CODE);
+    nlohmann::json dataArray;
+    for (const auto &report : slotEnabledReportList) {
+        nlohmann::json dataItem;
+        dataItem["slotType"] = report.slotType;
+        dataItem["status"] = report.status;
+        dataItem["bundleName"] = report.bundleName;
+        dataItem["uid"] = report.uid;
+        dataArray.push_back(dataItem);
+    }
+    ansData["data"] = dataArray;
+
+    std::string message = ansData.dump(-1, ' ', false,
+        nlohmann::json::error_handler_t::replace);
+    EventFwk::Want want;
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    want.SetParam("ansData", message);
+
+    reportCache.want = want;
+    reportCache.eventCode = ANS_CUSTOMIZE_CODE;
+    return true;
+}
+
+bool NotificationAnalyticsUtil::CheckSlotNeedReport()
+{
+    std::lock_guard<std::mutex> lock(lastReportTimeMutex_);
+    auto now = GetCurrentTime();
+    if (lastReportTime_ != 0 && abs(now - lastReportTime_) <= SLOT_REPORT_INTERVAL) {
+        ANS_LOGD("no need report");
+        return false;
+    }
+
+    ANS_LOGI("slot enabled need report");
+    lastReportTime_ = now;
+    return true;
+}
+
+bool NotificationAnalyticsUtil::GetAllSlotMessageCache(const int32_t &userId)
+{
+    std::unordered_map<std::string, std::string> slotEnablesMap;
+    auto res = NotificationPreferences::GetInstance()->GetBatchKvsFromDbContainsKey(
+        LIVE_VIEW_SLOT_ENABLE_END, slotEnablesMap, userId);
+    if (res != ERR_OK) {
+        ANS_LOGW("message is err:%{public}d, userId:%{public}d ", res, userId);
+        return false;
+    }
+
+    if (slotEnablesMap.size() == 0 || slotEnablesMap.size() > SLOT_MAX_REPORT) {
+        ANS_LOGW("slotEnablesMap size %{public}zu", slotEnablesMap.size());
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(slotEnabledListMutex_);
+    for (const auto& budleEntry : slotEnablesMap) {
+        std::string budleEntryKey = budleEntry.first;
+        // enable
+        ReportSlotMessage reportSlotMessage;
+        std::string budleEntryValue = budleEntry.second;
+        NotificationAnalyticsUtil::GetReportSlotMessage(budleEntryKey,
+            budleEntryValue, reportSlotMessage, userId);
+        slotEnabledList_.push_back(reportSlotMessage);
+    }
+    return true;
+}
+
+bool NotificationAnalyticsUtil::GetReportSlotMessage(std::string& budleEntryKey,
+    std::string& budleEntryValue, ReportSlotMessage& reportSlotMessage, const int32_t &userId)
+{
+    // find first
+    size_t firstUnderscore = budleEntryKey.find('_');
+    // find second
+    size_t secondUnderscore = budleEntryKey.find('_', firstUnderscore + 1);
+    // find third
+    size_t thirdUnderscore = budleEntryKey.find('_', secondUnderscore + 1);
+    // get bundle string
+    std::string extracted = budleEntryKey.substr(secondUnderscore + 1, thirdUnderscore - secondUnderscore - 1);
+
+    std::unordered_map<std::string, std::string> bundleInfoMap;
+    auto res = NotificationPreferences::GetInstance()->GetBatchKvsFromDbContainsKey(
+        extracted, bundleInfoMap, userId);
+    if (res != ERR_OK) {
+        ANS_LOGW("get bundleInfoMap is err:%{public}d", res);
+        return false;
+    }
+
+    auto nameIt = bundleInfoMap.find(ANS_BUNDLE_BEGIN + LINE + extracted + LINE + NAME);
+    auto uidIt = bundleInfoMap.find(ANS_BUNDLE_BEGIN + LINE + extracted + LINE + UID);
+    if (nameIt == bundleInfoMap.end() || uidIt == bundleInfoMap.end()) {
+        ANS_LOGW("bundleInfoMap is empty, database error");
+        return false;
+    }
+
+    // data process
+    std::string bundleName = nameIt->second;
+    int32_t uid = std::atoi(uidIt->second.c_str());
+    bool enable = std::atoi(budleEntryValue.c_str());
+    ANS_LOGI("budleInfoEntry uid %{public}d, name is:%{public}s, enabled:%{public}d",
+        uid, bundleName.c_str(), enable);
+    reportSlotMessage.uid = uid;
+    reportSlotMessage.status = enable;
+    reportSlotMessage.slotType = static_cast<int32_t>(
+        NotificationConstant::SlotType::LIVE_VIEW);
+    reportSlotMessage.bundleName = bundleName;
+    return true;
 }
 } // namespace Notification
 } // namespace OHOS

@@ -93,7 +93,8 @@ export default class Constants {
   public static CLICK_SHADOW_LENGTH = 48;
   public static DIVIDER = '1px';
   public static DIVIDER_HEIGHT = 24;
-  public public static DIVIDER_WIDTH = '2px';
+  public static DIVIDER_WIDTH = '2px';
+  public static DIVIDER_WIDTH_THIN = '1px';
   public static DIVIDER_MARGIN_RIGHT_PERMISSION = 52;
   public static DIVIDER_MARGIN_RIGHT_APPLICATION = 68;
 

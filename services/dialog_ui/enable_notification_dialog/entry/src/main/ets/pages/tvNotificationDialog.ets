@@ -130,13 +130,17 @@ struct PermissionDialog {
                       await this.enableNotification(false);
                     })
                     .customizeButton()
-                    .margin({right: 12})
+                  Divider()
+                    .color(Color.Transparent)
+                    .vertical(true)
+                    .height(Constants.DIVIDER_HEIGHT)
+                    .strokeWidth(Constants.DIVIDER_WIDTH_THIN)
+                    .margin({left: 12, right: 12})
                   Button($r('app.string.ALLOW'))
                     .onClick(async (): Promise<void> => {
                       await this.enableNotification(true);
                     })
                     .customizeButton()
-                    .margin({left: 12})
                 }
                 .margin({
                   left: Constants.TV_TITLE_MARGIN_SIDE,

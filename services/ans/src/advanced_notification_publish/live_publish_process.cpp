@@ -25,7 +25,7 @@
 #include "os_account_manager_helper.h"
 #include "ans_status.h"
 
-#include "advanced_notification_inline.cpp"
+#include "advanced_notification_inline.h"
 
 namespace OHOS {
 namespace Notification {

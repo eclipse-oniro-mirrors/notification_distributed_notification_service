@@ -108,13 +108,14 @@ ohos_shared_library("libdans") {
     "src/helper/distributed_operation_helper.cpp",
     "src/helper/distributed_preference.cpp",
     "src/helper/distributed_rdb_helper.cpp",
-    "src/soft_bus/distributed_cmd_service.cpp",
+    "src/soft_bus/distributed_bundle_service.cpp",
+    "src/soft_bus/distributed_device_service.cpp",
     "src/soft_bus/distributed_extern_intferface.cpp",
     "src/soft_bus/distributed_observer_service.cpp",
-    "src/soft_bus/distributed_publish_service.cpp",
+    "src/soft_bus/distributed_operation_service.cpp",
+    "src/soft_bus/distributed_publish_service_v2.cpp",
     "src/soft_bus/distributed_service.cpp",
-    "src/soft_bus/distributed_service_uitls.cpp",
-    "src/soft_bus/distributed_subscribe_service.cpp",
+    "src/soft_bus/distributed_subscribe_service_v2.cpp",
     "src/soft_bus/distributed_subscriber.cpp",
     "src/tlv_box/batch_remove_box.cpp",
     "src/tlv_box/box_base.cpp",
@@ -169,7 +170,7 @@ ohos_shared_library("libdans") {
     defines += [ "HITRACE_METER_ENABLE" ]
   }
 
-  if (distributed_notification_service_feature_distributed_master) {
+  if (distributed_notification_service_feature_phone_collaboration) {
     defines += [ "DISTRIBUTED_FEATURE_MASTER" ]
   }
 
