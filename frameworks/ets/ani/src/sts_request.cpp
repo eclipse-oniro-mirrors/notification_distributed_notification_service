@@ -469,19 +469,19 @@ ani_status GetNotificationContent(ani_env *env, ani_object obj,
         ANS_LOGE("GetNotificationContent failed, has nullptr");
         return ANI_ERROR;
     }
-    ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref notificationContentRef = {};
     if (ANI_OK != GetPropertyRef(env, obj, "content", isUndefined, notificationContentRef)
         || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetNotificationContent:get contentRef failed");
-        return status;
+        return ANI_INVALID_ARGS;
     }
     ani_ref contentTypeRef;
-    if (ANI_OK != GetPropertyRef(env, obj, "notificationContentType", isUndefined, contentTypeRef)
+    if (ANI_OK != GetPropertyRef(env, static_cast<ani_object>(notificationContentRef),
+        "notificationContentType", isUndefined, contentTypeRef)
         || isUndefined == ANI_TRUE || contentTypeRef == nullptr) {
         ANS_LOGE("GetNotificationContent:get notificationContentType failed");
-        return status;
+        return ANI_INVALID_ARGS;
     }
     ContentType type;
     if (!ContentTypeEtsToC(env, static_cast<ani_enum_item>(contentTypeRef), type)) {
@@ -493,7 +493,7 @@ ani_status GetNotificationContent(ani_env *env, ani_object obj,
         return ANI_INVALID_ARGS;
     }
     ANS_LOGD("GetNotificationContent end");
-    return status;
+    return ANI_OK;
 }
 
 void GetNotificationSlotType(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
