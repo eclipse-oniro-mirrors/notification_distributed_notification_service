@@ -41,6 +41,7 @@ public:
     bool SetNotificationBriefText(const std::string& text);
     bool SetNotificationExpandedTitle(const std::string& text);
     bool SetNotificationLongText(const std::string& text);
+    bool SetAllLineLength(const int32_t& length);
     bool SetNotificationAllLines(const std::vector<std::string>& allLines);
     bool SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture);
     bool SetNotificationActionName(const std::string& actionName);
@@ -63,6 +64,7 @@ public:
     bool GetNotificationBriefText(std::string& text) const;
     bool GetNotificationExpandedTitle(std::string& text) const;
     bool GetNotificationLongText(std::string& text) const;
+    bool GetAllLineLength(int32_t& length) const;
     bool GetNotificationAllLines(std::vector<std::string>& allLines) const;
     bool GetNotificationBigPicture(std::shared_ptr<Media::PixelMap>& bigPicture) const;
     bool GetNotificationActionName(std::string& actionName) const;
