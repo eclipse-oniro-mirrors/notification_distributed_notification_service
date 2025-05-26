@@ -157,10 +157,11 @@ bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slo
         ANS_LOGE("set String params fail");
         return false;
     }
-    if (!SetOptionalFieldArrayDouble(env, cls, outAniObj, "vibrationValues", slot->GetVibrationStyle())) {
-        ANS_LOGE("Set vibrationValues fail");
-        return false;
-    }
+    if (slot->GetVibrationStyle().size() != 0
+        && !SetOptionalFieldArrayDouble(env, cls, outAniObj, "vibrationValues", slot->GetVibrationStyle())) {
+            ANS_LOGE("Set vibrationValues fail");
+            return false;
+        }
     ANS_LOGD("WrapNotificationSlot end");
     return true;
 }

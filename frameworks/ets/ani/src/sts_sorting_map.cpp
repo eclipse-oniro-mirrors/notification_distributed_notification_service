@@ -83,14 +83,16 @@ bool WarpNotificationSortingMap(ani_env *env,
         return false;
     }
     std::vector<std::string> keys = sortingMap->GetKey();
-    ani_object arrayObj = GetAniStringArrayByVectorString(env, keys);
-    if (arrayObj == nullptr) {
-        ANS_LOGE("WarpVectorStringToSts sortedHashCode faild");
-        return false;
-    }
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortedHashCode", arrayObj))) {
-        ANS_LOGE("Object_SetPropertyByName_Ref sortedHashCode faild. status %{public}d", status);
-        return false;
+    if (!keys.empty()) {
+        ani_object arrayObj = GetAniStringArrayByVectorString(env, keys);
+        if (arrayObj == nullptr) {
+            ANS_LOGE("WarpVectorStringToSts sortedHashCode faild");
+            return false;
+        }
+        if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortedHashCode", arrayObj))) {
+            ANS_LOGE("Object_SetPropertyByName_Ref sortedHashCode faild. status %{public}d", status);
+            return false;
+        }
     }
     return true;
 }

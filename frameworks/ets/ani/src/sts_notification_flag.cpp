@@ -57,7 +57,7 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
     }
     // readonly reminderFlags?: number;
     uint32_t reminderFlags = flags->GetReminderFlags();
-    if (SetPropertyOptionalByDouble(env, flagsObject, "reminderFlags", reminderFlags)) {
+    if (!SetPropertyOptionalByDouble(env, flagsObject, "reminderFlags", reminderFlags)) {
         ANS_LOGD("WarpNotificationFlags set 'reminderFlags' faild");
     }
     return true;

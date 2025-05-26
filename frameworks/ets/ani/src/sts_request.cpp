@@ -469,19 +469,20 @@ ani_status GetNotificationContent(ani_env *env, ani_object obj,
         ANS_LOGE("GetNotificationContent failed, has nullptr");
         return ANI_ERROR;
     }
+    ani_status status = ANI_OK;
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref notificationContentRef = {};
-    if (ANI_OK != GetPropertyRef(env, obj, "content", isUndefined, notificationContentRef)
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "content", isUndefined, notificationContentRef))
         || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetNotificationContent:get contentRef failed");
-        return ANI_INVALID_ARGS;
+        ANS_LOGE("GetNotificationContent:get contentRef failed. status %{public}d", status);
+        return status;
     }
     ani_ref contentTypeRef;
-    if (ANI_OK != GetPropertyRef(env, static_cast<ani_object>(notificationContentRef),
-        "notificationContentType", isUndefined, contentTypeRef)
+    if (ANI_OK != (status = GetPropertyRef(env, static_cast<ani_object>(notificationContentRef),
+        "notificationContentType", isUndefined, contentTypeRef))
         || isUndefined == ANI_TRUE || contentTypeRef == nullptr) {
-        ANS_LOGE("GetNotificationContent:get notificationContentType failed");
-        return ANI_INVALID_ARGS;
+        ANS_LOGE("GetNotificationContent:get notificationContentType failed. status %{public}d", status);
+        return status;
     }
     ContentType type;
     if (!ContentTypeEtsToC(env, static_cast<ani_enum_item>(contentTypeRef), type)) {

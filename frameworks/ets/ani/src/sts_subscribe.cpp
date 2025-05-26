@@ -123,6 +123,7 @@ void StsSubscriberInstance::OnCanceled(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnConsumed(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
@@ -151,6 +152,7 @@ void StsSubscriberInstance::OnConsumed(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
@@ -177,6 +179,7 @@ void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMa
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnConnected()
 {
@@ -197,6 +200,7 @@ void StsSubscriberInstance::OnConnected()
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnDisconnected()
 {
@@ -222,6 +226,7 @@ void StsSubscriberInstance::OnDisconnected()
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnDied()
 {
@@ -242,6 +247,7 @@ void StsSubscriberInstance::OnDied()
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<NotificationDoNotDisturbDate> &date)
 {
@@ -273,6 +279,7 @@ void StsSubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notifica
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnEnabledNotificationChanged(
     const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
@@ -300,6 +307,7 @@ void StsSubscriberInstance::OnEnabledNotificationChanged(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnBadgeChanged(const std::shared_ptr<BadgeNumberCallbackData> &badgeData)
 {
@@ -326,6 +334,7 @@ void StsSubscriberInstance::OnBadgeChanged(const std::shared_ptr<BadgeNumberCall
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
 {
@@ -356,6 +365,7 @@ void StsSubscriberInstance::OnBadgeEnabledChanged(const sptr<EnabledNotification
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 void StsSubscriberInstance::OnBatchCanceled(
     const std::vector<std::shared_ptr<OHOS::Notification::Notification>> &requestList,
@@ -384,6 +394,7 @@ void StsSubscriberInstance::OnBatchCanceled(
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
+    ANS_LOGD("done");
 }
 bool StsSubscriberInstance::HasOnBatchCancelCallback()
 {
@@ -487,6 +498,7 @@ bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::ve
         ANS_LOGD("FunctionalObject_Call error. result: %{public}d.", aniResult);
         return false;
     }
+    ANS_LOGD("done");
     return true;
 }
 
