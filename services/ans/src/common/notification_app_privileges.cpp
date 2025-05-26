@@ -28,6 +28,9 @@ NotificationAppPrivileges::NotificationAppPrivileges(const std::string &flagStr)
     if (flagStr.size() > REMINDER_ENABLED_SEQ && flagStr[REMINDER_ENABLED_SEQ] == '1') {
         privileges_ |= 1 << REMINDER_ENABLED_SEQ;
     }
+    if (flagStr.size() > DISTRIBUTED_REPLY_SEQ && flagStr[DISTRIBUTED_REPLY_SEQ] == '1') {
+        privileges_ |= 1 << DISTRIBUTED_REPLY_SEQ;
+    }
 }
 bool NotificationAppPrivileges::IsLiveViewEnabled() const
 {
@@ -46,6 +49,13 @@ bool NotificationAppPrivileges::IsBannerEnabled() const
 bool NotificationAppPrivileges::IsReminderEnabled() const
 {
     if ((privileges_ & (1 << REMINDER_ENABLED_SEQ)) != 0) {
+        return true;
+    }
+    return false;
+}
+bool NotificationAppPrivileges::IsDistributedReplyEnabled() const
+{
+    if ((privileges_ & (1 << DISTRIBUTED_REPLY_SEQ)) != 0) {
         return true;
     }
     return false;

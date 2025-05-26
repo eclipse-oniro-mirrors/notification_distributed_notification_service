@@ -155,6 +155,8 @@ public:
 
     static void ReportSkipFailedEvent(const HaMetaMessage& message);
 
+    static void ReportPublishWithUserInput(const sptr<NotificationRequest>& request);
+
     static bool ReportAllBundlesSlotEnabled();
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,

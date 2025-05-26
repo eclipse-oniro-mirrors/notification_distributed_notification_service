@@ -245,6 +245,10 @@ const static std::string KEY_SUBSCRIBER_EXISTED_FLAG = "existFlag";
 const static int32_t DISTRIBUTED_KEY_NUM = 4;
 const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
 const static int32_t DISTRIBUTED_KEY_UID_INDEX = 2;
+constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
+const static std::string KEY_REMOVE_SLOT_FLAG = "label_ans_remove_";
+const static std::string KEY_REMOVED_FLAG = "1";
+const static std::string KEY_SECOND_REMOVED_FLAG = "2";
 
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
@@ -2642,6 +2646,85 @@ uint32_t NotificationPreferencesDatabase::GetHashCodeRule(const int32_t uid)
         }
     });
     return result;
+}
+
+static std::string GetBundleRemoveFlagKey(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
+{
+    std::string key;
+    if (sourceType == CLEAR_SLOT_FROM_AVSEESAION) {
+        key = KEY_REMOVE_SLOT_FLAG + bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid()) +
+            KEY_UNDER_LINE + std::to_string(slotType);
+    } else {
+        key = KEY_REMOVE_SLOT_FLAG + std::to_string(sourceType) + KEY_UNDER_LINE + bundleOption->GetBundleName() +
+            std::to_string(bundleOption->GetUid()) + KEY_UNDER_LINE + std::to_string(slotType);
+    }
+    return key;
+}
+
+bool NotificationPreferencesDatabase::SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Current bundle option is null");
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+
+    std::string key = GetBundleRemoveFlagKey(bundleOption, slotType, sourceType);
+    int32_t result = rdbDataManager_->InsertData(key, KEY_SECOND_REMOVED_FLAG, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
+    const NotificationConstant::SlotType &slotType, int32_t sourceType)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Current bundle option is null");
+        return true;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGW("Current user acquisition failed");
+        return true;
+    }
+
+    std::string key = GetBundleRemoveFlagKey(bundleOption, slotType, sourceType);
+    bool existFlag = true;
+    std::string result;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                existFlag = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = value;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
+    if (!existFlag || result == KEY_REMOVED_FLAG) {
+        return false;
+    }
+    return true;
 }
 
 std::string NotificationPreferencesDatabase::GenerateHashCodeGenerate(const int32_t uid)

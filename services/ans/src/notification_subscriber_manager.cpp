@@ -599,7 +599,6 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return false;
     }
     auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
-    ANS_LOGI("slotTypecount:%{public}d", (int)record->slotTypes.size());
     auto slotIter = std::find(record->slotTypes.begin(), record->slotTypes.end(), soltType);
     bool isSubscribedSlotType = (record->slotTypes.size() == 0) || (slotIter != record->slotTypes.end());
     if (!isSubscribedSlotType) {
@@ -637,6 +636,12 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
         }
         if (!isQuickReply && (record->filterType & FILTETYPE_IM) > 0) {
             ANS_LOGI("ConsumeRecordFilter-filterType-im");
+            return false;
+        }
+        std::string bundleName = notification->GetBundleName();
+        if (isQuickReply && record->deviceType == DEVICE_TYPE_WEARABLE &&
+            !DelayedSingleton<NotificationConfigParse>::GetInstance()->IsDistributedReplyEnabled(bundleName)) {
+            ANS_LOGI("ConsumeRecordFilter-filterType-im bundle %{public}s", bundleName.c_str());
             return false;
         }
     }

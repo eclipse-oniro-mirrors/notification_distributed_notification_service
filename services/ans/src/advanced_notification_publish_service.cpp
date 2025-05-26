@@ -75,9 +75,13 @@ constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
-const static std::string BUNDLE_NAME_ABROAD = "com.easy.transfer.abroad";
+const static std::string BUNDLE_NAME_ABROAD = "com.easy.abroad";
 const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
+constexpr int32_t ZERO_USER_ID = 0;
 constexpr int32_t BADGE_NUM_LIMIT = 0;
+constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
+constexpr int32_t CLEAR_SLOT_FROM_RSS = 2;
+constexpr const char *SAMPLE_MEACHINE =  "const.dfx.enable_retail";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -301,8 +305,9 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
+        ANS_LOGE("Request object is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = PrePublishRequest(request);
@@ -348,6 +353,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         if (IsDisableNotification(bundle)) {
             ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            message.BranchId(EventBranchId::BRANCH_1)
+                .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
         }
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
@@ -359,7 +366,9 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             return;
         }
 
-        CheckDoNotDisturbProfile(record);
+        if (!request->IsDoNotDisturbByPassed()) {
+            CheckDoNotDisturbProfile(record);
+        }
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
@@ -374,10 +383,12 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
         result = FlowControlService::GetInstance()->FlowControl(record, ipcUid, isNotificationExists);
         if (result != ERR_OK) {
+            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
             return;
         }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
+            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("Failed to assign notification list");
             return;
         }
 
@@ -386,6 +397,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     });
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
     }
 
@@ -1013,7 +1025,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         return ERR_ANS_INVALID_PARAM;
     }
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false);
+    return CommonRequestEnableNotification(deviceId, callback, callerToken, bundleOption, false, false);
 }
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string bundleName, const int32_t uid)
@@ -1028,20 +1040,24 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, 1, bundleInfo, 0);
+    bool ret = BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        bundleInfo, ZERO_USER_ID);
+    bool easyAbroad = false;
     if (bundleInfo.applicationInfo.installSource == INSTALL_SOURCE_EASYABROAD) {
         ANS_LOGI("RequestEnableNotification abroad app");
-        return ERR_ANS_NOT_ALLOWED;
+        easyAbroad = true;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
-    return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true);
+    return CommonRequestEnableNotification("", nullptr, nullptr, bundleOption, true, easyAbroad);
 }
 
 ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::string &deviceId,
     const sptr<AnsDialogCallback> &callback,
     const sptr<IRemoteObject> &callerToken,
     const sptr<NotificationBundleOption> bundleOption,
-    const bool innerLake)
+    const bool innerLake,
+    const bool easyAbroad)
 {
     ANS_LOGI("%{public}s", __FUNCTION__);
     ErrCode result = ERR_OK;
@@ -1079,6 +1095,9 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
+    if (GetSystemBoolParameter(SAMPLE_MEACHINE, false)) {
+        return ERR_ANS_NOT_ALLOWED;
+    }
 
     if (!CreateDialogManager()) {
         ANS_LOGE("Create dialog manager failed.");
@@ -1087,7 +1106,8 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         return ERROR_INTERNAL_ERROR;
     }
 
-    result = dialogManager_->RequestEnableNotificationDailog(bundleOption, callback, callerToken, innerLake);
+    result = dialogManager_->RequestEnableNotificationDailog(bundleOption,
+        callback, callerToken, innerLake, easyAbroad);
     if (result == ERR_OK) {
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }
@@ -1300,7 +1320,10 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_NOT_ALLOWED;
     }
-
+    if (GetSystemBoolParameter(SAMPLE_MEACHINE, false)) {
+        return ERR_ANS_NOT_ALLOWED;
+    }
+    
     if (!CreateDialogManager()) {
         ANS_LOGE("Create dialog manager failed.");
         message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Create dialog failed");
@@ -2426,6 +2449,43 @@ void AdvancedNotificationService::UpdateUnifiedGroupInfo(const std::string &key,
     });
 }
 
+void AdvancedNotificationService::ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid,
+    int32_t sourceType)
+{
+    if (request == nullptr || (sourceType != CLEAR_SLOT_FROM_AVSEESAION && sourceType != CLEAR_SLOT_FROM_RSS)) {
+        return;
+    }
+
+    if (sourceType == CLEAR_SLOT_FROM_AVSEESAION) {
+        if (callingUid != AVSEESAION_PID ||
+            request->GetSlotType() != NotificationConstant::SlotType::LIVE_VIEW) {
+            return;
+        }
+    }
+    if (sourceType == CLEAR_SLOT_FROM_RSS) {
+        if (request->GetCreatorUid() != RSS_PID || !request->IsSystemLiveView()) {
+            return;
+        }
+    }
+
+    int32_t uid = request->GetOwnerUid();
+    std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(uid);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption == nullptr) {
+        ANS_LOGW("Notification get bundle failed %{public}d", uid);
+        return;
+    }
+
+    if (NotificationPreferences::GetInstance()->GetBundleRemoveFlag(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW, sourceType)) {
+        return;
+    }
+    NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW);
+    NotificationPreferences::GetInstance()->SetBundleRemoveFlag(bundleOption,
+        NotificationConstant::SlotType::LIVE_VIEW, sourceType);
+}
+
 ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -2537,7 +2597,9 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             }
         }
 
-        CheckDoNotDisturbProfile(record);
+        if (!request->IsDoNotDisturbByPassed()) {
+            CheckDoNotDisturbProfile(record);
+        }
         ChangeNotificationByControlFlags(record, isAgentController);
         if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
         (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
@@ -2546,6 +2608,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             if (result == ERR_OK) {
                 SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
             }
+            ClearSlotTypeData(record->request, ipcUid, CLEAR_SLOT_FROM_RSS);
             return;
         }
         bool isNotificationExists = IsNotificationExists(record->notification->GetKey());

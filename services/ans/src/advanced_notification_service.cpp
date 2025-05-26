@@ -737,6 +737,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         if (result != ERR_OK) {
             return;
         }
+        NotificationAnalyticsUtil::ReportPublishWithUserInput(request);
         NotificationAnalyticsUtil::ReportPublishSuccessEvent(request, message);
     }));
     notificationSvrQueue_->wait(handler);
@@ -913,6 +914,10 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         if (slot->GetAuthorizedStatus() == NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED) {
             slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         }
+    }
+    if (record->request->IsSystemLiveView()) {
+        ANS_LOGI("System live view no need add sloty.");
+        return ERR_OK;
     }
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
@@ -2204,6 +2209,10 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
 {
     ANS_LOGD("start.");
     if (pushCallBacks_.find(request->GetSlotType()) == pushCallBacks_.end()) {
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            return ERR_OK;
+        }
         return ERR_ANS_PUSH_CHECK_UNREGISTERED;
     }
     sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
@@ -2229,16 +2238,15 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
 
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
-    if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
-        result != ERR_OK) {
-        ANS_LOGI("The application with the permission fails to pushcheck.");
-        result = ERR_OK;
-    }
     if (result != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
             .ErrorCode(result).Message("Push OnCheckNotification failed.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+            ANS_LOGI("The application with the permission fails to pushcheck.");
+            result = ERR_OK;
+        }
     }
     if (pushCallBackParam != nullptr && !pushCallBackParam->eventControl.empty() && extroInfo != nullptr) {
         extroInfo->SetParam("eventControl", AAFwk::String::Box(pushCallBackParam->eventControl));

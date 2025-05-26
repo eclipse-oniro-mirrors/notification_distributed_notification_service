@@ -179,13 +179,14 @@ ErrCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBund
     return proxy->SetSlotFlagsAsBundle(bo, slotFlags);
 }
 
-ErrCode AnsNotification::PublishNotification(const NotificationRequest &request)
+ErrCode AnsNotification::PublishNotification(const NotificationRequest &request, std::string instanceKey)
 {
     ANS_LOGD("enter");
-    return PublishNotification(std::string(), request);
+    return PublishNotification(std::string(), request, instanceKey);
 }
 
-ErrCode AnsNotification::PublishNotification(const std::string &label, const NotificationRequest &request)
+ErrCode AnsNotification::PublishNotification(const std::string &label, const NotificationRequest &request,
+    std::string instanceKey)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
     ANS_LOGI("PublishNotification,notificationId:%{public}u", request.GetNotificationId());
@@ -230,7 +231,6 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
-    std::string instanceKey = GetAppInstanceKey();
     reqPtr->SetAppInstanceKey(instanceKey);
 
     return proxy->Publish(label, reqPtr);
@@ -281,18 +281,17 @@ ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationR
     if (IsNonDistributedNotificationType(reqPtr->GetNotificationType())) {
         reqPtr->SetDistributed(false);
     }
-    std::string instanceKey = GetAppInstanceKey();
-    reqPtr->SetAppInstanceKey(instanceKey);
 
     return proxy->PublishNotificationForIndirectProxy(reqPtr);
 }
 
-ErrCode AnsNotification::CancelNotification(int32_t notificationId)
+ErrCode AnsNotification::CancelNotification(int32_t notificationId, std::string instanceKey)
 {
-    return CancelNotification("", notificationId);
+    return CancelNotification("", notificationId, instanceKey);
 }
 
-ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t notificationId)
+ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t notificationId,
+    std::string instanceKey)
 {
     ANS_LOGI("enter CancelNotification,notificationId:%{public}d", notificationId);
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -301,11 +300,10 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::string instanceKey = GetAppInstanceKey();
     return proxy->Cancel(notificationId, label, instanceKey);
 }
 
-ErrCode AnsNotification::CancelAllNotifications()
+ErrCode AnsNotification::CancelAllNotifications(std::string instanceKey)
 {
     ANS_LOGI("CancelAllNotifications called.");
 
@@ -314,7 +312,6 @@ ErrCode AnsNotification::CancelAllNotifications()
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::string instanceKey = GetAppInstanceKey();
     return proxy->CancelAll(instanceKey);
 }
 
@@ -353,14 +350,14 @@ ErrCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
     return proxy->GetActiveNotificationNums(num);
 }
 
-ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request)
+ErrCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request,
+    std::string instanceKey)
 {
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::string instanceKey = GetAppInstanceKey();
     return proxy->GetActiveNotifications(request, instanceKey);
 }
 
@@ -1079,7 +1076,7 @@ ErrCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
     return proxy->GetShowBadgeEnabled(enabled);
 }
 
-ErrCode AnsNotification::CancelGroup(const std::string &groupName)
+ErrCode AnsNotification::CancelGroup(const std::string &groupName, std::string instanceKey)
 {
     ANS_LOGI("enter CancelGroup,groupName:%{public}s", groupName.c_str());
     if (groupName.empty()) {
@@ -1092,7 +1089,6 @@ ErrCode AnsNotification::CancelGroup(const std::string &groupName)
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::string instanceKey = GetAppInstanceKey();
     return proxy->CancelGroup(groupName, instanceKey);
 }
 
@@ -1694,14 +1690,13 @@ ErrCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32_t user
     return proxy->GetSyncNotificationEnabledWithoutApp(userId, enabled);
 }
 
-ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber)
+ErrCode AnsNotification::SetBadgeNumber(int32_t badgeNumber, std::string instanceKey)
 {
     sptr<AnsManagerInterface> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("SetBadgeNumber fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::string instanceKey = GetAppInstanceKey();
     return proxy->SetBadgeNumber(badgeNumber, instanceKey);
 }
 
@@ -2056,14 +2051,7 @@ ErrCode AnsNotification::UpdateNotificationTimerByUid(const int32_t uid, const b
 
 std::string AnsNotification::GetAppInstanceKey() const
 {
-    std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext>context =
-        OHOS::AbilityRuntime::Context::GetApplicationContext();
-    if (context != nullptr) {
-        return context->GetCurrentInstanceKey();
-    } else {
-        ANS_LOGE("GetApplicationContext for instacekey fail.");
-        return "";
-    }
+    return "";
 }
 
 ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &notificationDisable)

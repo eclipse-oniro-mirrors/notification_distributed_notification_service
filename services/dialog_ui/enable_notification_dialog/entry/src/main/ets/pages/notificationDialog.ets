@@ -151,10 +151,12 @@ struct PermissionDialog {
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text() {
-                    if (!this.dialog.innerLake) {
-                      Span(permission.reason)
-                    } else {
+                    if (this.dialog.easyAbroad) {
+                      Span($r('app.string.reason_cjy'))
+                    } else if (this.dialog.innerLake) {
                       Span($r('app.string.reason_zyt'))
+                    } else {
+                      Span(permission.reason)
                     }
                   }
                   .fontSize(Constants.DIALOG_DESP_FONT_SIZE)
