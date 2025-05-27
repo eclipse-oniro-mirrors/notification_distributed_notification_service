@@ -233,6 +233,14 @@ public:
 
     void NotifyChange(const Uri &uri) override {}
 
+    void RegisterObserverExtProvider(const Uri &uri, const std::shared_ptr<DataShareObserver> dataObserver,
+        bool isDescendants) override {}
+
+    void UnregisterObserverExtProvider(const Uri &uri,
+        const std::shared_ptr<DataShareObserver> dataObserver) override {}
+
+    void NotifyChangeExtProvider(const DataShareObserver::ChangeInfo &changeInfo) override {}
+
     Uri NormalizeUri(Uri &uri) override
     {
         return uri;
