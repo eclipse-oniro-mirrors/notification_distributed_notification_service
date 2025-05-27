@@ -37,6 +37,7 @@ namespace Notification {
 extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
+extern void MockIsNonBundleName(bool isNonBundleName);
 
 class AnsSlotServiceTest : public testing::Test {
 public:
@@ -585,7 +586,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00002, Function | SmallTest
 
     ret = advancedNotificationService_->GetNotificationSettings(flag);
     ASSERT_EQ(ret, ERR_OK);
-    EXPECT_EQ(flag , 0x11);
+    EXPECT_EQ(flag, 0x11);
 }
 
 /**
@@ -598,12 +599,30 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00003, Function | SmallTest
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(false);
-    std::shared_ptr<ffrt::queue> notificationSvrQueue = advancedNotificationService_->notificationSvrQueue_;
-    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    auto advancedNotificationService = std::make_shared<AdvancedNotificationService>();
+    ASSERT_NE(advancedNotificationService, nullptr);
+    advancedNotificationService->notificationSvrQueue_ = nullptr;
+    uint32_t flag;
+    auto ret = advancedNotificationService->GetNotificationSettings(flag);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetNotificationSettings_00004
+ * @tc.desc: Test GetNotificationSettings when bundleName is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_INVALID);
+    MockIsNonBundleName(true);
     uint32_t flag;
     auto ret = advancedNotificationService_->GetNotificationSettings(flag);
-    advancedNotificationService_->notificationSvrQueue_ = notificationSvrQueue;
-    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsNonBundleName(false);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
 }
 }  // namespace Notification
 }  // namespace OHOS
