@@ -1729,7 +1729,7 @@ ErrCode AnsNotification::SetDoNotDisturbDate(const int32_t &userId,
         ANS_LOGE("Fail: dndDate is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->SetDoNotDisturbDate(userId, dndDate);
+    return proxy->SetDoNotDisturbDate(dndDate);
 }
 
 ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, NotificationDoNotDisturbDate &doNotDisturbDate)
@@ -1746,7 +1746,7 @@ ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, Notification
     }
 
     sptr<NotificationDoNotDisturbDate> dndDate = nullptr;
-    auto ret = proxy->GetDoNotDisturbDate(userId, dndDate);
+    auto ret = proxy->GetDoNotDisturbDate(dndDate);
     if (ret != ERR_OK) {
         ANS_LOGE("Get DoNotDisturbDate failed.");
         return ret;
