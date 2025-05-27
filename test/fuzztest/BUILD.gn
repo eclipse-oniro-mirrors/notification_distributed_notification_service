@@ -23,8 +23,6 @@ group("fuzztest") {
     "ansmanagerstubannex_fuzzer:AnsManagerStubAnnexFuzzTest",
     "ansmanagerstubannexthree_fuzzer:AnsManagerStubAnnexThreeFuzzTest",
     "ansmanagerstubannextwo_fuzzer:AnsManagerStubAnnexTwoFuzzTest",
-    "anssubscriberproxy_fuzzer:AnsSubscriberProxyFuzzTest",
-    "anssubscriberstub_fuzzer:AnsSubscriberStubFuzzTest",
     "cancelasbundle_fuzzer:CancelAsBundleFuzzTest",
     "cancelgroup_fuzzer:CancelGroupFuzzTest",
     "cancelnotification_fuzzer:CancelNotificationFuzzTest",

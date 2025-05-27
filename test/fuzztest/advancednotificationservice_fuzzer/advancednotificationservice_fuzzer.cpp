@@ -181,6 +181,7 @@ namespace OHOS {
         service->IsSmartReminderEnabled(deviceType, enabled);
         service->SetTargetDeviceStatus(deviceType, fuzzData->ConsumeIntegral<int32_t>(), "");
         service->ClearAllNotificationGroupInfo(localSwitch);
+        service->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
 
         OHOS::DoTestForAdvancedNotificationUtils(service, fuzzData);
         OHOS::DoTestForAdvancedNotificationService(service, fuzzData);
