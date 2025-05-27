@@ -137,9 +137,26 @@ bool NotificationRequestBox::SetNotificationLongText(const std::string& text)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_LONG_TITLE, text));
 }
 
+bool NotificationRequestBox::SetAllLineLength(const int32_t& length)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(ALL_LINES_LENGTH, length));
+}
+
 bool NotificationRequestBox::SetNotificationAllLines(const std::vector<std::string>& allLines)
 {
-    return true;
+    if (box_ == nullptr) {
+        return false;
+    }
+    int32_t index = 0;
+    for (auto& line : allLines) {
+        if (box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_ALL_LINES_START_INDEX + index, line))) {
+            index++;
+        }
+    }
+    return SetAllLineLength(index);
 }
 
 bool NotificationRequestBox::SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture)
@@ -309,8 +326,26 @@ bool NotificationRequestBox::GetNotificationLongText(std::string& text) const
     return box_->GetStringValue(NOTIFICATION_LONG_TITLE, text);
 }
 
+bool NotificationRequestBox::GetAllLineLength(int32_t& length) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(ALL_LINES_LENGTH, length);
+}
+
 bool NotificationRequestBox::GetNotificationAllLines(std::vector<std::string>& allLines) const
 {
+    int32_t length = 0;
+    if (!GetAllLineLength(length)) {
+        return false;
+    }
+    for (int i = 0; i < length; i++) {
+        std::string line;
+        if (box_->GetStringValue(NOTIFICATION_ALL_LINES_START_INDEX + i, line)) {
+            allLines.push_back(line);
+        }
+    }
     return true;
 }
 

@@ -422,6 +422,10 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
         std::string actionName;
         std::string userInputKey;
         box.GetNotificationActionName(actionName);
+        if (actionName.empty()) {
+            ANS_LOGE("Check actionButtons is null.");
+            return;
+        }
         box.GetNotificationUserInput(userInputKey);
         std::shared_ptr<NotificationUserInput> userInput  = NotificationUserInput::Create(userInputKey);
         std::shared_ptr<NotificationActionButton> actionButton =
