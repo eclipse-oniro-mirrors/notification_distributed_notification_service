@@ -1523,6 +1523,19 @@ private:
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode DeleteAllByUserInner(const int32_t &userId, int32_t reason, bool isAsync = false, bool removeAll = false);
     ErrCode RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
+    void ExcuteRemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &bundle, int32_t &reason);
+    void GetRemoveListForRemoveAll(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList);
+    ErrCode ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
+    ErrCode ExcuteRemoveNotification(const sptr<NotificationBundleOption> &bundle,
+        int32_t notificationId, const std::string &label, int32_t &removeReason);
+    void ExcuteRemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason);
+    void GetRemoveListForRemoveNtfBySlot(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationSlot> &slot, std::vector<std::shared_ptr<NotificationRecord>> &removeList);
+    void ExcuteDeleteAll(ErrCode &result, const int32_t reason);
+    ErrCode GetNotificationById(const sptr<NotificationBundleOption> &bundle,
+        const int32_t notificationId, sptr<Notification> &notification);
     ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
         const sptr<NotificationBundleOption> &bundleOption);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
