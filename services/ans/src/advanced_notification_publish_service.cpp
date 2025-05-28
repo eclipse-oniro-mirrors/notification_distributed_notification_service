@@ -62,7 +62,6 @@
 namespace OHOS {
 namespace Notification {
 
-constexpr char FOUNDATION_BUNDLE_NAME[] = "ohos.global.systemres";
 constexpr uint32_t SECONDS_IN_ONE_DAY = 24 * 60 * 60;
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
 const static std::string NOTIFICATION_EVENT_SUBSCRIBER_STATUS = "notification.event.SUBSCRIBER_STATUS";
@@ -72,7 +71,6 @@ constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr const char *FOCUS_MODE_REPEAT_CALLERS_ENABLE = "1";
 constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
-constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 constexpr int32_t CLEAR_SLOT_FROM_RSS = 2;
 
@@ -98,102 +96,6 @@ ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     }
 
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
-    return result;
-}
-
-ErrCode AdvancedNotificationService::PublishWithMaxCapacity(
-    const std::string& label, const sptr<NotificationRequest>& request)
-{
-    return Publish(label, request);
-}
-
-ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    if (!request) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    if (request->GetDistributedCollaborate()) {
-        return CollaboratePublish(request);
-    }
-
-    if (!InitPublishProcess()) {
-        return ERR_ANS_NO_MEMORY;
-    }
-
-    request->SetCreateTime(GetCurrentTime());
-    
-    bool isUpdateByOwnerAllowed = IsUpdateSystemLiveviewByOwner(request);
-    AnsStatus ansStatus = publishProcess_[request->GetSlotType()]->PublishPreWork(request, isUpdateByOwnerAllowed);
-    if (!ansStatus.Ok()) {
-        ansStatus.AppendSceneBranch(EventSceneId::SCENE_1, EventBranchId::BRANCH_0, "publish prework failed");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
-        return ansStatus.GetErrCode();
-    }
-
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, EventBranchId::BRANCH_1);
-    ErrCode result = CheckUserIdParams(request->GetReceiverUserId());
-    if (result != ERR_OK) {
-        message.SceneId(EventSceneId::SCENE_3).ErrorCode(result).Message("User is invalid", true);
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
-    }
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    request->SetIsSystemApp(AccessTokenHelper::IsSystemApp() || isSubsystem);
-    if (isSubsystem) {
-        return PublishNotificationBySa(request);
-    }
-    if (request->GetRemovalWantAgent() != nullptr && request->GetRemovalWantAgent()->GetPendingWant() != nullptr) {
-        uint32_t operationType = (uint32_t)(request->GetRemovalWantAgent()->GetPendingWant()
-            ->GetType(request->GetRemovalWantAgent()->GetPendingWant()->GetTarget()));
-        bool isSystemApp = AccessTokenHelper::IsSystemApp();
-        if (!isSubsystem && !isSystemApp && operationType != OPERATION_TYPE_COMMON_EVENT) {
-            ANS_LOGI("SetRemovalWantAgent as nullptr");
-            request->SetRemovalWantAgent(nullptr);
-        }
-    }
-    do {
-        result = publishProcess_[request->GetSlotType()]->PublishNotificationByApp(request);
-        if (result != ERR_OK) {
-            break;
-        }
-
-        sptr<NotificationBundleOption> bundleOption;
-        result = PrepareNotificationInfo(request, bundleOption);
-        if (result != ERR_OK) {
-            message.ErrorCode(result).Message("PrepareNotificationInfo failed.");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            break;
-        }
-
-        result = CheckSoundPermission(request, bundleOption->GetBundleName());
-        if (result != ERR_OK) {
-            message.ErrorCode(result).Message("Check sound failed.");
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-            break;
-        }
-
-#ifndef IS_EMULATOR
-        if (IsNeedPushCheck(request)) {
-            result = PushCheck(request);
-        }
-#endif
-
-        if (result != ERR_OK) {
-            break;
-        }
-        result = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
-        if (result != ERR_OK) {
-            break;
-        }
-    } while (0);
-
-    NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled();
-    SendPublishHiSysEvent(request, result);
     return result;
 }
 
@@ -301,128 +203,6 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxyWithMaxCapacity(
-    const sptr<NotificationRequest>& request)
-{
-    return PublishNotificationForIndirectProxy(request);
-}
-
-ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
-{
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
-    if (!request) {
-        ANS_LOGE("Request object is nullptr");
-        message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Request object is nullptr");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ErrCode result = PrePublishRequest(request);
-    if (result != ERR_OK) {
-        return result;
-    }
-    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
-        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
-    // SA not support sound
-    if (!request->GetSound().empty()) {
-        request->SetSound("");
-    }
-    std::string bundle = request->GetCreatorBundleName();
-    int32_t uid = request->GetCreatorUid();
-    request->SetOwnerUid(uid);
-    request->SetOwnerBundleName(bundle);
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->request = request;
-    record->isThirdparty = false;
-    record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
-    if (record->bundleOption == nullptr || bundleOption == nullptr) {
-        ANS_LOGE("Failed to create bundleOption");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create bundleOption");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_NO_MEMORY;
-    }
-    record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
-    record->notification = new (std::nothrow) Notification(request);
-    if (record->notification == nullptr) {
-        ANS_LOGE("Failed to create notification");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create notification");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_NO_MEMORY;
-    }
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Serial queue is invalid.");
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    SetRequestBySlotType(record->request, bundleOption);
-
-    const int32_t ipcUid = IPCSkeleton::GetCallingUid();
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        if (IsDisableNotification(bundle)) {
-            ANS_LOGE("bundle in Disable Notification list, bundleName=%{public}s", bundle.c_str());
-            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
-            message.BranchId(EventBranchId::BRANCH_1)
-                .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
-            return;
-        }
-        if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
-            ANS_LOGE("Can not assign valid slot!");
-        }
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return;
-        }
-
-        if (!request->IsDoNotDisturbByPassed()) {
-            CheckDoNotDisturbProfile(record);
-        }
-        ChangeNotificationByControlFlags(record, isAgentController);
-        if (IsSaCreateSystemLiveViewAsBundle(record, ipcUid) &&
-        (std::static_pointer_cast<OHOS::Notification::NotificationLocalLiveViewContent>(
-        record->request->GetContent()->GetNotificationContent())->GetType() == TYPE_CODE_DOWNLOAD)) {
-            result = SaPublishSystemLiveViewAsBundle(record);
-            if (result == ERR_OK) {
-                SendLiveViewUploadHiSysEvent(record, UploadStatus::CREATE);
-            }
-            return;
-        }
-
-        bool isNotificationExists = IsNotificationExists(record->notification->GetKey());
-        result = FlowControlService::GetInstance().FlowControl(record, ipcUid, isNotificationExists);
-        if (result != ERR_OK) {
-            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("publish failed with FlowControl");
-            return;
-        }
-        if (AssignToNotificationList(record) != ERR_OK) {
-            ANS_LOGE("Failed to assign notification list");
-            message.BranchId(EventBranchId::BRANCH_5).ErrorCode(result).Message("Failed to assign notification list");
-            return;
-        }
-
-        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
-    });
-    notificationSvrQueue_->wait(handler);
-    if (result != ERR_OK) {
-        NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
-        return result;
-    }
-
-    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
-    }
-    return ERR_OK;
-}
-
 bool AdvancedNotificationService::InitPublishProcess()
 {
     if (publishProcess_.size() > 0) {
@@ -459,18 +239,6 @@ bool AdvancedNotificationService::InitPublishProcess()
     return true;
 }
 
-ErrCode AdvancedNotificationService::PublishAsBundle(
-    const sptr<NotificationRequest>& notification, const std::string &representativeBundle)
-{
-    return ERR_INVALID_OPERATION;
-}
-
-ErrCode AdvancedNotificationService::PublishAsBundleWithMaxCapacity(
-    const sptr<NotificationRequest>& notification, const std::string &representativeBundle)
-{
-    return PublishAsBundle(notification, representativeBundle);
-}
-
 ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<NotificationBundleOption>
     &bundleOption, bool &allowed)
 {
@@ -496,75 +264,6 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
             allowed = CheckApiCompatibility(bundleOption);
         }
     }
-    return result;
-}
-
-ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem) {
-        return ERR_ANS_NOT_SYSTEM_SERVICE;
-    }
-
-    int32_t uid = IPCSkeleton::GetCallingUid();
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
-    request->SetCreatorUserId(userId);
-    ANS_LOGD("%{public}s, uid=%{public}d userId=%{public}d", __FUNCTION__, uid, userId);
-
-    if (request->GetCreatorBundleName().empty()) {
-        request->SetCreatorBundleName(FOUNDATION_BUNDLE_NAME);
-    }
-
-    if (request->GetOwnerBundleName().empty()) {
-        request->SetOwnerBundleName(FOUNDATION_BUNDLE_NAME);
-    }
-
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    bundleOption = new (std::nothrow) NotificationBundleOption(std::string(), uid);
-    if (bundleOption == nullptr) {
-        ANS_LOGE("Failed to create NotificationBundleOption instance");
-        return ERR_NO_MEMORY;
-    }
-
-    ErrCode result = PrepareContinuousTaskNotificationRequest(request, uid);
-    if (result != ERR_OK) {
-        return result;
-    }
-    request->SetUnremovable(true);
-    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
-    record->request = request;
-    record->bundleOption = bundleOption;
-    record->notification = new (std::nothrow) Notification(request);
-    if (record->notification == nullptr) {
-        ANS_LOGE("Failed to create Notification instance");
-        return ERR_NO_MEMORY;
-    }
-    record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
-
-    if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        if (!IsNotificationExists(record->notification->GetKey())) {
-            AddToNotificationList(record);
-        } else {
-            if (record->request->IsAlertOneTime()) {
-                CloseAlert(record);
-            }
-            UpdateInNotificationList(record);
-        }
-
-        UpdateRecentNotification(record->notification, false, 0);
-        sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
-        NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
-    }));
-    notificationSvrQueue_->wait(handler);
-
     return result;
 }
 
