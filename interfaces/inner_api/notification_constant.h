@@ -349,6 +349,8 @@ public:
 
     static constexpr uint64_t INVALID_TIMER_ID = 0ULL;
 
+    static constexpr int32_t ANS_UID = 5523;
+
     // live view max size is 512KB(extra size) + 8KB(base size) = 520KB
     static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;
 
