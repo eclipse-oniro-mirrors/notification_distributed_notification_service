@@ -19,7 +19,7 @@ import { NotificationSubscribeInfo } from 'notification.notificationSubscribeInf
 import { NotificationSubscriber } from 'notification.notificationSubscriber';
 
 type ResolveCallback<T> = (data: T) => void;
-type RejectCallback = (err: Object) => void;
+type RejectCallback = (err: Error) => void;
 
 const ERROR_OK = 0;
 const ERROR_PARAM_INVALID = 401;
@@ -92,7 +92,7 @@ export default namespace notificationSubscribe {
             (e: NullishType): void => {
                 let err: BusinessError<void> = {code: 0, data: undefined};
                 callback(err, undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -111,7 +111,7 @@ export default namespace notificationSubscribe {
             (e: NullishType): void => {
                 let err: BusinessError<void> = {code: 0, data: undefined};
                 callback(err, undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -126,7 +126,7 @@ export default namespace notificationSubscribe {
             p.then(
                 (e: NullishType): void => {
                     resolve(undefined);
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -143,7 +143,7 @@ export default namespace notificationSubscribe {
             (e: NullishType): void => {
                 let err: BusinessError<void> = {code: 0, data: undefined};
                 callback(err, undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -159,7 +159,7 @@ export default namespace notificationSubscribe {
             p.then(
                 (e: NullishType): void => {
                     resolve(undefined);
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -183,7 +183,7 @@ export default namespace notificationSubscribe {
             (e: NullishType): void => {
                 let err: BusinessError<void> = {code: 0, data: undefined};
                 callback(err, undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -205,7 +205,7 @@ export default namespace notificationSubscribe {
             p.then(
                 (e: NullishType): void => {
                     resolve(undefined);
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -224,7 +224,7 @@ export default namespace notificationSubscribe {
             (e: NullishType): void => {
                 let err: BusinessError<void> = {code: 0, data: undefined};
                 callback(err, undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -242,7 +242,7 @@ export default namespace notificationSubscribe {
             p.then(
                 (e: NullishType): void => {
                     resolve(undefined);
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -261,7 +261,7 @@ export default namespace notificationSubscribe {
             (e: NullishType): void => {
                 let err: BusinessError<void> = {code: 0, data: undefined};
                 callback(err, undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -279,7 +279,7 @@ export default namespace notificationSubscribe {
             p.then(
                 (e: NullishType): void => {
                     resolve(undefined);
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -310,7 +310,7 @@ export default namespace notificationSubscribe {
                     } else {
                         resolve(undefined);
                     }
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -337,7 +337,7 @@ export default namespace notificationSubscribe {
             p.then(
                 (e: NullishType): void => {
                     resolve(undefined);
-                }, (error: Object): void => {
+                }, (error: Error): void => {
                     reject(error);
                 }
             )
@@ -380,7 +380,7 @@ export default namespace notificationSubscribe {
             });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -428,7 +428,7 @@ export default namespace notificationSubscribe {
         let p = taskpool.execute((): void => { return notificationSubscribe.nativeRemoveAllForUserId(userId); });
         p.then((data: NullishType): void => {
             resolve(undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             reject(error);
         });
     });
