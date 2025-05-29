@@ -19,6 +19,7 @@
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_request.h"
+#include "sts_common.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -46,14 +47,19 @@ ani_object AniGetAllActiveNotifications(ani_env *env)
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetAllActiveNotifications error, errorCode: %{public}d", externalCode);
         return nullptr;
     }
-    ani_object arrayRequestObj = NotificationSts::GetAniNotificationRequestArrayByNotifocations(env, notifications);
+    ani_object arrayRequestObj;
+    if (notifications.size() == 0) {
+        arrayRequestObj = NotificationSts::newArrayClass(env, 0);
+    } else {
+        arrayRequestObj = NotificationSts::GetAniNotificationRequestArrayByNotifocations(env, notifications);
+    }
     if (arrayRequestObj == nullptr) {
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniGetAllActiveNotifications  ERROR_INTERNAL_ERROR");
     }
     ANS_LOGD("sts AniGetAllActiveNotifications end");
     return arrayRequestObj;
@@ -61,22 +67,27 @@ ani_object AniGetAllActiveNotifications(ani_env *env)
 
 ani_object AniGetActiveNotifications(ani_env *env)
 {
-    ANS_LOGD("sts AniGetAllActiveNotifications call");
+    ANS_LOGD("sts AniGetActiveNotifications call");
     std::vector<sptr<NotificationSts::NotificationRequest>> requests;
     int returncode = OHOS::Notification::NotificationHelper::GetActiveNotifications(requests);
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetActiveNotifications error, errorCode: %{public}d", externalCode);
         return nullptr;
     }
-    ani_object arrayRequestObj = NotificationSts::GetAniNotificationRequestArray(env, requests);
+    ani_object arrayRequestObj;
+    if (requests.size() == 0) {
+        arrayRequestObj = NotificationSts::newArrayClass(env, 0);
+    } else {
+        arrayRequestObj = NotificationSts::GetAniNotificationRequestArray(env, requests);
+    }
     if (arrayRequestObj == nullptr) {
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniGetActiveNotifications ERROR_INTERNAL_ERROR");
     }
-    ANS_LOGD("sts AniGetAllActiveNotifications end");
+    ANS_LOGD("sts AniGetActiveNotifications end");
     return arrayRequestObj;
 }
 } // namespace NotificationManagerSts
