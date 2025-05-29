@@ -495,5 +495,30 @@ HWTEST_F(NotificationAnalyticsUtilTest, BuildAnsData_300, Function | SmallTest |
 
     ASSERT_FALSE(ret.find("keyNode") != std::string::npos);
 }
+
+/**
+ * @tc.name: AggregateLiveView_001
+ * @tc.desc: Test AggregateLiveView
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, AggregateLiveView_001, Function | SmallTest | Level1)
+{
+    std::string bundle = "com.example.app#TAXI";
+    int32_t status = 0;
+
+    NotificationAnalyticsUtil::AddLiveViewFailedNum(bundle, status);
+    NotificationAnalyticsUtil::AddLiveViewSuccessNum(bundle, status);
+    bundle = "com.example.app2#-99";
+    NotificationAnalyticsUtil::AddLocalLiveViewFailedNum(bundle);
+    NotificationAnalyticsUtil::AddLocalLiveViewSuccessNum(bundle);
+    ReportCache reportCache = NotificationAnalyticsUtil::AggregateLiveView();
+
+    EXPECT_EQ(reportCache.eventCode, 7);
+    std::string ansData = reportCache.want.GetStringParam("ansData");
+    nlohmann::json jsonData = nlohmann::json::parse(ansData);
+    EXPECT_TRUE(jsonData["data"].is_string());
+    EXPECT_TRUE(jsonData["startTime"].is_number_integer());
+    EXPECT_TRUE(jsonData["endTime"].is_number_integer());
+}
 }
 }
