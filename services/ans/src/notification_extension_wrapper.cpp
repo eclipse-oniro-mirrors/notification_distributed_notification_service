@@ -25,6 +25,10 @@
 #include "common_event_subscriber.h"
 #include "system_event_observer.h"
 
+#ifndef SYMBOL_EXPORT
+#define SYMBOL_EXPORT __attribute__ ((visibility("default")))
+#endif
+
 namespace OHOS::Notification {
 const std::string EXTENTION_WRAPPER_PATH = "libans_ext.z.so";
 const int32_t ACTIVE_DELETE = 0;
@@ -47,6 +51,24 @@ void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<Notification
 {
     AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
 }
+
+SYMBOL_EXPORT void GetAdditionalConfig(const std::string &key, std::string &value)
+{
+    value = NotificationPreferences::GetInstance()->GetAdditionalConfig(key);
+    ANS_LOGD("GetAdditionalConfig SYMBOL_EXPORT valiue %{public}s", value.c_str());
+}
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+SYMBOL_EXPORT int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId)
+{
+    return NotificationPreferences::GetInstance()->SetKvToDb(key, value, userId);
+}
+
+SYMBOL_EXPORT int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId, int32_t& retCode)
+{
+    return NotificationPreferences::GetInstance()->GetKvFromDb(key, value, userId, retCode);
+}
+#endif
 
 #ifdef __cplusplus
 }
@@ -83,6 +105,24 @@ void ExtensionWrapper::InitExtentionWrapper()
     modifyReminderFlags_ = (MODIFY_REMINDER_FLAGS)dlsym(extensionWrapperHandle_, "ModifyReminderFlags");
     if (modifyReminderFlags_ == nullptr) {
         ANS_LOGE("extension wrapper modifyReminderFlags symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+    getPrivilegeDialogPopped_ = (GET_PRIVILEGE_DIALOG_POPPED)dlsym(extensionWrapperHandle_, "GetPrivilegeDialogPopped");
+    if (getPrivilegeDialogPopped_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+    setDialogOpenSuccessTimeStamp_ =
+        (SET_DIALOG_OPENSUCCESS_TIMESTAMP)dlsym(extensionWrapperHandle_, "SetDialogOpenSuccessTimeStamp");
+    if (setDialogOpenSuccessTimeStamp_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+    
+    setDialogOpenSuccessTimeInterval_ =
+        (SET_DIALOG_OPENSUCCESS_TIMEINTERVAL)dlsym(extensionWrapperHandle_, "SetDialogOpenSuccessTimeInterval");
+    if (setDialogOpenSuccessTimeInterval_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
 #endif
@@ -195,6 +235,36 @@ bool ExtensionWrapper::ModifyReminderFlags(const sptr<NotificationRequest> &requ
         return false;
     }
     return modifyReminderFlags_(request);
+}
+
+bool ExtensionWrapper::GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption,
+    const int32_t &userId)
+{
+    if (getPrivilegeDialogPopped_ == nullptr) {
+        ANS_LOGE("GetPrivilegeDialogPopped wrapper symbol failed.");
+        return -1;
+    }
+    return getPrivilegeDialogPopped_(bundleOption, userId);
+}
+
+bool ExtensionWrapper::SetDialogOpenSuccessTimeStamp(const sptr<NotificationBundleOption>& bundleOption,
+    const int32_t &userId)
+{
+    if (setDialogOpenSuccessTimeStamp_ == nullptr) {
+        ANS_LOGE("SetDialogOpenSuccessTimeStamp wrapper symbol failed.");
+        return -1;
+    }
+    return setDialogOpenSuccessTimeStamp_(bundleOption, userId);
+}
+
+bool ExtensionWrapper::SetDialogOpenSuccessTimeInterval(const sptr<NotificationBundleOption>& bundleOption,
+    const int32_t &userId)
+{
+    if (setDialogOpenSuccessTimeInterval_ == nullptr) {
+        ANS_LOGE("SetDialogOpenSuccessTimeInterval wrapper symbol failed.");
+        return -1;
+    }
+    return setDialogOpenSuccessTimeInterval_(bundleOption, userId);
 }
 #endif
 

@@ -1287,6 +1287,8 @@ public:
      */
     ErrCode SetHashCodeRule(const uint32_t type) override;
 
+    ErrCode GetOverlayIconScaleSize(uint32_t& scaleSize) override;
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1577,6 +1579,9 @@ private:
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    void SetDialogPoppedUnEnableTime(const sptr<NotificationBundleOption> &bundleOption);
+#endif
     ErrCode CommonRequestEnableNotification(const std::string &deviceId,
         const sptr<IAnsDialogCallback> &callback,
         const sptr<IRemoteObject> &callerToken,

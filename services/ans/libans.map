@@ -52,6 +52,9 @@
     *Subscribe*;
     *UpdateSlots*;
     *VerifyShellToken*;
+    *GetAdditionalConfig*;
+    *SetKvToDb*;
+    *GetKvFromDb*;
   local:
     *;
 };

@@ -1891,6 +1891,18 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
     return NativeRdb::E_OK;
 }
 
+int32_t NotificationPreferencesDatabase::GetKvFromDb(
+    const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return NativeRdb::E_ERROR;
+    }
+
+    retCode = rdbDataManager_->QueryData(key, value, userId);
+    return retCode;
+}
+
 int32_t NotificationPreferencesDatabase::GetByteFromDb(
     const std::string &key, std::vector<uint8_t> &value, const int32_t &userId)
 {

@@ -295,4 +295,6 @@ interface OHOS.Notification.IAnsManager {
     void SetHashCodeRule([in] unsigned int type);
 
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
+
+    void GetOverlayIconScaleSize([out] unsigned int scaleSize);
 }

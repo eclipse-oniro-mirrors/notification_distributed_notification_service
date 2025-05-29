@@ -662,6 +662,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetOverlayIconScaleSize(uint32_t &scaleSize) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
 private:
     std::string cmd_;
     std::string bundle_;
