@@ -59,6 +59,14 @@ bool NotificationRequestBox::SetContentType(int32_t type)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT_TYPE, type));
 }
 
+bool NotificationRequestBox::SetAppMessageId(const std::string& appMessageId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_APP_MESSAGE_ID, appMessageId));
+}
+
 bool NotificationRequestBox::SetReminderFlag(int32_t flag)
 {
     if (box_ == nullptr) {
@@ -420,6 +428,14 @@ bool NotificationRequestBox::GetAutoDeleteTime(int64_t& time) const
         return false;
     }
     return box_->GetInt64Value(AUTO_DELETE_TIME, time);
+}
+
+bool NotificationRequestBox::GetAppMessageId(std::string& appMessageId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_APP_MESSAGE_ID, appMessageId);
 }
 #endif
 }

@@ -1393,6 +1393,13 @@ public:
     std::string GenerateUniqueKey();
 
     /**
+     * @brief Generate notification request distributed unique key.
+     *
+     * @return Return the distributed unique key of notification request.
+     */
+    std::string GenerateDistributedUniqueKey();
+
+    /**
      * @brief Sets the unifiedGroupInfo of this notification.
      *
      * @param flags Indicates the unifiedGroupInfo of this notification.

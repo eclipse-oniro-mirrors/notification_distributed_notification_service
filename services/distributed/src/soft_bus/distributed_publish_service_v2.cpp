@@ -229,6 +229,9 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     } else {
         requestBox->SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
     }
+    if (!requestPoint->GetAppMessageId().empty()) {
+        requestBox->SetAppMessageId(requestPoint->GetAppMessageId());
+    }
     if (request->GetBundleName().empty()) {
         requestBox->SetCreatorBundleName(request->GetCreateBundle());
     } else {
@@ -445,6 +448,9 @@ void DistributedPublishService::MakeNotificationReminderFlag(const NotificationR
     }
     if (box.GetReminderFlag(type)) {
         request->SetCollaboratedReminderFlag(static_cast<uint32_t>(type));
+    }
+    if (box.GetAppMessageId(context)) {
+        request->SetAppMessageId(context);
     }
     if (box.GetCreatorBundleName(context)) {
         request->SetOwnerBundleName(context);

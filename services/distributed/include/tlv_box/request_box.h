@@ -51,6 +51,7 @@ public:
     bool SetCommonLiveView(const std::vector<uint8_t>& byteSequence);
     bool SetFinishTime(int64_t time);
     bool SetAutoDeleteTime(int64_t time);
+    bool SetAppMessageId(const std::string& appMessageId);
 
 #else
     bool GetNotificationHashCode(std::string& hasdCode) const;
@@ -74,6 +75,7 @@ public:
     bool GetCommonLiveView(std::vector<uint8_t>& byteSequence) const;
     bool GetFinishTime(int64_t& time) const;
     bool GetAutoDeleteTime(int64_t& time) const;
+    bool GetAppMessageId(std::string& appMessageId) const;
 #endif
 };
 }  // namespace Notification

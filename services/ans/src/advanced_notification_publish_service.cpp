@@ -186,6 +186,10 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+        if (DuplicateMsgControl(record->request) == ERR_ANS_DUPLICATE_MSG) {
+            (void)PublishRemoveDuplicateEvent(record);
+            return;
+        }
         if (AssignToNotificationList(record) != ERR_OK) {
             ANS_LOGE("Failed to assign notification list");
             return;
@@ -779,14 +783,29 @@ ErrCode AdvancedNotificationService::DuplicateMsgControl(const sptr<Notification
     }
 
     RemoveExpiredUniqueKey();
+    RemoveExpiredDistributedUniqueKey();
+    RemoveExpiredLocalUniqueKey();
     std::string uniqueKey = request->GenerateUniqueKey();
-    if (IsDuplicateMsg(uniqueKey)) {
-        ANS_LOGI("Duplicate msg, no need to notify, key is %{public}s, appmessageId is %{public}s",
-            request->GetKey().c_str(), request->GetAppMessageId().c_str());
-        return ERR_ANS_DUPLICATE_MSG;
-    }
+    std::string distributedUniqueKey = request->GenerateDistributedUniqueKey();
+    std::string localUniqueKey = distributedUniqueKey;
 
-    uniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+    if (request->GetDistributedCollaborate()) {
+        if (IsDuplicateMsg(distributedUniqueKeyList_, distributedUniqueKey)) {
+            ANS_LOGE("Distributed duplicate msg, no need to notify, key is %{public}s, appmessageId is %{public}s",
+                request->GetKey().c_str(), request->GetAppMessageId().c_str());
+            return ERR_ANS_DUPLICATE_MSG;
+        }
+        localUniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), localUniqueKey));
+        distributedUniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), distributedUniqueKey));
+    } else {
+        if (IsDuplicateMsg(uniqueKeyList_, uniqueKey) || IsDuplicateMsg(localUniqueKeyList_, localUniqueKey)) {
+            ANS_LOGE("Duplicate msg, no need to notify, key is %{public}s, appmessageId is %{public}s",
+                request->GetKey().c_str(), request->GetAppMessageId().c_str());
+            return ERR_ANS_DUPLICATE_MSG;
+        }
+        uniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), uniqueKey));
+        distributedUniqueKeyList_.emplace_back(std::make_pair(std::chrono::system_clock::now(), distributedUniqueKey));
+    }
     return ERR_OK;
 }
 
@@ -800,10 +819,33 @@ void AdvancedNotificationService::DeleteDuplicateMsgs(const sptr<NotificationBun
     std::stringstream stream;
     stream << bundleOption->GetUid() << keySpliter << bundleOption->GetBundleName() << keySpliter;
     std::string uniqueKeyHead = stream.str();
-    auto iter = uniqueKeyList_.begin();
     for (auto iter = uniqueKeyList_.begin(); iter != uniqueKeyList_.end();) {
         if ((*iter).second.find(uniqueKeyHead) == 0) {
             iter = uniqueKeyList_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+
+    stream.str(std::string());
+    stream.clear();
+    stream << bundleOption->GetBundleName() << keySpliter;
+    std::string distributedUniqueKeyHead = stream.str();
+    for (auto iter = distributedUniqueKeyList_.begin(); iter != distributedUniqueKeyList_.end();) {
+        if ((*iter).second.find(distributedUniqueKeyHead) == 0) {
+            iter = distributedUniqueKeyList_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+
+    stream.str(std::string());
+    stream.clear();
+    stream << bundleOption->GetBundleName() << keySpliter;
+    std::string localUniqueKeyHead = stream.str();
+    for (auto iter = localUniqueKeyList_.begin(); iter != localUniqueKeyList_.end();) {
+        if ((*iter).second.find(localUniqueKeyHead) == 0) {
+            iter = localUniqueKeyList_.erase(iter);
         } else {
             ++iter;
         }
@@ -818,7 +860,7 @@ void AdvancedNotificationService::RemoveExpiredUniqueKey()
         uint32_t duration = std::chrono::duration_cast<std::chrono::seconds>(abs(now - (*iter).first)).count();
         ANS_LOGD("RemoveExpiredUniqueKey duration is %{public}u", duration);
         if (duration > SECONDS_IN_ONE_DAY) {
-            ANS_LOGD("RemoveExpiredUniqueKey end duration is %{public}u", duration);
+            ANS_LOGI("RemoveExpiredUniqueKey end duration is %{public}u", duration);
             iter = uniqueKeyList_.erase(iter);
         } else {
             break;
@@ -826,14 +868,46 @@ void AdvancedNotificationService::RemoveExpiredUniqueKey()
     }
 }
 
-bool AdvancedNotificationService::IsDuplicateMsg(const std::string &uniqueKey)
+void AdvancedNotificationService::RemoveExpiredDistributedUniqueKey()
 {
-    for (auto record : uniqueKeyList_) {
-        if (strcmp(record.second.c_str(), uniqueKey.c_str()) == 0) {
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    auto iter = distributedUniqueKeyList_.begin();
+    while (iter != distributedUniqueKeyList_.end()) {
+        uint32_t duration = std::chrono::duration_cast<std::chrono::seconds>(abs(now - (*iter).first)).count();
+        ANS_LOGD("RemoveExpired distributedUniqueKeyList_ duration is %{public}u", duration);
+        if (duration > SECONDS_IN_ONE_DAY) {
+            ANS_LOGI("RemoveExpired distributedUniqueKeyList_ end duration is %{public}u", duration);
+            iter = distributedUniqueKeyList_.erase(iter);
+        } else {
+            break;
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveExpiredLocalUniqueKey()
+{
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    auto iter = localUniqueKeyList_.begin();
+    while (iter != localUniqueKeyList_.end()) {
+        uint32_t duration = std::chrono::duration_cast<std::chrono::seconds>(abs(now - (*iter).first)).count();
+        ANS_LOGD("RemoveExpired localUniqueKeyList_ duration is %{public}u", duration);
+        if (duration > SECONDS_IN_ONE_DAY) {
+            ANS_LOGI("RemoveExpired localUniqueKeyList_ end duration is %{public}u", duration);
+            iter = localUniqueKeyList_.erase(iter);
+        } else {
+            break;
+        }
+    }
+}
+
+bool AdvancedNotificationService::IsDuplicateMsg(const std::list<std::pair<std::chrono::system_clock::time_point,
+    std::string>> &msglist, const std::string &key)
+{
+    for (auto record : msglist) {
+        if (strcmp(record.second.c_str(), key.c_str()) == 0) {
             return true;
         }
     }
-
     return false;
 }
 

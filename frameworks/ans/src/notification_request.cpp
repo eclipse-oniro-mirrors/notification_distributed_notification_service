@@ -2915,6 +2915,25 @@ std::string NotificationRequest::GenerateUniqueKey()
     return stream.str();
 }
 
+std::string NotificationRequest::GenerateDistributedUniqueKey()
+{
+    const char *keySpliter = "_";
+    int typeFlag = 0;
+    if (GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {
+        typeFlag = 1;
+    }
+
+    std::stringstream stream;
+    if (IsAgentNotification()) {
+        stream << ownerBundleName_ << keySpliter << ownerUserId_ << keySpliter << typeFlag << keySpliter
+            << appMessageId_;
+    } else {
+        stream << creatorBundleName_ << keySpliter << creatorUserId_ << keySpliter << typeFlag << keySpliter
+            << appMessageId_;
+    }
+    return stream.str();
+}
+
 void NotificationRequest::SetUnifiedGroupInfo(const std::shared_ptr<NotificationUnifiedGroupInfo> &unifiedGroupInfo)
 {
     unifiedGroupInfo_ = unifiedGroupInfo;

@@ -1308,8 +1308,7 @@ HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00001, Function | SmallTest | Lev
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request->SetAppMessageId("test2");
     auto uniqueKey = request->GenerateUniqueKey();
-
-    auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
+    auto ret = advancedNotificationService_->IsDuplicateMsg(advancedNotificationService_->uniqueKeyList_, uniqueKey);
     ASSERT_EQ(ret, false);
 }
 
@@ -1327,8 +1326,7 @@ HWTEST_F(AnsPublishServiceTest, IsDuplicateMsg_00002, Function | SmallTest | Lev
     auto uniqueKey = request->GenerateUniqueKey();
     advancedNotificationService_->uniqueKeyList_.emplace_back(
         std::make_pair(std::chrono::system_clock::now(), uniqueKey));
-
-    auto ret = advancedNotificationService_->IsDuplicateMsg(uniqueKey);
+    auto ret = advancedNotificationService_->IsDuplicateMsg(advancedNotificationService_->uniqueKeyList_, uniqueKey);
     ASSERT_EQ(ret, true);
 }
 
@@ -1351,6 +1349,48 @@ HWTEST_F(AnsPublishServiceTest, RemoveExpiredUniqueKey_00001, Function | SmallTe
     ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 1);
     advancedNotificationService_->RemoveExpiredUniqueKey();
     ASSERT_EQ(advancedNotificationService_->uniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveExpiredDistributedUniqueKey_00001
+ * @tc.desc: Test RemoveExpiredDistributedUniqueKey
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveExpiredDistributedUniqueKey_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test3");
+    auto distributedUniqueKey = request->GenerateDistributedUniqueKey();
+    advancedNotificationService_->distributedUniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(24), distributedUniqueKey));
+
+    sleep(1);
+    ASSERT_EQ(advancedNotificationService_->distributedUniqueKeyList_.size(), 1);
+    advancedNotificationService_->RemoveExpiredDistributedUniqueKey();
+    ASSERT_EQ(advancedNotificationService_->distributedUniqueKeyList_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveExpiredLocalUniqueKey_00001
+ * @tc.desc: Test RemoveExpiredLocalUniqueKey
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveExpiredLocalUniqueKey_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetAppMessageId("test4");
+    auto localUniqueKey = request->GenerateDistributedUniqueKey();
+    advancedNotificationService_->localUniqueKeyList_.emplace_back(
+        std::make_pair(std::chrono::system_clock::now() - std::chrono::hours(24), localUniqueKey));
+
+    sleep(1);
+    ASSERT_EQ(advancedNotificationService_->localUniqueKeyList_.size(), 1);
+    advancedNotificationService_->RemoveExpiredLocalUniqueKey();
+    ASSERT_EQ(advancedNotificationService_->localUniqueKeyList_.size(), 0);
 }
 
 /*
