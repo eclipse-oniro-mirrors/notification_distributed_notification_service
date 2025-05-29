@@ -61,6 +61,7 @@ public:
     void GetCollaborationFilter();
     bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
     uint32_t GetStartAbilityTimeout();
+    uint32_t GetOverlayIconScaleSize() const;
 
 private:
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
@@ -95,6 +96,7 @@ public:
     #endif
     constexpr static const char* CFG_KEY_COLLABORATIVE_DELETE_TYPES = "collaborativeDeleteTypes";
     constexpr static const char* CFG_KEY_START_ABILITY_TIMEOUT = "startAbilityTimeout";
+    constexpr static const char* CFG_KEY_OVERLAYICON_SCALE_SIZE = "overlayIconScaleSize";
 };
 } // namespace Notification
 } // namespace OHOS

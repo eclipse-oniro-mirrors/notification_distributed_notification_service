@@ -23,6 +23,7 @@ ohos_unittest("ans_image_util_test") {
   include_dirs = [
     "${core_path}/include",
     "${core_path}/common/include",
+    "${interfaces_path}/kits/native",
     "../mock",
   ]
 
@@ -34,7 +35,7 @@ ohos_unittest("ans_image_util_test") {
     "ans_image_util_unit_test.cpp",
   ]
 
-  deps = []
+  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
     "ability_base:want",

@@ -76,6 +76,8 @@ public:
 
     static bool ImageScale(const std::shared_ptr<Media::PixelMap> &pixelMap, int32_t width, int32_t height);
 
+    static bool HandleOverSizeOverlayIcon(const std::shared_ptr<Media::PixelMap> &pixelMap);
+
     /**
      * @brief Converts a binary string to a hexadecimal string.
      *

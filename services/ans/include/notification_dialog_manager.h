@@ -39,7 +39,7 @@ enum class DialogStatus {
     DENY_CLICKED,
     DIALOG_CRASHED,
     DIALOG_SERVICE_DESTROYED,
-    REMOVE_BUNDLE
+    REMOVE_BUNDLE,
 };
 
 class NotificationDialogEventSubscriber : public EventFwk::CommonEventSubscriber {
@@ -131,6 +131,9 @@ private:
 
     bool HandleOneDialogClosed(sptr<NotificationBundleOption> bundleOption, EnabledDialogStatus status);
     bool HandleAllDialogsClosed();
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    void SetDialogPoppedTimeInterVal(const sptr<NotificationBundleOption> &bundleOption);
+#endif
 
     std::shared_ptr<NotificationDialogEventSubscriber> dialogEventSubscriber = nullptr;
     AdvancedNotificationService& ans_;

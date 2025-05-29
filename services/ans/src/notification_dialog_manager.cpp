@@ -24,6 +24,8 @@
 #include "notification_bundle_option.h"
 #include "notification_dialog.h"
 #include "notification_preferences.h"
+#include "os_account_manager_helper.h"
+#include "notification_extension_wrapper.h"
 #include <cstdlib>
 #include <string>
 
@@ -240,6 +242,11 @@ bool NotificationDialogManager::OnDialogButtonClicked(const std::string& bundleN
     ErrCode result = ans_.SetNotificationsEnabledForSpecialBundle(
         NotificationDialogManager::DEFAULT_DEVICE_ID,
         bundleOption, enabled);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    if (!enabled) {
+        SetDialogPoppedTimeInterVal(bundleOption);
+    }
+#endif
     if (result != ERR_OK) {
         ANS_LOGE("SetNotificationsEnabledForSpecialBundle Failed, code is %{public}d", result);
         // Do not return here, need to clear the data
@@ -313,4 +320,14 @@ bool NotificationDialogManager::HandleAllDialogsClosed()
     return true;
 }
 
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+void NotificationDialogManager::SetDialogPoppedTimeInterVal(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("SetDialogPoppedTimeInterVal called.");
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    EXTENTION_WRAPPER->SetDialogOpenSuccessTimeInterval(bundleOption, userId);
+    ANS_LOGD("SetDialogPoppedTimeInterVal end.");
+}
+#endif
 } // namespace OHOS::Notification

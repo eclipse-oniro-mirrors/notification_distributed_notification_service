@@ -1287,6 +1287,14 @@ public:
      */
     ErrCode SetHashCodeRule(const uint32_t type);
 
+    /**
+     * @brief get the scale size of overlay icon.
+     *
+     * @param scaleSize the scale size of overlay icon.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetOverlayIconScaleSize(uint32_t &scaleSize);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

@@ -26,6 +26,7 @@ namespace {
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
     constexpr char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
+    constexpr char CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG[] = "CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG";
 }
 
 struct ConfigParams {
@@ -70,7 +71,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     params.key = keyStr;
     if (std::strlen(keyStr) == 0 ||
         (strcmp(keyStr, KEY_NAME) != 0 && strcmp(keyStr, RING_LIST_KEY_NAME) != 0
-            && strcmp(keyStr, CTRL_LIST_KEY_NAME) != 0)) {
+            && strcmp(keyStr, CTRL_LIST_KEY_NAME) != 0 && strcmp(keyStr, CAMPAIGN_NOTIFICATION_SWITCH_LIST_PKG) != 0)) {
         ANS_LOGE("Argument type error. String expected.");
         std::string msg = "Incorrect parameter types.The type of param must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
