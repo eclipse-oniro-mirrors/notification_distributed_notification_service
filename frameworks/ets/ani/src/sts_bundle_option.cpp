@@ -63,7 +63,7 @@ bool UnwrapArrayBundleOption(ani_env *env,
     for (int32_t i = 0; i < static_cast<int>(length); i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lnotification/NotificationCommonDef/BundleOption;", &optionRef, i);
+            "$_get", "I:Lstd/core/Object;", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;

@@ -30,16 +30,16 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_double idAni = 0.0;
-    if (ANI_OK != GetPropertyDouble(env, param, "id", isUndefined, idAni) || isUndefined == ANI_TRUE) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(param, "id", &idAni)) {
         ANS_LOGE("UnwrapDoNotDisturbProfile: get id failed");
         return false;
     }
+    profile->SetProfileId(static_cast<int64_t>(idAni));
     std::string nameStr = "";
     if (ANI_OK != GetPropertyString(env, param, "name", isUndefined, nameStr) || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapDoNotDisturbProfile: get name failed");
         return false;
     }
-    profile->SetProfileId(static_cast<int64_t>(idAni));
     profile->SetProfileName(nameStr);
     ani_ref trustlistRef;
     if (ANI_OK != GetPropertyRef(env, param, "trustlist", isUndefined, trustlistRef) || isUndefined == ANI_TRUE) {
@@ -70,15 +70,15 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
         ANS_LOGD("UnwrapArrayDoNotDisturbProfile: status = %{public}d", status);
         return false;
     }
-    sptr<NotificationDoNotDisturbProfile> profile;
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "I:L@ohos/notificationManager/notificationManager/DoNotDisturbProfile;", &optionRef, (ani_int)i);
+            "I:Lstd/core/Object;", &optionRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, i);
             return false;
         }
+        sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow)NotificationDoNotDisturbProfile();
         if (!UnwrapDoNotDisturbProfile(env, static_cast<ani_object>(optionRef), profile)) {
             ANS_LOGE("Get profile failed, index: %{public}d", i);
             return false;

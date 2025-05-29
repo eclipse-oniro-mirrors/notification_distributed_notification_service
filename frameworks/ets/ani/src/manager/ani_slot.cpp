@@ -145,7 +145,7 @@ ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
     return slotFlags;
 }
 
-void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj)
+void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_double slotFlags)
 {
     ANS_LOGD("sts setSlotFlagsByBundle call");
     Notification::NotificationBundleOption option;
@@ -153,8 +153,8 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj)
         NotificationSts::ThrowStsErroWithMsg(env, "AniSetSlotFlagsByBundle : erro arguments.");
         return;
     }
-    uint32_t slotFlags = 0;
-    int returncode = Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(option, slotFlags);
+    int returncode =
+        Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(option, static_cast<int32_t>(slotFlags));
     int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
     if (externalCode != 0) {
         ANS_LOGE("AniSetSlotFlagsByBundle -> error, errorCode: %{public}d", externalCode);

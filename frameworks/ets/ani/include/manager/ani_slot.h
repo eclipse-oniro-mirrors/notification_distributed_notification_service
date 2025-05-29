@@ -20,7 +20,7 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj);
-void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj);
+void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_double slotFlags);
 
 ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption);
 ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item  type);
