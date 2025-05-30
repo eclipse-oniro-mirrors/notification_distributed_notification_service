@@ -35,7 +35,7 @@ class NotificationFlagsInner implements NotificationFlags {
 
     public soundEnabled?: NotificationFlagStatus | undefined;
 
-    public vibrationEnabled?: NotificationFlagStatus| undefined;
+    public vibrationEnabled?: NotificationFlagStatus | undefined;
 
     public reminderFlags?: number | undefined;
 }

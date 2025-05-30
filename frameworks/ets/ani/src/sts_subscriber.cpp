@@ -191,7 +191,7 @@ bool WarpSubscribeCallbackDataArray(
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(
             outObj, "$_set", "ILstd/core/Object;:V", i, obj))) {
-                ANS_LOGE("set object faild. index %{public}d status %{public}d", i, status);
+                ANS_LOGE("set object faild. status %{public}d", status);
                 return false;
             }
     }

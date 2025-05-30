@@ -1254,11 +1254,6 @@ bool SetNotificationMultiLineContent(
     if (allLinesObject == nullptr || !SetPropertyByRef(env, contentObj, "lines", allLinesObject)) {
         ANS_LOGD("SetNotificationMultiLineContent: set lines failed");
     }
-    ani_object lineWantAgentsObject = GetAniWantAgentArray(env, content->GetLineWantAgents());
-    if (lineWantAgentsObject == nullptr
-        || !SetPropertyByRef(env, contentObj, "lineWantAgents", lineWantAgentsObject)) {
-        ANS_LOGD("SetNotificationMultiLineContent: set lineWantAgents failed");
-    }
     return SetPropertyByRef(env, ncObj, "multiLine", contentObj);
 }
 
