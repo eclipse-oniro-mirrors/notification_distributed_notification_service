@@ -693,6 +693,24 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, StartAutoDeletedTimer_200, Functio
 }
 
 /**
+ * @tc.name: StartAutoDeletedTimer_300
+ * @tc.desc: Test StartAutoDeletedTimer when timer succeeded to create and cancel origin timer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, StartAutoDeletedTimer_300, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->notification->SetAutoDeletedTimer(1);
+
+    auto ret = advancedNotificationService_->StartAutoDeletedTimer(record);
+    advancedNotificationService_->TriggerAutoDelete("hashCode", 27);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: ReportDoNotDisturbModeChanged_100
  * @tc.desc: Test ReportDoNotDisturbModeChanged.
  * @tc.type: FUNC

@@ -241,16 +241,14 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+        if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+            StartAutoDeletedTimer(record);
+        }
     });
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return result;
-    }
-
-    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDelete(record,
-            record->request->GetAutoDeletedTime(), NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
     }
     return ERR_OK;
 }

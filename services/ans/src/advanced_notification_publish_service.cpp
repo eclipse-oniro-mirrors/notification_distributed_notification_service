@@ -112,6 +112,9 @@ void AdvancedNotificationService::SetCollaborateReminderFlag(const sptr<Notifica
 void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record)
 {
     if (!record->request->IsCommonLiveView()) {
+        if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
+            StartAutoDeletedTimer(record);
+        }
         return;
     }
 
@@ -760,14 +763,13 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         UpdateRecentNotification(record->notification, false, 0);
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
+        if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
+            StartAutoDeletedTimer(record);
+        }
     });
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK) {
         return result;
-    }
-
-    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDeletedTimer(record);
     }
     return ERR_OK;
 }
