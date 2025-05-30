@@ -273,7 +273,7 @@ interface OHOS.Notification.IAnsManager {
 
     void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] String deveiceId);
 
-    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] unsigned int controlFlag, [in] String deveiceId);
+    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] unsigned int controlFlag, [in] String deveiceId, [in] int userId);
 
     void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile);
 
@@ -291,6 +291,10 @@ interface OHOS.Notification.IAnsManager {
 
     void GetNotificationRequestByHashCode(
         [in] String hashCode, [out] null_sptr<NotificationRequest> notificationRequest);
+
+    void SetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [in] int operatorType, [in] String[] bundleList);
+
+    void SetTargetDeviceSwitch([in] String deviceType, [in] String deviceId, [in] boolean notificaitonEnable, [in] boolean liveViewEnable);
 
     void SetHashCodeRule([in] unsigned int type);
 

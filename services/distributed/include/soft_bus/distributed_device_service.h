@@ -24,14 +24,26 @@ namespace OHOS {
 namespace Notification {
 class DistributedDeviceService {
 public:
+    static constexpr int32_t STATE_TYPE_BOTH = 3;
+    static constexpr int32_t STATE_TYPE_SWITCH = 2;
+    static constexpr int32_t STATE_TYPE_LOCKSCREEN = 1;
+    static constexpr int32_t SYNC_BUNDLE_ICONS = 1;
+    static constexpr int32_t SYNC_LIVE_VIEW = 2;
+    static constexpr int32_t SYNC_INSTALLED_BUNDLE = 3;
+    static constexpr int32_t DEVICE_USAGE = 4;
+
     static DistributedDeviceService& GetInstance();
+    static std::string DeviceTypeToTypeString(uint16_t deviceType);
+
     bool IsReportDataByHa();
     void InitLocalDevice(const std::string &deviceId, uint16_t deviceType);
     DistributedDeviceInfo GetLocalDevice();
-    bool IsDeviceSyncData(const std::string& deviceId);
+    bool IsSyncLiveView(const std::string& deviceId, bool forceSync);
+    bool IsSyncIcons(const std::string& deviceId, bool forceSync);
+    bool IsSyncInstalledBundle(const std::string& deviceId, bool forceSync);
     bool GetDeviceInfo(const std::string& deviceId, DistributedDeviceInfo& device);
     void SetDeviceState(const std::string& deviceId, int32_t state);
-    void SetDeviceSyncData(const std::string& deviceId, bool syncData);
+    void SetDeviceSyncData(const std::string& deviceId, int32_t type, bool syncData);
     bool CheckDeviceExist(const std::string& deviceId);
     bool CheckDeviceNeedSync(const std::string& deviceId);
     void IncreaseDeviceSyncCount(const std::string& deviceId);
@@ -43,7 +55,7 @@ public:
     void SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage);
 #else
     void InitCurrentDeviceStatus();
-    void SyncDeviceStatus(int32_t status);
+    void SyncDeviceStatus(int32_t type, int32_t status, bool notificationEnable, bool liveViewEnable);
 #endif
 
 private:

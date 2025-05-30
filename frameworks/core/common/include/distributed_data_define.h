@@ -31,6 +31,25 @@ constexpr char const AnonymousString[] = "******";
 constexpr int32_t DEFAULT_REPLY_TIMEOUT = 3;
 }
 
+enum BunleListOperationType {
+    ADD_BUNDLES = 0,      // add bundles
+    REMOVE_BUNDLES,   // remove bundle
+    RELEASE_BUNDLES   // release bundles
+};
+
+enum DeviceStatueChangeType {
+    DEVICE_USING_CHANGE = 0,
+    NOTIFICATION_ENABLE_CHANGE = 1,
+    ALL_CONNECT_STATUS_CHANGE = 2,
+};
+
+struct DeviceStatueChangeInfo {
+    int32_t changeType;
+    std::string deviceId;
+    bool enableChange;
+    bool liveViewChange;
+};
+
 struct DistributedDeviceConfig {
     int32_t maxTitleLength;
     int32_t maxContentLength;

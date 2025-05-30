@@ -15,6 +15,8 @@
 
 #include "distributed_device_status.h"
 
+#include "distributed_data_define.h"
+
 namespace OHOS {
 namespace Notification {
 namespace {
@@ -54,6 +56,50 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
     }
     deviceStatus_.EnsureInsert(deviceType, oldStatus);
     ANS_LOGI("update %{public}s status %{public}u %{public}u", deviceType.c_str(), oldStatus, status);
+    return ERR_OK;
+}
+
+void ChangeStatus(DeviceStatus& device, const uint32_t status, const uint32_t controlFlag, int32_t userId)
+{
+    uint32_t beforeStatus = device.status;
+    if ((1 << DistributedDeviceStatus::USERID_FLAG) & controlFlag) {
+        device.userId = userId;
+    }
+    for (uint32_t i = 0; i < DistributedDeviceStatus::STATUS_SIZE; i++) {
+        if (((1 << i) & controlFlag) && ((1 << i) & status)) {
+            device.status |= (1 << i);
+        }
+        if (((1 << i) & controlFlag) && !((1 << i) & status)) {
+            device.status &= ~(1 << i);
+        }
+    }
+
+    ANS_LOGI("update %{public}s %{public}s %{public}d status %{public}d %{public}u%{public}u",
+        device.deviceType.c_str(), StringAnonymous(device.deviceId).c_str(), userId, controlFlag,
+        beforeStatus, device.status);
+}
+
+ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag, const std::string deviceId, int32_t userId)
+{
+    bool existFlag = false;
+    uint32_t finalStatus = 0;
+    std::lock_guard<std::mutex> lock(mapLock_);
+    for (auto device = deviceInfo_.begin(); device != deviceInfo_.end(); device++) {
+        if (device->deviceType != deviceType || device->deviceId != deviceId) {
+            continue;
+        }
+        ChangeStatus(*device, status, controlFlag, userId);
+        existFlag = true;
+        break;
+    }
+
+    if (!existFlag) {
+        DeviceStatus device = DeviceStatus(deviceType, deviceId);
+        ChangeStatus(device, status, controlFlag, userId);
+        deviceInfo_.emplace_back(device);
+        ANS_LOGI("Add device %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
+    }
     return ERR_OK;
 }
 

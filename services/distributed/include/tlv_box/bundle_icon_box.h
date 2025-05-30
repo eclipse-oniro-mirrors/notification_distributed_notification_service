@@ -33,8 +33,11 @@ enum IconSyncType {
 class BundleIconBox : public BoxBase {
 public:
     const static int32_t MAX_ICON_NUM = 10;
+    const static int32_t MAX_BUNDLE_NUM = 30;
+
     BundleIconBox();
     BundleIconBox(std::shared_ptr<TlvBox> box);
+    bool SetMessageType(int32_t messageType);
     bool SetIconSyncType(int32_t type);
     bool SetDataLength(int32_t length);
     bool SetBundleList(const std::vector<std::string>& bundleList);

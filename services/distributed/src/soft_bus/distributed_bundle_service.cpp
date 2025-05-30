@@ -24,6 +24,7 @@
 #include "bundle_resource_helper.h"
 #include "distributed_device_service.h"
 #include "distributed_preference.h"
+#include "distributed_subscribe_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -70,12 +71,7 @@ void DistributedBundleService::HandleBundleIconSync(const std::shared_ptr<TlvBox
 
 void DistributedBundleService::RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce)
 {
-    if (!DistributedDeviceService::GetInstance().CheckDeviceExist(peerDevice.deviceId_)) {
-        return;
-    }
-    bool sync = DistributedDeviceService::GetInstance().IsDeviceSyncData(peerDevice.deviceId_);
-    if (!isForce && sync) {
-        ANS_LOGI("Dans %{public}d %{public}d.", isForce, sync);
+    if (!DistributedDeviceService::GetInstance().IsSyncIcons(peerDevice.deviceId_, isForce)) {
         return;
     }
 
@@ -92,6 +88,8 @@ void DistributedBundleService::RequestBundlesIcon(const DistributedDeviceInfo pe
         peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
     ANS_LOGI("Dans RequestBundlesIcon %{public}s %{public}d.",
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
+        DistributedDeviceService::SYNC_BUNDLE_ICONS, true);
 }
 
 void DistributedBundleService::GenerateBundleIconSync(const DistributedDeviceInfo& device)
@@ -263,6 +261,44 @@ void DistributedBundleService::GetNeedUpdateDevice(bool updatedExit, const std::
         }
     }
 }
+
+void DistributedBundleService::SetDeviceBundleList(const std::shared_ptr<TlvBox>& boxMessage)
+{
+    int32_t operatorType = 0;
+    std::string deviceId;
+    BundleIconBox iconBox = BundleIconBox(boxMessage);
+    if (!iconBox.GetLocalDeviceId(deviceId)) {
+        ANS_LOGW("Dans bundle get deviceid failed.");
+        return;
+    }
+
+    DistributedDeviceInfo device;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+        ANS_LOGW("Dans bundle get device info failed %{public}s.", StringAnonymous(deviceId).c_str());
+        return;
+    }
+
+    if (!iconBox.GetIconSyncType(operatorType)) {
+        ANS_LOGI("Dans handle bundle icon sync failed.");
+        return;
+    }
+
+    std::vector<std::string> bundleList;
+    if (!iconBox.GetBundleList(bundleList)) {
+        ANS_LOGI("Dans handle bundle list failed.");
+        return;
+    }
+
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+    if (deviceType.empty()) {
+        ANS_LOGW("Dans handle bundle invalid %{public}s %{public}u.", StringAnonymous(deviceId).c_str(),
+            device.deviceType_);
+        return;
+    }
+    auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+    ANS_LOGI("SetDeviceBundleList %{public}s %{public}s %{public}d %{public}zu %{public}d", deviceType.c_str(),
+        StringAnonymous(deviceId).c_str(), operatorType, bundleList.size(), ret);
+}
 #else
 void DistributedBundleService::HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage)
 {
@@ -323,6 +359,64 @@ void DistributedBundleService::ReportBundleIconList(const DistributedDeviceInfo 
     DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
     ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d.",
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
+}
+
+void DistributedBundleService::SyncInstalledBundles(const DistributedDeviceInfo& peerDevice, bool isForce)
+{
+    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
+        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+        return;
+    }
+
+    bool isSync = false;
+    if (DistributedDeviceService::GetInstance().IsSyncInstalledBundle(peerDevice.deviceId_, isSync) != ERR_OK) {
+        return;
+    }
+    if (!isForce && isSync) {
+        ANS_LOGI("Dans %{public}d %{public}d.", isForce, isSync);
+        return;
+    }
+
+    std::vector<std::string> bundlesName;
+    int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
+    int32_t result = DelayedSingleton<BundleResourceHelper>::GetInstance()->GetAllInstalledBundles(
+        bundlesName, userId);
+    if (result != ERR_OK) {
+        ANS_LOGW("Dans get bundls failed.");
+        return;
+    }
+
+    std::vector<std::string> bundles;
+    for (auto& bundle : bundlesName) {
+        bundles.push_back(bundle);
+        if (bundles.size() >= BundleIconBox::MAX_BUNDLE_NUM) {
+            SendInstalledBundles(peerDevice, localDevice.deviceId_, bundles,
+                BunleListOperationType::ADD_BUNDLES);
+            bundles.clear();
+        }
+    }
+
+    if (!bundles.empty()) {
+        SendInstalledBundles(peerDevice, localDevice.deviceId_, bundles, BunleListOperationType::ADD_BUNDLES);
+    }
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
+        DistributedDeviceService::SYNC_INSTALLED_BUNDLE, true);
+}
+
+void DistributedBundleService::SendInstalledBundles(const DistributedDeviceInfo& peerDevice,
+    const std::string& localDeviceId, const std::vector<std::string>& bundles, int32_t type)
+{
+    std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
+    iconBox->SetMessageType(INSTALLED_BUNDLE_SYNC);
+    iconBox->SetLocalDeviceId(localDeviceId);
+    iconBox->SetIconSyncType(type);
+    iconBox->SetBundleList(bundles);
+
+    DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
+        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
+    ANS_LOGI("Dans send bundle %{public}s %{public}d.",
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
 }
 #endif

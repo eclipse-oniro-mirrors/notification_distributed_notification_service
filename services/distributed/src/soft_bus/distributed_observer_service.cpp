@@ -57,6 +57,19 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
         DistributedService::GetInstance().SyncDeviceStatus(SCREEN_ON);
         return;
     }
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
+        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
+        OHOS::AppExecFwk::ElementName ele = want.GetElement();
+        std::string bundleName = ele.GetBundleName();
+        if (bundleName.empty()) {
+            ANS_LOGE("Illegal bundle name.");
+            return;
+        }
+        bool isAddBundle =
+            (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) ? true : false;
+        DistributedService::GetInstance().SyncInstalledBundle(bundleName, isAddBundle);
+        return;
+    }
 #endif
 }
 
@@ -74,6 +87,11 @@ void OberverService::Init(uint16_t deviceType)
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
 #else
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
+    }
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
 #endif

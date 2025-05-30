@@ -148,12 +148,7 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
 #ifdef DISTRIBUTED_FEATURE_MASTER
 void DistributedPublishService::SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce)
 {
-    if (!DistributedDeviceService::GetInstance().CheckDeviceExist(peerDevice.deviceId_)) {
-        return;
-    }
-    bool sync = DistributedDeviceService::GetInstance().IsDeviceSyncData(peerDevice.deviceId_);
-    if (!isForce && sync) {
-        ANS_LOGI("Dans %{public}d %{public}d.", isForce, sync);
+    if (!DistributedDeviceService::GetInstance().IsSyncLiveView(peerDevice.deviceId_, isForce)) {
         return;
     }
 
@@ -185,6 +180,8 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
         std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
         SendNotifictionRequest(sharedNotification, peerDevice, true);
     }
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
+        DistributedDeviceService::SYNC_LIVE_VIEW, true);
 }
 
 void DistributedPublishService::SyncNotifictionList(const DistributedDeviceInfo& peerDevice,

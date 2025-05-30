@@ -629,10 +629,24 @@ ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType,
 }
 
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag, const std::string deveiceId)
+    const uint32_t controlFlag, const std::string deveiceId, int32_t userId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, controlFlag,
-        deveiceId);
+        deveiceId, userId);
+}
+
+ErrCode NotificationHelper::SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+    int operatorType, const std::vector<std::string>& bundleList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceBundleList(deviceType, deviceId,
+        operatorType, bundleList);
+}
+
+ErrCode NotificationHelper::SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+    bool notificaitonEnable, bool liveViewEnable)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceSwitch(deviceType, deviceId,
+        notificaitonEnable, liveViewEnable);
 }
 
 ErrCode NotificationHelper::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)

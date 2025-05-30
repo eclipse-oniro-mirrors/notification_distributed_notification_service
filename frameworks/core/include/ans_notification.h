@@ -1191,7 +1191,13 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status, const uint32_t controlFlag,
-        const std::string deveiceId = std::string());
+        const std::string deveiceId = std::string(), int32_t userId = 0);
+
+    ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+            int operatorType, const std::vector<std::string>& bundleList);
+
+    ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+            bool notificaitonEnable, bool liveViewEnable);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**

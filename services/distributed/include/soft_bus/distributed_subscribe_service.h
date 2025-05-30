@@ -24,6 +24,7 @@ namespace Notification {
 class DistributedSubscribeService {
 public:
     static DistributedSubscribeService& GetInstance();
+    static int32_t GetCurrentActiveUserId();
     void UnSubscribeAllNotification();
     void SubscribeNotification(const DistributedDeviceInfo peerDevice);
     void UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType);

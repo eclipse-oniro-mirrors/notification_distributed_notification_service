@@ -35,6 +35,7 @@ typedef void (*ADD_DEVICE)(const std::string &deviceId, uint16_t deviceType,
 typedef void (*RELEASE_DEVICE)(const std::string &deviceId, uint16_t deviceType);
 typedef void (*REFRESH_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
+typedef void (*CHANGE_STATUS)(const DeviceStatueChangeInfo& changeInfo);
 typedef void (*INIT_HA_CALLBACK)(
     std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
 typedef void (*INIT_SENDREPORT_CALLBACK)(
@@ -377,6 +378,29 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
         HADotCallback(PUBLISH_ERROR_EVENT_CODE, 0, EventSceneId::SCENE_3, reason);
         ANS_LOGI("Dans refresh %{public}s %{public}s.", StringAnonymous(deviceInfo.deviceId).c_str(),
             StringAnonymous(deviceInfo.networkId).c_str());
+    });
+    distributedQueue_->submit(changeTask);
+}
+
+void DistributedExtensionService::DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)
+{
+    if (distributedQueue_ == nullptr) {
+        return;
+    }
+    std::function<void()> changeTask = std::bind([&, changeInfo]() {
+        if (!dansRunning_.load() || dansHandler_ == nullptr || !dansHandler_->IsValid()) {
+            ANS_LOGE("Dans state not normal %{public}d", dansRunning_.load());
+            return;
+        }
+        CHANGE_STATUS handler = (CHANGE_STATUS)dansHandler_->GetProxyFunc("DeviceStatusChange");
+        if (handler == nullptr) {
+            ANS_LOGE("Dans handler is null ptr.");
+            return;
+        }
+        handler(changeInfo);
+        ANS_LOGI("Dans statuc change %{public}s %{public}d %{public}d %{public}d.",
+            StringAnonymous(changeInfo.deviceId).c_str(), changeInfo.changeType, changeInfo.enableChange,
+            changeInfo.liveViewChange);
     });
     distributedQueue_->submit(changeTask);
 }

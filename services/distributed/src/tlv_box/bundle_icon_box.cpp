@@ -25,6 +25,7 @@ const int32_t BUNDLE_NAME_TYPE = 1;
 const int32_t ICON_TYPE = 2;
 const int32_t LENGTH_TYPE = 3;
 const int32_t ICON_START_INDEX = 10;
+const int32_t BUNDLE_START_INDEX = 2000;
 }
 
 BundleIconBox::BundleIconBox()
@@ -37,6 +38,14 @@ BundleIconBox::BundleIconBox()
 
 BundleIconBox::BundleIconBox(std::shared_ptr<TlvBox> box) : BoxBase(box)
 {
+}
+
+bool BundleIconBox::SetMessageType(int32_t messageType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->SetMessageType(messageType);
 }
 
 bool BundleIconBox::SetIconSyncType(int32_t type)
@@ -60,9 +69,13 @@ bool BundleIconBox::SetBundleList(const std::vector<std::string>& bundleList)
     if (box_ == nullptr) {
         return false;
     }
-    int32_t index = 0;
+    int32_t messageType;
+    int32_t index = ICON_START_INDEX;
+    if (box_->GetMessageType(messageType)) {
+        index = (messageType == BUNDLE_ICON_SYNC) ? ICON_START_INDEX : BUNDLE_START_INDEX;
+    }
     for (auto& bundleName : bundleList) {
-        if (box_->PutValue(std::make_shared<TlvItem>(ICON_START_INDEX + index, bundleName))) {
+        if (box_->PutValue(std::make_shared<TlvItem>(index, bundleName))) {
             index++;
         }
     }
@@ -120,9 +133,14 @@ bool BundleIconBox::GetBundleList(std::vector<std::string>& bundleList)
     if (!GetDataLength(length)) {
         return false;
     }
+    int32_t messageType;
+    int32_t index = ICON_START_INDEX;
+    if (box_->GetMessageType(messageType)) {
+        index = (messageType == BUNDLE_ICON_SYNC) ? ICON_START_INDEX : BUNDLE_START_INDEX;
+    }
     for (int i = 0; i < length; i++) {
         std::string bundleName;
-        if (box_->GetStringValue(ICON_START_INDEX + i, bundleName))
+        if (box_->GetStringValue(index + i, bundleName))
             bundleList.push_back(bundleName);
     }
     return true;

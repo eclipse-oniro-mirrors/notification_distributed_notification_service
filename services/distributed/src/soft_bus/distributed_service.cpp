@@ -30,6 +30,7 @@
 #include "distributed_operation_service.h"
 #include "distributed_publish_service.h"
 #include "distributed_subscribe_service.h"
+#include "bundle_resource_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -149,6 +150,37 @@ void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t dev
         DistributedSubscribeService::GetInstance().UnSubscribeNotification(deviceId, deviceType);
     });
     serviceQueue_->submit(subscribeTask);
+}
+
+void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+    std::function<void()> task = std::bind([changeInfo]() {
+        ANS_LOGI("Device change %{public}d %{public}d %{public}d", changeInfo.changeType,
+            changeInfo.enableChange, changeInfo.liveViewChange);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+        if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CHANGE) {
+            DistributedDeviceService::GetInstance().SetDeviceSyncData(changeInfo.deviceId,
+                DistributedDeviceService::DEVICE_USAGE, true);
+            DistributedDeviceInfo device;
+            if (DistributedDeviceService::GetInstance().GetDeviceInfo(changeInfo.deviceId, device)) {
+                DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
+            }
+        }
+
+        if (changeInfo.changeType == DeviceStatueChangeType::ALL_CONNECT_STATUS_CHANGE) {
+        }
+#else
+        if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
+            DistributedDeviceService::GetInstance().SyncDeviceStatus(DistributedDeviceService::STATE_TYPE_SWITCH,
+                false, changeInfo.enableChange, changeInfo.liveViewChange);
+        }
+#endif
+    });
+    serviceQueue_->submit(task);
 }
 
 void DistributedService::OnCanceled(const std::shared_ptr<Notification>& notification,
@@ -271,7 +303,39 @@ void DistributedService::SyncDeviceStatus(int32_t status)
     }
     status = (static_cast<uint32_t>(status) << 1);
     std::function<void()> task = std::bind([&, status]() {
-        DistributedDeviceService::GetInstance().SyncDeviceStatus(status);
+        DistributedDeviceService::GetInstance().SyncDeviceStatus(DistributedDeviceService::STATE_TYPE_LOCKSCREEN,
+            status, false, false);
+    });
+    serviceQueue_->submit(task);
+}
+
+void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool isAdd)
+{
+    if (serviceQueue_ == nullptr) {
+        ANS_LOGE("Check handler is null.");
+        return;
+    }
+    std::function<void()> task = std::bind([&, bundleName, isAdd]() {
+        std::vector<std::string> bundles = { bundleName };
+        auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+        auto peerDevices = DistributedDeviceService::GetInstance().GetDeviceList();
+        if (!isAdd) {
+            for (auto& device : peerDevices) {
+                DistributedBundleService::GetInstance().SendInstalledBundles(device.second, localDevice.deviceId_,
+                    bundles, BunleListOperationType::REMOVE_BUNDLES);
+            }
+            ANS_LOGI("Sync bundle remove %{public}s %{public}zu.", bundleName.c_str(), peerDevices.size());
+            return;
+        }
+
+        int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
+        if (!DelayedSingleton<BundleResourceHelper>::GetInstance()->CheckSystemApp(bundleName, userId)) {
+            for (auto device : peerDevices) {
+                DistributedBundleService::GetInstance().SendInstalledBundles(device.second, localDevice.deviceId_,
+                    bundles, BunleListOperationType::ADD_BUNDLES);
+            }
+            ANS_LOGI("Sync bundle add %{public}s %{public}zu.", bundleName.c_str(), peerDevices.size());
+        }
     });
     serviceQueue_->submit(task);
 }
@@ -313,13 +377,14 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
         DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
         DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, false);
     }
-    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_, true);
 #else
     if (matchType == MatchType::MATCH_SYN) {
         DistributedDeviceService::GetInstance().SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
+        DistributedBundleService::GetInstance().SyncInstalledBundles(peerDevice, true);
     } else if (matchType == MatchType::MATCH_ACK) {
         DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
         DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
+        DistributedBundleService::GetInstance().SyncInstalledBundles(peerDevice, false);
     }
 #endif
 }
@@ -358,6 +423,9 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
             case NotificationEventType::NOTIFICATION_STATE_SYNC:
                 DistributedDeviceService::GetInstance().SetDeviceStatus(box);
                 break;
+            case NotificationEventType::INSTALLED_BUNDLE_SYNC:
+                DistributedBundleService::GetInstance().SetDeviceBundleList(box);
+                break;
 #else
             case NotificationEventType::PUBLISH_NOTIFICATION:
                 DistributedPublishService::GetInstance().PublishNotification(box);
@@ -367,7 +435,6 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
                 break;
 #endif
             default:
-                ANS_LOGW("Dans receive msg %{public}d %{public}d.", type, box->bytesLength_);
                 break;
         }
     });
