@@ -608,6 +608,10 @@ ErrCode AdvancedNotificationService::StartAutoDeletedTimer(const std::shared_ptr
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_TASK_ERR;
     }
+    uint64_t originTimerId = record->notification->GetAutoDeletedTimer();
+    if (originTimerId != NotificationConstant::INVALID_TIMER_ID) {
+        CancelTimer(originTimerId);
+    }
     record->notification->SetAutoDeletedTimer(timerId);
     return ERR_OK;
 }
@@ -755,10 +759,6 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         NotificationAnalyticsUtil::ReportPublishBadge(request);
     }));
     notificationSvrQueue_->wait(handler);
-    // live view handled in UpdateNotificationTimerInfo, ignore here.
-    if ((record->request->GetAutoDeletedTime() > GetCurrentTime()) && !record->request->IsCommonLiveView()) {
-        StartAutoDeletedTimer(record);
-    }
     return result;
 }
 
@@ -1128,6 +1128,8 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
                 LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(record->request);
             }
             FillLockScreenPicture(record->request, (*iter)->request);
+            record->notification->SetAutoDeletedTimer((*iter)->notification->GetAutoDeletedTimer());
+            record->notification->SetArchiveTimer((*iter)->notification->GetArchiveTimer());
             record->notification->SetUpdateTimer((*iter)->notification->GetUpdateTimer());
             if (!record->request->IsSystemLiveView()) {
                 record->notification->SetFinishTimer((*iter)->notification->GetFinishTimer());
@@ -1834,6 +1836,7 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
 
         if (record->notification->GetKey() == hashCode) {
             UpdateRecentNotification(record->notification, true, reason);
+            TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
             CancelTimer(record->notification->GetAutoDeletedTimer());
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteLiveView(record);
