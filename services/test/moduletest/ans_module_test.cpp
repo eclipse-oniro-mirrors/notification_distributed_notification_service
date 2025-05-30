@@ -146,6 +146,8 @@ void AnsModuleTest::TestAddSlots()
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     TestAddSlots();
     std::string label = "testLabel";
     sptr<NotificationRequest> req = new NotificationRequest(0);
@@ -178,6 +180,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_002, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_003, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -219,6 +223,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_003, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -276,6 +282,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_005, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_006, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -318,6 +326,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_006, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -377,6 +387,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_007, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0013, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -419,6 +431,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0013, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0014, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -461,6 +475,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0014, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0015, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -503,6 +519,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0015, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0017, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -545,6 +563,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0017, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0019, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -587,6 +607,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0019, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -645,6 +667,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0021, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0023, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -687,6 +711,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0023, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -744,6 +770,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0031, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0033, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -792,6 +820,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0033, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0034, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -840,6 +870,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0034, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -884,6 +916,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0035, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -928,6 +962,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0036, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -986,6 +1022,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0039, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0040, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1028,6 +1066,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0040, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0041, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1070,6 +1110,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0041, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0042, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1112,6 +1154,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0042, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0043, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1281,6 +1325,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0056, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0058, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1331,6 +1377,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0058, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1389,6 +1437,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0062, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0063, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1480,6 +1530,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0065, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1516,6 +1568,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0066, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0100, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1563,6 +1617,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0100, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0101, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1603,6 +1659,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0101, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0102, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1707,6 +1765,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0105, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0106, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // create wantagent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent =
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
@@ -1894,6 +1954,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0111, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -1958,6 +2020,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0112, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2021,6 +2085,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0113, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2084,6 +2150,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0114, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2148,6 +2216,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0116, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2212,6 +2282,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0117, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0120, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2335,6 +2407,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0122, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     int ret = 0;
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2408,6 +2482,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0123, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0124, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2449,6 +2525,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0124, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0125, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2488,6 +2566,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0125, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0126, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2529,6 +2609,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0126, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0127, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     const int EXPECT_REQUST_NUM = 2;
 
     int ret = 0;
@@ -2587,6 +2669,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0127, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0128, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     const int EXPECT_REQUST_NUM = 2;
 
     int ret = 0;
@@ -2645,6 +2729,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0128, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0130, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2700,6 +2786,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0131, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2743,6 +2831,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2792,6 +2882,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);
@@ -2841,6 +2933,8 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsModuleTest, AnsModuleTest_0135, Function | SmallTest | Level1)
 {
+    ASSERT_EQ(g_advancedNotificationService->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption("bundleName", 1), true), (int)ERR_OK);
     // subscriber
     std::shared_ptr<TestAnsSubscriber> subscriber = std::make_shared<TestAnsSubscriber>();
     std::shared_ptr<NotificationSubscriber> ptr = std::static_pointer_cast<NotificationSubscriber>(subscriber);

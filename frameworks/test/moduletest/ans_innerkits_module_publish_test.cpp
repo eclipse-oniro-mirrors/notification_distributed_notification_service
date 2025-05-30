@@ -633,6 +633,13 @@ void AnsInnerKitsModulePublishTest::CheckJsonConverter(const NotificationRequest
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_00100 start ==========>";
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
@@ -714,6 +721,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00200, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -776,6 +790,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00200, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00300, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -829,6 +850,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00300, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00400, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -880,6 +908,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00400, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00500, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -919,6 +954,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00500, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00600, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -958,6 +1000,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00600, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00700, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -999,6 +1048,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00700, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00800, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::CONTENT_INFORMATION);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1043,6 +1099,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00800, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00900, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1091,6 +1154,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00900, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_01000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::SERVICE_REMINDER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1125,6 +1195,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_01000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_02000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::SOCIAL_COMMUNICATION);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1157,6 +1234,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_02000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_03000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::CUSTOM);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1190,6 +1274,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_03000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_07000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::SOCIAL_COMMUNICATION);
     slot.EnableBypassDnd(true);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
@@ -1226,6 +1317,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_07000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_00100, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     std::shared_ptr<NotificationLongTextContent> implContent = std::make_shared<NotificationLongTextContent>();
     EXPECT_NE(implContent, nullptr);
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(implContent);
@@ -1270,6 +1368,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_GetActiveNotifications_
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSubscribeInfo info = NotificationSubscribeInfo();
     info.AddAppName("bundleName");
     info.AddAppUserId(SUBSCRIBE_USER_ALL);
@@ -1343,6 +1448,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_CancelGroup_10100, Func
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_04000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1458,6 +1570,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_08000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_05000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1497,6 +1616,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_05000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_06000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
@@ -1532,6 +1658,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_06000, Function
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00100::start:";
     NotificationSlot slot(NotificationConstant::CONTENT_INFORMATION);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
@@ -1568,6 +1701,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00100, Func
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Slot_Enalbe_00200::start:";
     NotificationSlot slot(NotificationConstant::SERVICE_REMINDER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
@@ -1610,6 +1750,13 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Slot_Enalbe_00200, Func
  */
 HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_09000, Function | MediumTest | Level1)
 {
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    bundleOption.SetUid(1);
+    std::string deviceId = "";
+    EXPECT_EQ(NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
+        bundleOption, deviceId, true), (int)ERR_OK);
+
     NotificationSlot slot(NotificationConstant::OTHER);
     EXPECT_EQ(0, NotificationHelper::AddNotificationSlot(slot));
     auto subscriber = std::make_shared<TestAnsSubscriber>();
