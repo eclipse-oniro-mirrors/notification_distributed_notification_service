@@ -28,6 +28,9 @@
 #include "nlohmann/json.hpp"
 #include "bundle_manager_helper.h"
 #include "notification_config_parse.h"
+#include "notification_preferences.h"
+#include "os_account_manager_helper.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -90,6 +93,19 @@ static uint64_t reportSuccessTimerId = 0;
 static std::list<ReportCache> successReportCacheList;
 static bool g_successReportFlag = false;
 static std::shared_ptr<ReportTimerInfo> reportSuccessTimeInfo = std::make_shared<ReportTimerInfo>();
+
+static int32_t SLOT_REPORT_INTERVAL = 7 * 24 * NotificationConstant::HOUR_TO_MS;
+static int64_t lastReportTime_ = 0;
+static std::mutex lastReportTimeMutex_;
+static int32_t SLOT_SUB_CODE = 101;
+static int32_t SLOT_ONCE_REPORT = 10;
+static uint32_t SLOT_MAX_REPORT = 200;
+static uint64_t reportSlotEnabledTimerId_ = 0;
+static std::shared_ptr<ReportTimerInfo> slotTimeInfo = std::make_shared<ReportTimerInfo>();
+static std::list<ReportSlotMessage> slotEnabledList_;
+static std::mutex slotEnabledListMutex_;
+static bool g_reportSlotFlag = false;
+static std::mutex reportSlotEnabledMutex_;
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -929,6 +945,214 @@ void NotificationAnalyticsUtil::ReportSkipFailedEvent(const HaMetaMessage& messa
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
 
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, MODIFY_ERROR_EVENT_CODE));
+}
+
+bool NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled()
+{
+    if (!CheckSlotNeedReport()) {
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("userId is failed");
+        return false;
+    }
+
+    if (!CreateSlotTimerExecute(userId)) {
+        return false;
+    }
+    return true;
+}
+
+bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
+{
+    std::lock_guard<std::mutex> lock(reportSlotEnabledMutex_);
+    if (g_reportSlotFlag) {
+        ANS_LOGW("now has message is reporting");
+        return false;
+    }
+
+    sptr<MiscServices::TimeServiceClient> timer =
+        MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        g_reportSlotFlag = false;
+        return false;
+    }
+    if (reportSlotEnabledTimerId_ == 0) {
+        reportSlotEnabledTimerId_ = timer->CreateTimer(slotTimeInfo);
+    }
+
+    auto triggerFunc = [userId] {
+        ANS_LOGI("trigger is arrived, userid:%{public}d", userId);
+        GetAllSlotMessageCache(userId);
+        ExecuteSlotReportList();
+    };
+
+    slotTimeInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(reportSlotEnabledTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
+        DEFAULT_ERROR_EVENT_TIME * NotificationConstant::SECOND_TO_MS);
+    g_reportSlotFlag = true;
+    return true;
+}
+
+void NotificationAnalyticsUtil::ExecuteSlotReportList()
+{
+    std::lock_guard<std::mutex> lock(reportSlotEnabledMutex_);
+
+    if (!ReportSlotEnable()) {
+        g_reportSlotFlag = false;
+        return;
+    }
+    
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        g_reportSlotFlag = false;
+        return;
+    }
+    auto triggerFunc = [] {
+        ExecuteSlotReportList();
+    };
+
+    slotTimeInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(reportSlotEnabledTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
+        DEFAULT_ERROR_EVENT_TIME * NotificationConstant::SECOND_TO_MS);
+    g_reportSlotFlag = true;
+}
+
+bool NotificationAnalyticsUtil::ReportSlotEnable()
+{
+    std::lock_guard<std::mutex> lock(slotEnabledListMutex_);
+    if (slotEnabledList_.empty()) {
+        ANS_LOGI("report end");
+        return false;
+    }
+
+    std::list<ReportSlotMessage> slotEnabledReportList;
+    int count = SLOT_ONCE_REPORT;
+    while (count-- > 0 && !slotEnabledList_.empty()) {
+        auto slotMessage = slotEnabledList_.front();
+        slotEnabledReportList.push_back(slotMessage);
+        slotEnabledList_.pop_front();
+    }
+
+    ReportCache reportCache;
+    BuildSlotReportCache(reportCache, slotEnabledReportList);
+    ReportCommonEvent(reportCache);
+    return true;
+}
+
+bool NotificationAnalyticsUtil::BuildSlotReportCache(ReportCache &reportCache,
+    std::list<ReportSlotMessage> &slotEnabledReportList)
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(SLOT_SUB_CODE);
+    nlohmann::json dataArray;
+    for (const auto &report : slotEnabledReportList) {
+        nlohmann::json dataItem;
+        dataItem["slotType"] = report.slotType;
+        dataItem["status"] = report.status;
+        dataItem["bundleName"] = report.bundleName;
+        dataItem["uid"] = report.uid;
+        dataArray.push_back(dataItem);
+    }
+    ansData["data"] = dataArray;
+
+    std::string message = ansData.dump(-1, ' ', false,
+        nlohmann::json::error_handler_t::replace);
+    EventFwk::Want want;
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    want.SetParam("ansData", message);
+
+    reportCache.want = want;
+    reportCache.eventCode = ANS_CUSTOMIZE_CODE;
+    return true;
+}
+
+bool NotificationAnalyticsUtil::CheckSlotNeedReport()
+{
+    std::lock_guard<std::mutex> lock(lastReportTimeMutex_);
+    auto now = GetCurrentTime();
+    if (lastReportTime_ != 0 && abs(now - lastReportTime_) <= SLOT_REPORT_INTERVAL) {
+        ANS_LOGD("no need report");
+        return false;
+    }
+
+    ANS_LOGI("slot enabled need report");
+    lastReportTime_ = now;
+    return true;
+}
+
+bool NotificationAnalyticsUtil::GetAllSlotMessageCache(const int32_t &userId)
+{
+    std::unordered_map<std::string, std::string> slotEnablesMap;
+    auto res = NotificationPreferences::GetInstance()->GetBatchKvsFromDbContainsKey(
+        LIVE_VIEW_SLOT_ENABLE_END, slotEnablesMap, userId);
+    if (res != ERR_OK) {
+        ANS_LOGW("message is err:%{public}d, userId:%{public}d ", res, userId);
+        return false;
+    }
+
+    if (slotEnablesMap.size() == 0 || slotEnablesMap.size() > SLOT_MAX_REPORT) {
+        ANS_LOGW("slotEnablesMap size %{public}zu", slotEnablesMap.size());
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(slotEnabledListMutex_);
+    for (const auto& budleEntry : slotEnablesMap) {
+        std::string budleEntryKey = budleEntry.first;
+        // enable
+        ReportSlotMessage reportSlotMessage;
+        std::string budleEntryValue = budleEntry.second;
+        NotificationAnalyticsUtil::GetReportSlotMessage(budleEntryKey,
+            budleEntryValue, reportSlotMessage, userId);
+        slotEnabledList_.push_back(reportSlotMessage);
+    }
+    return true;
+}
+
+bool NotificationAnalyticsUtil::GetReportSlotMessage(std::string& budleEntryKey,
+    std::string& budleEntryValue, ReportSlotMessage& reportSlotMessage, const int32_t &userId)
+{
+    // find first
+    size_t firstUnderscore = budleEntryKey.find('_');
+    // find second
+    size_t secondUnderscore = budleEntryKey.find('_', firstUnderscore + 1);
+    // find third
+    size_t thirdUnderscore = budleEntryKey.find('_', secondUnderscore + 1);
+    // get bundle string
+    std::string extracted = budleEntryKey.substr(secondUnderscore + 1, thirdUnderscore - secondUnderscore - 1);
+
+    std::unordered_map<std::string, std::string> bundleInfoMap;
+    auto res = NotificationPreferences::GetInstance()->GetBatchKvsFromDbContainsKey(
+        extracted, bundleInfoMap, userId);
+    if (res != ERR_OK) {
+        ANS_LOGW("get bundleInfoMap is err:%{public}d", res);
+        return false;
+    }
+
+    auto nameIt = bundleInfoMap.find(ANS_BUNDLE_BEGIN + LINE + extracted + LINE + NAME);
+    auto uidIt = bundleInfoMap.find(ANS_BUNDLE_BEGIN + LINE + extracted + LINE + UID);
+    if (nameIt == bundleInfoMap.end() || uidIt == bundleInfoMap.end()) {
+        ANS_LOGW("bundleInfoMap is empty, database error");
+        return false;
+    }
+
+    // data process
+    std::string bundleName = nameIt->second;
+    int32_t uid = std::atoi(uidIt->second.c_str());
+    bool enable = std::atoi(budleEntryValue.c_str());
+    ANS_LOGI("budleInfoEntry uid %{public}d, name is:%{public}s, enabled:%{public}d",
+        uid, bundleName.c_str(), enable);
+    reportSlotMessage.uid = uid;
+    reportSlotMessage.status = enable;
+    reportSlotMessage.slotType = static_cast<int32_t>(
+        NotificationConstant::SlotType::LIVE_VIEW);
+    reportSlotMessage.bundleName = bundleName;
+    return true;
 }
 } // namespace Notification
 } // namespace OHOS

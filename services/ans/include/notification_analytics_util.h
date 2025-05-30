@@ -22,6 +22,13 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+    const static std::string LINE = "_";
+    const static std::string ANS_BUNDLE_BEGIN = "ans_bundle";
+    const static std::string LIVE_VIEW_SLOT_ENABLE_END = "slot_type_5_enabled";
+    const static std::string NAME = "name";
+    const static std::string UID = "uid";
+}
 
 enum EventSceneId {
     SCENE_0 = 0,
@@ -50,6 +57,7 @@ enum EventBranchId {
     BRANCH_6 = 6,
     BRANCH_7 = 7,
     BRANCH_8 = 8,
+    BRANCH_9 = 9,
 };
 class HaMetaMessage {
 public:
@@ -118,6 +126,12 @@ struct ReportCache {
     int32_t eventCode;
 };
 
+struct ReportSlotMessage {
+    std::string bundleName;
+    int32_t uid;
+    int32_t slotType;
+    bool status;
+};
 class NotificationAnalyticsUtil {
 public:
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
@@ -143,6 +157,7 @@ public:
 
     static void ReportPublishWithUserInput(const sptr<NotificationRequest>& request);
 
+    static bool ReportAllBundlesSlotEnabled();
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
@@ -189,6 +204,22 @@ private:
     static bool DetermineWhetherToSend(uint32_t slotType);
 
     static std::string BuildAnsData(const HaMetaMessage& message);
+
+    static bool CheckSlotNeedReport();
+
+    static bool GetAllSlotMessageCache(const int32_t &userId);
+
+    static bool GetReportSlotMessage(std::string& budleEntryKey, std::string& budleEntryValue,
+        ReportSlotMessage& reportSlotMessage, const int32_t &userId);
+
+    static bool CreateSlotTimerExecute(const int32_t &userId);
+
+    static void ExecuteSlotReportList();
+
+    static bool ReportSlotEnable();
+
+    static bool BuildSlotReportCache(ReportCache& reportCache,
+        std::list<ReportSlotMessage>& slotEnabledReportList);
 };
 } // namespace Notification
 } // namespace OHOS

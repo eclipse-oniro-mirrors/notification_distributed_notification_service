@@ -1257,6 +1257,15 @@ int32_t NotificationPreferences::GetByteFromDb(
     return preferncesDB_->GetByteFromDb(key, value, userId);
 }
 
+int32_t NotificationPreferences::GetBatchKvsFromDbContainsKey(
+    const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->GetBatchKvsFromDbContainsKey(key, values, userId);
+}
+
 int32_t NotificationPreferences::GetBatchKvsFromDb(
     const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
