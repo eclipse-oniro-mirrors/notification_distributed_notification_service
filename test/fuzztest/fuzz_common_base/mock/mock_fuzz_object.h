@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef FUZZ_COMMON_BASE_H
-#define FUZZ_COMMON_BASE_H
+#ifndef MOCK_OBJECT_BUILDER_H
+#define MOCK_OBJECT_BUILDER_H
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include "securec.h"
+#include "ans_log_wrapper.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
-extern "C" {
-void NativeTokenGet(const std::vector<std::string> &permissions);
+namespace OHOS {
+namespace Notification {
 
-void NormalHapTokenGet();
+template <typename T>
+struct ObjectBuilder {
+    static T* Build(FuzzedDataProvider *fdp)
+    {
+        return nullptr;
+    }
 
-void SystemHapTokenGet(const std::vector<std::string> &permissions);
+    static std::shared_ptr<T> BuildSharedPtr(FuzzedDataProvider *fdp)
+    {
+        return std::shared_ptr<T>(Build(fdp));
+    }
+};
+}  // namespace Notification
+}  // namespace OHOS
 
-void MockRandomToken(FuzzedDataProvider *fdp, const std::vector<std::string> &permissions);
-}
-
-#endif // FUZZ_COMMON_BASE_H
+#endif  // MOCK_OBJECT_BUILDER_H

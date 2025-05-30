@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,47 +19,26 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "fuzz_common_base.h"
+#include <iostream>
+#include <fstream>
 
 extern "C" {
-static constexpr uint32_t U32_AT_SIZE     = 3;
-static constexpr uint32_t MAX_MEMORY_SIZE = 4 * 1024 * 1024;
-
 using namespace OHOS::Security::AccessToken;
 
-uint32_t GetU32Size()
+void MockRandomToken(FuzzedDataProvider *fdp, const std::vector<std::string> &permissions)
 {
-    return U32_AT_SIZE;
-}
-
-uint32_t GetU32Data(const char* ptr)
-{
-    // convert fuzz input data to an integer
-    return (ptr[0] << 16) | (ptr[1] << 8) | ptr[2];
-}
-
-char* ParseData(const uint8_t* data, size_t size)
-{
-    if (data == nullptr) {
-        return nullptr;
+    int caseNum = fdp->ConsumeIntegralInRange(0, 3);
+    switch (caseNum) {
+        case 0:
+            NativeTokenGet(permissions);
+            break;
+        case 1:
+            SystemHapTokenGet(permissions);
+            break;
+        case 2:
+        default:
+            NormalHapTokenGet();
     }
-
-    if (size > MAX_MEMORY_SIZE) {
-        return nullptr;
-    }
-
-    char* ch = (char *)malloc(size + 1);
-    if (ch == nullptr) {
-        return nullptr;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size, data, size) != EOK) {
-        free(ch);
-        ch = nullptr;
-        return nullptr;
-    }
-
-    return ch;
 }
 
 void NativeTokenGet(const std::vector<std::string> &permissions)
@@ -90,10 +69,9 @@ void NativeTokenGet(const std::vector<std::string> &permissions)
 
 void SystemHapTokenGet(const std::vector<std::string> &permissions)
 {
-
     HapPolicyParams hapPolicyPrams = {
         .apl = APL_SYSTEM_CORE,
-        .domain = "com.ohos.notificationdialog",
+        .domain = "test.fuzz.ans",
         .permList = {},
         .permStateList = {}
     };
@@ -101,17 +79,17 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
     for (auto permission : permissions) {
         PermissionStateFull permStateFull = {
             .permissionName = permission,
-            .isGeneral = true,
-            .resDeviceID = {"local"},
-            .grantStatus = {PermissionState::PERMISSION_GRANTED},
-            .grantFlags = {1}
+            .isGeneral = false,
+            .resDeviceID = {"device 1", "device 2"},
+            .grantStatus = {PermissionState::PERMISSION_GRANTED, PermissionState::PERMISSION_GRANTED},
+            .grantFlags = {1, 2}
         };
         PermissionDef permDef = {
             .permissionName = permission,
-            .bundleName = "com.ohos.notificationdialog",
+            .bundleName = "test.fuzz.ans",
             .grantMode = 1,
-            .availableLevel = APL_NORMAL,
-            .label = "label",
+            .availableLevel = APL_SYSTEM_CORE,
+            .label = "label3",
             .labelId = 1,
             .description = "break the door",
             .descriptionId = 1,
@@ -122,11 +100,34 @@ void SystemHapTokenGet(const std::vector<std::string> &permissions)
 
     HapInfoParams hapInfoParams = {
         .userID = 100,
-        .bundleName = "com.ohos.notificationdialog",
+        .bundleName = "test.fuzz.ans",
         .instIndex = 0,
-        .appIDDesc = "com.ohos.notificationdialog",
+        .appIDDesc = "test.fuzz.ans",
         .apiVersion = 12,
         .isSystemApp = true
+    };
+
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(hapInfoParams, hapPolicyPrams);
+    SetSelfTokenID(tokenIdEx.tokenIDEx);
+}
+
+void NormalHapTokenGet()
+{
+    HapPolicyParams hapPolicyPrams = {
+        .apl = APL_NORMAL,
+        .domain = "test.fuzz.ans",
+        .permList = {},
+        .permStateList = {}
+    };
+
+    HapInfoParams hapInfoParams = {
+        .userID = 100,
+        .bundleName = "test.fuzz.ans",
+        .instIndex = 0,
+        .appIDDesc = "test.fuzz.ans",
+        .apiVersion = 12,
+        .isSystemApp = false
     };
 
     AccessTokenIDEx tokenIdEx = {0};
