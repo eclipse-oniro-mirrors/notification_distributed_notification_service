@@ -1512,7 +1512,10 @@ private:
         bool isSystemApp, bool isUpdateByOwner, const bool isAgentController);
     ErrCode DuplicateMsgControl(const sptr<NotificationRequest> &request);
     void RemoveExpiredUniqueKey();
-    bool IsDuplicateMsg(const std::string &uniqueKey);
+    void RemoveExpiredDistributedUniqueKey();
+    void RemoveExpiredLocalUniqueKey();
+    bool IsDuplicateMsg(const std::list<std::pair<std::chrono::system_clock::time_point, std::string>> &msglist,
+        const std::string &key);
     void DeleteDuplicateMsgs(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record);
     ErrCode UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record);
@@ -1634,6 +1637,8 @@ private:
     std::shared_ptr<NotificationSlotFilter> notificationSlotFilter_ = nullptr;
     std::shared_ptr<NotificationDialogManager> dialogManager_ = nullptr;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> uniqueKeyList_;
+    std::list<std::pair<std::chrono::system_clock::time_point, std::string>> distributedUniqueKeyList_;
+    std::list<std::pair<std::chrono::system_clock::time_point, std::string>> localUniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
     std::mutex delayNotificationMutext_;
     static std::mutex doNotDisturbMutex_;
