@@ -166,6 +166,12 @@ struct ReportSlotMessage {
     bool status;
 };
 
+struct ReportLiveViewMessage {
+    int32_t successNum;
+    int32_t FailedNum;
+    int64_t startTime;
+};
+
 class NotificationAnalyticsUtil {
 public:
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
@@ -198,6 +204,8 @@ public:
     static void ReportBadgeChange(const sptr<BadgeNumberCallbackData> &badgeData);
 
     static bool ReportAllBundlesSlotEnabled();
+
+    static void ReportLiveViewNumber(const sptr<NotificationRequest>& request, const int32_t reportType);
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);
@@ -266,6 +274,20 @@ private:
 
     static bool BuildSlotReportCache(ReportCache& reportCache,
         std::list<ReportSlotMessage>& slotEnabledReportList);
+
+    static void AddLiveViewSuccessNum(std::string bundle, int32_t status);
+
+    static void AddLiveViewFailedNum(std::string bundle, int32_t status);
+
+    static void CreateLiveViewTimerExecute();
+
+    static ReportCache AggregateLiveView();
+
+    static void ExecuteLiveViewReport();
+
+    static void AddLocalLiveViewSuccessNum(std::string bundle);
+
+    static void AddLocalLiveViewFailedNum(std::string bundle);
 };
 } // namespace Notification
 } // namespace OHOS

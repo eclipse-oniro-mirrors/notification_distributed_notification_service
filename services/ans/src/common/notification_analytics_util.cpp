@@ -75,6 +75,7 @@ static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowC
     {ANS_CUSTOMIZE_CODE, {}},
 };
 static std::map<std::string, BadgeInfo> badgeInfos;
+static std::map<std::string, ReportLiveViewMessage> liveViewMessages;
 
 int32_t HaMetaMessage::syncWatch_ = 0;
 int32_t HaMetaMessage::syncHeadSet_ = 0;
@@ -115,6 +116,15 @@ static std::list<ReportSlotMessage> slotEnabledList_;
 static std::mutex slotEnabledListMutex_;
 static bool g_reportSlotFlag = false;
 static std::mutex reportSlotEnabledMutex_;
+
+static int32_t LIVEVIEW_SUB_CODE = 202;
+static int32_t LIVEVIEW_AGGREGATE_NUM = 10;
+static std::mutex ReportLiveViewMessageMutex_;
+static uint64_t reportLiveViewMessageTimerId_ = 0;
+static std::shared_ptr<ReportTimerInfo> liveViewTimeInfo = std::make_shared<ReportTimerInfo>();
+static int32_t LIVEVIEW_REPORT_INTERVAL = 2 * NotificationConstant::HOUR_TO_MS;
+static const int32_t LIVE_VIEW_CREATE = 0;
+static bool g_reportLiveViewFlag = false;
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -285,6 +295,7 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<Notification
     const HaMetaMessage& message)
 {
     CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
+    ReportLiveViewNumber(request, PUBLISH_ERROR_EVENT_CODE);
 }
 
 void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationRequest>& request,
@@ -311,6 +322,7 @@ void NotificationAnalyticsUtil::ReportPublishSuccessEvent(const sptr<Notificatio
     if (request == nullptr) {
         return;
     }
+    ReportLiveViewNumber(request, ANS_CUSTOMIZE_CODE);
     if (!IsAllowedBundle(request)) {
         ANS_LOGW("This Bundle not allowed.");
         return;
@@ -327,6 +339,217 @@ void NotificationAnalyticsUtil::ReportPublishSuccessEvent(const sptr<Notificatio
     want.SetParam("ansData", ansData);
 
     IN_PROCESS_CALL_WITHOUT_RET(AddSuccessListCache(want, ANS_CUSTOMIZE_CODE));
+}
+
+void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequest>& request, const int32_t reportType)
+{
+    NotificationNapi::ContentType contentType;
+    NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
+        static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
+    if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
+        auto content = request->GetContent()->GetNotificationContent();
+        auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
+        if (liveViewContent->GetExtraInfo() != nullptr) {
+            std::string bundle = request->GetOwnerBundleName() + MESSAGE_DELIMITER +
+                liveViewContent->GetExtraInfo()->GetStringParam("event");
+                std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
+                if (reportType == ANS_CUSTOMIZE_CODE) {
+                    AddLiveViewSuccessNum(bundle, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
+                } else if (reportType == PUBLISH_ERROR_EVENT_CODE) {
+                    AddLiveViewFailedNum(bundle, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
+                }
+            CreateLiveViewTimerExecute();
+        }
+    }
+    if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW) {
+        std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
+        std::string bundle = request->GetOwnerBundleName() + "#-99";
+        if (reportType == ANS_CUSTOMIZE_CODE) {
+            AddLocalLiveViewSuccessNum(bundle);
+        } else if (reportType == PUBLISH_ERROR_EVENT_CODE) {
+            AddLocalLiveViewFailedNum(bundle);
+        }
+        CreateLiveViewTimerExecute();
+    }
+}
+
+void NotificationAnalyticsUtil::AddLiveViewSuccessNum(std::string bundle, int32_t status)
+{
+    auto iter = liveViewMessages.find(bundle);
+    switch (status) {
+        case LIVE_VIEW_CREATE:
+            if (iter != liveViewMessages.end()) {
+                iter->second.successNum ++;
+            } else {
+                ReportLiveViewMessage liveViewMessage;
+                liveViewMessage.FailedNum = 0;
+                liveViewMessage.successNum = 1;
+                liveViewMessage.startTime = GetCurrentTime();
+                liveViewMessages[bundle] = liveViewMessage;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void NotificationAnalyticsUtil::AddLiveViewFailedNum(std::string bundle, int32_t status)
+{
+    auto iter = liveViewMessages.find(bundle);
+    switch (status) {
+        case LIVE_VIEW_CREATE:
+            if (iter != liveViewMessages.end()) {
+                iter->second.FailedNum ++;
+            } else {
+                ReportLiveViewMessage liveViewMessage;
+                liveViewMessage.FailedNum = 1;
+                liveViewMessage.successNum = 0;
+                liveViewMessage.startTime = GetCurrentTime();
+                liveViewMessages[bundle] = liveViewMessage;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void NotificationAnalyticsUtil::AddLocalLiveViewFailedNum(std::string bundle)
+{
+    auto iter = liveViewMessages.find(bundle);
+    if (iter != liveViewMessages.end()) {
+        iter->second.FailedNum ++;
+    } else {
+        ReportLiveViewMessage liveViewMessage;
+        liveViewMessage.FailedNum = 1;
+        liveViewMessage.successNum = 0;
+        liveViewMessage.startTime = GetCurrentTime();
+        liveViewMessages[bundle] = liveViewMessage;
+    }
+}
+
+void NotificationAnalyticsUtil::AddLocalLiveViewSuccessNum(std::string bundle)
+{
+    auto iter = liveViewMessages.find(bundle);
+    if (iter != liveViewMessages.end()) {
+        iter->second.successNum ++;
+    } else {
+        ReportLiveViewMessage liveViewMessage;
+        liveViewMessage.FailedNum = 0;
+        liveViewMessage.successNum = 1;
+        liveViewMessage.startTime = GetCurrentTime();
+        liveViewMessages[bundle] = liveViewMessage;
+    }
+}
+
+void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
+{
+    if (g_reportLiveViewFlag) {
+        ANS_LOGW("now has liveview message is reporting");
+        return;
+    }
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        g_reportLiveViewFlag = false;
+        return;
+    }
+    if (reportLiveViewMessageTimerId_ == 0) {
+        reportLiveViewMessageTimerId_ = timer->CreateTimer(liveViewTimeInfo);
+    }
+
+    auto triggerFunc = [] {
+        ExecuteLiveViewReport();
+    };
+
+    liveViewTimeInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(reportLiveViewMessageTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
+        LIVEVIEW_REPORT_INTERVAL * NotificationConstant::SECOND_TO_MS);
+    g_reportLiveViewFlag = true;
+}
+
+void NotificationAnalyticsUtil::ExecuteLiveViewReport()
+{
+    std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
+    if (liveViewMessages.empty()) {
+        ANS_LOGI("report end");
+        g_reportLiveViewFlag = false;
+        return;
+    }
+    if (reportAggregateTimeId == 0) {
+        sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
+        if (aggregateTimer == nullptr) {
+            ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+            g_reportLiveViewFlag = false;
+            return;
+        }
+        reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
+    }
+    ReportCache reportCache = AggregateLiveView();
+    reportAggList.emplace_back(reportCache);
+    if (!g_successReportFlag) {
+        ExecuteSuccessCacheList();
+    }
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        return;
+    }
+    auto triggerFunc = [] {
+        ExecuteLiveViewReport();
+    };
+    liveViewTimeInfo->SetCallbackInfo(triggerFunc);
+    timer->StartTimer(reportLiveViewMessageTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
+        LIVEVIEW_REPORT_INTERVAL * NotificationConstant::SECOND_TO_MS);
+    g_reportLiveViewFlag = true;
+}
+
+ReportCache NotificationAnalyticsUtil::AggregateLiveView()
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(LIVEVIEW_SUB_CODE);
+    int32_t aggreCount = LIVEVIEW_AGGREGATE_NUM;
+    std::string data;
+    std::vector<std::string> reportBundles;
+    int64_t startTime = GetCurrentTime();
+
+    std::vector<std::pair<std::string, ReportLiveViewMessage>> messageVector(liveViewMessages.begin(),
+        liveViewMessages.end());
+    std::sort(messageVector.begin(), messageVector.end(), [](const std::pair<std::string, ReportLiveViewMessage> &a,
+        std::pair<std::string, ReportLiveViewMessage> &b) {
+            return a.second.startTime < b.second.startTime;
+    });
+    for (const auto &message : messageVector) {
+        ReportLiveViewMessage liveViewData = message.second;
+        std::string create = std::to_string(liveViewData.successNum) + "," + std::to_string(liveViewData.FailedNum);
+        std::string update;
+        std::string end;
+        std::string cancel;
+        std::string singleData = message.first + ":" + create + MESSAGE_DELIMITER +
+            update + MESSAGE_DELIMITER + end + MESSAGE_DELIMITER + cancel + MESSAGE_DELIMITER;
+        data += singleData;
+        startTime = startTime < liveViewData.startTime ? startTime : liveViewData.startTime;
+        reportBundles.emplace_back(message.first);
+        aggreCount --;
+        if (aggreCount <= 0) {
+            break;
+        }
+        data += ",";
+    }
+    for (auto bundle : reportBundles) {
+        liveViewMessages.erase(bundle);
+    }
+    ansData["data"] = data;
+    ansData["startTime"] = startTime;
+    ansData["endTime"] = GetCurrentTime();
+    std::string message = ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    EventFwk::Want want;
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    want.SetParam("ansData", message);
+
+    ReportCache reportCache;
+    reportCache.want = want;
+    reportCache.eventCode = ANS_CUSTOMIZE_CODE;
+    return reportCache;
 }
 
 bool NotificationAnalyticsUtil::IsAllowedBundle(const sptr<NotificationRequest>& request)
@@ -660,6 +883,7 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
         reason["status"] = static_cast<int32_t>(liveViewContent->GetLiveViewStatus());
         if (liveViewContent->GetExtraInfo() != nullptr) {
             reason["et"] = liveViewContent->GetExtraInfo()->GetStringParam("event");
+            reason["lt"] = liveViewContent->GetExtraInfo()->GetIntParam("LayoutData.layoutType", -1);
         }
     }
 
