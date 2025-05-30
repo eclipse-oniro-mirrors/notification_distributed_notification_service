@@ -116,6 +116,9 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerInfo(const std::shar
     ErrCode result = ERR_OK;
 
     if (!record->request->IsCommonLiveView()) {
+        if ((record->request->GetAutoDeletedTime() > GetCurrentTime())) {
+            StartAutoDeletedTimer(record);
+        }
         return ERR_OK;
     }
 
