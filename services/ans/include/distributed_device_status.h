@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <singleton.h>
 #include <string>
+#include <vector>
 
 #include "errors.h"
 #include "ans_log_wrapper.h"
@@ -26,19 +27,32 @@
 
 namespace OHOS {
 namespace Notification {
+
+struct DeviceStatus {
+    DeviceStatus(std::string type, std::string id) : deviceType(type), deviceId(id) {}
+    std::string deviceType;
+    std::string deviceId;
+    uint32_t status = 0;
+    int32_t userId = 0;
+};
+
 class DistributedDeviceStatus : public DelayedSingleton<DistributedDeviceStatus> {
 public:
     DistributedDeviceStatus();
     ~DistributedDeviceStatus();
     ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status,
         const uint32_t controlFlag);
+    ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status,
+        const uint32_t controlFlag, const std::string deveiceId, int32_t userId);
 
     uint32_t GetDeviceStatus(const std::string &deviceType);
 private:
     std::mutex mapLock_;
+    std::vector<DeviceStatus> deviceInfo_;
     SafeMap<std::string, uint32_t> deviceStatus_;
 
 public:
+    static constexpr int32_t USERID_FLAG = 16;
     static constexpr int32_t STATUS_SIZE = 4;
     static constexpr int32_t USING_FLAG = 0;
     static constexpr int32_t LOCK_FLAG = 1;

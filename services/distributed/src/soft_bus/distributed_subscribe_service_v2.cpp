@@ -41,7 +41,7 @@ static std::string SubscribeTransDeviceType(uint16_t deviceType)
     }
 }
 
-static int32_t GetCurrentActiveUserId()
+int32_t DistributedSubscribeService::GetCurrentActiveUserId()
 {
     int32_t userId = DEFAULT_USER_ID;
     int32_t ret = OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);

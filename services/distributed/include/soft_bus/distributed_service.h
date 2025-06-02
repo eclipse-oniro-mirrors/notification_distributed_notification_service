@@ -40,6 +40,7 @@ public:
     int32_t InitService(const std::string &deviceId, uint16_t deviceType);
     void AddDevice(DistributedDeviceInfo device);
     void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);
+    void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo);
     void OnConsumed(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& device);
     void OnApplicationInfnChanged(const std::string& bundleName);
@@ -53,6 +54,7 @@ public:
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
 #else
     void SyncDeviceStatus(int32_t status);
+    void SyncInstalledBundle(const std::string& bundleName, bool isAdd);
 #endif
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
 private:

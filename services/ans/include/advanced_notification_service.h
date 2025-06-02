@@ -1112,7 +1112,13 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-        uint32_t controlFlag, const std::string &deveiceId) override;
+        uint32_t controlFlag, const std::string &deveiceId, int32_t userId) override;
+
+    ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        int operatorType, const std::vector<std::string>& bundleList) override;
+
+    ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+        bool notificaitonEnable, bool liveViewEnable) override;
 
     /**
      * @brief clear notification when aggregate local switch close.

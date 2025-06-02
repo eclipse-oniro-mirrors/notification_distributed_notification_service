@@ -605,7 +605,19 @@ public:
     }
 
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-        uint32_t controlFlag, const std::string& deveiceId) override
+        uint32_t controlFlag, const std::string& deveiceId, int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        int operatorType, const std::vector<std::string>& bundleList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+        bool notificaitonEnable, bool liveViewEnable) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

@@ -65,6 +65,30 @@ public:
     ErrCode GetBundleInfo(const std::string &bundleName,
         AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex = 0);
 
+    /**
+     * @brief Obtains all installed bundle info.
+     *
+     * @param flag Indicates the bundle flag.
+     * @param bundleInfo Indicates the bundle resource.
+     * @param userId Indicates the userId.
+     * @return Returns the invock result.
+     */
+    ErrCode GetAllBundleInfos(int32_t flags, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId);
+
+    /**
+     * @brief Obtains all installed bundle info.
+     *
+     * @param bundlesName Indicates the bundle name.
+     * @param userId Indicates the userId.
+     * @return Returns the invock result.
+     */
+    ErrCode GetAllInstalledBundles(std::vector<std::string> &bundlesName, int32_t userId);
+
+    ErrCode GetApplicationInfo(const std::string &appName, int32_t flags, int32_t userId,
+        AppExecFwk::ApplicationInfo &appInfo);
+
+    bool CheckSystemApp(const std::string& bundleName, int32_t userId);
+
 private:
     void Connect();
     void Disconnect();

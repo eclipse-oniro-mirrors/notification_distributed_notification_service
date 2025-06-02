@@ -2118,7 +2118,7 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
 }
 
 ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag, const std::string deveiceId)
+    const uint32_t controlFlag, const std::string deveiceId, int32_t userId)
 {
     ANS_LOGD("enter");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
@@ -2127,7 +2127,29 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->SetTargetDeviceStatus(deviceType, status, controlFlag, deveiceId);
+    return proxy->SetTargetDeviceStatus(deviceType, status, controlFlag, deveiceId, userId);
+}
+
+ErrCode AnsNotification::SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+    int operatorType, const std::vector<std::string>& bundleList)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+}
+
+ErrCode AnsNotification::SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+    bool notificaitonEnable, bool liveViewEnable)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->SetTargetDeviceSwitch(deviceType, deviceId, notificaitonEnable, liveViewEnable);
 }
 
 ErrCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)

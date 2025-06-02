@@ -52,6 +52,7 @@ public:
     void OnDeviceOnline(const DmDeviceInfo &deviceInfo);
     void OnDeviceOffline(const DmDeviceInfo &deviceInfo);
     void OnDeviceChanged(const DmDeviceInfo &deviceInfo);
+    void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo);
     static DistributedExtensionService& GetInstance();
     void HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason);
     void SendReportCallback(int32_t messageType, int32_t errCode, std::string reason);

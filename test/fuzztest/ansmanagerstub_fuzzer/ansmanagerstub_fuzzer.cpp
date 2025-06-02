@@ -187,7 +187,7 @@ namespace OHOS {
         uint32_t status = fuzzData->ConsumeIntegral<uint32_t>();
         uint32_t controlFlag = fuzzData->ConsumeIntegral<uint32_t>();
         service->SetTargetDeviceStatus(deviceType, status, stringData);
-        service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData);
+        service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData, userId);
         service->ClearAllNotificationGroupInfo(localSwitch);
 
         service->SetSlotFlagsAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>());

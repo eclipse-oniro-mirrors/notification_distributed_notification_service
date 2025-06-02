@@ -54,6 +54,22 @@ bool NotifticationStateBox::GetState(int32_t& state)
     }
     return box_->GetInt32Value(LOCAL_DEVICE_STATUS, state);
 }
+
+bool NotifticationStateBox::GetLiveViewEnable(bool& enable)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetBoolValue(LIVEVIEW_SYNC_ENABLE, enable);
+}
+
+bool NotifticationStateBox::GetNotificationEnable(bool& enable)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetBoolValue(NOTIFICATION_SYNC_ENABLE, enable);
+}
 #else
 bool NotifticationStateBox::SetDeviceType(const std::string& deviceType)
 {
@@ -77,6 +93,22 @@ bool NotifticationStateBox::SetState(int32_t state)
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_STATUS, state));
+}
+
+bool NotifticationStateBox::SetLiveViewEnable(bool enable)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LIVEVIEW_SYNC_ENABLE, enable));
+}
+
+bool NotifticationStateBox::SetNotificationEnable(bool enable)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_SYNC_ENABLE, enable));
 }
 #endif
 }

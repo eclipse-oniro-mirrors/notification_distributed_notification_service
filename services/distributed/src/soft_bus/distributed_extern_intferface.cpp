@@ -48,6 +48,13 @@ SYMBOL_EXPORT void AddDevice(const std::string &deviceId, uint16_t deviceType,
     DistributedService::GetInstance().AddDevice(peerDevice);
 }
 
+SYMBOL_EXPORT void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)
+{
+    ANS_LOGI("Device StatusChange %{public}s %{public}d.", StringAnonymous(changeInfo.deviceId).c_str(),
+        changeInfo.changeType);
+    DistributedService::GetInstance().DeviceStatusChange(changeInfo);
+}
+
 SYMBOL_EXPORT void ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
 {
     ANS_LOGI("ReleaseDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));

@@ -46,13 +46,16 @@ struct DistributedDeviceInfo {
         : deviceType_(deviceType), deviceId_(deviceId) {}
     DistributedDeviceInfo(uint16_t deviceType, std::string deviceId, std::string networkId)
         : deviceType_(deviceType), deviceId_(deviceId), networkId_(networkId) {}
+    bool deviceUsage = false;
+    bool liveViewSync = false;
+    bool iconSync = false;
+    bool installedBunlesSync = false;
     uint16_t deviceType_;
-    std::string deviceId_;
-    std::string networkId_;
     int32_t peerState_ = DeviceState::STATE_INIT;
     int32_t socketId_ = -1;
     int32_t connectedTry_ = 0;
-    bool isSync = false;
+    std::string deviceId_;
+    std::string networkId_;
 };
 
 struct ConnectedSocketInfo {

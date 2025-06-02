@@ -114,6 +114,7 @@ ohos_source_set("ans_service_sources") {
     "src/liveview_all_scenarios_extension_wrapper.cpp",
     "src/notification_dialog.cpp",
     "src/notification_dialog_manager.cpp",
+    "src/notification_extension/distributed_device_data_service.cpp",
     "src/notification_extension/distributed_device_manager.cpp",
     "src/notification_extension/distributed_extension_service.cpp",
     "src/notification_extension/notification_operation_service.cpp",

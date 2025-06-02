@@ -30,10 +30,14 @@ public:
     bool GetDeviceType(std::string& deviceType);
     bool GetDeviceId(std::string& deviceId);
     bool GetState(int32_t& state);
+    bool GetLiveViewEnable(bool& enable);
+    bool GetNotificationEnable(bool& enable);
 #else
     bool SetDeviceType(const std::string& deviceType);
     bool SetDeviceId(const std::string& deviceId);
     bool SetState(int32_t state);
+    bool SetLiveViewEnable(bool enable);
+    bool SetNotificationEnable(bool enable);
 #endif
 };
 }  // namespace Notification

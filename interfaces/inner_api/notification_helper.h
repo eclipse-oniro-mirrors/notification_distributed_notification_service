@@ -1178,7 +1178,30 @@ public:
      * @return Returns set result.
      */
     static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag, const std::string deveiceId = std::string());
+        const uint32_t controlFlag, const std::string deveiceId = std::string(), int32_t userId = 0);
+
+    /**
+     * @brief set target device of bundle list.
+     *
+     * @param deviceType device type.
+     * @param operatorType operation type.
+     * @param bundleList device of bundle list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        int operatorType, const std::vector<std::string>& bundleList);
+
+    /**
+     * @brief set target device of bundle list.
+     *
+     * @param deviceType device type.
+     * @param operatorType operation type.
+     * @param notificaitonEnable notification switch.
+     * @param liveViewEnable live view switch.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
+        bool notificaitonEnable, bool liveViewEnable);
 
     /**
      * @brief Register Swing Callback Function.

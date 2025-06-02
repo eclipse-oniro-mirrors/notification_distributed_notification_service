@@ -34,6 +34,7 @@ public:
     void GenerateBundleIconSync(const DistributedDeviceInfo& device);
     void HandleBundleRemoved(const std::string& bundleName);
     void HandleBundleChanged(const std::string& bundleName, bool updatedExit);
+    void SetDeviceBundleList(const std::shared_ptr<TlvBox>& boxMessage);
 private:
     int32_t UpdateBundlesIcon(const std::unordered_map<std::string, std::string>& icons,
         const DistributedDeviceInfo peerDevice);
@@ -42,6 +43,9 @@ private:
         std::vector<DistributedDeviceInfo>& updateDeviceList);
 #else
     void ReportBundleIconList(const DistributedDeviceInfo peerDevice);
+    void SyncInstalledBundles(const DistributedDeviceInfo& peerDevice, bool isForce);
+    void SendInstalledBundles(const DistributedDeviceInfo& peerDevice, const std::string& localDeviceId,
+        const std::vector<std::string>& bundles, int32_t type);
 #endif
 
 private:

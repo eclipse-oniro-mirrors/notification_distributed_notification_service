@@ -198,7 +198,7 @@ namespace OHOS {
         service->GetAllNotificationsBySlotType(notificationsVector, slotType);
         service->AllowUseReminder(bundleName, allowed);
         service->SetTargetDeviceStatus(deviceType, status, stringData);
-        service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData);
+        service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData, userId);
         service->SetDistributedEnabledByBundle(bundleOption, deviceType, enabled);
         service->IsDistributedEnabledByBundle(bundleOption, deviceType, enabled);
         service->SetSmartReminderEnabled(deviceType, enabled);

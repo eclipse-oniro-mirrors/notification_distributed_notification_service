@@ -38,6 +38,7 @@
 #include "../advanced_notification_inline.cpp"
 #include "notification_analytics_util.h"
 #include "notification_operation_service.h"
+#include "distributed_device_data_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -417,7 +418,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-    uint32_t controlFlag, const std::string &deveiceId)
+    uint32_t controlFlag, const std::string &deveiceId, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
@@ -435,11 +436,45 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
         return ERR_ANS_PERMISSION_DENIED;
     }
 
+    if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE) {
+        return DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status,
+            controlFlag, deveiceId, userId);
+    }
+
     DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status, controlFlag);
     ANS_LOGI("update %{public}s status %{public}u %{public}u", deviceType.c_str(), status, controlFlag);
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string& deviceType,
+    const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList)
+{
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(deviceType, deviceId,
+        operatorType, bundleList);
+}
+
+ErrCode AdvancedNotificationService::SetTargetDeviceSwitch(const std::string& deviceType,
+    const std::string& deviceId, bool notificaitonEnable, bool liveViewEnable)
+{
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGD("AccessTokenHelper::CheckPermission is false.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(deviceType, deviceId,
+        notificaitonEnable, liveViewEnable);
+}
 
 ErrCode AdvancedNotificationService::GetAllDistribuedEnabledBundles(
     const std::string& deviceType, std::vector<NotificationBundleOption> &bundleOption)
