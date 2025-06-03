@@ -56,6 +56,8 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_manager.cpp",
     "./src/manager/ani_request_enable.cpp",
     "./src/manager/ani_ans_dialog_callback.cpp",
+    "./src/manager/ani_on.cpp",
+    "./src/manager/ani_push_callback.cpp",
   ]
 
   cflags = []
@@ -67,6 +69,12 @@ ohos_shared_library("notification_manager_ani") {
      "${frameworks_module_ans_path}:ans_innerkits",
      "${frameworks_path}/cj/ffi:cj_notification_manager_ffi",
   ]
+
+  defines = []
+
+  if (distributed_notification_service_feature_local_liveview) {
+    defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
+  }
 
   external_deps = [
     "c_utils:utils",
@@ -87,6 +95,7 @@ ohos_shared_library("notification_manager_ani") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
     "ace_engine:ace_uicontent",
+    "access_token:libtokenid_sdk",
   ]
 
   innerapi_tags = [ "platformsdk" ]

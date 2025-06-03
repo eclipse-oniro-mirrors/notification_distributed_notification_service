@@ -95,7 +95,7 @@ bool WrapBundleOption(ani_env* env,
     }
     // bundle: string;
     ani_string stringValue = nullptr;
-    if (!GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
+    if (ANI_OK != GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
         || !CallSetter(env, bundleCls, bundleObject, "bundle", stringValue)) {
         ANS_LOGE("WrapBundleOption: set bundle failed");
         return false;

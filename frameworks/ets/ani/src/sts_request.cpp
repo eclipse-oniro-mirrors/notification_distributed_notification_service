@@ -1203,5 +1203,87 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
     }
     return arrayObj;
 }
+
+bool GetCheckRequestContent(ani_env *env, ani_object obj, NotificationContent::Type &outContentType)
+{
+    ani_status status = ANI_OK;
+    ani_ref contentAniType;
+    STSContentType contentType = NOTIFICATION_CONTENT_BASIC_TEXT;
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(obj, "contentType", &contentAniType))) {
+        ANS_LOGE("GetCheckRequestContent get contentType faild. status %{public}d", status);
+        return false;
+    }
+    if (contentAniType == nullptr ||
+        !EnumConvertAniToNative(env, static_cast<ani_enum_item>(contentAniType), contentType)) {
+            ANS_LOGE("EnumConvertAniToNative contentType faild");
+            return false;
+        }
+    if (!StsContentTypeUtils::StsToC(contentType, outContentType)) {
+        ANS_LOGE("StsToC contentType faild");
+        return false;
+    }
+    return true;
+}
+
+bool GetCheckRequestSlotType(ani_env *env, ani_object obj, NotificationConstant::SlotType &outSlotType)
+{
+    ani_status status = ANI_OK;
+    ani_ref slotAniType;
+    STSSlotType slotType = UNKNOWN_TYPE;
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(obj, "slotType", &slotAniType))) {
+        ANS_LOGE("UnWarpNotificationCheckRequest get slotType faild. status %{public}d", status);
+        return false;
+    }
+    if (slotAniType == nullptr || !EnumConvertAniToNative(env, static_cast<ani_enum_item>(slotAniType), slotType)) {
+        ANS_LOGE("EnumConvertAniToNative slotType faild");
+        return false;
+    }
+    if (!StsSlotTypeUtils::StsToC(slotType, outSlotType)) {
+        ANS_LOGE("StsToC slotType faild");
+        return false;
+    }
+    return true;
+}
+
+bool UnWarpNotificationCheckRequest(ani_env *env, ani_object obj, sptr<NotificationCheckRequest> &checkRequest)
+{
+    if (env == nullptr || obj == nullptr || checkRequest == nullptr) {
+        ANS_LOGE("UnWarpNotificationCheckRequest invalid parameters");
+        return false;
+    }
+    ani_status status = ANI_OK;
+    ani_ref extraInfoKeysObj;
+    NotificationContent::Type outContentType = NotificationContent::Type::NONE;
+    NotificationConstant::SlotType outSlotType = NotificationConstant::SlotType::OTHER;
+    std::vector<std::string> extraInfoKeys;
+    // contentType: notificationManager.ContentType;
+    if (!GetCheckRequestContent(env, obj, outContentType)) {
+        ANS_LOGE("GetCheckRequestContent faild.");
+        return false;
+    }
+    checkRequest->SetContentType(outContentType);
+    // slotType: notificationManager.SlotType;
+    if (!GetCheckRequestSlotType(env, obj, outSlotType)) {
+        ANS_LOGE("GetCheckRequestSlotType faild.");
+        return false;
+    }
+    checkRequest->SetSlotType(outSlotType);
+    // extraInfoKeys: Array<string>;
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(obj, "extraInfoKeys", &extraInfoKeysObj))) {
+        ANS_LOGE("UnWarpNotificationCheckRequest get extraInfoKeys faild. status %{public}d", status);
+        return false;
+    }
+    if (!GetStringArrayByAniObj(env, static_cast<ani_object>(extraInfoKeysObj), extraInfoKeys)) {
+        ANS_LOGE("UnWarpNotificationCheckRequest. extraInfoKeys GetStringArrayByAniObj faild.");
+        return false;
+    }
+    checkRequest->SetExtraKeys(extraInfoKeys);
+    ANS_LOGD("contentType %{public}d slotType %{public}d",
+        checkRequest->GetContentType(), checkRequest->GetSlotType());
+    for (auto &it : checkRequest->GetExtraKeys()) {
+        ANS_LOGD("extrakey %{public}s", it.c_str());
+    }
+    return true;
+}
 } // namespace NotificationSts
 } // OHOS

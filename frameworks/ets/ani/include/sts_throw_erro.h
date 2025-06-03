@@ -71,6 +71,18 @@ inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)
     OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
         FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
 }
+
+inline void ThrowStsErrorWithCode(ani_env *env, const int32_t errCode, std::string msg = "")
+{
+    if (env == nullptr) return;
+    OHOS::AbilityRuntime::ThrowStsError(env, errCode, msg.empty() ? FindAnsErrMsg(errCode) : msg);
+}
+
+inline void ThrowStsErrorWithInvalidParam(ani_env *env)
+{
+    ThrowStsErrorWithCode(env, ERROR_PARAM_INVALID);
+}
+
 } // namespace NotificationSts
 } // OHOS
 #endif
