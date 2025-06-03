@@ -22,6 +22,7 @@
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
 #include "sts_runtime.h"
+#include "notification_check_info.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -138,6 +139,8 @@ ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonO
 ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonOption);
 bool WarpNotificationDoNotDisturbDate(
     ani_env *env, const std::shared_ptr<NotificationDoNotDisturbDate> &date, ani_object &outObj);
+bool WarpNotificationCheckInfo(
+    ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj);
 } // namespace NotificationSts
 } // OHOS
 #endif

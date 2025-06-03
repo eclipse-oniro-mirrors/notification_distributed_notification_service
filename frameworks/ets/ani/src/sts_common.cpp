@@ -93,8 +93,8 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
             return false;
         }
         std::string std_string;
-        if (!GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string)) {
-            ANS_LOGE("GetStdString faild");
+        if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string))) {
+            ANS_LOGE("GetStdString faild. status %{public}d", status);
             return false;
         }
         stdVString.emplace_back(std_string);

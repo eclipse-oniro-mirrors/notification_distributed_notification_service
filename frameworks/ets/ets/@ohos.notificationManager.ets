@@ -16,7 +16,7 @@
 import { BundleOption } from 'notification.NotificationCommonDef';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import { NotificationSlot } from 'notification.notificationSlot';
-import { NotificationRequest } from 'notification.notificationRequest';
+import { NotificationRequest, NotificationCheckRequest } from 'notification.notificationRequest';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NotificationBasicContent } from 'notification.notificationContent';
 import { NotificationLongTextContent } from 'notification.notificationContent';
@@ -31,6 +31,8 @@ import image from '@ohos.multimedia.image';
 
 type ResolveCallback<T> = (data: T) => void;
 type RejectCallback = (err: Object) => void;
+type CallbackForCheckInfo =
+    (checkInfo: notificationManager.NotificationCheckInfo)=> notificationManager.NotificationCheckResult;
 
 const ERROR_OK = 0;
 const ERROR_PARAM_INVALID = 401;
@@ -158,6 +160,11 @@ export default namespace notificationManager {
     export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
     export native function nativeRequestEnableNotification(content: UIAbilityContext): Promise<int>;
+
+    export native function nativeOn(
+        type: 'checkNotification', callback: CallbackForCheckInfo, checkRequest?: NotificationCheckRequest): int;
+    export native function nativeOff(
+        type: 'checkNotification', callback?: CallbackForCheckInfo): int;
 
     function isInvalidParameter(bundle: BundleOption): BusinessError
     {
@@ -1301,5 +1308,92 @@ export default namespace notificationManager {
                 callback(err, undefined);
             }
         )
+    }
+
+    export interface NotificationCheckResult {
+        code: number;
+        message: string;
+    }
+
+    class NotificationCheckResultInner implements NotificationCheckResult {
+        public code: number = -1;
+        public message: string = '';
+    }
+
+    export function on(
+        type: 'checkNotification', callback: (checkInfo: NotificationCheckInfo) => NotificationCheckResult): void
+    {
+        let errCode = nativeOn(type, callback);
+        if (errCode != 0) {
+            const error: BusinessError = {code: errCode, message: "unknown error"};
+            throw error;
+        }
+    }
+
+    export function on(type: 'checkNotification', checkRequest: NotificationCheckRequest,
+        callback: (checkInfo: NotificationCheckInfo) => Promise<NotificationCheckResult>): void
+    {
+        let onFuncCallback: CallbackForCheckInfo =
+            (checkInfo: notificationManager.NotificationCheckInfo): notificationManager.NotificationCheckResult => {
+                let result: notificationManager.NotificationCheckResult = {
+                    code: -1,
+                    message: 'unknown error'
+                };
+                let p = callback(checkInfo);
+                await p.then(
+                    (e: NullishType): void => {
+                        result = e as notificationManager.NotificationCheckResult;
+                    }, (error: Object): void => {
+                        let err: BusinessError = error as BusinessError;
+                        result = {
+                            code: err.code,
+                            message: err.message
+                        };
+                    }
+                );
+                return result;
+            };
+        let errCode = nativeOn(type, onFuncCallback, checkRequest);
+        if (errCode != 0) {
+            const error: BusinessError = {code: errCode, message: "unknown error"};
+            throw error;
+        }
+    }
+
+    export function off(
+        type: 'checkNotification',
+        callback?: (checkInfo: NotificationCheckInfo) => NotificationCheckResult
+    ): void
+    {
+        let errCode = -1;
+        if (callback === undefined) {
+            errCode = nativeOff(type);
+        } else {
+            errCode = nativeOff(type, callback);
+        }
+        if (errCode != 0) {
+            const error: BusinessError = {code: errCode, message: "unknown error"};
+            throw error;
+        }
+    }
+
+    export interface NotificationCheckInfo {
+        bundleName: string;
+        notificationId: number;
+        label?: string;
+        contentType: ContentType;
+        creatorUserId: number;
+        slotType: SlotType;
+        extraInfos?: Record<string, Object>;
+    }
+
+    class NotificationCheckInfoInner implements NotificationCheckInfo {
+        public bundleName: string = '';
+        public notificationId: number = -1;
+        public label?: string;
+        public contentType: ContentType = ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
+        public creatorUserId: number = -1;
+        public slotType: SlotType = SlotType.UNKNOWN_TYPE;
+        public extraInfos?: Record<string, Object>;
     }
 }

@@ -24,6 +24,7 @@
 #include "ani_publish.h"
 #include "ani_local_live_view.h"
 #include "ani_request_enable.h"
+#include "ani_on.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -72,6 +73,13 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeRequestEnableNotification",
         "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
+    ani_native_function {"nativeOn",
+        "Lstd/core/String;"
+        "Lstd/core/Function1;"
+        "Lnotification/notificationRequest/NotificationCheckRequest;"
+        ":I",
+        reinterpret_cast<void *>(AniOn)},
+    ani_native_function {"nativeOff", "Lstd/core/String;Lstd/core/Function1;:I", reinterpret_cast<void *>(AniOff)},
 };
 
 void AniNotificationManagerRegistryInit(ani_env *env)

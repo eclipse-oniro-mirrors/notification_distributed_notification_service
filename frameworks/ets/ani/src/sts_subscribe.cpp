@@ -481,9 +481,9 @@ bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::ve
     ANS_LOGD("enter");
     if (env == nullptr) return false;
     ani_ref fn_ref;
-    ani_status aniResult = env->Object_GetFieldByName_Ref(static_cast<ani_object>(ref_), func, &fn_ref);
+    ani_status aniResult = env->Object_GetPropertyByName_Ref(static_cast<ani_object>(ref_), func, &fn_ref);
     if (ANI_OK != aniResult) {
-        ANS_LOGD("Object_GetFieldByName_Ref '%{public}s' error. result: %{public}d.", func, aniResult);
+        ANS_LOGD("Object_GetPropertyByName_Ref '%{public}s' error. result: %{public}d.", func, aniResult);
         return false;
     }
     ani_boolean IsUndefined = ANI_FALSE;
