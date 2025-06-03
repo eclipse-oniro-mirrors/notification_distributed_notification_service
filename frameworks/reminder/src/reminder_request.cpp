@@ -954,6 +954,16 @@ ReminderRequest::RingChannel ReminderRequest::GetRingChannel() const
     return ringChannel_;
 }
 
+void ReminderRequest::SetRingLoop(const bool isRingLoop)
+{
+    isRingLoop_ = isRingLoop;
+}
+
+bool ReminderRequest::IsRingLoop() const
+{
+    return isRingLoop_;
+}
+
 int32_t ReminderRequest::GetUserId() const
 {
     return userId_;
