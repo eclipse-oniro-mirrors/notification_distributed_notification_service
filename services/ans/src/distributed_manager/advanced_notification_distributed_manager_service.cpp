@@ -27,6 +27,8 @@
 
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
+#include "os_account_info.h"
+#include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "hitrace_meter_adapter.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -42,6 +44,8 @@
 
 namespace OHOS {
 namespace Notification {
+using namespace OHOS::AccountSA;
+
 ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -615,6 +619,80 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
     }
 
     return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType, enabled);
+}
+
+ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    return NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
+        enabled? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+}
+
+ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (!AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    NotificationConstant::ENABLE_STATUS enableStatus;
+    ErrCode errResult = NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType, enableStatus);
+    enabled = enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE;
+    return errResult;
+}
+
+ErrCode AdvancedNotificationService::GetDistributedAbility(int32_t &abilityId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    abilityId = static_cast<int32_t>(NotificationConstant::DANS_SUPPORT_STATUS::UNSUPPORT);
+    bool isPrivate = false;
+    ErrCode result = OsAccountManagerHelper::GetInstance().GetOsAccountPrivateStatus(isPrivate);
+    if (result != ERR_OK || isPrivate) {
+        return result;
+    }
+    abilityId = static_cast<int32_t>(NotificationConstant::DANS_SUPPORT_STATUS::SUPPORT);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    return NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+}
+
+ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    return NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 }
 
 ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)

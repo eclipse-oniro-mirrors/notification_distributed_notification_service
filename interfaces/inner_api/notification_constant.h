@@ -145,6 +145,35 @@ public:
         CLOSE
     };
 
+    enum class ENABLE_STATUS {
+        /**
+         * the device type notification switch never been set.
+         */
+        ENABLE_NONE,
+
+        /**
+         * the device type notification switch is enabled
+         */
+        ENABLE_TRUE,
+
+        /**
+         * the device type notification switch is disable
+         */
+        ENABLE_FALSE
+    };
+
+    enum class DANS_SUPPORT_STATUS {
+        /**
+         * unsupport the set of distributed abilities.
+         */
+        UNSUPPORT = -1,
+
+        /**
+         * support the set of distributed abilities.
+         */
+        SUPPORT
+    };
+
     static const int32_t DEFAULT_REASON_DELETE = 0;
 
     /**

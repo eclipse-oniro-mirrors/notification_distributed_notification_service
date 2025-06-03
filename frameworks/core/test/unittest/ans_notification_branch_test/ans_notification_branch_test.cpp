@@ -421,6 +421,33 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetDistributedEnabled(const std::string &deviceType, bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsDistributedEnabled(const std::string &deviceType, bool &enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetDistributedAbility(int32_t &abilityId)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetDeviceRemindType(int32_t& remindTypeInt) override
     {
         return ERR_ANS_INVALID_PARAM;

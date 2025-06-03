@@ -1096,6 +1096,56 @@ public:
         const NotificationBundleOption &bundleOption, const std::string &deviceType, bool &enabled);
 
     /**
+     * @brief Configuring Whether to Synchronize Common Notifications to Target Devices.
+     *
+     * @param deviceType Target device type.
+     * @param enabled Whether to Synchronize Common Notifications to Target Devices.
+     * @return Returns configuring Whether to Synchronize Common Notifications to Target Devices result.
+     */
+    static ErrCode SetDistributedEnabled(const std::string &deviceType, const bool &enabled);
+
+    /**
+     * @brief Querying Whether to Synchronize Common Devices to Target Devices.
+     *
+     * @param deviceType Target device type.
+     * @param enabled Whether to Synchronize Common Notifications to Target Devices.
+     * @return Returns Whether to Synchronize Common Notifications to Target Devices result.
+     */
+    static ErrCode IsDistributedEnabled(const std::string &deviceType, bool &enabled);
+
+    /**
+     * @brief Obtains the set of supported distributed abilities.
+     *
+     * @param abilityId The set of supported distributed abilities.
+     * @return Returns result in Obtains the set of supported distributed abilities.
+     */
+    static ErrCode GetDistributedAbility(int32_t &abilityId);
+
+    /**
+     * @brief Get the target device's authorization status.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param deviceId The id of the target device.
+     * @param userId The userid of the target device.
+     * @param isAuth Return The authorization status.
+     * @return Returns get result.
+     */
+    static ErrCode GetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth);
+
+    /**
+     * @brief Set the target device's authorization status.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param deviceId The id of the target device.
+     * @param userId The userid of the target device.
+     * @param isAuth The authorization status.
+     * @return Returns set result.
+     */
+    static ErrCode SetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth);
+
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.
