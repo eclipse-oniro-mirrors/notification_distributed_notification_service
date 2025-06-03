@@ -21,25 +21,12 @@
 #include "notification_helper.h"
 #include "distributed_device_service.h"
 #include "notification_subscribe_info.h"
+#include "device_type_helper.h"
 
 namespace OHOS {
 namespace Notification {
 
 const int32_t DEFAULT_FILTER_TYPE = 1;
-
-static std::string SubscribeTransDeviceType(uint16_t deviceType)
-{
-    switch (deviceType) {
-        case DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH: {
-            return "wearable";
-        }
-        case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
-            return "Pad";
-        }
-        default:
-            return "";
-    }
-}
 
 int32_t DistributedSubscribeService::GetCurrentActiveUserId()
 {
@@ -75,7 +62,7 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
     slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     subscribeInfo->SetSlotTypes(slotTypes);
     subscribeInfo->SetFilterType(DEFAULT_FILTER_TYPE);
-    subscribeInfo->AddDeviceType(SubscribeTransDeviceType(peerDevice.deviceType_));
+    subscribeInfo->AddDeviceType(DeviceTypeHelper::Dm2Ans(peerDevice.deviceType_));
     subscribeInfo->AddAppUserId(userId);
     subscribeInfo->SetNeedNotifyApplication(true);
     subscribeInfo->SetNeedNotifyResponse(true);

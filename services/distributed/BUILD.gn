@@ -104,6 +104,7 @@ ohos_shared_library("libdans") {
     "src/helper/ability_manager_helper.cpp",
     "src/helper/analytics_util.cpp",
     "src/helper/bundle_resource_helper.cpp",
+    "src/helper/device_type_helper.cpp",
     "src/helper/distributed_operation_connection.cpp",
     "src/helper/distributed_operation_helper.cpp",
     "src/helper/distributed_preference.cpp",
