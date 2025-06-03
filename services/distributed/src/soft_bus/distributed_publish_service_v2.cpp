@@ -428,6 +428,10 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
         }
         box.GetNotificationUserInput(userInputKey);
         std::shared_ptr<NotificationUserInput> userInput  = NotificationUserInput::Create(userInputKey);
+        if (!userInput) {
+            ANS_LOGE("Failed to create NotificationUserInput by inputKey=%{public}s", userInputKey.c_str());
+            return;
+        }
         std::shared_ptr<NotificationActionButton> actionButton =
             NotificationActionButton::Create(nullptr, actionName, nullptr);
         actionButton->AddNotificationUserInput(userInput);

@@ -150,15 +150,8 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
     }
 }
 
-ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationRequest> &request)
+ErrCode AdvancedNotificationService::SetCollaborateRequest(const sptr<NotificationRequest> &request)
 {
-    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
-    if (!AccessTokenHelper::VerifyNativeToken(tokenCaller) ||
-        !AccessTokenHelper::VerifyCallerPermission(tokenCaller, OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("Collaborate publish cheak permission failed.");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
@@ -174,7 +167,20 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
+    SetCollaborateReminderFlag(request);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationRequest> &request)
+{
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    if (!AccessTokenHelper::VerifyNativeToken(tokenCaller) ||
+        !AccessTokenHelper::VerifyCallerPermission(tokenCaller, OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Collaborate publish cheak permission failed.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    SetCollaborateRequest(request);
     record->request = request;
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
@@ -183,7 +189,7 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     }
     record->bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(), 0);
     record->notification->SetKey(request->GetLabel() + request->GetDistributedHashCode());
-    SetCollaborateReminderFlag(record->request);
+
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;

@@ -1573,6 +1573,7 @@ private:
     uint32_t GetDefaultSlotFlags(const sptr<NotificationRequest> &request);
     bool IsSystemUser(int32_t userId);
     ErrCode CollaboratePublish(const sptr<NotificationRequest> &request);
+    ErrCode SetCollaborateRequest(const sptr<NotificationRequest> &request);
     void SetCollaborateReminderFlag(const sptr<NotificationRequest> &request);
     ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle,
