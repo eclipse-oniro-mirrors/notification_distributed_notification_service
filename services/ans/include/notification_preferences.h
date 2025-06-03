@@ -357,6 +357,50 @@ public:
         const std::string &deviceType, bool &enabled);
 
     /**
+     * @brief Configuring Whether to Synchronize Common Notifications to Target Devices.
+     *
+     * @param deviceType Target device type.
+     * @param enabled Whether to Synchronize Common Notifications to Target Devices.
+     * @return Returns configuring Whether to Synchronize Common Notifications to Target Devices result.
+     */
+    ErrCode SetDistributedEnabled(
+        const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enableStatus);
+
+    /**
+     * @brief Querying Whether to Synchronize Common Devices to Target Devices.
+     *
+     * @param deviceType Target device type.
+     * @param enabled Whether to Synchronize Common Notifications to Target Devices.
+     * @return Returns Whether to Synchronize Common Notifications to Target Devices result.
+     */
+    ErrCode IsDistributedEnabled(
+        const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enableStatus);
+
+    /**
+     * @brief Get the target device's authorization status.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param deviceId The id of the target device.
+     * @param userId The userid of the target device.
+     * @param isAuth Return The authorization status.
+     * @return Returns get result.
+     */
+    ErrCode GetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth);
+
+    /**
+     * @brief Set the target device's authorization status.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param deviceId The id of the target device.
+     * @param userId The userid of the target device.
+     * @param isAuth The authorization status.
+     * @return Returns set result.
+     */
+    ErrCode SetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth);
+
+    /**
      * @brief Set the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
      *

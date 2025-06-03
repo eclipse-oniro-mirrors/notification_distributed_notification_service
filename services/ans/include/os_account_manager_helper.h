@@ -86,6 +86,11 @@ public:
      * @return Returns result.
      */
     ErrCode GetAllActiveOsAccount(std::vector<int32_t> &userIds);
+
+    /**
+     * Get private status from osAccount.
+     */
+    ErrCode GetOsAccountPrivateStatus(bool &isPrivate);
 };
 } // namespace OHOS
 } // namespace Notification

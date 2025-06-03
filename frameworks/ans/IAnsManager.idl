@@ -263,6 +263,16 @@ interface OHOS.Notification.IAnsManager {
     void SetDistributedEnabledByBundle(
         [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled);
 
+    void SetDistributedEnabled([in] String deviceType, [in] boolean enabled);
+
+    void IsDistributedEnabled([in] String deviceType, [out] boolean enabled);
+
+    void GetDistributedAbility([out] int abilityId);
+
+    void GetDistributedAuthStatus([in] String deviceType, [in] String deviceId, [in] int userId, [out] boolean isAuth);
+
+    void SetDistributedAuthStatus([in] String deviceType, [in] String deviceId, [in] int userId, [in] boolean isAuth);
+
     void IsSmartReminderEnabled([in] String deviceType, [out] boolean enabled);
 
     void SetSmartReminderEnabled([in] String deviceType, [in] boolean enabled);

@@ -120,5 +120,24 @@ bool OsAccountManagerHelper::IsSystemAccount(int32_t userId)
 {
     return userId >= AccountSA::Constants::START_USER_ID && userId <= AccountSA::Constants::MAX_USER_ID;
 }
+
+ErrCode OsAccountManagerHelper::GetOsAccountPrivateStatus(bool &isPrivate)
+{
+    int32_t userId = 0;
+    ErrCode querryRes = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (querryRes != ERR_OK) {
+        ANS_LOGE("GetForegroundOsAccountLocalId fail, querryRes: %{public}d", querryRes);
+        return querryRes;
+    }
+    AccountSA::OsAccountType type;
+    querryRes = AccountSA::OsAccountManager::GetOsAccountType(userId, type);
+    if (querryRes != ERR_OK) {
+        ANS_LOGE("GetOsAccountTypef fail, querryRes: %{public}d", querryRes);
+        return querryRes;
+    }
+    ANS_LOGI("GetOsAccountTypef, type: %{public}d", type);
+    isPrivate = type == AccountSA::OsAccountType::PRIVATE;
+    return querryRes;
+}
 }
 }
