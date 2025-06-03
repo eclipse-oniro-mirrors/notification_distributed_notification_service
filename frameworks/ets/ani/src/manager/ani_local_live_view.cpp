@@ -36,7 +36,7 @@ void AniTriggerSystemLiveView(
         return;
     }
     NotificationSts::ButtonOption buttonOption;
-    if (!NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption)) {
+    if (NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption) != ANI_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");

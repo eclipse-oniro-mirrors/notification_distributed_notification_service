@@ -255,6 +255,44 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     return status;
 }
 
+ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<int64_t> &res)
+{
+    ANS_LOGD("GetPropertyNumberArray enter");
+    ani_ref arrayObj = nullptr;
+    ani_status status;
+    ani_double length;
+    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
+        return ANI_INVALID_ARGS;
+    }
+
+    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    if (status != ANI_OK) {
+        ANS_LOGI("status : %{public}d", status);
+        return status;
+    }
+
+    for (int i = 0; i < static_cast<int>(length); i++) {
+        ani_ref numEntryRef;
+        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
+            "$_get", "I:Lstd/core/Object;", &numEntryRef, (ani_int)i);
+        if (status != ANI_OK) {
+            ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
+            return status;
+        }
+        ani_double doubleValue = 0.0;
+        status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "unboxed",
+            ":D", &doubleValue);
+        if (status != ANI_OK) {
+            ANS_LOGI("Object_CallMethodByName_Double uid fail, status: %{public}d", status);
+            return status;
+        }
+        res.push_back(static_cast<int64_t>(doubleValue));
+    }
+    ANS_LOGD("GetPropertyNumberArray leave");
+    return status;
+}
+
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs)
 {
     if (env == nullptr || strs.empty()) {
