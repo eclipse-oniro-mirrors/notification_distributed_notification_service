@@ -430,6 +430,7 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::CreateRemi
 void ReminderDataShareHelper::InitNormalInfo(sptr<ReminderRequest>& reminder)
 {
     reminder->SetRingDuration(0);
+    reminder->SetRingLoop(false);
     reminder->InitUserId(curUserId_);
     reminder->InitUid(uid_);
     reminder->InitCreatorUid(dataUid_);

@@ -470,6 +470,12 @@ public:
     void SetRingChannel(const RingChannel channel);
     RingChannel GetRingChannel() const;
 
+    /**
+     * @brief Set/Get ring loop.
+     */
+    void SetRingLoop(const bool isRingLoop);
+    bool IsRingLoop() const;
+
     int32_t GetUserId() const;
     int32_t GetUid() const;
 
@@ -1176,6 +1182,7 @@ private:
     int32_t uid_ {-1};
     bool isSystemApp_ {false};
     bool tapDismissed_ {true};
+    bool isRingLoop_ {true};
     int64_t autoDeletedTime_ {0};
     std::string customButtonUri_ {};
     std::string customRingUri_ {};

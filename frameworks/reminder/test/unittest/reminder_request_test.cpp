@@ -2409,5 +2409,20 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_006, Function | SmallTest | Le
     child.SetRingChannel(ReminderRequest::RingChannel::MEDIA);
     EXPECT_EQ(child.GetRingChannel(), ReminderRequest::RingChannel::MEDIA);
 }
+
+/**
+ * @tc.name: ReminderRequestTest_007
+ * @tc.desc: Test RingLoop parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_007, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    child.SetRingLoop(true);
+    EXPECT_EQ(child.IsRingLoop(), true);
+    child.SetRingLoop(false);
+    EXPECT_EQ(child.IsRingLoop(), false);
+}
 }
 }

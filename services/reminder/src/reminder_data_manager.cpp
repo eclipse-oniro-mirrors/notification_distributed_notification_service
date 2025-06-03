@@ -1644,7 +1644,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     (void)format.PutIntValue(Media::PlayerKeys::STREAM_USAGE, STREAM_ALARM);
     (void)format.PutIntValue(Media::PlayerKeys::RENDERER_FLAG, DEFAULT_VALUE);
     soundPlayer_->SetParameter(format);
-    soundPlayer_->SetLooping(true);
+    soundPlayer_->SetLooping(reminder->IsRingLoop());
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
 #endif
