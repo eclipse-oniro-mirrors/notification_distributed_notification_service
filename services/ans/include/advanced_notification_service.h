@@ -1178,7 +1178,7 @@ public:
     /**
      * @brief Reset pushcallback proxy
      */
-    void ResetPushCallbackProxy();
+    void ResetPushCallbackProxy(NotificationConstant::SlotType slotType);
 
     /**
      * @brief Set the notification SlotFlags whitelist.
@@ -1711,8 +1711,11 @@ private:
 class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
     PushCallbackRecipient();
+    PushCallbackRecipient(const NotificationConstant::SlotType slotType);
     virtual ~PushCallbackRecipient();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+private:
+    NotificationConstant::SlotType slotType_;
 };
 }  // namespace Notification
 }  // namespace OHOS

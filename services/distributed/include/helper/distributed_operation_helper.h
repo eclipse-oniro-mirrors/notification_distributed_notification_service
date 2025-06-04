@@ -43,7 +43,6 @@ public:
 
 private:
     std::string eventId_;
-    OperationType type_;
 };
 
 class OperationService {

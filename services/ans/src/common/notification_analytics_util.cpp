@@ -1011,7 +1011,7 @@ void NotificationAnalyticsUtil::ReportPublishBadge(const sptr<NotificationReques
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     std::string bundle = request->GetOwnerBundleName() + "_"  + std::to_string(request->GetOwnerUid());
-    int32_t badgeNumber = request->GetBadgeNumber();
+    uint32_t badgeNumber = request->GetBadgeNumber();
     std::string badgeNumStr = (badgeNumber > MAX_BADGE_NUMBER) ? "99+" : std::to_string(badgeNumber);
     {
         std::lock_guard<std::mutex> lock(badgeInfosMutex_);
