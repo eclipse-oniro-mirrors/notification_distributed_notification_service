@@ -1571,7 +1571,7 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     return result;
 }
 
-void AdvancedNotificationService::ResetPushCallbackProxy()
+void AdvancedNotificationService::ResetPushCallbackProxy(NotificationConstant::SlotType slotType)
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(pushMutex_);
@@ -1586,7 +1586,7 @@ void AdvancedNotificationService::ResetPushCallbackProxy()
             it->second->AsObject()->RemoveDeathRecipient(pushRecipient_);
         }
     }
-    pushCallBacks_.clear();
+    pushCallBacks_.erase(slotType);
 }
 
 ErrCode AdvancedNotificationService::RegisterPushCallbackTokenCheck()
@@ -1629,13 +1629,6 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         return ERR_INVALID_VALUE;
     }
 
-    pushRecipient_ = new (std::nothrow) PushCallbackRecipient();
-    if (!pushRecipient_) {
-        ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
-        return ERR_NO_INIT;
-    }
-    pushCallback->AddDeathRecipient(pushRecipient_);
-
     sptr<IPushCallBack> pushCallBack = iface_cast<IPushCallBack>(pushCallback);
     NotificationConstant::SlotType slotType = notificationCheckRequest->GetSlotType();
     int32_t uid = IPCSkeleton::GetCallingUid();
@@ -1648,6 +1641,12 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     }
     {
         std::lock_guard<std::mutex> lock(pushMutex_);
+        pushRecipient_ = new (std::nothrow) PushCallbackRecipient();
+        if (!pushRecipient_) {
+            ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
+            return ERR_NO_INIT;
+        }
+        pushCallback->AddDeathRecipient(pushRecipient_);
         pushCallBacks_.insert_or_assign(slotType, pushCallBack);
     }
     ANS_LOGD("insert pushCallBack, slot type %{public}d", slotType);
@@ -2025,7 +2024,7 @@ ErrCode AdvancedNotificationService::RegisterSwingCallback(const sptr<IRemoteObj
 void PushCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     ANS_LOGI("Push Callback died, remove the proxy object");
-    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy();
+    AdvancedNotificationService::GetInstance()->ResetPushCallbackProxy(slotType_);
 }
 
 void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<NotificationRecord> &record)
@@ -2039,6 +2038,11 @@ void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<N
 }
 
 PushCallbackRecipient::PushCallbackRecipient() {}
+
+PushCallbackRecipient::PushCallbackRecipient(const NotificationConstant::SlotType slotType)
+{
+    slotType_ = slotType;
+}
 
 PushCallbackRecipient::~PushCallbackRecipient() {}
 
