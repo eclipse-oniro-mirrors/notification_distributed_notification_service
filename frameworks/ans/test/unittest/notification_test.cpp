@@ -316,7 +316,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "permitted = true, isAgent = false, updateOnly = false, isForceDistributed = false, "
     "isNotDistributed = false, isDoNotDisturbByPassed = false, "
     "removalWantAgent = null, maxScreenWantAgent = null, "
-    "additionalParams = null, littleIcon = null, bigIcon = null, overlayIcon = null, "
+    "additionalParams = null, extendInfo = null, littleIcon = null, bigIcon = null, overlayIcon = null, "
     "notificationContent = null, notificationTemplate = null, actionButtons = empty, "
     "messageUsers = empty, userInputHistory = empty, distributedOptions = "
     "NotificationDistributedOptions{ isDistributed = true, devicesSupportDisplay = [], "
@@ -324,7 +324,8 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "notificationBundleOption = null, agentBundle = null, creatorUserId = -1, ownerUserId = -1, "
     "receiverUserId = -1, updateDeadLine = 0, finishDeadLine = 0, sound = , distributed = 0: "
     "flag: 0, unifiedGroupInfo_ = null }, postTime = 0, "
-    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
+    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0, "
+    "isPrivileged = false }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
