@@ -672,6 +672,7 @@ private:
      * @brief report event to dfx
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
+    void ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged);
 
     /**
      * @brief Create load reminder timer.
@@ -751,7 +752,7 @@ private:
      * Indicates the active reminder that timing is taking effect.
      */
     std::atomic<int32_t> activeReminderId_ = -1;
-    std::atomic<uint64_t> activeTriggerTime_ = -1;
+    std::atomic<uint64_t> activeTriggerTime_ = 0;
     sptr<ReminderRequest> activeReminder_ = nullptr;
 
     /**

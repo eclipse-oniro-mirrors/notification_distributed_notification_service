@@ -42,6 +42,7 @@
 #include "hitrace_meter_adapter.h"
 #ifdef HAS_HISYSEVENT_PART
 #include "hisysevent.h"
+#include "reminder_utils.h"
 #endif
 
 namespace OHOS {
@@ -346,7 +347,7 @@ void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminde
     if (reminder == nullptr) {
         // activeReminder_ should not be set with null as it point to actual object.
         activeReminderId_ = -1;
-        activeTriggerTime_ = -1;
+        activeTriggerTime_ = 0;
     } else {
         activeReminderId_ = reminder->GetReminderId();
         activeTriggerTime_ = reminder->GetTriggerTimeInMilli();
@@ -366,6 +367,30 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
         alertingReminder_ = reminder;
     }
     ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
+}
+
+void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged)
+{
+#ifdef HAS_HISYSEVENT_PART
+    if (targetTime == 0) {
+        return;
+    }
+    constexpr int64_t deviation = 1000 * 60;  // 1min
+    int64_t now = GetCurrentTime();
+    if ((now - targetTime) <= deviation) {
+        return;
+    }
+    std::string event = "REMINDER_TIMER_ERROR";
+    std::string bundleName = "";
+    std::string errorInfo = "";
+    if (isSysTimeChanged) {
+        errorInfo = "SYSTEM_TIME_CHANGED";
+    } else {
+        errorInfo = "TIMER_ERROR";
+    }
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "BUNDLE_NAME", bundleName, "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_INFO", errorInfo);
+#endif
 }
 }
 }

@@ -564,14 +564,17 @@ void ReminderDataShareHelper::ReminderDataObserver::OnChange(const ChangeInfo& i
 {
     switch (info.changeType_) {
         case DataShare::DataShareObserver::ChangeType::INSERT: {
+            ANSR_LOGI("DataShare insert.");
             ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
             break;
         }
         case DataShare::DataShareObserver::ChangeType::UPDATE: {
+            ANSR_LOGI("DataShare update.");
             ReminderDataShareHelper::GetInstance().OnDataUpdate(info);
             break;
         }
         case DataShare::DataShareObserver::ChangeType::DELETE: {
+            ANSR_LOGI("DataShare delete.");
             ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
             break;
         }
