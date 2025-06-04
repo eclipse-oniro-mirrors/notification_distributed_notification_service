@@ -166,7 +166,7 @@ HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool print)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::Path(const std::string path)
+HaMetaMessage& HaMetaMessage::Path(const std::string &path)
 {
     path_ = path;
     return *this;
