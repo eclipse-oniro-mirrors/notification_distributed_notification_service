@@ -218,6 +218,51 @@ bool StsSlotLevelUtils::StsToC(const STSSlotLevel inLevel, SlotLevel &outLevel)
     return true;
 }
 
+bool StsRemindTypeUtils::StsToC(const STSRemindType inType, RemindType &outType)
+{
+    switch (inType) {
+        case STSRemindType::IDLE_DONOT_REMIND:
+            outType = RemindType::DEVICE_IDLE_DONOT_REMIND;
+            break;
+        case STSRemindType::IDLE_REMIND:
+            outType = RemindType::DEVICE_IDLE_REMIND;
+            break;
+        case STSRemindType::ACTIVE_DONOT_REMIND:
+            outType = RemindType::DEVICE_ACTIVE_DONOT_REMIND;
+            break;
+        case STSRemindType::ACTIVE_REMIND:
+            outType = RemindType::DEVICE_ACTIVE_REMIND;
+            break;
+        default:
+            ANS_LOGE("STSRemindType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool StsRemindTypeUtils::CToSts(const RemindType inType, STSRemindType &outType)
+{
+    switch (inType) {
+        case RemindType::NONE:
+        case RemindType::DEVICE_IDLE_DONOT_REMIND:
+            outType = STSRemindType::IDLE_DONOT_REMIND;
+            break;
+        case RemindType::DEVICE_IDLE_REMIND:
+            outType = STSRemindType::IDLE_REMIND;
+            break;
+        case RemindType::DEVICE_ACTIVE_DONOT_REMIND:
+            outType = STSRemindType::ACTIVE_DONOT_REMIND;
+            break;
+        case RemindType::DEVICE_ACTIVE_REMIND:
+            outType = STSRemindType::ACTIVE_REMIND;
+            break;
+        default:
+            ANS_LOGE("RemindType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
 StsNotificationLocalLiveViewSubscriber::StsNotificationLocalLiveViewSubscriber()
 {}
 
@@ -381,6 +426,25 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
         return false;
     }
     return true;
+}
+
+bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem)
+{
+    STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
+    StsRemindTypeUtils::CToSts(remindType, stsRemindType);
+    EnumConvertNativeToAni(env,
+        "L@ohos/notificationManager/notificationManager/RemindType;", stsRemindType, enumItem);
+    return true;
+}
+
+bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType)
+{
+    STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
+    if (EnumConvertAniToNative(env, enumItem, stsRemindType)) {
+        StsRemindTypeUtils::StsToC(stsRemindType, remindType);
+        return true;
+    }
+    return false;
 }
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,

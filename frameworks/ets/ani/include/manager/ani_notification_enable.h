@@ -23,6 +23,8 @@ ani_boolean AniIsNotificationEnabled(ani_env *env);
 ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_double userId);
 ani_boolean AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bundleOption);
 void AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_boolean enable);
+void AniSetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId, ani_boolean enabled);
+ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

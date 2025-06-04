@@ -92,5 +92,35 @@ void AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_boolean
     }
     ANS_LOGD("AniSetNotificationEnable end");
 }
+
+ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId)
+{
+    ANS_LOGD("AniGetSyncNotificationEnabledWithoutApp call");
+    bool enabled = false;
+    int returncode = Notification::NotificationHelper::GetSyncNotificationEnabledWithoutApp(
+        static_cast<int32_t>(userId), enabled);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniGetSyncNotificationEnabledWithoutApp -> error, errorCode: %{public}d", externalCode);
+        return NotificationSts::BoolToAniBoolean(false);
+    }
+    ANS_LOGD("End success, enabled: %{public}d,returncode: %{public}d", enabled, externalCode);
+    return NotificationSts::BoolToAniBoolean(enabled);
+}
+
+void AniSetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId, ani_boolean enabled)
+{
+    ANS_LOGD("AniSetSyncNotificationEnabledWithoutApp call,enable : %{public}d", enabled);
+    int returncode = Notification::NotificationHelper::SetSyncNotificationEnabledWithoutApp(
+        static_cast<int32_t>(userId), NotificationSts::AniBooleanToBool(enabled));
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        ANS_LOGE("AniSetSyncNotificationEnabledWithoutApp -> error, errorCode: %{public}d", externalCode);
+        return;
+    }
+    ANS_LOGD("AniSetSyncNotificationEnabledWithoutApp end");
+}
 } // namespace NotificationManagerSts
 } // namespace OHOS

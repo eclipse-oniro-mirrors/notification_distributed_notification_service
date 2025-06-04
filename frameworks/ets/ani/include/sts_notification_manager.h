@@ -32,6 +32,7 @@ using SlotLevel = OHOS::Notification::NotificationSlot::NotificationLevel;
 using ContentType = OHOS::Notification::NotificationContent::Type;
 using ButtonOption = OHOS::Notification::NotificationButtonOption;
 using NotificationDoNotDisturbDate = OHOS::Notification::NotificationDoNotDisturbDate;
+using RemindType = OHOS::Notification::NotificationConstant::RemindType;
 enum STSSlotType {
     UNKNOWN_TYPE = 0,
     SOCIAL_COMMUNICATION = 1,
@@ -61,6 +62,13 @@ enum STSContentType {
     NOTIFICATION_CONTENT_LIVE_VIEW,
 };
 
+enum class STSRemindType {
+    IDLE_DONOT_REMIND,
+    IDLE_REMIND,
+    ACTIVE_DONOT_REMIND,
+    ACTIVE_REMIND
+};
+
 class StsSlotTypeUtils {
 public:
 static bool StsToC(const STSSlotType inType, SlotType &outType);
@@ -77,6 +85,12 @@ class StsContentTypeUtils {
 public:
 static bool StsToC(const STSContentType inType, ContentType &outType);
 static bool CToSts(const ContentType inType, STSContentType &outType);
+};
+
+class StsRemindTypeUtils {
+public:
+static bool StsToC(const STSRemindType inType, RemindType &outType);
+static bool CToSts(const RemindType inType, STSRemindType &outType);
 };
 
 class StsNotificationLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
@@ -133,6 +147,8 @@ bool SlotLevelCToEts(ani_env *env, SlotLevel slotLevel, ani_enum_item &enumItem)
 bool ContentTypeEtsToC(ani_env *env, ani_enum_item enumItem, ContentType &contentType);
 bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enumItem);
 
+bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem);
+bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType);
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption);

@@ -58,6 +58,8 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_ans_dialog_callback.cpp",
     "./src/manager/ani_on.cpp",
     "./src/manager/ani_push_callback.cpp",
+    "./src/manager/ani_support_template.cpp",
+    "./src/manager/ani_distributed_enable.cpp",
   ]
 
   cflags = []

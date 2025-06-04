@@ -25,6 +25,8 @@
 #include "ani_local_live_view.h"
 #include "ani_request_enable.h"
 #include "ani_on.h"
+#include "ani_support_template.h"
+#include "ani_distributed_enable.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -98,6 +100,18 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetSlotByBundle)},
     ani_native_function {"nativeGetSlotNumByBundle", nullptr,
         reinterpret_cast<void *>(AniGetSlotNumByBundle)},
+    ani_native_function {"nativeIsSupportTemplate", nullptr, reinterpret_cast<void *>(AniIsSupportTemplate)},
+    ani_native_function {"nativeSetDistributedEnable", nullptr, reinterpret_cast<void *>(AniSetDistributedEnable)},
+    ani_native_function {"nativeIsDistributedEnabled", nullptr, reinterpret_cast<void *>(AniIsDistributedEnabled)},
+    ani_native_function {"nativeIsDistributedEnabledByBundle", nullptr,
+        reinterpret_cast<void *>(AniIsDistributedEnabledByBundle)},
+    ani_native_function {"nativeIsDistributedEnabledByBundleType", nullptr,
+        reinterpret_cast<void *>(AniIsDistributedEnabledByBundleType)},
+    ani_native_function {"nativeGetDeviceRemindType", nullptr, reinterpret_cast<void *>(AniGetDeviceRemindType)},
+    ani_native_function {"nativeGetSyncNotificationEnabledWithoutApp", nullptr,
+        reinterpret_cast<void *>(AniGetSyncNotificationEnabledWithoutApp)},
+    ani_native_function {"nativeSetSyncNotificationEnabledWithoutApp", nullptr,
+        reinterpret_cast<void *>(AniSetSyncNotificationEnabledWithoutApp)},
 };
 
 void AniNotificationManagerRegistryInit(ani_env *env)
