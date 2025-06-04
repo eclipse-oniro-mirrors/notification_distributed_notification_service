@@ -279,5 +279,41 @@ bool BundleManagerHelper::GetBundleInfoV9(
     IPCSkeleton::SetCallingIdentity(identity);
     return ret;
 }
+
+ErrCode BundleManagerHelper::GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
+    AppExecFwk::ApplicationInfo &appInfo)
+{
+    ErrCode result = 0;
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        ANS_LOGE("GetBundleInfo bundle proxy failed.");
+        return -1;
+    }
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    result = bundleMgr_->GetApplicationInfoV9(bundleName, flags, userId, appInfo);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return result;
+}
+
+bool BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
+{
+    AppExecFwk::ApplicationInfo appInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+    ErrCode result = GetApplicationInfo(bundleName, flags, userId, appInfo);
+    if (result != ERR_OK) {
+        ANS_LOGE("Get installed bundle failed %{public}d.", result);
+        return false;
+    }
+
+    if (appInfo.bundleType != AppExecFwk::BundleType::APP) {
+        ANS_LOGD("Get not app %{public}s %{public}d", bundleName.c_str(), appInfo.bundleType);
+        return true;
+    }
+
+    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(), appInfo.isSystemApp);
+    return appInfo.isSystemApp;
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -335,6 +335,20 @@ public:
     const std::shared_ptr<AAFwk::WantParams> GetAdditionalData() const;
 
     /**
+     * @brief Sets extendInfo that are stored as key-value pairs for the notification.
+     *
+     * @param extras Indicates the WantParams object containing the extendInfo in key-value pair format.
+     */
+    void SetExtendInfo(const std::shared_ptr<AAFwk::WantParams> &extendInfo);
+
+    /**
+     * @brief Obtains the WantParams object set in the notification.
+     *
+     * @return Returns the WantParams object.
+     */
+    const std::shared_ptr<AAFwk::WantParams> GetExtendInfo() const;
+
+    /**
      * @brief Sets the time to deliver a notification.
      *
      * @param deliveryTime Indicates the time in milliseconds.
@@ -1618,6 +1632,7 @@ private:
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removalWantAgent_ {};
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenWantAgent_ {};
     std::shared_ptr<AAFwk::WantParams> additionalParams_ {};
+    std::shared_ptr<AAFwk::WantParams> extendInfo_ {};
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
     std::string littleIconType_ {};
     mutable std::shared_ptr<Media::PixelMap> bigIcon_ {};

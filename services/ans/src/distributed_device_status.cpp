@@ -108,5 +108,17 @@ uint32_t DistributedDeviceStatus::GetDeviceStatus(const std::string &deviceType)
     std::lock_guard<std::mutex> lock(mapLock_);
     return deviceStatus_.ReadVal(deviceType);
 }
+
+DeviceStatus DistributedDeviceStatus::GetMultiDeviceStatus(
+    const std::string &deviceType, const uint32_t status)
+{
+    std::lock_guard<std::mutex> lock(mapLock_);
+    for (DeviceStatus device : deviceInfo_) {
+        if (device.deviceType == deviceType && (device.status & status) > 0) {
+            return device;
+        }
+    }
+    return DeviceStatus("", "");
+}
 } // namespace Notification
 } // namespace OHOS
