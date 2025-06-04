@@ -1152,7 +1152,8 @@ void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<Notification
     }
     OHOS::AbilityRuntime::WantAgent::TriggerInfo triggerInfo("", nullptr, want, 0);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = request->GetRemovalWantAgent();
-    AbilityRuntime::WantAgent::WantAgentHelper::TriggerWantAgent(agent, nullptr, triggerInfo);
+    sptr<AbilityRuntime::WantAgent::CompletedDispatcher> data;
+    AbilityRuntime::WantAgent::WantAgentHelper::TriggerWantAgent(agent, nullptr, triggerInfo, data, nullptr);
 }
 
 void AdvancedNotificationService::OnResourceRemove(int32_t userId)
