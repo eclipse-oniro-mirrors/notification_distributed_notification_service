@@ -104,7 +104,7 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
     ANS_LOGD("StsRemoveForHashCodes enter");
     std::vector<std::string> hashCodesStd;
     int32_t reasonType;
-    if (ANI_OK != NotificationSts::GetStringArrayByAniObj(env, hashCodes, hashCodesStd)) {
+    if (!NotificationSts::GetStringArrayByAniObj(env, hashCodes, hashCodesStd)) {
         ANS_LOGE("hashCodes is valid");
         std::string msg = "hashCodes is valid";
         OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
