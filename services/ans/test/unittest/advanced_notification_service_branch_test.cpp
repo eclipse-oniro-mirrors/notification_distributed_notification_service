@@ -1092,5 +1092,24 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_279002, Function | SmallTest | Level1)
     ASSERT_EQ(record->notification->GetUpdateTimer(), NotificationConstant::INVALID_TIMER_ID);
     ASSERT_EQ(record->notification->GetFinishTimer(), NotificationConstant::INVALID_TIMER_ID);
 }
+
+HWTEST_F(AnsBranchTest, AnsBranchTest_279003, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    NotificationRequest notificationRequest;
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto basicContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(basicContent);
+    notificationRequest.SetContent(content);
+
+    record->request = sptr<NotificationRequest>::MakeSptr(notificationRequest);
+    record->notification = new (std::nothrow) Notification(record->request);
+
+    auto result = advancedNotificationService_->UpdateNotificationTimerInfo(record);
+
+    ASSERT_EQ(result, ERR_OK);
+    /* finish timer not change, but update timer changed */
+    ASSERT_EQ(record->notification->GetAutoDeletedTimer(), NotificationConstant::INVALID_TIMER_ID);
+}
 }  // namespace Notification
 }  // namespace OHOS
