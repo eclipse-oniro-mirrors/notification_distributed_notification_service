@@ -1659,6 +1659,7 @@ private:
  */
 class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
+    PushCallbackRecipient();
     PushCallbackRecipient(const NotificationConstant::SlotType slotType);
     virtual ~PushCallbackRecipient();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
