@@ -25,6 +25,10 @@
 #include "os_account_manager.h"
 #include "screenlock_manager.h"
 #include "string_utils.h"
+#include "distributed_device_data_service.h"
+#include "bundle_manager_helper.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -307,6 +311,12 @@ void SmartReminderCenter::InitValidDevices(
             ANS_LOGI("not afford consume, deviceType = %{public}s", deviceType.c_str());
             continue;
         }
+
+        if (NotificationConstant::PC_DEVICE_TYPE == deviceType || NotificationConstant::PAD_DEVICE_TYPE == deviceType) {
+            InitPcPadDevices(deviceType, syncDevices, smartDevices, statusMap, request);
+            continue;
+        }
+
         if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
             bool isEnable = false;
             std::string queryDeviceType = deviceType;
@@ -362,6 +372,93 @@ void SmartReminderCenter::InitValidDevices(
     ANS_LOGI("sync device list: %{public}s", syncDevicesStr.c_str());
     ANS_LOGI("smart device list: %{public}s", smartDevicesStr.c_str());
     return;
+}
+
+void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
+    set<string> &syncDevices, set<string> &smartDevices,
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
+    const sptr<NotificationRequest> &request) const
+{
+    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType() &&
+        NotificationConstant::PC_DEVICE_TYPE == deviceType) {
+        ANS_LOGI("PC/PAD init, pc not support liveView");
+        return;
+    }
+    // used device
+    DeviceStatus deviceStatus = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->
+        GetMultiDeviceStatus(deviceType, STATUS_USED_FLAG);
+    if (deviceStatus.deviceType.empty()) {
+        ANS_LOGI("PC/PAD init, not get any used device, type = %{public}s", deviceType.c_str());
+        return;
+    }
+    // switch
+    string deviceId = deviceStatus.deviceId;
+    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
+        if (!DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(deviceType, deviceId)) {
+            ANS_LOGI("PC/PAD init, liveView switch is closed , type = %{public}s", deviceType.c_str());
+            return;
+        }
+    } else {
+        if (!DistributedDeviceDataService::GetInstance().GetDeviceNotificationEnable(deviceType, deviceId)) {
+            ANS_LOGI("PC/PAD init, notification switch is closed , type = %{public}s", deviceType.c_str());
+            return;
+        }
+    }
+    // application list
+    std::string bundleName = request->GetOwnerBundleName();
+    int32_t userId = request->GetOwnerUserId();
+    if (DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(
+        deviceType, deviceId, bundleName)) {
+        ANS_LOGI("PC/PAD init, application has installed, type = %{public}s, bundleName = %{public}s",
+            deviceType.c_str(), bundleName.c_str());
+        return;
+    }
+    // system app
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager != nullptr) {
+        if (bundleManager->CheckSystemApp(bundleName, userId)) {
+            ANS_LOGI("PC/PAD init, application is systemApp, type = %{public}s, bundleName = %{public}s",
+                deviceType.c_str(), bundleName.c_str());
+            return;
+        }
+    } else {
+        ANS_LOGE("get bundleManager fail");
+    }
+    FillRequestExtendInfo(deviceType, deviceStatus, request);
+    statusMap.insert(pair<string, bitset<DistributedDeviceStatus::STATUS_SIZE>>(
+        deviceType, bitset<DistributedDeviceStatus::STATUS_SIZE>(deviceStatus.status)));
+    syncDevices.insert(deviceType);
+    smartDevices.insert(deviceType);
+    return;
+}
+
+void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,
+    const sptr<NotificationRequest> &request) const
+{
+    std::string bundleName = request->GetOwnerBundleName();
+    int32_t userId = request->GetOwnerUserId();
+    std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+    if (bundleManager != nullptr) {
+        int32_t flags = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+        AppExecFwk::ApplicationInfo appInfo;
+        if (bundleManager->GetApplicationInfo(bundleName, flags, userId, appInfo) != ERR_OK) {
+            ANS_LOGI("FillRequestExtendInfo, get GetApplicationInfo error, type = %{public}s, bundleName = %{public}s",
+                deviceType.c_str(), bundleName.c_str());
+            return;
+        }
+        std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_NAME, AAFwk::String::Box(appInfo.name));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_LABEL, AAFwk::String::Box(appInfo.label));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_ICON, AAFwk::String::Box(appInfo.icon));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_INDEX, AAFwk::Integer::Box(appInfo.appIndex));
+
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + deviceType +  "_" + EXTEND_INFO_DEVICE_ID,
+            AAFwk::String::Box(deviceStatus.deviceId));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + deviceType +  "_" + EXTEND_INFO_USER_ID,
+            AAFwk::Integer::Box(deviceStatus.userId));
+        return;
+    }
+    ANS_LOGE("get bundleManager fail");
 }
 
 void SmartReminderCenter::HandleReminderMethods(

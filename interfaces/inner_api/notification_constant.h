@@ -396,9 +396,9 @@ public:
     constexpr static const char* HEADSET_DEVICE_TYPE = "headset";
     constexpr static const char* LITEWEARABLE_DEVICE_TYPE = "liteWearable";
     constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
-    constexpr static const char* PAD_DEVICE_TYPE = "Pad";
-    constexpr static const char* PC_DEVICE_TYPE = "Pc";
-    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable"};
+    constexpr static const char* PAD_DEVICE_TYPE = "pad";
+    constexpr static const char* PC_DEVICE_TYPE = "pc";
+    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "pc", "pad"};
 };
 }  // namespace Notification
 }  // namespace OHOS

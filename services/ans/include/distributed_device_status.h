@@ -46,6 +46,9 @@ public:
         const uint32_t controlFlag, const std::string deveiceId, int32_t userId);
 
     uint32_t GetDeviceStatus(const std::string &deviceType);
+
+    DeviceStatus GetMultiDeviceStatus(const std::string &deviceType, const uint32_t status);
+
 private:
     std::mutex mapLock_;
     std::vector<DeviceStatus> deviceInfo_;
