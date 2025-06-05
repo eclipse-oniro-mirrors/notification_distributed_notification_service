@@ -144,7 +144,7 @@ bool WrapDoNotDisturbProfile(ani_env* env, sptr<NotificationDoNotDisturbProfile>
     }
     ani_double id = static_cast<double>(profile->GetProfileId());
     if (ANI_OK != (status = env->Object_SetPropertyByName_Double(outObj, "id", id))) {
-        ANS_LOGE("WrapDoNotDisturbProfile ddd set reason faild. status %{public}d", status);
+        ANS_LOGE("WrapDoNotDisturbProfile : set reason faild. status %{public}d", status);
         return false;
     }
     if (!SetPropertyOptionalByString(env, outObj, "name", profile->GetProfileName())) {

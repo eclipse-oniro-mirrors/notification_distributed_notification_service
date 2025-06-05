@@ -347,7 +347,7 @@ export default namespace notificationSubscribe {
 
     export function removeAll(bundle: BundleOption, callback: AsyncCallback<void>): void {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == undefined) {

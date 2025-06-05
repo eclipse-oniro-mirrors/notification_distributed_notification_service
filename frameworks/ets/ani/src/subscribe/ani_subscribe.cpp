@@ -124,7 +124,7 @@ void AniSubScribeRegistryInit(ani_env *env)
         ani_native_function {"nativeRemoveAllForBundle",
             REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE, reinterpret_cast<void *>(AniRemoveAllForBundle)},
         ani_native_function {"nativeRemoveAllForUserId",
-            REMOVEALL_FOR_USERID_STGNATURE,reinterpret_cast<void *>(AniRemoveAllForUserId)},
+            REMOVEALL_FOR_USERID_STGNATURE, reinterpret_cast<void *>(AniRemoveAllForUserId)},
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
