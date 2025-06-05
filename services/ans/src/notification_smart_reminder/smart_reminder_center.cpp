@@ -391,8 +391,6 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
         ANS_LOGI("PC/PAD init, not get any used device, type = %{public}s", deviceType.c_str());
         return;
     }
-    ANS_LOGI("InitPcPadDevices deviceStatus type = %{public}s  deviceId=  %{public}s userId = %{public}d",
-        deviceStatus.deviceType.c_str(), deviceStatus.deviceId.c_str(), deviceStatus.userId);
     // switch
     string deviceId = deviceStatus.deviceId;
     if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
