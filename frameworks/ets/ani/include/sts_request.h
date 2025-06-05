@@ -43,6 +43,7 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
 ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests);
 
 bool UnWarpNotificationCheckRequest(ani_env *env, ani_object obj, sptr<NotificationCheckRequest> &checkRequest);
+bool UnWarpNotificationFilter(ani_env *env, ani_object obj, LiveViewFilter& filter);
 } // namespace NotificationSts
 } // OHOS
 #endif

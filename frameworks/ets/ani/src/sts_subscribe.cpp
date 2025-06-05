@@ -609,13 +609,13 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
             return false;
         }
     }
-    ErrCode status = 0;
+    ErrCode status = ERR_OK;
     if (!isInfoUndefine) {
         status = NotificationHelper::SubscribeNotification(stsSubscriber, SubscribeInfo);
     } else {
         status = NotificationHelper::SubscribeNotification(stsSubscriber);
     }
-    if (status != 0) {
+    if (status != ERR_OK) {
         int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
         externalErrorCode =
             (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
@@ -647,7 +647,7 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     bool ret = AddDeletingSubscriber(stsSubscriber);
     if (ret) {
         int32_t status = NotificationHelper::UnSubscribeNotification(stsSubscriber);
-        if (status != 0) {
+        if (status != ERR_OK) {
             int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
             externalErrorCode =
                 (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
@@ -660,6 +660,43 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     } else {
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_SUBSCRIBER_IS_DELETING);
         OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
+        return false;
+    }
+    return true;
+}
+
+bool SubscriberInstanceManager::SubscribeSelf(ani_env *env, ani_object subscriber)
+{
+    ANS_LOGD("enter");
+    bool isSubscribeUndefine = IsUndefine(env, subscriber);
+    if (isSubscribeUndefine) {
+        ANS_LOGD("subscriber is undefine");
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, "subscriber is undefine");
+        return false;
+    }
+    std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
+    if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
+        if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
+            ANS_LOGD("GetNotificationSubscriber faild");
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
+            return false;
+        }
+        if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
+            ANS_LOGD("AddSubscriberInstancesInfo faild");
+            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
+            return false;
+        }
+    }
+    ErrCode status = ERR_OK;
+    status = NotificationHelper::SubscribeNotificationSelf(stsSubscriber);
+    if (status != ERR_OK) {
+        int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
+        externalErrorCode =
+            (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
+        ANS_LOGD("SubscribeNotificationSelf faild. status %{public}d ErrorToExternal %{public}d",
+            status, externalErrorCode);
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
         return false;
     }
     return true;

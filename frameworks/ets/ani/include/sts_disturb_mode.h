@@ -25,6 +25,7 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
     sptr<NotificationDoNotDisturbProfile> &profile);
 bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
     std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
+bool WrapDoNotDisturbProfile(ani_env* env, sptr<NotificationDoNotDisturbProfile> profile, ani_object& outObj);
 } // namespace NotificationSts
 } // OHOS
 #endif

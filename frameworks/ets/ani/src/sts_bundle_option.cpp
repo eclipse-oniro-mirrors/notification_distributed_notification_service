@@ -44,6 +44,37 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     return true;
 }
 
+ani_object GetAniArrayBundleOption(ani_env* env,
+    const std::vector<BundleOption> &bundleOptions)
+{
+    ANS_LOGD("GetAniArrayActionButton call");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniArrayActionButton failed, has nullptr");
+        return nullptr;
+    }
+    ani_object arrayObj = newArrayClass(env, bundleOptions.size());
+    if (arrayObj == nullptr) {
+        ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
+        return nullptr;
+    }
+    ani_size index = 0;
+    for (auto &option : bundleOptions) {
+        std::shared_ptr<BundleOption> optSp = std::make_shared<BundleOption>(option);
+        ani_object item;
+        if (!WrapBundleOption(env, optSp, item) || item == nullptr) {
+            ANS_LOGE("GetAniArrayActionButton: item is nullptr");
+            return nullptr;
+        }
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+            ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
+            return nullptr;
+        }
+        index ++;
+    }
+    ANS_LOGD("GetAniArrayActionButton end");
+    return arrayObj;
+}
+
 bool UnwrapArrayBundleOption(ani_env *env,
     ani_ref arrayObj, std::vector<Notification::NotificationBundleOption>& options)
 {

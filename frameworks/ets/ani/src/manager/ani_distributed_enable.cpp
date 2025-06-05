@@ -96,5 +96,197 @@ ani_boolean AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, an
     ANS_LOGD("AniIsDistributedEnabledByBundle end, enabled: %{public}d, returncode: %{public}d", enabled, externalCode);
     return NotificationSts::BoolToAniBoolean(enabled);
 }
+
+void AniSetDistributedEnableByBundle(ani_env *env, ani_object obj, ani_boolean enable)
+{
+    ANS_LOGD("setDistributedEnableByBundle call");
+    int returncode = ERR_OK;
+    Notification::NotificationBundleOption option;
+    bool bFlag = NotificationSts::UnwrapBundleOption(env, obj, option);
+    if (bFlag) {
+        returncode = Notification::NotificationHelper::EnableDistributedByBundle(
+            option, NotificationSts::AniBooleanToBool(enable));
+    } else {
+        ANS_LOGE("sts setDistributedEnableByBundle ERROR_INTERNAL_ERROR");
+        OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return;
+    }
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("sts setDistributedEnableByBundle error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return;
+    }
+    ANS_LOGD("sts setDistributedEnableByBundle end, ret: %{public}d", externalCode);
+}
+
+void AniSetDistributedEnableByBundleAndType(ani_env *env,
+    ani_object obj, ani_string deviceType, ani_boolean enable)
+{
+    ANS_LOGD("sts setDistributedEnabledByBundle call");
+    std::string deviceTypeStr;
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    int returncode = ERR_OK;
+    Notification::NotificationBundleOption option;
+    bool bFlag = NotificationSts::UnwrapBundleOption(env, obj, option);
+    if (bFlag) {
+        returncode = Notification::NotificationHelper::SetDistributedEnabledByBundle(option,
+            deviceTypeStr, NotificationSts::AniBooleanToBool(enable));
+    } else {
+        ANS_LOGE("sts setDistributedEnabledByBundle ERROR_INTERNAL_ERROR");
+        OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return;
+    }
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("sts setDistributedEnabledByBundle error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return;
+    }
+    ANS_LOGD("sts setDistributedEnabledByBundle end, ret: %{public}d", externalCode);
+}
+
+void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_double status)
+{
+    ANS_LOGD("sts setTargetDeviceStatus call, id:%{public}lf", status);
+    std::string deviceTypeStr;
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    ANS_LOGD("sts setTargetDeviceStatus id:%{public}lf deviceType:%{public}s", status, deviceTypeStr.c_str());
+    int32_t ret = Notification::NotificationHelper::SetTargetDeviceStatus(deviceTypeStr, status, DISTURB_DEFAULT_FLAG);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("sts setTargetDeviceStatus error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return;
+    }
+    ANS_LOGD("sts setTargetDeviceStatus end, externalCode: %{public}d", externalCode);
+}
+
+ani_boolean AniIsSmartReminderEnabled(ani_env *env, ani_string deviceType)
+{
+    ANS_LOGD("isSmartReminderEnabled call");
+    bool allowed = false;
+    std::string deviceTypeStr;
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return ANI_FALSE;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return ANI_FALSE;
+    }
+    int returncode = Notification::NotificationHelper::IsSmartReminderEnabled(deviceTypeStr, allowed);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("isSmartReminderEnabled -> error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("isSmartReminderEnabled end");
+    return NotificationSts::BoolToAniBoolean(allowed);
+}
+
+
+void AniSetSmartReminderEnable(ani_env *env, ani_string deviceType, ani_boolean enable)
+{
+    ANS_LOGD("setSmartReminderEnabled call");
+    std::string deviceTypeStr;
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return;
+    }
+
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    int returncode = Notification::NotificationHelper::SetSmartReminderEnabled(deviceTypeStr,
+        NotificationSts::AniBooleanToBool(enable));
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("setSmartReminderEnabled -> error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("setSmartReminderEnabled end");
+}
+
+void AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType, ani_boolean enable)
+{
+    ANS_LOGD("setDistributedEnabledBySlot enter ");
+    std::string deviceTypeStr;
+    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
+    if (!NotificationSts::SlotTypeEtsToC(env, slot, slotType)) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("SlotTypeEtsToC failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    int returncode = ERR_OK;
+    returncode = Notification::NotificationHelper::SetDistributedEnabledBySlot(slotType,
+        deviceTypeStr, NotificationSts::AniBooleanToBool(enable));
+
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("setDistributedEnabledBySlot error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+}
+
+ani_boolean AniIsDistributedEnabledBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType)
+{
+    ANS_LOGD("isDistributedEnabledBySlot enter");
+    std::string deviceTypeStr;
+
+    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
+    if (!NotificationSts::SlotTypeEtsToC(env, slot, slotType)) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("SlotTypeEtsToC failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return ANI_FALSE;
+    }
+    if (env == nullptr || deviceType == nullptr) {
+        ANS_LOGE("Invalid env or deviceType is null");
+        return ANI_FALSE;
+    }
+    if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
+        std::string msg = "Parameter verification failed";
+        ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
+        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        return ANI_FALSE;
+    }
+    bool isEnable = false;
+    int returncode = Notification::NotificationHelper::IsDistributedEnabledBySlot(slotType, deviceTypeStr, isEnable);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("isDistributedEnabledBySlot -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    return isEnable ? ANI_TRUE : ANI_FALSE;
+}
 }
 }

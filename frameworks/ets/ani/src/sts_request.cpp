@@ -25,6 +25,8 @@
 #include "ans_log_wrapper.h"
 #include "want_params.h"
 #include "ani_common_want.h"
+#include "sts_bundle_option.h"
+#include "sts_subscribe.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -1146,10 +1148,6 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
 
 ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests)
 {
-    if (requests.empty()) {
-        ANS_LOGE("actionButtons is empty");
-        return nullptr;
-    }
     ani_object arrayObj = newArrayClass(env, requests.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr");
@@ -1175,10 +1173,6 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
 
 ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests)
 {
-    if (requests.empty()) {
-        ANS_LOGE("actionButtons is empty");
-        return nullptr;
-    }
     ani_object arrayObj = newArrayClass(env, requests.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr");
@@ -1282,6 +1276,45 @@ bool UnWarpNotificationCheckRequest(ani_env *env, ani_object obj, sptr<Notificat
         checkRequest->GetContentType(), checkRequest->GetSlotType());
     for (auto &it : checkRequest->GetExtraKeys()) {
         ANS_LOGD("extrakey %{public}s", it.c_str());
+    }
+    return true;
+}
+
+bool UnWarpNotificationFilter(ani_env *env, ani_object obj, LiveViewFilter& filter)
+{
+    ANS_LOGD("UnWarpNotificationFilter call");
+    if (env == nullptr || obj == nullptr) {
+        ANS_LOGE("UnWarpNotificationFilter failed, has nullptr");
+        return false;
+    }
+
+    ani_status status = ANI_OK;
+    ani_boolean isUndefined = ANI_TRUE;
+    ani_ref bundleObj = {};
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "bundle", isUndefined, bundleObj))
+        || isUndefined == ANI_TRUE) {
+        ANS_LOGE("UnWarpNotificationFilter:get bundle failed. status %{public}d", status);
+        return false;
+    }
+    if (!OHOS::NotificationSts::UnwrapBundleOption(env, static_cast<ani_object>(bundleObj), filter.bundle)) {
+        ANS_LOGE("UnWarpNotificationFilter:UnwrapBundleOption failed");
+        return false;
+    }
+
+    ani_ref notificationKeyObj = {};
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "notificationKey", isUndefined, notificationKeyObj))
+        || isUndefined == ANI_TRUE) {
+        ANS_LOGE("UnWarpNotificationFilter:get notificationKey failed. status %{public}d", status);
+        return false;
+    }
+
+    if (OHOS::NotificationSts::UnWarpNotificationKey(env, static_cast<ani_object>(notificationKeyObj),
+        filter.notificationKey)) {
+        ANS_LOGD("UnWarpNotificationFilter:UnWarpNotificationKey label is undefined");
+    }
+
+    if (ANI_OK != (status = GetPropertyStringArray(env, obj, "extraInfoKeys", isUndefined, filter.extraInfoKeys))) {
+        ANS_LOGD("UnWarpNotificationFilter:get extraInfoKeysObj failed. status %{public}d", status);
     }
     return true;
 }

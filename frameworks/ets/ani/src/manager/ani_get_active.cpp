@@ -90,5 +90,34 @@ ani_object AniGetActiveNotifications(ani_env *env)
     ANS_LOGD("sts AniGetActiveNotifications end");
     return arrayRequestObj;
 }
+
+ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj)
+{
+    ANS_LOGD("AniGetActiveNotificationByFilter call");
+    Notification::LiveViewFilter filter;
+    if (!OHOS::NotificationSts::UnWarpNotificationFilter(env, obj, filter)) {
+        NotificationSts::ThrowStsErroWithMsg(env, "sts UnWarpNotificationFilter ERROR_INTERNAL_ERROR");
+        return nullptr;
+    }
+    sptr<OHOS::Notification::NotificationRequest> notificationRequest = nullptr;
+    int returncode = Notification::NotificationHelper::GetActiveNotificationByFilter(filter, notificationRequest);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("AniGetActiveNotificationByFilter -> error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullptr;
+    }
+
+    ani_object requestObj = nullptr;
+    ani_class requestCls;
+    if (!NotificationSts::WarpNotificationRequest(env, notificationRequest.GetRefPtr(), requestCls, requestObj)
+        || requestObj == nullptr) {
+        NotificationSts::ThrowStsErroWithMsg(env, "sts UnWarpNotificationFilter ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniGetActiveNotificationByFilter WarpNotificationRequest faild");
+        return nullptr;
+    }
+    ANS_LOGD("AniGetActiveNotificationByFilter end");
+    return requestObj;
+}
 } // namespace NotificationManagerSts
 } // namespace OHOS

@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUBLISH_H
-#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUBLISH_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_DO_NOT_DISTURB_DATA_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_DO_NOT_DISTURB_DATA_H
 #include "ani.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniPublish(ani_env *env, ani_object obj);
-void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId);
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_double userId);
-void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_object request);
+void AniSetDoNotDisturbDate(ani_env *env, ani_object date);
+void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double userId);
+ani_object AniGetDoNotDisturbDate(ani_env *env);
+ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_double userId);
+ani_boolean AniIsSupportDoNotDisturbMode(ani_env *env);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

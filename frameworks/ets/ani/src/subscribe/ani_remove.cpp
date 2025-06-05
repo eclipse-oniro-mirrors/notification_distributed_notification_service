@@ -130,5 +130,46 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
         OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
     }
 }
+
+void AniRemoveAllForBundle(ani_env *env, ani_object bundle)
+{
+    ANS_LOGD("removeAll enter");
+    int retcode = ERR_OK;
+    bool isForBundleUndefine = NotificationSts::IsUndefine(env, bundle);
+    if (isForBundleUndefine) {
+        retcode = NotificationHelper::RemoveNotifications();
+        std::string msg = "IsUndefine falid";
+        ANS_LOGE("IsUndefine is falid");
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    BundleOption option;
+    if (!NotificationSts::UnwrapBundleOption(env, bundle, option)) {
+        ANS_LOGE("bundle is valid");
+        std::string msg = "UnwrapBundleOption faild";
+        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        return;
+    }
+    int ret = NotificationHelper::RemoveAllNotifications(option);
+    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+    if (ret != ERR_OK) {
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+    }
+}
+
+void AniRemoveAllForUserId(ani_env *env, ani_double userId)
+{
+    ANS_LOGD("removeAll enter");
+    ANS_LOGD("sts RemoveAll call, userId:%{public}lf", userId);
+    int ret = NotificationHelper::RemoveNotifications(userId);
+    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+    if (ret != ERR_OK) {
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+    }
+}
 }
 }

@@ -18,6 +18,7 @@
 #include "ani.h"
 #include "notification_constant.h"
 #include "notification_content.h"
+#include "notification_do_not_disturb_date.h"
 #include "notification_slot.h"
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
@@ -33,6 +34,15 @@ using ContentType = OHOS::Notification::NotificationContent::Type;
 using ButtonOption = OHOS::Notification::NotificationButtonOption;
 using NotificationDoNotDisturbDate = OHOS::Notification::NotificationDoNotDisturbDate;
 using RemindType = OHOS::Notification::NotificationConstant::RemindType;
+using NotificationConstant = OHOS::Notification::NotificationConstant;
+
+enum STSDoNotDisturbType {
+    TYPE_NONE = 0,
+    TYPE_ONCE = 1,
+    TYPE_DAILY = 2,
+    TYPE_CLEARLY = 3,
+};
+
 enum STSSlotType {
     UNKNOWN_TYPE = 0,
     SOCIAL_COMMUNICATION = 1,
@@ -67,6 +77,12 @@ enum class STSRemindType {
     IDLE_REMIND,
     ACTIVE_DONOT_REMIND,
     ACTIVE_REMIND
+};
+
+class StsDoNotDisturbTypeUtils {
+public:
+static bool StsToC(const STSDoNotDisturbType inType,
+    OHOS::Notification::NotificationConstant::DoNotDisturbType &outType);
 };
 
 class StsSlotTypeUtils {
@@ -153,8 +169,12 @@ bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &re
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption);
 ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonOption);
+
+bool UnWarpNotificationDoNotDisturbDate(ani_env* env, const ani_object doNotDisturbDateObj,
+    NotificationDoNotDisturbDate& doNotDisturbDate);
 bool WarpNotificationDoNotDisturbDate(
     ani_env *env, const std::shared_ptr<NotificationDoNotDisturbDate> &date, ani_object &outObj);
+
 bool WarpNotificationCheckInfo(
     ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj);
 } // namespace NotificationSts
