@@ -20,6 +20,7 @@
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_device_manager.h"
 #include "advanced_datashare_helper.h"
+#include "distributed_extension_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -29,6 +30,7 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AdvancedNotificationServiceAbility, ADVANCED_NOTIF
 
 const std::string EXTENSION_BACKUP = "backup";
 const std::string EXTENSION_RESTORE = "restore";
+const int32_t ALL_CONNECT_SA_ID = 70633;
 
 AdvancedNotificationServiceAbility::AdvancedNotificationServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
     : SystemAbility(systemAbilityId, runOnCreate), service_(nullptr)
@@ -59,6 +61,7 @@ void AdvancedNotificationServiceAbility::OnStart()
     TEL_EXTENTION_WRAPPER->InitTelExtentionWrapper();
 #endif
     AddSystemAbilityListener(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
+    AddSystemAbilityListener(ALL_CONNECT_SA_ID);
 }
 
 void AdvancedNotificationServiceAbility::OnStop()
@@ -105,6 +108,8 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) {
         ANS_LOGW("DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID");
         DistributedDeviceManager::GetInstance().RegisterDms(true);
+    } else if (systemAbilityId == ALL_CONNECT_SA_ID) {
+        DistributedExtensionService::GetInstance().OnAllConnectOnline();
     }
 }
 

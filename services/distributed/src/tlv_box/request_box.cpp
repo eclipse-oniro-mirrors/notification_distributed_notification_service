@@ -90,7 +90,7 @@ bool NotificationRequestBox::SetNotificationTitle(const std::string& title)
     }
     uint32_t maxLength = static_cast<uint32_t>(DistributedLocalConfig::GetInstance().GetTitleLength());
     if (title.size() > maxLength) {
-        ANS_LOGI("SetNotificationTitle truncate %{public}d %{public}d", (int32_t)(title.size()), (int32_t)(maxLength));
+        ANS_LOGI("SetNotificationTitle truncate %{public}zu %{public}u", title.size(), maxLength);
         std::string subTitle =  title.substr(0, maxLength);
         ANS_LOGI("SetNotificationTitle truncate %{public}s %{public}s", subTitle.c_str(), title.c_str());
         return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_TITLE, subTitle));
@@ -105,7 +105,7 @@ bool NotificationRequestBox::SetNotificationText(const std::string& text)
     }
     uint32_t maxLength = static_cast<uint32_t>(DistributedLocalConfig::GetInstance().GetContentLength());
     if (text.size() > maxLength) {
-        ANS_LOGI("SetNotificationText truncate %{public}d %{public}d", (int32_t)(text.size()), (int32_t)(maxLength));
+        ANS_LOGI("SetNotificationText truncate %{public}zu %{public}u", text.size(), maxLength);
         std::string subText =  text.substr(0, maxLength);
         ANS_LOGI("SetNotificationTitle truncate %{public}s %{public}s", subText.c_str(), text.c_str());
         return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT, subText));
@@ -188,34 +188,55 @@ bool NotificationRequestBox::SetNotificationUserInput(const std::string& userInp
     return box_->PutValue(std::make_shared<TlvItem>(ACTION_USER_INPUT, userInput));
 }
 
-bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon)
+bool NotificationRequestBox::SetSmallIcon(const std::string& icon)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_ICON, icon));
+}
+
+bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon,
+    int32_t deviceType)
 {
     if (box_ == nullptr) {
         return false;
     }
 
-    std::string copyIcon = AnsImageUtil::PackImage(bigIcon);
-    auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
-    if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
-        return false;
+    std::string icon;
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::string copyIcon = AnsImageUtil::PackImage(bigIcon);
+        auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
+        if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
+            return false;
+        }
+        icon = AnsImageUtil::PackImage(copyPixelMap);
+        ANS_LOGI("SetBigIcon %{public}zu, %{public}zu", copyIcon.size(), icon.size());
+    } else {
+        icon = AnsImageUtil::PackImage(bigIcon);
     }
-    std::string icon = AnsImageUtil::PackImage(copyPixelMap);
-    ANS_LOGI("SetBigIcon %{public}d, %{public}d", (int32_t)(copyIcon.size()), (int32_t)(icon.size()));
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
 }
 
-bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon)
+bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon,
+    int32_t deviceType)
 {
     if (box_ == nullptr) {
         return false;
     }
-    std::string copyIcon = AnsImageUtil::PackImage(overlayIcon);
-    auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
-    if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
-        return false;
+
+    std::string icon;
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::string copyIcon = AnsImageUtil::PackImage(overlayIcon);
+        auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
+        if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
+            return false;
+        }
+        icon = AnsImageUtil::PackImage(copyPixelMap);
+        ANS_LOGI("SetOverlayIcon %{public}zu, %{public}zu", copyIcon.size(), icon.size());
+    } else {
+        icon = AnsImageUtil::PackImage(overlayIcon);
     }
-    std::string icon = AnsImageUtil::PackImage(copyPixelMap);
-    ANS_LOGI("SetOverlayIcon %{public}d, %{public}d", (int32_t)(copyIcon.size()), (int32_t)(icon.size()));
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
 }
 
@@ -243,6 +264,54 @@ bool NotificationRequestBox::SetAutoDeleteTime(int64_t time)
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
+}
+
+bool NotificationRequestBox::SetAppName(const std::string& appName)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(APP_NAME, appName));
+}
+
+bool NotificationRequestBox::SetAppLabel(const std::string& appLabel)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(APP_LABEL, appLabel));
+}
+
+bool NotificationRequestBox::SetAppIndex(const int32_t& appIndex)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(APP_INDEX, appIndex));
+}
+
+bool NotificationRequestBox::SetNotificationUserId(const int32_t& userId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_USERID, userId));
+}
+
+bool NotificationRequestBox::SetDeviceUserId(const int32_t& userId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(DEVICE_USERID, userId));
+}
+
+bool NotificationRequestBox::SetDeviceId(const std::string& deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
 }
 
 #else
@@ -378,6 +447,20 @@ bool NotificationRequestBox::GetNotificationUserInput(std::string& userInput) co
     return box_->GetStringValue(ACTION_USER_INPUT, userInput);
 }
 
+bool NotificationRequestBox::GetSmallIcon(std::shared_ptr<Media::PixelMap>& smallIcon) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    std::string content;
+    if (!box_->GetStringValue(BUNDLE_ICON, content)) {
+        return false;
+    }
+    ANS_LOGI("GetBigIcon %{public}zu", content.size());
+    smallIcon = AnsImageUtil::UnPackImage(content);
+    return true;
+}
+
 bool NotificationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const
 {
     if (box_ == nullptr) {
@@ -387,7 +470,7 @@ bool NotificationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIco
     if (!box_->GetStringValue(NOTIFICATION_BIG_ICON, bigIconContent)) {
         return false;
     }
-    ANS_LOGI("GetBigIcon %{public}d", (int32_t)(bigIconContent.size()));
+    ANS_LOGI("GetBigIcon %{public}zu", bigIconContent.size());
     bigIcon = AnsImageUtil::UnPackImage(bigIconContent);
     return true;
 }
@@ -401,7 +484,7 @@ bool NotificationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& ov
     if (!box_->GetStringValue(NOTIFICATION_OVERLAY_ICON, overlayContent)) {
         return false;
     }
-    ANS_LOGI("GetOverlayIcon %{public}d", (int32_t)(overlayContent.size()));
+    ANS_LOGI("GetOverlayIcon %{public}zu", overlayContent.size());
     overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
     return true;
 }
@@ -437,6 +520,55 @@ bool NotificationRequestBox::GetAppMessageId(std::string& appMessageId) const
     }
     return box_->GetStringValue(NOTIFICATION_APP_MESSAGE_ID, appMessageId);
 }
+
+bool NotificationRequestBox::GetAppName(std::string& appName) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(APP_NAME, appName);
+}
+
+bool NotificationRequestBox::GetAppLabel(std::string& appLabel) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(APP_LABEL, appLabel);
+}
+
+bool NotificationRequestBox::GetAppIndex(int32_t& appIndex) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(APP_INDEX, appIndex);
+}
+
+bool NotificationRequestBox::GetNotificationUserId(int32_t& userId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(NOTIFICATION_USERID, userId);
+}
+
+bool NotificationRequestBox::GetDeviceUserId(int32_t& userId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(DEVICE_USERID, userId);
+}
+
+bool NotificationRequestBox::GetDeviceId(std::string& deviceId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
+}
 #endif
 }
 }
+

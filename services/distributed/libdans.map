@@ -20,6 +20,7 @@
     ReleaseLocalDevice;
     InitHACallBack;
     InitSendReportCallBack;
+    DeviceStatusChange;
   local:
     *;
 };

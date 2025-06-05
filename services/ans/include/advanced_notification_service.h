@@ -1633,6 +1633,7 @@ private:
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
+    ErrCode CollaborateFilter(const sptr<NotificationRequest> &request);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
