@@ -1371,8 +1371,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
     "hilog:libhilog",
   ]
 
-  if (distributed_notification_service_feature_summary ||
-      distributed_notification_service_feature_additional_control ||
+  if (distributed_notification_service_feature_additional_control ||
       distributed_notification_service_feature_privileged_message) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
   }
