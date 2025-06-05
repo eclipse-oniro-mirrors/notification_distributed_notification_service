@@ -174,6 +174,8 @@ struct ReportLiveViewMessage {
 
 class NotificationAnalyticsUtil {
 public:
+    static void ReportTipsEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
 
     static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, HaMetaMessage& message);
@@ -288,6 +290,8 @@ private:
     static void AddLocalLiveViewSuccessNum(std::string bundle);
 
     static void AddLocalLiveViewFailedNum(std::string bundle);
+
+    static void MakeRequestBundle(const sptr<NotificationRequest>& request);
 };
 } // namespace Notification
 } // namespace OHOS
