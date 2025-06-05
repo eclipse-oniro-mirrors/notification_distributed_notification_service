@@ -42,13 +42,19 @@ std::string DistributedDeviceService::DeviceTypeToTypeString(uint16_t deviceType
             return "wearable";
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
-            return "Pad";
+            return "pad";
+        }
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_PC: {
+            return "pc";
+        }
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1: {
+            return "pc";
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE: {
-            return "Phone";
+            return "phone";
         }
         default:
-            return std::string();
+            return "";
     }
 }
 
@@ -68,15 +74,44 @@ bool DistributedDeviceService::IsReportDataByHa()
     return localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
 }
 
+void DistributedDeviceService::SetSubscribeAllConnect(bool subscribe)
+{
+    subscribeAllConnect = subscribe;
+}
+
+bool DistributedDeviceService::IsSubscribeAllConnect()
+{
+    return subscribeAllConnect;
+}
+
+bool DistributedDeviceService::CheckNeedSubscribeAllConnect()
+{
+    std::lock_guard<std::mutex> lock(mapLock_);
+    for (auto& device : peerDevice_) {
+        if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+            device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
+            device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool DistributedDeviceService::IsSyncLiveView(const std::string& deviceId, bool forceSync)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device is data %{public}s.", StringAnonymous(deviceId).c_str());
         return false;
     }
-    if (iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-        iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+
+    if (iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC ||
+        iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) {
+        ANS_LOGI("Dans device pc no need sync %{public}s.", StringAnonymous(deviceId).c_str());
+        return false;
+    }
+    if (iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD) {
         if (!iter->second.deviceUsage || iter->second.peerState_ != DeviceState::STATE_SYNC) {
             return false;
         }
@@ -91,9 +126,13 @@ bool DistributedDeviceService::IsSyncLiveView(const std::string& deviceId, bool 
 
 bool DistributedDeviceService::IsSyncIcons(const std::string& deviceId, bool forceSync)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device is data %{public}s.", StringAnonymous(deviceId).c_str());
+        return false;
+    }
+    if (iter->second.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
         return false;
     }
 
@@ -106,9 +145,14 @@ bool DistributedDeviceService::IsSyncIcons(const std::string& deviceId, bool for
 
 bool DistributedDeviceService::IsSyncInstalledBundle(const std::string& deviceId, bool forceSync)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device is data %{public}s.", StringAnonymous(deviceId).c_str());
+        return false;
+    }
+
+    if (iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
         return false;
     }
 
@@ -121,6 +165,7 @@ bool DistributedDeviceService::IsSyncInstalledBundle(const std::string& deviceId
 
 void DistributedDeviceService::SetDeviceSyncData(const std::string& deviceId, int32_t type, bool syncData)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device set data %{public}s.", StringAnonymous(deviceId).c_str());
@@ -142,6 +187,7 @@ void DistributedDeviceService::SetDeviceSyncData(const std::string& deviceId, in
 
 void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32_t state)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device set status %{public}s.", StringAnonymous(deviceId).c_str());
@@ -152,6 +198,7 @@ void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32
 
 bool DistributedDeviceService::CheckDeviceExist(const std::string& deviceId)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     if (peerDevice_.find(deviceId) == peerDevice_.end()) {
         ANS_LOGI("Dans unknown device %{public}s.", StringAnonymous(deviceId).c_str());
         return false;
@@ -161,6 +208,7 @@ bool DistributedDeviceService::CheckDeviceExist(const std::string& deviceId)
 
 bool DistributedDeviceService::GetDeviceInfo(const std::string& deviceId, DistributedDeviceInfo& device)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(deviceId).c_str());
@@ -172,13 +220,15 @@ bool DistributedDeviceService::GetDeviceInfo(const std::string& deviceId, Distri
 
 bool DistributedDeviceService::CheckDeviceNeedSync(const std::string& deviceId)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device connected %{public}s.", StringAnonymous(deviceId).c_str());
         return false;
     }
     if (iter->second.connectedTry_ >= MAX_CONNECTED_TYR || iter->second.peerState_ != DeviceState::STATE_SYNC) {
-        ANS_LOGE("Dans no need try %{public}d.", iter->second.connectedTry_);
+        ANS_LOGI("Dans no need try %{public}d %{public}d.", iter->second.connectedTry_,
+            iter->second.peerState_);
         iter->second.connectedTry_ = 0;
         return false;
     }
@@ -187,6 +237,7 @@ bool DistributedDeviceService::CheckDeviceNeedSync(const std::string& deviceId)
 
 void DistributedDeviceService::IncreaseDeviceSyncCount(const std::string& deviceId)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = peerDevice_.find(deviceId);
     if (iter == peerDevice_.end()) {
         ANS_LOGE("Dans unknown device count %{public}s.", StringAnonymous(deviceId).c_str());
@@ -199,11 +250,13 @@ void DistributedDeviceService::IncreaseDeviceSyncCount(const std::string& device
 
 void DistributedDeviceService::AddDeviceInfo(DistributedDeviceInfo deviceItem)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     peerDevice_[deviceItem.deviceId_] = deviceItem;
 }
 
 void DistributedDeviceService::DeleteDeviceInfo(const std::string& deviceId)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto deviceIter = peerDevice_.find(deviceId);
     if (deviceIter != peerDevice_.end()) {
         ANS_LOGI("Delete device %{public}s.", StringAnonymous(deviceId).c_str());
@@ -213,6 +266,7 @@ void DistributedDeviceService::DeleteDeviceInfo(const std::string& deviceId)
 
 std::map<std::string, DistributedDeviceInfo>& DistributedDeviceService::GetDeviceList()
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     return peerDevice_;
 }
 
@@ -300,6 +354,7 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
         ANS_LOGW("Dans SyncDeviceState serialize failed.");
         return;
     }
+    std::lock_guard<std::mutex> lock(mapLock_);
     for (const auto& peer : peerDevice_) {
         DistributedClient::GetInstance().SendMessage(stateBox, TransDataType::DATA_TYPE_MESSAGE,
             peer.second.deviceId_, MODIFY_ERROR_EVENT_CODE);

@@ -20,6 +20,7 @@
 #include "notification_config_parse.h"
 #include "distributed_preferences.h"
 #include "distributed_local_config.h"
+#include "distributed_device_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -74,6 +75,26 @@ void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &reque
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         ANS_LOGI("No need consumed notification %{public}d %{public}s.",
             localDevice_.deviceType_, StringAnonymous(localDevice_.deviceId_).c_str());
+        return;
+    }
+    if (peerDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        DistributedService::GetInstance().OnConsumed(request, peerDevice_);
+        return;
+    }
+    if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
+        return;
+    }
+    auto requestPoint = request->GetNotificationRequestPoint();
+    auto params = requestPoint->GetExtendInfo();
+    if (params == nullptr) {
+        ANS_LOGI("Dans OnConsumed invalid extend info.");
+        return;
+    }
+    std::string deviceId = params->GetStringParam("notification_collaboration_deviceId_" +
+        DistributedDeviceService::DeviceTypeToTypeString(peerDevice_.deviceType_));
+    if (deviceId.empty() || deviceId != peerDevice_.deviceId_) {
+        ANS_LOGI("Dans OnConsumed invalid device %{public}s %{public}s.", StringAnonymous(deviceId).c_str(),
+            StringAnonymous(peerDevice_.deviceId_).c_str());
         return;
     }
     DistributedService::GetInstance().OnConsumed(request, peerDevice_);

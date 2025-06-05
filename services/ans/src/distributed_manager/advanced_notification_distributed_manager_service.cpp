@@ -41,6 +41,7 @@
 #include "notification_analytics_util.h"
 #include "notification_operation_service.h"
 #include "distributed_device_data_service.h"
+#include "distributed_extension_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -93,7 +94,18 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
 
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enabled);
-
+    if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
+        NotificationConstant::ENABLE_STATUS notification = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+        if (NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType,
+            notification) != ERR_OK) {
+            ANS_LOGW("Get notification distributed failed %{public}s!", deviceType.c_str());
+        }
+        DeviceStatueChangeInfo changeInfo;
+        changeInfo.enableChange = (notification == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) ? true : false;
+        changeInfo.liveViewChange = enabled;
+        changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
+        DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+    }
     ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledBySlot result: %{public}d",
         slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
@@ -624,26 +636,41 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
 ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("IsSystemApp is bogus.");
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    return NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
-        enabled? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+    auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
+        enabled ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+    if (result == ERR_OK) {
+        bool liveViewEnabled = false;
+        if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
+            NotificationConstant::SlotType::LIVE_VIEW, deviceType, liveViewEnabled) != ERR_OK) {
+            ANS_LOGW("Get live view distributed failed %{public}s!", deviceType.c_str());
+        }
+        DeviceStatueChangeInfo changeInfo;
+        changeInfo.enableChange = enabled;
+        changeInfo.liveViewChange = liveViewEnabled;
+        changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
+        DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+    }
+    return result;
 }
 
 ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &deviceType, bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (!AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("IsSystemApp is bogus.");
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
     NotificationConstant::ENABLE_STATUS enableStatus;
     ErrCode errResult = NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType, enableStatus);
-    enabled = enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE;
+    enabled = (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE);
     return errResult;
 }
 
