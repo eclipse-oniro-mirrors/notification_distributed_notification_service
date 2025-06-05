@@ -104,6 +104,19 @@ NotificationConstant::FlagStatus NotificationSubscriber::DowngradeReminder(
 }
 #endif
 
+void NotificationSubscriber::ProcessRemoveExtendInfo(std::shared_ptr<Notification> &notification) const
+{
+    sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
+    std::shared_ptr<AAFwk::WantParams> extendInfo =  request->GetExtendInfo();
+    if (extendInfo != nullptr) {
+        std::set<std::string> keySet = extendInfo->KeySet();
+        for (std::string key : keySet) {
+            extendInfo->Remove(key);
+        }
+    }
+    return;
+}
+
 const sptr<NotificationSubscriber::SubscriberImpl> NotificationSubscriber::GetImpl() const
 {
     return impl_;
@@ -148,6 +161,7 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
         return ERR_OK;
     }
 #endif
+    subscriber_.ProcessRemoveExtendInfo(sharedNotification);
     subscriber_.OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
     return ERR_OK;
