@@ -95,6 +95,35 @@ HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
 }
 
 /**
+ * @tc.name: CancelReminderToDb_0001
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, CancelReminderToDb_0001, Level1)
+{
+    IPCSkeleton::SetCallingTokenID(100);
+    int32_t callingUid = 99999;
+    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(500));
+    reminder1->InitCreatorBundleName("test_getvalid");
+    reminder1->InitCreatorUid(callingUid);
+    reminder1->InitBundleName("test_getvalid");
+    reminder1->InitUid(callingUid);
+    reminder1->SetExpired(false);
+    manager->PublishReminder(reminder1, callingUid);
+    
+    auto store = std::move(manager->store_);
+    int32_t ret = manager->CancelReminderToDb(reminder1->GetReminderId(), callingUid);
+    EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
+    manager->store_ = std::move(store);
+
+    ret = manager->CancelReminderToDb(12457, callingUid);
+    EXPECT_TRUE(ret == ERR_REMINDER_NOT_EXIST);
+    ret = manager->CancelReminderToDb(reminder1->GetReminderId(), callingUid);
+    EXPECT_TRUE(ret == ERR_OK);
+}
+
+/**
  * @tc.name: ReminderDataManagerTest_001
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
