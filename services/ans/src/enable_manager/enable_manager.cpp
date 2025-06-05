@@ -148,6 +148,9 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+        } else {
+            ANS_LOGI("duplicated popped.");
+            message.Append(" duplicated popped.");
         }
 #endif
     }

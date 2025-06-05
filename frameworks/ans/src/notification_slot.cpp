@@ -156,9 +156,6 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetName("CONTENT_INFORMATION");
             SetLockscreenVisibleness(NotificationConstant::VisiblenessType::SECRET);
             SetEnableVibration(false);
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-            SetSound(DEFAULT_NOTIFICATION_SOUND);
-#endif
             SetLevel(LEVEL_MIN);
             break;
         case NotificationConstant::SlotType::LIVE_VIEW:
@@ -191,9 +188,6 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetName("OTHER");
             SetLockscreenVisibleness(NotificationConstant::VisiblenessType::SECRET);
             SetEnableVibration(false);
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-            SetSound(DEFAULT_NOTIFICATION_SOUND);
-#endif
             SetLevel(LEVEL_MIN);
             break;
         default:
