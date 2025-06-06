@@ -395,16 +395,9 @@ void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool 
     if ((now - targetTime) <= deviation) {
         return;
     }
-    std::string event = "REMINDER_TIMER_ERROR";
-    std::string bundleName = "";
-    std::string errorInfo = "";
-    if (isSysTimeChanged) {
-        errorInfo = "SYSTEM_TIME_CHANGED";
-    } else {
-        errorInfo = "TIMER_ERROR";
-    }
+    uint8_t errorCode = isSysTimeChanged ? 0 : 1;
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "BUNDLE_NAME", bundleName, "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_INFO", errorInfo);
+        "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_CODE", errorCode);
 #endif
 }
 }

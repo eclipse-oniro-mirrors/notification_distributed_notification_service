@@ -34,6 +34,7 @@
 #include "reminder_config_change_observer.h"
 #include "reminder_calendar_share_table.h"
 #include "reminder_timer_info.h"
+#include "reminder_utils.h"
 
 using namespace testing::ext;
 using namespace OHOS::EventFwk;
@@ -1553,6 +1554,22 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_033, Level1)
     manager->UpdateAndSaveReminderLocked(calendar, true);
     calendar->isShare_ = false;
     manager->UpdateAndSaveReminderLocked(calendar, true);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_034
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_034, Level1)
+{
+    manager->ReportTimerEvent(0, false);
+    int64_t targetTime = GetCurrentTime();
+    manager->ReportTimerEvent(targetTime, false);
+    targetTime -= 60 * 60 * 1000;
+    manager->ReportTimerEvent(targetTime, false);
     EXPECT_TRUE(manager != nullptr);
 }
 }  // namespace Notification
