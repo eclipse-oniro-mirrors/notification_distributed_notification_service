@@ -466,10 +466,9 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_INDEX,
             AAFwk::Integer::Box(appInfo.appIndex));
 
-        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + deviceType +  "_" + EXTEND_INFO_DEVICE_ID,
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_DEVICE_ID + "_" + deviceType,
             AAFwk::String::Box(deviceStatus.deviceId));
-
-        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + deviceType +  "_" + EXTEND_INFO_USER_ID,
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_USER_ID +  "_" + deviceType,
             AAFwk::Integer::Box(deviceStatus.userId));
         ANS_LOGI("FillRequestExtendInfo result: %{public}s %{public}s %{public}s %{public}d %{public}s %{public}d",
             appInfo.name.c_str(), bundleResourceInfo.label.c_str(),

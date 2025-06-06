@@ -32,11 +32,26 @@
 #include "distributed_data_define.h"
 #include "distributed_preference.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
+#include "distributed_subscribe_service.h"
 
 namespace OHOS {
 namespace Notification {
 
 static const std::string DISTRIBUTED_LABEL = "ans_distributed";
+static const std::string EXTENDINFO_INFO_PRE = "notification_collaboration_";
+static const std::string EXTENDINFO_FLAG = "flag";
+static const std::string EXTENDINFO_USERID = "userId_";
+static const std::string EXTENDINFO_APP_NAME = "app_name";
+static const std::string EXTENDINFO_APP_LABEL = "app_label";
+static const std::string EXTENDINFO_APP_ICON = "app_icon";
+static const std::string EXTENDINFO_APP_INDEX = "app_index";
+static const std::string EXTENDINFO_DEVICE_USERID = "userId";
+static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
+static const std::string EXTENDINFO_ENABLE_CHECK = "check";
+static const std::string EXTENDINFO_DEVICETYPE = "deviceType";
 
 DistributedPublishService& DistributedPublishService::GetInstance()
 {
@@ -216,6 +231,8 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     auto requestPoint = request->GetNotificationRequestPoint();
     ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
         requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    requestBox->SetDeviceId(local.deviceId_);
     requestBox->SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
     requestBox->SetFinishTime(requestPoint->GetFinishDeadLine());
     requestBox->SetNotificationHashCode(request->GetKey());
@@ -234,17 +251,12 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     } else {
         requestBox->SetCreatorBundleName(request->GetBundleName());
     }
-    if (requestPoint->GetBigIcon() != nullptr) {
-        requestBox->SetBigIcon(requestPoint->GetBigIcon());
-    }
-    if (requestPoint->GetOverlayIcon() != nullptr) {
-        requestBox->SetOverlayIcon(requestPoint->GetOverlayIcon());
-    }
     if (requestPoint->IsCommonLiveView()) {
         std::vector<uint8_t> buffer;
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
         requestBox->SetCommonLiveView(buffer);
     }
+    SetNotificationExtendInfo(requestPoint, peerDevice.deviceType_, requestBox);
     SetNotificationButtons(requestPoint, requestPoint->GetSlotType(), requestBox);
     SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
         requestPoint->GetNotificationType(), requestBox);
@@ -336,6 +348,43 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
         }
     }
 }
+
+void DistributedPublishService::SetNotificationExtendInfo(const sptr<NotificationRequest> notificationRequest,
+    int32_t deviceType, std::shared_ptr<NotificationRequestBox>& requestBox)
+{
+    if (notificationRequest->GetBigIcon() != nullptr) {
+        requestBox->SetBigIcon(notificationRequest->GetBigIcon(), deviceType);
+    }
+    if (notificationRequest->GetOverlayIcon() != nullptr) {
+        requestBox->SetOverlayIcon(notificationRequest->GetOverlayIcon(), deviceType);
+    }
+
+    auto params = notificationRequest->GetExtendInfo();
+    if (params == nullptr) {
+        ANS_LOGI("Send request invalid extend info.");
+        return;
+    }
+    std::string content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME);
+    if (!content.empty()) {
+        requestBox->SetAppName(content);
+    }
+    content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL);
+    if (!content.empty()) {
+        requestBox->SetAppLabel(content);
+    }
+    content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_ICON);
+    if (!content.empty()) {
+        requestBox->SetSmallIcon(content);
+    }
+    int32_t appIndex = params->GetIntParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, 0);
+    requestBox->SetAppIndex(appIndex);
+    std::string key = EXTENDINFO_INFO_PRE + EXTENDINFO_USERID +
+        DistributedDeviceService::DeviceTypeToTypeString(deviceType);
+    int32_t userId = params->GetIntParam(key, DEFAULT_USER_ID);
+    requestBox->SetNotificationUserId(userId);
+    requestBox->SetDeviceUserId(DistributedSubscribeService::GetCurrentActiveUserId());
+}
+
 #else
 void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox>& boxMessage)
 {
@@ -353,6 +402,7 @@ void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox
             (static_cast<NotificationContent::Type>(contentType) == NotificationContent::Type::LIVE_VIEW) &&
             (static_cast<NotificationConstant::SlotType>(slotType) == NotificationConstant::SlotType::LIVE_VIEW);
     }
+    MakeExtendInfo(requestBox, request);
     MakeNotificationButtons(requestBox, static_cast<NotificationConstant::SlotType>(slotType), request);
     MakeNotificationContent(requestBox, request, isCommonLiveView, contentType);
     MakeNotificationIcon(requestBox, request, isCommonLiveView);
@@ -464,6 +514,43 @@ void DistributedPublishService::MakeNotificationReminderFlag(const NotificationR
     request->SetLabel(DISTRIBUTED_LABEL);
 }
 
+void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box,
+    sptr<NotificationRequest>& request)
+{
+    std::string info;
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG, AAFwk::Boolean::Box(true));
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (local.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_ENABLE_CHECK, AAFwk::Boolean::Box(false));
+    } else {
+        extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_ENABLE_CHECK, AAFwk::Boolean::Box(true));
+        if (box.GetAppLabel(info)) {
+            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL, AAFwk::String::Box(info));
+        }
+        if (box.GetAppName(info)) {
+            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME, AAFwk::String::Box(info));
+        }
+        if (box.GetDeviceId(info)) {
+            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID, AAFwk::String::Box(info));
+        }
+        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(local.deviceType_);
+        extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICETYPE, AAFwk::String::Box(deviceType));
+        int32_t appIndex;
+        if (box.GetAppIndex(appIndex)) {
+            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, AAFwk::Integer::Box(appIndex));
+        }
+        int32_t userId;
+        if (box.GetDeviceUserId(userId)) {
+            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_USERID, AAFwk::Integer::Box(userId));
+        }
+        if (box.GetNotificationUserId(userId)) {
+            request->SetReceiverUserId(userId);
+        }
+    }
+    request->SetExtendInfo(extendInfo);
+}
+
 void DistributedPublishService::MakeNotificationIcon(const NotificationRequestBox& box,
     sptr<NotificationRequest>& request, bool isCommonLiveView)
 {
@@ -474,18 +561,8 @@ void DistributedPublishService::MakeNotificationIcon(const NotificationRequestBo
     if (box.GetOverlayIcon(icon)) {
         request->SetOverlayIcon(icon);
     }
-
-    if (isCommonLiveView) {
-        std::string bundleName;
-        if (!box.GetCreatorBundleName(bundleName)) {
-            return;
-        }
-        std::string icon;
-        DistributedPreferences::GetInstance().GetIconByBundleName(bundleName, icon);
-        if (!icon.empty()) {
-            auto iconPixelMap = AnsImageUtil::UnPackImage(icon);
-            request->SetLittleIcon(iconPixelMap);
-        }
+    if (box.GetSmallIcon(icon)) {
+        request->SetLittleIcon(icon);
     }
 }
 

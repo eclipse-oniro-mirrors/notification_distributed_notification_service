@@ -59,6 +59,16 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("distributed liveview all trigger failed, error: %{public}s", dlerror());
         return;
     }
+    subscribeHandler_ = (SUBSCRIBE_ALL_CONNECT)dlsym(ExtensionHandle_, "SubscribeAllConnect");
+    if (subscribeHandler_ == nullptr) {
+        ANS_LOGE("distributed subscribe all conncet failed, error: %{public}s", dlerror());
+        return;
+    }
+    unSubscribeHandler_ = (UnSUBSCRIBE_ALL_CONNECT)dlsym(ExtensionHandle_, "UnSubscribeAllConnect");
+    if (unSubscribeHandler_ == nullptr) {
+        ANS_LOGE("distributed unsubscribe all conncet failed, error: %{public}s", dlerror());
+        return;
+    }
     ANS_LOGI("distributed liveview all scenarios extension wrapper init success");
 }
 
@@ -66,6 +76,8 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
 {
     if (ExtensionHandle_ != nullptr) {
         dlclose(ExtensionHandle_);
+        subscribeHandler_ = nullptr;
+        unSubscribeHandler_ = nullptr;
         ExtensionHandle_ = nullptr;
         triggerHandler_ = nullptr;
         updateLiveviewEncodeContent_ = nullptr;
@@ -102,5 +114,23 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
         return 0;
     }
     return triggerHandler_(request, actionType, extraInfo);
+}
+
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect()
+{
+    if (subscribeHandler_ == nullptr) {
+        ANS_LOGE("Subscribe all connect wrapper symbol failed");
+        return 0;
+    }
+    return subscribeHandler_();
+}
+
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
+{
+    if (unSubscribeHandler_ == nullptr) {
+        ANS_LOGE("UnSubscribe all connect wrapper symbol failed");
+        return 0;
+    }
+    return unSubscribeHandler_();
 }
 }

@@ -48,7 +48,7 @@ int32_t DistributedDeviceDataService::SetDeviceSyncSwitch(const std::string& dev
         if (itemIter->deviceType == deviceType && itemIter->deviceId == deviceId) {
             itemIter->liveViewSyncEnable = liveViewEnable;
             itemIter->notificationSyncEnable = notificationEnable;
-            ANS_LOGW("Set device %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
+            ANS_LOGI("Set device %{public}s %{public}d %{public}d", StringAnonymous(deviceId).c_str(),
                 notificationEnable, liveViewEnable);
             return ERR_OK;
         }
@@ -73,14 +73,14 @@ int32_t DistributedDeviceDataService::SetDeviceSyncSwitch(const std::string& dev
 int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::string& deviceType,
     const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList)
 {
-    ANS_LOGW("Set bundles %{public}s %{public}s %{public}d %{public}zu.", StringAnonymous(deviceId).c_str(),
-        deviceType.c_str(), operatorType, bundleList.size());
     std::lock_guard<std::mutex> lock(lock_);
     for (auto itemIter = devicesData_.begin(); itemIter != devicesData_.end(); itemIter++) {
         if (itemIter->deviceType != deviceType || itemIter->deviceId != deviceId) {
             continue;
         }
-
+        ANS_LOGI("Set bundles %{public}s %{public}s %{public}d %{public}zu %{public}zu.",
+            StringAnonymous(deviceId).c_str(), deviceType.c_str(), operatorType,
+            itemIter->installedBundles.size(), bundleList.size());
         if (operatorType == BunleListOperationType::ADD_BUNDLES) {
             for (auto& bundle : bundleList) {
                 itemIter->installedBundles.insert(bundle);
@@ -96,6 +96,8 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
         if (operatorType == BunleListOperationType::RELEASE_BUNDLES) {
             itemIter->installedBundles.clear();
         }
+        ANS_LOGI("After Set bundles %{public}s %{public}d %{public}zu.",
+            deviceType.c_str(), operatorType, itemIter->installedBundles.size());
         return ERR_OK;
     }
 
@@ -112,7 +114,8 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
         deviceData.installedBundles.insert(bundle);
     }
     devicesData_.emplace_back(deviceData);
-    ANS_LOGI("Set device add %{public}s %{public}zu", StringAnonymous(deviceId).c_str(), bundleList.size());
+    ANS_LOGI("Set device add %{public}s %{public}s %{public}zu", StringAnonymous(deviceId).c_str(),
+        deviceType.c_str(), bundleList.size());
     return ERR_OK;
 }
 

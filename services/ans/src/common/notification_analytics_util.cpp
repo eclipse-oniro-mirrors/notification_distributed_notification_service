@@ -294,6 +294,9 @@ std::string HaMetaMessage::Build() const
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
+    if (request == nullptr) {
+        return;
+    }
     CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
     ReportLiveViewNumber(request, PUBLISH_ERROR_EVENT_CODE);
 }
@@ -463,7 +466,7 @@ void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
 
     liveViewTimeInfo->SetCallbackInfo(triggerFunc);
     timer->StartTimer(reportLiveViewMessageTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
-        LIVEVIEW_REPORT_INTERVAL * NotificationConstant::SECOND_TO_MS);
+        LIVEVIEW_REPORT_INTERVAL);
     g_reportLiveViewFlag = true;
 }
 
@@ -499,7 +502,7 @@ void NotificationAnalyticsUtil::ExecuteLiveViewReport()
     };
     liveViewTimeInfo->SetCallbackInfo(triggerFunc);
     timer->StartTimer(reportLiveViewMessageTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
-        LIVEVIEW_REPORT_INTERVAL * NotificationConstant::SECOND_TO_MS);
+        LIVEVIEW_REPORT_INTERVAL);
     g_reportLiveViewFlag = true;
 }
 

@@ -52,6 +52,7 @@ public:
     void OnReceiveMsg(const void *data, uint32_t dataLen);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
+    void HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo);
 #else
     void SyncDeviceStatus(int32_t status);
     void SyncInstalledBundle(const std::string& bundleName, bool isAdd);

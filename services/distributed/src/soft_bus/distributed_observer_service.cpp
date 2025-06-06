@@ -88,6 +88,7 @@ void OberverService::Init(uint16_t deviceType)
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
 #else
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
         deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
