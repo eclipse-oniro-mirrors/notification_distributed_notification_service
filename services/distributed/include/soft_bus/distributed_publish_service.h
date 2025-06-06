@@ -38,6 +38,8 @@ public:
     void SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
         const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
+    void SetNotificationExtendInfo(const sptr<NotificationRequest> notificationRequest,
+            int32_t deviceType, std::shared_ptr<NotificationRequestBox>& requestBox);
 private:
     void SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
         const std::vector<std::string>& notificationList);
@@ -49,6 +51,7 @@ private:
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);
 private:
+    void MakeExtendInfo(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationButtons(const NotificationRequestBox& box,
         NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request);
     void MakeNotificationContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,

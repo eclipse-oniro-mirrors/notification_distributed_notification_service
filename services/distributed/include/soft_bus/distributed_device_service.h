@@ -18,6 +18,7 @@
 
 #include "distributed_device_data.h"
 
+#include <thread>
 #include "match_box.h"
 
 namespace OHOS {
@@ -38,6 +39,9 @@ public:
     bool IsReportDataByHa();
     void InitLocalDevice(const std::string &deviceId, uint16_t deviceType);
     DistributedDeviceInfo GetLocalDevice();
+    void SetSubscribeAllConnect(bool subscribe);
+    bool IsSubscribeAllConnect();
+    bool CheckNeedSubscribeAllConnect();
     bool IsSyncLiveView(const std::string& deviceId, bool forceSync);
     bool IsSyncIcons(const std::string& deviceId, bool forceSync);
     bool IsSyncInstalledBundle(const std::string& deviceId, bool forceSync);
@@ -59,6 +63,8 @@ public:
 #endif
 
 private:
+    std::mutex mapLock_;
+    bool subscribeAllConnect = false;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;
 };

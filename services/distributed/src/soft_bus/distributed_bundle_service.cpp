@@ -366,16 +366,12 @@ void DistributedBundleService::SyncInstalledBundles(const DistributedDeviceInfo&
 {
     auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
     if (localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
+        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 &&
         localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
         return;
     }
 
-    bool isSync = false;
-    if (DistributedDeviceService::GetInstance().IsSyncInstalledBundle(peerDevice.deviceId_, isSync) != ERR_OK) {
-        return;
-    }
-    if (!isForce && isSync) {
-        ANS_LOGI("Dans %{public}d %{public}d.", isForce, isSync);
+    if (!DistributedDeviceService::GetInstance().IsSyncInstalledBundle(peerDevice.deviceId_, isForce)) {
         return;
     }
 
@@ -413,6 +409,10 @@ void DistributedBundleService::SendInstalledBundles(const DistributedDeviceInfo&
     iconBox->SetLocalDeviceId(localDeviceId);
     iconBox->SetIconSyncType(type);
     iconBox->SetBundleList(bundles);
+    if (!iconBox->Serialize()) {
+        ANS_LOGW("Dans SendInstalledBundles serialize failed.");
+        return;
+    }
 
     DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
         peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);

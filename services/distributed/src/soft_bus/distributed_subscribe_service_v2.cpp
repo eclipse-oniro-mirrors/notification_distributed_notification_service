@@ -21,12 +21,12 @@
 #include "notification_helper.h"
 #include "distributed_device_service.h"
 #include "notification_subscribe_info.h"
-#include "device_type_helper.h"
 
 namespace OHOS {
 namespace Notification {
 
-const int32_t DEFAULT_FILTER_TYPE = 1;
+const int32_t FILTER_IM_TYPE = 1;
+const int32_t FILTER_IM_REPLY_TYPE = 2;
 
 int32_t DistributedSubscribeService::GetCurrentActiveUserId()
 {
@@ -57,12 +57,18 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
     subscriber->SetLocalDevice(DistributedDeviceService::GetInstance().GetLocalDevice());
     subscriber->SetPeerDevice(peerDevice);
     sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
-    std::vector<NotificationConstant::SlotType> slotTypes;
-    slotTypes.push_back(NotificationConstant::SlotType::LIVE_VIEW);
-    slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    subscribeInfo->SetSlotTypes(slotTypes);
-    subscribeInfo->SetFilterType(DEFAULT_FILTER_TYPE);
-    subscribeInfo->AddDeviceType(DeviceTypeHelper::Dm2Ans(peerDevice.deviceType_));
+    if (peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::vector<NotificationConstant::SlotType> slotTypes;
+        slotTypes.push_back(NotificationConstant::SlotType::LIVE_VIEW);
+        slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+        subscribeInfo->SetSlotTypes(slotTypes);
+        subscribeInfo->SetFilterType(FILTER_IM_TYPE);
+    } else if (peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC ||
+        peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
+        peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD) {
+        subscribeInfo->SetFilterType(FILTER_IM_REPLY_TYPE);
+    }
+    subscribeInfo->AddDeviceType(DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_));
     subscribeInfo->AddAppUserId(userId);
     subscribeInfo->SetNeedNotifyApplication(true);
     subscribeInfo->SetNeedNotifyResponse(true);
