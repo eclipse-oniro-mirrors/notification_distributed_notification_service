@@ -145,6 +145,35 @@ public:
     bool GetBundleInfoV9(const std::string bundle, const int32_t flag,
         AppExecFwk::BundleInfo &bundleInfo, const int32_t userId);
 
+    /**
+     * @brief CheckSystemApp.
+     * @param bundleName bundle name.
+     * @param userId userId.
+     * @return Returns the query result. if systemapp, retrun true.
+     */
+    bool CheckSystemApp(const std::string& bundleName, int32_t userId);
+
+    /**
+     * @brief GetApplicationInfo.
+     * @param bundleName bundle name.
+     * @param flag query condation.
+     * @param userId userId.
+     * @param appInfo application info.
+     * @return Returns the query result. if succeed, retrun 0.
+     */
+    ErrCode GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
+        AppExecFwk::ApplicationInfo &appInfo);
+
+    /**
+     * @brief GetBundleResourceInfo.
+     * @param bundleName bundle name.
+     * @param bundleResourceInfo bundle resource.
+     * @param appIndex app index.
+     * @return Returns the query result. if succeed, retrun 0.
+     */
+    ErrCode GetBundleResourceInfo(const std::string &bundleName,
+        AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex);
+
 private:
     void Connect();
     void Disconnect();

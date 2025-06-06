@@ -89,6 +89,12 @@ private:
     void InitValidDevices(set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         const sptr<NotificationRequest> &request) const;
+    void InitPcPadDevices(const string &deviceType,
+        set<string> &syncDevices, set<string> &smartDevices,
+        map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
+        const sptr<NotificationRequest> &request) const;
+    void FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,
+        const sptr<NotificationRequest> &request) const;
     bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;
@@ -104,6 +110,14 @@ private:
     constexpr static const char* SPLIT_FLAG = "|";
     constexpr static const char* STATUS_UNUSED = "xxx0";
     constexpr static const char* STATUS_UNLOCK_OWNER = "x01x";
+    constexpr static const uint32_t STATUS_USED_FLAG = 1;
+    const std::string EXTEND_INFO_PRE = "notification_collaboration";
+    const std::string EXTEND_INFO_APP_NAME = "app_name";
+    const std::string EXTEND_INFO_APP_LABEL = "app_label";
+    const std::string EXTEND_INFO_APP_ICON = "app_icon";
+    const std::string EXTEND_INFO_APP_INDEX = "app_index";
+    const std::string EXTEND_INFO_DEVICE_ID = "deviceId";
+    const std::string EXTEND_INFO_USER_ID = "userId";
 };
 }  // namespace Notification
 }  // namespace OHOS

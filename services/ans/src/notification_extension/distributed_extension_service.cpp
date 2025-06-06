@@ -18,6 +18,7 @@
 #include "ans_log_wrapper.h"
 #include "event_report.h"
 #include "notification_analytics_util.h"
+#include "distributed_device_data_service.h"
 
 #include <utility>
 
@@ -67,10 +68,33 @@ std::string TransDeviceTypeToName(uint16_t deviceType_)
             return "Watch";
         }
         case DmDeviceType::DEVICE_TYPE_PAD: {
-            return "Pad";
+            return "Tablet";
         }
         case DmDeviceType::DEVICE_TYPE_PHONE: {
             return "Phone";
+        }
+        case DmDeviceType::DEVICE_TYPE_2IN1: {
+            return "Pc";
+        }
+        case DmDeviceType::DEVICE_TYPE_PC: {
+            return "Pc";
+        }
+        default:
+            return "";
+    }
+}
+
+std::string DeviceTypeToTypeString(uint16_t deviceType)
+{
+    switch (deviceType) {
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
+            return "pad";
+        }
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_PC: {
+            return "pc";
+        }
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1: {
+            return "pc";
         }
         default:
             return "";
@@ -251,6 +275,8 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
             return;
         }
         std::lock_guard<std::mutex> lock(mapLock_);
+        DistributedDeviceDataService::GetInstance().ResetTargetDevice(
+            DeviceTypeToTypeString(deviceInfo.deviceTypeId), deviceInfo.deviceId);
         handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
             " ; deviceId: " + StringAnonymous(deviceInfo.deviceId) + " ; networkId: " +
@@ -380,6 +406,14 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
             StringAnonymous(deviceInfo.networkId).c_str());
     });
     distributedQueue_->submit(changeTask);
+}
+
+void DistributedExtensionService::OnAllConnectOnline()
+{
+    DeviceStatueChangeInfo changeInfo;
+    changeInfo.enableChange = true;
+    changeInfo.changeType = DeviceStatueChangeType::ALL_CONNECT_STATUS_CHANGE;
+    DeviceStatusChange(changeInfo);
 }
 
 void DistributedExtensionService::DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)

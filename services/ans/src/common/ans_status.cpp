@@ -75,8 +75,6 @@ AnsStatus AnsStatus::InvalidParam(const std::string& msg, int32_t sceneId, int32
 
 HaMetaMessage AnsStatus::BuildMessage(bool isPrint)
 {
-    ANS_LOGD("Build message(branchId: %{public}d, sceneId: %{public}d, path: %{public}s, msg: %{public}s)",
-        branchId_, sceneId_, path_.c_str(), msg_.c_str());
     return HaMetaMessage(branchId_, sceneId_).Path(path_).Message(msg_, isPrint);
 }
 

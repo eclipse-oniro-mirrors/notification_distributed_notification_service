@@ -590,6 +590,35 @@ ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundl
         deviceType, enabled);
 }
 
+ErrCode NotificationHelper::SetDistributedEnabled(const std::string &deviceType, const bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::IsDistributedEnabled(const std::string &deviceType, bool &enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(deviceType, enabled);
+}
+
+ErrCode NotificationHelper::GetDistributedAbility(int32_t &abilityId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedAbility(abilityId);
+}
+
+ErrCode NotificationHelper::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedAuthStatus(
+        deviceType, deviceId, userId, isAuth);
+}
+
+ErrCode NotificationHelper::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedAuthStatus(
+        deviceType, deviceId, userId, isAuth);
+}
+
 ErrCode NotificationHelper::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(deviceType, enabled);

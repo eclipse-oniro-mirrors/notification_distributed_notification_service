@@ -46,12 +46,19 @@ public:
     bool SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture);
     bool SetNotificationActionName(const std::string& actionName);
     bool SetNotificationUserInput(const std::string& userInput);
-    bool SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon);
-    bool SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon);
+    bool SetSmallIcon(const std::string& icon);
+    bool SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon, int32_t deviceType);
+    bool SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon, int32_t deviceType);
     bool SetCommonLiveView(const std::vector<uint8_t>& byteSequence);
     bool SetFinishTime(int64_t time);
     bool SetAutoDeleteTime(int64_t time);
     bool SetAppMessageId(const std::string& appMessageId);
+    bool SetAppName(const std::string& appName);
+    bool SetAppLabel(const std::string& appLabel);
+    bool SetAppIndex(const int32_t& appIndex);
+    bool SetNotificationUserId(const int32_t& userId);
+    bool SetDeviceUserId(const int32_t& userId);
+    bool SetDeviceId(const std::string& deviceId);
 
 #else
     bool GetNotificationHashCode(std::string& hasdCode) const;
@@ -70,12 +77,19 @@ public:
     bool GetNotificationBigPicture(std::shared_ptr<Media::PixelMap>& bigPicture) const;
     bool GetNotificationActionName(std::string& actionName) const;
     bool GetNotificationUserInput(std::string& userInput) const;
+    bool GetSmallIcon(std::shared_ptr<Media::PixelMap>& smallIcon) const;
     bool GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const;
     bool GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const;
     bool GetCommonLiveView(std::vector<uint8_t>& byteSequence) const;
     bool GetFinishTime(int64_t& time) const;
     bool GetAutoDeleteTime(int64_t& time) const;
     bool GetAppMessageId(std::string& appMessageId) const;
+    bool GetAppName(std::string& appName) const;
+    bool GetAppLabel(std::string& appLabel) const;
+    bool GetAppIndex(int32_t& appIndex) const;
+    bool GetNotificationUserId(int32_t& userId) const;
+    bool GetDeviceUserId(int32_t& userId) const;
+    bool GetDeviceId(std::string& deviceId) const;
 #endif
 };
 }  // namespace Notification

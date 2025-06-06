@@ -27,6 +27,8 @@
 
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
+#include "os_account_info.h"
+#include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "hitrace_meter_adapter.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -39,9 +41,12 @@
 #include "notification_analytics_util.h"
 #include "notification_operation_service.h"
 #include "distributed_device_data_service.h"
+#include "distributed_extension_service.h"
 
 namespace OHOS {
 namespace Notification {
+using namespace OHOS::AccountSA;
+
 ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -89,7 +94,18 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
 
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enabled);
-
+    if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
+        NotificationConstant::ENABLE_STATUS notification = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+        if (NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType,
+            notification) != ERR_OK) {
+            ANS_LOGW("Get notification distributed failed %{public}s!", deviceType.c_str());
+        }
+        DeviceStatueChangeInfo changeInfo;
+        changeInfo.enableChange = (notification == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) ? true : false;
+        changeInfo.liveViewChange = enabled;
+        changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
+        DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+    }
     ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledBySlot result: %{public}d",
         slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
@@ -615,6 +631,95 @@ ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<Not
     }
 
     return NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(bundle, deviceType, enabled);
+}
+
+ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &deviceType, const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app or SA!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
+        enabled ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+    if (result == ERR_OK) {
+        bool liveViewEnabled = false;
+        if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
+            NotificationConstant::SlotType::LIVE_VIEW, deviceType, liveViewEnabled) != ERR_OK) {
+            ANS_LOGW("Get live view distributed failed %{public}s!", deviceType.c_str());
+        }
+        DeviceStatueChangeInfo changeInfo;
+        changeInfo.enableChange = enabled;
+        changeInfo.liveViewChange = liveViewEnabled;
+        changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
+        DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app or SA!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    NotificationConstant::ENABLE_STATUS enableStatus;
+    ErrCode errResult = NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType, enableStatus);
+    enabled = (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE);
+    return errResult;
+}
+
+ErrCode AdvancedNotificationService::GetDistributedAbility(int32_t &abilityId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    abilityId = static_cast<int32_t>(NotificationConstant::DANS_SUPPORT_STATUS::UNSUPPORT);
+    bool isPrivate = false;
+    ErrCode result = OsAccountManagerHelper::GetInstance().GetOsAccountPrivateStatus(isPrivate);
+    if (result != ERR_OK || isPrivate) {
+        return result;
+    }
+    abilityId = static_cast<int32_t>(NotificationConstant::DANS_SUPPORT_STATUS::SUPPORT);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    return NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+}
+
+ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("IsSystemApp is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    return NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 }
 
 ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)

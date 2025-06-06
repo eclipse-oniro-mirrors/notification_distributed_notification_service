@@ -49,6 +49,7 @@ public:
     bool initConfig();
     int32_t InitDans();
     int32_t ReleaseLocalDevice();
+    void OnAllConnectOnline();
     void OnDeviceOnline(const DmDeviceInfo &deviceInfo);
     void OnDeviceOffline(const DmDeviceInfo &deviceInfo);
     void OnDeviceChanged(const DmDeviceInfo &deviceInfo);

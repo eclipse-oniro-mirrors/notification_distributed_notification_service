@@ -253,6 +253,16 @@ const static int32_t DISTRIBUTED_KEY_NUM = 4;
 const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
 const static int32_t DISTRIBUTED_KEY_UID_INDEX = 2;
 
+/**
+ * Indicates that distributed notification switch.
+ */
+static const char* const KEY_DISTRIBUTED_NOTIFICATION_SWITCH = "distributedNotificationSwitch";
+
+/**
+ * Indicates the target device's authorization status.
+ */
+static const char* const KEY_ENABLE_DISTRIBUTED_AUTH_STATUS = "enabledDistributedAuthStatus";
+
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
     NotificationRdbConfig notificationRdbConfig;
@@ -2067,6 +2077,17 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(
             bundleInfo.GetBundleUid())).append(KEY_MIDDLE_LINE).append(deviceType));
 }
 
+std::string NotificationPreferencesDatabase::GenerateBundleLablel(
+    const std::string &deviceType,
+    const std::string &deviceId,
+    const int32_t userId) const
+{
+    return std::string(KEY_ENABLE_DISTRIBUTED_AUTH_STATUS).append(KEY_MIDDLE_LINE)
+        .append(deviceType).append(KEY_MIDDLE_LINE)
+        .append(deviceId).append(KEY_MIDDLE_LINE)
+        .append(std::to_string(userId));
+}
+
 template <typename T>
 int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, const T &value, const int32_t &userId)
 {
@@ -2077,6 +2098,95 @@ int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, con
     std::string valueStr = std::to_string(value);
     int32_t result = rdbDataManager_->InsertData(key, valueStr, userId);
     return result;
+}
+
+bool NotificationPreferencesDatabase::PutDistributedEnabled(
+    const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType: %{public}s, enabled: %{public}d",
+        __FUNCTION__, deviceType.c_str(), static_cast<int32_t>(enabled));
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    std::string key = std::string(KEY_DISTRIBUTED_NOTIFICATION_SWITCH).append(KEY_MIDDLE_LINE).append(
+        deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(enabled), userId);
+    ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetDistributedEnabled(
+    const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enabled)
+{
+    ANS_LOGD("%{public}s, deviceType: %{public}s", __FUNCTION__, deviceType.c_str());
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    std::string key = std::string(KEY_DISTRIBUTED_NOTIFICATION_SWITCH).append(KEY_MIDDLE_LINE).append(
+        deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
+    bool result = false;
+    enabled = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                enabled = static_cast<NotificationConstant::ENABLE_STATUS>(StringToInt(value));
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+ErrCode NotificationPreferencesDatabase::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+{
+    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, userId: %{public}d",
+        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), userId);
+    std::string key = GenerateBundleLablel(deviceType, deviceId, userId);
+    bool result = false;
+    isAuth = false;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                isAuth = StringToInt(value) != 0;
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+ErrCode NotificationPreferencesDatabase::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+{
+    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, userId: %{public}d",
+        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), userId);
+    std::string key = GenerateBundleLablel(deviceType, deviceId, userId);
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(isAuth), userId);
+    ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);
+    return (result == NativeRdb::E_OK);
 }
 
 bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::string deviceType,

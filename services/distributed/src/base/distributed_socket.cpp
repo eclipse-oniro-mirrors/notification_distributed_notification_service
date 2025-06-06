@@ -91,9 +91,6 @@ static void OnClientShutdown(int32_t socket, ShutdownReason reason)
 static void OnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
 {
     ANS_LOGI("OnQos %{public}d %{public}d %{public}d", socket, (int32_t)eventId, (int32_t)(qosCount));
-    for (uint32_t idx = 0; idx < qosCount; idx++) {
-        ANS_LOGI("QosTV: type: %{public}d, value: %{public}d", (int32_t)qos[idx].qos, qos[idx].value);
-    }
 }
 
 void CloseSocket(int32_t socketId)

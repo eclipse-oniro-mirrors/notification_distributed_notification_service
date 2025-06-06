@@ -31,6 +31,7 @@
 #include "distributed_publish_service.h"
 #include "distributed_subscribe_service.h"
 #include "bundle_resource_helper.h"
+#include "distributed_liveview_all_scenarios_extension_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -98,6 +99,9 @@ void DistributedService::DestoryService()
         DistributedClient::GetInstance().ReleaseClient();
         DistributedServer::GetInstance().ReleaseServer();
         OberverService::GetInstance().Destory();
+#ifdef DISTRIBUTED_FEATURE_MASTER
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UnSubscribeAllConnect();
+#endif
         DistributedSubscribeService::GetInstance().UnSubscribeAllNotification();
     });
     serviceQueue_->wait(handler);
@@ -106,7 +110,7 @@ void DistributedService::DestoryService()
 void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
 {
     if (!DistributedDeviceService::GetInstance().CheckDeviceNeedSync(device.deviceId_)) {
-        ANS_LOGE("ConnectPeerDevice device is failed.");
+        ANS_LOGI("ConnectPeerDevice device is failed.");
         return;
     }
 
@@ -158,20 +162,19 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
         ANS_LOGE("Check handler is null.");
         return;
     }
-    std::function<void()> task = std::bind([changeInfo]() {
+    std::function<void()> task = std::bind([&, changeInfo]() {
         ANS_LOGI("Device change %{public}d %{public}d %{public}d", changeInfo.changeType,
             changeInfo.enableChange, changeInfo.liveViewChange);
 #ifdef DISTRIBUTED_FEATURE_MASTER
         if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CHANGE) {
-            DistributedDeviceService::GetInstance().SetDeviceSyncData(changeInfo.deviceId,
-                DistributedDeviceService::DEVICE_USAGE, true);
-            DistributedDeviceInfo device;
-            if (DistributedDeviceService::GetInstance().GetDeviceInfo(changeInfo.deviceId, device)) {
-                DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
-            }
+            HandleDeviceUsingChange(changeInfo);
         }
 
         if (changeInfo.changeType == DeviceStatueChangeType::ALL_CONNECT_STATUS_CHANGE) {
+            if (DistributedDeviceService::GetInstance().CheckNeedSubscribeAllConnect()) {
+                DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
+                DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
+            }
         }
 #else
         if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
@@ -245,7 +248,10 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
         ANS_LOGE("Check handler is null.");
         return;
     }
-    std::function<void()> task = std::bind([request, peerDevice]() {
+    std::function<void()> task = std::bind([request, peerDevice, this]() {
+        if (!OnConsumedSetFlags(request, peerDevice)) {
+            return;
+        }
         DistributedPublishService::GetInstance().SendNotifictionRequest(request, peerDevice);
     });
     serviceQueue_->submit(task);
@@ -281,6 +287,20 @@ void DistributedService::HandleBundlesEvent(const std::string& bundleName, const
         ANS_LOGI("Handle bundle event %{public}s, %{public}s.", bundleName.c_str(), action.c_str());
     });
     serviceQueue_->submit(task);
+}
+
+void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo)
+{
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(changeInfo.deviceId,
+        DistributedDeviceService::DEVICE_USAGE, true);
+    DistributedDeviceInfo device;
+    if (DistributedDeviceService::GetInstance().GetDeviceInfo(changeInfo.deviceId, device)) {
+        if (!DistributedDeviceService::GetInstance().IsSubscribeAllConnect()) {
+            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
+            DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
+        }
+        DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
+    }
 }
 #else
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
@@ -453,6 +473,42 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
         return;
     }
     OnHandleMsg(box);
+}
+
+bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
+    const DistributedDeviceInfo& peerDevice)
+{
+    std::string deviceType =  DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
+    sptr<NotificationRequest> requestPoint = request->GetNotificationRequestPoint();
+    auto flagsMap = requestPoint->GetDeviceFlags();
+    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+        return false;
+    }
+    auto flagIter = flagsMap->find(deviceType);
+    if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter \
+            flags = %{public}d, deviceType:%{public}s",
+            requestPoint->GetKey().c_str(), flagIter->second->GetReminderFlags(), deviceType.c_str());
+        std::shared_ptr<NotificationFlags> tempFlags = requestPoint->GetFlags();
+        tempFlags->SetSoundEnabled(tempFlags->IsSoundEnabled() ==  NotificationConstant::FlagStatus::OPEN &&
+            flagIter->second->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN ?
+            NotificationConstant::FlagStatus::OPEN : NotificationConstant::FlagStatus::CLOSE);
+        tempFlags->SetVibrationEnabled(tempFlags->IsVibrationEnabled() ==  NotificationConstant::FlagStatus::OPEN  &&
+            flagIter->second->IsVibrationEnabled() ==  NotificationConstant::FlagStatus::OPEN ?
+            NotificationConstant::FlagStatus::OPEN : NotificationConstant::FlagStatus::CLOSE);
+        tempFlags->SetLockScreenVisblenessEnabled(
+            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
+        tempFlags->SetBannerEnabled(
+            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
+        tempFlags->SetLightScreenEnabled(
+            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
+        requestPoint->SetFlags(tempFlags);
+        ANS_LOGI("SetFlags-after filte, notificationKey = %{public}s flags = %{public}d",
+            requestPoint->GetKey().c_str(), tempFlags->GetReminderFlags());
+    } else {
+        return false;
+    }
+    return true;
 }
 }
 }

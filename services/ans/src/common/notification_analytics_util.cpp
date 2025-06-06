@@ -31,6 +31,7 @@
 #include "notification_preferences.h"
 #include "os_account_manager_helper.h"
 #include "notification_constant.h"
+#include "advanced_notification_inline.h"
 
 namespace OHOS {
 namespace Notification {
@@ -166,7 +167,7 @@ HaMetaMessage& HaMetaMessage::Message(const std::string& message, bool print)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::Path(const std::string path)
+HaMetaMessage& HaMetaMessage::Path(const std::string &path)
 {
     path_ = path;
     return *this;
@@ -291,9 +292,31 @@ std::string HaMetaMessage::Build() const
         MESSAGE_DELIMITER + message_ + MESSAGE_DELIMITER;
 }
 
+void NotificationAnalyticsUtil::MakeRequestBundle(const sptr<NotificationRequest>& request)
+{
+    if (request->GetOwnerBundleName().empty() && request->GetCreatorBundleName().empty()) {
+        request->SetCreatorUid(IPCSkeleton::GetCallingUid());
+        request->SetCreatorBundleName(GetClientBundleName());
+    }
+}
+
+void NotificationAnalyticsUtil::ReportTipsEvent(const sptr<NotificationRequest>& request,
+    const HaMetaMessage& message)
+{
+    if (request == nullptr) {
+        return;
+    }
+    MakeRequestBundle(request);
+    CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
+}
+
 void NotificationAnalyticsUtil::ReportPublishFailedEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
+    if (request == nullptr) {
+        return;
+    }
+    MakeRequestBundle(request);
     CommonNotificationEvent(request, PUBLISH_ERROR_EVENT_CODE, message);
     ReportLiveViewNumber(request, PUBLISH_ERROR_EVENT_CODE);
 }
@@ -344,13 +367,15 @@ void NotificationAnalyticsUtil::ReportPublishSuccessEvent(const sptr<Notificatio
 void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequest>& request, const int32_t reportType)
 {
     NotificationNapi::ContentType contentType;
+    std::string bundleName = request->GetOwnerBundleName().empty() ? request->GetCreatorBundleName() :
+        request->GetOwnerBundleName();
     NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
     if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
         auto content = request->GetContent()->GetNotificationContent();
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
         if (liveViewContent->GetExtraInfo() != nullptr) {
-            std::string bundle = request->GetOwnerBundleName() + MESSAGE_DELIMITER +
+            std::string bundle = bundleName + MESSAGE_DELIMITER +
                 liveViewContent->GetExtraInfo()->GetStringParam("event");
                 std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
                 if (reportType == ANS_CUSTOMIZE_CODE) {
@@ -363,7 +388,7 @@ void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequ
     }
     if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW) {
         std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
-        std::string bundle = request->GetOwnerBundleName() + "#-99";
+        std::string bundle = bundleName + "#-99";
         if (reportType == ANS_CUSTOMIZE_CODE) {
             AddLocalLiveViewSuccessNum(bundle);
         } else if (reportType == PUBLISH_ERROR_EVENT_CODE) {
@@ -463,7 +488,7 @@ void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
 
     liveViewTimeInfo->SetCallbackInfo(triggerFunc);
     timer->StartTimer(reportLiveViewMessageTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
-        LIVEVIEW_REPORT_INTERVAL * NotificationConstant::SECOND_TO_MS);
+        LIVEVIEW_REPORT_INTERVAL);
     g_reportLiveViewFlag = true;
 }
 
@@ -499,7 +524,7 @@ void NotificationAnalyticsUtil::ExecuteLiveViewReport()
     };
     liveViewTimeInfo->SetCallbackInfo(triggerFunc);
     timer->StartTimer(reportLiveViewMessageTimerId_, NotificationAnalyticsUtil::GetCurrentTime() +
-        LIVEVIEW_REPORT_INTERVAL * NotificationConstant::SECOND_TO_MS);
+        LIVEVIEW_REPORT_INTERVAL);
     g_reportLiveViewFlag = true;
 }
 
@@ -1011,7 +1036,7 @@ void NotificationAnalyticsUtil::ReportPublishBadge(const sptr<NotificationReques
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     std::string bundle = request->GetOwnerBundleName() + "_"  + std::to_string(request->GetOwnerUid());
-    int32_t badgeNumber = request->GetBadgeNumber();
+    uint32_t badgeNumber = request->GetBadgeNumber();
     std::string badgeNumStr = (badgeNumber > MAX_BADGE_NUMBER) ? "99+" : std::to_string(badgeNumber);
     {
         std::lock_guard<std::mutex> lock(badgeInfosMutex_);

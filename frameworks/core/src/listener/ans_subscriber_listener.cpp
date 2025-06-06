@@ -68,7 +68,8 @@ ErrCode SubscriberListener::OnConsumed(
         return ERR_INVALID_OPERATION;
     }
 #endif
-
+    
+    subscriber->ProcessRemoveExtendInfo(sharedNotification);
     subscriber->OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
     return ERR_OK;

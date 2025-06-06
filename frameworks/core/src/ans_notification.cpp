@@ -2013,6 +2013,88 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
     return proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled);
 }
 
+ErrCode AnsNotification::SetDistributedEnabled(const std::string &deviceType, const bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (deviceType.empty()) {
+        ANS_LOGE("Invalid deviceType.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetDistributedEnabled(deviceType, enabled);
+}
+
+ErrCode AnsNotification::IsDistributedEnabled(const std::string &deviceType, bool &enabled)
+{
+    ANS_LOGD("enter");
+    if (deviceType.empty()) {
+        ANS_LOGE("Invalid deviceType.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->IsDistributedEnabled(deviceType, enabled);
+}
+
+ErrCode AnsNotification::GetDistributedAbility(int32_t &abilityId)
+{
+    ANS_LOGD("enter");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetDistributedAbility(abilityId);
+}
+
+ErrCode AnsNotification::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+{
+    ANS_LOGD("enter");
+    if (deviceType.empty() || deviceId.empty()) {
+        ANS_LOGE("Invalid deviceType or deviceId.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+}
+
+ErrCode AnsNotification::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+{
+    ANS_LOGD("enter");
+    if (deviceType.empty() || deviceId.empty()) {
+        ANS_LOGE("Invalid deviceType or deviceId.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("UnregisterPushCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+}
+
 ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, bool &enabled)
 {

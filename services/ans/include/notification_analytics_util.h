@@ -93,7 +93,7 @@ public:
     HaMetaMessage& BranchId(uint32_t branchId);
     HaMetaMessage& ErrorCode(uint32_t errorCode);
     HaMetaMessage& Message(const std::string& message, bool print = false);
-    HaMetaMessage& Path(const std::string path);
+    HaMetaMessage& Path(const std::string &path);
     HaMetaMessage& Append(const std::string& message);
     HaMetaMessage& BundleName(const std::string& bundleName_);
     HaMetaMessage& AgentBundleName(const std::string& agentBundleName);
@@ -174,6 +174,8 @@ struct ReportLiveViewMessage {
 
 class NotificationAnalyticsUtil {
 public:
+    static void ReportTipsEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
+
     static void ReportPublishFailedEvent(const sptr<NotificationRequest>& request, const HaMetaMessage& message);
 
     static void ReportDeleteFailedEvent(const sptr<NotificationRequest>& request, HaMetaMessage& message);
@@ -288,6 +290,8 @@ private:
     static void AddLocalLiveViewSuccessNum(std::string bundle);
 
     static void AddLocalLiveViewFailedNum(std::string bundle);
+
+    static void MakeRequestBundle(const sptr<NotificationRequest>& request);
 };
 } // namespace Notification
 } // namespace OHOS

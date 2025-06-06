@@ -369,6 +369,21 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
     ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
 }
 
+ErrCode ReminderDataManager::CancelReminderToDb(const int32_t reminderId, const int32_t callingUid)
+{
+    if (store_ == nullptr) {
+        ANSR_LOGE("Store is nullptr.");
+        return ERR_REMINDER_NOT_EXIST;
+    }
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    if (!store_->IsReminderExist(reminderId, callingUid)) {
+        ANSR_LOGE("Not find reminder[%{public}d] in db.", reminderId);
+        return ERR_REMINDER_NOT_EXIST;
+    }
+    store_->Delete(reminderId);
+    return ERR_OK;
+}
+
 void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged)
 {
 #ifdef HAS_HISYSEVENT_PART

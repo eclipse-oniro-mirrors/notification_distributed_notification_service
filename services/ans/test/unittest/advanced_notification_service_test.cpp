@@ -3103,7 +3103,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00006,
 {
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00006 test start";
     EXPECT_NE(advancedNotificationService_, nullptr);
-    advancedNotificationService_->ResetPushCallbackProxy();
+    advancedNotificationService_->ResetPushCallbackProxy(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     ASSERT_EQ(advancedNotificationService_->pushCallBacks_.empty(), true);
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00006 test end";
 }
@@ -3125,7 +3125,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00007,
     sptr<NotificationCheckRequest> checkRequest = new (std::nothrow) NotificationCheckRequest();
 
     advancedNotificationService_->pushCallBacks_.insert_or_assign(checkRequest->GetSlotType(), pushCallBack);
-    advancedNotificationService_->ResetPushCallbackProxy();
+    advancedNotificationService_->ResetPushCallbackProxy(checkRequest->GetSlotType());
     ASSERT_TRUE(advancedNotificationService_->pushCallBacks_.empty());
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00007 test end";
 }

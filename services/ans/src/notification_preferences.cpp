@@ -1098,6 +1098,47 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
+ErrCode NotificationPreferences::SetDistributedEnabled(
+    const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enableStatus)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->PutDistributedEnabled(deviceType, enableStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::IsDistributedEnabled(
+    const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enableStatus)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    enableStatus = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+    storeDBResult = preferncesDB_->GetDistributedEnabled(deviceType, enableStatus);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

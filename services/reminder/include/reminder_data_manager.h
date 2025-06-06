@@ -693,7 +693,7 @@ private:
         sptr<ReminderRequest>& reminder);
 
     void UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb);
-
+    ErrCode CancelReminderToDb(const int32_t reminderId, const int32_t callingUid);
    /**
     * Single instance.
     */

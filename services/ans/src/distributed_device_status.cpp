@@ -16,6 +16,7 @@
 #include "distributed_device_status.h"
 
 #include "distributed_data_define.h"
+#include "distributed_extension_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -59,7 +60,8 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
     return ERR_OK;
 }
 
-void ChangeStatus(DeviceStatus& device, const uint32_t status, const uint32_t controlFlag, int32_t userId)
+void ChangeStatus(DeviceStatus& device, const std::string &deviceType, const uint32_t status,
+    const uint32_t controlFlag, int32_t userId)
 {
     uint32_t beforeStatus = device.status;
     if ((1 << DistributedDeviceStatus::USERID_FLAG) & controlFlag) {
@@ -73,8 +75,20 @@ void ChangeStatus(DeviceStatus& device, const uint32_t status, const uint32_t co
             device.status &= ~(1 << i);
         }
     }
+    if (deviceType == NotificationConstant::PAD_DEVICE_TYPE ||
+        deviceType == NotificationConstant::PC_DEVICE_TYPE) {
+        if (((1 << DistributedDeviceStatus::USING_FLAG) & controlFlag) &&
+            ((1 << DistributedDeviceStatus::USING_FLAG) & device.status)) {
+            DeviceStatueChangeInfo changeInfo;
+            changeInfo.deviceId = device.deviceId;
+            changeInfo.changeType = DeviceStatueChangeType::DEVICE_USING_CHANGE;
+            DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+            ANS_LOGI("notify %{public}s %{public}s using change.", device.deviceType.c_str(),
+                StringAnonymous(device.deviceId).c_str());
+        }
+    }
 
-    ANS_LOGI("update %{public}s %{public}s %{public}d status %{public}d %{public}u%{public}u",
+    ANS_LOGI("update %{public}s %{public}s %{public}d status %{public}d %{public}u %{public}u",
         device.deviceType.c_str(), StringAnonymous(device.deviceId).c_str(), userId, controlFlag,
         beforeStatus, device.status);
 }
@@ -89,14 +103,14 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         if (device->deviceType != deviceType || device->deviceId != deviceId) {
             continue;
         }
-        ChangeStatus(*device, status, controlFlag, userId);
+        ChangeStatus(*device, deviceType, status, controlFlag, userId);
         existFlag = true;
         break;
     }
 
     if (!existFlag) {
         DeviceStatus device = DeviceStatus(deviceType, deviceId);
-        ChangeStatus(device, status, controlFlag, userId);
+        ChangeStatus(device, deviceType, status, controlFlag, userId);
         deviceInfo_.emplace_back(device);
         ANS_LOGI("Add device %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
     }
@@ -107,6 +121,18 @@ uint32_t DistributedDeviceStatus::GetDeviceStatus(const std::string &deviceType)
 {
     std::lock_guard<std::mutex> lock(mapLock_);
     return deviceStatus_.ReadVal(deviceType);
+}
+
+DeviceStatus DistributedDeviceStatus::GetMultiDeviceStatus(
+    const std::string &deviceType, const uint32_t status)
+{
+    std::lock_guard<std::mutex> lock(mapLock_);
+    for (DeviceStatus device : deviceInfo_) {
+        if (device.deviceType == deviceType && (device.status & status) > 0) {
+            return device;
+        }
+    }
+    return DeviceStatus("", "");
 }
 } // namespace Notification
 } // namespace OHOS

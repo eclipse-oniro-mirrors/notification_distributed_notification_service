@@ -58,6 +58,7 @@
 #include "advanced_notification_flow_control_service.h"
 #include "notification_operation_info.h"
 #include "notification_operation_service.h"
+#include "bool_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -171,6 +172,53 @@ ErrCode AdvancedNotificationService::SetCollaborateRequest(const sptr<Notificati
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::CollaborateFilter(const sptr<NotificationRequest> &request)
+{
+    auto params = request->GetExtendInfo();
+    if (params == nullptr) {
+        ANS_LOGI("Collaborate filter extend info is null.");
+        return ERR_OK;
+    }
+
+    auto value = params->GetParam("notification_collaboration_check");
+    AAFwk::IBoolean* ao = AAFwk::IBoolean::Query(value);
+    if (ao == nullptr) {
+        ANS_LOGI("Collaborate filter invalid extend info.");
+        return ERR_OK;
+    }
+    if (!AAFwk::Boolean::Unbox(ao)) {
+        ANS_LOGI("Collaborate filter check is false.");
+        return ERR_OK;
+    }
+    bool switchEnabled = false;
+    std::string deviceType = params->GetStringParam("notification_collaboration_deviceType");
+    std::string deviceId = params->GetStringParam("notification_collaboration_deviceId");
+    int32_t userId = params->GetIntParam("notification_collaboration_userId", DEFAULT_USER_ID);
+    auto result = NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType,
+        deviceId, userId, switchEnabled);
+    if (result != ERR_OK || !switchEnabled) {
+        ANS_LOGW("Collaborate live view auth %{public}d %{public}d.", result, switchEnabled);
+        return ERR_ANS_NOT_ALLOWED;
+    }
+    NotificationConstant::SlotType slotType = request->GetSlotType();
+    if (slotType == NotificationConstant::SlotType::LIVE_VIEW) {
+        result = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
+            NotificationConstant::SlotType::LIVE_VIEW, deviceType, switchEnabled);
+        if (result != ERR_OK || !switchEnabled) {
+            ANS_LOGW("Get live view distributed failed %{public}d %{public}d.", result, switchEnabled);
+            return ERR_ANS_NOT_ALLOWED;
+        }
+        return ERR_OK;
+    }
+    NotificationConstant::ENABLE_STATUS enable;
+    result = NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType, enable);
+    if (result != ERR_OK || enable != NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+        ANS_LOGW("Get notification distributed failed %{public}d %{public}d.", result, enable);
+        return ERR_ANS_NOT_ALLOWED;
+    }
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationRequest> &request)
 {
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
@@ -189,7 +237,9 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     }
     record->bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(), 0);
     record->notification->SetKey(request->GetLabel() + request->GetDistributedHashCode());
-
+    if (CollaborateFilter(request) != ERR_OK) {
+        return ERR_ANS_NOT_ALLOWED;
+    }
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;

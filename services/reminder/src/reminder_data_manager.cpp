@@ -122,8 +122,8 @@ ErrCode ReminderDataManager::CancelReminder(
     ANSR_LOGI("cancel reminder id: %{public}d", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, false);
     if (reminder == nullptr) {
-        ANSR_LOGW("Cancel reminder, not find the reminder");
-        return ERR_REMINDER_NOT_EXIST;
+        ANSR_LOGW("Cancel reminder, not find the reminder in memory.");
+        return CancelReminderToDb(reminderId, callingUid);
     }
     if (!CheckIsSameApp(reminder, callingUid)) {
         ANSR_LOGW("Not find the reminder due to not match");

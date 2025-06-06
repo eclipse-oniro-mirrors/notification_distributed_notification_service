@@ -145,6 +145,35 @@ public:
         CLOSE
     };
 
+    enum class ENABLE_STATUS {
+        /**
+         * the device type notification switch never been set.
+         */
+        ENABLE_NONE,
+
+        /**
+         * the device type notification switch is enabled
+         */
+        ENABLE_TRUE,
+
+        /**
+         * the device type notification switch is disable
+         */
+        ENABLE_FALSE
+    };
+
+    enum class DANS_SUPPORT_STATUS {
+        /**
+         * unsupport the set of distributed abilities.
+         */
+        UNSUPPORT = -1,
+
+        /**
+         * support the set of distributed abilities.
+         */
+        SUPPORT
+    };
+
     static const int32_t DEFAULT_REASON_DELETE = 0;
 
     /**
@@ -367,9 +396,9 @@ public:
     constexpr static const char* HEADSET_DEVICE_TYPE = "headset";
     constexpr static const char* LITEWEARABLE_DEVICE_TYPE = "liteWearable";
     constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
-    constexpr static const char* PAD_DEVICE_TYPE = "Pad";
-    constexpr static const char* PC_DEVICE_TYPE = "Pc";
-    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable"};
+    constexpr static const char* PAD_DEVICE_TYPE = "pad";
+    constexpr static const char* PC_DEVICE_TYPE = "pc";
+    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "pc", "pad"};
 };
 }  // namespace Notification
 }  // namespace OHOS

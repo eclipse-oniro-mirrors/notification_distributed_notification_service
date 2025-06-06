@@ -89,8 +89,7 @@ ohos_fuzztest("AnsManagerStubAnnexFuzzTest") {
     defines += [ "SCREENLOCK_MGR_ENABLE" ]
   }
 
-  if (distributed_notification_service_feature_summary ||
-      distributed_notification_service_feature_additional_control) {
+  if (distributed_notification_service_feature_additional_control) {
     defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
   }
 

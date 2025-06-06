@@ -168,6 +168,16 @@ const std::shared_ptr<AAFwk::WantParams> NotificationRequest::GetAdditionalData(
     return additionalParams_;
 }
 
+void NotificationRequest::SetExtendInfo(const std::shared_ptr<AAFwk::WantParams> &extendInfo)
+{
+    extendInfo_ = extendInfo;
+}
+
+const std::shared_ptr<AAFwk::WantParams> NotificationRequest::GetExtendInfo() const
+{
+    return extendInfo_;
+}
+
 void NotificationRequest::SetDeliveryTime(int64_t deliveryTime)
 {
     deliveryTime_ = deliveryTime;
@@ -813,6 +823,7 @@ std::string NotificationRequest::Dump()
             ", removalWantAgent = " + (removalWantAgent_ ? "not null" : "null") +
             ", maxScreenWantAgent = " + (maxScreenWantAgent_ ? "not null" : "null") +
             ", additionalParams = " + (additionalParams_ ? "not null" : "null") +
+            ", extendInfo = " + (extendInfo_ ? "not null" : "null") +
             ", littleIcon = " + (littleIcon_ ? "not null" : "null") +
             ", bigIcon = " + (bigIcon_ ? "not null" : "null") +
             ", overlayIcon = " + (overlayIcon_ ? "not null" : "null") +
@@ -944,6 +955,14 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
         if (!extraInfoStr.empty()) {
             AAFwk::WantParams params    = AAFwk::WantParamWrapper::ParseWantParams(extraInfoStr);
             pRequest->additionalParams_ = std::make_shared<AAFwk::WantParams>(params);
+        }
+    }
+
+    if (jsonObject.find("extendInfo") != jsonEnd && jsonObject.at("extendInfo").is_string()) {
+        auto extendInfoStr = jsonObject.at("extendInfo").get<std::string>();
+        if (!extendInfoStr.empty()) {
+            AAFwk::WantParams extendInfoParams = AAFwk::WantParamWrapper::ParseWantParams(extendInfoStr);
+            pRequest->extendInfo_ = std::make_shared<AAFwk::WantParams>(extendInfoParams);
         }
     }
 
@@ -1305,6 +1324,19 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     if (valid) {
         if (!parcel.WriteParcelable(additionalParams_.get())) {
             ANS_LOGE("Failed to write additionalParams");
+            return false;
+        }
+    }
+
+    valid = extendInfo_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether extendInfo is null");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(extendInfo_.get())) {
+            ANS_LOGE("Failed to write extendInfo");
             return false;
         }
     }
@@ -1723,6 +1755,15 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     valid = parcel.ReadBool();
     if (valid) {
+        extendInfo_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
+        if (!extendInfo_) {
+            ANS_LOGE("Failed to read extendInfo");
+            return false;
+        }
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
         littleIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
     }
 
@@ -2065,6 +2106,7 @@ void NotificationRequest::CopyOther(const NotificationRequest &other)
     this->removalWantAgent_ = other.removalWantAgent_;
     this->maxScreenWantAgent_ = other.maxScreenWantAgent_;
     this->additionalParams_ = other.additionalParams_;
+    this->extendInfo_ = other.extendInfo_;
     this->littleIcon_ = other.littleIcon_;
     this->bigIcon_ = other.bigIcon_;
     this->overlayIcon_ = other.overlayIcon_;
@@ -2122,6 +2164,14 @@ bool NotificationRequest::ConvertObjectsToJson(nlohmann::json &jsonObject) const
         extraInfoStr = wWrapper.ToString();
     }
     jsonObject["extraInfo"] = extraInfoStr;
+
+    std::string extendInfoStr;
+    if (extendInfo_) {
+        AAFwk::WantParamWrapper wWrapper(*extendInfo_);
+        extendInfoStr = wWrapper.ToString();
+    }
+    jsonObject["extendInfo"] = extendInfoStr;
+    
     jsonObject["smallIcon"] = AnsImageUtil::PackImage(littleIcon_);
     jsonObject["largeIcon"] = AnsImageUtil::PackImage(bigIcon_);
     jsonObject["overlayIcon"] = overlayIcon_ ? AnsImageUtil::PackImage(overlayIcon_) : "";

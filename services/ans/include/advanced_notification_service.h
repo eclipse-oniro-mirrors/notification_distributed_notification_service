@@ -1049,6 +1049,56 @@ public:
         const std::string &deviceType, bool &enabled) override;
 
     /**
+     * @brief configuring Whether to Synchronize Common Notifications to Target Devices.
+     *
+     * @param deviceType Target device type.
+     * @param enabled Whether to Synchronize Common Notifications to Target Devices.
+     * @return Returns configuring Whether to Synchronize Common Notifications to Target Devices result.
+     */
+    ErrCode SetDistributedEnabled(const std::string &deviceType, const bool enabled) override;
+
+    /**
+     * @brief querying Whether to Synchronize Common Devices to Target Devices.
+     *
+     * @param deviceType Target device type.
+     * @param enabled Whether to Synchronize Common Notifications to Target Devices.
+     * @return Returns Whether to Synchronize Common Notifications to Target Devices result.
+     */
+    ErrCode IsDistributedEnabled(const std::string &deviceType, bool &enabled) override;
+
+    /**
+     * @brief Obtains the set of supported distributed abilities.
+     *
+     * @param abilityId The set of supported distributed abilities.
+     * @return Returns result in Obtains the set of supported distributed abilities.
+     */
+    ErrCode GetDistributedAbility(int32_t &abilityId) override;
+
+    /**
+     * @brief Get the target device's authorization status.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param deviceId The id of the target device.
+     * @param userId The userid of the target device.
+     * @param isAuth Return The authorization status.
+     * @return Returns get result.
+     */
+    ErrCode GetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth) override;
+
+    /**
+     * @brief Set the target device's authorization status.
+     *
+     * @param deviceType Type of the target device whose status you want to set.
+     * @param deviceId The id of the target device.
+     * @param userId The userid of the target device.
+     * @param isAuth The authorization status.
+     * @return Returns set result.
+     */
+    ErrCode SetDistributedAuthStatus(
+        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth) override;
+
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.
@@ -1128,7 +1178,7 @@ public:
     /**
      * @brief Reset pushcallback proxy
      */
-    void ResetPushCallbackProxy();
+    void ResetPushCallbackProxy(NotificationConstant::SlotType slotType);
 
     /**
      * @brief Set the notification SlotFlags whitelist.
@@ -1583,6 +1633,7 @@ private:
         const sptr<NotificationBundleOption> &bundle,
         bool enabled, bool isForceControl);
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
+    ErrCode CollaborateFilter(const sptr<NotificationRequest> &request);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
@@ -1661,8 +1712,11 @@ private:
 class PushCallbackRecipient : public IRemoteObject::DeathRecipient {
 public:
     PushCallbackRecipient();
+    PushCallbackRecipient(const NotificationConstant::SlotType slotType);
     virtual ~PushCallbackRecipient();
     void OnRemoteDied(const wptr<IRemoteObject> &remote);
+private:
+    NotificationConstant::SlotType slotType_;
 };
 }  // namespace Notification
 }  // namespace OHOS
