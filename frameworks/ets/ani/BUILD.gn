@@ -45,6 +45,11 @@ ohos_shared_library("notification_manager_ani") {
     "./src/sts_notification_content.cpp",
     "./src/sts_template.cpp",
     "./src/sts_request.cpp",
+    "./src/sts_subscribe.cpp",
+    "./src/sts_subscriber.cpp",
+    "./src/sts_sorting_map.cpp",
+    "./src/sts_subscribe_info.cpp",
+    "./src/sts_sorting.cpp",
     "./src/manager/ani_local_live_view.cpp",
     "./src/manager/ani_publish.cpp",
     "./src/manager/ani_display_badge.cpp",
@@ -52,6 +57,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_cance.cpp",
     "./src/manager/ani_notification_enable.cpp",
     "./src/manager/ani_do_not_disturb_profile.cpp",
+    "./src/manager/ani_do_not_disturb_date.cpp",
     "./src/manager/ani_get_active.cpp",
     "./src/manager/ani_manager.cpp",
     "./src/manager/ani_request_enable.cpp",
@@ -60,6 +66,9 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_push_callback.cpp",
     "./src/manager/ani_support_template.cpp",
     "./src/manager/ani_distributed_enable.cpp",
+    "./src/manager/ani_remove_group.cpp",
+    "./src/manager/ani_open_settings.cpp",
+    "./src/manager/ani_sync_config.cpp",
   ]
 
   cflags = []

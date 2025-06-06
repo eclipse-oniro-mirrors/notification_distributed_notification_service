@@ -19,6 +19,7 @@
 #include "ani_slot.h"
 #include "ani_cance.h"
 #include "ani_notification_enable.h"
+#include "ani_do_not_disturb_date.h"
 #include "ani_do_not_disturb_profile.h"
 #include "ani_get_active.h"
 #include "ani_publish.h"
@@ -27,6 +28,9 @@
 #include "ani_on.h"
 #include "ani_support_template.h"
 #include "ani_distributed_enable.h"
+#include "ani_remove_group.h"
+#include "ani_open_settings.h"
+#include "ani_sync_config.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -75,6 +79,22 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeRequestEnableNotification",
         "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
+    ani_native_function {"nativePublishAsBundle", nullptr, reinterpret_cast<void *>(AniPublishAsBundle)},
+    ani_native_function {"nativePublishAsBundleWithBundleOption", nullptr,
+        reinterpret_cast<void *>(AniPublishAsBundleWithBundleOption)},
+    ani_native_function {"nativeCancelAsBundle", nullptr, reinterpret_cast<void *>(AniCancelAsBundle)},
+    ani_native_function {"nativeCancelAsBundleWithBundleOption", nullptr,
+        reinterpret_cast<void *>(AniCancelAsBundleWithBundleOption)},
+    ani_native_function {"nativeCancelGroup", nullptr, reinterpret_cast<void *>(AniCancelGroup)},
+    ani_native_function {"nativeSetDoNotDisturbDate", nullptr, reinterpret_cast<void *>(AniSetDoNotDisturbDate)},
+    ani_native_function {"nativeSetDoNotDisturbDateWithId", nullptr,
+        reinterpret_cast<void *>(AniSetDoNotDisturbDateWithId)},
+    ani_native_function {"nativeGetDoNotDisturbDate", nullptr, reinterpret_cast<void *>(AniGetDoNotDisturbDate)},
+    ani_native_function {"nativeGetDoNotDisturbDateWithId", nullptr,
+        reinterpret_cast<void *>(AniGetDoNotDisturbDateWithId)},
+    ani_native_function {"nativeIsSupportDoNotDisturbMode", nullptr,
+        reinterpret_cast<void *>(AniIsSupportDoNotDisturbMode)},
+    ani_native_function {"nativeGetDoNotDisturbProfile", nullptr, reinterpret_cast<void *>(AniGetDoNotDisturbProfile)},
     ani_native_function {"nativeOn",
         "Lstd/core/String;"
         "Lstd/core/Function1;"
@@ -82,6 +102,18 @@ static std::array kitManagerFunctions = {
         ":I",
         reinterpret_cast<void *>(AniOn)},
     ani_native_function {"nativeOff", "Lstd/core/String;Lstd/core/Function1;:I", reinterpret_cast<void *>(AniOff)},
+    ani_native_function {"nativeGetAllNotificationEnabledBundles", nullptr,
+        reinterpret_cast<void *>(AniGetAllNotificationEnabledBundles)},
+    ani_native_function {"nativeIsNotificationEnabledSync", nullptr,
+        reinterpret_cast<void *>(AniIsNotificationEnabledSync)},
+    ani_native_function {"nativeSetBadgeNumber", "D:V",
+        reinterpret_cast<void *>(AniSetBadgeNumber)},
+    ani_native_function {"nativeSetBadgeNumberByBundle", nullptr,
+        reinterpret_cast<void *>(AniSetBadgeNumberByBundle)},
+    ani_native_function {"nativeGetActiveNotificationByFilter", nullptr,
+        reinterpret_cast<void *>(AniGetActiveNotificationByFilter)},
+    ani_native_function {"nativeRemoveGroupByBundle", nullptr,
+        reinterpret_cast<void *>(AniRemoveGroupByBundle)},
     ani_native_function {"nativeAddSlotByNotificationSlot", nullptr,
         reinterpret_cast<void *>(AniAddSlotByNotificationSlot)},
     ani_native_function {"nativeAddSlotBySlotType", nullptr,
@@ -100,6 +132,27 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetSlotByBundle)},
     ani_native_function {"nativeGetSlotNumByBundle", nullptr,
         reinterpret_cast<void *>(AniGetSlotNumByBundle)},
+    ani_native_function {"nativeOpenNotificationSettings",
+        "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+        reinterpret_cast<void *>(AniOpenNotificationSettings)},
+    ani_native_function {"nativesetTargetDeviceStatus", nullptr,
+        reinterpret_cast<void *>(AniSetTargetDeviceStatus)},
+    ani_native_function {"nativesetDistributedEnabledByBundle", nullptr,
+        reinterpret_cast<void *>(AniSetDistributedEnableByBundleAndType)},
+    ani_native_function {"nativesetSmartReminderEnabled", nullptr,
+        reinterpret_cast<void *>(AniSetSmartReminderEnable)},
+    ani_native_function {"nativeisSmartReminderEnabled", nullptr,
+        reinterpret_cast<void *>(AniIsSmartReminderEnabled)},
+    ani_native_function {"nativesetDistributedEnabledBySlot", nullptr,
+        reinterpret_cast<void *>(AniSetDistributedEnableBySlot)},
+    ani_native_function {"nativeisDistributedEnabledBySlot", nullptr,
+        reinterpret_cast<void *>(AniIsDistributedEnabledBySlot)},
+    ani_native_function {"nativesetAdditionalConfig", nullptr,
+        reinterpret_cast<void *>(AniSetAdditionalConfig)},
+    ani_native_function {"nativesetDistributedEnableByBundle", nullptr,
+        reinterpret_cast<void *>(AniSetDistributedEnableByBundle)},
+    ani_native_function {"nativedisableNotificationFeature", nullptr,
+        reinterpret_cast<void *>(AniDisableNotificationFeature)},
     ani_native_function {"nativeIsSupportTemplate", nullptr, reinterpret_cast<void *>(AniIsSupportTemplate)},
     ani_native_function {"nativeSetDistributedEnable", nullptr, reinterpret_cast<void *>(AniSetDistributedEnable)},
     ani_native_function {"nativeIsDistributedEnabled", nullptr, reinterpret_cast<void *>(AniIsDistributedEnabled)},

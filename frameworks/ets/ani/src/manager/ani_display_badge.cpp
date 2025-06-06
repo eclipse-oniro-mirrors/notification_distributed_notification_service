@@ -78,5 +78,39 @@ ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
         externalCode);
     return NotificationSts::BoolToAniBoolean(isDisplayed);
 }
+
+void AniSetBadgeNumber(ani_env *env, ani_double badgeNumber)
+{
+    ANS_LOGD("sts AniSetBadgeNumber call, BadgeNumber: %{public}lf", badgeNumber);
+    int returncode = Notification::NotificationHelper::SetBadgeNumber(static_cast<int32_t>(badgeNumber));
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("sts AniSetBadgeNumber error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("sts AniSetBadgeNumber end");
+}
+
+void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_double badgeNumber)
+{
+    ANS_LOGD("AniSetBadgeNumberByBundle call, badgeNumber: %{public}lf", badgeNumber);
+    int returncode = ERR_OK;
+    BundleOption option;
+    if (NotificationSts::UnwrapBundleOption(env, obj, option)) {
+        returncode = Notification::NotificationHelper::SetBadgeNumberByBundle(option,
+            static_cast<int32_t>(badgeNumber));
+    } else {
+        ANS_LOGE("sts AniSetBadgeNumberByBundle ERROR_INTERNAL_ERROR");
+        OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        return;
+    }
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("sts AniSetBadgeNumberByBundle error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniSetBadgeNumberByBundle end, ret: %{public}d", externalCode);
+}
 }
 }

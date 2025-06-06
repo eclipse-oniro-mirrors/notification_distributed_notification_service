@@ -112,6 +112,7 @@ public:
     void DelDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber);
 
     bool Subscribe(ani_env *env, ani_object subscriber, ani_object info);
+    bool SubscribeSelf(ani_env *env, ani_object subscriber);
     bool UnSubscribe(ani_env *env, ani_object subscriber);
 private:
     SubscriberInstanceManager() {}

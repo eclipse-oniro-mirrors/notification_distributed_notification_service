@@ -218,6 +218,29 @@ bool StsSlotLevelUtils::StsToC(const STSSlotLevel inLevel, SlotLevel &outLevel)
     return true;
 }
 
+bool StsDoNotDisturbTypeUtils::StsToC(const STSDoNotDisturbType inType,
+    OHOS::Notification::NotificationConstant::DoNotDisturbType &outType)
+{
+    switch (inType) {
+        case STSDoNotDisturbType::TYPE_NONE:
+            outType = Notification::NotificationConstant::DoNotDisturbType::NONE;
+            break;
+        case STSDoNotDisturbType::TYPE_ONCE:
+            outType = Notification::NotificationConstant::DoNotDisturbType::ONCE;
+            break;
+        case STSDoNotDisturbType::TYPE_DAILY:
+            outType = Notification::NotificationConstant::DoNotDisturbType::DAILY;
+            break;
+        case STSDoNotDisturbType::TYPE_CLEARLY:
+            outType = Notification::NotificationConstant::DoNotDisturbType::CLEARLY;
+            break;
+        default:
+            ANS_LOGE("STSDoNotDisturbType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
 bool StsRemindTypeUtils::StsToC(const STSRemindType inType, RemindType &outType)
 {
     switch (inType) {
@@ -423,6 +446,19 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
         || !EnumConvertNativeToAni(env,
         "L@ohos/notificationManager/notificationManager/ContentType;", stsContentType, enumItem)) {
         ANS_LOGE("ContentTypeCToEts failed");
+        return false;
+    }
+    return true;
+}
+
+bool DoNotDisturbTypeEtsToC(ani_env *env, ani_enum_item enumItem,
+    Notification::NotificationConstant::DoNotDisturbType &doNotDisturbType)
+{
+    ANS_LOGD("DoNotDisturbTypeEtsToC call");
+    STSDoNotDisturbType stsDoNotDisturbType = TYPE_NONE;
+    if (!EnumConvertAniToNative(env, enumItem, stsDoNotDisturbType)
+        || !StsDoNotDisturbTypeUtils::StsToC(stsDoNotDisturbType, doNotDisturbType)) {
+        ANS_LOGE("DoNotDisturbTypeEtsToC failed");
         return false;
     }
     return true;
@@ -674,6 +710,61 @@ bool WarpNotificationCheckInfo(
         return false;
     }
     outObj = obj;
+    return true;
+}
+
+void GetDoNotDisturbDateByDoNotDisturbType(ani_env *env, ani_object obj, NotificationDoNotDisturbDate &doNotDisturbDate)
+{
+    ANS_LOGD("GetDoNotDisturbDateByDoNotDisturbType start");
+    if (env == nullptr || obj == nullptr) {
+        ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType failed, has nullptr");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isUndefined = ANI_OK;
+    ani_ref doNotDisturbTypeRef = {};
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "doNotDisturbType", isUndefined, doNotDisturbTypeRef))
+        || isUndefined == ANI_TRUE || doNotDisturbTypeRef == nullptr) {
+        ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType: get Ref failed");
+        return;
+    }
+    NotificationConstant::DoNotDisturbType type = NotificationConstant::DoNotDisturbType::NONE;
+
+    if (!DoNotDisturbTypeEtsToC(env, static_cast<ani_enum_item>(doNotDisturbTypeRef), type)) {
+        ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType: SlotTypeEtsToC failed");
+        return;
+    }
+    doNotDisturbDate.SetDoNotDisturbType(type);
+    ANS_LOGD("GetDoNotDisturbDateByDoNotDisturbType end");
+}
+
+bool UnWarpNotificationDoNotDisturbDate(
+    ani_env* env,
+    const ani_object doNotDisturbDateObj,
+    NotificationDoNotDisturbDate& doNotDisturbDate)
+{
+    ani_boolean isUndefined = false;
+    ani_double mDouble = 0.0;
+    if (env == nullptr) {
+        ANS_LOGE("UnWarpNotificationDoNotDisturbDate: Invalid input parameters");
+        return false;
+    }
+    GetDoNotDisturbDateByDoNotDisturbType(env, doNotDisturbDateObj, doNotDisturbDate);
+
+    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "begin", isUndefined, mDouble)
+        && isUndefined == ANI_FALSE) {
+        doNotDisturbDate.SetBeginDate(static_cast<int32_t>(mDouble));
+    }
+    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "end", isUndefined, mDouble)
+        && isUndefined == ANI_FALSE) {
+        doNotDisturbDate.SetEndDate(static_cast<int32_t>(mDouble));
+    }
+    if (doNotDisturbDate.GetBeginDate() >= doNotDisturbDate.GetEndDate()) {
+        ANS_LOGE("Invalid time range: begin(%{public}lld) >= end(%{public}lld)",
+            doNotDisturbDate.GetBeginDate(), doNotDisturbDate.GetEndDate());
+        return false;
+    }
+    ANS_LOGD("Successfully parsed DoNotDisturbDate");
     return true;
 }
 } // namespace NotificationSts

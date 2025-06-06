@@ -88,5 +88,74 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
     ANS_LOGD("UnwrapArrayDoNotDisturbProfile end");
     return true;
 }
+
+bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> profile,
+    ani_object &outObj)
+{
+    ani_status status = ANI_OK;
+    const auto& trustList = profile->GetProfileTrustList();
+    if (trustList.empty()) {
+        ANS_LOGE("WrapProfileTrustList trustlist is nullptr");
+        return true;
+    }
+    ani_object arrayObj = newArrayClass(env, trustList.size());
+    if (arrayObj == nullptr) {
+        ANS_LOGE("WrapProfileTrustList Failed to create trustlist array");
+        return false;
+    }
+
+    size_t index = 0;
+    for (const auto& bundle : trustList) {
+        auto bundlePtr = std::make_shared<Notification::NotificationBundleOption>(bundle);
+        ani_object bundleObj = nullptr;
+        if (!WrapBundleOption(env, bundlePtr, bundleObj)) {
+            ANS_LOGE("WrapProfileTrustList WrapBundleOption failed");
+            return false;
+        }
+        if (ANI_OK != (status = env->Object_CallMethodByName_Void(arrayObj, "$_set",
+            "ILstd/core/Object;:V", index, bundleObj))) {
+            ANS_LOGE("WrapProfileTrustList set object faild. index %{public}d status %{public}d",
+                index, status);
+            return false;
+        }
+        index++;
+    }
+    ani_ref arrayRef = arrayObj;
+    if (!SetPropertyByRef(env, outObj, "trustlist", arrayRef)) {
+        ANS_LOGE("WrapProfileTrustList Failed to set trustlist property");
+        return false;
+    }
+    return true;
+}
+
+bool WrapDoNotDisturbProfile(ani_env* env, sptr<NotificationDoNotDisturbProfile> profile,
+    ani_object &outObj)
+{
+    ani_status status = ANI_OK;
+    ani_class cls = nullptr;
+    if (env == nullptr) {
+        ANS_LOGE("WrapDoNotDisturbProfile: Invalid input parameters");
+        return false;
+    }
+    const char* className = "L@ohos/notificationManager/notificationManager/DoNotDisturbProfileInner;";
+    if (!CreateClassObjByClassName(env, className, cls, outObj) || outObj == nullptr) {
+        ANS_LOGE("WrapDoNotDisturbProfile: Failed to create profile class object");
+        return false;
+    }
+    ani_double id = static_cast<double>(profile->GetProfileId());
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(outObj, "id", id))) {
+        ANS_LOGE("WrapDoNotDisturbProfile : set reason faild. status %{public}d", status);
+        return false;
+    }
+    if (!SetPropertyOptionalByString(env, outObj, "name", profile->GetProfileName())) {
+        ANS_LOGE("WrapDoNotDisturbProfile: set name failed");
+        return false;
+    }
+    if (!WrapProfileTrustList(env, profile, outObj)) {
+        ANS_LOGE("WrapDoNotDisturbProfile: set trustList failed");
+        return false;
+    }
+    return true;
+}
 } // namespace NotificationSts
 } // OHOS

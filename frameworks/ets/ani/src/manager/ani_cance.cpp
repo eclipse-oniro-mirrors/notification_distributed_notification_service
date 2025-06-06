@@ -114,5 +114,76 @@ void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
     }
     ANS_LOGD("sts AniCancelWithIdOptinalLabel end, externalCode: %{public}d", externalCode);
 }
+
+void AniCancelAsBundle(ani_env *env, ani_double id, ani_string representativeBundle, ani_double userId)
+{
+    ANS_LOGD("AniCancelAsBundle enter");
+    int32_t convertedId = static_cast<int32_t>(id);
+    int32_t UserId = static_cast<int32_t>(userId);
+    std::string bundleStr;
+
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
+        ANS_LOGE("AniCancelAsBundle:: representativeBundle parse failed!");
+        NotificationSts::ThrowStsErroWithMsg(env, "representativeBundle parse failed!");
+        return;
+    }
+    ANS_LOGD("AniCancelAsBundle, convertedId: %{public}d, UserId: %{public}d, bundleStr: %{public}s",
+        convertedId, UserId, bundleStr.c_str());
+
+    int returncode = Notification::NotificationHelper::CancelAsBundle(convertedId, bundleStr, UserId);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("AniCancelAsBundle: CancelAsBundle retern erro. returncode: %{public}d, externalCode: %{public}d",
+            returncode, externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+
+    ANS_LOGD("AniCancelAsBundle end");
+}
+
+void AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_double id)
+{
+    ANS_LOGD("AniCancelAsBundleWithBundleOption enter");
+    int32_t idTest = static_cast<int32_t>(id);
+    BundleOption option;
+    if (NotificationSts::UnwrapBundleOption(env, representativeBundle, option) != true) {
+        ANS_LOGE("AniPublishAsBundleWithBundleOption BundleOption parse failed!");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniPublishAsBundleWithBundleOption BundleOption parse failed!");
+        return;
+    }
+
+    ANS_LOGD("AniPublishAsBundleWithBundleOption: bundle %{public}s, uid: %{public}d, id: %{public}d",
+        option.GetBundleName().c_str(), option.GetUid(), idTest);
+
+    int returncode =  Notification::NotificationHelper::CancelAsBundle(option, idTest);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("CancelAsBundle retern error. returncode: %{public}d, externalCode: %{public}d",
+            returncode, externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+
+    ANS_LOGD("AniCancelAsBundleWithBundleOption end");
+}
+
+void AniCancelGroup(ani_env *env, ani_string groupName)
+{
+    ANS_LOGD("AniCancelGroup enter");
+
+    std::string groupNameStr;
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, groupNameStr)) {
+        NotificationSts::ThrowStsErroWithMsg(env, "AniCancelGroup: groupName parse failed!");
+        return;
+    }
+    ANS_LOGD("AniCancelGroup groupNameStr: %{public}s", groupNameStr.c_str());
+    int returncode = Notification::NotificationHelper::CancelGroup(groupNameStr);
+    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+        ANS_LOGE("AniCancelGroup: CancelAsBundle retern erro. returncode: %{public}d, externalCode: %{public}d",
+            returncode, externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniCancelGroup end");
+}
 } // namespace NotificationManagerSts
 } // namespace OHOS

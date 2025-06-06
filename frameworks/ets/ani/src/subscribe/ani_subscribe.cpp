@@ -39,6 +39,9 @@ static const char *SUBSCRIBE_SIGNATURE =
    "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
 static const char *UNSUBSCRIBE_SIGNATURE =
    "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
+static const char *REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE =
+   "Lnotification/NotificationCommonDef/BundleOption;:V";
+static const char *REMOVEALL_FOR_USERID_STGNATURE = "D:V";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
@@ -90,6 +93,12 @@ void AniUnSubscribe(ani_env *env, ani_object obj)
     OHOS::NotificationSts::SubscriberInstanceManager::GetInstance()->UnSubscribe(env, obj);
 }
 
+void AniSubscribeSelf(ani_env *env, ani_object obj)
+{
+    ANS_LOGD("StsSubscribeSelf enter");
+    OHOS::NotificationSts::SubscriberInstanceManager::GetInstance()->SubscribeSelf(env, obj);
+}
+
 void AniSubScribeRegistryInit(ani_env *env)
 {
     ANS_LOGD("AniSubScribeRegistryInit call");
@@ -101,7 +110,8 @@ void AniSubScribeRegistryInit(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function {"nativeRemove", REMOVE_FOR_BUNDLE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForBundle)},
+        ani_native_function {"nativeRemove",
+            REMOVE_FOR_BUNDLE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForBundle)},
         ani_native_function {"nativeRemove",
             REMOVE_FOR_HASHCODE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForHashCode)},
         ani_native_function {"nativeRemove",
@@ -110,6 +120,11 @@ void AniSubScribeRegistryInit(ani_env *env)
             DISTRIBUTE_OPERATION_SIGNATURE, reinterpret_cast<void *>(AniDistributeOperation)},
         ani_native_function {"nativeSubscribe", SUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniSubscribe)},
         ani_native_function {"nativeUnSubscribe", UNSUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniUnSubscribe)},
+        ani_native_function {"nativeSubscribeSelf", UNSUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniSubscribeSelf)},
+        ani_native_function {"nativeRemoveAllForBundle",
+            REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE, reinterpret_cast<void *>(AniRemoveAllForBundle)},
+        ani_native_function {"nativeRemoveAllForUserId",
+            REMOVEALL_FOR_USERID_STGNATURE, reinterpret_cast<void *>(AniRemoveAllForUserId)},
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
