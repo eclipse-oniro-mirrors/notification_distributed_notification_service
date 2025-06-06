@@ -1343,8 +1343,6 @@ public:
      */
     ErrCode SetHashCodeRule(const uint32_t type) override;
 
-    ErrCode GetOverlayIconScaleSize(uint32_t& scaleSize) override;
-
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.

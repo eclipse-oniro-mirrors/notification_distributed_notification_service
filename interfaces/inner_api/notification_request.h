@@ -568,12 +568,6 @@ public:
     void SetOverlayIcon(const std::shared_ptr<Media::PixelMap> &overlayIcon);
 
     /**
-     * @brief reset the overlay icon of this notification.
-     *
-     */
-    void ResetOverlayIcon() const;
-
-    /**
      * @brief Obtains the overlay icon of this notification.
      *
      * @return Returns the overlay icon of this notification.
@@ -1636,7 +1630,7 @@ private:
     std::shared_ptr<Media::PixelMap> littleIcon_ {};
     std::string littleIconType_ {};
     mutable std::shared_ptr<Media::PixelMap> bigIcon_ {};
-    mutable std::shared_ptr<Media::PixelMap> overlayIcon_ {};
+    std::shared_ptr<Media::PixelMap> overlayIcon_ {};
     std::shared_ptr<NotificationContent> notificationContent_ {};
 
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};

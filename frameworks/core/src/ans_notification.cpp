@@ -26,7 +26,6 @@
 #include "notification_local_live_view_subscriber.h"
 #include "system_ability_definition.h"
 #include "unique_fd.h"
-#include "ans_image_util.h"
 
 #include <memory>
 #include <thread>
@@ -1599,10 +1598,7 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
     auto overlayIcon = request.GetOverlayIcon();
     if (overlayIcon && NotificationRequest::CheckImageOverSizeForPixelMap(overlayIcon, MAX_ICON_SIZE)) {
         ANS_LOGE("The size of overlay icon exceeds limit");
-        if (!AnsImageUtil::HandleOverSizeOverlayIcon(overlayIcon)) {
-            ANS_LOGE("HandleOverSizeOverlayIcon failed.");
-            request.ResetOverlayIcon();
-        }
+        return ERR_ANS_ICON_OVER_SIZE;
     }
 
     ErrCode err = request.CheckImageSizeForContent();
@@ -2360,19 +2356,6 @@ ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &n
     return proxy->DisableNotificationFeature(reqPtr);
 }
 
-ErrCode AnsNotification::GetOverlayIconScaleSize(uint32_t& scale)
-{
-    ANS_LOGI("GetOverlayIconScaleSize proxy called.");
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
-
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_SERVICE_NOT_CONNECTED;
-    }
-    return proxy->GetOverlayIconScaleSize(scale);
-}
-
 ErrCode AnsNotification::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
     const sptr<IAnsOperationCallback> &callback)
 {
@@ -2440,6 +2423,5 @@ ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notifica
     }
     return proxy->GetAllNotificationsBySlotType(notifications, slotType);
 }
-
 }  // namespace Notification
 }  // namespace OHOS

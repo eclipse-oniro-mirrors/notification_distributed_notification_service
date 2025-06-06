@@ -16,8 +16,6 @@
 #include "ans_log_wrapper.h"
 #include "image_packer.h"
 #include "image_source.h"
-#include "ans_notification.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace Notification {
@@ -182,30 +180,6 @@ bool AnsImageUtil::ImageScale(const std::shared_ptr<Media::PixelMap> &pixelMap, 
     float xAxis = (float)width / (float)imgaeInfo.size.width;
     float yAxis = (float)height / (float)imgaeInfo.size.height;
     pixelMap->scale(xAxis, yAxis, Media::AntiAliasingOption::HIGH);
-    return true;
-}
-
-bool AnsImageUtil::HandleOverSizeOverlayIcon(const std::shared_ptr<Media::PixelMap> &pixelMap)
-{
-    uint32_t ccmScaleSize = 0;
-
-    ErrCode code = DelayedSingleton<AnsNotification>::GetInstance()->GetOverlayIconScaleSize(ccmScaleSize);
-    if (code != ERR_OK || ccmScaleSize == 0) {
-        ANS_LOGW("get overlayIcon scale size failed.");
-        return false;
-    }
-    ANS_LOGD("overlayIcon size before scale: %{public}d", pixelMap->GetByteCount());
-    auto icon = AnsImageUtil::ImageScale(pixelMap, ccmScaleSize, ccmScaleSize);
-    if (!icon) {
-        ANS_LOGE("overlayIcon is null after scale.");
-        return false;
-    }
-    ANS_LOGD("overlayIcon size after scale: %{public}d", pixelMap->GetByteCount());
-    auto size = static_cast<uint32_t>(pixelMap->GetByteCount());
-    if (size > MAX_ICON_SIZE) {
-        ANS_LOGW("overlayIcon oversize after scale.");
-        return false;
-    }
     return true;
 }
 
