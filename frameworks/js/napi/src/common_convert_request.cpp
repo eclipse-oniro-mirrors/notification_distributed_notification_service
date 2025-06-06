@@ -320,6 +320,14 @@ napi_value Common::SetNotificationRequestByCustom(
         napi_set_named_property(env, result, "extraInfo", extraInfo);
     }
 
+    // extendInfo?: {[key:string] : any}
+    std::shared_ptr<AAFwk::WantParams> extendInfoData = request->GetExtendInfo();
+    if (extendInfoData) {
+        napi_value extendInfo = nullptr;
+        extendInfo = OHOS::AppExecFwk::WrapWantParams(env, *extendInfoData);
+        napi_set_named_property(env, result, "extendInfo", extendInfo);
+    }
+    
     // actionButtons?: Array<NotificationActionButton>
     napi_value arr = nullptr;
     uint32_t count = 0;

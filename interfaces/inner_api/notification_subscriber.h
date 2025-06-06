@@ -137,6 +137,8 @@ public:
     bool ProcessSyncDecision(const std::string &deviceType, std::shared_ptr<Notification> &notification) const;
 #endif
 
+void ProcessRemoveExtendInfo(std::shared_ptr<Notification> &notification) const;
+
 private:
     class SubscriberImpl final : public AnsSubscriberStub {
     public:

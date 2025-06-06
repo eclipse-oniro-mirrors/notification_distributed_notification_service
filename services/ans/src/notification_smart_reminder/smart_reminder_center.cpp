@@ -301,10 +301,6 @@ void SmartReminderCenter::InitValidDevices(
         pair<string, bitset<DistributedDeviceStatus::STATUS_SIZE>>(NotificationConstant::CURRENT_DEVICE_TYPE, status));
 
     for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
-        GetDeviceStatusByType(deviceType, status);
-        statusMap.insert(pair<string, bitset<DistributedDeviceStatus::STATUS_SIZE>>(deviceType, status));
-        request->AdddeviceStatu(deviceType, status.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
-        
         bool affordConsume = false;
         NotificationSubscriberManager::GetInstance()->IsDeviceTypeAffordConsume(deviceType, request, affordConsume);
         if (!affordConsume) {
@@ -316,6 +312,10 @@ void SmartReminderCenter::InitValidDevices(
             InitPcPadDevices(deviceType, syncDevices, smartDevices, statusMap, request);
             continue;
         }
+
+        GetDeviceStatusByType(deviceType, status);
+        statusMap.insert(pair<string, bitset<DistributedDeviceStatus::STATUS_SIZE>>(deviceType, status));
+        request->AdddeviceStatu(deviceType, status.bitset<DistributedDeviceStatus::STATUS_SIZE>::to_string());
 
         if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
             bool isEnable = false;
@@ -442,20 +442,38 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
         int32_t flags = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
         AppExecFwk::ApplicationInfo appInfo;
         if (bundleManager->GetApplicationInfo(bundleName, flags, userId, appInfo) != ERR_OK) {
-            ANS_LOGI("FillRequestExtendInfo, get GetApplicationInfo error, type = %{public}s, bundleName = %{public}s",
+            ANS_LOGE("FillRequestExtendInfo, GetApplicationInfo error, type = %{public}s, bundleName = %{public}s",
+                deviceType.c_str(), bundleName.c_str());
+            return;
+        }
+
+        AppExecFwk::BundleResourceInfo bundleResourceInfo;
+        if (bundleManager->GetBundleResourceInfo(bundleName, bundleResourceInfo, appInfo.appIndex) != ERR_OK) {
+            ANS_LOGE("FillRequestExtendInfo, GetBundleResourceInfo error, type = %{public}s, bundleName = %{public}s",
                 deviceType.c_str(), bundleName.c_str());
             return;
         }
         std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+        if (extendInfo == nullptr) {
+            extendInfo = std::make_shared<AAFwk::WantParams>();
+            request->SetExtendInfo(extendInfo);
+        }
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_NAME, AAFwk::String::Box(appInfo.name));
-        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_LABEL, AAFwk::String::Box(appInfo.label));
-        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_ICON, AAFwk::String::Box(appInfo.icon));
-        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_INDEX, AAFwk::Integer::Box(appInfo.appIndex));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_LABEL,
+            AAFwk::String::Box(bundleResourceInfo.label));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_ICON,
+            AAFwk::String::Box(bundleResourceInfo.icon));
+        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_INDEX,
+            AAFwk::Integer::Box(appInfo.appIndex));
 
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_DEVICE_ID + "_" + deviceType,
             AAFwk::String::Box(deviceStatus.deviceId));
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_USER_ID +  "_" + deviceType,
             AAFwk::Integer::Box(deviceStatus.userId));
+        ANS_LOGI("FillRequestExtendInfo result: %{public}s %{public}s %{public}s %{public}d %{public}s %{public}d",
+            appInfo.name.c_str(), bundleResourceInfo.label.c_str(),
+            bundleResourceInfo.icon.c_str(), appInfo.appIndex,
+            deviceStatus.deviceId.c_str(), deviceStatus.userId);
         return;
     }
     ANS_LOGE("get bundleManager fail");

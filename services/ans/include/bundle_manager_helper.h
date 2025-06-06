@@ -164,6 +164,16 @@ public:
     ErrCode GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
         AppExecFwk::ApplicationInfo &appInfo);
 
+    /**
+     * @brief GetBundleResourceInfo.
+     * @param bundleName bundle name.
+     * @param bundleResourceInfo bundle resource.
+     * @param appIndex app index.
+     * @return Returns the query result. if succeed, retrun 0.
+     */
+    ErrCode GetBundleResourceInfo(const std::string &bundleName,
+        AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex);
+
 private:
     void Connect();
     void Disconnect();

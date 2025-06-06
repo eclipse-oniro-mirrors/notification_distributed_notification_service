@@ -315,5 +315,28 @@ bool BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t 
     ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(), appInfo.isSystemApp);
     return appInfo.isSystemApp;
 }
+
+ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName,
+    AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex)
+{
+    ErrCode result = 0;
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        ANS_LOGE("GetBundleInfo bundle proxy failed.");
+        return -1;
+    }
+    sptr<AppExecFwk::IBundleResource> bundleResourceProxy = bundleMgr_->GetBundleResourceProxy();
+    if (!bundleResourceProxy) {
+        ANS_LOGE("GetBundleInfo, get bundle resource proxy failed.");
+        return -1;
+    }
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL);
+    result = bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo, appIndex);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return result;
+}
 }  // namespace Notification
 }  // namespace OHOS
