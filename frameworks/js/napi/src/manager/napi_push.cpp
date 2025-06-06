@@ -111,7 +111,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     auto result = NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
     if (result != ERR_OK) {
         ANS_LOGE("Register failed, result is %{public}d", result);
-        ThrowError(env, Common::ErrorToExternal(result));
+        ThrowError(env, OHOS::Notification::ErrorToExternal(result));
     }
     return undefined;
 }

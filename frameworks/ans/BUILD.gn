@@ -72,6 +72,7 @@ ohos_shared_library("ans_innerkits") {
 
   sources = [
     "${core_path}/common/src/ans_convert_enum.cpp",
+    "${core_path}/common/src/ans_inner_errors.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_notification.cpp",
     "${core_path}/src/dialog_status_data.cpp",

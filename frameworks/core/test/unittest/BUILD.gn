@@ -16,6 +16,7 @@ group("unittest") {
   deps = []
 
   deps += [
+    "ans_core_common_test:unittest",
     "ans_image_util_test:unittest",
     "ans_manager_proxy_test:unittest",
     "ans_notification_annex_test:unittest",

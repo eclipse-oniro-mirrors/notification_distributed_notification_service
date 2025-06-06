@@ -366,6 +366,10 @@ ErrCode NotificationShellCommand::RunSetEnableCmd()
         resultReceiver_.append("set notification enabled success\n");
     } else {
         resultReceiver_.append("set notification enabled failed\n");
+        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        if (message != "") {
+            resultReceiver_.append("failed reason is " + message + "\n");
+        }
     }
     return ret;
 }
@@ -391,6 +395,10 @@ ErrCode NotificationShellCommand::RunGetDeviceStatusCmd()
         resultReceiver_.append("\n");
     } else {
         resultReceiver_.append("Get device status failed\n");
+        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        if (message != "") {
+            resultReceiver_.append("failed reason is " + message + "\n");
+        }
     }
     return ret;
 }
@@ -420,6 +428,10 @@ ErrCode NotificationShellCommand::RunSetDeviceStatusCmd()
         resultReceiver_.append("set device status success\n");
     } else {
         resultReceiver_.append("set device status failed\n");
+        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        if (message != "") {
+            resultReceiver_.append("failed reason is " + message + "\n");
+        }
     }
     return ret;
 }
@@ -448,6 +460,10 @@ ErrCode NotificationShellCommand::RunSetSmartReminderEnabledCmd()
         resultReceiver_.append("set collaboration switch success\n");
     } else {
         resultReceiver_.append("set collaboration switch failed\n");
+        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        if (message != "") {
+            resultReceiver_.append("failed reason is " + message + "\n");
+        }
     }
     return ret;
 }
@@ -486,6 +502,10 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledByBundleCmd()
         resultReceiver_.append("set bundle collaboration switch success\n");
     } else {
         resultReceiver_.append("set bundle collaboration switch failed\n");
+        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        if (message != "") {
+            resultReceiver_.append("failed reason is " + message + "\n");
+        }
     }
     return ret;
 }
@@ -525,6 +545,10 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledBySlotCmd()
         resultReceiver_.append("set slot collaboration switch success\n");
     } else {
         resultReceiver_.append("set slot collaboration switch failed\n");
+        std::string message = GetAnsErrMessage(ErrorToExternal(ret));
+        if (message != "") {
+            resultReceiver_.append("failed reason is " + message + "\n");
+        }
     }
     return ret;
 }

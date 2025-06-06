@@ -37,7 +37,7 @@ ErrCode DistributedOperationCallback::OnOperationCallback(const int32_t operatio
     }
 
     if (operationResult != ERR_OK) {
-        operationOnCallBack->operationResult = Common::ErrorToExternal(operationResult);
+        operationOnCallBack->operationResult = OHOS::Notification::ErrorToExternal(operationResult);
     } else {
         operationOnCallBack->operationResult = operationResult;
     }
