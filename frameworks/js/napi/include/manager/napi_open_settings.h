@@ -43,6 +43,7 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
 bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName);
 bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo, JsAnsCallbackComplete complete);
 void ProcessStatusChanged(int32_t code);
+void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo);
 
 class SettingsModalExtensionCallback {
 public:

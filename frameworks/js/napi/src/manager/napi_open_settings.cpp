@@ -84,28 +84,7 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
-        while (true) {
-            if (asynccallbackinfo->params.context != nullptr) {
-                ANS_LOGD("stage mode");
-                std::string bundleName {""};
-                if (isExist.exchange(true)) {
-                    ANS_LOGE("SettingsUIExtension existed");
-                    asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
-                    break;
-                }
-                bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName);
-                if (success) {
-                    asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
-                } else {
-                    asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-                }
-            } else {
-                asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
-            }
-            ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
-            break;
-        }
-
+        CreateExtension(asynccallbackinfo);
         ErrCode errCode = asynccallbackinfo->info.errorCode;
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
             ANS_LOGE("error, code is %{public}d.", errCode);
@@ -306,6 +285,28 @@ void ProcessStatusChanged(int32_t code)
     callbackInfo.release();
     workData.release();
     work.release();
+}
+
+void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
+{
+    if (asynccallbackinfo->params.context != nullptr) {
+        ANS_LOGD("stage mode");
+        std::string bundleName {""};
+        if (isExist.exchange(true)) {
+            ANS_LOGE("SettingsUIExtension existed");
+            asynccallbackinfo->info.errorCode = ERROR_SETTING_WINDOW_EXIST;
+            return;
+        }
+        bool success = CreateSettingsUIExtension(asynccallbackinfo->params.context, bundleName);
+        if (success) {
+            asynccallbackinfo->info.errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
+        } else {
+            asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        }
+    } else {
+        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+    }
+    ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
 }
 
 SettingsModalExtensionCallback::SettingsModalExtensionCallback()
