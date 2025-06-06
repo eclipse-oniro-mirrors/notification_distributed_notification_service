@@ -188,11 +188,12 @@ bool NotificationRequestBox::SetNotificationUserInput(const std::string& userInp
     return box_->PutValue(std::make_shared<TlvItem>(ACTION_USER_INPUT, userInput));
 }
 
-bool NotificationRequestBox::SetSmallIcon(const std::string& icon)
+bool NotificationRequestBox::SetSmallIcon(const std::shared_ptr<Media::PixelMap>& smallIcon)
 {
     if (box_ == nullptr) {
         return false;
     }
+    std::string icon = AnsImageUtil::PackImage(smallIcon);
     return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_ICON, icon));
 }
 
@@ -264,6 +265,14 @@ bool NotificationRequestBox::SetAutoDeleteTime(int64_t time)
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
+}
+
+bool NotificationRequestBox::SetAppIcon(const std::string& appIcon)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(APP_ICON, appIcon));
 }
 
 bool NotificationRequestBox::SetAppName(const std::string& appName)
@@ -519,6 +528,14 @@ bool NotificationRequestBox::GetAppMessageId(std::string& appMessageId) const
         return false;
     }
     return box_->GetStringValue(NOTIFICATION_APP_MESSAGE_ID, appMessageId);
+}
+
+bool NotificationRequestBox::GetAppIcon(std::string& appIcon) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(APP_ICON, appIcon);
 }
 
 bool NotificationRequestBox::GetAppName(std::string& appName) const

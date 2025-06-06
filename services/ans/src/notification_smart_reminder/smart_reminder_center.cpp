@@ -456,7 +456,6 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
         std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
         if (extendInfo == nullptr) {
             extendInfo = std::make_shared<AAFwk::WantParams>();
-            request->SetExtendInfo(extendInfo);
         }
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_NAME, AAFwk::String::Box(appInfo.name));
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_LABEL,
@@ -470,6 +469,7 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
             AAFwk::String::Box(deviceStatus.deviceId));
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_USER_ID +  "_" + deviceType,
             AAFwk::Integer::Box(deviceStatus.userId));
+        request->SetExtendInfo(extendInfo);
         ANS_LOGI("FillRequestExtendInfo result: %{public}s %{public}s %{public}s %{public}d %{public}s %{public}d",
             appInfo.name.c_str(), bundleResourceInfo.label.c_str(),
             bundleResourceInfo.icon.c_str(), appInfo.appIndex,
