@@ -89,7 +89,9 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
             ANS_LOGE("error, code is %{public}d.", errCode);
             NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
-            isExist.store(false);
+            if (errCode != ERROR_SETTING_WINDOW_EXIST) {
+                isExist.store(false);
+            }
             return;
         }
         if (!Init(env, asynccallbackinfo, NapiAsyncCompleteCallbackOpenSettings)) {
