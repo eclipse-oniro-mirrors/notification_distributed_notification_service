@@ -122,3 +122,9 @@ STATIC_LIVE_VIEW_UPLOAD:
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   CONTENT_TYPE: {type: INT32, desc: notification content type}
   OPERATE_FLAG: {type: INT32, desc: download liveview operate flag}
+
+REMINDER_TIMER_ERROR:
+  __BASE: {type: STATISTIC, level: MINOR, desc: reminder timer error}
+  TARGET_TIME: {type: UINT64, desc: target time}
+  TRIGGER_TIME: {type: UINT64, desc: trigger time}
+  ERROR_CODE: {type: UINT8, desc: error code}

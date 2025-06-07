@@ -829,6 +829,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
         ANSR_LOGW("bundle service or ability service not ready.");
         return;
     }
+    int64_t targetTime = static_cast<int64_t>(activeTriggerTime_.load());
     std::string typeInfo = type == TIME_ZONE_CHANGE ? "timeZone" : "dateTime";
     ANSR_LOGI("Refresh all reminders due to %{public}s changed by user", typeInfo.c_str());
     if (activeReminderId_ != -1) {
@@ -847,6 +848,10 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIME_CHANGE);
     } else if (type == TIME_ZONE_CHANGE) {
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE);
+    }
+
+    if (type == DATE_TIME_CHANGE) {
+        ReportTimerEvent(targetTime, true);
     }
     std::vector<sptr<ReminderRequest>> showImmediately;
     std::vector<sptr<ReminderRequest>> extensionReminders;
@@ -961,6 +966,7 @@ bool ReminderDataManager::ShouldAlert(const sptr<ReminderRequest> &reminder) con
 void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
 {
     int32_t reminderId = static_cast<int32_t>(want.GetIntParam(ReminderRequest::PARAM_REMINDER_ID, -1));
+    int64_t targetTime = static_cast<int64_t>(activeTriggerTime_.load());
     bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     ANSR_LOGI("Begin to show reminder(reminderId=%{public}d)", reminderId);
     if (reminderId == activeReminderId_) {
@@ -974,6 +980,7 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     if (HandleSysTimeChange(reminder)) {
         return;
     }
+    ReportTimerEvent(targetTime, false);
     std::vector<sptr<ReminderRequest>> extensionReminders;
     ShowActiveReminderExtendLocked(reminder, extensionReminders);
     HandleExtensionReminder(extensionReminders, NORMAL_CALLBACK);
