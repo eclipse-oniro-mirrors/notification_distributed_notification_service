@@ -239,7 +239,8 @@ public:
     }
 
     ErrCode SetNotificationsEnabledForSpecialBundle(
-        const std::string& deviceId, const sptr<NotificationBundleOption>& bundleOption, bool enabled) override
+        const std::string& deviceId, const sptr<NotificationBundleOption>& bundleOption, bool enabled,
+        bool updateUnEnableTime) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

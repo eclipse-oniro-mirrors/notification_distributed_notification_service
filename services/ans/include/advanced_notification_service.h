@@ -495,10 +495,12 @@ public:
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
      * @param enabled Indicates the flag that allows notification to be pulished.
+     * @param updateUnEnableTime Indicates whether update the unenable time.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SetNotificationsEnabledForSpecialBundle(
-        const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled) override;
+        const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption,
+        bool enabled, bool updateUnEnableTime = true) override;
 
     /**
      * @brief Sets whether the bundle allows the banner to display notification.

@@ -265,7 +265,7 @@ bool NotificationDialogManager::OnDialogCrashed(const std::string& bundleName, c
 
     ErrCode result = ans_.SetNotificationsEnabledForSpecialBundle(
         NotificationDialogManager::DEFAULT_DEVICE_ID,
-        bundleOption, false);
+        bundleOption, false, false);
     if (result != ERR_OK) {
         ANS_LOGE("SetNotificationsEnabledForSpecialBundle Failed, code is %{public}d", result);
         // Do not return here, need to clear the data

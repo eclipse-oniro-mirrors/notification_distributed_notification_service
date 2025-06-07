@@ -1149,7 +1149,7 @@ ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
         ANS_LOGE("Fail: bundle is nullptr.");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->SetNotificationsEnabledForSpecialBundle(deviceId, bo, enabled);
+    return proxy->SetNotificationsEnabledForSpecialBundle(deviceId, bo, enabled, true);
 }
 
 ErrCode AnsNotification::SetShowBadgeEnabledForBundle(const NotificationBundleOption &bundleOption, bool enabled)
