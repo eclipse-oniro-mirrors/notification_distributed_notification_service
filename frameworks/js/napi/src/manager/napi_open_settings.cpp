@@ -41,7 +41,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
         errorCode = ERROR_SETTING_WINDOW_EXIST;
     } else {
         errorCode = asynccallbackinfo->info.errorCode ==
-            ERR_OK ? ERR_OK : Common::ErrorToExternal(asynccallbackinfo->info.errorCode);
+            ERR_OK ? ERR_OK : OHOS::Notification::ErrorToExternal(asynccallbackinfo->info.errorCode);
     }
     if (asynccallbackinfo->info.isCallback) {
         Common::SetCallback(env, asynccallbackinfo->info.callback, errorCode, result, true);
