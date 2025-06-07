@@ -69,7 +69,7 @@ std::unique_ptr<ImageSource> ImageSource::CreateImageSource(std::unique_ptr<std:
 }
 
 std::unique_ptr<ImageSource> ImageSource::CreateImageSource(const uint8_t *data, uint32_t size,
-    const SourceOptions &opts, uint32_t &errorCode)
+    const SourceOptions &opts, uint32_t &errorCode, bool isUserBuffer)
 {
     errorCode = g_mockImageSourceCreateImageSourceErrorCode;
     if (g_mockImageSourceCreateImageSourceRet) {
