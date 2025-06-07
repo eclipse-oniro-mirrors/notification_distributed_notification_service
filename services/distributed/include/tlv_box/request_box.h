@@ -46,13 +46,14 @@ public:
     bool SetNotificationBigPicture(const std::shared_ptr<Media::PixelMap>& bigPicture);
     bool SetNotificationActionName(const std::string& actionName);
     bool SetNotificationUserInput(const std::string& userInput);
-    bool SetSmallIcon(const std::string& icon);
+    bool SetSmallIcon(const std::shared_ptr<Media::PixelMap>& smallIcon);
     bool SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon, int32_t deviceType);
     bool SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon, int32_t deviceType);
     bool SetCommonLiveView(const std::vector<uint8_t>& byteSequence);
     bool SetFinishTime(int64_t time);
     bool SetAutoDeleteTime(int64_t time);
     bool SetAppMessageId(const std::string& appMessageId);
+    bool SetAppIcon(const std::string& appIcon);
     bool SetAppName(const std::string& appName);
     bool SetAppLabel(const std::string& appLabel);
     bool SetAppIndex(const int32_t& appIndex);
@@ -84,6 +85,7 @@ public:
     bool GetFinishTime(int64_t& time) const;
     bool GetAutoDeleteTime(int64_t& time) const;
     bool GetAppMessageId(std::string& appMessageId) const;
+    bool GetAppIcon(std::string& appIcon) const;
     bool GetAppName(std::string& appName) const;
     bool GetAppLabel(std::string& appLabel) const;
     bool GetAppIndex(int32_t& appIndex) const;

@@ -52,6 +52,7 @@ static const std::string EXTENDINFO_DEVICE_USERID = "userId";
 static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
 static const std::string EXTENDINFO_ENABLE_CHECK = "check";
 static const std::string EXTENDINFO_DEVICETYPE = "deviceType";
+static const std::string EXTENDINFO_LOCALTYPE = "localType";
 
 DistributedPublishService& DistributedPublishService::GetInstance()
 {
@@ -358,6 +359,9 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
     if (notificationRequest->GetOverlayIcon() != nullptr) {
         requestBox->SetOverlayIcon(notificationRequest->GetOverlayIcon(), deviceType);
     }
+    if (notificationRequest->GetLittleIcon() != nullptr) {
+        requestBox->SetSmallIcon(notificationRequest->GetLittleIcon());
+    }
 
     auto params = notificationRequest->GetExtendInfo();
     if (params == nullptr) {
@@ -374,7 +378,7 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
     }
     content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_ICON);
     if (!content.empty()) {
-        requestBox->SetSmallIcon(content);
+        requestBox->SetAppIcon(content);
     }
     int32_t appIndex = params->GetIntParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, 0);
     requestBox->SetAppIndex(appIndex);
@@ -531,11 +535,19 @@ void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box
         if (box.GetAppName(info)) {
             extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME, AAFwk::String::Box(info));
         }
+        if (box.GetAppIcon(info)) {
+            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_ICON, AAFwk::String::Box(info));
+        }
         if (box.GetDeviceId(info)) {
             extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID, AAFwk::String::Box(info));
+            DistributedDeviceInfo peerDevice;
+            if (DistributedDeviceService::GetInstance().GetDeviceInfo(info, peerDevice)) {
+                std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
+                extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICETYPE, AAFwk::String::Box(deviceType));
+            }
         }
-        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(local.deviceType_);
-        extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICETYPE, AAFwk::String::Box(deviceType));
+        std::string localType = DistributedDeviceService::DeviceTypeToTypeString(local.deviceType_);
+        extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_LOCALTYPE, AAFwk::String::Box(localType));
         int32_t appIndex;
         if (box.GetAppIndex(appIndex)) {
             extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, AAFwk::Integer::Box(appIndex));
@@ -548,6 +560,7 @@ void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box
             request->SetReceiverUserId(userId);
         }
     }
+    extendInfo->DumpInfo(0);
     request->SetExtendInfo(extendInfo);
 }
 
