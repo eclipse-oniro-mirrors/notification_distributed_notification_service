@@ -1229,12 +1229,5 @@ ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type)
 
     return result;
 }
-
-ErrCode AdvancedNotificationService::GetOverlayIconScaleSize(uint32_t& scaleSize)
-{
-    ANS_LOGD("%{public}s", __FUNCTION__);
-    scaleSize = NotificationConfigParse::GetInstance()->GetOverlayIconScaleSize();
-    return ERR_OK;
-}
 }  // namespace Notification
 }  // namespace OHOS

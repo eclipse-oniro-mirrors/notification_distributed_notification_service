@@ -343,11 +343,6 @@ const std::shared_ptr<Media::PixelMap> NotificationRequest::GetOverlayIcon() con
     return overlayIcon_;
 }
 
-void NotificationRequest::ResetOverlayIcon() const
-{
-    overlayIcon_ = nullptr;
-}
-
 void NotificationRequest::SetClassification(const std::string &classification)
 {
     classification_ = classification;

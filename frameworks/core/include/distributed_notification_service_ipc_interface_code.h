@@ -111,7 +111,6 @@ namespace Notification {
         REGISTER_PUSH_CALLBACK,
         UNREGISTER_PUSH_CALLBACK,
         DISTRIBUTE_OPERATION,
-        GET_OVERLAY_ICON_SCALE_SIZE,
         // ans_subscriber_interface
         ON_CONNECTED,
         ON_DISCONNECTED,

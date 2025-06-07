@@ -477,31 +477,6 @@ void NotificationConfigParse::GetReportTrustListConfig()
     return;
 }
 
-uint32_t NotificationConfigParse::GetOverlayIconScaleSize() const
-{
-    uint32_t ret;
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    if (!GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("Fail to get JsonPoint CCM config file");
-        return 0;
-    }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
-        ANS_LOGW("GetOverlayIconScaleSize not found jsonKey");
-        return 0;
-    }
-    nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
-    if (affects.is_null() || affects.empty()) {
-        ANS_LOGE("GetOverlayIconScaleSize failed as invalid json key.");
-        return 0;
-    }
-    if (affects.contains(CFG_KEY_OVERLAYICON_SCALE_SIZE)) {
-        return affects[CFG_KEY_OVERLAYICON_SCALE_SIZE];
-    }
-    return 0;
-}
-
 bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
 {
     return reporteTrustSet_.count(bundleName);
