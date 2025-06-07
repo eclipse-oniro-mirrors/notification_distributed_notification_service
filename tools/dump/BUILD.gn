@@ -69,7 +69,11 @@ ohos_executable("anm") {
   ]
   external_deps += component_external_deps
 
-  install_enable = true
+  install_enable = false
+  if (build_variant == "root") {
+    install_enable = false
+  }
+
   part_name = "${component_name}"
   subsystem_name = "${subsystem_name}"
 }
