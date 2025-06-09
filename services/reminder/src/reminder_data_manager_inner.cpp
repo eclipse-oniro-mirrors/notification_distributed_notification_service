@@ -396,7 +396,8 @@ void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool 
         return;
     }
     uint8_t errorCode = isSysTimeChanged ? 0 : 1;
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, "REMINDER_TIMER_ERROR",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_CODE", errorCode);
 #endif
 }
