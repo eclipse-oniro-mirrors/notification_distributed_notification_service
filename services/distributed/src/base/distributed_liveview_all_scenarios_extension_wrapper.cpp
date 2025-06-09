@@ -64,7 +64,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("distributed subscribe all conncet failed, error: %{public}s", dlerror());
         return;
     }
-    unSubscribeHandler_ = (UnSUBSCRIBE_ALL_CONNECT)dlsym(ExtensionHandle_, "UnSubscribeAllConnect");
+    unSubscribeHandler_ = (UNSUBSCRIBE_ALL_CONNECT)dlsym(ExtensionHandle_, "UnSubscribeAllConnect");
     if (unSubscribeHandler_ == nullptr) {
         ANS_LOGE("distributed unsubscribe all conncet failed, error: %{public}s", dlerror());
         return;

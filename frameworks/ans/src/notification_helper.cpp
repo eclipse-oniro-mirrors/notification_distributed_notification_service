@@ -652,16 +652,16 @@ ErrCode NotificationHelper::SetAdditionConfig(const std::string &key, const std:
 }
 
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const std::string deveiceId)
+    const std::string deviceId)
 {
-    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, deveiceId);
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, deviceId);
 }
 
 ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-    const uint32_t controlFlag, const std::string deveiceId, int32_t userId)
+    const uint32_t controlFlag, const std::string deviceId, int32_t userId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(deviceType, status, controlFlag,
-        deveiceId, userId);
+        deviceId, userId);
 }
 
 ErrCode NotificationHelper::SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,

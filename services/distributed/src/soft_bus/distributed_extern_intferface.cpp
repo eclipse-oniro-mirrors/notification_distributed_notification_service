@@ -38,12 +38,13 @@ SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t devi
     return DistributedService::GetInstance().InitService(deviceId, deviceType);
 }
 
-SYMBOL_EXPORT void AddDevice(const std::string &deviceId, uint16_t deviceType,
+SYMBOL_EXPORT void AddDevice(const std::string &deviceId, const std::string &udid, uint16_t deviceType,
     const std::string &networkId)
 {
     ANS_LOGI("InitLocalDevice %{public}s %{public}d %{public}s.", StringAnonymous(deviceId).c_str(),
         (int32_t)(deviceType), StringAnonymous(networkId).c_str());
     DistributedDeviceInfo peerDevice = DistributedDeviceInfo(deviceType, deviceId, networkId);
+    peerDevice.udid_ = udid;
     DistributedClient::GetInstance().AddDevice(peerDevice);
     DistributedService::GetInstance().AddDevice(peerDevice);
 }
@@ -72,7 +73,7 @@ SYMBOL_EXPORT void RefreshDevice(const std::string &deviceId, uint16_t deviceTyp
 
 SYMBOL_EXPORT void ReleaseLocalDevice()
 {
-    DistributedService::GetInstance().DestoryService();
+    DistributedService::GetInstance().DestroyService();
 }
 
 SYMBOL_EXPORT void InitHACallBack(

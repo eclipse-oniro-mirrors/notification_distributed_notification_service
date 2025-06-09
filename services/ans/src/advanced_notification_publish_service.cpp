@@ -201,6 +201,7 @@ ErrCode AdvancedNotificationService::CollaborateFilter(const sptr<NotificationRe
         ANS_LOGW("Collaborate live view auth %{public}d %{public}d.", result, switchEnabled);
         return ERR_ANS_NOT_ALLOWED;
     }
+    switchEnabled = false;
     NotificationConstant::SlotType slotType = request->GetSlotType();
     if (slotType == NotificationConstant::SlotType::LIVE_VIEW) {
         result = NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(

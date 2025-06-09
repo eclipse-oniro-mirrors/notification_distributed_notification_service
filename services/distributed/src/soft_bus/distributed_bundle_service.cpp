@@ -295,7 +295,7 @@ void DistributedBundleService::SetDeviceBundleList(const std::shared_ptr<TlvBox>
             device.deviceType_);
         return;
     }
-    auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+    auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_, operatorType, bundleList);
     ANS_LOGI("SetDeviceBundleList %{public}s %{public}s %{public}d %{public}zu %{public}d", deviceType.c_str(),
         StringAnonymous(deviceId).c_str(), operatorType, bundleList.size(), ret);
 }

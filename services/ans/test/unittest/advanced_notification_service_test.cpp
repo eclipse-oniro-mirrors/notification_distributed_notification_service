@@ -298,8 +298,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03000,
 {
     const std::string device = "current";
     const uint32_t status = 1;
-    std::string deveiceId = "";
-    ASSERT_EQ((int)advancedNotificationService_->SetTargetDeviceStatus(device, status, deveiceId),
+    std::string deviceId = "";
+    ASSERT_EQ((int)advancedNotificationService_->SetTargetDeviceStatus(device, status, deviceId),
               (int)ERR_OK);
 }
 

@@ -92,7 +92,7 @@ void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &reque
     }
     std::string deviceId = params->GetStringParam("notification_collaboration_deviceId_" +
         DistributedDeviceService::DeviceTypeToTypeString(peerDevice_.deviceType_));
-    if (deviceId.empty() || deviceId != peerDevice_.deviceId_) {
+    if (deviceId.empty() || deviceId != peerDevice_.udid_) {
         ANS_LOGI("Dans OnConsumed invalid device %{public}s %{public}s.", StringAnonymous(deviceId).c_str(),
             StringAnonymous(peerDevice_.deviceId_).c_str());
         return;

@@ -1152,7 +1152,7 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-        const std::string &deveiceId) override;
+        const std::string &deviceId) override;
 
     /**
      * @brief Set the status of the target device.
@@ -1162,7 +1162,7 @@ public:
      * @return Returns set result.
      */
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-        uint32_t controlFlag, const std::string &deveiceId, int32_t userId) override;
+        uint32_t controlFlag, const std::string &deviceId, int32_t userId) override;
 
     ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
         int operatorType, const std::vector<std::string>& bundleList) override;

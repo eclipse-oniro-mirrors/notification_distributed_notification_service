@@ -539,11 +539,11 @@ void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box
             extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_ICON, AAFwk::String::Box(info));
         }
         if (box.GetDeviceId(info)) {
-            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID, AAFwk::String::Box(info));
             DistributedDeviceInfo peerDevice;
             if (DistributedDeviceService::GetInstance().GetDeviceInfo(info, peerDevice)) {
                 std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
                 extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICETYPE, AAFwk::String::Box(deviceType));
+                extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID, AAFwk::String::Box(peerDevice.udid_));
             }
         }
         std::string localType = DistributedDeviceService::DeviceTypeToTypeString(local.deviceType_);

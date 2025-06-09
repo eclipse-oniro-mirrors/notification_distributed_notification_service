@@ -88,7 +88,7 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
     return 0;
 }
 
-void DistributedService::DestoryService()
+void DistributedService::DestroyService()
 {
     if (serviceQueue_ == nullptr) {
         ANS_LOGE("Check handler is null.");
@@ -291,16 +291,17 @@ void DistributedService::HandleBundlesEvent(const std::string& bundleName, const
 
 void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo)
 {
-    DistributedDeviceService::GetInstance().SetDeviceSyncData(changeInfo.deviceId,
-        DistributedDeviceService::DEVICE_USAGE, true);
     DistributedDeviceInfo device;
-    if (DistributedDeviceService::GetInstance().GetDeviceInfo(changeInfo.deviceId, device)) {
-        if (!DistributedDeviceService::GetInstance().IsSubscribeAllConnect()) {
-            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
-            DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
-        }
-        DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(changeInfo.deviceId, device)) {
+        return;
     }
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(device.deviceId_,
+        DistributedDeviceService::DEVICE_USAGE, true);
+    if (!DistributedDeviceService::GetInstance().IsSubscribeAllConnect()) {
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
+        DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
+    }
+    DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
 }
 #else
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
@@ -368,15 +369,8 @@ void DistributedService::OnApplicationInfnChanged(const std::string& bundleName)
 
 void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage)
 {
-    int32_t type = 0;
     DistributedDeviceInfo peerDevice;
     NotifticationMatchBox matchBox = NotifticationMatchBox(boxMessage);
-    if (!matchBox.GetLocalDeviceType(type)) {
-        ANS_LOGI("Dans handle match device type failed.");
-        return;
-    } else {
-        peerDevice.deviceType_ = static_cast<uint16_t>(type);
-    }
     if (!matchBox.GetLocalDeviceId(peerDevice.deviceId_)) {
         ANS_LOGI("Dans handle match device id failed.");
         return;
