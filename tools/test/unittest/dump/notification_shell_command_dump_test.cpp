@@ -60,6 +60,21 @@ static char g_dumpActiveUser[] =
 "  --user-id, -u  <userId>       dump the info filter by the specified userId\n"
 "  --receiver, -r  <userId>       dump the info filter by the specified receiver userId\n";
 
+constexpr char SETTING_HELP_MSG[] =
+    "usage: anm setting [<options>]\n"
+    "options list:\n"
+    "  --help, -h                   help menu\n"
+    "  --recent-count -c <number>   set the max count of recent notifications keeping in memory\n"
+    "  --enable-notification -e <bundleName:uid:enable> set notification enabled for the bundle,"
+    " eg: -e com.example:10100:1\n"
+    "  --set-device-status -d <device:status> set device status, eg: -d device:1\n"
+    "  --collaboration-switch -k <device:enable> set collaboration status, eg: -k wearable:1\n"
+    "  --collaboration-switch-bundle -b <device:bundleName:bundleUid:status> set bundle collaboration switch status\n"
+    "      eg: -b wearable:example:10100:1\n"
+    "  --collaboration-switch-slot -o <device:slotType:status> set slot collaboration switch status\n"
+    "  --get-device-status -o <device> set device status\n"
+    "      eg: -o wearable:0:1\n";
+
 static char g_enableErrorInformation[] =
 "error: option 'e' requires a value.\n"
 "usage: anm setting [<options>]\n"
@@ -566,7 +581,8 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_1700, Function | Medium
 
     NotificationShellCommand cmd(argc, argv);
 
-    EXPECT_EQ(cmd.ExecCommand(), "set notification enabled failed\n");
+    EXPECT_EQ(cmd.ExecCommand(),
+        "set notification enabled failed\nfailed reason is Failed to connect to the service\n");
 }
 
 /**
@@ -652,6 +668,444 @@ HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Dump_2100, Function | Medium
     NotificationShellCommand cmd(argc, argv);
 
     EXPECT_EQ(cmd.ExecCommand(), "set notification enabled success\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -g phone" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2100, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-g",
+        (char *)"phone",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "Get device status success: 0\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -g 2in1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2101, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-g",
+        (char *)"2in1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(),
+        "Get device status failed\nfailed reason is Failed to connect to the service\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -g phone" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2102, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-g",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: option 'g' requires a value.\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -g phone" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2103, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-g",
+        (char *)"",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "error: getting information error\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -d phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2200, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-d",
+        (char *)"phone:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "set device status success\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -d 2in1:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2201, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-d",
+        (char *)"2in1:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "set device status failed\nfailed reason is Failed to connect to the service\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -d phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2202, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-d",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: option 'd' requires a value.\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -d 2in1:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2203, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-d",
+        (char *)"2in1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: setting information error\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -k phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2300, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-k",
+        (char *)"phone:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "set collaboration switch success\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -k phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2301, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-k",
+        (char *)"2in1:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(),
+        "set collaboration switch failed\nfailed reason is Failed to connect to the service\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -k phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2302, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-k",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: option 'k' requires a value.\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -k phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2303, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-k",
+        (char *)"phone:1:",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: setting information error\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2400, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-b",
+        (char *)"phone:bundleName:10001:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "set bundle collaboration switch success\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2401, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-b",
+        (char *)"2in1:bundleName:10001:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(),
+        "set bundle collaboration switch failed\nfailed reason is Failed to connect to the service\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2402, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-b",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: option 'b' requires a value.\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2403, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-b",
+        (char *)"2in1:bundleName:10001:1:",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: setting information error\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2500, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-o",
+        (char *)"phone:2:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(), "set slot collaboration switch success\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2501, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-o",
+        (char *)"2in1:2:1",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    EXPECT_EQ(cmd.ExecCommand(),
+        "set slot collaboration switch failed\nfailed reason is Failed to connect to the service\n");
+}
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2502, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-o",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: option 'o' requires a value.\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
+}
+
+
+/**
+ * @tc.number: Anm_Command_Dump_2100
+ * @tc.name: RunAsSettingCommand
+ * @tc.desc: Verify the "anm setting -b phone:1" command.
+ */
+HWTEST_F(AnmManagerDumpTest, Anm_Notification_Shell_Setting_2503, Function | MediumTest | Level1)
+{
+    char *argv[] = {
+        (char *)toolName_.c_str(),
+        (char *)enable_.c_str(),
+        (char *)"-o",
+        (char *)"2in1:2:1:",
+        (char *)"",
+    };
+    int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+
+    NotificationShellCommand cmd(argc, argv);
+
+    std::string result = "error: setting information error\n";
+    result.append(SETTING_HELP_MSG);
+    EXPECT_EQ(cmd.ExecCommand(), result);
 }
 
 /**
