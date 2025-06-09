@@ -306,7 +306,7 @@ void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
             asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
         }
     } else {
-        asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;
+        ANS_LOGD("un stage mode");
     }
     ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
 }
