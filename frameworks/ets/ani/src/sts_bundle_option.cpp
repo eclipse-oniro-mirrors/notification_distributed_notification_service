@@ -57,7 +57,7 @@ ani_object GetAniArrayBundleOption(ani_env* env,
         ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
         return nullptr;
     }
-    ani_size index = 0;
+    int32_t index = 0;
     for (auto &option : bundleOptions) {
         std::shared_ptr<BundleOption> optSp = std::make_shared<BundleOption>(option);
         ani_object item;
