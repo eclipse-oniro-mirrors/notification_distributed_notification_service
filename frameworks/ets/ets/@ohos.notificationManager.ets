@@ -246,11 +246,11 @@ export default namespace notificationManager {
             }
         }
         if (slot.desc !== undefined && slot.desc?.trim() === '') {
-			return errorParamInvalid;
-		}
+            return errorParamInvalid;
+        }
         if (slot.sound !== undefined && slot.sound?.trim() === '') {
-			return errorParamInvalid;
-		}
+            return errorParamInvalid;
+        }
         if (slot.vibrationValues !== undefined && slot.vibrationValues?.length === 0) {
             return errorParamInvalid;
         }
@@ -310,183 +310,240 @@ export default namespace notificationManager {
     function isInvalidContent(normal?: NotificationBasicContent): boolean
     {
         if (normal === null) {
-			return false;
-		}
-		if (!normal?.title || normal?.title?.trim() === '') {
-			return false;
-		}
-		if (!normal?.text || normal?.text?.trim() === '') {
-			return false;
-		}
-		if (normal?.additionalText !== undefined && normal?.additionalText?.trim() === '') {
-			return false;
-		}
-		if (normal?.lockscreenPicture != undefined && !(normal?.lockscreenPicture instanceof image.PixelMap)) {
-			return false;
-		}
-        
+            return false;
+        }
+        if (!normal?.title || normal?.title?.trim() === '') {
+            return false;
+        }
+        if (!normal?.text || normal?.text?.trim() === '') {
+            return false;
+        }
+        if (normal?.additionalText !== undefined && normal?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (normal?.lockscreenPicture != undefined && !(normal?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
         return true;
     }
     function isInvalidLongText(longText?: NotificationLongTextContent): boolean
     {
         if (longText === null) {
-			return false;
-		}
-		if (!longText?.longText || longText?.longText?.trim() === '') {
-			return false;
-		}
-		if (!longText?.briefText || longText?.briefText?.trim() === '') {
-			return false;
-		}
-		if (!longText?.expandedTitle || longText?.expandedTitle?.trim() === '') {
-			return false;
-		}
+            return false;
+        }
+        if (!longText?.title || longText?.title?.trim() === '') {
+            return false;
+        }
+        if (!longText?.text || longText?.text?.trim() === '') {
+            return false;
+        }
+        if (longText?.additionalText !== undefined && longText?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (longText?.lockscreenPicture != undefined && !(longText?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (!longText?.longText || longText?.longText?.trim() === '') {
+            return false;
+        }
+        if (!longText?.briefText || longText?.briefText?.trim() === '') {
+            return false;
+        }
+        if (!longText?.expandedTitle || longText?.expandedTitle?.trim() === '') {
+            return false;
+        }
         return true;
     }
     function isInvalidMultiLine(multiLine?: NotificationMultiLineContent): boolean
     {
         if (multiLine === null) {
-			return false
-		}
-		if (!multiLine?.briefText || multiLine?.briefText.trim() === '') {
-			return false;
-		}
-		if (!multiLine?.longTitle || multiLine?.longTitle.trim() === '') {
-			return false;
-		}
-		if (multiLine?.lines?.length === 0) {
-			return false;
-		}
-        
+            return false
+        }
+        if (!multiLine?.title || multiLine?.title?.trim() === '') {
+            return false;
+        }
+        if (!multiLine?.text || multiLine?.text?.trim() === '') {
+            return false;
+        }
+        if (multiLine?.additionalText !== undefined && multiLine?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (multiLine?.lockscreenPicture != undefined && !(multiLine?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (!multiLine?.briefText || multiLine?.briefText.trim() === '') {
+            return false;
+        }
+        if (!multiLine?.longTitle || multiLine?.longTitle.trim() === '') {
+            return false;
+        }
+        if (multiLine?.lines?.length === 0) {
+            return false;
+        }
         return true;
     }
     function isInvalidPicture(picture?: NotificationPictureContent): boolean
     {
         if (picture === null) {
-			return false;
-		}
-		if (!picture?.briefText || picture?.briefText?.trim() === '') {
-			return false;
-		}
-		if (!picture?.expandedTitle || picture?.expandedTitle?.trim() === '') {
-			return false;
-		}
-		if (!(picture?.picture instanceof image.PixelMap)) {
-			return false;
-		}
+            return false;
+        }
+        if (!picture?.title || picture?.title?.trim() === '') {
+            return false;
+        }
+        if (!picture?.text || picture?.text?.trim() === '') {
+            return false;
+        }
+        if (picture?.additionalText !== undefined && picture?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (picture?.lockscreenPicture != undefined && !(picture?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (!picture?.briefText || picture?.briefText?.trim() === '') {
+            return false;
+        }
+        if (!picture?.expandedTitle || picture?.expandedTitle?.trim() === '') {
+            return false;
+        }
+        if (!(picture?.picture instanceof image.PixelMap)) {
+            return false;
+        }
         return true;
     }
     function isInvalidSystemLiveView(systemLiveView?: NotificationSystemLiveViewContent): boolean
     {
         if (systemLiveView === null) {
-			return false
-		}
-		if (systemLiveView?.capsule !== undefined && systemLiveView?.capsule === null) {
-			return false
-		}
-		if (systemLiveView?.capsule?.title !== undefined && systemLiveView?.capsule?.title?.trim() === '') {
-			return false;
-		}
-		if (systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
-			return false;
-		}
-		if (systemLiveView?.capsule?.backgroundColor != undefined && systemLiveView?.capsule?.backgroundColor?.trim() === '') {
-			return false;
-		}
-		if (systemLiveView?.capsule?.content != undefined && systemLiveView?.capsule?.content?.trim() === '') {
-			return false;
-		}
-		if (systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
-			return false;
-		}
-		if (systemLiveView?.button !== undefined && systemLiveView?.button === null) {
-			return false;
-		}
-		if (systemLiveView?.button?.names != undefined && systemLiveView?.button?.names?.length === 0) {
-			return false;
-		}
-		if (systemLiveView?.button?.icons != undefined && systemLiveView?.button?.icons?.length === 0) {
-			return false;
-		}
-		if (systemLiveView?.button?.iconsResource != undefined && systemLiveView?.button?.iconsResource?.length === 0) {
-			return false;
-		}
-		
-		if (systemLiveView?.cardButtons !== undefined && systemLiveView?.cardButtons?.length === 0) {
-			return false;
-		}
+            return false
+        }
+        if (!systemLiveView?.title || systemLiveView?.title?.trim() === '') {
+            return false;
+        }
+        if (!systemLiveView?.text || systemLiveView?.text?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.additionalText !== undefined && systemLiveView?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.lockscreenPicture != undefined && !(systemLiveView?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (systemLiveView?.capsule !== undefined && systemLiveView?.capsule === null) {
+            return false
+        }
+        if (systemLiveView?.capsule?.title !== undefined && systemLiveView?.capsule?.title?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
+            return false;
+        }
+        if (systemLiveView?.capsule?.backgroundColor != undefined && systemLiveView?.capsule?.backgroundColor?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.capsule?.content != undefined && systemLiveView?.capsule?.content?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
+            return false;
+        }
+        if (systemLiveView?.button !== undefined && systemLiveView?.button === null) {
+            return false;
+        }
+        if (systemLiveView?.button?.names != undefined && systemLiveView?.button?.names?.length === 0) {
+            return false;
+        }
+        if (systemLiveView?.button?.icons != undefined && systemLiveView?.button?.icons?.length === 0) {
+            return false;
+        }
+        if (systemLiveView?.button?.iconsResource != undefined && systemLiveView?.button?.iconsResource?.length === 0) {
+            return false;
+        }
         
+        if (systemLiveView?.cardButtons !== undefined && systemLiveView?.cardButtons?.length === 0) {
+            return false;
+        }
         return true;
     }
     function isInvalidLiveView(liveView?: NotificationLiveViewContent): boolean
     {
         if (liveView === null) {
-			return false;
-		}
-		if (liveView?.extraInfo !== undefined && liveView?.extraInfo === null) {
-			return false;
-		}
-		if (liveView?.pictureInfo !== undefined && liveView?.pictureInfo === null) {
-			return false;
-		}
+            return false;
+        }
+        if (!liveView?.title || liveView?.title?.trim() === '') {
+            return false;
+        }
+        if (!liveView?.text || liveView?.text?.trim() === '') {
+            return false;
+        }
+        if (liveView?.additionalText !== undefined && liveView?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (liveView?.lockscreenPicture != undefined && !(liveView?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (liveView?.extraInfo !== undefined && liveView?.extraInfo === null) {
+            return false;
+        }
+        if (liveView?.pictureInfo !== undefined && liveView?.pictureInfo === null) {
+            return false;
+        }
         return true;
     }
     function isInvalidTemplate(template?: NotificationTemplate): boolean
     {
         if (template === null) {
-			return false;
-		}
-		if (template?.name != undefined && template?.name?.trim() === '') {
-			return false;
-		}
-		if (template?.data != undefined && template?.data === null) {
-			return false;
-		}
+            return false;
+        }
+        if (template?.name != undefined && template?.name?.trim() === '') {
+            return false;
+        }
+        if (template?.data != undefined && template?.data === null) {
+            return false;
+        }
         return true;
     }
     function isInvalidDistributedOption(distributedOption?: DistributedOptions): boolean
     {
         if (distributedOption === null) {
-			return false
-		}
-		if (distributedOption?.supportDisplayDevices != undefined && distributedOption?.supportDisplayDevices?.length === 0) {
-			return false;
-		}
-		if (distributedOption?.supportOperateDevices != undefined && distributedOption?.supportOperateDevices?.length === 0) {
-			return false;
-		}
+            return false
+        }
+        if (distributedOption?.supportDisplayDevices != undefined && distributedOption?.supportDisplayDevices?.length === 0) {
+            return false;
+        }
+        if (distributedOption?.supportOperateDevices != undefined && distributedOption?.supportOperateDevices?.length === 0) {
+            return false;
+        }
         return true;
     }
     function isInvalidUnifiedGroupInfo(unifiedGroupInfo?: UnifiedGroupInfo): boolean
     {
         if (unifiedGroupInfo === null) {
-			return false;
-		}
-		if (unifiedGroupInfo?.key != undefined && unifiedGroupInfo?.key?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.title != undefined && unifiedGroupInfo?.title?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.content != undefined && unifiedGroupInfo?.content?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.sceneName != undefined && unifiedGroupInfo?.sceneName?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.extraInfo != undefined && unifiedGroupInfo?.extraInfo == null) {
-			return false;
-		}
+            return false;
+        }
+        if (unifiedGroupInfo?.key != undefined && unifiedGroupInfo?.key?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.title != undefined && unifiedGroupInfo?.title?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.content != undefined && unifiedGroupInfo?.content?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.sceneName != undefined && unifiedGroupInfo?.sceneName?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.extraInfo != undefined && unifiedGroupInfo?.extraInfo == null) {
+            return false;
+        }
         return true;
     }
     function isInvalidBundleOption(bundleOption?: BundleOption): boolean
     {
         if (bundleOption === null) {
-			return false;
-		}
-		if (bundleOption?.bundle != undefined && bundleOption?.bundle?.trim() === '') {
-			return false;
-		}
+            return false;
+        }
+        if (bundleOption?.bundle != undefined && bundleOption?.bundle?.trim() === '') {
+            return false;
+        }
         return true;
     }
     function isInvalidParameter(request: NotificationRequest): BusinessError

@@ -108,7 +108,6 @@ export interface NotificationRequest {
     readonly creatorUid?: number;
     readonly creatorPid?: number;
     readonly creatorUserId?: number;
-    readonly creatorInstanceKey?: number;
     sound?: string;
     classification?: string;
     readonly hashCode?: string;
@@ -160,7 +159,6 @@ class NotificationRequestInner implements NotificationRequest {
     public readonly creatorUid?: number | undefined;
     public readonly creatorPid?: number | undefined;
     public readonly creatorUserId?: number | undefined;
-    public readonly creatorInstanceKey?: number | undefined;
     public sound?: string | undefined;
     public classification?: string | undefined;
     public readonly hashCode?: string | undefined;
