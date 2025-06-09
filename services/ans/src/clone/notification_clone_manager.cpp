@@ -36,6 +36,7 @@ namespace Notification {
 
 const int ANS_CLONE_ERROR = -1;
 const int32_t DEFAULT_APP_INDEX = -1;
+constexpr int32_t DEFAULT_ANCO_APP_INDEX = 0;
 constexpr uint64_t NOTIFICATION_FDSAN_TAG = 0xD001203;
 constexpr uint64_t COMMON_FDSAN_TAG = 0;
 constexpr const char *CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
@@ -308,6 +309,9 @@ void NotificationCloneManager::OnDhRestoreStart(const std::string bundleName, co
     for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
         if (iter->second != nullptr && iter->second->isDhSource()) {
             iter->second->OnRestoreStart(bundleName, DEFAULT_APP_INDEX, ZERO_USERID, uid);
+        }
+        if (iter->first == CLONE_ITEM_DISTURB && iter->second != nullptr) {
+            iter->second->OnRestoreStart(bundleName, DEFAULT_ANCO_APP_INDEX, DEFAULT_USER_ID, uid);
         }
     }
 }

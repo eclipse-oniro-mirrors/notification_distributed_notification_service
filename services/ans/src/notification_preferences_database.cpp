@@ -977,7 +977,7 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
             if (result != ERR_OK) {
                 return false;
             }
-            if (userid != currentUserId) {
+            if (userid != currentUserId && !(currentUserId == DEFAULT_USER_ID && userid == ZERO_USER_ID)) {
                 continue;
             }
             NotificationBundleOption obj(value, StringToInt(uidItem->second));
