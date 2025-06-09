@@ -281,9 +281,9 @@ interface OHOS.Notification.IAnsManager {
 
     void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id);
 
-    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] String deveiceId);
+    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] String deviceId);
 
-    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] unsigned int controlFlag, [in] String deveiceId, [in] int userId);
+    void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] unsigned int controlFlag, [in] String deviceId, [in] int userId);
 
     void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile);
 

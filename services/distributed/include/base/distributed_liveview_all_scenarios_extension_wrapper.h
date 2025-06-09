@@ -36,7 +36,7 @@ public:
     typedef ErrCode (*TRIGGER_PUSH_WANT_AGENT)(const sptr<NotificationRequest> &request,
         int32_t actionType, const AAFwk::WantParams extraInfo);
     typedef ErrCode (*SUBSCRIBE_ALL_CONNECT)();
-    typedef ErrCode (*UnSUBSCRIBE_ALL_CONNECT)();
+    typedef ErrCode (*UNSUBSCRIBE_ALL_CONNECT)();
     ErrCode UpdateLiveviewDecodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
         const AAFwk::WantParams extraInfo);
@@ -45,7 +45,7 @@ public:
 private:
     void* ExtensionHandle_ = nullptr;
     SUBSCRIBE_ALL_CONNECT subscribeHandler_ = nullptr;
-    UnSUBSCRIBE_ALL_CONNECT unSubscribeHandler_ = nullptr;
+    UNSUBSCRIBE_ALL_CONNECT unSubscribeHandler_ = nullptr;
     TRIGGER_PUSH_WANT_AGENT triggerHandler_ = nullptr;
     UPDATE_LIVEVIEW_ENCODE_CONTENT updateLiveviewEncodeContent_ = nullptr;
     UPDATE_LIVEVIEW_DECODE_CONTENT updateLiveviewDecodeContent_ = nullptr;

@@ -1217,7 +1217,7 @@ public:
      * @return Returns set result.
      */
     static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const std::string deveiceId = std::string());
+        const std::string deviceId = std::string());
 
     /**
      * @brief Set the status of the target device.
@@ -1228,7 +1228,7 @@ public:
      * @return Returns set result.
      */
     static ErrCode SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag, const std::string deveiceId = std::string(), int32_t userId = 0);
+        const uint32_t controlFlag, const std::string deviceId = std::string(), int32_t userId = 0);
 
     /**
      * @brief set target device of bundle list.

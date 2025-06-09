@@ -45,10 +45,11 @@ DistributedSubscribeService& DistributedSubscribeService::GetInstance()
     return distributedSubscribeService;
 }
 
-void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceInfo peerDevice)
+void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceInfo device)
 {
-    if (DistributedDeviceService::GetInstance().CheckDeviceExist(peerDevice.deviceId_)) {
-        ANS_LOGI("Local device no %{public}s .", StringAnonymous(peerDevice.deviceId_).c_str());
+    DistributedDeviceInfo peerDevice;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(device.deviceId_, peerDevice)) {
+        ANS_LOGI("Local device no %{public}s .", StringAnonymous(device.deviceId_).c_str());
         return;
     }
 
@@ -63,10 +64,6 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
         slotTypes.push_back(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
         subscribeInfo->SetSlotTypes(slotTypes);
         subscribeInfo->SetFilterType(FILTER_IM_TYPE);
-    } else if (peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC ||
-        peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
-        peerDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD) {
-        subscribeInfo->SetFilterType(FILTER_IM_REPLY_TYPE);
     }
     subscribeInfo->AddDeviceType(DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_));
     subscribeInfo->AddAppUserId(userId);
@@ -74,6 +71,7 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
     subscribeInfo->SetNeedNotifyResponse(true);
     int result = NotificationHelper::SubscribeNotification(subscriber, subscribeInfo);
     if (result == 0) {
+        std::lock_guard<std::mutex> lock(mapLock_);
         auto iter = subscriberMap_.find(peerDevice.deviceId_);
         if (iter != subscriberMap_.end()) {
             NotificationHelper::UnSubscribeNotification(iter->second);
@@ -91,6 +89,7 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
 void DistributedSubscribeService::UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType)
 {
     DistributedDeviceService::GetInstance().DeleteDeviceInfo(deviceId);
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = subscriberMap_.find(deviceId);
     if (iter == subscriberMap_.end()) {
         ANS_LOGI("UnSubscribe invalid %{public}s.", StringAnonymous(deviceId).c_str());
@@ -109,6 +108,7 @@ void DistributedSubscribeService::UnSubscribeNotification(const std::string &dev
 
 void DistributedSubscribeService::UnSubscribeAllNotification()
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     for (auto& subscriberInfo : subscriberMap_) {
         int32_t result = NotificationHelper::UnSubscribeNotification(subscriberInfo.second);
         ANS_LOGI("UnSubscribe %{public}s %{public}d.", subscriberInfo.first.c_str(), result);

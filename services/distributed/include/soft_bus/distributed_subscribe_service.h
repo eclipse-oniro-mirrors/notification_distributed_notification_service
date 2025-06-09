@@ -17,6 +17,7 @@
 #define DISTRIBUTED_INCLUDE_SOFTBUS_DISTRIBUTED_SUBSCRIBE_SERVICE_H
 
 #include "distributed_subscriber.h"
+#include <thread>
 #include "distributed_device_data.h"
 
 namespace OHOS {
@@ -29,6 +30,7 @@ public:
     void SubscribeNotification(const DistributedDeviceInfo peerDevice);
     void UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType);
 private:
+    std::mutex mapLock_;
     std::map<std::string, std::shared_ptr<DistribuedSubscriber>> subscriberMap_;
 };
 }

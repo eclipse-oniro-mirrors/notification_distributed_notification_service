@@ -62,6 +62,7 @@ public:
 private:
     DistributedExtensionService();
     ~DistributedExtensionService();
+    int32_t TransDeviceIdToUdid(const DmDeviceInfo &deviceInfo, std::string& udid);
     void SetMaxContentLength(nlohmann::json &configJson);
     void SetOperationReplyTimeout(nlohmann::json &configJson);
 

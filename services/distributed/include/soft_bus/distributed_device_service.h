@@ -45,6 +45,7 @@ public:
     bool IsSyncLiveView(const std::string& deviceId, bool forceSync);
     bool IsSyncIcons(const std::string& deviceId, bool forceSync);
     bool IsSyncInstalledBundle(const std::string& deviceId, bool forceSync);
+    bool GetDeviceInfoByUdid(const std::string& udid, DistributedDeviceInfo& device);
     bool GetDeviceInfo(const std::string& deviceId, DistributedDeviceInfo& device);
     void SetDeviceState(const std::string& deviceId, int32_t state);
     void SetDeviceSyncData(const std::string& deviceId, int32_t type, bool syncData);

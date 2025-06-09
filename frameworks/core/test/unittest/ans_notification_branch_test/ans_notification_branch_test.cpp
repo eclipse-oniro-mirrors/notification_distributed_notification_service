@@ -626,13 +626,13 @@ public:
     }
 
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-        const std::string& deveiceId) override
+        const std::string& deviceId) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-        uint32_t controlFlag, const std::string& deveiceId, int32_t userId) override
+        uint32_t controlFlag, const std::string& deviceId, int32_t userId) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

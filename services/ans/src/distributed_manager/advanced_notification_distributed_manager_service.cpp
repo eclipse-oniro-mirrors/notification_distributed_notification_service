@@ -414,7 +414,7 @@ ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string&
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-    const std::string &deveiceId)
+    const std::string &deviceId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     uint32_t status_ = status;
@@ -434,7 +434,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
-    uint32_t controlFlag, const std::string &deveiceId, int32_t userId)
+    uint32_t controlFlag, const std::string &deviceId, int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (deviceType.empty()) {
@@ -454,7 +454,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 
     if (deviceType == NotificationConstant::PAD_DEVICE_TYPE || deviceType == NotificationConstant::PC_DEVICE_TYPE) {
         return DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status,
-            controlFlag, deveiceId, userId);
+            controlFlag, deviceId, userId);
     }
 
     DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status, controlFlag);

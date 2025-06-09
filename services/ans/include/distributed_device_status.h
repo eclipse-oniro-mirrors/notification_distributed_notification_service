@@ -43,7 +43,7 @@ public:
     ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status,
         const uint32_t controlFlag);
     ErrCode SetDeviceStatus(const std::string &deviceType, const uint32_t status,
-        const uint32_t controlFlag, const std::string deveiceId, int32_t userId);
+        const uint32_t controlFlag, const std::string deviceId, int32_t userId);
 
     uint32_t GetDeviceStatus(const std::string &deviceType);
 

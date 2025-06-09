@@ -36,7 +36,7 @@ class DistributedService {
 public:
     DistributedService();
     static DistributedService& GetInstance();
-    void DestoryService();
+    void DestroyService();
     int32_t InitService(const std::string &deviceId, uint16_t deviceType);
     void AddDevice(DistributedDeviceInfo device);
     void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);

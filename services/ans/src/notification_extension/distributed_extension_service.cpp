@@ -31,8 +31,8 @@ using DeviceCallback = std::function<bool(std::string, int32_t, bool)>;
 typedef int32_t (*INIT_LOCAL_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     DistributedDeviceConfig config);
 typedef void (*RELEASE_LOCAL_DEVICE)();
-typedef void (*ADD_DEVICE)(const std::string &deviceId, uint16_t deviceType,
-    const std::string &networkId);
+typedef void (*ADD_DEVICE)(const std::string &deviceId, const std::string &udId,
+    uint16_t deviceType, const std::string &networkId);
 typedef void (*RELEASE_DEVICE)(const std::string &deviceId, uint16_t deviceType);
 typedef void (*REFRESH_DEVICE)(const std::string &deviceId, uint16_t deviceType,
     const std::string &networkId);
@@ -253,6 +253,18 @@ int32_t DistributedExtensionService::ReleaseLocalDevice()
     return 0;
 }
 
+int32_t DistributedExtensionService::TransDeviceIdToUdid(const DmDeviceInfo &deviceInfo, std::string& udid)
+{
+    int32_t ret = DeviceManager::GetInstance().GetUdidByNetworkId(APP_ID, deviceInfo.networkId, udid);
+    if (ret != 0) {
+        ANS_LOGE("On line device failed, %{public}s ret:%{public}d",
+            StringAnonymous(deviceInfo.deviceId).c_str(), ret);
+        return ret;
+    }
+    ANS_LOGI("OnDeviceOnline id change %{public}s %{public}s", deviceInfo.deviceId, udid.c_str());
+    return ERR_OK;
+}
+
 void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
 {
     std::string name = TransDeviceTypeToName(deviceInfo.deviceTypeId);
@@ -268,7 +280,10 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
             ANS_LOGE("OnDeviceOnline init dans failed.");
             return;
         };
-
+        std::string udid;
+        if (TransDeviceIdToUdid(deviceInfo, udid) != ERR_OK) {
+            return;
+        }
         ADD_DEVICE handler = (ADD_DEVICE)dansHandler_->GetProxyFunc("AddDevice");
         if (handler == nullptr) {
             ANS_LOGE("Dans handler is null ptr.");
@@ -277,7 +292,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
         std::lock_guard<std::mutex> lock(mapLock_);
         DistributedDeviceDataService::GetInstance().ResetTargetDevice(
             DeviceTypeToTypeString(deviceInfo.deviceTypeId), deviceInfo.deviceId);
-        handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceInfo.networkId);
+        handler(deviceInfo.deviceId, udid, deviceInfo.deviceTypeId, deviceInfo.networkId);
         std::string reason = "deviceType: " + std::to_string(deviceInfo.deviceTypeId) +
             " ; deviceId: " + StringAnonymous(deviceInfo.deviceId) + " ; networkId: " +
             StringAnonymous(deviceInfo.networkId);

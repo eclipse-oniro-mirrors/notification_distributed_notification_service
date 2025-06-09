@@ -112,7 +112,9 @@ bool DistributedDeviceService::IsSyncLiveView(const std::string& deviceId, bool 
         return false;
     }
     if (iter->second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD) {
-        if (!iter->second.deviceUsage || iter->second.peerState_ != DeviceState::STATE_SYNC) {
+        if (!iter->second.deviceUsage || iter->second.peerState_ == DeviceState::STATE_SYNC) {
+            ANS_LOGI("Dans pad sync %{public}d %{public}d.", iter->second.peerState_,
+                iter->second.deviceUsage);
             return false;
         }
     }
@@ -218,6 +220,19 @@ bool DistributedDeviceService::GetDeviceInfo(const std::string& deviceId, Distri
     return true;
 }
 
+bool DistributedDeviceService::GetDeviceInfoByUdid(const std::string& udid, DistributedDeviceInfo& device)
+{
+    std::lock_guard<std::mutex> lock(mapLock_);
+    for (auto deviceItem : peerDevice_) {
+        if (udid == deviceItem.second.udid_) {
+            device = deviceItem.second;
+            return true;
+        }
+    }
+    ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(udid).c_str());
+    return false;
+}
+
 bool DistributedDeviceService::CheckDeviceNeedSync(const std::string& deviceId)
 {
     std::lock_guard<std::mutex> lock(mapLock_);
@@ -304,10 +319,16 @@ void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& bo
         return;
     }
 
+    DistributedDeviceInfo device;
+    if (!GetDeviceInfo(deviceId, device)) {
+        ANS_LOGW("Dans get device failed %{public}s %{public}s.", deviceName.c_str(),
+            StringAnonymous(deviceId).c_str());
+        return;
+    }
     int32_t status;
     if (stateBox.GetState(status)) {
         int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status,
-            DEFAULT_LOCK_SCREEN_FLAG, deviceId);
+            DEFAULT_LOCK_SCREEN_FLAG, device.udid_);
         ANS_LOGI("Dans set state %{public}s %{public}s %{public}d %{public}d.", deviceName.c_str(),
             StringAnonymous(deviceId).c_str(), status, result);
     }
@@ -315,7 +336,7 @@ void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& bo
     bool liveViewEnable;
     bool notificationEnable;
     if (stateBox.GetLiveViewEnable(liveViewEnable) && stateBox.GetNotificationEnable(notificationEnable)) {
-        int32_t result = NotificationHelper::SetTargetDeviceSwitch(deviceName, deviceId,
+        int32_t result = NotificationHelper::SetTargetDeviceSwitch(deviceName, device.udid_,
             notificationEnable, liveViewEnable);
         ANS_LOGI("Dans set enable %{public}s %{public}s %{public}d %{public}d %{public}d.", deviceName.c_str(),
             StringAnonymous(deviceId).c_str(), liveViewEnable, notificationEnable, result);
