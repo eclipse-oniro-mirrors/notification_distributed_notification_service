@@ -23,7 +23,6 @@ ohos_moduletest("ans_module_test") {
   include_dirs = [
     "include",
     "${services_path}/ans/include",
-    "${services_path}/ans/include/disturb_manager",
     "${services_path}/ans/test/unittest",
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/test/moduletest/mock/include",
