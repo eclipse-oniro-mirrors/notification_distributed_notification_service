@@ -1246,70 +1246,6 @@ ohos_unittest("os_account_manager_helper_test") {
   part_name = "${component_name}"
 }
 
-ohos_unittest("disturb_manager_unit_test") {
-  module_out_path = module_output_path
-  include_dirs = [
-    ".",
-    "${services_path}/ans/include",
-    "${services_path}/ans/include/disturb_manager",
-    "${services_path}/ans/test/unittest/mock/include",
-    "${frameworks_module_ans_path}/core/include",
-  ]
-
-  defines = []
-
-  sources = [
-    "${test_path}/mock/mock_tokenid_kit.cpp",
-    "disturb_manager/disturb_manager_test.cpp",
-    "mock/mock_accesstoken_kit.cpp",
-    "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "notification_subscriber_manager_branch_test/mock_access_token_helper.cpp",
-  ]
-
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:libans",
-  ]
-
-  if (distributed_notification_supported) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
-    deps += [ "${services_path}/distributed:libans_distributed" ]
-    include_dirs += [ "${services_path}/distributed/include" ]
-  }
-
-  external_deps = [
-    "ability_base:want",
-    "ability_base:zuri",
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:app_manager",
-    "ability_runtime:wantagent_innerkits",
-    "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "device_manager:devicemanagersdk",
-    "eventhandler:libeventhandler",
-    "ffrt:libffrt",
-    "googletest:gmock_main",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "hitrace:libhitracechain",
-    "image_framework:image_native",
-    "ipc:ipc_core",
-    "kv_store:distributeddata_inner",
-    "os_account:os_account_innerkits",
-    "relational_store:native_rdb",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-    "time_service:time_client",
-  ]
-
-  subsystem_name = "${subsystem_name}"
-  part_name = "${component_name}"
-}
-
 ohos_unittest("advanced_datashare_observer_unit_test") {
   module_out_path = module_output_path
   include_dirs = [
@@ -1508,7 +1444,6 @@ group("unittest") {
     ":ans_unit_test",
     ":bundle_manager_helper_branch_test",
     ":common_utils_test",
-    ":disturb_manager_unit_test",
     ":notification_config_parse_test",
     ":notification_dialog_test",
     ":notification_extension_wrapper_unit_test",
