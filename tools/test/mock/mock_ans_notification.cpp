@@ -28,5 +28,53 @@ ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 }
+
+ErrCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceType, int32_t &status)
+{
+    if (deviceType == "phone") {
+        return ERR_OK;
+    } else {
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+}
+
+ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, const uint32_t status,
+    const std::string deveiceId)
+{
+    if (deviceType == "phone") {
+        return ERR_OK;
+    } else {
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+}
+
+ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
+{
+    if (deviceType == "phone") {
+        return ERR_OK;
+    } else {
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+}
+
+ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
+    const std::string &deviceType, const bool enabled)
+{
+    if (deviceType == "phone") {
+        return ERR_OK;
+    } else {
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+}
+
+ErrCode AnsNotification::SetDistributedEnabledBySlot(
+    const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
+{
+    if (deviceType == "phone") {
+        return ERR_OK;
+    } else {
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS
