@@ -17,6 +17,7 @@
 #include "ans_inner_errors.h"
 #include <mutex>
 #include <uv.h>
+#include "hitrace_util.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -351,9 +352,19 @@ bool SubscriberInstance::HasOnBatchCancelCallback()
 
 void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGI("OnConsumed thread safe start");
-
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+    auto additionalData = dataWorkerData->request->GetNotificationRequest().GetAdditionalData();
+    if (additionalData && additionalData->HasParam("_oh_ans_sys_traceid")) {
+        std::stringstream sin(additionalData->GetStringParam("_oh_ans_sys_traceid"));
+        uint64_t chainId;
+        if (sin >> std::hex >> chainId) {
+            TraceChainUtil traceChainUtil = TraceChainUtil();
+            OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
+            traceId.SetChainId(chainId);
+            OHOS::HiviewDFX::HiTraceChain::SetId(traceId);
+        }
+    }
+    ANS_LOGI("OnConsumed thread safe start");
     if (dataWorkerData == nullptr) {
         ANS_LOGE("dataWorkerData is null.");
         return;

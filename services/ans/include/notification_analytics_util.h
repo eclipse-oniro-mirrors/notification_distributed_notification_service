@@ -292,6 +292,8 @@ private:
     static void AddLocalLiveViewFailedNum(std::string bundle);
 
     static void MakeRequestBundle(const sptr<NotificationRequest>& request);
+
+    static std::string GetTraceIdStr();
 };
 } // namespace Notification
 } // namespace OHOS

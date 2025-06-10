@@ -82,6 +82,7 @@ ohos_shared_library("notificationsubscribe") {
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
+    "hitrace:libhitracechain",
     "image_framework:image",
     "ipc:ipc_single",
     "libuv:uv",

@@ -32,6 +32,7 @@
 #include "os_account_manager_helper.h"
 #include "notification_constant.h"
 #include "advanced_notification_inline.h"
+#include "hitrace_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -626,6 +627,7 @@ std::string NotificationAnalyticsUtil::BuildAnsData(const sptr<NotificationReque
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
     std::chrono::system_clock::now().time_since_epoch()).count();
     ansData["time"] = now;
+    ansData["traceId"] = GetTraceIdStr();
     ANS_LOGI("Ansdata built, the controlFlags is %{public}d, deviceStatus is %{public}s",
         controlFlags, GetDeviceStatus(request).c_str());
     return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
@@ -921,6 +923,7 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
         std::chrono::system_clock::now().time_since_epoch()).count();
     reason["time"] = now;
 
+    reason["traceId"] = GetTraceIdStr();
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (request->GetUnifiedGroupInfo() != nullptr &&
         request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
@@ -950,6 +953,16 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
 
     return wWrapper.ToString();
+}
+
+std::string NotificationAnalyticsUtil::GetTraceIdStr()
+{
+    OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
+    std::stringstream chainId;
+    chainId << std::hex << traceId.GetChainId();
+    std::string hexTransId;
+    chainId >> std::hex >> hexTransId;
+    return hexTransId;
 }
 
 void NotificationAnalyticsUtil::SetCommonWant(EventFwk::Want& want, const HaMetaMessage& message,

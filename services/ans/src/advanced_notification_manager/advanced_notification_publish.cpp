@@ -28,6 +28,8 @@
 #include "notification_analytics_util.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
+#include "string_wrapper.h"
+#include "hitrace_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -46,6 +48,8 @@ ErrCode AdvancedNotificationService::PublishWithMaxCapacity(
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    TraceChainUtil traceChain = TraceChainUtil();
+    OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (!request) {
@@ -53,6 +57,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return ERR_ANS_INVALID_PARAM;
     }
 
+    SetChainIdToExtraInfo(request, traceId);
     if (request->GetDistributedCollaborate()) {
         return CollaboratePublish(request);
     }
@@ -131,6 +136,21 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled();
     SendPublishHiSysEvent(request, result);
     return result;
+}
+
+void AdvancedNotificationService::SetChainIdToExtraInfo
+    (const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId)
+{
+    std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
+    if (!additionalData) {
+        additionalData = std::make_shared<AAFwk::WantParams>();
+    }
+    std::stringstream chainId;
+    chainId << std::hex << traceId.GetChainId();
+    std::string hexTransId;
+    chainId >> std::hex >> hexTransId;
+    additionalData->SetParam("_oh_ans_sys_traceid", AAFwk::String::Box(hexTransId));
+    request->SetAdditionalData(additionalData);
 }
 
 ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxyWithMaxCapacity(

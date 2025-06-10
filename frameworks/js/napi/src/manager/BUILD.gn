@@ -115,6 +115,7 @@ ohos_shared_library("notificationmanager") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "hilog:libhilog",
+    "hitrace:libhitracechain",
     "image_framework:image",
     "ipc:ipc_single",
     "napi:ace_napi",

@@ -17,6 +17,7 @@
 
 #include "ans_inner_errors.h"
 #include "publish.h"
+#include "hitrace_util.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -24,6 +25,7 @@ namespace NotificationNapi {
 napi_value NapiPublish(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
+    TraceChainUtil traceChain = TraceChainUtil();
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -149,6 +151,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("enter");
+    TraceChainUtil traceChain = TraceChainUtil();
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
