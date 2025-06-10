@@ -31,7 +31,7 @@ import { NotificationFilter } from 'notification.notificationRequest';
 import image from '@ohos.multimedia.image';
 
 type ResolveCallback<T> = (data: T) => void;
-type RejectCallback = (err: Object) => void;
+type RejectCallback = (err: Error) => void;
 type CallbackForCheckInfo =
     (checkInfo: notificationManager.NotificationCheckInfo)=> notificationManager.NotificationCheckResult;
 
@@ -649,7 +649,7 @@ export default namespace notificationManager {
         }
         return error;
     }
-    
+
     export function getSlotNumByBundle(bundle: BundleOption): Promise<number> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
@@ -660,7 +660,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : number = data as number;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -680,7 +680,7 @@ export default namespace notificationManager {
             let ret : number = data as number;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret: number = -1;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -703,7 +703,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -722,7 +722,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetSlotByBundle(bundle, slot); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -737,7 +737,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -748,7 +748,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeRemoveAllSlots(); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -763,7 +763,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -774,7 +774,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeRemoveSlot(slotType); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -787,7 +787,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : Array<NotificationSlot> = data as Array<NotificationSlot>;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -803,7 +803,7 @@ export default namespace notificationManager {
             let ret : Array<NotificationSlot> = data as Array<NotificationSlot>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : Array<NotificationSlot> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -816,7 +816,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : NotificationSlot = data as NotificationSlot;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -832,7 +832,7 @@ export default namespace notificationManager {
             let ret : NotificationSlot = data as NotificationSlot;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : NotificationSlot = { enabled: false, reminderMode: 0, authorizedStatus: 0 } as NotificationSlot;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -847,7 +847,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeAddSlots(slots); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -865,7 +865,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -880,7 +880,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeAddSlotByNotificationSlot(slot); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -899,7 +899,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -913,7 +913,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -924,7 +924,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeAddSlotBySlotType(type); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -941,13 +941,13 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
         return pPromise;
     }
-    
+
     export function setNotificationEnable(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void
     {
         let error: BusinessError = isInvalidParameter(bundle);
@@ -961,7 +961,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -981,7 +981,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -1001,7 +1001,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1018,7 +1018,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -1032,7 +1032,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1049,7 +1049,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -1063,7 +1063,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1090,7 +1090,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -1113,7 +1113,7 @@ export default namespace notificationManager {
                 });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1134,7 +1134,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1151,7 +1151,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1172,7 +1172,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
              let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -1193,13 +1193,13 @@ export default namespace notificationManager {
             let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, slots);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let slots : Array<NotificationSlot> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, slots);
-        })             
+        })
     }
-    
+
     export function getSlotsByBundle(bundle: BundleOption): Promise<Array<NotificationSlot>>
     {
         let error: BusinessError = isInvalidParameter(bundle);
@@ -1212,7 +1212,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
                 resolve(slots);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1228,7 +1228,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetSlotFlagsByBundle(bundle, slotFlags); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1245,7 +1245,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : Double = data as Double;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1264,7 +1264,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -1279,7 +1279,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativePublish(request); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1298,12 +1298,12 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
     }
-    
+
     export function publish(request: NotificationRequest, userId: number): Promise<void> {
         let error: BusinessError = isInvalidParameter(request);
         if (error.code !== ERROR_OK) {
@@ -1313,7 +1313,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1333,11 +1333,11 @@ export default namespace notificationManager {
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {
-                return nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions); 
+                return nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions);
             });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1353,7 +1353,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSubscribeSystemLiveView(subscriber); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1368,7 +1368,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfile(templates); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1383,7 +1383,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1399,7 +1399,7 @@ export default namespace notificationManager {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let retData : Array<NotificationRequest> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, retData);
@@ -1414,7 +1414,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
 		    	let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1427,7 +1427,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
 		    	let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1443,7 +1443,7 @@ export default namespace notificationManager {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let retData : Array<NotificationRequest> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, retData);
@@ -1472,7 +1472,7 @@ export default namespace notificationManager {
             p.then((data :NullishType): void => {
                 let ret : number = data as number;
                 resolve(ret);
-            }, (err:Object): void => {
+            }, (err:Error): void => {
                 reject(err);
             });
         });
@@ -1491,12 +1491,12 @@ export default namespace notificationManager {
         p.then((e: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
     }
-    
+
     export function displayBadge(bundle: BundleOption, enable: boolean): Promise<void> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
@@ -1506,7 +1506,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1523,13 +1523,13 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
         })
     }
-    
+
     export function isBadgeDisplayed(bundle: BundleOption): Promise<boolean> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
@@ -1540,7 +1540,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1556,7 +1556,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelWithBundle(bundle, id); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1571,7 +1571,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelWithIdOptionalLabel(id, label); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1589,7 +1589,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1603,7 +1603,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1614,7 +1614,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelAll(); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1629,7 +1629,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
     	    let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1655,7 +1655,7 @@ export default namespace notificationManager {
                         }
                     }
                 },
-                (error: Object): void => {
+                (error: Error): void => {
                     reject(error);
                 }
             )
@@ -1682,7 +1682,7 @@ export default namespace notificationManager {
                     }
                 }
             },
-            (error: Object): void => {
+            (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
@@ -1722,7 +1722,7 @@ export default namespace notificationManager {
                 await p.then(
                     (e: NullishType): void => {
                         result = e as notificationManager.NotificationCheckResult;
-                    }, (error: Object): void => {
+                    }, (error: Error): void => {
                         let err: BusinessError = error as BusinessError;
                         result = {
                             code: err.code,
@@ -1784,7 +1784,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let options : Array<BundleOption> = data as Array<BundleOption>;
                 resolve(options);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1816,7 +1816,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetBadgeNumber(badgeNumber); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1833,7 +1833,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetBadgeNumberByBundle(bundle, badgeNumber); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1885,7 +1885,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : NotificationRequest = data as NotificationRequest;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1899,7 +1899,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1922,7 +1922,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1941,7 +1941,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeRemoveGroupByBundle(bundle, groupName); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1984,7 +1984,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativePublishAsBundle(request, representativeBundle, userId); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2005,7 +2005,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativePublishAsBundleWithBundleOption(representativeBundle, request); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2024,7 +2024,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -2039,7 +2039,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelAsBundle(id, representativeBundle, userId); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2057,7 +2057,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelAsBundleWithBundleOption(representativeBundle, id); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2091,7 +2091,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelGroup(groupName); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2127,7 +2127,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDate(date); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2163,7 +2163,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDateWithId(date, userId); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2194,7 +2194,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
                 resolve(doNotDisturbDate);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2225,7 +2225,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
                 resolve(doNotDisturbDate);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2273,7 +2273,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2287,7 +2287,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2314,7 +2314,7 @@ export default namespace notificationManager {
                         }
                     }
                 },
-                (error: Object): void => {
+                (error: Error): void => {
                     reject(error);
                 }
             )
@@ -2327,7 +2327,7 @@ export default namespace notificationManager {
         let p = taskpool.execute((): void => { return nativesetTargetDeviceStatus(deviceType,status); });
         p.then((data: NullishType): void => {
             resolve(undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             reject(error);
         });
         });
@@ -2344,7 +2344,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativesetDistributedEnabledByBundle(bundle, deviceType, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2362,7 +2362,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativesetDistributedEnableByBundle(bundle, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2375,7 +2375,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativesetSmartReminderEnabled(deviceType, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2389,7 +2389,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2404,7 +2404,7 @@ export default namespace notificationManager {
             });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2418,7 +2418,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2431,7 +2431,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : Double = data as Double;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2445,7 +2445,7 @@ export default namespace notificationManager {
             });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2492,7 +2492,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSetDistributedEnable(enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2506,7 +2506,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2523,7 +2523,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -2541,7 +2541,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2563,7 +2563,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -2581,7 +2581,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2596,7 +2596,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : DeviceRemindType = data as DeviceRemindType;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2613,7 +2613,7 @@ export default namespace notificationManager {
             let ret : DeviceRemindType = data as DeviceRemindType;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             const defaultRemindType: DeviceRemindType = DeviceRemindType.IDLE_DONOT_REMIND;
             let err: BusinessError = error as BusinessError;
             callback(err, defaultRemindType);
@@ -2631,7 +2631,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -2644,7 +2644,7 @@ export default namespace notificationManager {
                 { return nativeSetSyncNotificationEnabledWithoutApp(userId, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2658,7 +2658,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -2675,7 +2675,7 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
