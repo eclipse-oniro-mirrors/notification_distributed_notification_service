@@ -813,6 +813,13 @@ void ReminderRequestCalendar::Copy(const sptr<ReminderRequest>& other)
     SetActionButtons(other->GetActionButtons());
     SetWantAgentInfo(other->GetWantAgentInfo());
     SetAutoDeletedTime(other->GetAutoDeletedTime());
+    SetTimeInterval(other->GetTimeInterval());
+    SetSnoozeTimes(other->GetSnoozeTimes());
+    SetRingDuration(other->GetRingDuration());
+    SetSnoozeSlotType(other->GetSnoozeSlotType());
+    SetSnoozeContent(other->GetSnoozeContent());
+    SetExpiredContent(other->GetExpiredContent());
+    SetCustomRingUri(other->GetCustomRingUri());
     ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(other.GetRefPtr());
     SetDateTime(calendar->GetDateTime());
     SetEndDateTime(calendar->GetEndDateTime());
