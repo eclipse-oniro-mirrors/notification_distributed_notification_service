@@ -89,8 +89,6 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_double id)
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 
-    ANS_LOGD("doNotDisturbProfile ProfileId: %{public}lld, ProfileName %{public}s",
-        doNotDisturbProfile->GetProfileId(), doNotDisturbProfile->GetProfileName().c_str());
     if (!NotificationSts::WrapDoNotDisturbProfile(env, doNotDisturbProfile, profile)) {
         ANS_LOGE("AniGetDoNotDisturbProfile WrapDoNotDisturbProfile failed");
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,

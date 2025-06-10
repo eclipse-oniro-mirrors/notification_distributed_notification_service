@@ -104,7 +104,7 @@ bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> pr
         return false;
     }
 
-    size_t index = 0;
+    int32_t index = 0;
     for (const auto& bundle : trustList) {
         auto bundlePtr = std::make_shared<Notification::NotificationBundleOption>(bundle);
         ani_object bundleObj = nullptr;
