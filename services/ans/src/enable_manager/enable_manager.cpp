@@ -138,12 +138,13 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
+        ANS_LOGE("Has popped is true.");
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
 #endif
-            ANS_LOGE("Has popped is true.");
+            ANS_LOGE("GetPrivilegeDialogPopped false.");
             message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
@@ -340,12 +341,13 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
+        ANS_LOGE("Has popped is true.");
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
 #endif
-            ANS_LOGE("Has popped is true.");
+            ANS_LOGE("GetPrivilegeDialogPopped false.");
             message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Haspopped true");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
