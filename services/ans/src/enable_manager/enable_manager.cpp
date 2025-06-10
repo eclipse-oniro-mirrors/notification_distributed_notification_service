@@ -223,7 +223,8 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForAllBundles(const 
 }
 
 ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
-    const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled)
+    const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+    bool updateUnEnableTime)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_5);
     HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
@@ -276,10 +277,12 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         if (result == ERR_OK) {
             if (!enabled) {
                 result = RemoveAllNotificationsForDisable(bundle);
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-                SetDialogPoppedUnEnableTime(bundleOption);
-#endif
             }
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+            if (!enabled && result == ERR_OK && updateUnEnableTime) {
+                SetDialogPoppedUnEnableTime(bundleOption);
+            }
+#endif
             SetSlotFlagsTrustlistsAsBundle(bundle);
             NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
             PublishSlotChangeCommonEvent(bundle);
@@ -337,10 +340,21 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
-        ANS_LOGE("Has popped is true.");
-        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Haspopped true");
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_NOT_ALLOWED;
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+        int32_t userId = -1;
+        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
+#endif
+            ANS_LOGE("Has popped is true.");
+            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Haspopped true");
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+            return ERR_ANS_NOT_ALLOWED;
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+        } else {
+            ANS_LOGI("duplicated popped.");
+            message.Append(" duplicated popped.");
+        }
+#endif
     }
     if (!EXTENTION_WRAPPER->NotificationDialogControl()) {
         return ERR_ANS_NOT_ALLOWED;

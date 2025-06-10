@@ -3639,7 +3639,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_01
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
+    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true, true);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -3662,7 +3662,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_02
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
+    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true, true);
     EXPECT_EQ(ERR_OK, result);
 }
 /*
@@ -3682,7 +3682,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_03
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
+    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true, true);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -3704,7 +3704,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetNotificationsEnabledForSpecialBundleTest_04
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true);
+    int32_t result = proxy->SetNotificationsEnabledForSpecialBundle("DeviceId", bundleOption, true, true);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 

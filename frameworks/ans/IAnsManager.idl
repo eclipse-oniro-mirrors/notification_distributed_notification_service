@@ -128,7 +128,7 @@ interface OHOS.Notification.IAnsManager {
     void SetNotificationsEnabledForAllBundles([in] String deviceId, [in] boolean enabled);
 
     void SetNotificationsEnabledForSpecialBundle(
-        [in] String deviceId, [in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+        [in] String deviceId, [in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled, [in] boolean updateUnEnbaleTime);
 
     void SetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
 
