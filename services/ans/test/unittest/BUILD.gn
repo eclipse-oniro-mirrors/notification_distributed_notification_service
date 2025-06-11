@@ -1348,7 +1348,9 @@ ohos_unittest("advanced_notification_service_unit_test") {
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
+    "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
+    "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
     "distributed_device_status_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
     "mock/mock_bundle_mgr.cpp",
