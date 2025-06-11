@@ -1669,6 +1669,8 @@ private:
         return true;
     }
 
+    void SetChainIdToExtraInfo(const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId);
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
