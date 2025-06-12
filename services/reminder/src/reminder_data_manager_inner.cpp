@@ -41,8 +41,10 @@
 #include "config_policy_utils.h"
 #include "hitrace_meter_adapter.h"
 #ifdef HAS_HISYSEVENT_PART
+#include <sys/statfs.h>
 #include "hisysevent.h"
 #include "reminder_utils.h"
+#include "directory_ex.h"
 #endif
 
 namespace OHOS {
@@ -56,6 +58,33 @@ constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 // The maximun number of system that can be start extension count
 constexpr int32_t TOTAL_MAX_NUMBER_START_EXTENSION = 100;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
+}
+
+static uint64_t GetRemainPartitionSize(const std::string& partitionName)
+{
+#ifdef HAS_HISYSEVENT_PART
+    struct statfs stat;
+    if (statfs(partitionName.c_str(), &stat) != 0) {
+        return -1;
+    }
+    uint64_t blockSize = stat.f_bsize;
+    uint64_t freeSize = stat.f_bfree * blockSize;
+    constexpr double units = 1024.0;
+    return freeSize/(units * units);
+#else
+    return 0;
+#endif
+}
+
+static std::vector<uint64_t> GetFileOrFolderSize(const std::vector<std::string>& paths)
+{
+    std::vector<uint64_t> folderSize;
+#ifdef HAS_HISYSEVENT_PART
+    for (auto path : paths) {
+        folderSize.emplace_back(OHOS::GetFolderSize(path));
+    }
+#endif
+    return folderSize;
 }
 
 bool ReminderDataManager::IsSystemReady()
@@ -399,6 +428,24 @@ void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool 
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, "REMINDER_TIMER_ERROR",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_CODE", errorCode);
+#endif
+}
+
+void ReminderDataManager::ReportUserDataSizeEvent()
+{
+#ifdef HAS_HISYSEVENT_PART
+    std::vector<std::string> paths = {
+        "/data/service/el1/public/notification/"
+    };
+    uint64_t remainPartitionSize = GetRemainPartitionSize("/data");
+    std::vector<uint64_t> folderSize = GetFileOrFolderSize(paths);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT, "USER_DATA_SIZE",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "COMPONENT_NAME", "distributed_notification_service",
+        "PARTITION_NAME", "/data",
+        "REMAIN_PARTITION_SIZE", remainPartitionSize,
+        "FILE_OR_FOLDER_PATH", paths,
+        "FILE_OR_FOLDER_SIZE", folderSize);
 #endif
 }
 }
