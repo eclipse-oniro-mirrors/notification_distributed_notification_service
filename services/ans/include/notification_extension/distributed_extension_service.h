@@ -55,6 +55,8 @@ public:
     void OnDeviceChanged(const DmDeviceInfo &deviceInfo);
     void DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo);
     static DistributedExtensionService& GetInstance();
+    static std::string TransDeviceTypeToName(uint16_t deviceType_);
+    static std::string DeviceTypeToTypeString(uint16_t deviceType_);
     void HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason);
     void SendReportCallback(int32_t messageType, int32_t errCode, std::string reason);
     int32_t GetOperationReplyTimeout();
