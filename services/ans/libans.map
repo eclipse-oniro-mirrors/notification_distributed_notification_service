@@ -55,6 +55,7 @@
     *GetAdditionalConfig*;
     *SetKvToDb*;
     *GetKvFromDb*;
+    *GetNotificationSlotFlagsForBundle*;
   local:
     *;
 };

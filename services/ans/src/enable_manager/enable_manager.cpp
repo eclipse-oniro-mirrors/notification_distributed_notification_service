@@ -143,16 +143,18 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
-#endif
             ANS_LOGE("GetPrivilegeDialogPopped false.");
-            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has no permission popped");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         } else {
             ANS_LOGI("duplicated popped.");
             message.Append(" duplicated popped.");
         }
+#else
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NOT_ALLOWED;
 #endif
     }
     if (!EXTENTION_WRAPPER->NotificationDialogControl()) {
@@ -346,16 +348,18 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
-#endif
             ANS_LOGE("GetPrivilegeDialogPopped false.");
-            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Haspopped true");
+            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has no permission popped");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         } else {
             ANS_LOGI("duplicated popped.");
             message.Append(" duplicated popped.");
         }
+#else
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NOT_ALLOWED;
 #endif
     }
     if (!EXTENTION_WRAPPER->NotificationDialogControl()) {

@@ -670,6 +670,9 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController);
+#endif
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     NotificationConstant::SlotType oldType = request->GetSlotType();
@@ -1075,20 +1078,6 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
         flags->SetStatusIconEnabled(false);
     }
-
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    bool isPrivileged = EXTENTION_WRAPPER->ModifyReminderFlags(record->request);
-    if (isPrivileged) {
-        record->notification->SetPrivileged(true);
-        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
-            record->notification->SetEnableSound(true);
-            record->notification->SetSound(DEFAULT_NOTIFICATION_SOUND);
-        }
-        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
-            record->notification->SetEnableVibration(true);
-        }
-    }
-#endif
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(

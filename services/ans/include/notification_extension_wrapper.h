@@ -52,6 +52,8 @@ public:
         const int32_t &userId);
     typedef bool (*SET_DIALOG_OPENSUCCESS_TIMEINTERVAL)(const sptr<NotificationBundleOption>& bundleOption,
         const int32_t &userId);
+    typedef void (*HANDLE_PRIVILEGE_MESSAGE)(const sptr<NotificationBundleOption>& bundleOption,
+        const sptr<NotificationRequest> &request, bool isAgentController);
 #endif
 
     ErrCode SyncAdditionConfig(const std::string& key, const std::string& value);
@@ -67,10 +69,11 @@ public:
     bool NotificationDialogControl();
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    bool ModifyReminderFlags(const sptr<NotificationRequest> &request);
     bool GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
     bool SetDialogOpenSuccessTimeStamp(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
     bool SetDialogOpenSuccessTimeInterval(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
+    void HandlePrivilegeMessage(const sptr<NotificationBundleOption>& bundleOption,
+        const sptr<NotificationRequest> &request, bool isAgentController);
 #endif
 
 private:
@@ -90,10 +93,10 @@ private:
     bool isRegisterDataSettingObserver = false;
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    MODIFY_REMINDER_FLAGS modifyReminderFlags_ = nullptr;
     GET_PRIVILEGE_DIALOG_POPPED getPrivilegeDialogPopped_ = nullptr;
     SET_DIALOG_OPENSUCCESS_TIMESTAMP setDialogOpenSuccessTimeStamp_ = nullptr;
     SET_DIALOG_OPENSUCCESS_TIMEINTERVAL setDialogOpenSuccessTimeInterval_ = nullptr;
+    HANDLE_PRIVILEGE_MESSAGE handlePrivilegeMessage_ = nullptr;
 #endif
 };
 
