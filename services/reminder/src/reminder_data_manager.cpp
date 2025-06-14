@@ -1475,35 +1475,6 @@ bool ReminderDataManager::RegisterConfigurationObserver()
     return true;
 }
 
-void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
-{
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto reminderSptr : reminderVector_) {
-        if (!(reminderSptr->ShouldShowImmediately())) {
-            break;
-        }
-        if (reminderSptr->GetReminderType() != ReminderRequest::ReminderType::TIMER) {
-            reminderSptr->SetSnoozeTimesDynamic(0);
-        }
-        reminders.push_back(reminderSptr);
-    }
-}
-
-bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder) const
-{
-    if (reminder == nullptr) {
-        return false;
-    }
-    bool isAllowed = false;
-    NotificationBundleOption bundleOption(reminder->GetBundleName(), reminder->GetUid());
-    ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, isAllowed));
-    if (errCode != ERR_OK) {
-        ANSR_LOGE("Failed to call IsAllowedNotify, errCode=%{public}d", errCode);
-        return false;
-    }
-    return isAllowed;
-}
-
 bool ReminderDataManager::IsReminderAgentReady() const
 {
     return isReminderAgentReady_;
@@ -1599,6 +1570,52 @@ std::string ReminderDataManager::GetFullPath(const std::string& oriPath)
     return filePath;
 }
 
+void ReminderDataManager::SetPlayerParam(const sptr<ReminderRequest> reminder)
+{
+#ifdef PLAYER_FRAMEWORK_ENABLE
+    std::string customRingUri = reminder->GetCustomRingUri();
+    if (customRingUri.empty()) {
+        // use default ring
+        std::string defaultPath;
+        if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
+            defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+        } else {
+            defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
+        }
+        Uri defaultSound(defaultPath);
+        soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
+        ANSR_LOGI("Play default sound.");
+    } else if (customRingUri.find("file://") == 0) {
+        if (systemSoundClient_ == nullptr) {
+            systemSoundClient_ = Media::SystemSoundManagerFactory::CreateSystemSoundManager();
+        }
+        if (systemSoundClient_ != nullptr) {
+            std::string url = customRingUri.substr(std::string("file:/").size());
+            constexpr int32_t toneType = 2;
+            soundFd_ = systemSoundClient_->OpenToneUri(nullptr, url, toneType);
+            soundPlayer_->SetSource(soundFd_, 0, -1);
+            ANSR_LOGI("Play system sound.");
+        }
+    } else {
+        Global::Resource::ResourceManager::RawFileDescriptor desc;
+        if (GetCustomRingFileDesc(reminder, desc)) {
+            soundPlayer_->SetSource(desc.fd, desc.offset, desc.length);
+        }
+        ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
+    }
+    int32_t STREAM_ALARM = reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA ?
+        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) :
+        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+    constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
+    Media::Format format;
+    (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
+    (void)format.PutIntValue(Media::PlayerKeys::STREAM_USAGE, STREAM_ALARM);
+    (void)format.PutIntValue(Media::PlayerKeys::RENDERER_FLAG, DEFAULT_VALUE);
+    soundPlayer_->SetParameter(format);
+    soundPlayer_->SetLooping(reminder->IsRingLoop());
+#endif
+}
+
 void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
@@ -1621,39 +1638,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         strategy.concurrencyMode = AudioStandard::AudioConcurrencyMode::PAUSE_OTHERS;
         audioManager->ActivateAudioSession(strategy);
     }
-    std::string customRingUri = reminder->GetCustomRingUri();
-    if (customRingUri.empty()) {
-        // use default ring
-        std::string defaultPath;
-        if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
-            defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
-        } else {
-            defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
-        }
-        Uri defaultSound(defaultPath);
-        soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
-        ANSR_LOGI("Play default sound.");
-    } else if (customRingUri.find("file://") == 0) {
-        Uri systemSound(customRingUri);
-        soundPlayer_->SetSource(systemSound.GetSchemeSpecificPart());
-        ANSR_LOGI("Play system sound.");
-    } else {
-        Global::Resource::ResourceManager::RawFileDescriptor desc;
-        if (GetCustomRingFileDesc(reminder, desc)) {
-            soundPlayer_->SetSource(desc.fd, desc.offset, desc.length);
-        }
-        ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
-    }
-    int32_t STREAM_ALARM = reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA ?
-        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) :
-        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
-    constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
-    Media::Format format;
-    (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
-    (void)format.PutIntValue(Media::PlayerKeys::STREAM_USAGE, STREAM_ALARM);
-    (void)format.PutIntValue(Media::PlayerKeys::RENDERER_FLAG, DEFAULT_VALUE);
-    soundPlayer_->SetParameter(format);
-    soundPlayer_->SetLooping(reminder->IsRingLoop());
+    SetPlayerParam(reminder);
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
 #endif
@@ -1685,6 +1670,13 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
         std::string customRingUri = reminder->GetCustomRingUri();
         if (customRingUri.empty()) {
             ANSR_LOGI("Stop default sound.");
+        } else if (customRingUri.find("file://") == 0) {
+            if (systemSoundClient_ != nullptr) {
+                systemSoundClient_->Close(soundFd_);
+                soundFd_ = -1;
+                ANSR_LOGI("Stop system sound.");
+            }
+            systemSoundClient_ = nullptr;
         } else {
             CloseCustomRingFileDesc(reminder->GetReminderId(), customRingUri);
         }

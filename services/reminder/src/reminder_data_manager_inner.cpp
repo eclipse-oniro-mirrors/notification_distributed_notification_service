@@ -40,6 +40,7 @@
 #include "iservice_registry.h"
 #include "config_policy_utils.h"
 #include "hitrace_meter_adapter.h"
+#include "notification_helper.h"
 #ifdef HAS_HISYSEVENT_PART
 #include <sys/statfs.h>
 #include "hisysevent.h"
@@ -411,6 +412,35 @@ ErrCode ReminderDataManager::CancelReminderToDb(const int32_t reminderId, const 
     }
     store_->Delete(reminderId);
     return ERR_OK;
+}
+
+void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
+{
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    for (auto reminderSptr : reminderVector_) {
+        if (!(reminderSptr->ShouldShowImmediately())) {
+            break;
+        }
+        if (reminderSptr->GetReminderType() != ReminderRequest::ReminderType::TIMER) {
+            reminderSptr->SetSnoozeTimesDynamic(0);
+        }
+        reminders.push_back(reminderSptr);
+    }
+}
+
+bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder) const
+{
+    if (reminder == nullptr) {
+        return false;
+    }
+    bool isAllowed = false;
+    NotificationBundleOption bundleOption(reminder->GetBundleName(), reminder->GetUid());
+    ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, isAllowed));
+    if (errCode != ERR_OK) {
+        ANSR_LOGE("Failed to call IsAllowedNotify, errCode=%{public}d", errCode);
+        return false;
+    }
+    return isAllowed;
 }
 
 void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged)
