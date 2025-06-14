@@ -152,5 +152,135 @@ HWTEST_F(NotificationCapsuleTest, SetIcon_00001, Function | SmallTest | Level1)
     capsule->SetIcon(pixmap);
     EXPECT_NE(capsule->GetIcon(), nullptr);
 }
+
+/**
+ * @tc.name: SetContent_00001
+ * @tc.desc: Test SetContent.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, SetContent_00001, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetContent("test");
+    ASSERT_EQ(capsule.GetContent(), "test");
+}
+
+/**
+ * @tc.name: SetTime_00001
+ * @tc.desc: Test SetTime.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, SetTime_00001, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetTime(1);
+    ASSERT_EQ(capsule.GetTime(), 1);
+}
+
+/**
+ * @tc.name: GetCapsuleButton_00001
+ * @tc.desc: Test GetCapsuleButton.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, GetCapsuleButton_00001, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+
+    std::vector<NotificationIconButton> buttons;
+    NotificationIconButton button;
+    buttons.push_back(button);
+
+    capsule.SetCapsuleButton(buttons);
+    ASSERT_EQ(capsule.GetCapsuleButton().size(), 1);
+}
+
+/**
+ * @tc.name: GetCapsuleButton_00002
+ * @tc.desc: Test GetCapsuleButton.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, GetCapsuleButton_00002, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetContent("test");
+
+    nlohmann::json jsonObject;
+    auto res = capsule.ToJson(jsonObject);
+    ASSERT_TRUE(res);
+
+    auto jsonString = jsonObject.dump();
+
+    auto it = jsonString.find("content");
+    ASSERT_NE(it, std::string::npos);
+
+    sptr<NotificationCapsule> capsuleSptr = capsule.FromJson(jsonObject);
+    ASSERT_NE(capsuleSptr, nullptr);
+    ASSERT_EQ(capsuleSptr->GetContent(), "test");
+}
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson_00003.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetContent("test");
+
+    nlohmann::json jsonObject;
+    auto res = capsule.ToJson(jsonObject);
+    ASSERT_TRUE(res);
+
+    auto jsonString = jsonObject.dump();
+
+    auto it = jsonString.find("content");
+    ASSERT_NE(it, std::string::npos);
+
+    sptr<NotificationCapsule> capsuleSptr = capsule.FromJson(jsonObject);
+    ASSERT_NE(capsuleSptr, nullptr);
+    ASSERT_EQ(capsuleSptr->GetContent(), "test");
+}
+
+/**
+ * @tc.name: Unmarshalling_00002
+ * @tc.desc: Test Unmarshalling_00002.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, Unmarshalling_00002, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    capsule.SetContent("test");
+
+    Parcel parcel;
+    auto res = capsule.Marshalling(parcel);
+    ASSERT_TRUE(res);
+
+    sptr<NotificationCapsule> capsuleSptr = capsule.Unmarshalling(parcel);
+    ASSERT_NE(capsuleSptr, nullptr);
+    ASSERT_EQ(capsuleSptr->GetContent(), "test");
+}
+
+/**
+ * @tc.name: ResetIcon_00001
+ * @tc.desc: Test ResetIcon.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, ResetIcon_00001, Function | SmallTest | Level1)
+{
+    NotificationCapsule capsule;
+    auto pixmap = std::make_shared<Media::PixelMap>();
+    capsule.SetIcon(pixmap);
+    ASSERT_NE(capsule.GetIcon(), nullptr);
+    capsule.ResetIcon();
+    ASSERT_EQ(capsule.GetIcon(), nullptr);
+}
 }
 }

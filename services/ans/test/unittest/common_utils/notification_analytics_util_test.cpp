@@ -520,5 +520,66 @@ HWTEST_F(NotificationAnalyticsUtilTest, AggregateLiveView_001, Function | SmallT
     EXPECT_TRUE(jsonData["startTime"].is_number_integer());
     EXPECT_TRUE(jsonData["endTime"].is_number_integer());
 }
+
+/**
+ * @tc.name: ReportFlowControl_001
+ * @tc.desc: Test ReportFlowControl_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, ReportFlowControl_001, Function | SmallTest | Level1)
+{
+    auto res = NotificationAnalyticsUtil::ReportFlowControl(0);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: RemoveExpired_001
+ * @tc.desc: Test RemoveExpired_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, RemoveExpired_001, Function | SmallTest | Level1)
+{
+    std::list<std::chrono::system_clock::time_point> list;
+    auto now = std::chrono::system_clock::now();
+    list.push_back(now);
+    EXPECT_EQ(list.size(), 1);
+    
+    NotificationAnalyticsUtil::RemoveExpired(list, now, 100);
+    EXPECT_EQ(list.size(), 1);
+    
+    NotificationAnalyticsUtil::RemoveExpired(list, now, -1);
+    EXPECT_EQ(list.size(), 0);
+}
+
+/**
+ * @tc.name: ReportSlotEnable_001
+ * @tc.desc: Test ReportSlotEnable_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, ReportSlotEnable_001, Function | SmallTest | Level1)
+{
+    NotificationAnalyticsUtil::GetAllSlotMessageCache(100);
+    for (auto i = 0; i <= 20; ++i) {
+        NotificationAnalyticsUtil::ReportSlotEnable();
+    }
+    auto res = NotificationAnalyticsUtil::ReportSlotEnable();
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetReportSlotMessage_001
+ * @tc.desc: Test GetReportSlotMessage_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, GetReportSlotMessage_001, Function | SmallTest | Level1)
+{
+    std::string budleEntryKey = "1_1_1_1_1_1_1";
+    std::string budleEntryValue = "1";
+    ReportSlotMessage reportSlotMessage;
+    int32_t userId = 1;
+    auto res = NotificationAnalyticsUtil::GetReportSlotMessage(
+        budleEntryKey, budleEntryValue, reportSlotMessage, userId);
+    EXPECT_FALSE(res);
+}
 }
 }

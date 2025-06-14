@@ -154,5 +154,46 @@ HWTEST_F(NotificationDoNotDisturbProfileTest, Unmarshalling_0100, TestSize.Level
     }
     EXPECT_EQ(unmarshalling, true);
 }
+
+/**
+ * @tc.name: ReadFromParcel_0300
+ * @tc.desc: test it when Unmarshalling success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, ReadFromParcel_0300, TestSize.Level1)
+{
+    NotificationDoNotDisturbProfile notificationDoNotDisturbProfile;
+    Parcel parcel;
+    parcel.WriteInt64(1);
+    parcel.WriteString("1");
+    parcel.WriteUint32(1);
+
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption());
+    parcel.WriteParcelable(bundleOption);
+    auto res = notificationDoNotDisturbProfile.ReadFromParcel(parcel);
+    ASSERT_TRUE(res);
+    ASSERT_EQ(notificationDoNotDisturbProfile.GetProfileTrustList().size(), 1);
+}
+
+/**
+ * @tc.name: FromJson_0100
+ * @tc.desc: test it when Unmarshalling success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, FromJson_0100, TestSize.Level1)
+{
+    NotificationDoNotDisturbProfile notificationDoNotDisturbProfile;
+    std::vector<NotificationBundleOption> trustList;
+    NotificationBundleOption notificationBundleOption;
+    trustList.push_back(notificationBundleOption);
+    notificationDoNotDisturbProfile.SetProfileTrustList(trustList);
+
+    auto jsonString = notificationDoNotDisturbProfile.ToJson();
+
+    NotificationDoNotDisturbProfile temp;
+    temp.FromJson(jsonString);
+
+    ASSERT_EQ(temp.GetProfileTrustList().size(), 1);
+}
 }  // namespace Notification
 }  // namespace OHOS
