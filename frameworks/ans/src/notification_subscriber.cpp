@@ -51,13 +51,6 @@ bool NotificationSubscriber::ProcessSyncDecision(
         return false;
     }
 
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    if (notification->GetPrivileged()) {
-        ANS_LOGI("No need to consume cause privileged reqeuest.")
-        return true;
-    }
-#endif
-
     auto flagsMap = request->GetDeviceFlags();
     if (flagsMap == nullptr || flagsMap->size() <= 0) {
         return true;
