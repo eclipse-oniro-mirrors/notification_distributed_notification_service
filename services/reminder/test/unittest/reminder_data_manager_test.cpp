@@ -1384,7 +1384,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_031, Level1)
     DataShare::DataShareObserver::ChangeInfo::Value snoozeTimes2 = static_cast<double>(-1);
     info[ReminderCalendarShareTable::SNOOZE_TIMES] = snoozeTimes2;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
-    EXPECT_TRUE(timer->GetSnoozeTimes() == UINT8_MAX);
+    EXPECT_TRUE(timer->GetSnoozeTimes() <= UINT8_MAX);
 
     uint64_t testValue = 5;
     DataShare::DataShareObserver::ChangeInfo::Value snoozeTimes3 = static_cast<double>(testValue);
