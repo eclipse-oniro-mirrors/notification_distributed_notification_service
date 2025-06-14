@@ -846,6 +846,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     if ((type == DATE_TIME_CHANGE) && (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME)) {
         lastStartTime_ = now;
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+        ReportUserDataSizeEvent();
     } else if (type == TIME_ZONE_CHANGE) {
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE);
     }
@@ -1562,6 +1563,7 @@ void ReminderDataManager::OnLoadReminderInFfrt()
     if (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME) {
         lastStartTime_ = now;
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_NORMAL);
+        ReportUserDataSizeEvent();
     }
     StartRecentReminder();
     StartLoadTimer();

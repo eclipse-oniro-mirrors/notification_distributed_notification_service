@@ -673,6 +673,7 @@ private:
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
     void ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged);
+    void ReportUserDataSizeEvent();
 
     /**
      * @brief Create load reminder timer.
