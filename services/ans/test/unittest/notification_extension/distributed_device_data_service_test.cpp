@@ -61,6 +61,8 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00001, Function | SmallTes
     // add device sync switch data failed, because deviceType or deviceId is empty.
     int32_t result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch("", "", true, true);
     ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE, "", true, true);
+    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
 
     // add device sync switch data
     result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE,
@@ -68,10 +70,20 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00001, Function | SmallTes
     ASSERT_EQ(result, (int)ERR_OK);
 
     bool liveView = DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(DEVICE_TYPE, DEVICE_ID);
-    ASSERT_EQ(true, liveView);
+    ASSERT_EQ(liveView, true);
+
+    liveView = DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable("", DEVICE_ID);
+    ASSERT_EQ(liveView, false);
+    liveView = DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(DEVICE_TYPE, "");
+    ASSERT_EQ(liveView, false);
 
     bool notification = DistributedDeviceDataService::GetInstance().GetDeviceNotificationEnable(DEVICE_TYPE, DEVICE_ID);
     ASSERT_EQ(true, notification);
+
+    notification = DistributedDeviceDataService::GetInstance().GetDeviceNotificationEnable("", DEVICE_ID);
+    ASSERT_EQ(false, notification);
+    notification = DistributedDeviceDataService::GetInstance().GetDeviceNotificationEnable(DEVICE_TYPE, "");
+    ASSERT_EQ(false, notification);
 
     // change device sync switch data
     result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE,
@@ -79,6 +91,14 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00001, Function | SmallTes
 
     notification = DistributedDeviceDataService::GetInstance().GetDeviceLiveViewEnable(DEVICE_TYPE, DEVICE_ID);
     ASSERT_EQ(false, notification);
+    result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch("", DEVICE_ID, true, true);
+    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    result = DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(DEVICE_TYPE, "", true, true);
+    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    // clear data
+    DistributedDeviceDataService::GetInstance().ResetTargetDevice("", DEVICE_ID);
+    DistributedDeviceDataService::GetInstance().ResetTargetDevice(DEVICE_TYPE, "");
+    DistributedDeviceDataService::GetInstance().ResetTargetDevice(DEVICE_TYPE, DEVICE_ID);
 }
 
 /**
@@ -89,10 +109,18 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00001, Function | SmallTes
  */
 HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTest | Level1)
 {
+    // clear data
+    DistributedDeviceDataService::GetInstance().ResetTargetDevice(DEVICE_TYPE, DEVICE_ID);
     StringAnonymous(DEVICE_ID);
     // add device installed bundles failed, because deviceType or deviceId is empty.
     int32_t result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("",
         DEVICE_ID, BunleListOperationType::ADD_BUNDLES, {});
+    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
+        "", BunleListOperationType::ADD_BUNDLES, {});
+    ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
+    result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
+        DEVICE_ID, BunleListOperationType::REMOVE_BUNDLES, {});
     ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
 
     // add device installed bundles
@@ -100,9 +128,26 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTes
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
         DEVICE_ID, BunleListOperationType::ADD_BUNDLES, bundleList);
     ASSERT_EQ(result, (int)ERR_OK);
+    result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
+        DEVICE_ID, BunleListOperationType::ADD_BUNDLES, { "ohos.com.test0" });
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("Pad",
+        DEVICE_ID, BunleListOperationType::ADD_BUNDLES, { "ohos.com.test0" });
+    ASSERT_EQ(result, (int)ERR_OK);
+    result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
+        "abcdef", BunleListOperationType::ADD_BUNDLES, { "ohos.com.test0" });
+    ASSERT_EQ(result, (int)ERR_OK);
     bool exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(DEVICE_TYPE,
         DEVICE_ID, "ohos.com.test1");
     ASSERT_EQ(exist, true);
+
+    exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist("",
+        DEVICE_ID, "ohos.com.test1");
+    ASSERT_EQ(exist, false);
+
+    exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(DEVICE_TYPE,
+        "", "ohos.com.test1");
+    ASSERT_EQ(exist, false);
 
     // remove device installed bundles
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,

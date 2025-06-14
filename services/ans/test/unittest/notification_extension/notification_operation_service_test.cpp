@@ -75,8 +75,10 @@ HWTEST_F(DistributedOperationServiceTest, DeviceData_00002, Function | SmallTest
 {
     MockOperationCallback::ResetOperationResult();
     // add operation.
-    sptr<MockOperationCallback> callback = new (std::nothrow) MockOperationCallback();
-    DistributedOperationService::GetInstance().AddOperation("abcd", callback);
+    sptr<MockOperationCallback> callback1 = new (std::nothrow) MockOperationCallback();
+    sptr<MockOperationCallback> callback2 = new (std::nothrow) MockOperationCallback();
+    DistributedOperationService::GetInstance().AddOperation("abcd", callback1);
+    DistributedOperationService::GetInstance().AddOperation("abcd", callback2);
     // invoke time out operation.
     DistributedOperationService::GetInstance().HandleOperationTimeOut("abcd");
     // time out operation result.
@@ -102,6 +104,27 @@ HWTEST_F(DistributedOperationServiceTest, DeviceData_00003, Function | SmallTest
     // invoke successful.
     int32_t result = MockOperationCallback::GetOperationResult();
     ASSERT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: Device sync switch check
+ * @tc.desc: Test device data service
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(DistributedOperationServiceTest, DeviceData_00004, Function | SmallTest | Level1)
+{
+    MockOperationCallback::ResetOperationResult();
+    // add operation.
+    sptr<MockOperationCallback> callback = new (std::nothrow) MockOperationCallback();
+    DistributedOperationService::GetInstance().AddOperation("abcd", callback);
+    DistributedOperationService::GetInstance().operationQueue_ = nullptr;
+    OperationTimerInfo TimerInfo = OperationTimerInfo("hashCode");
+    TimerInfo.OnTrigger();
+    // invoke successful operation.
+    sleep(4);
+    int32_t result = MockOperationCallback::GetOperationResult();
+    ASSERT_EQ(result, -1);
 }
 }
 }
