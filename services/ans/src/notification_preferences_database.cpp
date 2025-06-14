@@ -1901,6 +1901,7 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
     return NativeRdb::E_OK;
 }
 
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 int32_t NotificationPreferencesDatabase::GetKvFromDb(
     const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
 {
@@ -1912,6 +1913,7 @@ int32_t NotificationPreferencesDatabase::GetKvFromDb(
     retCode = rdbDataManager_->QueryData(key, value, userId);
     return retCode;
 }
+#endif
 
 int32_t NotificationPreferencesDatabase::GetByteFromDb(
     const std::string &key, std::vector<uint8_t> &value, const int32_t &userId)

@@ -1318,17 +1318,6 @@ int32_t NotificationPreferences::GetBatchKvsFromDbContainsKey(
     return preferncesDB_->GetBatchKvsFromDbContainsKey(key, values, userId);
 }
 
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-int32_t NotificationPreferences::GetKvFromDb(
-    const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
-{
-    if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
-    }
-    return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
-}
-#endif
-
 int32_t NotificationPreferences::GetBatchKvsFromDb(
     const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
@@ -1586,5 +1575,16 @@ bool NotificationPreferences::SetBundleRemoveFlag(const sptr<NotificationBundleO
     }
     return preferncesDB_->SetBundleRemoveFlag(bundleOption, slotType, sourceType);
 }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+int32_t NotificationPreferences::GetKvFromDb(
+    const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

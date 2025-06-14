@@ -971,6 +971,17 @@ bool AdvancedNotificationService::IsDuplicateMsg(const std::list<std::pair<std::
     return false;
 }
 
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+void AdvancedNotificationService::SetDialogPoppedUnEnableTime(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGD("SetDialogPoppedRefuseTime called.");
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    EXTENTION_WRAPPER->SetDialogOpenSuccessTimeStamp(bundleOption, userId);
+    ANS_LOGD("SetDialogPoppedRefuseTime end.");
+}
+#endif
+
 ErrCode AdvancedNotificationService::PublishRemoveDuplicateEvent(const std::shared_ptr<NotificationRecord> &record)
 {
     if (record == nullptr) {

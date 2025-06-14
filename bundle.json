@@ -44,9 +44,9 @@
       "SystemCapability.Notification.NotificationSettings"
     ],
     "features": [
+      "distributed_notification_service_feature_privileged_message",
       "distributed_notification_service_feature_additional_control",
       "distributed_notification_service_feature_disable_fa_model",
-      "distributed_notification_service_feature_privileged_message",
       "distributed_notification_service_disable_control",
       "distributed_notification_service_feature_badge_manager",
       "distributed_notification_service_feature_local_liveview",
