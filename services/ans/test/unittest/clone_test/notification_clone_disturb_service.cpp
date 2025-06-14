@@ -49,6 +49,7 @@ protected:
     {
         // Clean up resources
         delete notificationCloneDisturb;
+        notificationCloneDisturb = nullptr;
     }
 
     NotificationCloneDisturb* notificationCloneDisturb;
