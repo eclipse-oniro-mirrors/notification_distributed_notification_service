@@ -441,7 +441,7 @@ void ReminderDataManager::ReportUserDataSizeEvent()
     std::vector<uint64_t> folderSize = GetFileOrFolderSize(paths);
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT, "USER_DATA_SIZE",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
-        "COMPONENT_NAME", "distributed_notification_service",
+        "COMPONENT_NAME", "resource_schedule_service",
         "PARTITION_NAME", "/data",
         "REMAIN_PARTITION_SIZE", remainPartitionSize,
         "FILE_OR_FOLDER_PATH", paths,
