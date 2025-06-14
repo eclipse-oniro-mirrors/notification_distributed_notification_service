@@ -597,5 +597,36 @@ HWTEST_F(NotificationTest, GetFinishTimer_00001, Function | SmallTest | Level1)
     rrc->SetFinishTimer(1);
     EXPECT_EQ(rrc->GetFinishTimer(), 1);
 }
+
+/**
+ * @tc.name: GetInstanceKey_00001
+ * @tc.desc: Test get finish timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetInstanceKeyr_00001, Function | SmallTest | Level1)
+{
+    sptr<Notification> notification(new Notification(nullptr));
+    
+    ASSERT_EQ(notification->GetInstanceKey(), "");
+}
+
+/**
+ * @tc.name: Dump_00002
+ * @tc.desc: Test Dump_00002
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, Dump_00002, Function | SmallTest | Level1)
+{
+    sptr<Notification> notification(new Notification(nullptr));
+    std::vector<int64_t> style;
+    style.push_back(999);
+    notification->SetVibrationStyle(style);
+
+    auto dump = notification->Dump();
+    auto it = dump.find("999");
+    ASSERT_NE(it, std::string::npos);
+}
 } // namespace Notification
 } // namespace OHOS

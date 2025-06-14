@@ -207,6 +207,25 @@ HWTEST_F(NotificationLiveViewContentTest, FromJson_00001, Function | SmallTest |
 }
 
 /**
+ * @tc.name: FromJson_00002
+ * @tc.desc: Test FromJson parameters when jsonObject is invalid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    nlohmann::json jsonObject;
+    auto res = rrc->ToJson(jsonObject);
+    rrc->SetIsOnlyLocalUpdate(true);
+    ASSERT_TRUE(res);
+
+    auto ptr = rrc->FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    ASSERT_TRUE(rrc->GetIsOnlyLocalUpdate());
+}
+
+/**
  * @tc.name: MarshallConvert_00001
  * @tc.desc: Test MarshallConvert parameters.
  * @tc.type: FUNC
