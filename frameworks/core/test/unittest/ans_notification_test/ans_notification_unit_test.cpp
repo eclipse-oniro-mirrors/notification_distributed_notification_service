@@ -129,6 +129,22 @@ HWTEST_F(AnsNotificationUnitTest, GetAnsManagerProxy_0100, Function | MediumTest
 }
 
 /*
+ * @tc.name: SetNotificationSlotFlagsAsBundle_0100
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("bundleName");
+    uint64_t num = 1;
+    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: AddSlotByType_0100
  * @tc.desc: test AddSlotByType ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
@@ -219,6 +235,28 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0100, Function 
 }
 
 /*
+ * @tc.name: GetNotificationSlotNumAsBundle_0200
+ * @tc.desc: test GetNotificationSlotNumAsBundle ErrCode ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0200, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    std::string bundleName = "bundleName";
+    bundleOptions.SetBundleName(bundleName);
+    uint64_t num;
+    ErrCode ret = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: GetNotificationSlotFlagsAsBundle_0100
  * @tc.desc: test GetNotificationSlotFlagsAsBundle.
  * @tc.type: FUNC
@@ -262,6 +300,52 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0200, Functio
 }
 
 /*
+ * @tc.name: GetNotificationSlotFlagsAsBundle_0300
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle errCode ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0300, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    std::string bundleName = "bundleName";
+    bundleOptions.SetBundleName(bundleName);
+    uint32_t num = 10;
+    ErrCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: AddNotificationSlots_0100
+ * @tc.desc: test AddNotificationSlots exceed MAX_SLOT_NUM.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, AddNotificationSlots_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    std::vector<NotificationSlot> slots;
+    for (int i = 0; i < MAX_SLOT_NUM + 1; i++) {
+        NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
+        sptr<NotificationSlot> notificationSlot = new (std::nothrow) NotificationSlot(slotType);
+        slots.push_back(*notificationSlot);
+    }
+    ErrCode ret = ans_->AddNotificationSlots(slots);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: SetNotificationSlotFlagsAsBundle_0200
  * @tc.desc: test GetNotificationSlotFlagsAsBundle.
  * @tc.type: FUNC
@@ -280,6 +364,27 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0200, Functio
     uint64_t num = 10;
     ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
     EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetNotificationSlotFlagsAsBundle_0300
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0300, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("bundleName");
+    uint64_t num = 1;
+    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1627,6 +1732,24 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0100, Func
  * @tc.type: FUNC
  */
 HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    uint32_t slotFlags = 0;
+    ErrCode result = ans_->GetNotificationSettings(slotFlags);
+    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSettings_0200
+ * @tc.desc: test GetNotificationSetting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0200, Function | MediumTest | Level1)
 {
     MockWriteInterfaceToken(false);
     sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
