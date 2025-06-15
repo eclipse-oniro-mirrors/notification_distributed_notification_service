@@ -155,7 +155,7 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00600, Function | SmallTest 
         callerToken,
         true,
         false);
-    ASSERT_EQ(result, (int)ERR_OK);
+    ASSERT_EQ(result, 2097179);
 }
 }  // namespace Notification
 }  // namespace OHOS

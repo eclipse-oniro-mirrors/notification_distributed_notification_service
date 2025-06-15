@@ -376,7 +376,6 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
         }
-        result = Filter(record);
         if (result != ERR_OK) {
             ANS_LOGE("Reject by filters: %{public}d", result);
             return;

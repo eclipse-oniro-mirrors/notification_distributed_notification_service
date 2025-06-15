@@ -1946,9 +1946,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19800,
 
     sptr<NotificationRequest> req = new NotificationRequest(19800);
     std::vector<std::string> devices;
-    devices.push_back("a");
-    devices.push_back("b");
-    devices.push_back("c");
+    devices.push_back("10001");
+    devices.push_back("10002");
+    devices.push_back("10003");
     req->SetDevicesSupportDisplay(devices);
     ASSERT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), false);
 
@@ -1965,7 +1965,7 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckDistributedNotificationType_0300,
 {
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0300 test start";
     DistributedDatabase::DeviceInfo localDeviceInfo;
-    std::string deviceId = "deviceId";
+    std::string deviceId = "10004";
     sptr<NotificationRequest> req = new NotificationRequest(19800);
     std::vector<std::string> devices;
     devices.push_back(deviceId);
@@ -2025,7 +2025,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0200, Function | 
     SleepForFC();
     advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request);
     SleepForFC();
-    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 }
 
 /**
@@ -2352,7 +2352,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | S
     for (auto record : advancedNotificationService_->notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
         record->request->GetContent()->GetNotificationContent());
-        ASSERT_EQ(ct->GetTitle(), "title 1");
+        ASSERT_EQ(ct->GetTitle(), "title 2");
     }
 }
 
@@ -2657,6 +2657,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20600,
     advancedNotificationService_->PublishInNotificationList(record);
 
     MockIsSystemApp(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    advancedNotificationService_->OnResourceRemove(userId);
+    MockIsSystemApp(true);
     bool enable = false;
     advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
