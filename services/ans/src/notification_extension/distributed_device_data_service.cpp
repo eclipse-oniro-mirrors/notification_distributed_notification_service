@@ -129,7 +129,7 @@ bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& dev
         }
     }
     ANS_LOGW("Get bundle failed %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
-    return true;
+    return false;
 }
 
 bool DistributedDeviceDataService::GetDeviceNotificationEnable(const std::string& deviceType,

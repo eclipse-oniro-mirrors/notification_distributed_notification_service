@@ -20,6 +20,30 @@ namespace OHOS {
 
 namespace Notification {
 static std::shared_ptr<DistributedHardware::DeviceStateCallback> deviceManagerCallback = nullptr;
+static std::shared_ptr<DistributedHardware::DmInitCallback> dmInitCallback = nullptr;
+static bool g_mockInitDeviceManager = false;
+static bool g_mockGetTrustedDeviceList = false;
+static bool g_mockRegisterDevStateCallback = false;
+
+void DeviceTrigger::MockInitDeviceManager(bool mock)
+{
+    g_mockInitDeviceManager = mock;
+}
+
+void DeviceTrigger::MockGetTrustedDeviceList(bool mock)
+{
+    g_mockGetTrustedDeviceList = mock;
+}
+
+void DeviceTrigger::MockRegisterDevStateCallback(bool mock)
+{
+    g_mockRegisterDevStateCallback = mock;
+}
+
+void DeviceTrigger::TriggerOnRemoteDied()
+{
+    dmInitCallback->OnRemoteDied();
+}
 
 void DeviceTrigger::TriggerDeviceOnline()
 {
@@ -64,15 +88,19 @@ DeviceManagerImpl &DeviceManagerImpl::GetInstance()
     return deviceManagerImpl;
 }
 
-int32_t DeviceManagerImpl::InitDeviceManager(const std::string &pkgName, std::shared_ptr<DmInitCallback> dmInitCallback)
+int32_t DeviceManagerImpl::InitDeviceManager(const std::string &pkgName, std::shared_ptr<DmInitCallback> callback)
 {
-    (void)dmInitCallback;
+    if (Notification::g_mockInitDeviceManager) {
+        return -1;
+    }
+    Notification::dmInitCallback = callback;
     printf("InitDeviceManager pkgName:%s\n", pkgName.c_str());
     return 0;
 }
 
 int32_t DeviceManagerImpl::UnInitDeviceManager(const std::string &pkgName)
 {
+    Notification::dmInitCallback = nullptr;
     printf("UnInitDeviceManager pkgName:%s\n", pkgName.c_str());
     return 0;
 }
@@ -80,6 +108,9 @@ int32_t DeviceManagerImpl::UnInitDeviceManager(const std::string &pkgName)
 int32_t DeviceManagerImpl::GetTrustedDeviceList(const std::string &pkgName, const std::string &extra,
                                                 std::vector<DmDeviceInfo> &deviceList)
 {
+    if (Notification::g_mockGetTrustedDeviceList) {
+        return -1;
+    }
     DmDeviceInfo remoteDevice;
     memset_s(&remoteDevice, sizeof(remoteDevice), 0, sizeof(remoteDevice));
     strcpy_s(remoteDevice.deviceId, sizeof(remoteDevice.deviceId) - 1, "remoteDeviceId");
@@ -92,6 +123,9 @@ int32_t DeviceManagerImpl::GetTrustedDeviceList(const std::string &pkgName, cons
 int32_t DeviceManagerImpl::GetTrustedDeviceList(
     const std::string &pkgName, const std::string &extra, bool isRefresh, std::vector<DmDeviceInfo> &deviceList)
 {
+    if (Notification::g_mockGetTrustedDeviceList) {
+        return -1;
+    }
     DmDeviceInfo remoteDevice;
     memset_s(&remoteDevice, sizeof(remoteDevice), 0, sizeof(remoteDevice));
     strcpy_s(remoteDevice.deviceId, sizeof(remoteDevice.deviceId) - 1, "remoteDeviceId");
@@ -113,6 +147,9 @@ int32_t DeviceManagerImpl::GetLocalDeviceInfo(const std::string &pkgName, DmDevi
 int32_t DeviceManagerImpl::RegisterDevStateCallback(const std::string &pkgName, const std::string &extra,
                                                     std::shared_ptr<DeviceStateCallback> callback)
 {
+    if (Notification::g_mockRegisterDevStateCallback) {
+        return -1;
+    }
     Notification::deviceManagerCallback = callback;
     return 0;
 }

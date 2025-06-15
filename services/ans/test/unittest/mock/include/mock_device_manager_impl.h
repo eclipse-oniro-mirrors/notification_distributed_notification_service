@@ -23,6 +23,11 @@ namespace Notification {
 
 class DeviceTrigger {
 public:
+    static void MockConfigScene(int32_t scene);
+    static void MockInitDeviceManager(bool mock);
+    static void MockGetTrustedDeviceList(bool mock);
+    static void MockRegisterDevStateCallback(bool mock);
+    static void TriggerOnRemoteDied();
     static void TriggerDeviceOnline();
     static void TriggerDeviceOffline();
     static void TriggerDeviceChanged();
