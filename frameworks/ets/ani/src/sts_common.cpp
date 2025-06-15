@@ -515,8 +515,8 @@ ani_object newRecordClass(ani_env *env)
 
 ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64_t> values)
 {
-    if (env == nullptr || values.empty()) {
-        ANS_LOGE("ConvertArrayDoubleToAniObj fail, env is nullptr or values is empty");
+    if (env == nullptr) {
+        ANS_LOGE("ConvertArrayDoubleToAniObj fail, env is nullptr");
         return nullptr;
     }
     ani_object arrayObj = newArrayClass(env, values.size());
