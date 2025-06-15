@@ -14,6 +14,8 @@
  */
 
 #include "ans_subscriber_listener.h"
+
+#include "ans_log_wrapper.h"
 #include "notification_constant.h"
 #include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
@@ -61,7 +63,10 @@ ErrCode SubscriberListener::OnConsumed(
         ANS_LOGE("Subscriber is nullptr");
         return ERR_INVALID_DATA;
     }
-
+    if (notificationMap == nullptr) {
+        ANS_LOGE("OnConsumed fail cause notificationMap is null.");
+        return ERR_INVALID_DATA;
+    }
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     if (!subscriber->ProcessSyncDecision(subscriber->GetDeviceType(), sharedNotification)) {

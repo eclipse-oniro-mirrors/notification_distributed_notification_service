@@ -25,5 +25,8 @@ group("unittest") {
     "ans_subscriber_proxy_branch_test:unittest",
     "ans_subscriber_proxy_test:unittest",
     "swing_callback_test:unittest",
+    "ans_subscriber_listener_test:unittest",
+    "dialog_status_data_test:unittest",
+    "ans_manager_death_recipient_test:unittest",
   ]
 }
