@@ -33,6 +33,8 @@
 #include "ans_dialog_host_client.h"
 #include "mock_push_callback_stub.h"
 #include "mock_ipc_skeleton.h"
+#include "bool_wrapper.h"
+#include "string_wrapper.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
