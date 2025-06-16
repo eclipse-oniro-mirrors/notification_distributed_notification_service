@@ -52,13 +52,13 @@ void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<Notification
     AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
 }
 
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 SYMBOL_EXPORT void GetAdditionalConfig(const std::string &key, std::string &value)
 {
     value = NotificationPreferences::GetInstance()->GetAdditionalConfig(key);
     ANS_LOGD("GetAdditionalConfig SYMBOL_EXPORT valiue %{public}s", value.c_str());
 }
 
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 SYMBOL_EXPORT int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId)
 {
     return NotificationPreferences::GetInstance()->SetKvToDb(key, value, userId);

@@ -142,6 +142,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
             ANS_LOGE("GetPrivilegeDialogPopped false.");
             message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has no permission popped");
@@ -347,6 +348,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
             ANS_LOGE("GetPrivilegeDialogPopped false.");
             message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has no permission popped");
