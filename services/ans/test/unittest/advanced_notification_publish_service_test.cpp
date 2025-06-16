@@ -2157,5 +2157,131 @@ HWTEST_F(AnsPublishServiceTest, SetHashCodeRule_00001, Function | SmallTest | Le
     ASSERT_EQ(result, ERR_OK);
 }
 
+/**
+ * @tc.name: CollaborateFilter_00001
+ * @tc.desc: Test CollaborateFilter
+ * 1.extendInfo is null return ok
+ * 2.notification_collaboration_check is false, return ok
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("test", AAFwk::String::Box("test"));
+    request->SetExtendInfo(extendInfo);
+
+    ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    extendInfo->SetParam("notification_collaboration_check", AAFwk::Boolean::Box(false));
+    ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    extendInfo->SetParam("notification_collaboration_check", AAFwk::Boolean::Box(true));
+    ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+}
+
+/**
+ * @tc.name: CollaborateFilter_00002
+ * @tc.desc: Test CollaborateFilter
+ * 1.DistributedAuthStatus closed, return ERR_ANS_NOT_ALLOWED
+ * 2.liveView:DistributedAuthStatus open, liveView distributed switch close, return ERR_ANS_NOT_ALLOWED
+ * 3.notification:DistributedAuthStatus open, distributed switch close, return ERR_ANS_NOT_ALLOWED
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("notification_collaboration_check", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    std::string deviceType = "deviceType";
+    std::string deviceId = "deviceId";
+    std::string localType = "localType";
+    int32_t userId = 100;
+    extendInfo->SetParam("notification_collaboration_deviceType", AAFwk::String::Box(deviceType));
+    extendInfo->SetParam("notification_collaboration_deviceId", AAFwk::String::Box(deviceId));
+    extendInfo->SetParam("notification_collaboration_localType", AAFwk::String::Box(localType));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, true);
+    
+    NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
+        NotificationConstant::SlotType::LIVE_VIEW, localType, true);
+    auto ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    
+    NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(
+        NotificationConstant::SlotType::LIVE_VIEW, localType, false);
+    ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    NotificationPreferences::GetInstance()->SetDistributedEnabled(
+        localType, NotificationConstant::ENABLE_STATUS::ENABLE_TRUE);
+    ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    NotificationPreferences::GetInstance()->SetDistributedEnabled(
+        localType, NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+    ret = advancedNotificationService_->CollaborateFilter(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
+
+    NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, false);
+}
+
+/**
+ * @tc.name: ClearSlotTypeData_00001
+ * @tc.desc: Test ClearSlotTypeData
+ * 1.sourceType == CLEAR_SLOT_FROM_AVSEESAION condation
+ * 2.sourceType == CLEAR_SLOT_FROM_RSS condation
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ClearSlotTypeData_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    int32_t callingUid = 0;
+    int32_t sourceType = 0;
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 0);
+
+    sourceType = 1;
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 1);
+
+    callingUid = 6700;
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 1);
+
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 1);
+
+    sourceType = 2;
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 2);
+
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 2);
+
+    request->SetCreatorUid(3051);
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 2);
+
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
+    ASSERT_EQ(sourceType, 2);
+}
+
 }  // namespace Notification
 }  // namespace OHOS
