@@ -17,6 +17,7 @@
 
 #include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
@@ -316,7 +317,7 @@ void ReminderDataManager::UpdateReminderFromDb(const std::vector<sptr<ReminderRe
 
 ErrCode ReminderDataManager::UpdateReminder(const sptr<ReminderRequest>& reminder, const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     sptr<ReminderRequest> reminderOld = FindReminderRequestLocked(reminder->GetReminderId(), false);
     bool existInMemory = true;
     if (nullptr != reminderOld) {

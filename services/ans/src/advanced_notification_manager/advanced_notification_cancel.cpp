@@ -15,10 +15,10 @@
 
 #include "advanced_notification_service.h"
 
+#include "ans_trace_wrapper.h"
 #include "access_token_helper.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
-#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "notification_analytics_util.h"
 #include "notification_bundle_option.h"
@@ -305,7 +305,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
 ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationBundleOption> &bundleOption,
     int32_t notificationId, const std::string &label, int32_t removeReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -420,7 +420,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotifications(const sptr<Notificat
 ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
     int32_t reason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -540,7 +540,7 @@ void AdvancedNotificationService::GetRemoveListForRemoveAll(const sptr<Notificat
 ErrCode AdvancedNotificationService::RemoveNotifications(
     const std::vector<std::string> &keys, int32_t removeReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("enter");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -602,7 +602,7 @@ void AdvancedNotificationService::ExcuteRemoveNotifications(const std::vector<st
 ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationSlot> &slot, const int reason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());

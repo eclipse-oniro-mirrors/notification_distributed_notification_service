@@ -22,7 +22,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "hitrace_meter_adapter.h"
+#include "ans_trace_wrapper.h"
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
 #include "notification_button_option.h"
@@ -67,7 +67,7 @@ void NotificationLocalLiveViewSubscriberManager::ResetFfrtQueue()
 ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null.");
         return ERR_ANS_INVALID_PARAM;
@@ -105,7 +105,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
 ErrCode NotificationLocalLiveViewSubscriberManager::RemoveLocalLiveViewSubscriber(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null.");
         return ERR_ANS_INVALID_PARAM;
@@ -130,7 +130,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveLocalLiveViewSubscribe
 void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponse(const sptr<Notification> &notification,
     const sptr<NotificationButtonOption> &buttonOption)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationButtonQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -212,7 +212,7 @@ std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscri
 ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationBundleOption> &bundleOption)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(subscriber);
     if (record == nullptr) {
         record = CreateSubscriberRecord(subscriber, bundleOption);
@@ -234,7 +234,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
 ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(subscriber);
 
     if (record == nullptr) {
@@ -256,7 +256,7 @@ void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner(
     const sptr<Notification> &notification, const sptr<NotificationButtonOption> buttonOption)
 {
     ANS_LOGD("ffrt enter!");
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     int32_t sendUserId;
     std::string bundleName;

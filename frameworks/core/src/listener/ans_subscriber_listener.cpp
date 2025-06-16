@@ -15,9 +15,8 @@
 
 #include "ans_subscriber_listener.h"
 
-#include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "notification_constant.h"
-#include "hitrace_meter_adapter.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -32,7 +31,7 @@ SubscriberListener::~SubscriberListener()
 
 ErrCode SubscriberListener::OnConnected()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -44,7 +43,7 @@ ErrCode SubscriberListener::OnConnected()
 
 ErrCode SubscriberListener::OnDisconnected()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -57,7 +56,7 @@ ErrCode SubscriberListener::OnDisconnected()
 ErrCode SubscriberListener::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -99,7 +98,7 @@ ErrCode SubscriberListener::OnConsumedWithMaxCapacity(const sptr<Notification> &
 ErrCode SubscriberListener::OnConsumedList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     for (auto notification : notifications) {
         OnConsumed(notification, notificationMap);
     }
@@ -114,7 +113,7 @@ ErrCode SubscriberListener::OnConsumedList(const std::vector<sptr<Notification>>
 ErrCode SubscriberListener::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -170,7 +169,7 @@ void SubscriberListener::OnBatchCanceled(const std::vector<sptr<Notification>> &
 ErrCode SubscriberListener::OnCanceledList(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -217,7 +216,7 @@ ErrCode SubscriberListener::OnDoNotDisturbDateChange(const sptr<NotificationDoNo
 ErrCode SubscriberListener::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -229,7 +228,7 @@ ErrCode SubscriberListener::OnEnabledNotificationChanged(
 
 ErrCode SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -242,7 +241,7 @@ ErrCode SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &
 ErrCode SubscriberListener::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr");
@@ -254,7 +253,7 @@ ErrCode SubscriberListener::OnBadgeEnabledChanged(
 
 ErrCode SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleName)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGW("OnApplicationInfoNeedChanged SubscriberListener 1.");
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
@@ -268,7 +267,7 @@ ErrCode SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bund
 ErrCode SubscriberListener::OnOperationResponse(
     const sptr<NotificationOperationInfo>& operationInfo, int32_t& funcResult)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
         ANS_LOGW("Subscriber is nullptr");

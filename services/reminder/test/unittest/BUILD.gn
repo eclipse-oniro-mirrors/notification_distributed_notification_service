@@ -153,6 +153,7 @@ ohos_unittest("reminder_agent_service_test") {
     "data_share:datashare_common",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
