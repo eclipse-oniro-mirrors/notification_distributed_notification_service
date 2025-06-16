@@ -26,6 +26,7 @@
 
 #include "ans_inner_errors.h"
 #include "ans_subscriber_listener.h"
+#include "mock_i_remote_object.h"
 
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
@@ -34,6 +35,49 @@ using namespace testing;
 
 namespace OHOS {
 namespace Notification {
+class MockAnsSubscriberTest : public MockAnsSubscriber  {
+public:
+    sptr<IRemoteObject> AsObject() override
+    {
+        return new MockIRemoteObject();
+    }
+
+    ErrCode OnConsumed(const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap) override
+    {
+        isCalled_ = true;
+        return ERR_OK;
+    }
+
+    ErrCode OnConsumed(const sptr<Notification> &notification) override
+    {
+        isCalled_ = true;
+        return ERR_OK;
+    };
+
+    ErrCode OnConsumedWithMaxCapacity(
+        const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap) override
+    {
+        isCalled_ = true;
+        return ERR_OK;
+    };
+
+    ErrCode OnConsumedWithMaxCapacity(const sptr<Notification> &notification) override
+    {
+        isCalled_ = true;
+        return ERR_OK;
+    };
+
+    bool IsCalled()
+    {
+        return isCalled_;
+    }
+
+private:
+    bool isCalled_{false};
+};
+
 class NotificationSubscriberManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -998,6 +1042,328 @@ HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_001, Function | SmallTe
     wptr<IRemoteObject> obj = nullptr;
     notificationSubscriberManager_->OnRemoteDied(obj);
     EXPECT_NE(notificationSubscriberManager_, nullptr);
+}
+/**
+ * @tc.name: NotifyConsumedInner_001
+ * @tc.desc: Test NotifyConsumedInner when notification is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_001, Function | SmallTest | Level1)
+{
+    sptr<Notification> notification = nullptr;
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    ASSERT_EQ(notification, nullptr);
+}
+
+/**
+ * @tc.name: NotifyConsumedInner_002
+ * @tc.desc: Test NotifyConsumedInner when notificationMap is not nullptr and notification type is not liveview
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    auto isCall = subscriber->IsCalled();
+    ASSERT_TRUE(isCall);
+}
+
+/**
+ * @tc.name: NotifyConsumedInner_003
+ * @tc.desc: Test NotifyConsumedInner when notificationMap is not nullptr and notification type is liveview
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    auto isCall = subscriber->IsCalled();
+    ASSERT_TRUE(isCall);
+}
+
+/**
+ * @tc.name: NotifyConsumedInner_004
+ * @tc.desc: Test NotifyConsumedInner when notificationMap is nullptr and notification type is not liveview
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    auto isCall = subscriber->IsCalled();
+    ASSERT_TRUE(isCall);
+}
+
+/**
+ * @tc.name: NotifyConsumedInner_005
+ * @tc.desc: Test NotifyConsumedInner when notificationMap is nullptr and notification type is liveview
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_005, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = nullptr;
+
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    auto isCall = subscriber->IsCalled();
+    ASSERT_TRUE(isCall);
+}
+
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+/**
+ * @tc.name: GetIsEnableEffectedRemind_001
+ * @tc.desc: Test GetIsEnableEffectedRemind when subscriberRecordList_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_001, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+
+    auto ret = notificationSubscriberManager.GetIsEnableEffectedRemind();
+
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetIsEnableEffectedRemind_002
+ * @tc.desc: Test GetIsEnableEffectedRemind when subscriberRecordList_ is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_002, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->AddDeviceType(NotificationConstant::PC_DEVICE_TYPE);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    auto ret = notificationSubscriberManager.GetIsEnableEffectedRemind();
+
+    ASSERT_TRUE(ret);
+}
+/**
+ * @tc.name: IsDeviceTypeSubscriberd_001
+ * @tc.desc: Test IsDeviceTypeSubscriberd when subscriberRecordList_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_001, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
+
+    auto ret = notificationSubscriberManager.IsDeviceTypeSubscriberd(deviceType);
+
+    ASSERT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsDeviceTypeSubscriberd_002
+ * @tc.desc: Test IsDeviceTypeSubscriberd when subscriberRecordList_ is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_002, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->AddDeviceType(deviceType);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+
+    auto ret = notificationSubscriberManager.IsDeviceTypeSubscriberd(deviceType);
+
+    ASSERT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IsDeviceTypeAffordConsume_001
+ * @tc.desc: Test IsDeviceTypeAffordConsume
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeAffordConsume_001, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->AddDeviceType(deviceType);
+    notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    bool result = false;
+
+    notificationSubscriberManager.IsDeviceTypeAffordConsume(deviceType, request, result);
+
+    ASSERT_TRUE(result);
+}
+#endif
+
+/**
+ * @tc.name: TrackCodeLog_002
+ * @tc.desc: Test TrackCodeLog
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, TrackCodeLog_002, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<Notification> notification = nullptr;
+    bool wearableFlag = false;
+    bool headsetFlag = false;
+    bool keyNodeFlag = false;
+
+    notificationSubscriberManager.TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
+
+    ASSERT_EQ(notification, nullptr);
+}
+
+/**
+ * @tc.name: TrackCodeLog_003
+ * @tc.desc: Test TrackCodeLog
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, TrackCodeLog_003, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationRequest> request = nullptr;
+    sptr<Notification> notification = new Notification(request);
+    bool wearableFlag = false;
+    bool headsetFlag = false;
+    bool keyNodeFlag = false;
+
+    notificationSubscriberManager.TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
+
+    ASSERT_EQ(notification->GetNotificationRequestPoint(), nullptr);
+}
+
+/**
+ * @tc.name: TrackCodeLog_004
+ * @tc.desc: Test TrackCodeLog
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, TrackCodeLog_004, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    bool wearableFlag = true;
+    bool headsetFlag = true;
+    bool keyNodeFlag = false;
+
+    notificationSubscriberManager.TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
+
+    ASSERT_NE(notification->GetNotificationRequestPoint(), nullptr);
+    ASSERT_TRUE(wearableFlag);
+    ASSERT_TRUE(headsetFlag);
+}
+
+/**
+ * @tc.name: TrackCodeLog_005
+ * @tc.desc: Test TrackCodeLog
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, TrackCodeLog_005, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    bool wearableFlag = true;
+    bool headsetFlag = false;
+    bool keyNodeFlag = false;
+
+    notificationSubscriberManager.TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
+
+    ASSERT_NE(notification->GetNotificationRequestPoint(), nullptr);
+    ASSERT_TRUE(wearableFlag);
+    ASSERT_FALSE(headsetFlag);
+}
+
+/**
+ * @tc.name: TrackCodeLog_006
+ * @tc.desc: Test TrackCodeLog
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberManagerTest, TrackCodeLog_006, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    sptr<Notification> notification = new Notification(request);
+    bool wearableFlag = false;
+    bool headsetFlag = true;
+    bool keyNodeFlag = false;
+
+    notificationSubscriberManager.TrackCodeLog(notification, wearableFlag, headsetFlag, keyNodeFlag);
+
+    ASSERT_NE(notification->GetNotificationRequestPoint(), nullptr);
+    ASSERT_TRUE(headsetFlag);
+    ASSERT_FALSE(wearableFlag);
 }
 }  // namespace Notification
 }  // namespace OHOS
