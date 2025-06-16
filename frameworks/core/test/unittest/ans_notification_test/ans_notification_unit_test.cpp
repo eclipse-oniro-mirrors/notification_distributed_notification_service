@@ -27,6 +27,7 @@
 #include "ans_notification.h"
 #include "ans_subscriber_proxy.h"
 #include "ans_manager_proxy.h"
+#include "notification_subscriber.h"
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
@@ -34,14 +35,18 @@
 #include "mock_i_remote_object.h"
 #include "notification.h"
 #include "singleton.h"
-#include "notification_subscriber.h"
+#include "mock_ans_manager_proxy.h"
+#include "mock_pixel_map.cpp"
 
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS;
 using namespace OHOS::Notification;
 
+extern void MockGetAnsManagerProxy(OHOS::sptr<OHOS::Notification::IAnsManager> mockRet);
+extern void MockPixelMapGetByteCount(int32_t mockRet);
 extern void MockWriteInterfaceToken(bool mockRet);
+
 
 namespace OHOS {
 namespace Notification {
@@ -83,6 +88,10 @@ void AnsNotificationUnitTest::TearDown() {}
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
+    TestAnsSubscriber()
+    {}
+    virtual ~TestAnsSubscriber()
+    {}
     void OnConnected() override
     {}
     void OnDisconnected() override
@@ -111,6 +120,27 @@ public:
     {}
 };
 
+class TestLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
+public:
+    void OnConnected()
+    {}
+
+    void OnDisconnected()
+    {}
+
+    void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption)
+    {}
+
+    void OnDied()
+    {}
+
+private:
+    const sptr<NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl> GetImpl() const
+    {
+        return nullptr;
+    }
+};
+
 /*
  * @tc.name: GetAnsManagerProxy_0100
  * @tc.desc: test GetAnsManagerProxy return false.
@@ -126,22 +156,6 @@ HWTEST_F(AnsNotificationUnitTest, GetAnsManagerProxy_0100, Function | MediumTest
     ASSERT_NE(nullptr, proxy);
     bool res = ans_->GetAnsManagerProxy();
     EXPECT_EQ(res, false);
-}
-
-/*
- * @tc.name: SetNotificationSlotFlagsAsBundle_0100
- * @tc.desc: test GetNotificationSlotFlagsAsBundle.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0100, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    NotificationBundleOption bundleOptions;
-    bundleOptions.SetBundleName("bundleName");
-    uint64_t num = 1;
-    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -235,28 +249,6 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0100, Function 
 }
 
 /*
- * @tc.name: GetNotificationSlotNumAsBundle_0200
- * @tc.desc: test GetNotificationSlotNumAsBundle ErrCode ERR_OK.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0200, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObjects);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-    NotificationBundleOption bundleOptions;
-    std::string bundleName = "bundleName";
-    bundleOptions.SetBundleName(bundleName);
-    uint64_t num;
-    ErrCode ret = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
-}
-
-/*
  * @tc.name: GetNotificationSlotFlagsAsBundle_0100
  * @tc.desc: test GetNotificationSlotFlagsAsBundle.
  * @tc.type: FUNC
@@ -300,54 +292,23 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0200, Functio
 }
 
 /*
- * @tc.name: GetNotificationSlotFlagsAsBundle_0300
- * @tc.desc: test GetNotificationSlotFlagsAsBundle errCode ERR_OK.
+ * @tc.name: SetNotificationSlotFlagsAsBundle_0100
+ * @tc.desc: test SetNotificationSlotFlagsAsBundle when proxy is null.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
-HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0300, Function | MediumTest | Level1)
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0100, Function | MediumTest | Level1)
 {
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObjects);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
     NotificationBundleOption bundleOptions;
-    std::string bundleName = "bundleName";
-    bundleOptions.SetBundleName(bundleName);
-    uint32_t num = 10;
-    ErrCode ret1 = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    bundleOptions.SetBundleName("bundleName");
+    uint64_t num = 1;
+    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*
- * @tc.name: AddNotificationSlots_0100
- * @tc.desc: test AddNotificationSlots exceed MAX_SLOT_NUM.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, AddNotificationSlots_0100, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObjects);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-    std::vector<NotificationSlot> slots;
-    for (int i = 0; i < MAX_SLOT_NUM + 1; i++) {
-        NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
-        sptr<NotificationSlot> notificationSlot = new (std::nothrow) NotificationSlot(slotType);
-        slots.push_back(*notificationSlot);
-    }
-    ErrCode ret = ans_->AddNotificationSlots(slots);
-    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
-}
-
-/*
  * @tc.name: SetNotificationSlotFlagsAsBundle_0200
- * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.desc: test SetNotificationSlotFlagsAsBundle with invalid bundleOptions.
  * @tc.type: FUNC
  * @tc.require: #I62SME
  */
@@ -364,27 +325,6 @@ HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0200, Functio
     uint64_t num = 10;
     ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
     EXPECT_EQ(ret1, ERR_ANS_INVALID_PARAM);
-}
-
-/*
- * @tc.name: SetNotificationSlotFlagsAsBundle_0300
- * @tc.desc: test GetNotificationSlotFlagsAsBundle.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0300, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObjects);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-    NotificationBundleOption bundleOptions;
-    bundleOptions.SetBundleName("bundleName");
-    uint64_t num = 1;
-    ErrCode ret1 = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
-    EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -406,6 +346,18 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0100, Function 
     std::string bundleName = "";
     ErrCode ret1 = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: RemoveEnableNotificationDialog_0100
+ * @tc.desc: test RemoveEnableNotificationDialog when proxy nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveEnableNotificationDialog_0100, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->RemoveEnableNotificationDialog();
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
 }
 
 /*
@@ -1202,6 +1154,32 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0400, Function | MediumT
 }
 
 /*
+ * @tc.name: SubscribeNotificationSelf_0100
+ * @tc.desc: test SubscribeNotificationSelf ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0100, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    ErrCode ret = ans_->SubscribeNotificationSelf(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SubscribeLocalLiveViewNotification_0100
+ * @tc.desc: test SubscribeLocalLiveViewNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeLocalLiveViewNotification_0100, Function | MediumTest | Level1)
+{
+    auto subscriber = TestLocalLiveViewSubscriber();
+    ErrCode ret = ans_->SubscribeLocalLiveViewNotification(subscriber, false);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: GetAllActiveNotifications_0100
  * @tc.desc: test GetAllActiveNotifications return false.
  * @tc.type: FUNC
@@ -1727,6 +1705,33 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0100, Func
 }
 
 /*
+ * @tc.name: PublishNotificationForIndirectProxy_0200
+ * @tc.desc: test PublishNotificationForIndirectProxy when proxy is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0200, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: CancelAsBundle_0100
+ * @tc.desc: test CancelAsBundle when proxy is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CancelAsBundle_0100, Function | MediumTest | Level1)
+{
+    NotificationBundleOption ntfBundleOption;
+    ErrCode res = ans_->CancelAsBundle(ntfBundleOption, 0);
+    EXPECT_EQ(res, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: GetNotificationSettings_0100
  * @tc.desc: test GetNotificationSetting.
  * @tc.type: FUNC
@@ -1751,15 +1756,445 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0100, Function | Mediu
  */
 HWTEST_F(AnsNotificationUnitTest, GetNotificationSettings_0200, Function | MediumTest | Level1)
 {
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObjects);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    MockGetAnsManagerProxy(proxy);
     uint32_t slotFlags = 0;
     ErrCode result = ans_->GetNotificationSettings(slotFlags);
-    EXPECT_EQ(result, ERR_ANS_SERVICE_NOT_CONNECTED);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * @tc.name: AddNotificationSlots_0100
+ * @tc.desc: test AddNotificationSlots exceed MAX_SLOT_NUM.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, AddNotificationSlots_0100, Function | MediumTest | Level1)
+{
+    std::vector<NotificationSlot> slots;
+    for (int i = 0; i < MAX_SLOT_NUM + 1; i++) {
+        NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOM;
+        sptr<NotificationSlot> notificationSlot = new (std::nothrow) NotificationSlot(slotType);
+        slots.push_back(*notificationSlot);
+    }
+    ErrCode ret = ans_->AddNotificationSlots(slots);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetNotificationSlotNumAsBundle_0200
+ * @tc.desc: test GetNotificationSlotNumAsBundle ErrCode ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotNumAsBundle_0200, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundleOptions;
+    std::string bundleName = "bundleName";
+    bundleOptions.SetBundleName(bundleName);
+    uint64_t num;
+    ErrCode ret = ans_->GetNotificationSlotNumAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetNotificationSlotFlagsAsBundle_0300
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle errCode ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetNotificationSlotFlagsAsBundle_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundleOptions;
+    std::string bundleName = "bundleName";
+    bundleOptions.SetBundleName(bundleName);
+    uint32_t num = 10;
+    ErrCode ret = ans_->GetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SetNotificationSlotFlagsAsBundle_0300
+ * @tc.desc: test GetNotificationSlotFlagsAsBundle.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationSlotFlagsAsBundle_0300, Function | MediumTest | Level1)
+{
+    NotificationBundleOption bundleOptions;
+    bundleOptions.SetBundleName("bundleName");
+    uint64_t num = 1;
+    ErrCode ret = ans_->SetNotificationSlotFlagsAsBundle(bundleOptions, num);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: PublishNotification_0200
+ * @tc.desc: test PublishNotification ErrCode ERR_ANS_INVALID_PARAM cause IsValidDelayTime fail.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotification_0200, Function | MediumTest | Level1)
+{
+    std::string label = "this is label";
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    request.SetPublishDelayTime(6);
+    ErrCode ret = ans_->PublishNotification(label, request, "instanceKey");
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: PublishNotification_0300
+ * @tc.desc: test PublishNotification ErrCode ERR_ANS_ICON_OVER_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotification_0300, Function | MediumTest | Level1)
+{
+    std::string label = "this is label";
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    MockPixelMapGetByteCount(256 * 1024);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    request.SetLittleIcon(pixelMap);
+    ErrCode ret = ans_->PublishNotification(label, request, "instanceKey");
+    EXPECT_EQ(ret, ERR_ANS_ICON_OVER_SIZE);
+}
+
+/*
+ * @tc.name: PublishNotification_0400
+ * @tc.desc: test PublishNotification with common liveView.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotification_0400, Function | MediumTest | Level1)
+{
+    std::string label = "this is label";
+    NotificationRequest request;
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    ErrCode ret = ans_->PublishNotification(label, request, "instanceKey");
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0300
+ * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INVALID_PARAM cause CanPublishMediaContent fail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0300, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::vector<uint32_t> actions;
+    for (int i = 0; i < 3; i++) {
+        actions.push_back(32);
+    }
+    mediaContent->SetShownActions(actions);
+    mediaContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::MEDIA));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    request.SetContent(content);
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0400
+ * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INVALID_PARAM cause CanPublishLiveViewContent fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0400, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationLiveViewContent> liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_BUTT);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveContent);
+    request.SetContent(content);
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0500
+ * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_ICON_OVER_SIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0500, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    MockPixelMapGetByteCount(256 * 1024);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    request.SetLittleIcon(pixelMap);
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_ANS_ICON_OVER_SIZE);
+}
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0600
+ * @tc.desc: test PublishNotificationForIndirectProxy with common liveView.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0600, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: PublishNotificationForIndirectProxy_0700
+ * @tc.desc: test PublishNotificationForIndirectProxy normal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0700, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    ErrCode res = ans_->PublishNotificationForIndirectProxy(request);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: PublishNotificationAsBundle_0100
+ * @tc.desc: test PublishNotificationAsBundle ErrCode ERR_ANS_ICON_OVER_SIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0100, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    MockPixelMapGetByteCount(256 * 1024);
+    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
+    request.SetLittleIcon(pixelMap);
+    std::string representativeBundle = "this is representativeBundle";
+    ErrCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    EXPECT_EQ(res, ERR_ANS_ICON_OVER_SIZE);
+}
+
+/*
+ * @tc.name: PublishNotificationAsBundle_0200
+ * @tc.desc: test PublishNotificationAsBundle with common liveView.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0200, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request.SetContent(content);
+    request.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    std::string representativeBundle = "this is representativeBundle";
+    ErrCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: PublishNotificationAsBundle_0300
+ * @tc.desc: test PublishNotificationAsBundle normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, PublishNotificationAsBundle_0300, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    request.SetContent(content);
+    std::string representativeBundle = "this is representativeBundle";
+    ErrCode res = ans_->PublishNotificationAsBundle(representativeBundle, request);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: CanPopEnableNotificationDialog_0200
+ * @tc.desc: test CanPopEnableNotificationDialog normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0200, Function | MediumTest | Level1)
+{
+    sptr<AnsDialogHostClient> client = nullptr;
+    bool enable = true;
+    std::string bundleName = "";
+    ErrCode ret = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: RemoveEnableNotificationDialog_0200
+ * @tc.desc: test RemoveEnableNotificationDialog normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveEnableNotificationDialog_0200, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->RemoveEnableNotificationDialog();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: RequestEnableNotification_0200
+ * @tc.desc: test RequestEnableNotification when hostClient nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0200, Function | MediumTest | Level1)
+{
+    std::string deviceId = "this is deviceId";
+    sptr<IRemoteObject> callerToken = nullptr;
+    sptr<AnsDialogHostClient> client = nullptr;
+    ErrCode ret = ans_->RequestEnableNotification(deviceId, client, callerToken);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: RequestEnableNotification_0300
+ * @tc.desc: test RequestEnableNotification normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0300, Function | MediumTest | Level1)
+{
+    std::string deviceId = "this is deviceId";
+    sptr<IRemoteObject> callerToken = new (std::nothrow) MockIRemoteObject();
+    sptr<AnsDialogHostClient> client = nullptr;
+    AnsDialogHostClient::CreateIfNullptr(client);
+    client = AnsDialogHostClient::GetInstance();
+    ErrCode ret = ans_->RequestEnableNotification(deviceId, client, callerToken);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: RequestEnableNotification_0400
+ * @tc.desc: test RequestEnableNotification normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, RequestEnableNotification_0400, Function | MediumTest | Level1)
+{
+    std::string bundleName = "bundleName";
+    int32_t uid = 100;
+    ErrCode ret = ans_->RequestEnableNotification(bundleName, uid);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetBundleImportance_0200
+ * @tc.desc: test GetBundleImportance ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0200, Function | MediumTest | Level1)
+{
+    NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_NONE;
+    ErrCode ret = ans_->GetBundleImportance(importance);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SubscribeNotification_0500
+ * @tc.desc: test SubscribeNotification when subscriberSptr nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0500, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    subscriber.impl_ = nullptr;
+    ErrCode ret = ans_->SubscribeNotification(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SubscribeNotificationSelf_0200
+ * @tc.desc: test SubscribeNotificationSelf when subscriberSptr nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0200, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    subscriber.impl_ = nullptr;
+    ErrCode ret = ans_->SubscribeNotificationSelf(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SubscribeNotificationSelf_0300
+ * @tc.desc: test SubscribeNotificationSelf normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0300, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    ErrCode ret = ans_->SubscribeNotificationSelf(subscriber);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SubscribeLocalLiveViewNotification_0200
+ * @tc.desc: test SubscribeLocalLiveViewNotification when subscriberSptr nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeLocalLiveViewNotification_0200, Function | MediumTest | Level1)
+{
+    auto subscriber = TestLocalLiveViewSubscriber();
+    subscriber.impl_ = nullptr;
+    ErrCode ret = ans_->SubscribeLocalLiveViewNotification(subscriber, false);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SubscribeNotification_0600
+ * @tc.desc: test SubscribeNotification when subscriberSptr nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0600, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    subscriber.impl_ = nullptr;
+    auto info = NotificationSubscribeInfo();
+    ErrCode ret = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SubscribeNotification_0700
+ * @tc.desc: test SubscribeNotification normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0700, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    auto info = NotificationSubscribeInfo();
+    info.AddDeviceType("phone");
+    ErrCode ret = ans_->SubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

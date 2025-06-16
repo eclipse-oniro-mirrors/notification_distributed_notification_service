@@ -26,6 +26,7 @@ ohos_unittest("ans_notification_test") {
   ]
 
   sources = [
+    "../mock/mock_ans_manager_proxy.cpp",
     "../mock/mock_message_parcel.cpp",
     "ans_notification_unit_test.cpp",
   ]
