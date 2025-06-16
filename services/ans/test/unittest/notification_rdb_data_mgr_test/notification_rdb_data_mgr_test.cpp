@@ -34,6 +34,7 @@ namespace {
 extern void MockHasBlock(bool mockRet);
 extern void MockGoToFirstRow(bool mockRet);
 extern void MockGetString(bool mockRet);
+extern void MockGetUserTableName(bool mockRet);
 
 using namespace testing::ext;
 using namespace OHOS::NativeRdb;
@@ -756,6 +757,197 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_02600
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     g_mockExecuteSql = false;
     ASSERT_EQ(notificationDataMgr->DropUserTable(-1), NativeRdb::E_ERROR);
+}
+
+
+/**
+ * @tc.name      : OnUpgrade_Test_001
+ * @tc.number    :
+ * @tc.desc      : Test that OnUpgrade function returns E_OK when called
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, OnUpgrade_Test_001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    int32_t oldVersion = 1;
+    int32_t newVersion = 2;
+    auto rdbStore = std::make_shared<RdbStoreTest>();
+    int32_t result = rdbStoreData_->OnUpgrade(*rdbStore, oldVersion, newVersion);
+
+    EXPECT_EQ(result, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : OnDowngrade_Test_001
+ * @tc.number    :
+ * @tc.desc      : Test that OnDowngrade function returns E_OK when called
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, OnDowngrade_Test_001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    int32_t currentVersion = 1;
+    int32_t targetVersion = 2;
+    auto rdbStore = std::make_shared<RdbStoreTest>();
+    int32_t result = rdbStoreData_->OnDowngrade(*rdbStore, currentVersion, targetVersion);
+
+    EXPECT_EQ(result, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : onCorruption_Test_001
+ * @tc.number    :
+ * @tc.desc      : Test that onCorruption function returns E_OK when called
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, onCorruption_Test_001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    std::string databaseFile = "test_file";
+    int32_t result = rdbStoreData_->onCorruption(databaseFile);
+
+    EXPECT_EQ(result, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : InsertData_Test_001
+ * @tc.number    :
+ * @tc.desc      : test InsertData
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, InsertData_Test_001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = nullptr;
+    std::string key = "<key>";
+    std::string value = "<value>";
+    MockGetUserTableName(false);
+    ASSERT_NE(notificationDataMgr->InsertData(key, value, -1), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : QueryDataContainsWithKey_Test_001
+ * @tc.number    :
+ * @tc.desc      : Test case to verify that the function returns E_ERROR when rdbStore_ is null.
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_Test_001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = nullptr;
+
+    std::unordered_map<std::string, std::string> values;
+    int32_t userId = 1;
+    std::string key = "testKey";
+
+    // Call the function and verify the result
+    int32_t result = notificationDataMgr->QueryDataContainsWithKey(key, values, userId);
+    EXPECT_EQ(result, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name      : QueryDataContainsWithKey_Test_002
+ * @tc.number    :
+ * @tc.desc      : Test case to verify that the function returns E_ERROR when rdbStore_ is null.
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_Test_002, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+
+    std::unordered_map<std::string, std::string> values;
+    int32_t userId = 1;
+    std::string key = "testKey";
+
+    // Call the function and verify the result
+    int32_t result = notificationDataMgr->QueryDataContainsWithKey(key, values, userId);
+    EXPECT_EQ(result, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : QueryDataContainsWithKey_Test_003
+ * @tc.number    :
+ * @tc.desc      : Test case to verify that the function returns E_ERROR when the result set is null.
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_Test_003, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+
+    std::unordered_map<std::string, std::string> values;
+    std::string tableName = "testTable";
+    std::string key = "testKey";
+    g_mockQueryRet = true;
+
+    int32_t result = notificationDataMgr->QueryDataContainsWithKey(tableName, key, values);
+    EXPECT_EQ(result, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name      : QueryDataContainsWithKey_Test_004
+ * @tc.number    :
+ * @tc.desc      : Test case to verify that the function returns E_EMPTY_VALUES_BUCKET when GoToFirstRow fails.
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_Test_004, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+
+    std::unordered_map<std::string, std::string> values;
+    std::string tableName = "testTable";
+    std::string key = "testKey";
+    g_mockQueryRet = false;
+    MockGoToFirstRow(false);
+
+    int32_t result = notificationDataMgr->QueryDataContainsWithKey(tableName, key, values);
+    EXPECT_EQ(result, NativeRdb::E_EMPTY_VALUES_BUCKET);
+}
+
+/**
+ * @tc.name      : QueryDataContainsWithKey_Test_005
+ * @tc.number    :
+ * @tc.desc      : Test case to verify that the function returns E_EMPTY_VALUES_BUCKET.
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_Test_005, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+
+    std::unordered_map<std::string, std::string> values;
+    std::string tableName = "testTable";
+    std::string key = "testKey";
+
+    int32_t result = notificationDataMgr->QueryDataContainsWithKey(tableName, key, values);
+    EXPECT_EQ(result, NativeRdb::E_EMPTY_VALUES_BUCKET);
+}
+
+/**
+ * @tc.name      : QueryDataContainsWithKey_Test_006
+ * @tc.number    :
+ * @tc.desc      : Test case to verify that the function returns E_ERROR.
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_Test_006, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+
+    int32_t result = notificationDataMgr->RestoreForMasterSlaver();
+    EXPECT_EQ(result, NativeRdb::E_ERROR);
 }
 }  // namespace Notification
 }  // namespace OHOS

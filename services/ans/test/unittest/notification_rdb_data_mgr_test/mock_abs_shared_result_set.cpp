@@ -19,6 +19,7 @@
 namespace {
     bool g_mockHasBlockRet = true;
     bool g_mockGetStringRet = true;
+    bool g_mockGetUserTableName = true;
 }
 
 void MockHasBlock(bool mockRet)
@@ -29,6 +30,11 @@ void MockHasBlock(bool mockRet)
 void MockGetString(bool mockRet)
 {
     g_mockGetStringRet = mockRet;
+}
+
+void MockGetUserTableName(bool mockRet)
+{
+    g_mockGetUserTableName = mockRet;
 }
 
 namespace OHOS {
