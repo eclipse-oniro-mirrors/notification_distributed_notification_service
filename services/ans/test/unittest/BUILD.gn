@@ -210,6 +210,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "include",
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
+    "${services_path}/../frameworks/core/test/unittest/mock",
     "${services_path}/../framworks/core/include",
   ]
 
@@ -241,6 +242,10 @@ ohos_unittest("notification_subscriber_manager_test") {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
   }
 
   external_deps = [
