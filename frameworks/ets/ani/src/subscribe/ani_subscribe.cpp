@@ -49,7 +49,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
     ani_object aniPromise {};
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
-        ANS_LOGD("Promise_New faild");
+        ANS_LOGE("Promise_New faild");
         return nullptr;
     }
     bool noWithOperationInfo = false;

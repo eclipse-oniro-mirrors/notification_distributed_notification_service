@@ -132,6 +132,11 @@ ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
         ANS_LOGE("AniGetSlot -> error, errorCode: %{public}d", externalCode);
         AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
+    if (slot == nullptr) {
+        ANS_LOGD("AniGetSlot -> slot is nullptr");
+        AbilityRuntime::ThrowStsError(env, RETURN_EXCEPTION_VALUE, "slot is null");
+        return nullptr;
+    }
     ani_object slotObj;
     if (!NotificationSts::WrapNotificationSlot(env, slot, slotObj)) {
         ANS_LOGE("WrapNotificationSlot faild");
