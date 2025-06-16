@@ -26,7 +26,8 @@ import StartOptions from '@ohos.app.ability.StartOptions';
 import configPolicy from '@ohos.configPolicy';
 import fs from '@ohos.file.fs';
 import Constants from '../common/constant';
-
+import DisplayUtils from '../common/displayUtils';
+import { shouldMoveWindow} from '../common/utils';
 
 
 const TAG = 'NotificationDialog_Service ';
@@ -85,6 +86,8 @@ export class EnableNotificationDialog {
   static PC_DIALOG_PATH = 'pages/pcNotificationDialog';
   static TV_DIALOG_PATH = 'pages/tvNotificationDialog';
   static CAR_DIALOG_PATH = 'pages/carNotificationDialog';
+  static EMPTY_PAGE_PATH = 'pages/emptyPage';
+  static MASK_COLOR = '#33000000';
   static TRANSPARANT_COLOR = '#00000000';
   static SCENEBOARD_BUNDLE = 'com.ohos.sceneboard';
   static SYSTEMUI_BUNDLE = 'com.ohos.systemui';
@@ -172,6 +175,7 @@ export class EnableNotificationDialog {
         };
         let subWindow = await extensionWindow.createSubWindowWithOptions('subWindowForHost' + Date(), subWindowOpts);
         this.subWindow = subWindow;
+        let moveToCenter : boolean = false;
         
         if(isPcDevice) {
           let hasDisalogRectInfo = false;
@@ -187,10 +191,28 @@ export class EnableNotificationDialog {
             await this.sleep(200);
           }
           if(hasDisalogRectInfo) {
+            // get display
+            let display = DisplayUtils.getCurWindowDisplay(subWindow);
+            if (display == undefined) {
+              throw new Error('Failed to getCurWindowDisplay');
+            }
             let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
             console.info(TAG, `size : ${windowRect?.left} ${windowRect?.top} ${windowRect?.width}  ${windowRect?.height}`);
-            await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
-            await subWindow.resize(windowRect?.width, windowRect?.height);
+
+            // need moveToCenter
+            moveToCenter = shouldMoveWindow(windowRect,display);
+            console.info(TAG,`moveToCenter = ${moveToCenter}`);
+            if (moveToCenter) {
+              AppStorage.setOrCreate('showInDisplayCenter', true);
+              let widht = Constants.MAX_DIALOG_WIDTH;
+              let height = Constants.PC_INIT_CONTENT_HEIGHT;
+              await subWindow.resize(vp2px(widht), vp2px(height));
+              await subWindow.moveWindowToGlobal(display.width / 2 - vp2px(widht)/2, display.height / 2 - vp2px(height)/2);
+            } else {
+              await subWindow.moveWindowToGlobal(windowRect?.left, windowRect?.top);
+              await subWindow.resize(windowRect?.width, windowRect?.height);
+            }
+
             hasDisalogRectInfo = false;
           } else {
             console.info(TAG,'waite send windwow info fail');
@@ -207,7 +229,9 @@ export class EnableNotificationDialog {
           }
         }
         try {
-          await subWindow.setFollowParentWindowLayoutEnabled(true);
+          if (!moveToCenter) {
+            await subWindow.setFollowParentWindowLayoutEnabled(true);
+          }
         } catch (err) {
           console.error(TAG, `setFollowParentWindowLayoutEnabled failed! ${err.code} ${err.message}`);
         }
@@ -217,6 +241,12 @@ export class EnableNotificationDialog {
         } catch (err) {
           console.error(TAG, 'subWindow hideNonSystemFloatingWindows failed!');
         }
+
+        if (moveToCenter) {
+          await session.loadContent(EnableNotificationDialog.EMPTY_PAGE_PATH, this.storage);  
+          await session.setWindowBackgroundColor(EnableNotificationDialog.MASK_COLOR);
+        } 
+        
         await subWindow.setWindowBackgroundColor(EnableNotificationDialog.TRANSPARANT_COLOR);
         await subWindow.showWindow();
       } else {
