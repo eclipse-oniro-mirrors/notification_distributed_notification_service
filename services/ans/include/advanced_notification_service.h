@@ -1671,6 +1671,8 @@ private:
 
     void SetChainIdToExtraInfo(const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId);
 
+    ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static std::mutex instanceMutex_;
