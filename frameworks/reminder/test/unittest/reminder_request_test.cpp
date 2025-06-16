@@ -2424,5 +2424,35 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_007, Function | SmallTest | Le
     child.SetRingLoop(false);
     EXPECT_EQ(child.IsRingLoop(), false);
 }
+
+/**
+ * @tc.name: ReminderRequestTest_008
+ * @tc.desc: Test MarshallingActionButton parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_008, Function | SmallTest | Level1)
+{
+    ReminderRequestChild child;
+    child.SetActionButton("test1", ReminderRequest::ActionButtonType::CLOSE, "test1",
+        nullptr, nullptr);
+    Parcel p;
+    child.MarshallingActionButton(p);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
+    
+    child.actionButtonMap_.clear();
+    auto wantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    child.SetActionButton("test2", ReminderRequest::ActionButtonType::SNOOZE, "test2",
+        wantAgent, nullptr);
+    child.MarshallingActionButton(p);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
+    
+    child.actionButtonMap_.clear();
+    auto update = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
+    child.SetActionButton("test3", ReminderRequest::ActionButtonType::CUSTOM, "test3",
+        wantAgent, update);
+    child.MarshallingActionButton(p);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
+}
 }
 }

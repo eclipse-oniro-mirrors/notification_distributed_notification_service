@@ -1572,5 +1572,23 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_034, Level1)
     manager->ReportTimerEvent(targetTime, false);
     EXPECT_TRUE(manager != nullptr);
 }
+
+/**
+ * @tc.name: ReminderDataManagerTest_035
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_035, Level1)
+{
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->SetSystemApp(true);
+    int32_t count = 0;
+    manager->AsyncStartExtensionAbility(calendar, 1, 1, count);
+    manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
+    count = 200;
+    manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
+    EXPECT_TRUE(manager != nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS
