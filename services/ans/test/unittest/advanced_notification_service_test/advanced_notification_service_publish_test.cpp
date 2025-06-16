@@ -582,6 +582,28 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01300,
     SleepForFC();
 }
 
+/**
+ * @tc.number    : ANS_Publish_01400
+ * @tc.name      : ANSPublish01400
+ * @tc.desc      : When an non system app wants to publish an notification with local wantAgent, the
+ *  notification publishing interface returns ERR_ANS_NON_SYSTEM_APP;
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01400, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    req->SetWantAgent(wantAgent);
+    MockIsSystemApp(false);
+    std::string label = "publish's label";
+    ASSERT_EQ(advancedNotificationService_->Publish(label, req), (int)ERR_ANS_NON_SYSTEM_APP);
+    SleepForFC();
+}
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_04600
@@ -1738,6 +1760,96 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1300, Function | SmallT
     data.SetCode(0);
     advancedNotificationService.systemEventObserver_->OnReceiveEvent(data);
     ASSERT_EQ(advancedNotificationService.localScreenOn_, false);
+}
+
+/**
+ * @tc.number    : CheckNotificationRequest_0100
+ * @tc.name      : CheckNotificationRequest_0100
+ * @tc.desc      : Test CheckNotificationRequest method when request is null
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0100, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(nullptr), ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : CheckNotificationRequest_0200
+ * @tc.name      : CheckNotificationRequest_0200
+ * @tc.desc      : Test CheckNotificationRequest method when request has no wantAgent
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0200, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    auto request = new NotificationRequest();
+    
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(request), ERR_OK);
+}
+
+/**
+ * @tc.number    : CheckNotificationRequest_0300
+ * @tc.name      : CheckNotificationRequest_0300
+ * @tc.desc      : Test CheckNotificationRequest method when request has no wantAgent
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0300, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    auto request = new NotificationRequest();
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    request->SetWantAgent(wantAgent);
+    MockSystemApp();
+
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(request), ERR_OK);
+}
+
+/**
+ * @tc.number    : CheckNotificationRequest_0300
+ * @tc.name      : CheckNotificationRequest_0300
+ * @tc.desc      : Test CheckNotificationRequest method when request has no wantAgent
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0400, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    auto request = new NotificationRequest();
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    request->SetRemovalWantAgent(wantAgent);
+    MockSystemApp();
+
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(request), ERR_OK);
+}
+
+/**
+ * @tc.number    : CheckNotificationRequest_0300
+ * @tc.name      : CheckNotificationRequest_0300
+ * @tc.desc      : Test CheckNotificationRequest method when request has no wantAgent
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0500, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    auto request = new NotificationRequest();
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    request->SetRemovalWantAgent(wantAgent);
+    MockIsSystemApp(false);
+
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(request), ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS
