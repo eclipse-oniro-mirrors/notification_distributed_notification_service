@@ -565,8 +565,9 @@ private:
      * @param isSysTimeChanged Indicates whether it is triggerred as system time changed by user.
      * @param needScheduleTimeout Indicates whether need to control the ring duration.
      */
-    void ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
-        const bool &isNeedToStartNext, const bool &isSysTimeChanged, const bool &needScheduleTimeout);
+    void ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
+        const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
+        const bool isNeedCloseDefaultSound);
 
     void SnoozeReminderImpl(sptr<ReminderRequest> &reminder);
 
