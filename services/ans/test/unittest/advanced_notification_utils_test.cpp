@@ -205,6 +205,9 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00001, Function | SmallTest
     sptr<NotificationRequest> newRequest;
     auto bundleOption = new NotificationBundleOption("test", 1);
     int notificationId = 1;
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
     ASSERT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label, keys, newRequest),
         (int)ERR_ANS_INVALID_PARAM);
 }
