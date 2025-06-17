@@ -24,6 +24,7 @@ void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEn
 void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reasonEnum);
 void AniRemoveAllForUserId(ani_env *env, ani_double userId);
 void AniRemoveAllForBundle(ani_env *env, ani_object bundle);
+void AniRemoveAll(ani_env *env);
 }
 }
 #endif
