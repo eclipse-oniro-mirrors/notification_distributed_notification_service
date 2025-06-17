@@ -82,6 +82,7 @@ export default namespace notificationSubscribe {
     export native function nativeSubscribeSelf(subscriber: NotificationSubscriber): void
     export native function nativeRemoveAllForBundle(bundle?: BundleOption): void;
     export native function nativeRemoveAllForUserId(userId: number): void;
+    export native function nativeRemoveAll(): void;
 
     export function subscribe(subscriber: NotificationSubscriber, callback: AsyncCallback<void>): void {
         if (subscriber == undefined || callback == undefined) {
@@ -369,11 +370,10 @@ export default namespace notificationSubscribe {
 
 	export function removeAll(bundle?: BundleOption): Promise<void>
     {
-
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {
                 if (bundle == undefined) {
-                    return notificationSubscribe.nativeRemoveAllForBundle();
+                    return notificationSubscribe.nativeRemoveAll();
                 } else {
                     return notificationSubscribe.nativeRemoveAllForBundle(bundle);
                 }
@@ -392,7 +392,7 @@ export default namespace notificationSubscribe {
             throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => {
-            return notificationSubscribe.nativeRemoveAllForBundle();
+            return notificationSubscribe.nativeRemoveAll();
         });
         p.then(
             (e: NullishType): void => {
