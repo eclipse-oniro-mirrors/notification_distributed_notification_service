@@ -42,7 +42,7 @@ static const char *UNSUBSCRIBE_SIGNATURE =
 static const char *REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE =
    "Lnotification/NotificationCommonDef/BundleOption;:V";
 static const char *REMOVEALL_FOR_USERID_STGNATURE = "D:V";
-static const char *REMOVEALL_SIGNATURE =":V";
+static const char *REMOVEALL_SIGNATURE = ":V";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
