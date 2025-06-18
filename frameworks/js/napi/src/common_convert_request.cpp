@@ -711,6 +711,10 @@ napi_value Common::GetNotificationRequestByCustom(
     if (GetNotificationExtraInfo(env, value, request) == nullptr) {
         return nullptr;
     }
+    // extendInfo?: {[key: string]: any}
+    if (GetNotificationExtendInfo(env, value, request) == nullptr) {
+        return nullptr;
+    }
     // removalWantAgent?: WantAgent
     if (GetNotificationRemovalWantAgent(env, value, request) == nullptr) {
         return nullptr;
@@ -1207,6 +1211,36 @@ napi_value Common::GetNotificationExtraInfo(const napi_env &env, const napi_valu
 
         std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>(wantParams);
         request.SetAdditionalData(extras);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetNotificationExtendInfo(const napi_env &env, const napi_value &value, NotificationRequest &request)
+{
+    ANS_LOGD("enter");
+
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "extendInfo", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "extendInfo", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of extendInfo must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        AAFwk::WantParams wantParams;
+        if (!OHOS::AppExecFwk::UnwrapWantParams(env, result, wantParams)) {
+            return nullptr;
+        }
+
+        std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>(wantParams);
+        request.SetExtendInfo(extendInfo);
     }
 
     return NapiGetNull(env);

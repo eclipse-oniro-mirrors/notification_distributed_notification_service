@@ -74,7 +74,6 @@ ErrCode SubscriberListener::OnConsumed(
     }
 #endif
     
-    subscriber->ProcessRemoveExtendInfo(subscriber->GetDeviceType(), sharedNotification);
     subscriber->OnConsumed(
         sharedNotification, std::make_shared<NotificationSortingMap>(*notificationMap));
     return ERR_OK;
