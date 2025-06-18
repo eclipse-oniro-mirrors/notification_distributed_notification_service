@@ -20,10 +20,10 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 
 #include "bundle_manager_helper.h"
-#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 
 #include "notification_preferences.h"
@@ -142,17 +142,20 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
-#endif
             ANS_LOGE("GetPrivilegeDialogPopped false.");
-            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has no permission popped");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         } else {
             ANS_LOGI("duplicated popped.");
             message.Append(" duplicated popped.");
         }
+#else
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NOT_ALLOWED;
 #endif
     }
     if (!EXTENTION_WRAPPER->NotificationDialogControl()) {
@@ -228,7 +231,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     bool updateUnEnableTime)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_5);
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
@@ -345,17 +348,20 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
-#endif
             ANS_LOGE("GetPrivilegeDialogPopped false.");
-            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Haspopped true");
+            message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has no permission popped");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         } else {
             ANS_LOGI("duplicated popped.");
             message.Append(" duplicated popped.");
         }
+#else
+        message.ErrorCode(ERR_ANS_NOT_ALLOWED).Append(" Has popped");
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+        return ERR_ANS_NOT_ALLOWED;
 #endif
     }
     if (!EXTENTION_WRAPPER->NotificationDialogControl()) {

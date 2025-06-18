@@ -18,6 +18,7 @@
 #include "ability_manager_client.h"
 #include "ans_convert_enum.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
@@ -94,7 +95,7 @@ ReminderDataManager::~ReminderDataManager() = default;
 ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &reminder,
     const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     uint32_t callerTokenId = IPCSkeleton::GetCallingTokenID();
     if (callerTokenId == 0) {
         ANSR_LOGE("pushlish failed, callerTokenId is 0");
@@ -118,7 +119,7 @@ ErrCode ReminderDataManager::PublishReminder(const sptr<ReminderRequest> &remind
 ErrCode ReminderDataManager::CancelReminder(
     const int32_t &reminderId, const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     ANSR_LOGI("cancel reminder id: %{public}d", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, false);
     if (reminder == nullptr) {
@@ -152,7 +153,7 @@ ErrCode ReminderDataManager::CancelReminder(
 ErrCode ReminderDataManager::CancelAllReminders(const std::string& bundleName,
     const int32_t userId, const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     CancelRemindersImplLocked(bundleName, userId, callingUid);
     return ERR_OK;
 }
@@ -180,7 +181,7 @@ sptr<ReminderRequest> ReminderDataManager::CheckExcludeDateParam(const int32_t r
 ErrCode ReminderDataManager::AddExcludeDate(const int32_t reminderId, const int64_t date,
     const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, callingUid);
     if (reminder == nullptr) {
         return ERR_REMINDER_NOT_EXIST;
@@ -197,7 +198,7 @@ ErrCode ReminderDataManager::AddExcludeDate(const int32_t reminderId, const int6
 ErrCode ReminderDataManager::DelExcludeDates(const int32_t reminderId,
     const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, callingUid);
     if (reminder == nullptr) {
         return ERR_REMINDER_NOT_EXIST;
@@ -214,7 +215,7 @@ ErrCode ReminderDataManager::DelExcludeDates(const int32_t reminderId,
 ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId,
     const int32_t callingUid, std::vector<int64_t>& dates)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     sptr<ReminderRequest> reminder = CheckExcludeDateParam(reminderId, callingUid);
     if (reminder == nullptr) {
         return ERR_REMINDER_NOT_EXIST;
@@ -230,7 +231,7 @@ ErrCode ReminderDataManager::GetExcludeDates(const int32_t reminderId,
 void ReminderDataManager::GetValidReminders(
     const int32_t callingUid, std::vector<ReminderRequestAdaptation> &reminders)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     auto reminderVector = store_->GetAllValidReminders();
     for (auto& eachReminder : reminderVector) {
@@ -846,6 +847,7 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     if ((type == DATE_TIME_CHANGE) && (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME)) {
         lastStartTime_ = now;
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIME_CHANGE);
+        ReportUserDataSizeEvent();
     } else if (type == TIME_ZONE_CHANGE) {
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_TIMEZONE_CHANGE);
     }
@@ -1035,11 +1037,11 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
             playSoundReminder = (*it);
             isAlerting = true;
         } else {
-            ShowReminder((*it), false, false, false, false);
+            ShowReminder((*it), false, false, false, false, isAlerting);
         }
     }
     if (playSoundReminder != nullptr) {
-        ShowReminder(playSoundReminder, true, false, false, true);
+        ShowReminder(playSoundReminder, true, false, false, true, true);
     }
 }
 
@@ -1065,8 +1067,9 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
     return true;
 }
 
-void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
-    const bool &isNeedToStartNext, const bool &isSysTimeChanged, const bool &needScheduleTimeout)
+void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
+    const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
+    const bool isNeedCloseDefaultSound)
 {
     ANSR_LOGD("Show the reminder(Play sound: %{public}d), %{public}s",
         static_cast<int32_t>(isNeedToPlaySound), reminder->Dump().c_str());
@@ -1087,7 +1090,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
-    if (toPlaySound) {
+    if (toPlaySound || isNeedCloseDefaultSound) {
         // close notification default sound.
         notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
             NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
@@ -1297,11 +1300,11 @@ void ReminderDataManager::HandleImmediatelyShow(
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), true, false, isSysTimeChanged, true);
+            ShowReminder((*it), true, false, isSysTimeChanged, true, true);
             isAlerting = true;
         } else {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), false, false, isSysTimeChanged, false);
+            ShowReminder((*it), false, false, isSysTimeChanged, false, isAlerting);
         }
     }
 }
@@ -1474,35 +1477,6 @@ bool ReminderDataManager::RegisterConfigurationObserver()
     return true;
 }
 
-void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
-{
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto reminderSptr : reminderVector_) {
-        if (!(reminderSptr->ShouldShowImmediately())) {
-            break;
-        }
-        if (reminderSptr->GetReminderType() != ReminderRequest::ReminderType::TIMER) {
-            reminderSptr->SetSnoozeTimesDynamic(0);
-        }
-        reminders.push_back(reminderSptr);
-    }
-}
-
-bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder) const
-{
-    if (reminder == nullptr) {
-        return false;
-    }
-    bool isAllowed = false;
-    NotificationBundleOption bundleOption(reminder->GetBundleName(), reminder->GetUid());
-    ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, isAllowed));
-    if (errCode != ERR_OK) {
-        ANSR_LOGE("Failed to call IsAllowedNotify, errCode=%{public}d", errCode);
-        return false;
-    }
-    return isAllowed;
-}
-
 bool ReminderDataManager::IsReminderAgentReady() const
 {
     return isReminderAgentReady_;
@@ -1562,6 +1536,7 @@ void ReminderDataManager::OnLoadReminderInFfrt()
     if (TimeDistance(now, lastStartTime_) > ONE_DAY_TIME) {
         lastStartTime_ = now;
         ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_NORMAL);
+        ReportUserDataSizeEvent();
     }
     StartRecentReminder();
     StartLoadTimer();
@@ -1597,6 +1572,52 @@ std::string ReminderDataManager::GetFullPath(const std::string& oriPath)
     return filePath;
 }
 
+void ReminderDataManager::SetPlayerParam(const sptr<ReminderRequest> reminder)
+{
+#ifdef PLAYER_FRAMEWORK_ENABLE
+    std::string customRingUri = reminder->GetCustomRingUri();
+    if (customRingUri.empty()) {
+        // use default ring
+        std::string defaultPath;
+        if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
+            defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
+        } else {
+            defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
+        }
+        Uri defaultSound(defaultPath);
+        soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
+        ANSR_LOGI("Play default sound.");
+    } else if (customRingUri.find("file://") == 0) {
+        if (systemSoundClient_ == nullptr) {
+            systemSoundClient_ = Media::SystemSoundManagerFactory::CreateSystemSoundManager();
+        }
+        if (systemSoundClient_ != nullptr) {
+            std::string url = customRingUri.substr(std::string("file:/").size());
+            constexpr int32_t toneType = 2;
+            soundFd_ = systemSoundClient_->OpenToneUri(nullptr, url, toneType);
+            soundPlayer_->SetSource(soundFd_, 0, -1);
+            ANSR_LOGI("Play system sound.");
+        }
+    } else {
+        Global::Resource::ResourceManager::RawFileDescriptor desc;
+        if (GetCustomRingFileDesc(reminder, desc)) {
+            soundPlayer_->SetSource(desc.fd, desc.offset, desc.length);
+        }
+        ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
+    }
+    int32_t STREAM_ALARM = reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA ?
+        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) :
+        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+    constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
+    Media::Format format;
+    (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
+    (void)format.PutIntValue(Media::PlayerKeys::STREAM_USAGE, STREAM_ALARM);
+    (void)format.PutIntValue(Media::PlayerKeys::RENDERER_FLAG, DEFAULT_VALUE);
+    soundPlayer_->SetParameter(format);
+    soundPlayer_->SetLooping(reminder->IsRingLoop());
+#endif
+}
+
 void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
@@ -1619,39 +1640,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         strategy.concurrencyMode = AudioStandard::AudioConcurrencyMode::PAUSE_OTHERS;
         audioManager->ActivateAudioSession(strategy);
     }
-    std::string customRingUri = reminder->GetCustomRingUri();
-    if (customRingUri.empty()) {
-        // use default ring
-        std::string defaultPath;
-        if (access(DEFAULT_REMINDER_SOUND_1.c_str(), F_OK) == 0) {
-            defaultPath = "file:/" + DEFAULT_REMINDER_SOUND_1;
-        } else {
-            defaultPath = "file:/" + GetFullPath(DEFAULT_REMINDER_SOUND_2);
-        }
-        Uri defaultSound(defaultPath);
-        soundPlayer_->SetSource(defaultSound.GetSchemeSpecificPart());
-        ANSR_LOGI("Play default sound.");
-    } else if (customRingUri.find("file://") == 0) {
-        Uri systemSound(customRingUri);
-        soundPlayer_->SetSource(systemSound.GetSchemeSpecificPart());
-        ANSR_LOGI("Play system sound.");
-    } else {
-        Global::Resource::ResourceManager::RawFileDescriptor desc;
-        if (GetCustomRingFileDesc(reminder, desc)) {
-            soundPlayer_->SetSource(desc.fd, desc.offset, desc.length);
-        }
-        ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
-    }
-    int32_t STREAM_ALARM = reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA ?
-        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) :
-        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
-    constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
-    Media::Format format;
-    (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
-    (void)format.PutIntValue(Media::PlayerKeys::STREAM_USAGE, STREAM_ALARM);
-    (void)format.PutIntValue(Media::PlayerKeys::RENDERER_FLAG, DEFAULT_VALUE);
-    soundPlayer_->SetParameter(format);
-    soundPlayer_->SetLooping(reminder->IsRingLoop());
+    SetPlayerParam(reminder);
     soundPlayer_->PrepareAsync();
     soundPlayer_->Play();
 #endif
@@ -1683,6 +1672,13 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
         std::string customRingUri = reminder->GetCustomRingUri();
         if (customRingUri.empty()) {
             ANSR_LOGI("Stop default sound.");
+        } else if (customRingUri.find("file://") == 0) {
+            if (systemSoundClient_ != nullptr) {
+                systemSoundClient_->Close(soundFd_);
+                soundFd_ = -1;
+                ANSR_LOGI("Stop system sound.");
+            }
+            systemSoundClient_ = nullptr;
         } else {
             CloseCustomRingFileDesc(reminder->GetReminderId(), customRingUri);
         }
@@ -2045,7 +2041,7 @@ void ReminderDataManager::OnLanguageChanged()
             continue;
         }
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        ShowReminder((*it), false, false, false, false);
+        ShowReminder((*it), false, false, false, false, false);
     }
     ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_LANGUAGE_CHANGE);
     ANSR_LOGI("System language config changed end.");
@@ -2145,7 +2141,7 @@ void ReminderDataManager::LoadShareReminders()
             calendar->Copy(iter->second);
             // In the logic of insertion or deletion, it can only be updated if the id changes.
             if ((*it)->IsShowing() && reminderId != iter->second->GetReminderId()) {
-                ShowReminder((*it), false, false, false, false);
+                ShowReminder((*it), false, false, false, false, false);
             }
             reminders.erase(iter);
             ++it;

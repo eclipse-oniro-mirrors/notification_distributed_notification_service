@@ -52,13 +52,13 @@ void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<Notification
     AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
 }
 
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 SYMBOL_EXPORT void GetAdditionalConfig(const std::string &key, std::string &value)
 {
     value = NotificationPreferences::GetInstance()->GetAdditionalConfig(key);
     ANS_LOGD("GetAdditionalConfig SYMBOL_EXPORT valiue %{public}s", value.c_str());
 }
 
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 SYMBOL_EXPORT int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId)
 {
     return NotificationPreferences::GetInstance()->SetKvToDb(key, value, userId);
@@ -67,6 +67,12 @@ SYMBOL_EXPORT int32_t SetKvToDb(const std::string &key, const std::string &value
 SYMBOL_EXPORT int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId, int32_t& retCode)
 {
     return NotificationPreferences::GetInstance()->GetKvFromDb(key, value, userId, retCode);
+}
+
+SYMBOL_EXPORT ErrCode GetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption,
+    uint32_t &slotFlags)
+{
+    return NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundleOption, slotFlags);
 }
 #endif
 
@@ -102,9 +108,9 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
 #endif
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    modifyReminderFlags_ = (MODIFY_REMINDER_FLAGS)dlsym(extensionWrapperHandle_, "ModifyReminderFlags");
-    if (modifyReminderFlags_ == nullptr) {
-        ANS_LOGE("extension wrapper modifyReminderFlags symbol failed, error: %{public}s", dlerror());
+    handlePrivilegeMessage_ = (HANDLE_PRIVILEGE_MESSAGE)dlsym(extensionWrapperHandle_, "HandlePrivilegeMessage");
+    if (handlePrivilegeMessage_ == nullptr) {
+        ANS_LOGE("extension wrapper handlePrivilegeMessage_ symbol failed, error: %{public}s", dlerror());
         return;
     }
     getPrivilegeDialogPopped_ = (GET_PRIVILEGE_DIALOG_POPPED)dlsym(extensionWrapperHandle_, "GetPrivilegeDialogPopped");
@@ -228,13 +234,14 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-bool ExtensionWrapper::ModifyReminderFlags(const sptr<NotificationRequest> &request)
+void ExtensionWrapper::HandlePrivilegeMessage(const sptr<NotificationBundleOption>& bundleOption,
+    const sptr<NotificationRequest> &request, bool isAgentController)
 {
-    if (modifyReminderFlags_ == nullptr) {
-        ANS_LOGE("ModifyReminderFlags wrapper symbol failed");
-        return false;
+    if (handlePrivilegeMessage_ == nullptr) {
+        ANS_LOGE("HandlePrivilegeMessage wrapper symbol failed");
+        return;
     }
-    return modifyReminderFlags_(request);
+    return handlePrivilegeMessage_(bundleOption, request, isAgentController);
 }
 
 bool ExtensionWrapper::GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption,

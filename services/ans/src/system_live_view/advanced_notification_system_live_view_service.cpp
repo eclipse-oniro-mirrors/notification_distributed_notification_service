@@ -18,9 +18,9 @@
 #include "ans_permission_def.h"
 #include "access_token_helper.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_inner_errors.h"
 #include "errors.h"
-#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 
 #include "notification_bundle_option.h"
@@ -33,7 +33,7 @@ namespace Notification {
 ErrCode AdvancedNotificationService::TriggerLocalLiveView(const sptr<NotificationBundleOption> &bundleOption,
     const int32_t notificationId, const sptr<NotificationButtonOption> &buttonOption)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -101,7 +101,7 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
     const sptr<IAnsSubscriberLocalLiveView> &subscriber,
     const sptr<NotificationSubscribeInfo> &info, const bool isNative)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s, isNative: %{public}d", __FUNCTION__, isNative);
 
     ErrCode errCode = ERR_OK;

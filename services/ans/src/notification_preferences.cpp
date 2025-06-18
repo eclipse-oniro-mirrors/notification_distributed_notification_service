@@ -23,9 +23,9 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
-#include "hitrace_meter_adapter.h"
 #include "nlohmann/json.hpp"
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
@@ -65,7 +65,7 @@ std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
 ErrCode NotificationPreferences::AddNotificationSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_6)
         .BundleName(bundleOption == nullptr ? "" : bundleOption->GetBundleName());
@@ -120,7 +120,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
 ErrCode NotificationPreferences::RemoveNotificationSlot(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SlotType &slotType)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
@@ -427,7 +427,7 @@ ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
 ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, const bool enabled)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1318,17 +1318,6 @@ int32_t NotificationPreferences::GetBatchKvsFromDbContainsKey(
     return preferncesDB_->GetBatchKvsFromDbContainsKey(key, values, userId);
 }
 
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-int32_t NotificationPreferences::GetKvFromDb(
-    const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
-{
-    if (preferncesDB_ == nullptr) {
-        return ERR_ANS_SERVICE_NOT_READY;
-    }
-    return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
-}
-#endif
-
 int32_t NotificationPreferences::GetBatchKvsFromDb(
     const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
 {
@@ -1586,5 +1575,16 @@ bool NotificationPreferences::SetBundleRemoveFlag(const sptr<NotificationBundleO
     }
     return preferncesDB_->SetBundleRemoveFlag(bundleOption, slotType, sourceType);
 }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+int32_t NotificationPreferences::GetKvFromDb(
+    const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode)
+{
+    if (preferncesDB_ == nullptr) {
+        return ERR_ANS_SERVICE_NOT_READY;
+    }
+    return preferncesDB_->GetKvFromDb(key, value, userId, retCode);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

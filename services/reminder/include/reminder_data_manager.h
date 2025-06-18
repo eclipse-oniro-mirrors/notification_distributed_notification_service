@@ -22,6 +22,7 @@
 #include "ans_inner_errors.h"
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "player.h"
+#include "system_sound_manager.h"
 #endif
 #include "ffrt.h"
 #include "app_mgr_client.h"
@@ -506,6 +507,7 @@ private:
 
     void LoadReminderFromDb();
 
+    void SetPlayerParam(const sptr<ReminderRequest> reminder);
     void PlaySoundAndVibrationLocked(const sptr<ReminderRequest> &reminder);
     void PlaySoundAndVibration(const sptr<ReminderRequest> &reminder);
     void StopSoundAndVibrationLocked(const sptr<ReminderRequest> &reminder);
@@ -563,8 +565,9 @@ private:
      * @param isSysTimeChanged Indicates whether it is triggerred as system time changed by user.
      * @param needScheduleTimeout Indicates whether need to control the ring duration.
      */
-    void ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
-        const bool &isNeedToStartNext, const bool &isSysTimeChanged, const bool &needScheduleTimeout);
+    void ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
+        const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
+        const bool isNeedCloseDefaultSound);
 
     void SnoozeReminderImpl(sptr<ReminderRequest> &reminder);
 
@@ -673,6 +676,7 @@ private:
      */
     void ReportSysEvent(const sptr<ReminderRequest>& reminder);
     void ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged);
+    void ReportUserDataSizeEvent();
 
     /**
      * @brief Create load reminder timer.
@@ -764,6 +768,8 @@ private:
     std::shared_ptr<Media::Player> soundPlayer_ = nullptr;
     std::mutex resourceMutex_;  // for soundResource_
     std::shared_ptr<Global::Resource::ResourceManager> soundResource_ = nullptr;
+    std::shared_ptr<Media::SystemSoundManager> systemSoundClient_ = nullptr;
+    int32_t soundFd_ = -1;
 #endif
     /**
      * Indicates the total count of reminders in system.

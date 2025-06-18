@@ -19,7 +19,7 @@
 
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "hitrace_meter_adapter.h"
+#include "ans_trace_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -314,7 +314,7 @@ bool DistributedNotificationManager::DeleteCallback(
 ErrCode DistributedNotificationManager::Publish(
     const std::string &bundleName, const std::string &label, int32_t id, const sptr<NotificationRequest> &request)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("start");
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
@@ -369,7 +369,7 @@ ErrCode DistributedNotificationManager::Update(
 
 ErrCode DistributedNotificationManager::Delete(const std::string &bundleName, const std::string &label, int32_t id)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("start");
     std::string key;
     if (!GenerateLocalDistributedKey(bundleName, label, id, key)) {
@@ -391,7 +391,7 @@ ErrCode DistributedNotificationManager::Delete(const std::string &bundleName, co
 ErrCode DistributedNotificationManager::DeleteRemoteNotification(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("start");
 
     std::string key;

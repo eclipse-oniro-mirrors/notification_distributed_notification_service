@@ -119,7 +119,7 @@ namespace OHOS {
         manager->HandleSameNotificationIdShowing(reminder);
         manager->IsBelongToSameApp(uid, uid);
         manager->CheckIsSameApp(reminder, uid);
-        manager->ShowReminder(reminder, value, value, value, value);
+        manager->ShowReminder(reminder, value, value, value, value, value);
         return true;
     }
 

@@ -84,6 +84,8 @@ ohos_unittest("reminder_unit_test") {
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
+    external_deps += [ "audio_framework:audio_client" ]
+    external_deps += [ "player_framework:system_sound_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
 
@@ -151,6 +153,7 @@ ohos_unittest("reminder_agent_service_test") {
     "data_share:datashare_common",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
@@ -295,6 +298,8 @@ ohos_unittest("reminder_service_test") {
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
+    external_deps += [ "audio_framework:audio_client" ]
+    external_deps += [ "player_framework:system_sound_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
 
@@ -380,6 +385,8 @@ ohos_unittest("reminder_agent_service_ability_test") {
 
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
+    external_deps += [ "audio_framework:audio_client" ]
+    external_deps += [ "player_framework:system_sound_client" ]
     defines += [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
 

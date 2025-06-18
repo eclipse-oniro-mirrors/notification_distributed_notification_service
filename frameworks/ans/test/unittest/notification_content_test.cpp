@@ -471,5 +471,54 @@ HWTEST_F(NotificationContentTest, Unmarshalling_00002, Level1)
     EXPECT_EQ(content1.Marshalling(parcel), true);
     EXPECT_NE(content1.Unmarshalling(parcel), nullptr);
 }
+
+/**
+ * @tc.name: ReadFromParcel_00700
+ * @tc.desc: Test ReadFromParcel
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, ReadFromParcel_00700, Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(100);
+    parcel.WriteBool(true);
+    NotificationContent notificationContent;
+    bool res = notificationContent.ReadFromParcel(parcel);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: ConvertJsonToContent_00200
+ * @tc.desc: Test ConvertJsonToContent
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, ConvertJsonToContent_00200, Level1)
+{
+    NotificationContent notificationContent;
+    nlohmann::json jsonObject = nlohmann::json{{"contentType", "test"}};
+    sptr<NotificationContent> contentSptr(new NotificationContent());
+    bool res = notificationContent.ConvertJsonToContent(contentSptr, jsonObject);
+    ASSERT_FALSE(res);
+
+    jsonObject = nlohmann::json{{"contentType", 999}, {"content", "test"}};
+    res = notificationContent.ConvertJsonToContent(contentSptr, jsonObject);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetContentTypeByString_00100
+ * @tc.desc: Test GetContentTypeByString_00100
+ * @tc.type: FUNC
+ * @tc.require: issueI5S0ZS
+ */
+HWTEST_F(NotificationContentTest, GetContentTypeByString_00100, Level1)
+{
+    NotificationContent notificationContent;
+    NotificationContent::Type contentType;
+    bool res = notificationContent.GetContentTypeByString("1111", contentType);
+    ASSERT_FALSE(res);
+}
 }
 }

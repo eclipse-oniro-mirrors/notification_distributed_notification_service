@@ -17,6 +17,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_manager_death_recipient.h"
 #include "ans_manager_proxy.h"
 #include "hitrace_meter_adapter.h"
@@ -228,7 +229,7 @@ ErrCode AnsNotification::PublishNotification(const NotificationRequest &request,
 ErrCode AnsNotification::PublishNotification(const std::string &label, const NotificationRequest &request,
     const std::string &instanceKey)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGI("PublishNotification,notificationId:%{public}u", request.GetNotificationId());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
@@ -280,7 +281,7 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
 
 ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationRequest &request)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
     ANS_LOGI("PublishNotificationForIndirectProxy,notificationId:%{public}u", request.GetNotificationId());
 
@@ -339,7 +340,7 @@ ErrCode AnsNotification::CancelNotification(const std::string &label, int32_t no
     const std::string &instanceKey)
 {
     ANS_LOGI("enter CancelNotification,notificationId:%{public}d", notificationId);
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -598,7 +599,7 @@ ErrCode AnsNotification::GetBundleImportance(NotificationSlot::NotificationLevel
 
 ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -615,7 +616,7 @@ ErrCode AnsNotification::SubscribeNotification(const NotificationSubscriber &sub
 
 ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -633,7 +634,7 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const NotificationSubscriber 
 ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLocalLiveViewSubscriber &subscriber,
     const bool isNative)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -651,7 +652,7 @@ ErrCode AnsNotification::SubscribeLocalLiveViewNotification(const NotificationLo
 ErrCode AnsNotification::SubscribeNotification(
     const NotificationSubscriber &subscriber, const NotificationSubscribeInfo &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("Failed to GetAnsManagerProxy.");
@@ -677,7 +678,7 @@ ErrCode AnsNotification::SubscribeNotification(
 
 ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -695,7 +696,7 @@ ErrCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &subscri
 ErrCode AnsNotification::UnSubscribeNotification(
     NotificationSubscriber &subscriber, NotificationSubscribeInfo subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -718,13 +719,13 @@ ErrCode AnsNotification::UnSubscribeNotification(
 
 ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     return SubscribeNotification(subscriber, nullptr);
 }
 
 ErrCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr.");
         return ERR_ANS_INVALID_PARAM;
@@ -749,7 +750,7 @@ ErrCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<Notific
 ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr.");
         return ERR_ANS_INVALID_PARAM;
@@ -780,14 +781,14 @@ ErrCode AnsNotification::SubscribeNotification(const std::shared_ptr<Notificatio
 
 ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     return UnSubscribeNotification(subscriber, nullptr);
 }
 
 ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber,
     const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("Subscriber is nullptr.");
         return ERR_ANS_INVALID_PARAM;
@@ -820,7 +821,7 @@ ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<Notificat
 ErrCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOption &bundleOption,
     const int32_t notificationId, const NotificationButtonOption &buttonOption)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     if (buttonOption.GetButtonName().empty()) {
         ANS_LOGE("Invalid button name.");
@@ -848,7 +849,7 @@ ErrCode AnsNotification::RemoveNotification(const std::string &key, int32_t remo
 {
     ANS_LOGI("enter RemoveNotification,key:%{public}s,removeReason:%{public}d",
         key.c_str(), removeReason);
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (key.empty()) {
         ANS_LOGW("Input key is empty.");
         return ERR_ANS_INVALID_PARAM;
@@ -867,7 +868,7 @@ ErrCode AnsNotification::RemoveNotification(const NotificationBundleOption &bund
 {
     ANS_LOGI("enter RemoveNotification,bundle:%{public}s,Id:%{public}d,reason:%{public}d label:%{public}s",
         bundleOption.GetBundleName().c_str(), notificationId, removeReason, label.c_str());
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -1134,7 +1135,7 @@ ErrCode AnsNotification::SetNotificationsEnabledForDefaultBundle(const std::stri
 ErrCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
     const NotificationBundleOption &bundleOption, const std::string &deviceId, bool enabled)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -1766,7 +1767,7 @@ ErrCode AnsNotification::GetDoNotDisturbDate(const int32_t &userId, Notification
 ErrCode AnsNotification::SetEnabledForBundleSlot(const NotificationBundleOption &bundleOption,
     const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
@@ -2361,7 +2362,7 @@ ErrCode AnsNotification::DisableNotificationFeature(const NotificationDisable &n
 ErrCode AnsNotification::DistributeOperation(sptr<NotificationOperationInfo>& operationInfo,
     const sptr<IAnsOperationCallback> &callback)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (operationInfo == nullptr || callback == nullptr) {
         ANS_LOGE("Input hashCode is empty.");
         return ERR_ANS_INVALID_PARAM;
@@ -2377,7 +2378,7 @@ ErrCode AnsNotification::DistributeOperation(sptr<NotificationOperationInfo>& op
 
 ErrCode AnsNotification::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -2391,7 +2392,7 @@ ErrCode AnsNotification::GetNotificationRequestByHashCode(
     const std::string& hashCode, sptr<NotificationRequest>& notificationRequest)
 {
     ANS_LOGI("Get notification request by hashCode, hashCode:%{public}s", hashCode.c_str());
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -2405,7 +2406,7 @@ ErrCode AnsNotification::SetHashCodeRule(
     const uint32_t type)
 {
     ANS_LOGI("SetHashCodeRule type = %{public}d", type);
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {

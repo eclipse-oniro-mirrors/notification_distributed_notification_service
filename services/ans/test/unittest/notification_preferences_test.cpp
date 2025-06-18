@@ -1727,6 +1727,73 @@ HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00200, Function
 }
 
 /**
+ * @tc.number    : UpdateDoNotDisturbProfiles_00300
+ * @tc.name      : UpdateDoNotDisturbProfiles_00300
+ * @tc.desc      : Test UpdateDoNotDisturbProfiles
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00300, Function | SmallTest | Level1)
+{
+    int32_t profileId = 3;
+    int32_t userId = 100;
+    std::string name = "testProfile";
+    std::vector<NotificationBundleOption> bundleList;
+
+    NotificationCloneBundleInfo cloneBundleInfo;
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.UpdateCloneBundleInfo(userId, cloneBundleInfo);
+    auto res =notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+
+    NotificationBundleOption bundleOne;
+    bundleOne.SetBundleName("test1");
+    bundleOne.SetUid(100);
+    bundleList.push_back(bundleOne);
+
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+
+    notificationPreferences.preferncesDB_ = nullptr;
+    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+}
+
+ /**
+ * @tc.name: UpdateDoNotDisturbProfiles_00400
+ * @tc.desc: Test UpdateDoNotDisturbProfile
+ * 1. Call the UpdateDoNotDisturbProfiles, assert the result of the method call is ERR_OK
+ * 2. Call the UpdateDoNotDisturbProfiles method again with the updated parameters
+ * 3. The method of GetDoNotDisturbProfiles will return true
+ * 3. Assert that the result is also ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00400, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    int32_t profileId = 0;
+    std::string name = "testProfile";
+    std::vector<NotificationBundleOption> bundleList;
+
+    NotificationBundleOption bundleOne;
+    bundleOne.SetBundleName("test1");
+    bundleOne.SetUid(100);
+    bundleList.push_back(bundleOne);
+
+    auto res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
+        userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_OK);
+
+    name = "testProfile2";
+    bundleOne.SetBundleName("test2");
+    bundleOne.SetUid(100);
+    bundleList.push_back(bundleOne);
+
+    res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
+            userId, profileId, name, bundleList);
+    ASSERT_EQ(res, ERR_OK);
+}
+
+/**
  * @tc.number    : GetTemplateSupported_00100
  * @tc.name      :
  * @tc.desc      :
@@ -1998,39 +2065,6 @@ HWTEST_F(NotificationPreferencesTest, IsNotificationSlotFlagsExists_0400, TestSi
 }
 
 /**
- * @tc.number    : UpdateDoNotDisturbProfiles_00300
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00300, Function | SmallTest | Level1)
-{
-    int32_t profileId = 3;
-    int32_t userId = 100;
-    std::string name = "testProfile";
-    std::vector<NotificationBundleOption> bundleList;
-
-    NotificationCloneBundleInfo cloneBundleInfo;
-    NotificationPreferences notificationPreferences;
-    notificationPreferences.UpdateCloneBundleInfo(userId, cloneBundleInfo);
-    auto res =notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
-
-    NotificationBundleOption bundleOne;
-    bundleOne.SetBundleName("test1");
-    bundleOne.SetUid(100);
-    bundleList.push_back(bundleOne);
-
-    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
-    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
-
-    notificationPreferences.preferncesDB_ = nullptr;
-    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
-}
-
-
-/**
  * @tc.name: RemoveDoNotDisturbProfiles_0400
  * @tc.desc:
  * @tc.type:
@@ -2209,6 +2243,170 @@ HWTEST_F(NotificationPreferencesTest, RemoveNotificationForBundle_00500, Functio
     notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
     res = notificationPreferences.RemoveNotificationForBundle(bundleOption_);
     ASSERT_EQ(res, ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: NullDeviceTypeTest_001
+ * @tc.desc: Test NullDeviceType
+ * 1. Declare a string variable deviceType and leave it empty
+ * 2. Call the SetDistributedEnabledBySlot/IsDistributedEnabledBySlot/SetSubscriberExistFlag/GetSubscriberExistFlag
+ * 3. Assert that res is equal to ERR_ANS_INVALID_PARAM
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTest | Level1)
+{
+    int32_t res;
+    bool flag = true;
+    std::string deviceType = "";
+    NotificationPreferences notificationPreferences;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+
+    res = notificationPreferences.SetDistributedEnabledBySlot(slotType, deviceType, flag);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    res = notificationPreferences.IsDistributedEnabledBySlot(slotType, deviceType, flag);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    res = notificationPreferences.SetSubscriberExistFlag(deviceType, flag);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+    res = notificationPreferences.GetSubscriberExistFlag(deviceType, flag);
+    ASSERT_EQ(res, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: NullPreferncesDBTest_001
+ * @tc.desc: Test preferncesDB_
+ * 1. Create an instance of NotificationPreferences and set preferncesDB_ to nullptr
+ * 2. Call the related methods
+ * 3. Assert that the result is as expected
+ * @tc.type: FUNC
+ */
+ HWTEST_F(NotificationPreferencesTest, NullPreferncesDBTest_001, TestSize.Level1)
+{
+    int32_t res;
+    std::string resStr;
+    std::string key = "notification";
+    std::vector<std::string> keys;
+    std::string value = "test";
+    std::vector<uint8_t> vecValue;
+    std::unordered_map<std::string, std::string> mapValue;
+    int32_t userId = 101;
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = nullptr;
+    sptr<NotificationDoNotDisturbProfile> info(new NotificationDoNotDisturbProfile());
+    info->SetProfileId(1);
+    info->SetProfileName("test");
+
+    res = notificationPreferences.SetKvToDb(key, value, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.SetByteToDb(key, vecValue, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.GetKvFromDb(key, value, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.GetByteFromDb(key, vecValue, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.GetBatchKvsFromDbContainsKey(key, mapValue, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.GetBatchKvsFromDb(key, mapValue, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.DeleteKvFromDb(key, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.DeleteBatchKvFromDb(keys, userId);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    resStr = notificationPreferences.GetAdditionalConfig(key);
+    ASSERT_EQ(resStr.size(), 0);
+
+    res = notificationPreferences.DelCloneProfileInfo(userId, info);
+    ASSERT_EQ(res, false);
+}
+/**
+ * @tc.name: NullPreferncesDBTest_002
+ * @tc.desc: Test preferncesDB_
+ * 1. Create an instance of NotificationPreferences and set preferncesDB_ to nullptr
+ * 2. Call the related methods
+ * 3. Assert that the result is as expected
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, NullPreferncesDBTest_002, TestSize.Level1)
+{
+    int32_t res;
+    bool flag = true;
+    int32_t userId = 101;
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = nullptr;
+    std::vector<NotificationCloneBundleInfo> cloneBundleInfos;
+    NotificationCloneBundleInfo cloneBundleInfo;
+    std::vector<sptr<NotificationDoNotDisturbProfile>> infos;
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
+    cloneBundleInfos.push_back(cloneBundleInfo);
+    NotificationDisable disable;
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+
+    res = notificationPreferences.UpdateBatchCloneProfileInfo(userId, infos);
+    ASSERT_EQ(res, false);
+
+    notificationPreferences.GetAllCloneProfileInfo(userId, infos);
+    notificationPreferences.GetAllCloneBundleInfo(userId, cloneBundleInfos);
+
+    res = notificationPreferences.UpdateBatchCloneBundleInfo(userId, cloneBundleInfos);
+    ASSERT_EQ(res, false);
+
+    res = notificationPreferences.DelCloneBundleInfo(userId, cloneBundleInfo);
+    ASSERT_EQ(res, false);
+
+    res = notificationPreferences.DelBatchCloneProfileInfo(userId, infos);
+    ASSERT_EQ(res, false);
+
+    res = notificationPreferences.DelBatchCloneBundleInfo(userId, cloneBundleInfos);
+    ASSERT_EQ(res, false);
+
+    res = notificationPreferences.GetDisableNotificationInfo(disable);
+    ASSERT_EQ(res, false);
+
+    res = notificationPreferences.SetDisableNotificationInfo(notificationDisable);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.SetSubscriberExistFlag(DEVICE_TYPE_HEADSET, flag);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.GetSubscriberExistFlag(DEVICE_TYPE_HEADSET, flag);
+    ASSERT_EQ(res, ERR_ANS_SERVICE_NOT_READY);
+
+    res = notificationPreferences.GetBundleRemoveFlag(bundleOption, slotType, 0);
+    ASSERT_EQ(res, true);
+
+    res = notificationPreferences.SetBundleRemoveFlag(bundleOption, slotType, 0);
+    ASSERT_EQ(res, false);
+}
+
+/**
+ * @tc.name: GetBundleRemoveFlag_001
+ * @tc.desc: Test GetBundleRemoveFlag And SetBundleRemoveFlag
+ * 1. Calls SetBundleRemoveFlag with bundleOption, slotType and sourceType, expects the result to be true
+ * 2. Calls GetBundleRemoveFlag with the same paras to retrieve the previously set flag, expects the result to be true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetBundleRemoveFlag_001, Function | SmallTest | Level1)
+{
+    int32_t res;
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+
+    res = notificationPreferences.SetBundleRemoveFlag(bundleOption, slotType, 0);
+    ASSERT_EQ(res, true);
+    
+    res = notificationPreferences.GetBundleRemoveFlag(bundleOption, slotType, 0);
+    ASSERT_EQ(res, true);
 }
 }  // namespace Notification
 }  // namespace OHOS

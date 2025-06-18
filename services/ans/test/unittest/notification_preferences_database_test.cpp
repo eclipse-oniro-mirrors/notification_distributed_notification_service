@@ -1555,5 +1555,173 @@ HWTEST_F(NotificationPreferencesDatabaseTest, UpdateBundlePropertyToDisturbeDB_0
     auto res = preferncesDB_->UpdateBundlePropertyToDisturbeDB(userId, bundleInfo);
     ASSERT_EQ(res, false);
 }
+
+/**
+ * @tc.name: IsAgentRelationship_0201
+ * @tc.desc: test IsAgentRelationship
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, IsAgentRelationship_0201, TestSize.Level1)
+{
+    std::string cacheString;
+    preferncesDB_->GetValueFromDisturbeDB("PROXY_PKG", SUBSCRIBE_USER_INIT,
+        [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_OK: {
+                cacheString = value;
+                break;
+            }
+        }
+    });
+
+    std::string value = "[{\"app\":\"ohos.example.app\",\"service\":\"ohos.example.app\"}]";
+    int32_t result = preferncesDB_->SetKvToDb("PROXY_PKG", value, SUBSCRIBE_USER_INIT);
+    ASSERT_EQ(result, 0);
+    bool isAgent = preferncesDB_->IsAgentRelationship("ohos.example.app", "ohos.example.app");
+    ASSERT_EQ(isAgent, true);
+    isAgent = preferncesDB_->IsAgentRelationship("ohos.example.app", "ohos.example.app1");
+    ASSERT_EQ(isAgent, false);
+    // delete data
+    result = preferncesDB_->DeleteKvFromDb("PROXY_PKG", SUBSCRIBE_USER_INIT);
+    ASSERT_EQ(result, 0);
+    isAgent = preferncesDB_->IsAgentRelationship("ohos.example.app", "ohos.example.app");
+    ASSERT_EQ(isAgent, false);
+
+    // insert data not array
+    value = "{\"app\":\"ohos.example.app\",\"service\":\"ohos.example.app\"}";
+    result = preferncesDB_->SetKvToDb("PROXY_PKG", value, SUBSCRIBE_USER_INIT);
+    ASSERT_EQ(result, 0);
+    isAgent = preferncesDB_->IsAgentRelationship("ohos.example.app", "ohos.example.app");
+    ASSERT_EQ(isAgent, false);
+
+    // insert empty data
+    result = preferncesDB_->SetKvToDb("PROXY_PKG", std::string(), SUBSCRIBE_USER_INIT);
+    ASSERT_EQ(result, 0);
+    isAgent = preferncesDB_->IsAgentRelationship("ohos.example.app", "ohos.example.app");
+    ASSERT_EQ(isAgent, false);
+
+    // recover data
+    result = preferncesDB_->SetKvToDb("PROXY_PKG", cacheString, SUBSCRIBE_USER_INIT);
+    ASSERT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: UpdateBundleSlotToDisturbeDB_0202
+ * @tc.desc: test UpdateBundleSlotToDisturbeDB
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, UpdateBundleSlotToDisturbeDB_0202, TestSize.Level1)
+{
+    int32_t userId = 100;
+    int32_t bundleUid = 100000;
+    std::string bundleName = "ohos.example.demo";
+    std::vector<sptr<NotificationSlot>> slots;
+    // updata empty slots
+    bool result = preferncesDB_->UpdateBundleSlotToDisturbeDB(userId, bundleName, bundleUid, slots);
+    ASSERT_EQ(result, true);
+
+    sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
+    slots.push_back(slotInfo);
+    // update empty bundle name
+    result = preferncesDB_->UpdateBundleSlotToDisturbeDB(userId, "", bundleUid, slots);
+    ASSERT_EQ(result, false);
+
+    // update slots
+    result = preferncesDB_->UpdateBundleSlotToDisturbeDB(userId, bundleName, bundleUid, slots);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: DelBatchCloneBundleInfo_0203
+ * @tc.desc: test DelBatchCloneBundleInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, DelBatchCloneBundleInfo_0203, TestSize.Level1)
+{
+    NotificationCloneBundleInfo bundleInfo;
+    bundleInfo.SetAppIndex(0);
+    bundleInfo.SetSlotFlags(59);
+    bundleInfo.SetBundleName("ohos.example.demo");
+    std::vector<NotificationCloneBundleInfo> cloneBundleInfo;
+    cloneBundleInfo.push_back(bundleInfo);
+    bool result = preferncesDB_->UpdateBatchCloneBundleInfo(100, cloneBundleInfo);
+    ASSERT_EQ(result, true);
+    result = preferncesDB_->DelBatchCloneBundleInfo(100, cloneBundleInfo);
+    ASSERT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SetBundleRemoveFlag_0204
+ * @tc.desc: test SetBundleRemoveFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetBundleRemoveFlag_0204, TestSize.Level1)
+{
+    sptr<NotificationBundleOption> bundle = nullptr;
+    bool result = preferncesDB_->GetBundleRemoveFlag(bundle, NotificationConstant::SlotType::LIVE_VIEW, 1);
+    ASSERT_EQ(result, true);
+
+    bundle = new (std::nothrow) NotificationBundleOption("ohos.example.demo", 10000);
+    result = preferncesDB_->GetBundleRemoveFlag(bundle, NotificationConstant::SlotType::LIVE_VIEW, 1);
+    ASSERT_EQ(result, false);
+    result = preferncesDB_->GetBundleRemoveFlag(bundle, NotificationConstant::SlotType::LIVE_VIEW, 2);
+    ASSERT_EQ(result, false);
+
+    result = preferncesDB_->SetBundleRemoveFlag(bundle, NotificationConstant::SlotType::LIVE_VIEW, 1);
+    ASSERT_EQ(result, true);
+    result = preferncesDB_->SetBundleRemoveFlag(bundle, NotificationConstant::SlotType::LIVE_VIEW, 2);
+    ASSERT_EQ(result, true);
+
+    result = preferncesDB_->GetBundleRemoveFlag(bundle, NotificationConstant::SlotType::LIVE_VIEW, 1);
+    ASSERT_EQ(result, true);
+
+    // delete data
+    std::string key = "label_ans_remove_ohos.example.demo10000_5";
+    int32_t res = preferncesDB_->DeleteKvFromDb(key, 100);
+    ASSERT_EQ(res, 0);
+    key = "label_ans_remove_2_ohos.example.demo10000_5";
+    res = preferncesDB_->DeleteKvFromDb(key, 100);
+    ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: DelCloneProfileInfo_0205
+ * @tc.desc: test DelCloneProfileInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, DelCloneProfileInfo_0205, TestSize.Level1)
+{
+    NotificationBundleOption bundle1 = NotificationBundleOption("ohos.example.demo", 10000);
+    NotificationBundleOption bundle2 = NotificationBundleOption("ohos.example.demo", 10001);
+    std::vector<NotificationBundleOption> trustList;
+    trustList.push_back(bundle1);
+    trustList.push_back(bundle2);
+
+    // update profile1 and profile2
+    sptr<NotificationDoNotDisturbProfile> profile1 = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile1->SetProfileId(1);
+    profile1->SetProfileName("name1");
+    profile1->SetProfileTrustList(trustList);
+    sptr<NotificationDoNotDisturbProfile> profile2 = new (std::nothrow) NotificationDoNotDisturbProfile();
+    profile2->SetProfileId(2);
+    profile2->SetProfileName("name1");
+    profile2->SetProfileTrustList(trustList);
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profileInfo;
+    profileInfo.push_back(profile1);
+    profileInfo.push_back(profile2);
+    bool result = preferncesDB_->UpdateBatchCloneProfileInfo(100, profileInfo);
+    ASSERT_EQ(result, true);
+    // delete profile1
+    result = preferncesDB_->DelCloneProfileInfo(100, profile1);
+    ASSERT_EQ(result, true);
+    std::vector<sptr<NotificationDoNotDisturbProfile>> tmpProfilesInfo;
+    preferncesDB_->GetAllCloneProfileInfo(100, tmpProfilesInfo);
+    ASSERT_EQ((int32_t)tmpProfilesInfo.size(), 1);
+
+    std::vector<sptr<NotificationDoNotDisturbProfile>> deleteProfileInfo;
+    deleteProfileInfo.push_back(profile2);
+    result = preferncesDB_->DelBatchCloneProfileInfo(100, deleteProfileInfo);
+    ASSERT_EQ(result, true);
+}
 }  // namespace Notification
 }  // namespace OHOS

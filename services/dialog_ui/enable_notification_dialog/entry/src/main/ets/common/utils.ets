@@ -83,3 +83,41 @@ export function sourceToVp(source: Resource): number {
 export function getLimitFontSize(fontSizeScale: number, sourceFontSize: number): string {
   return `${sourceFontSize * fontSizeScale}vp`;
 }
+
+/**
+   * 
+   * @param windowRect windowRect
+   * @param display display
+   * @returns true need removeWindow
+   */
+  export function shouldMoveWindow(windowRect: window.Rect, display: display.Display): boolean {
+    try {
+      if (windowRect === undefined) {
+        console.error(TAG, `windowRect is null`);
+        return false;
+      }
+      console.info(TAG, `displayW=${display.width}, displayH=${display.height}.` );
+
+      if (windowRect.width >= display.width && windowRect.height >= display.height) {
+        console.info(TAG, `windowRect >= display, no need move.`);
+        return false;
+      }
+      let windowCenterX = windowRect.left + windowRect.width / 2;
+      let windowCenterY = windowRect.top + windowRect.height / 2;
+      let minX = windowRect.width / 2;
+      let maxX = display.width - windowRect.width / 2;
+      let minY = windowRect.height / 2;
+      let maxY = display.height - windowRect.height / 2 - Constants.PC_DOCK_HEIGHT;
+
+      console.info(TAG, `windowCenterX=${windowCenterX}, windowCenterY=${windowCenterY}`);
+      console.info(TAG, `x range=[${minX}, ${maxX}], y range=[${minY}, ${maxY}]`);
+      let isXOk: boolean = windowCenterX >= minX && windowCenterX <= maxX;
+      let isYOk: boolean = windowCenterY >= minY && windowCenterY <= maxY;
+      let shouldMove = !(isXOk && isYOk);
+      console.info(TAG, `shouldMoveWindow, shouldMove=${shouldMove}`);
+      return shouldMove;
+    } catch (err) {
+      console.error(TAG, `check shouldMoveWindow failed, code=${err?.code}, msg=${err?.message}.`);
+      return false;
+    }
+  }

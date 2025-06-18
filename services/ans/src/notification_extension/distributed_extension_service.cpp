@@ -61,7 +61,7 @@ constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 constexpr int64_t DURATION_ONE_SECOND = 1000;  // 1s, millisecond
 }
 
-std::string TransDeviceTypeToName(uint16_t deviceType_)
+std::string DistributedExtensionService::TransDeviceTypeToName(uint16_t deviceType_)
 {
     switch (deviceType_) {
         case DmDeviceType::DEVICE_TYPE_WATCH: {
@@ -84,7 +84,7 @@ std::string TransDeviceTypeToName(uint16_t deviceType_)
     }
 }
 
-std::string DeviceTypeToTypeString(uint16_t deviceType)
+std::string DistributedExtensionService::DeviceTypeToTypeString(uint16_t deviceType)
 {
     switch (deviceType) {
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
@@ -121,6 +121,10 @@ DistributedExtensionService::DistributedExtensionService()
 
 DistributedExtensionService::~DistributedExtensionService()
 {
+    if (distributedQueue_ == nullptr) {
+        ANS_LOGI("Dans already release.");
+        return;
+    }
     std::function<void()> task = std::bind([&]() {
         ReleaseLocalDevice();
         dansHandler_.reset();

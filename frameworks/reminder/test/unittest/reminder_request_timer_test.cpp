@@ -196,5 +196,37 @@ HWTEST_F(ReminderRequestTimerTest, Construct_001, Function | SmallTest | Level1)
     ReminderRequestTimer timer4;
     EXPECT_EQ(timer4.GetReminderId(), -1);
 }
+
+/**
+ * @tc.name: ReminderRequestTimerTest_001
+ * @tc.desc: Test CheckParamsValid parameters.
+ * @tc.type: FUNC
+ * @tc.require:I9BM6I
+ */
+HWTEST_F(ReminderRequestTimerTest, ReminderRequestTimerTest_001, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer1(35);
+    timer1.CheckParamsValid(0);
+    timer1.CheckParamsValid(UINT64_MAX);
+    timer1.CheckParamsValid(100);
+    EXPECT_EQ(timer1.GetReminderId(), 35);
+}
+
+/**
+ * @tc.name: Unmarshalling_00001
+ * @tc.desc: Test Unmarshalling parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderRequestTimerTest, ReminderRequestTimerTest_002, Function | SmallTest | Level1)
+{
+    ReminderRequestTimer timer(35);
+    Parcel parcel;
+    bool result = false;
+    if (nullptr == timer.Unmarshalling(parcel)) {
+        result = true;
+    }
+    EXPECT_EQ(true, result);
+}
 }
 }

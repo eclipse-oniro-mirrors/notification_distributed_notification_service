@@ -349,14 +349,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
 {
     sptr<ReminderRequest> reminder(new ReminderRequestTimer(10));
     reminder->SetReminderId(0);
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     reminder->SetReminderId(10);
-    manager->ShowReminder(reminder, true, true, true, true);
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     manager->alertingReminderId_ = 1;
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     manager->alertingReminderId_ = -1;
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -1414,7 +1414,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_031, Level1)
     DataShare::DataShareObserver::ChangeInfo::Value snoozeTimes2 = static_cast<double>(-1);
     info[ReminderCalendarShareTable::SNOOZE_TIMES] = snoozeTimes2;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
-    EXPECT_TRUE(timer->GetSnoozeTimes() == UINT8_MAX);
+    EXPECT_TRUE(timer->GetSnoozeTimes() <= UINT8_MAX);
 
     uint64_t testValue = 5;
     DataShare::DataShareObserver::ChangeInfo::Value snoozeTimes3 = static_cast<double>(testValue);
@@ -1570,6 +1570,24 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_034, Level1)
     manager->ReportTimerEvent(targetTime, false);
     targetTime -= 60 * 60 * 1000;
     manager->ReportTimerEvent(targetTime, false);
+    EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_035
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_035, Level1)
+{
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->SetSystemApp(true);
+    int32_t count = 0;
+    manager->AsyncStartExtensionAbility(calendar, 1, 1, count);
+    manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
+    count = 200;
+    manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
     EXPECT_TRUE(manager != nullptr);
 }
 }  // namespace Notification

@@ -145,6 +145,7 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         if (pIcon == nullptr) {
             ANS_LOGE("Failed to parse button icon");
             delete button;
+            button = nullptr;
         } else {
             button->SetIconImage(pIcon);
         }
@@ -154,6 +155,7 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         if (pIcon == nullptr) {
             ANS_LOGE("Failed to parse button icon");
             delete button;
+            button = nullptr;
         } else {
             button->SetIconImage(pIcon);
         }

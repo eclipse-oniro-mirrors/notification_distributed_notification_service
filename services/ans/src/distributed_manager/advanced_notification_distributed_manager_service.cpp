@@ -574,7 +574,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
-        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP));
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
         return ERR_ANS_INVALID_BUNDLE;
     }
 

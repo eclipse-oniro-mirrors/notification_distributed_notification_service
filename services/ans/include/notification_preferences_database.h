@@ -303,7 +303,9 @@ public:
     int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId);
     int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
     int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId, int32_t &retCode);
+#endif
     int32_t GetByteFromDb(const std::string &key, std::vector<uint8_t> &value, const int32_t &userId);
     int32_t GetBatchKvsFromDb(
         const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId);

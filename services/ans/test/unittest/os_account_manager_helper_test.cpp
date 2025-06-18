@@ -23,6 +23,7 @@
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
+constexpr int32_t ERR_ACCOUNT_COMMON_PERMISSION_DENIED = 0x400008;
 class OsAccountManagerHelperTest : public testing::Test {
 public:
     static void SetUpTestSuite() {};
@@ -129,6 +130,30 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0400, Function | SmallTest 
 {
     int32_t userId = 10736;
     ASSERT_EQ(true, OsAccountManagerHelper::IsSystemAccount(userId));
+}
+
+/**
+ * @tc.number    : GetAllOsAccount_001
+ * @tc.name      : GetAllOsAccount_001
+ * @tc.desc      : test GetAllOsAccount function.
+ */
+HWTEST_F(OsAccountManagerHelperTest, GetAllOsAccount_001, Function | SmallTest | Level1)
+{
+    std::vector<int32_t> userIds;
+    ASSERT_EQ(OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds),
+        ERR_ACCOUNT_COMMON_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.number    : GetOsAccountPrivateStatus_Test_001
+ * @tc.name      : GetOsAccountPrivateStatus_Test_001
+ * @tc.desc      : test GetAllOsAccount function.
+ */
+HWTEST_F(OsAccountManagerHelperTest, GetOsAccountPrivateStatus_Test_001, Function | SmallTest | Level1)
+{
+    bool isPrivate = false;
+    ASSERT_EQ(OsAccountManagerHelper::GetInstance().GetOsAccountPrivateStatus(isPrivate),
+        ERR_ACCOUNT_COMMON_PERMISSION_DENIED);
 }
 }
 }

@@ -21,7 +21,6 @@
 #include "accesstoken_kit.h"
 #include "advanced_notification_service.h"
 #include "ans_subscriber_listener.h"
-#include "disturb_manager.h"
 #include "notification_subscriber.h"
 
 using namespace testing::ext;
@@ -97,17 +96,14 @@ public:
     void TestAddSlots();
 
     static sptr<AdvancedNotificationService> g_advancedNotificationService;
-    static std::shared_ptr<DisturbManager> g_disturbManager;
 };
 
 sptr<AdvancedNotificationService> AnsModuleTest::g_advancedNotificationService;
-std::shared_ptr<DisturbManager> AnsModuleTest::g_disturbManager;
 void AnsModuleTest::SetUpTestCase()
 {
     passed = false;
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     g_advancedNotificationService = OHOS::Notification::AdvancedNotificationService::GetInstance();
-    g_disturbManager = DelayedSingleton<DisturbManager>::GetInstance();
 }
 
 void AnsModuleTest::TearDownTestCase()
@@ -2816,7 +2812,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0132, Function | SmallTest | Level1)
 
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    EXPECT_EQ(g_disturbManager->SetDoNotDisturbDateByUserSyncQueue(100, date), ERR_OK);
+    EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -2867,7 +2863,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0133, Function | SmallTest | Level1)
     int64_t endDate = endDuration.count();
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::ONCE, beginDate, endDate);
-    EXPECT_EQ(g_disturbManager->SetDoNotDisturbDateByUserSyncQueue(100, date), ERR_OK);
+    EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -2918,7 +2914,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0134, Function | SmallTest | Level1)
     int64_t endDate = endDuration.count();
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::DAILY, beginDate, endDate);
-    EXPECT_EQ(g_disturbManager->SetDoNotDisturbDateByUserSyncQueue(100, date), ERR_OK);
+    EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -2969,7 +2965,7 @@ HWTEST_F(AnsModuleTest, AnsModuleTest_0135, Function | SmallTest | Level1)
     int64_t endDate = endDuration.count();
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::CLEARLY, beginDate, endDate);
-    EXPECT_EQ(g_disturbManager->SetDoNotDisturbDateByUserSyncQueue(100, date), ERR_OK);
+    EXPECT_EQ(g_advancedNotificationService->SetDoNotDisturbDate(100, date), ERR_OK);
 
     EXPECT_EQ(g_advancedNotificationService->Publish(label, req), ERR_OK);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));

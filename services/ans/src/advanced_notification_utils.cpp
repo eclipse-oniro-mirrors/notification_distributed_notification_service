@@ -21,6 +21,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "access_token_helper.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
@@ -1089,7 +1090,7 @@ ErrCode AdvancedNotificationService::DoDistributedPublish(
 ErrCode AdvancedNotificationService::DoDistributedDelete(
     const std::string deviceId, const std::string bundleName, const sptr<Notification> notification)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (!notification->GetNotificationRequestPoint()->GetNotificationDistributedOptions().IsDistributed()) {
         return ERR_OK;
     }
@@ -1139,7 +1140,7 @@ ErrCode AdvancedNotificationService::IsSupportTemplate(const std::string& templa
 void AdvancedNotificationService::TriggerRemoveWantAgent(const sptr<NotificationRequest> &request,
     int32_t removeReason, bool isThirdParty)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s %{public}d %{public}d", __FUNCTION__, isThirdParty, removeReason);
 
     if ((request == nullptr) || (request->GetRemovalWantAgent() == nullptr)) {

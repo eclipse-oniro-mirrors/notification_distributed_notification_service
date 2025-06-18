@@ -17,6 +17,7 @@
 
 #include "ability_manager_client.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_const_define.h"
 #include "common_event_support.h"
 #include "common_event_manager.h"
@@ -40,9 +41,12 @@
 #include "iservice_registry.h"
 #include "config_policy_utils.h"
 #include "hitrace_meter_adapter.h"
+#include "notification_helper.h"
 #ifdef HAS_HISYSEVENT_PART
+#include <sys/statfs.h>
 #include "hisysevent.h"
 #include "reminder_utils.h"
+#include "directory_ex.h"
 #endif
 
 namespace OHOS {
@@ -56,6 +60,33 @@ constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 // The maximun number of system that can be start extension count
 constexpr int32_t TOTAL_MAX_NUMBER_START_EXTENSION = 100;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
+}
+
+static uint64_t GetRemainPartitionSize(const std::string& partitionName)
+{
+#ifdef HAS_HISYSEVENT_PART
+    struct statfs stat;
+    if (statfs(partitionName.c_str(), &stat) != 0) {
+        return -1;
+    }
+    uint64_t blockSize = stat.f_bsize;
+    uint64_t freeSize = stat.f_bfree * blockSize;
+    constexpr double units = 1024.0;
+    return freeSize/(units * units);
+#else
+    return 0;
+#endif
+}
+
+static std::vector<uint64_t> GetFileOrFolderSize(const std::vector<std::string>& paths)
+{
+    std::vector<uint64_t> folderSize;
+#ifdef HAS_HISYSEVENT_PART
+    for (auto path : paths) {
+        folderSize.emplace_back(OHOS::GetFolderSize(path));
+    }
+#endif
+    return folderSize;
 }
 
 bool ReminderDataManager::IsSystemReady()
@@ -221,7 +252,7 @@ void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>((*it).GetRefPtr());
         calendar->Copy(iter->second);
         if ((*it)->IsShowing()) {
-            ShowReminder((*it), false, false, false, false);
+            ShowReminder((*it), false, false, false, false, false);
         }
     }
 }
@@ -286,7 +317,7 @@ void ReminderDataManager::UpdateReminderFromDb(const std::vector<sptr<ReminderRe
 
 ErrCode ReminderDataManager::UpdateReminder(const sptr<ReminderRequest>& reminder, const int32_t callingUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_OHOS, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
     sptr<ReminderRequest> reminderOld = FindReminderRequestLocked(reminder->GetReminderId(), false);
     bool existInMemory = true;
     if (nullptr != reminderOld) {
@@ -384,6 +415,35 @@ ErrCode ReminderDataManager::CancelReminderToDb(const int32_t reminderId, const 
     return ERR_OK;
 }
 
+void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
+{
+    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+    for (auto reminderSptr : reminderVector_) {
+        if (!(reminderSptr->ShouldShowImmediately())) {
+            break;
+        }
+        if (reminderSptr->GetReminderType() != ReminderRequest::ReminderType::TIMER) {
+            reminderSptr->SetSnoozeTimesDynamic(0);
+        }
+        reminders.push_back(reminderSptr);
+    }
+}
+
+bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder) const
+{
+    if (reminder == nullptr) {
+        return false;
+    }
+    bool isAllowed = false;
+    NotificationBundleOption bundleOption(reminder->GetBundleName(), reminder->GetUid());
+    ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::IsAllowedNotify(bundleOption, isAllowed));
+    if (errCode != ERR_OK) {
+        ANSR_LOGE("Failed to call IsAllowedNotify, errCode=%{public}d", errCode);
+        return false;
+    }
+    return isAllowed;
+}
+
 void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool isSysTimeChanged)
 {
 #ifdef HAS_HISYSEVENT_PART
@@ -399,6 +459,24 @@ void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool 
     HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, "REMINDER_TIMER_ERROR",
         HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_CODE", errorCode);
+#endif
+}
+
+void ReminderDataManager::ReportUserDataSizeEvent()
+{
+#ifdef HAS_HISYSEVENT_PART
+    std::vector<std::string> paths = {
+        "/data/service/el1/public/notification/"
+    };
+    uint64_t remainPartitionSize = GetRemainPartitionSize("/data");
+    std::vector<uint64_t> folderSize = GetFileOrFolderSize(paths);
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT, "USER_DATA_SIZE",
+        HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        "COMPONENT_NAME", "resource_schedule_service",
+        "PARTITION_NAME", "/data",
+        "REMAIN_PARTITION_SIZE", remainPartitionSize,
+        "FILE_OR_FOLDER_PATH", paths,
+        "FILE_OR_FOLDER_SIZE", folderSize);
 #endif
 }
 }

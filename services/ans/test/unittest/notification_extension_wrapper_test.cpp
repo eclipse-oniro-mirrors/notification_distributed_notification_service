@@ -76,11 +76,6 @@ HWTEST_F(NotificationExtensionWrapperTest, InitExtentionWrapper_Test, TestSize.L
     EXPECT_NE(extensionWrapper.bannerControl_, nullptr);
 #endif
 
-    // 验证modifyReminderFlags_是否被正确初始化
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    EXPECT_NE(extensionWrapper.modifyReminderFlags_, nullptr);
-#endif
-
     // 验证initSummary_是否被正确初始化
 #ifdef ENABLE_ANS_AGGREGATION
     EXPECT_NE(extensionWrapper.initSummary_, nullptr);
@@ -261,36 +256,6 @@ HWTEST_F(NotificationExtensionWrapperTest, BannerControl_ValidBannerControl, Tes
     EXPECT_EQ(0, result);
 }
 
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-HWTEST_F(NotificationExtensionWrapperTest, ModifyReminderFlags_NullCase, TestSize.Level0) {
-    // Arrange
-    OHOS::Notification::ExtensionWrapper wrapper;
-    wrapper.modifyReminderFlags_ = nullptr;
-    auto request = new NotificationRequest();
-
-    // Act
-    bool result = wrapper.ModifyReminderFlags(request);
-
-    // Assert
-    ASSERT_FALSE(result);
-}
-
-HWTEST_F(NotificationExtensionWrapperTest, ModifyReminderFlags_SuccessCase, TestSize.Level0) {
-    // Arrange
-    OHOS::Notification::ExtensionWrapper wrapper;
-    bool (*mockFunc)(const sptr<NotificationRequest> &) = [](const sptr<NotificationRequest> &req) {
-        return true;
-    };
-    wrapper.modifyReminderFlags_ = mockFunc;
-    auto request = new NotificationRequest();
-
-    // Act
-    bool result = wrapper.ModifyReminderFlags(request);
-
-    // Assert
-    ASSERT_TRUE(result);
-}
-#endif
 HWTEST_F(NotificationExtensionWrapperTest, LocalControl_NullCase, TestSize.Level0) {
     // Arrange
     OHOS::Notification::ExtensionWrapper wrapper;

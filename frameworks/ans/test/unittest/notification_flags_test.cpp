@@ -166,5 +166,59 @@ HWTEST_F(NotificationFlagsTest, ReadFromParcel_00001, Function | SmallTest | Lev
     auto rrc = std::make_shared<NotificationFlags>();
     EXPECT_EQ(rrc->ReadFromParcel(parcel), true);
 }
+
+/**
+ * @tc.name: IsLightScreenEnabled_00001
+ * @tc.desc: Test IsLightScreenEnabled parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationFlagsTest, IsLightScreenEnabled_00001, Function | SmallTest | Level1)
+{
+    NotificationFlags flag;
+    flag.SetReminderFlags(0);
+    auto res = flag.IsLightScreenEnabled();
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetReminderFlagsByString_00001
+ * @tc.desc: Test GetReminderFlagsByString parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationFlagsTest, GetReminderFlagsByString_00001, Function | SmallTest | Level1)
+{
+    NotificationFlags flag;
+    flag.SetReminderFlags(0);
+
+    std::shared_ptr<NotificationFlags> flagSptr = std::make_shared<NotificationFlags>();
+    auto res = flag.GetReminderFlagsByString("333", flagSptr);
+    ASSERT_FALSE(res);
+
+    res = flag.GetReminderFlagsByString("111111", flagSptr);
+    ASSERT_TRUE(res);
+
+    res = flag.GetReminderFlagsByString("444444", flagSptr);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: ValidCharReminderFlag_00001
+ * @tc.desc: Test ValidCharReminderFlag parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationFlagsTest, ValidCharReminderFlag_00001, Function | SmallTest | Level1)
+{
+    NotificationFlags flag;
+    flag.SetReminderFlags(0);
+
+    auto res = flag.ValidCharReminderFlag('3', 6);
+    ASSERT_FALSE(res);
+
+    res = flag.ValidCharReminderFlag('2', 5);
+    ASSERT_TRUE(res);
+}
 }
 }

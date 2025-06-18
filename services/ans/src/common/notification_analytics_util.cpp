@@ -637,7 +637,8 @@ std::string NotificationAnalyticsUtil::GetDeviceStatus(const sptr<NotificationRe
 {
     std::map<std::string, std::string> deviceStatus = request->GetdeviceStatus();
     nlohmann::json deviceStatusJson;
-    for (map<string, string>::const_iterator iter = deviceStatus.begin(); iter != deviceStatus.end(); ++iter) {
+    for (std::map<std::string, std::string>::const_iterator iter = deviceStatus.begin();
+        iter != deviceStatus.end(); ++iter) {
         deviceStatusJson[iter->first] = iter->second;
     }
     return deviceStatusJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
@@ -949,7 +950,7 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
         extraInfo->SetParam("reason",
             AAFwk::String::Box(reason.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace)));
     }
-    
+
     AAFwk::WantParamWrapper wWrapper(*extraInfo);
 
     return wWrapper.ToString();
@@ -1123,7 +1124,7 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
     EventFwk::Want want;
     nlohmann::json ansData;
     std::string badgeMessage;
-    std::vector<string> removeBundles;
+    std::vector<std::string> removeBundles;
     want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
     ansData["subCode"] = std::to_string(BADGE_CHANGE_CODE);
     {
@@ -1162,7 +1163,7 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
             badgeInfos.erase(bundle);
         }
     }
-    
+
     if (!g_successReportFlag) {
         ExecuteSuccessCacheList();
     }
@@ -1484,7 +1485,7 @@ void NotificationAnalyticsUtil::ExecuteSlotReportList()
         g_reportSlotFlag = false;
         return;
     }
-    
+
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
         ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");

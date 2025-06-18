@@ -99,7 +99,7 @@ NotificationProgress *NotificationProgress::FromJson(const nlohmann::json &jsonO
     }
 
     if (jsonObject.find("isPercentage") != jsonEnd && jsonObject.at("isPercentage").is_boolean()) {
-        progress->isPercentage_ = jsonObject.at("isPercentage_").get<bool>();
+        progress->isPercentage_ = jsonObject.at("isPercentage").get<bool>();
     }
 
     return progress;

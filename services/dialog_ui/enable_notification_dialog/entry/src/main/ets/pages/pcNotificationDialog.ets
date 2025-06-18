@@ -32,6 +32,7 @@ import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
 import uiextension from '@ohos.arkui.uiExtension';
+import DisplayUtils from '../common/displayUtils';
 
 const TAG = 'NotificationDialog_Service ';
 
@@ -63,14 +64,18 @@ let storage = LocalStorage.getShared();
 @Component
 struct NotificationDialogPage {
   @StorageLink('isUpdate') isUpdate: number = 0;
+  @StorageLink('showInDisplayCenter') showInDisplayCenter: boolean = false;
 
   privacyDialogController: CustomDialogController = new CustomDialogController({
-    builder: PermissionDialog({ isUpdate: $isUpdate }),
+    builder: PermissionDialog({ 
+      isUpdate : $isUpdate,
+      showInDisplayCenter : $showInDisplayCenter
+    }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
     customStyle: true,
     cornerRadius: Constants.PC_RDIUS_16,
-    maskColor: $r('sys.color.ohos_id_color_mask_thin'),
+    maskColor: this.showInDisplayCenter ? '#00000000' : $r('sys.color.ohos_id_color_mask_thin'),
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
@@ -92,6 +97,7 @@ struct PermissionDialog {
   @State naviHeight: number = 0;
   @State isBottomPopover: boolean = false;
   @StorageLink('clicked') clicked: boolean = false;
+  @StorageLink('showInDisplayCenter') showInDisplayCenter: boolean = false;
   @Link @Watch('updateOnPageShow') isUpdate: number;
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
@@ -192,8 +198,19 @@ struct PermissionDialog {
                 })
               }
             }
+            .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+              if (this.showInDisplayCenter) {
+                console.error(TAG, `content onSizeChange : ${newValue.height}`);
+                let width = vp2px(newValue.width as number);
+                let height = vp2px(newValue.height as number);
+                let display = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
+                height = height > display.height * 0.9 ? display.height * 0.9 : height;
+                this.dialog?.subWindow?.resize(width, height);
+                this.dialog?.subWindow?.moveWindowTo(display.width / 2 - width/2, display.height / 2 - height/2);
+              }
+            })
           }
-          .constraintSize({ maxHeight: '90%' })
+          .constraintSize({ maxHeight: this.showInDisplayCenter ? '100%' : '90%'})
         }
         .borderRadius(Constants.PC_RDIUS_16)
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
@@ -214,7 +231,9 @@ struct PermissionDialog {
     this.dialog = storage.get('dialog') as EnableNotificationDialog;
     this.session = storage.get('session') as UIExtensionContentSession;
     this.updateAvoidWindow();
-    this.updateSubWindowSize();
+    if (this.showInDisplayCenter) {
+      this.updateSubWindowSize();
+    }
     try {
       await this.updateStatus();
       await this.dialog?.dialogOpenEvent();

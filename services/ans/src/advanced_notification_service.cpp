@@ -28,6 +28,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 #include "errors.h"
 #include "notification_extension_wrapper.h"
@@ -41,7 +42,6 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "event_report.h"
-#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "nlohmann/json.hpp"
 #include "notification_constant.h"
@@ -410,7 +410,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
 ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notificationId,
     const std::string &label, const sptr<NotificationBundleOption> &bundleOption, int32_t reason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption == nullptr) {
         std::string message = "bundleOption is null";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(1, 2)
@@ -454,7 +454,7 @@ ErrCode AdvancedNotificationService::CancelPreparedNotification(int32_t notifica
 ErrCode AdvancedNotificationService::PrepareNotificationInfo(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (request == nullptr) {
         ANS_LOGE("request is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -665,11 +665,14 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::MakeNotificatio
 ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGI("PublishPreparedNotification");
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController);
+#endif
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     NotificationConstant::SlotType oldType = request->GetSlotType();
@@ -1075,20 +1078,6 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
         flags->SetStatusIconEnabled(false);
     }
-
-#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    bool isPrivileged = EXTENTION_WRAPPER->ModifyReminderFlags(record->request);
-    if (isPrivileged) {
-        record->notification->SetPrivileged(true);
-        if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN) {
-            record->notification->SetEnableSound(true);
-            record->notification->SetSound(DEFAULT_NOTIFICATION_SOUND);
-        }
-        if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN) {
-            record->notification->SetEnableVibration(true);
-        }
-    }
-#endif
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(

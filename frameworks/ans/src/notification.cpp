@@ -62,7 +62,6 @@ Notification::Notification(const Notification &other)
     updateTimerId_ = other.updateTimerId_;
     finishTimerId_ = other.finishTimerId_;
     archiveTimerId_ = other.archiveTimerId_;
-    isPrivileged_ = other.isPrivileged_;
 }
 
 Notification::~Notification()
@@ -255,11 +254,6 @@ std::string Notification::GetInstanceKey() const
     return request_->GetAppInstanceKey();
 }
 
-bool Notification::GetPrivileged() const
-{
-    return isPrivileged_;
-}
-
 bool Notification::MarshallingBool(Parcel &parcel) const
 {
     if (!parcel.WriteBool(enableLight_)) {
@@ -279,11 +273,6 @@ bool Notification::MarshallingBool(Parcel &parcel) const
 
     if (!parcel.WriteBool(isRemoveAllowed_)) {
         ANS_LOGE("Can't write isRemoveAllowed");
-        return false;
-    }
-
-    if (!parcel.WriteBool(isPrivileged_)) {
-        ANS_LOGE("Can't write isPrivileged");
         return false;
     }
 
@@ -419,9 +408,6 @@ void Notification::ReadFromParcelBool(Parcel &parcel)
 
     // Read isRemoveAllowed_
     isRemoveAllowed_ = parcel.ReadBool();
-
-    // Read isPrivileged_
-    isPrivileged_ = parcel.ReadBool();
 }
 
 void Notification::ReadFromParcelString(Parcel &parcel)
@@ -552,11 +538,6 @@ void Notification::SetRemoveAllowed(bool removeAllowed)
     isRemoveAllowed_ = removeAllowed;
 }
 
-void Notification::SetPrivileged(const bool &isPrivileged)
-{
-    isPrivileged_ = isPrivileged;
-}
-
 void Notification::SetSourceType(NotificationConstant::SourceType sourceType)
 {
     sourceType_ = sourceType;
@@ -584,7 +565,6 @@ std::string Notification::Dump() const
             ", updateTimer = " + std::to_string(updateTimerId_) +
             ", finishTimer = " + std::to_string(finishTimerId_) +
             ", archiveTimer = " + std::to_string(archiveTimerId_) +
-            ", isPrivileged = " + (isPrivileged_ ? "true" : "false") +
             " }";
 }
 

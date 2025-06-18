@@ -172,6 +172,8 @@ export default class Constants {
 
   public static PC_RDIUS_16 = 16;
   public static PC_RDIUS_8 = 8;
+  public static PC_DOCK_HEIGHT = 120;
+  public static PC_INIT_CONTENT_HEIGHT = 230;
 
   public static PC_OUTLINE_COLOR = '#20FFFFFF'; 
   
@@ -188,4 +190,7 @@ export default class Constants {
 
   // ccm config path
   public static CCM_CONFIG_PATH = "etc/notification/notification_config.json";
+
+  public static TAG = 'NotificationDialog_Service ';
+
 }

@@ -24,8 +24,10 @@
 #include "notification_bundle_option.h"
 #include "notification_dialog.h"
 #include "notification_preferences.h"
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
+#endif
 #include <cstdlib>
 #include <string>
 

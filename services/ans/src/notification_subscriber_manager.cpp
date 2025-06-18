@@ -22,7 +22,7 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "hitrace_meter_adapter.h"
+#include "ans_trace_wrapper.h"
 #include "ipc_skeleton.h"
 #include "notification_flags.h"
 #include "notification_constant.h"
@@ -81,7 +81,7 @@ void NotificationSubscriberManager::ResetFfrtQueue()
 ErrCode NotificationSubscriberManager::AddSubscriber(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null.");
         return ERR_ANS_INVALID_PARAM;
@@ -144,7 +144,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
 ErrCode NotificationSubscriberManager::RemoveSubscriber(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
         ANS_LOGE("subscriber is null.");
         return ERR_ANS_INVALID_PARAM;
@@ -175,7 +175,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
 void NotificationSubscriberManager::NotifyConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -188,7 +188,7 @@ void NotificationSubscriberManager::NotifyConsumed(
 
 void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::string& bundleName)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr || bundleName.empty()) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -202,7 +202,7 @@ void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::
 
 void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std::string& bundleName)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGI("NotifyApplicationInfochangedInner %{public}s", bundleName.c_str());
     for (auto record : subscriberRecordList_) {
         if (record->needNotifyApplicationChanged) {
@@ -214,7 +214,7 @@ void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std:
 void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGI("Start batch notifyConsumed.");
     if (notifications.empty() || notificationMap == nullptr || record == nullptr) {
         ANS_LOGE("Invalid input.");
@@ -235,7 +235,7 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
 void NotificationSubscriberManager::NotifyCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 #ifdef ENABLE_ANS_AGGREGATION
     std::vector<sptr<Notification>> notifications;
     notifications.emplace_back(notification);
@@ -255,7 +255,7 @@ void NotificationSubscriberManager::NotifyCanceled(
 void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 #ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->UpdateByCancel(notifications, deleteReason);
 #endif
@@ -298,7 +298,7 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const int32_t 
 void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("queue is nullptr");
         return;
@@ -311,7 +311,7 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
 
 void NotificationSubscriberManager::NotifyBadgeEnabledChanged(const sptr<EnabledNotificationCallbackData> &callbackData)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("Queue is nullptr.");
         return;
@@ -428,7 +428,7 @@ void NotificationSubscriberManager::RemoveRecordInfo(
 ErrCode NotificationSubscriberManager::AddSubscriberInner(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
     if (record == nullptr) {
         record = CreateSubscriberRecord(subscriber);
@@ -462,7 +462,7 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
 ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
 
     if (record == nullptr) {
@@ -490,7 +490,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
         ANS_LOGE("[OnConsumed] fail: notification is nullptr.");
         return;
     }
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
 
     bool wearableFlag = false;
@@ -582,7 +582,7 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
 void NotificationSubscriberManager::BatchNotifyConsumedInner(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, const std::shared_ptr<SubscriberRecord> &record)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notifications.empty() || notificationMap == nullptr || record == nullptr) {
         ANS_LOGE("Invalid input.");
         return;
@@ -626,7 +626,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
         ANS_LOGE("[OnCanceled] fail: notification is nullptr.");
         return;
     }
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
 
@@ -711,7 +711,7 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
 void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     ANS_LOGD("notifications size = <%{public}zu>", notifications.size());
 
@@ -960,7 +960,7 @@ void NotificationSubscriberManager::TrackCodeLog(
 
 ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr || operationInfo == nullptr) {
         ANS_LOGE("queue is nullptr");
         return ERR_ANS_TASK_ERR;

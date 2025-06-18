@@ -324,7 +324,7 @@ HWTEST_F(NotificationTest, Dump_00001, Function | SmallTest | Level1)
     "notificationBundleOption = null, agentBundle = null, creatorUserId = -1, ownerUserId = -1, "
     "receiverUserId = -1, updateDeadLine = 0, finishDeadLine = 0, sound = , distributed = 0: "
     "flag: 0, unifiedGroupInfo_ = null }, postTime = 0, "
-    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0, isPrivileged = false }";
+    "sound = nullptr, vibrationStyle = [], updateTimer = 0, finishTimer = 0, archiveTimer = 0 }";
     EXPECT_EQ(rrc->Dump(), ret);
 }
 
@@ -596,6 +596,37 @@ HWTEST_F(NotificationTest, GetFinishTimer_00001, Function | SmallTest | Level1)
     auto rrc = std::make_shared<Notification>(request);
     rrc->SetFinishTimer(1);
     EXPECT_EQ(rrc->GetFinishTimer(), 1);
+}
+
+/**
+ * @tc.name: GetInstanceKey_00001
+ * @tc.desc: Test get finish timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, GetInstanceKeyr_00001, Function | SmallTest | Level1)
+{
+    sptr<Notification> notification(new Notification(nullptr));
+    
+    ASSERT_EQ(notification->GetInstanceKey(), "");
+}
+
+/**
+ * @tc.name: Dump_00002
+ * @tc.desc: Test Dump_00002
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, Dump_00002, Function | SmallTest | Level1)
+{
+    sptr<Notification> notification(new Notification(nullptr));
+    std::vector<int64_t> style;
+    style.push_back(999);
+    notification->SetVibrationStyle(style);
+
+    auto dump = notification->Dump();
+    auto it = dump.find("999");
+    ASSERT_NE(it, std::string::npos);
 }
 } // namespace Notification
 } // namespace OHOS

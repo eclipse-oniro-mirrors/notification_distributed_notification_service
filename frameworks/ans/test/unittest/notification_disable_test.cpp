@@ -106,5 +106,40 @@ HWTEST_F(NotificationDisableTest, Unmarshalling_0100, Function | SmallTest | Lev
     }
     EXPECT_TRUE(unmarshalling);
 }
+
+/**
+ * @tc.name: Marshalling_0200
+ * @tc.desc: Test Marshalling_0200.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, Marshalling_0200, Function | SmallTest | Level1)
+{
+    NotificationDisable notificationDisable;
+    std::vector<std::string> bundleList;
+
+    for (auto i = 0; i <= 1000; ++i) {
+        bundleList.push_back("123");
+    }
+    notificationDisable.SetBundleList(bundleList);
+
+    Parcel parcel;
+    auto res = notificationDisable.Marshalling(parcel);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: Marshalling_0100
+ * @tc.desc: Test Marshalling_0100.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, FromJson_0100, Function | SmallTest | Level1)
+{
+    NotificationDisable notificationDisable;
+    std::vector<std::string> bundleList;
+
+    std::string jsonObjString = "";
+    notificationDisable.FromJson(jsonObjString);
+    ASSERT_FALSE(notificationDisable.GetDisabled());
+}
 }
 }

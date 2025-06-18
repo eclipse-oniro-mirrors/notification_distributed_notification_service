@@ -22,9 +22,9 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_status.h"
 
-#include "hitrace_meter_adapter.h"
 #include "notification_analytics_util.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
@@ -47,14 +47,14 @@ ErrCode AdvancedNotificationService::PublishWithMaxCapacity(
 
 ErrCode AdvancedNotificationService::Publish(const std::string &label, const sptr<NotificationRequest> &request)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    if (!request) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
-        return ERR_ANS_INVALID_PARAM;
+    const auto checkResult = CheckNotificationRequest(request);
+    if (checkResult != ERR_OK) {
+        return checkResult;
     }
 
     SetChainIdToExtraInfo(request, traceId);
@@ -161,7 +161,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxyWithMaxC
 
 ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -374,6 +374,30 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t 
         HandleUpdateLiveViewNotificationTimer(uid, isPaused);
     }));
     notificationSvrQueue_->wait(handler);
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<NotificationRequest> &request)
+{
+    if (!request) {
+        ANSR_LOGE("ReminderRequest object is nullptr");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
+    bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
+        OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
+
+    const auto wantAgent = request->GetWantAgent();
+    const auto removalWantAgent = request->GetRemovalWantAgent();
+    const auto isLocalWantAgent = (wantAgent != nullptr && wantAgent->IsLocal()) ||
+        (removalWantAgent != nullptr && removalWantAgent->IsLocal());
+    bool isSpecifiedAccess = (isSystemApp || isSubsystem) && isAgentController;
+    if (isLocalWantAgent && !isSpecifiedAccess) {
+        ANSR_LOGE("Local wantAgent does not support non system app");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
     return ERR_OK;
 }
 

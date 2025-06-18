@@ -728,12 +728,28 @@ HWTEST_F(ReminderStoreTest, ReminderStoreTest_001, Function | SmallTest | Level1
         callback.OnUpgrade(store, 10, 1);
         callback.OnUpgrade(store, 1, 2);
         callback.OnDowngrade(store, 8, 1);
-        callback.OnUpgrade(store, 1, 8);
+        callback.OnUpgrade(store, 1, 9);
         callback.OnDowngrade(store, 1, 8);
         callback.OnDowngrade(store, 8, 7);
     }
     ClearStore();
     EXPECT_NE(reminderStore.rdbStore_, nullptr);
+}
+
+/**
+ * @tc.name: Update_00002
+ * @tc.desc: Test Update parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, Update_00002, Function | SmallTest | Level1)
+{
+    sptr<ReminderRequest> alarm = new ReminderRequestAlarm(10);
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
+    int64_t ret = reminderStore.Update(alarm);
+    ClearStore();
+    EXPECT_EQ(ret, 0);
 }
 }
 }

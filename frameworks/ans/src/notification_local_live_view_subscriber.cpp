@@ -15,7 +15,7 @@
 
 #include "notification_local_live_view_subscriber.h"
 
-#include "hitrace_meter_adapter.h"
+#include "ans_trace_wrapper.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -42,7 +42,7 @@ NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::SubscriberLoca
 
 ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConnected()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->AddDeathRecipient(recipient_);
@@ -54,7 +54,7 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConn
 
 ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisconnected()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->RemoveDeathRecipient(recipient_);
@@ -67,7 +67,7 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisc
 ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnResponse(int32_t notificationId,
     const sptr<NotificationButtonOption> &buttonOption)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     subscriber_.OnResponse(notificationId, buttonOption);
     return ERR_OK;
 }
