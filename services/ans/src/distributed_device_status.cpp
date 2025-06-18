@@ -17,6 +17,7 @@
 
 #include "distributed_data_define.h"
 #include "distributed_extension_service.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace Notification {
@@ -97,22 +98,35 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
     const uint32_t controlFlag, const std::string deviceId, int32_t userId)
 {
     bool existFlag = false;
+    std::string deviceStatusId = deviceId;
     uint32_t finalStatus = 0;
+    if ((1 << NETWORKID_FLAG) & controlFlag) {
+        std::string udid;
+        int32_t result = DistributedExtensionService::GetInstance().TransDeviceIdToUdid(deviceId, udid);
+        if (result != ERR_OK) {
+            ANS_LOGI("Get udid failed %{public}s %{public}s %{public}d ", deviceType.c_str(),
+                StringAnonymous(deviceStatusId).c_str(), result);
+            return ERR_ANS_TASK_ERR;
+        }
+        deviceStatusId = udid;
+    }
+
     std::lock_guard<std::mutex> lock(mapLock_);
     for (auto device = deviceInfo_.begin(); device != deviceInfo_.end(); device++) {
-        if (device->deviceType != deviceType || device->deviceId != deviceId) {
+        if (device->deviceType != deviceType || device->deviceId != deviceStatusId) {
             continue;
         }
         ChangeStatus(*device, deviceType, status, controlFlag, userId);
+        ANS_LOGI("update 222 %{public}s %{public}u", StringAnonymous(device->deviceId).c_str(), device->status);
         existFlag = true;
         break;
     }
 
     if (!existFlag) {
-        DeviceStatus device = DeviceStatus(deviceType, deviceId);
+        DeviceStatus device = DeviceStatus(deviceType, deviceStatusId);
         ChangeStatus(device, deviceType, status, controlFlag, userId);
         deviceInfo_.emplace_back(device);
-        ANS_LOGI("Add device %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
+        ANS_LOGI("Add device %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceStatusId).c_str());
     }
     return ERR_OK;
 }

@@ -55,7 +55,8 @@ private:
     SafeMap<std::string, uint32_t> deviceStatus_;
 
 public:
-    static constexpr int32_t USERID_FLAG = 5;
+    static constexpr int32_t NETWORKID_FLAG = 16;
+    static constexpr int32_t USERID_FLAG = 4;
     static constexpr int32_t STATUS_SIZE = 4;
     static constexpr int32_t USING_FLAG = 0;
     static constexpr int32_t LOCK_FLAG = 1;

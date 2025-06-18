@@ -345,7 +345,7 @@ void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& bo
 #else
 void DistributedDeviceService::InitCurrentDeviceStatus()
 {
-    bool notificationEnable = true;
+    bool notificationEnable = false;
     bool liveViewEnable = false;
     std::string localType = DeviceTypeToTypeString(localDevice_.deviceType_);
     int32_t status = OberverService::GetInstance().IsScreenLocked();
@@ -353,6 +353,10 @@ void DistributedDeviceService::InitCurrentDeviceStatus()
         localType, liveViewEnable);
     if (result != ERR_OK) {
         ANS_LOGW("Dans get live view enable failed.");
+    }
+    result = NotificationHelper::IsDistributedEnabled(localType, notificationEnable);
+    if (result != ERR_OK) {
+        ANS_LOGW("Dans get notification enable failed.");
     }
     SyncDeviceStatus(STATE_TYPE_BOTH, status, notificationEnable, liveViewEnable);
 }
@@ -379,8 +383,9 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
     for (const auto& peer : peerDevice_) {
         DistributedClient::GetInstance().SendMessage(stateBox, TransDataType::DATA_TYPE_MESSAGE,
             peer.second.deviceId_, MODIFY_ERROR_EVENT_CODE);
-        ANS_LOGI("Dans SyncDeviceState %{public}d %{public}d %{public}d %{public}d.",
-            peer.second.deviceType_, localDevice_.deviceType_, status, (int32_t)(peerDevice_.size()));
+        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}lu %{public}d %{public}d %{public}d.",
+            peer.second.deviceType_, localDevice_.deviceType_, status, peerDevice_.size(),
+            type, liveViewEnable, notificationEnable);
     }
 }
 #endif

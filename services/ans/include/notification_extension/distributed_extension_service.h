@@ -60,11 +60,11 @@ public:
     void HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason);
     void SendReportCallback(int32_t messageType, int32_t errCode, std::string reason);
     int32_t GetOperationReplyTimeout();
+    int32_t TransDeviceIdToUdid(const std::string& networkId, std::string& udid);
 
 private:
     DistributedExtensionService();
     ~DistributedExtensionService();
-    int32_t TransDeviceIdToUdid(const DmDeviceInfo &deviceInfo, std::string& udid);
     void SetMaxContentLength(nlohmann::json &configJson);
     void SetOperationReplyTimeout(nlohmann::json &configJson);
 
