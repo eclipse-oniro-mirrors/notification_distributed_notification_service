@@ -1037,11 +1037,11 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
             playSoundReminder = (*it);
             isAlerting = true;
         } else {
-            ShowReminder((*it), false, false, false, false);
+            ShowReminder((*it), false, false, false, false, isAlerting);
         }
     }
     if (playSoundReminder != nullptr) {
-        ShowReminder(playSoundReminder, true, false, false, true);
+        ShowReminder(playSoundReminder, true, false, false, true, true);
     }
 }
 
@@ -1067,8 +1067,9 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
     return true;
 }
 
-void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, const bool &isNeedToPlaySound,
-    const bool &isNeedToStartNext, const bool &isSysTimeChanged, const bool &needScheduleTimeout)
+void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
+    const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
+    const bool isNeedCloseDefaultSound)
 {
     ANSR_LOGD("Show the reminder(Play sound: %{public}d), %{public}s",
         static_cast<int32_t>(isNeedToPlaySound), reminder->Dump().c_str());
@@ -1089,7 +1090,7 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest> &reminder, co
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
-    if (toPlaySound) {
+    if (toPlaySound || isNeedCloseDefaultSound) {
         // close notification default sound.
         notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
             NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
@@ -1299,11 +1300,11 @@ void ReminderDataManager::HandleImmediatelyShow(
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), true, false, isSysTimeChanged, true);
+            ShowReminder((*it), true, false, isSysTimeChanged, true, true);
             isAlerting = true;
         } else {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), false, false, isSysTimeChanged, false);
+            ShowReminder((*it), false, false, isSysTimeChanged, false, isAlerting);
         }
     }
 }
@@ -2040,7 +2041,7 @@ void ReminderDataManager::OnLanguageChanged()
             continue;
         }
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        ShowReminder((*it), false, false, false, false);
+        ShowReminder((*it), false, false, false, false, false);
     }
     ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_LANGUAGE_CHANGE);
     ANSR_LOGI("System language config changed end.");
@@ -2140,7 +2141,7 @@ void ReminderDataManager::LoadShareReminders()
             calendar->Copy(iter->second);
             // In the logic of insertion or deletion, it can only be updated if the id changes.
             if ((*it)->IsShowing() && reminderId != iter->second->GetReminderId()) {
-                ShowReminder((*it), false, false, false, false);
+                ShowReminder((*it), false, false, false, false, false);
             }
             reminders.erase(iter);
             ++it;

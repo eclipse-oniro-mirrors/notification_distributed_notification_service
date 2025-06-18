@@ -349,14 +349,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
 {
     sptr<ReminderRequest> reminder(new ReminderRequestTimer(10));
     reminder->SetReminderId(0);
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     reminder->SetReminderId(10);
-    manager->ShowReminder(reminder, true, true, true, true);
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     manager->alertingReminderId_ = 1;
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     manager->alertingReminderId_ = -1;
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, true, true, true, true, true);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }

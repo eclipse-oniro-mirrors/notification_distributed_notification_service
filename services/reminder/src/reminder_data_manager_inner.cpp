@@ -252,7 +252,7 @@ void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>((*it).GetRefPtr());
         calendar->Copy(iter->second);
         if ((*it)->IsShowing()) {
-            ShowReminder((*it), false, false, false, false);
+            ShowReminder((*it), false, false, false, false, false);
         }
     }
 }
