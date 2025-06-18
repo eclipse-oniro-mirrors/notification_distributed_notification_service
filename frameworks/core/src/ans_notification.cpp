@@ -27,6 +27,7 @@
 #include "notification_local_live_view_subscriber.h"
 #include "system_ability_definition.h"
 #include "unique_fd.h"
+#include "hitrace_util.h"
 
 #include <memory>
 #include <thread>
@@ -281,6 +282,7 @@ ErrCode AnsNotification::PublishNotification(const std::string &label, const Not
 ErrCode AnsNotification::PublishNotificationForIndirectProxy(const NotificationRequest &request)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    TraceChainUtil traceChain = TraceChainUtil();
     ANS_LOGI("PublishNotificationForIndirectProxy,notificationId:%{public}u", request.GetNotificationId());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {

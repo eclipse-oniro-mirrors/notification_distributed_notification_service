@@ -162,6 +162,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxyWithMaxC
 ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const sptr<NotificationRequest> &request)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    TraceChainUtil traceChain = TraceChainUtil();
+    OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
@@ -171,6 +173,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
     }
+    SetChainIdToExtraInfo(request, traceId);
     ErrCode result = PrePublishRequest(request);
     if (result != ERR_OK) {
         return result;
