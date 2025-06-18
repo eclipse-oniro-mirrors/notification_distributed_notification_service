@@ -20,10 +20,10 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 
 #include "bundle_manager_helper.h"
-#include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 
 #include "notification_preferences.h"
@@ -231,7 +231,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     bool updateUnEnableTime)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_5);
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");

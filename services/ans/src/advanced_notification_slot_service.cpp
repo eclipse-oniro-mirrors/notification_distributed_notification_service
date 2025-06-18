@@ -22,11 +22,11 @@
 #include "access_token_helper.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 #include "errors.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
-#include "hitrace_meter_adapter.h"
 #include "os_account_manager_helper.h"
 #include "ipc_skeleton.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -843,7 +843,7 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<NotificationBundleOption> &bundleOption,
     int32_t slotTypeInt, bool enabled, bool isForceControl)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
         slotType, enabled, isForceControl);
@@ -954,7 +954,7 @@ bool AdvancedNotificationService::PublishSlotChangeCommonEvent(const sptr<Notifi
     if (bundleOption == nullptr) {
         return false;
     }
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("bundle [%{public}s : %{public}d]", bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
 
     EventFwk::Want want;

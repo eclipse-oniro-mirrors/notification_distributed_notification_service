@@ -37,6 +37,7 @@ ohos_unittest("ans_subscriber_listener_test") {
     "c_utils:utils",
     "ipc:ipc_single",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
   ]
  
   subsystem_name = "${subsystem_name}"

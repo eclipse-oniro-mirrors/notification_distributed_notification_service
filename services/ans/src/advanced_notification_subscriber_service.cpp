@@ -23,12 +23,12 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "errors.h"
 
 #include "ipc_skeleton.h"
 #include "notification_constant.h"
 #include "os_account_manager_helper.h"
-#include "hitrace_meter_adapter.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_notification_manager.h"
 #include "distributed_preferences.h"
@@ -49,7 +49,7 @@ ErrCode AdvancedNotificationService::Subscribe(const sptr<IAnsSubscriber> &subsc
 ErrCode AdvancedNotificationService::Subscribe(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     ErrCode errCode = ERR_OK;
     do {
@@ -88,7 +88,7 @@ ErrCode AdvancedNotificationService::Subscribe(
 
 ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &subscriber)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
     if (sptrInfo == nullptr) {
@@ -145,7 +145,7 @@ ErrCode AdvancedNotificationService::Unsubscribe(const sptr<IAnsSubscriber> &sub
 ErrCode AdvancedNotificationService::Unsubscribe(
     const sptr<IAnsSubscriber> &subscriber, const sptr<NotificationSubscribeInfo> &info)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);

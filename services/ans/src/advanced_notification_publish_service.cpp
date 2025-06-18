@@ -23,12 +23,12 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "ans_trace_wrapper.h"
 #include "errors.h"
 
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
-#include "hitrace_meter_adapter.h"
 #include "notification_unified_group_Info.h"
 #include "os_account_manager.h"
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
@@ -1147,7 +1147,7 @@ void AdvancedNotificationService::PublishSubscriberExistFlagEvent(bool headsetEx
 
 ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
     if (bundleName.empty()) {

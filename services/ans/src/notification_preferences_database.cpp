@@ -23,7 +23,7 @@
 #include "ans_inner_errors.h"
 #include "os_account_manager_helper.h"
 #include "ans_log_wrapper.h"
-#include "hitrace_meter_adapter.h"
+#include "ans_trace_wrapper.h"
 #include "os_account_manager.h"
 #include "ipc_skeleton.h"
 #include "bundle_manager_helper.h"
@@ -290,7 +290,7 @@ bool NotificationPreferencesDatabase::CheckRdbStore()
 bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
     const std::string &bundleName, const int32_t &bundleUid, const std::vector<sptr<NotificationSlot>> &slots)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleName.empty()) {
         ANS_LOGE("Bundle name is null.");
@@ -839,7 +839,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(
 bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     const std::string &bundleKey, const NotificationConstant::SlotType &type, const int32_t &bundleUid)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_NOTIFICATION, __PRETTY_FUNCTION__);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
