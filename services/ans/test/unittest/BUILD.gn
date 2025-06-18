@@ -1470,6 +1470,7 @@ ohos_unittest("notification_extension_test") {
   sources = [
     "notification_extension/device_manager_impl_mock.cpp",
     "notification_extension/distributed_device_data_service_test.cpp",
+    "notification_extension/distributed_device_status_test.cpp",
     "notification_extension/distributed_extension_service_test.cpp",
     "notification_extension/mock_distributed_operation_callback.cpp",
     "notification_extension/notification_config_parse_mock.cpp",

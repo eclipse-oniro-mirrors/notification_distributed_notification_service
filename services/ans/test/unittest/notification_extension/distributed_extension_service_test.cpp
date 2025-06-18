@@ -150,12 +150,18 @@ HWTEST_F(DistributedExtensionServiceTest, extension_00004, Function | SmallTest 
     DistributedExtensionService::GetInstance().HADotCallback(0, 0, 0, "{\"result\":\"ok\"}");
     DistributedDeviceManager::GetInstance().InitTrustList();
     // trigger device online
+    DeviceTrigger::MockTransDeviceIdToUdid(true);
+    DeviceTrigger::TriggerDeviceOnline();
+    DeviceTrigger::MockTransDeviceIdToUdid(false);
+    bool isEmpty = DistributedExtensionService::GetInstance().deviceMap_.empty();
+    ASSERT_EQ(isEmpty, true);
+
     DeviceTrigger::TriggerDeviceOnline();
     DistributedExtensionService::GetInstance().OnAllConnectOnline();
     sleep(1);
     // check online device
     DistributedExtensionService::GetInstance().HADotCallback(7, 0, BRANCH_3, "{\"result\":\"ok\"}");
-    bool isEmpty = DistributedExtensionService::GetInstance().deviceMap_.empty();
+    isEmpty = DistributedExtensionService::GetInstance().deviceMap_.empty();
     ASSERT_EQ(isEmpty, false);
     // trigger device ready
     DistributedExtensionService::GetInstance().HADotCallback(7, 0, BRANCH_4, "{\"result\":\"ok\"}");

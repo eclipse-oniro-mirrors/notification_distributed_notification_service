@@ -27,6 +27,7 @@ public:
     static void MockInitDeviceManager(bool mock);
     static void MockGetTrustedDeviceList(bool mock);
     static void MockRegisterDevStateCallback(bool mock);
+    static void MockTransDeviceIdToUdid(bool mock);
     static void TriggerOnRemoteDied();
     static void TriggerDeviceOnline();
     static void TriggerDeviceOffline();

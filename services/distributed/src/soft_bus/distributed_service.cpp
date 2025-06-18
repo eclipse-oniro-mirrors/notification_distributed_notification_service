@@ -301,7 +301,7 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
         DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
     }
-    DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
+    DistributedPublishService::GetInstance().SyncLiveViewNotification(device, true);
 }
 #else
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,

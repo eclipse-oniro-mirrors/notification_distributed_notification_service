@@ -24,6 +24,7 @@ static std::shared_ptr<DistributedHardware::DmInitCallback> dmInitCallback = nul
 static bool g_mockInitDeviceManager = false;
 static bool g_mockGetTrustedDeviceList = false;
 static bool g_mockRegisterDevStateCallback = false;
+static bool g_mockTransDeviceIdToUdid = false;
 
 void DeviceTrigger::MockInitDeviceManager(bool mock)
 {
@@ -43,6 +44,11 @@ void DeviceTrigger::MockRegisterDevStateCallback(bool mock)
 void DeviceTrigger::TriggerOnRemoteDied()
 {
     dmInitCallback->OnRemoteDied();
+}
+
+void DeviceTrigger::MockTransDeviceIdToUdid(bool mock)
+{
+    g_mockTransDeviceIdToUdid = mock;
 }
 
 void DeviceTrigger::TriggerDeviceOnline()
@@ -228,8 +234,14 @@ int32_t DeviceManagerImpl::GetUdidByNetworkId(const std::string &pkgName, const 
 }
 
 int32_t DeviceManagerImpl::GetUuidByNetworkId(const std::string &pkgName, const std::string &netWorkId,
-                                              std::string &uuid)
+                                              std::string &udid)
 {
+    if (Notification::g_mockTransDeviceIdToUdid) {
+        return -1;
+    }
+    if (netWorkId == "netWorkId") {
+        udid = "udidNum";
+    }
     return 0;
 }
 

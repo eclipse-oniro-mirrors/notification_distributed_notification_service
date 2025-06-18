@@ -257,15 +257,15 @@ int32_t DistributedExtensionService::ReleaseLocalDevice()
     return 0;
 }
 
-int32_t DistributedExtensionService::TransDeviceIdToUdid(const DmDeviceInfo &deviceInfo, std::string& udid)
+int32_t DistributedExtensionService::TransDeviceIdToUdid(const std::string& networkId, std::string& udid)
 {
-    int32_t ret = DeviceManager::GetInstance().GetUdidByNetworkId(APP_ID, deviceInfo.networkId, udid);
+    int32_t ret = DeviceManager::GetInstance().GetUdidByNetworkId(APP_ID, networkId, udid);
     if (ret != 0) {
         ANS_LOGE("On line device failed, %{public}s ret:%{public}d",
-            StringAnonymous(deviceInfo.deviceId).c_str(), ret);
+            StringAnonymous(networkId).c_str(), ret);
         return ret;
     }
-    ANS_LOGI("OnDeviceOnline id change %{public}s %{public}s", deviceInfo.deviceId, udid.c_str());
+    ANS_LOGI("OnDeviceOnline id change %{public}s %{public}s", networkId.c_str(), udid.c_str());
     return ERR_OK;
 }
 
@@ -285,7 +285,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
             return;
         };
         std::string udid;
-        if (TransDeviceIdToUdid(deviceInfo, udid) != ERR_OK) {
+        if (TransDeviceIdToUdid(deviceInfo.networkId, udid) != ERR_OK) {
             return;
         }
         ADD_DEVICE handler = (ADD_DEVICE)dansHandler_->GetProxyFunc("AddDevice");
