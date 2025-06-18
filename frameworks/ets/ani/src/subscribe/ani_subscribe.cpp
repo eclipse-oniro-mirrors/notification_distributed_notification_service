@@ -42,6 +42,7 @@ static const char *UNSUBSCRIBE_SIGNATURE =
 static const char *REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE =
    "Lnotification/NotificationCommonDef/BundleOption;:V";
 static const char *REMOVEALL_FOR_USERID_STGNATURE = "D:V";
+static const char *REMOVEALL_SIGNATURE = ":V";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
@@ -125,6 +126,7 @@ void AniSubScribeRegistryInit(ani_env *env)
             REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE, reinterpret_cast<void *>(AniRemoveAllForBundle)},
         ani_native_function {"nativeRemoveAllForUserId",
             REMOVEALL_FOR_USERID_STGNATURE, reinterpret_cast<void *>(AniRemoveAllForUserId)},
+        ani_native_function {"nativeRemoveAll", REMOVEALL_SIGNATURE, reinterpret_cast<void *>(AniRemoveAll)},
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
