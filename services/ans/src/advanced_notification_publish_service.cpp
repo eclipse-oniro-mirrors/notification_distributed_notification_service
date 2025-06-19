@@ -50,6 +50,7 @@
 #include "advanced_datashare_helper_ext.h"
 #include "datashare_result_set.h"
 #include "parameter.h"
+#include "parameters.h"
 #include "system_ability_definition.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -74,6 +75,7 @@ constexpr const char *CONTACT_DATA = "datashare:///com.ohos.contactsdataability/
 constexpr const char *SUPPORT_INTEGELLIGENT_SCENE = "true";
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 constexpr int32_t CLEAR_SLOT_FROM_RSS = 2;
+constexpr const char *PERSIST_EDM_NOTIFICATION_DISABLE =  "persist.edm.notification_disable";
 
 ErrCode AdvancedNotificationService::SetDefaultNotificationEnabled(
     const sptr<NotificationBundleOption> &bundleOption, bool enabled)
@@ -1050,6 +1052,9 @@ void AdvancedNotificationService::ClearAllNotificationGroupInfo(std::string loca
 
 bool AdvancedNotificationService::IsDisableNotification(const std::string &bundleName)
 {
+    if (system::GetBoolParameter(PERSIST_EDM_NOTIFICATION_DISABLE, false)) {
+        return true;
+    }
     NotificationDisable notificationDisable;
     if (NotificationPreferences::GetInstance()->GetDisableNotificationInfo(notificationDisable)) {
         if (notificationDisable.GetDisabled()) {

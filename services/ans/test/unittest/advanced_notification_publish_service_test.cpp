@@ -31,6 +31,7 @@
 #include "notification_constant.h"
 #include "ans_ut_constant.h"
 #include "ans_dialog_host_client.h"
+#include "mock_parameters.h"
 #include "mock_push_callback_stub.h"
 #include "mock_ipc_skeleton.h"
 #include "bool_wrapper.h"
@@ -1579,6 +1580,24 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_001, Function | SmallTest 
     std::string bundleName = "";
     bool result = advancedNotificationService_->IsDisableNotification(bundleName);
     ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsDisableNotification_002
+ * @tc.desc: Test IsDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotification_002, Function | SmallTest | Level1)
+{
+    bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
+    if (!defaultPolicy) {
+        system::SetBoolParameter("persist.edm.notification_disable", true);
+    }
+    std::string bundleName = "";
+    bool result = advancedNotificationService_->IsDisableNotification(bundleName);
+    ASSERT_TRUE(result);
+    system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
 }
 
 /**
