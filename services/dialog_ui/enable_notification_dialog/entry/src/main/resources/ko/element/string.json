@@ -20,6 +20,34 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason",
+            "value":"여기에는 잠금 화면 알림, 배너, 배지, 사운드 및 진동이 포함될 수 있습니다. 설정에서 변경할 수 있습니다.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_simple",
+            "value":"여기에는 배너, 배지 및 사운드가 포함될 수 있습니다. 설정에서 변경할 수 있습니다.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"여기에는 잠금 화면 알림, 배너, 배지, 사운드, 진동 등이 포함될 수 있습니다. DroiTong > 앱 관리에서 해당 설정을 변경할 수 있습니다.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"여기에는 잠금 화면 알림, 배너, 배지, 사운드, 진동 등이 포함될 수 있습니다. EasyAbroad > 앱 관리에서 해당 설정을 변경할 수 있습니다.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

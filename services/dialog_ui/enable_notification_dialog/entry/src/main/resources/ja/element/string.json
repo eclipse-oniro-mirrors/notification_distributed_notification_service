@@ -20,6 +20,34 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason",
+            "value":"これには、ロック画面通知、バナー、バッジ、サウンド、バイブレーションが含まれます。これは[設定]で変更できます。",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_simple",
+            "value":"これには、バナー、バッジ、サウンドが含まれます。これは[設定]で変更できます。",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"これには、ロック画面通知、バナー、バッジ、サウンド、バイブレーションが含まれる場合があります。この設定は、[DroiTong ] > [アプリ管理]で変更できます。",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"これには、ロック画面通知、バナー、バッジ、サウンド、バイブレーションが含まれる場合があります。この設定は、[EasyAbroad] > [アプリ管理]で変更できます。",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }

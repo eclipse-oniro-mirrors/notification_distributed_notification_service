@@ -20,6 +20,34 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason",
+            "value":"Những nội dung này có thể bao gồm thông báo màn hình khóa, biểu ngữ, dấu báo, âm thanh và chế độ rung. Bạn có thể thay đổi chế độ này trong mục Cài đặt.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Những nội dung này có thể bao gồm biểu ngữ, dấu báo và âm thanh. Bạn có thể thay đổi chế độ này trong mục Cài đặt.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"Những thông báo này có thể bao gồm thông báo trên màn hình khóa, biểu ngữ, huy hiệu, âm thanh và rung. Bạn có thể thay đổi những cài đặt này trong DroiTong > Quản lý ứng dụng.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"Những thông báo này có thể bao gồm thông báo trên màn hình khóa, biểu ngữ, huy hiệu, âm thanh và rung. Bạn có thể thay đổi những cài đặt này trong EasyAbroad > Quản lý ứng dụng.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
