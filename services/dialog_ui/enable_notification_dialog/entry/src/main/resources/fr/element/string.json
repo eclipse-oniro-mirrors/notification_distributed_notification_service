@@ -20,6 +20,34 @@
             "attr":{
                 "priority":"translate"
             }
+        },
+        {
+            "name":"reason",
+            "value":"Cela peut inclure des notifications sur l'écran verrouillé, bannières, badges, sons et vibrations. Vous pouvez changer cela dans Paramètres.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_simple",
+            "value":"Cela peut inclure des bannières, badges et sons. Vous pouvez changer cela dans Paramètres.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"Il peut s'agir de notifications d'écran verrouillé, de bannières, de badges, de sons et de vibrations. Ces paramètres peuvent être modifiés sous DroiTong > Gestion des applications.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"Il peut s'agir de notifications d'écran verrouillé, de bannières, de badges, de sons et de vibrations. Ces paramètres peuvent être modifiés sous EasyAbroad > Gestion des applications.",
+            "attr":{
+                "priority":"translate"
+            }
         }
     ]
 }
