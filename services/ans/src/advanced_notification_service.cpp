@@ -874,14 +874,15 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     if (NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(atoll(profileId.c_str()), userId, profile) !=
         ERR_OK) {
         ANS_LOGE("profile failed. pid: %{public}s, userid: %{public}d", profileId.c_str(), userId);
-        //ceshi
         message.Message("profileid:" + profileId + ",userid:" + std::to_string(userId));
         NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_8));
+        DoNotDisturbUpdataReminderFlags(record);
         return;
     }
     if (profile == nullptr) {
         ANS_LOGE("The do not disturb profile is nullptr.");
         NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_9));
+        DoNotDisturbUpdataReminderFlags(record);
         return;
     }
     auto uid = record->bundleOption->GetUid();
