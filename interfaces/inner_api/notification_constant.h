@@ -342,6 +342,11 @@ public:
     static const int32_t USER_LOGOUT_REASON_DELETE = 33;
 
     /**
+     * Indicates that a notification is deleted because collaboration click.
+     */
+    static const int32_t DISTRIBUTED_COLLABORATIVE_CLICK_DELETE = 34;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;
@@ -379,6 +384,8 @@ public:
     static constexpr uint64_t INVALID_TIMER_ID = 0ULL;
 
     static constexpr int32_t ANS_UID = 5523;
+
+    static constexpr int32_t MAX_BTN_NUM = 3;
 
     // live view max size is 512KB(extra size) + 8KB(base size) = 520KB
     static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;

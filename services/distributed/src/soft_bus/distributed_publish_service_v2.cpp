@@ -258,7 +258,7 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
         requestBox->SetCommonLiveView(buffer);
     }
     SetNotificationExtendInfo(requestPoint, peerDevice.deviceType_, requestBox);
-    SetNotificationButtons(requestPoint, requestPoint->GetSlotType(), requestBox);
+    SetNotificationButtons(requestPoint, peerDevice.deviceType_, requestPoint->GetSlotType(), requestBox);
     SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
         requestPoint->GetNotificationType(), requestBox);
     if (!requestBox->Serialize()) {
@@ -326,15 +326,41 @@ void DistributedPublishService::SetNotificationContent(const std::shared_ptr<Not
 }
 
 void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
-    NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox)
+    int32_t deviceType, NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox)
 {
-    if (slotType == NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
-        auto actionButtons = notificationRequest->GetActionButtons();
-        if (actionButtons.empty()) {
-            ANS_LOGE("Check actionButtons is null.");
+    auto actionButtons = notificationRequest->GetActionButtons();
+    if (actionButtons.empty()) {
+        ANS_LOGE("Check actionButtons is null.");
+        return;
+    }
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+        if (notificationRequest->IsCommonLiveView()) {
             return;
         }
-
+        std::vector<std::string> buttonsTitle;
+        std::vector<std::string> userInputs;
+        size_t length = actionButtons.size();
+        if (length > NotificationConstant::MAX_BTN_NUM) {
+            length = NotificationConstant::MAX_BTN_NUM;
+        }
+        for (size_t i = 0; i < length; i++) {
+            if (actionButtons[i] == nullptr) {
+                return;
+            }
+            buttonsTitle.push_back(actionButtons[i]->GetTitle());
+            std::string inputKey = "";
+            if (actionButtons[i]->GetUserInput() != nullptr) {
+                userInputs.push_back(actionButtons[i]->GetUserInput()->GetInputKey());
+            } else {
+                userInputs.push_back(inputKey);
+            }
+        }
+        requestBox->SetActionButtonsTitle(buttonsTitle);
+        requestBox->SetActionUserInputs(userInputs);
+        return;
+    }
+    if (slotType == NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
         std::shared_ptr<NotificationActionButton> button = nullptr;
         for (std::shared_ptr<NotificationActionButton> buttonItem : actionButtons) {
             if (buttonItem != nullptr && buttonItem->GetUserInput() != nullptr &&
@@ -472,6 +498,13 @@ void DistributedPublishService::PublishSynchronousLiveView(const std::shared_ptr
 void DistributedPublishService::MakeNotificationButtons(const NotificationRequestBox& box,
     NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request)
 {
+    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if ((localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC)) {
+        MakePadNotificationButtons(box, request);
+        return;
+    }
+
     if (request != nullptr && slotType == NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
         std::string actionName;
         std::string userInputKey;
@@ -489,6 +522,38 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
         std::shared_ptr<NotificationActionButton> actionButton =
             NotificationActionButton::Create(nullptr, actionName, nullptr);
         actionButton->AddNotificationUserInput(userInput);
+        request->AddActionButton(actionButton);
+    }
+}
+
+void DistributedPublishService::MakePadNotificationButtons(
+    const NotificationRequestBox& box, sptr<NotificationRequest>& request)
+{
+    if (request == nullptr || request->IsCommonLiveView()) {
+        return;
+    }
+    std::vector<std::string> buttonsTitle;
+    std::vector<std::string> userInputs;
+    if (!box.GetActionButtonsTitle(buttonsTitle) ||
+        !box.GetActionUserInputs(userInputs) || buttonsTitle.size() <= 0) {
+        ANS_LOGI("Notification [hashCode: %{public}s] has no button.", request->GetNotificationHashCode().c_str());
+        return;
+    }
+    if (buttonsTitle.size() != userInputs.size()) {
+        ANS_LOGE("Notification [hashCode: %{public}s] inner error, button property size not same.",
+            request->GetNotificationHashCode().c_str());
+        return;
+    }
+    for (size_t i = 0; i < buttonsTitle.size(); i++) {
+        std::shared_ptr<NotificationActionButton> actionButton =
+            NotificationActionButton::Create(nullptr, buttonsTitle[i], nullptr);
+        std::shared_ptr<NotificationUserInput> userInput;
+        if (userInputs[i].length() > 0) {
+            userInput = NotificationUserInput::Create(userInputs[i]);
+        }
+        if (userInput) {
+            actionButton->AddNotificationUserInput(userInput);
+        }
         request->AddActionButton(actionButton);
     }
 }

@@ -33,18 +33,22 @@ public:
     bool SetActionName(const std::string& actionName);
     bool SetUserInput(const std::string& userInput);
     bool SetOperationType(int32_t type);
+    bool SetOperationBtnIndex(int32_t index);
     bool SetMatchType(int32_t type);
     bool SetLocalDeviceId(const std::string& deviceId);
     bool SetResponseResult(int32_t result);
+    bool SetLocalDeviceType(const int32_t& deviceType);
 
     bool GetNotificationHashCode(std::string& hashCode) const;
     bool GetOperationEventId(std::string& eventId) const;
     bool GetActionName(std::string& actionName) const;
     bool GetUserInput(std::string& userInput) const;
     bool GetOperationType(int32_t& type) const;
+    bool GetOperationBtnIndex(int32_t& index) const;
     bool GetMatchType(int32_t& type) const;
     bool GetLocalDeviceId(std::string& deviceId) const;
     bool GetResponseResult(int32_t& result) const;
+    bool GetLocalDeviceType(int32_t& deviceType) const;
 };
 }  // namespace Notification
 }  // namespace OHOS

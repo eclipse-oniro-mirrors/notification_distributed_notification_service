@@ -1707,9 +1707,40 @@ void DelDeletingSubscriber(std::shared_ptr<SubscriberInstance> subscriber)
     }
 }
 
+napi_value GetParamOperationInfoSub(const napi_env &env, const napi_value &content, OperationInfo& operationInfo)
+{
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, content, "operationType", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, content, "operationType", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            return nullptr;
+        }
+        int32_t code;
+        NAPI_CALL(env, napi_get_value_int32(env, result, &code));
+        operationInfo.operationType = code;
+    }
+
+    NAPI_CALL(env, napi_has_named_property(env, content, "buttonIndex", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, content, "buttonIndex", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            return nullptr;
+        }
+
+        int32_t code;
+        NAPI_CALL(env, napi_get_value_int32(env, result, &code));
+        operationInfo.btnIndex = code;
+    }
+    return Common::NapiGetNull(env);
+}
+ 
 napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content, OperationInfo& operationInfo)
 {
-    operationInfo.withOperationInfo = true;
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, content, &valuetype));
     if (valuetype != napi_object) {
@@ -1751,7 +1782,8 @@ napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content,
         NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, LONG_STR_MAX_SIZE - 1, &strLen));
         operationInfo.userInput = str;
     }
-    return Common::NapiGetNull(env);
+
+    return GetParamOperationInfoSub(env, content, operationInfo);
 }
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, std::string &hashCode,

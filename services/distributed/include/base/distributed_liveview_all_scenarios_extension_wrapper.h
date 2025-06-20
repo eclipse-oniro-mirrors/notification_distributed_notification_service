@@ -37,11 +37,17 @@ public:
         int32_t actionType, const AAFwk::WantParams extraInfo);
     typedef ErrCode (*SUBSCRIBE_ALL_CONNECT)();
     typedef ErrCode (*UNSUBSCRIBE_ALL_CONNECT)();
+    typedef ErrCode (*LIVE_VIEW_MULTI_SCREEN_SYNC_OPER)(
+        sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
+    typedef ErrCode (*RESTORE_COLLABORATION_WINDOW)(const std::string &networkId);
     ErrCode UpdateLiveviewDecodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
         const AAFwk::WantParams extraInfo);
     ErrCode SubscribeAllConnect();
     ErrCode UnSubscribeAllConnect();
+    ErrCode LiveViewMultiScreenSyncOper(
+        sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
+    int32_t RestoreCollaborationWindow(const std::string &networkId);
 private:
     void* ExtensionHandle_ = nullptr;
     SUBSCRIBE_ALL_CONNECT subscribeHandler_ = nullptr;
@@ -49,6 +55,8 @@ private:
     TRIGGER_PUSH_WANT_AGENT triggerHandler_ = nullptr;
     UPDATE_LIVEVIEW_ENCODE_CONTENT updateLiveviewEncodeContent_ = nullptr;
     UPDATE_LIVEVIEW_DECODE_CONTENT updateLiveviewDecodeContent_ = nullptr;
+    LIVE_VIEW_MULTI_SCREEN_SYNC_OPER liveViewMultiScreenSyncOper_ = nullptr;
+    RESTORE_COLLABORATION_WINDOW restoreCollaborationWindow_ = nullptr;
 };
 
 #define DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER \

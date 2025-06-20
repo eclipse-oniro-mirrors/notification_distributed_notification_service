@@ -25,7 +25,8 @@ namespace Notification {
 
 enum OperationType {
     DISTRIBUTE_OPERATION_JUMP = 0,
-    DISTRIBUTE_OPERATION_REPLY
+    DISTRIBUTE_OPERATION_REPLY,
+    DISTRIBUTE_OPERATION_FOR_LIVE_VIEW = 32
 };
 
 class NotificationOperationInfo : public Parcelable {
@@ -64,6 +65,10 @@ public:
 
     void SetOperationType(const OperationType& operationType);
 
+    int32_t GetBtnIndex() const;
+
+    void SetBtnIndex(const int32_t& btnIndex);
+
     std::string Dump();
 
     /**
@@ -90,6 +95,7 @@ private:
     std::string userInput_;
     std::string hashCode_;
     std::string eventId_;
+    int32_t btnIndex_;
     OperationType operationType_;
 };
 }  // namespace Notification

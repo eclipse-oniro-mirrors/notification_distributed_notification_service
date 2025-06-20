@@ -117,6 +117,7 @@ ohos_shared_library("libdans") {
     "src/soft_bus/distributed_service.cpp",
     "src/soft_bus/distributed_subscribe_service_v2.cpp",
     "src/soft_bus/distributed_subscriber.cpp",
+    "src/soft_bus/distributed_unlock_listener_oper_service.cpp",
     "src/tlv_box/batch_remove_box.cpp",
     "src/tlv_box/box_base.cpp",
     "src/tlv_box/bundle_icon_box.cpp",

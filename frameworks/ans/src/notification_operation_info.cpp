@@ -75,6 +75,16 @@ void NotificationOperationInfo::SetOperationType(const OperationType& operationT
     operationType_ = operationType;
 }
 
+int32_t NotificationOperationInfo::GetBtnIndex() const
+{
+    return btnIndex_;
+}
+
+void NotificationOperationInfo::SetBtnIndex(const int32_t& btnIndex)
+{
+    btnIndex_ = btnIndex;
+}
+
 std::string NotificationOperationInfo::Dump()
 {
     return "NotificationOperationInfo{ "
@@ -82,6 +92,7 @@ std::string NotificationOperationInfo::Dump()
         ", eventId = " + eventId_ +
         ", actionName = " + actionName_ +
         ", operationType = " + std::to_string(static_cast<int32_t>(operationType_)) +
+        ", btnIndex = " + std::to_string(btnIndex_) +
         " }";
 }
 
@@ -112,6 +123,11 @@ bool NotificationOperationInfo::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(static_cast<int32_t>(btnIndex_))) {
+        ANS_LOGE("Failed to write operationType");
+        return false;
+    }
+
     return true;
 }
 
@@ -138,6 +154,8 @@ bool NotificationOperationInfo::ReadFromParcel(Parcel &parcel)
     }
 
     operationType_ = static_cast<OperationType>(parcel.ReadInt32());
+
+    btnIndex_ = static_cast<int32_t>(parcel.ReadInt32());
 
     return true;
 }

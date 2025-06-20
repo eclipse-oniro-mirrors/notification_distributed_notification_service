@@ -179,6 +179,21 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_1
 }
 
 /**
+ * @tc.name: DistributeOperationParamCheck_200
+ * @tc.desc: Test DistributeOperationParamCheck when invalid operationType.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_200, Function | SmallTest | Level1)
+{
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    operationInfo->SetOperationType(static_cast<OperationType>(2));
+    sptr<IAnsOperationCallback> callback = nullptr;
+    auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: DistributeOperation_100
  * @tc.desc: Test DistributeOperation when notificationSvrQueue_ is nullptr.
  * @tc.type: FUNC

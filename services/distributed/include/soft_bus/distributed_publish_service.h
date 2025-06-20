@@ -43,7 +43,7 @@ public:
 private:
     void SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
         const std::vector<std::string>& notificationList);
-    void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest,
+    void SetNotificationButtons(const sptr<NotificationRequest> notificationRequest, int32_t deviceType,
         NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
         NotificationContent::Type type, std::shared_ptr<NotificationRequestBox>& requestBox);
@@ -54,6 +54,7 @@ private:
     void MakeExtendInfo(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationButtons(const NotificationRequestBox& box,
         NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request);
+    void MakePadNotificationButtons(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView, int32_t contentType);
     void MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
