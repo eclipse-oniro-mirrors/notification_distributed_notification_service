@@ -74,7 +74,7 @@ NotificationTemplate *NotificationTemplate::Unmarshalling(Parcel &parcel)
 {
     auto templ = new (std::nothrow) NotificationTemplate();
     if (templ == nullptr) {
-        ANS_LOGE("Failed to create NotificationTemplate instance");
+        ANS_LOGE("null templ");
         return nullptr;
     }
     if (!templ->ReadFromParcel(parcel)) {
@@ -96,7 +96,7 @@ bool NotificationTemplate::ReadFromParcel(Parcel &parcel)
     if (valid) {
         templateData_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
         if (!templateData_) {
-            ANS_LOGE("Failed to read template data");
+            ANS_LOGE("null templateData");
             return false;
         }
     }

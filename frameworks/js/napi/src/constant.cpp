@@ -29,7 +29,7 @@ void SetNamedPropertyByInteger(napi_env env, napi_value dstObj, int32_t objName,
 
 napi_value RemoveReasonInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -47,7 +47,7 @@ napi_value RemoveReasonInit(napi_env env, napi_value exports)
 
 napi_value SlotTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -72,7 +72,7 @@ napi_value SlotTypeInit(napi_env env, napi_value exports)
 
 napi_value SlotLevelInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -93,7 +93,7 @@ napi_value SlotLevelInit(napi_env env, napi_value exports)
 
 napi_value SemanticActionButtonInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -127,7 +127,7 @@ napi_value SemanticActionButtonInit(napi_env env, napi_value exports)
 
 napi_value InputsSourceInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -145,7 +145,7 @@ napi_value InputsSourceInit(napi_env env, napi_value exports)
 
 napi_value DoNotDisturbMode(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -166,7 +166,7 @@ napi_value DoNotDisturbMode(napi_env env, napi_value exports)
 
 napi_value InputEditTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -185,7 +185,7 @@ napi_value InputEditTypeInit(napi_env env, napi_value exports)
 
 napi_value ContentTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -215,7 +215,7 @@ napi_value ContentTypeInit(napi_env env, napi_value exports)
 
 napi_value DoNotDisturbTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -235,7 +235,7 @@ napi_value DoNotDisturbTypeInit(napi_env env, napi_value exports)
 
 napi_value DeviceRemindTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -255,7 +255,7 @@ napi_value DeviceRemindTypeInit(napi_env env, napi_value exports)
 
 napi_value SourceTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -274,7 +274,7 @@ napi_value SourceTypeInit(napi_env env, napi_value exports)
 
 napi_value NotificationControlFlagStatusInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -308,7 +308,7 @@ napi_value NotificationControlFlagStatusInit(napi_env env, napi_value exports)
 
 napi_value NotificationFlagTypeInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -327,7 +327,7 @@ napi_value NotificationFlagTypeInit(napi_env env, napi_value exports)
 
 napi_value LiveViewStatusInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("%{public}s, called", __func__);
+    ANS_LOGD("called");
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);

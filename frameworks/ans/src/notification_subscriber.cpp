@@ -48,7 +48,7 @@ bool NotificationSubscriber::ProcessSyncDecision(
 {
     sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
     if (request == nullptr) {
-        ANS_LOGE("No need to consume cause invalid reqeuest.");
+        ANS_LOGE("null request");
         return false;
     }
 

@@ -39,7 +39,7 @@ std::shared_ptr<LivePublishProcess> LivePublishProcess::GetInstance()
     if (instance_ == nullptr) {
         instance_ = std::make_shared<LivePublishProcess>();
         if (instance_ == nullptr) {
-            ANS_LOGE("Failed to create LivePublishProcess instance");
+            ANS_LOGE("null instance");
             return nullptr;
         }
     }

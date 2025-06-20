@@ -73,7 +73,7 @@ ErrCode PushCallBackStub::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
 
 int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    ANS_LOGD("called.");
+    ANS_LOGD("called");
     if (data.ReadInterfaceToken() != GetDescriptor()) {
         ANS_LOGE("local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
@@ -125,14 +125,14 @@ int32_t PushCallBackProxy::OnCheckNotification(
 
     auto remote = Remote();
     if (remote == nullptr) {
-        ANS_LOGE("Get Remote fail.");
+        ANS_LOGE("null remote");
         return false;
     }
 
     int error = remote->SendRequest(static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION),
         data, reply, option);
     if (error != NO_ERROR) {
-        ANS_LOGE("Connect done fail, error: %{public}d", error);
+        ANS_LOGE("error: %{public}d", error);
         return false;
     }
 
@@ -148,12 +148,12 @@ void PushCallBackProxy::HandleEventControl(
     std::string eventControl, const std::shared_ptr<PushCallBackParam> &pushCallBackParam)
 {
     if (pushCallBackParam == nullptr) {
-        ANS_LOGE("pushCallBackParam is null");
+        ANS_LOGE("null pushCallBackParam");
         return;
     }
     std::string event = pushCallBackParam->event;
     if (event.empty()) {
-        ANS_LOGE("event is null");
+        ANS_LOGE("null event");
         return;
     }
     ANS_LOGI("eventControl:%{public}s,event:%{public}s", eventControl.c_str(), event.c_str());

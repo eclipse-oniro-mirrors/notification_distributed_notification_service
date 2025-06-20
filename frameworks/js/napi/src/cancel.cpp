@@ -27,7 +27,7 @@ constexpr int8_t CANCEL_AS_BUNDLEOPTION_MAX_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancel &paras)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = CANCEL_MAX_PARA;
     napi_value argv[CANCEL_MAX_PARA] = {nullptr};
@@ -54,7 +54,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     } else {
         auto retValue = Common::GetBundleOption(env, argv[PARAM0], paras.option);
         if (retValue == nullptr) {
-            ANS_LOGE("GetBundleOption failed.");
+            ANS_LOGE("null retValue");
             Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             return nullptr;
         }
@@ -116,7 +116,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelGroup &paras)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = CANCEL_GROUP_MAX_PARA;
     napi_value argv[CANCEL_GROUP_MAX_PARA] = {nullptr};
@@ -167,7 +167,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value Cancel(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
@@ -177,7 +177,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     AsyncCallbackInfoCancel *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr, .id = paras.id, .label = paras.label};
     if (!asynccallbackinfo) {
-        ANS_LOGD("AsyncCallbackinfo is nullptr.");
+        ANS_LOGD("null asyncCallbackinfo");
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -220,7 +220,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("cancel callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -229,7 +229,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
 
 napi_value CancelAll(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -238,7 +238,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoCancel {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        ANS_LOGD("Asynccallbackinfo is nullptr.");
+        ANS_LOGD("null asynccallbackinfo");
         return Common::JSParaError(env, callback);
     }
     napi_value promise = nullptr;
@@ -279,7 +279,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("CancelAll callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -288,7 +288,7 @@ napi_value CancelAll(napi_env env, napi_callback_info info)
 
 napi_value CancelGroup(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     ParametersInfoCancelGroup params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -342,7 +342,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("CancelGroup callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -351,7 +351,7 @@ napi_value CancelGroup(napi_env env, napi_callback_info info)
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoCancelAsBundle &paras)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = CANCEL_AS_BUNDLE_MAX_PARA;
     napi_value argv[CANCEL_AS_BUNDLE_MAX_PARA] = {nullptr};
@@ -436,7 +436,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value CancelAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     ParametersInfoCancelAsBundle paras;
     if (ParseParameters(env, info, paras) == nullptr) {
@@ -450,7 +450,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
         .userId = paras.userId
     };
     if (!asynccallbackinfo) {
-        ANS_LOGD("AsyncCallbackinfo is nullptr.");
+        ANS_LOGD("null asyncCallbackinfo");
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -493,7 +493,7 @@ napi_value CancelAsBundle(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("CancelAsBundle callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

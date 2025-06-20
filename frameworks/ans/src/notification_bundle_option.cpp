@@ -152,7 +152,7 @@ NotificationBundleOption *NotificationBundleOption::FromJson(const nlohmann::jso
 
     auto *pBundle = new (std::nothrow) NotificationBundleOption();
     if (pBundle == nullptr) {
-        ANS_LOGE("Failed to create bundle option instance");
+        ANS_LOGE("null pBundle");
         return nullptr;
     }
 

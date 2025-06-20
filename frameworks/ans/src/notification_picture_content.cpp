@@ -81,7 +81,7 @@ NotificationPictureContent *NotificationPictureContent::FromJson(const nlohmann:
 
     auto pContent = new (std::nothrow) NotificationPictureContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create pictureContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 
@@ -89,7 +89,7 @@ NotificationPictureContent *NotificationPictureContent::FromJson(const nlohmann:
 
     const auto &jsonEnd = jsonObject.cend();
     if (jsonObject.find("expandedTitle") != jsonEnd && jsonObject.at("expandedTitle").is_string()) {
-        ANS_LOGD("Find expandedTitle success.");
+        ANS_LOGD("Find expandedTitle success");
         pContent->expandedTitle_ = jsonObject.at("expandedTitle").get<std::string>();
     }
 

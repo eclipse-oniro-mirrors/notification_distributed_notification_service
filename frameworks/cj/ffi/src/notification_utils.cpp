@@ -268,7 +268,7 @@ namespace Notification {
         if (contentResult->lockscreenPicture != -1) {
             auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(contentResult->lockscreenPicture);
             if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pixelMap");
                 return false;
             }
             basicContent->SetLockScreenPicture(pixelMap->GetRealPixelMap());
@@ -280,7 +280,7 @@ namespace Notification {
     {
         std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
         if (normalContent == nullptr) {
-            LOGE("normalContent is null");
+            LOGE("null normalContent");
             return false;
         }
 
@@ -347,7 +347,7 @@ namespace Notification {
         std::shared_ptr<OHOS::Notification::NotificationLongTextContent> longContent =
         std::make_shared<OHOS::Notification::NotificationLongTextContent>();
         if (longContent == nullptr) {
-            LOGE("longContent is null");
+            LOGE("null longContent");
             return false;
         }
         if (!GetNotificationLongTextContentDetailedV2(contentResult, longContent)) {
@@ -397,7 +397,7 @@ namespace Notification {
         // picture: image.PixelMap
         auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(contentResult->picture);
         if (pixelMap == nullptr) {
-            LOGE("Invalid object pixelMap");
+            LOGE("null pixelMap");
             return false;
         }
         pictureContent->SetBigPicture(pixelMap->GetRealPixelMap());
@@ -412,7 +412,7 @@ namespace Notification {
         std::shared_ptr<OHOS::Notification::NotificationPictureContent> pictureContent =
         std::make_shared<OHOS::Notification::NotificationPictureContent>();
         if (pictureContent == nullptr) {
-            LOGE("pictureContent is null");
+            LOGE("null pictureContent");
             return false;
         }
 
@@ -452,7 +452,7 @@ namespace Notification {
         std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> multiLineContent =
         std::make_shared<OHOS::Notification::NotificationMultiLineContent>();
         if (multiLineContent == nullptr) {
-            LOGE("multiLineContent is null");
+            LOGE("null multiLineContent");
             return false;
         }
 
@@ -514,7 +514,7 @@ namespace Notification {
         if (contentResult->capsule.icon != -1) {
             auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(contentResult->capsule.icon);
             if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pixelMap");
                 return false;
             }
             capsule.SetIcon(pixelMap->GetRealPixelMap());
@@ -544,7 +544,7 @@ namespace Notification {
             int64_t id = contentResult->button.icons.head[i];
             auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(id);
             if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pixelMap");
                 return false;
             }
             auto pix = pixelMap->GetRealPixelMap();
@@ -646,7 +646,7 @@ namespace Notification {
         std::shared_ptr<NotificationLocalLiveViewContent> localLiveViewContent =
             std::make_shared<NotificationLocalLiveViewContent>();
         if (localLiveViewContent == nullptr) {
-            LOGE("localLiveViewContent is null");
+            LOGE("null localLiveViewContent");
             return false;
         }
 
@@ -824,7 +824,7 @@ namespace Notification {
         if (smallIcon != -1) {
             auto pixelMap = FFIData::GetData<Media::PixelMapImpl>(smallIcon);
             if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pixelMap");
                 return false;
             }
             request.SetLittleIcon(pixelMap->GetRealPixelMap());
@@ -837,7 +837,7 @@ namespace Notification {
         if (largeIcon != -1) {
             auto pixelMap = FFI::FFIData::GetData<Media::PixelMapImpl>(largeIcon);
             if (pixelMap == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pixelMap");
                 return false;
             }
             request.SetBigIcon(pixelMap->GetRealPixelMap());
@@ -926,7 +926,7 @@ namespace Notification {
                 free(notificationSlot.sound);
                 notificationSlot.desc = nullptr;
                 notificationSlot.sound = nullptr;
-                LOGE("SetNotificationSlotV2 malloc vibrationValues.head failed.");
+                LOGE("malloc vibrationValues.head failed");
                 return false;
             }
             int i = 0;
@@ -1081,13 +1081,13 @@ namespace Notification {
         if (basicContent->GetLockScreenPicture()) {
             std::shared_ptr<Media::PixelMap> pix = basicContent->GetLockScreenPicture();
             if (pix == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pix");
                 freeNotificationBasicContent(normal);
                 return false;
             }
             auto native = FFIData::Create<Media::PixelMapImpl>(pix);
             if (native == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null native");
                 freeNotificationBasicContent(normal);
                 return false;
             }
@@ -1117,18 +1117,18 @@ namespace Notification {
         CNotificationLongTextContentV2* longText)
     {
         if (basicContent == nullptr) {
-            LOGE("basicContent is null.");
+            LOGE("null basicContent");
             return false;
         }
         if (longText == nullptr) {
-            LOGE("malloc CNotificationLongTextContent failed, longText is null.");
+            LOGE("null longText");
             return false;
         }
 
         OHOS::Notification::NotificationLongTextContent *longTextContent =
             static_cast<OHOS::Notification::NotificationLongTextContent *>(basicContent);
         if (longTextContent == nullptr) {
-            LOGE("longTextContent is null");
+            LOGE("null longTextContent");
             return false;
         }
         // title: string
@@ -1148,13 +1148,13 @@ namespace Notification {
         if (longTextContent->GetLockScreenPicture()) {
             std::shared_ptr<Media::PixelMap> pix = longTextContent->GetLockScreenPicture();
             if (pix == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pix");
                 freeNotificationLongTextContent(longText);
                 return false;
             }
             auto native = FFIData::Create<Media::PixelMapImpl>(pix);
             if (native == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null native");
                 freeNotificationLongTextContent(longText);
                 return false;
             }
@@ -1181,13 +1181,13 @@ namespace Notification {
         CNotificationPictureContentV2* picture)
     {
         if (basicContent == nullptr) {
-            LOGE("basicContent is null");
+            LOGE("null basicContent");
             return false;
         }
         OHOS::Notification::NotificationPictureContent *pictureContent =
             static_cast<OHOS::Notification::NotificationPictureContent *>(basicContent);
         if (pictureContent == nullptr) {
-            LOGE("pictureContent is null");
+            LOGE("null pictureContent");
             return false;
         }
         // title、text: string
@@ -1201,13 +1201,13 @@ namespace Notification {
         // picture: image.PixelMap
         std::shared_ptr<Media::PixelMap> pix = pictureContent->GetBigPicture();
         if (pix == nullptr) {
-            LOGE("Invalid object pixelMap");
+            LOGE("null pix");
             freeNotificationPictureContent(picture);
             return false;
         }
         auto native1 = FFIData::Create<Media::PixelMapImpl>(pix);
         if (native1 == nullptr) {
-            LOGE("Invalid object pixelMap");
+            LOGE("null native1");
             freeNotificationPictureContent(picture);
             return false;
         }
@@ -1217,13 +1217,13 @@ namespace Notification {
         if (pictureContent->GetLockScreenPicture()) {
             std::shared_ptr<Media::PixelMap> pixx = pictureContent->GetLockScreenPicture();
             if (pixx == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pixx");
                 freeNotificationPictureContent(picture);
                 return false;
             }
             auto native2 = FFIData::Create<Media::PixelMapImpl>(pixx);
             if (native2 == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null native2");
                 freeNotificationPictureContent(picture);
                 return false;
             }
@@ -1258,13 +1258,13 @@ namespace Notification {
         CNotificationMultiLineContentV2* multiLine)
     {
         if (basicContent == nullptr) {
-            LOGE("basicContent is null");
+            LOGE("null basicContent");
             return false;
         }
         OHOS::Notification::NotificationMultiLineContent *multiLineContent =
             static_cast<OHOS::Notification::NotificationMultiLineContent *>(basicContent);
         if (multiLineContent == nullptr) {
-            LOGE("multiLineContent is null");
+            LOGE("null multiLineContent");
             return false;
         }
         // title、text、additionalText?: string
@@ -1280,7 +1280,7 @@ namespace Notification {
         lines.head = static_cast<char **>(malloc(sizeof(char *) * vecs.size()));
         lines.size = static_cast<int64_t>(vecs.size());
         if (lines.head == nullptr) {
-            LOGE("multiLineContent lines malloc failed");
+            LOGE("null lines.head");
             freeNotificationMultiLineContent(multiLine);
             return false;
         }
@@ -1294,13 +1294,13 @@ namespace Notification {
         if (multiLineContent->GetLockScreenPicture()) {
             std::shared_ptr<Media::PixelMap> pix = multiLineContent->GetLockScreenPicture();
             if (pix == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pix");
                 freeNotificationMultiLineContent(multiLine);
                 return false;
             }
             auto native2 = FFIData::Create<Media::PixelMapImpl>(pix);
             if (native2 == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null native2");
                 freeNotificationMultiLineContent(multiLine);
                 return false;
             }
@@ -1324,7 +1324,7 @@ namespace Notification {
                 free(cCapsule.backgroundColor);
                 cCapsule.title = nullptr;
                 cCapsule.backgroundColor = nullptr;
-                LOGE("Invalid object pixelMap of icon");
+                LOGE("null native");
                 return false;
             }
             cCapsule.icon = native->GetID();
@@ -1341,7 +1341,7 @@ namespace Notification {
             names.head = static_cast<char **>(malloc(sizeof(char *) * vecs.size()));
             names.size = static_cast<int64_t>(vecs.size());
             if (names.head == nullptr) {
-                LOGE("NotificationButton names malloc failed");
+                LOGE("null names.head");
                 return false;
             }
             int i = 0;
@@ -1358,14 +1358,14 @@ namespace Notification {
         if (iconsVec.size()) {
             icons.head = static_cast<int64_t *>(malloc(sizeof(int64_t) * iconsVec.size()));
             if (icons.head == nullptr) {
-                LOGE("NotificationButton icons malloc failed");
+                LOGE("null icons.head");
                 return false;
             }
             for (auto vec : iconsVec) {
                 // buttonIcon
                 auto native = FFIData::Create<Media::PixelMapImpl>(vec);
                 if (native == nullptr) {
-                    LOGE("Invalid object pixelMap of buttonIcons.");
+                    LOGE("null native");
                     free(icons.head);
                     freeCArrString(cButton.names);
                     return false;
@@ -1438,7 +1438,7 @@ namespace Notification {
         CNotificationSystemLiveViewContentV2* systemLiveView)
     {
         if (basicContent == nullptr) {
-            LOGE("basicContent is null.");
+            LOGE("null basicContent");
             return false;
         }
         if (systemLiveView == nullptr) {
@@ -1448,7 +1448,7 @@ namespace Notification {
         OHOS::Notification::NotificationLocalLiveViewContent *localLiveViewContent =
             static_cast<OHOS::Notification::NotificationLocalLiveViewContent *>(basicContent);
         if (localLiveViewContent == nullptr) {
-            LOGE("localLiveViewContent is null");
+            LOGE("null localLiveViewContent");
             return false;
         }
 
@@ -1469,12 +1469,12 @@ namespace Notification {
         if (localLiveViewContent->GetLockScreenPicture()) {
             std::shared_ptr<Media::PixelMap> pix = localLiveViewContent->GetLockScreenPicture();
             if (pix == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null pix");
                 return false;
             }
             auto native2 = FFIData::Create<Media::PixelMapImpl>(pix);
             if (native2 == nullptr) {
-                LOGE("Invalid object pixelMap");
+                LOGE("null native2");
                 return false;
             }
             systemLiveView->lockscreenPicture = native2->GetID();
@@ -1488,7 +1488,7 @@ namespace Notification {
         bool ret = false;
         std::shared_ptr<NotificationBasicContent> basicContent = content->GetNotificationContent();
         if (basicContent == nullptr) {
-            LOGE("content is null");
+            LOGE("null basicContent");
             return ret;
         }
         switch (type) {
@@ -1564,7 +1564,7 @@ namespace Notification {
         CNotificationFlagsV2 &notificationFlags)
     {
         if (flags == nullptr) {
-            LOGE("flags is null");
+            LOGE("null flags");
             return false;
         }
         notificationFlags.soundEnabled = static_cast<int32_t>(flags->IsSoundEnabled());
@@ -1579,7 +1579,7 @@ namespace Notification {
         // content: NotificationContent
         std::shared_ptr<NotificationContent> content = request->GetContent();
         if (!content) {
-            LOGE("content is nullptr");
+            LOGE("null content");
             return false;
         }
         if (!SetNotificationContentV2(content, notificationRequest.notificationContent)) {
@@ -1620,7 +1620,7 @@ namespace Notification {
         CNotificationRequestV2 &notificationRequest)
     {
         if (request == nullptr) {
-            LOGE("request is nullptr");
+            LOGE("null request");
             return false;
         }
         InitNotificationRequest(notificationRequest);

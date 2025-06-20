@@ -23,10 +23,10 @@ namespace Notification {
 
 void ReminderConfigChangeObserver::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
 {
-    ANSR_LOGD("OnConfigurationUpdated.");
+    ANSR_LOGD("called");
     auto reminderDataMgr = ReminderDataManager::GetInstance();
     if (reminderDataMgr == nullptr) {
-        ANSR_LOGE("Reminder data manager is nullptr");
+        ANSR_LOGE("null reminderDataMgr");
         return;
     }
     std::string newLanguageInfo = configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);

@@ -100,7 +100,7 @@ NotificationLongTextContent *NotificationLongTextContent::FromJson(const nlohman
 
     auto pContent = new (std::nothrow) NotificationLongTextContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create longTextContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 

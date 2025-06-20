@@ -25,7 +25,7 @@ namespace OHOS {
 namespace NotificationNapi {
 void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -75,17 +75,17 @@ void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_statu
 
 napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        ANS_LOGD("ParseParaOnlyCallback is nullptr.");
+        ANS_LOGD("null ParseParaOnlyCallback");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoActive {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        ANS_LOGD("Asynccallbackinfo is nullptr.");
+        ANS_LOGD("null asynccallbackinfo");
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, callback);
     }
@@ -115,7 +115,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiGetAllActiveNotifications callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -173,10 +173,10 @@ void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status s
 
 napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
-        ANS_LOGD("Callback is nullptr.");
+        ANS_LOGD("null ParseParaOnlyCallback");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -215,7 +215,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiGetActiveNotifications callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -251,7 +251,7 @@ void AsyncCompleteCallbackNapiGetActiveNotificationCount(napi_env env, napi_stat
 
 napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -289,7 +289,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiGetActiveNotificationCount callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -301,24 +301,24 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
     // bundle
     napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, obj, "bundle", napi_object);
     if (result == nullptr) {
-        ANS_LOGE("Failed to get bundle from params.");
+        ANS_LOGE("null result");
         return nullptr;
     }
     auto retValue = Common::GetBundleOption(env, result, filter.bundle);
     if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed");
+        ANS_LOGE("null retValue");
         return nullptr;
     }
 
     // notificationKey
     result = AppExecFwk::GetPropertyValueByPropertyName(env, obj, "notificationKey", napi_object);
     if (result == nullptr) {
-        ANS_LOGE("Failed to get notificationKeys from params.");
+        ANS_LOGE("null result");
         return nullptr;
     }
     retValue = Common::GetNotificationKey(env, result, filter.notificationKey);
     if (retValue == nullptr) {
-        ANS_LOGE("GetNotificationKey failed");
+        ANS_LOGE("null retValue");
         return nullptr;
     }
 
@@ -339,7 +339,7 @@ napi_value ParseGetLiveViewFilter(const napi_env &env, const napi_value &obj, Li
 napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info &info,
     LiveViewFilter &filter, napi_ref &callback)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("start");
 
     size_t argc = ARGS_TWO;
     napi_value argv[ARGS_TWO] = {nullptr};
@@ -378,7 +378,7 @@ napi_value ParseGetLiveViewParams(const napi_env &env, const napi_callback_info 
 
 void AsyncGetLiveViewExecute(napi_env env, void *data)
 {
-    ANS_LOGD("NapiGetActiveNotificationByFilter work excute.");
+    ANS_LOGD("called");
 
     auto asyncLiveViewCallBackInfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncLiveViewCallBackInfo) {
@@ -389,11 +389,11 @@ void AsyncGetLiveViewExecute(napi_env env, void *data)
 
 void AsyncGetLiveViewComplete(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     auto asyncCallbackinfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncCallbackinfo == nullptr) {
-        ANS_LOGE("Invalid async live view callback data.");
+        ANS_LOGE("null asyncCallbackinfo");
         return;
     }
 
@@ -424,17 +424,17 @@ void AsyncGetLiveViewComplete(napi_env env, napi_status status, void *data)
 
 napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     auto asyncLiveViewCallBackInfo = new (std::nothrow) AsyncLiveViewCallBackInfo {.env = env, .asyncWork = nullptr};
     if (asyncLiveViewCallBackInfo == nullptr) {
-        ANS_LOGE("asyncLiveViewCallBackInfo is nullptr.");
+        ANS_LOGE("null asyncLiveViewCallBackInfo");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
     napi_ref callback = nullptr;
     if (ParseGetLiveViewParams(env, info, asyncLiveViewCallBackInfo->filter, callback) == nullptr) {
-        ANS_LOGE("ParseGetLiveViewParams is nullptr.");
+        ANS_LOGE("null ParseGetLiveViewParams");
         delete asyncLiveViewCallBackInfo;
         asyncLiveViewCallBackInfo = nullptr;
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -453,7 +453,7 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
     napi_queue_async_work_with_qos(env, asyncLiveViewCallBackInfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("NapiGetActiveNotificationByFilter callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     }
 

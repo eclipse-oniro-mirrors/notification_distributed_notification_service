@@ -110,7 +110,7 @@ bool NotificationDoNotDisturbProfile::ReadFromParcel(Parcel &parcel)
     for (uint32_t index = 0; index < size; ++index) {
         sptr<NotificationBundleOption> bundleOption = parcel.ReadParcelable<NotificationBundleOption>();
         if (bundleOption == nullptr) {
-            ANS_LOGE("Failed to read bundle option.");
+            ANS_LOGE("null bundleOption");
             return false;
         }
         trustList_.emplace_back(*bundleOption);

@@ -59,7 +59,7 @@ NotificationButtonOption *NotificationButtonOption::FromJson(const nlohmann::jso
 
     NotificationButtonOption *button = new (std::nothrow) NotificationButtonOption();
     if (button == nullptr) {
-        ANS_LOGE("Failed to create button option instance");
+        ANS_LOGE("null button");
         return nullptr;
     }
 

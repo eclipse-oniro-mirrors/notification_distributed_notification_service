@@ -46,13 +46,13 @@ constexpr const char *BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notifi
 
 std::shared_ptr<AncoRestoreStartEventSubscriber> AncoRestoreStartEventSubscriber::create()
 {
-    ANS_LOGI("AncoRestoreStartEventSubscriber create");
+    ANS_LOGD("start");
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(AncoRestoreStartEventSubscriber::EVENT_NAME);
     EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriberInfo.SetPermission(AncoRestoreStartEventSubscriber::EVENT_PUBLISHER_PERMISSION);
     return std::make_shared<AncoRestoreStartEventSubscriber>(subscriberInfo);
-    ANS_LOGI("AncoRestoreStartEventSubscriber create end");
+    ANS_LOGD("end");
 }
 
 AncoRestoreStartEventSubscriber::AncoRestoreStartEventSubscriber(
@@ -63,7 +63,7 @@ AncoRestoreStartEventSubscriber::AncoRestoreStartEventSubscriber(
 
 AncoRestoreStartEventSubscriber::~AncoRestoreStartEventSubscriber()
 {
-    ANS_LOGI("AncoRestoreStartEventSubscriber release");
+    ANS_LOGD("called");
 }
 
 void AncoRestoreStartEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
@@ -106,7 +106,7 @@ static std::string SetBackUpReply()
 
 int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& reply)
 {
-    ANS_LOGI("OnBackup start");
+    ANS_LOGD("called");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_22, EventBranchId::BRANCH_1);
     if (cloneTemplates.empty()) {
         ANS_LOGI("Notification no need Backup.");
@@ -118,7 +118,7 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
         nlohmann::json jsonItem;
         auto cloneTemplate = iter->second;
         if (cloneTemplate == nullptr) {
-            ANS_LOGW("Notification OnBackup %{public}s funtion is null.", iter->first.c_str());
+            ANS_LOGW("null cloneTemplate %{public}s", iter->first.c_str());
             continue;
         }
         if (iter->second->OnBackup(jsonItem) != ERR_OK) {
@@ -136,7 +136,7 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
 
     FILE *fdfile = fopen(BACKUP_CONFIG_FILE_PATH, "r");
     if (fdfile == nullptr) {
-        ANS_LOGE("Notification open file failed.");
+        ANS_LOGE("null fdfile");
         message.Message("Notification open file failed.");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ANS_CLONE_ERROR;
@@ -157,7 +157,7 @@ int32_t NotificationCloneManager::OnBackup(MessageParcel& data, MessageParcel& r
 
 int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& reply)
 {
-    ANS_LOGI("OnRestore start");
+    ANS_LOGD("start");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_22, EventBranchId::BRANCH_2);
     reply.WriteString(SetBackUpReply());
     std::string storeMessage;
@@ -189,13 +189,13 @@ int32_t NotificationCloneManager::OnRestore(MessageParcel& data, MessageParcel& 
             iter->second->OnRestore(jsonObject.at(iter->first));
         }
     }
-    ANS_LOGI("OnRestore end");
+    ANS_LOGD("end");
     return ERR_OK;
 }
 
 NotificationCloneManager::NotificationCloneManager()
 {
-    ANS_LOGI("Notification clone manager init.");
+    ANS_LOGD("start");
     // not change push sequence, ensure [clone item] before [dh clone item]
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_BUNDLE_INFO, NotificationCloneBundle::GetInstance()));
     cloneTemplates.push_back(std::make_pair(DH_CLONE_ITEM_BUNDLE_INFO, DhNotificationCloneBundle::GetInstance()));
@@ -206,17 +206,17 @@ NotificationCloneManager::NotificationCloneManager()
         ANS_LOGE("Subscribe AncoRestoreStartEventSubscriber Failed.");
         restoreStartEventSubscriber_ = nullptr;
     }
-    ANS_LOGI("Subscribe AncoRestoreStartEventSubscriber success.");
+    ANS_LOGD("end");
 }
 
 NotificationCloneManager::~NotificationCloneManager()
 {
-    ANS_LOGI("Notification clone manager destory.");
+    ANS_LOGD("called");
 }
 
 ErrCode NotificationCloneManager::LoadConfig(UniqueFd &fd, std::string& config)
 {
-    ANS_LOGI("Load notification config.");
+    ANS_LOGD("called");
     struct stat statBuf;
     if (fstat(fd.Get(), &statBuf) < 0) {
         ANS_LOGE("LoadConfig fstat fd fail %{public}d.", fd.Get());

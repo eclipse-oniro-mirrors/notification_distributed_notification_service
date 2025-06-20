@@ -85,7 +85,7 @@ NotificationProgress *NotificationProgress::FromJson(const nlohmann::json &jsonO
 
     NotificationProgress *progress = new (std::nothrow) NotificationProgress();
     if (progress == nullptr) {
-        ANS_LOGE("Failed to create capsule instance");
+        ANS_LOGE("null progress");
         return nullptr;
     }
 

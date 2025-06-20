@@ -47,7 +47,7 @@ static napi_value NapiPushInit(napi_env env, napi_value exports)
 {
     ANS_LOGD("called");
     if (env == nullptr || exports == nullptr) {
-        ANS_LOGE("Invalid input parameters");
+        ANS_LOGE("null env or exports");
         return nullptr;
     }
 
@@ -67,7 +67,7 @@ static napi_value NapiPushInit(napi_env env, napi_value exports)
 
 napi_value NotificationManagerInit(napi_env env, napi_value exports)
 {
-    ANS_LOGD("NotificationManagerInit start");
+    ANS_LOGD("called");
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("publish", NapiPublish),

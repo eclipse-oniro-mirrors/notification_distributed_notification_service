@@ -32,7 +32,7 @@ ErrCode DistributedOperationCallback::OnOperationCallback(const int32_t operatio
 {
     OperationOnCallBack *operationOnCallBack = new (std::nothrow) OperationOnCallBack();
     if (operationOnCallBack == nullptr) {
-        ANS_LOGE("new operationOnCallBack failed");
+        ANS_LOGE("null operationOnCallBack");
         return ERR_INVALID_DATA;
     }
 
@@ -45,7 +45,7 @@ ErrCode DistributedOperationCallback::OnOperationCallback(const int32_t operatio
     operationOnCallBack->deferred = asyncCallbackInfo_.deferred;
     bool bRet = UvQueue::Call(asyncCallbackInfo_.env, operationOnCallBack, UvWorkOnCallBack);
     if (!bRet) {
-        ANS_LOGE("DistributedOperationCallback::OnCallBack failed");
+        ANS_LOGE("OnCallBack failed");
     }
     return ERR_OK;
 }
@@ -53,12 +53,12 @@ ErrCode DistributedOperationCallback::OnOperationCallback(const int32_t operatio
 void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t status)
 {
     if (work == nullptr) {
-        ANS_LOGE("UvWorkOnCallBack, work is null");
+        ANS_LOGE("null work");
         return;
     }
     OperationOnCallBack *callBackPtr = static_cast<OperationOnCallBack *>(work->data);
     if (callBackPtr == nullptr) {
-        ANS_LOGE("UvWorkOnCallBack, callBackPtr is null");
+        ANS_LOGE("null callBackPtr");
         if (work != nullptr) {
             delete work;
             work = nullptr;
@@ -81,7 +81,7 @@ void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t sta
         delete work;
         work = nullptr;
     }
-    ANS_LOGD("UvWorkOnCallBack end");
+    ANS_LOGD("end");
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS

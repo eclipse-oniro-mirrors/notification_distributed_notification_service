@@ -30,7 +30,7 @@ std::shared_ptr<CommonNotificationPublishProcess> CommonNotificationPublishProce
     if (instance_ == nullptr) {
         instance_ = std::make_shared<CommonNotificationPublishProcess>();
         if (instance_ == nullptr) {
-            ANS_LOGE("Failed to create CommonNotificationPublishProcess instance");
+            ANS_LOGE("null instance");
             return nullptr;
         }
     }

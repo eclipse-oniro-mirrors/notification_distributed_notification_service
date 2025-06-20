@@ -46,7 +46,7 @@ NotificationCloneBundle::~NotificationCloneBundle()
 
 ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 {
-    ANS_LOGI("Notification bundle backup.");
+    ANS_LOGI("called");
     int32_t userId = NotificationCloneUtil::GetActiveUserId();
     std::vector<NotificationCloneBundleInfo> cloneBundles;
     NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(userId, cloneBundles);
@@ -68,7 +68,7 @@ ErrCode NotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 
 void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 {
-    ANS_LOGI("Notification bundle list on restore.");
+    ANS_LOGI("called");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
         ANS_LOGI("Notification disturb profile list is null or not array.");
         return;
@@ -107,7 +107,7 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
     for (auto bundle = bundlesInfo_.begin(); bundle != bundlesInfo_.end(); bundle++) {
         ANS_LOGI("Event bundle left %{public}s.", bundle->Dump().c_str());
     }
-    ANS_LOGI("Notification bundle list on restore end.");
+    ANS_LOGD("end");
 }
 
 void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32_t appIndex,
@@ -137,7 +137,7 @@ void NotificationCloneBundle::OnUserSwitch(int32_t userId)
 {
     ANS_LOGI("Handler user switch %{public}d", userId);
     if (cloneBundleQueue_ == nullptr) {
-        ANS_LOGW("Clone bundle queue is null.");
+        ANS_LOGW("null cloneBundleQueue");
         return;
     }
     cloneBundleQueue_->submit_h(std::bind([&, userId]() {

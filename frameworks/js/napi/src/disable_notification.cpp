@@ -22,7 +22,7 @@ constexpr int8_t DISABLE_MAX_PARA = 2;
 
 bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool &disabled)
 {
-    ANS_LOGD("parse disabled");
+    ANS_LOGD("called");
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, value, &valuetype), false);
     if (valuetype != napi_boolean) {
@@ -37,7 +37,7 @@ bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool 
 
 bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std::vector<std::string> &bundleList)
 {
-    ANS_LOGD("parse bundle list");
+    ANS_LOGD("called");
     bool isArray = false;
     napi_is_array(env, value, &isArray);
     if (!isArray) {
@@ -82,7 +82,7 @@ bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std
 bool ParseDisableNotificationParameters(
     const napi_env &env, const napi_callback_info &info, NotificationDisable &param)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     size_t argc = DISABLE_MAX_PARA;
     napi_value argv[DISABLE_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;

@@ -34,22 +34,22 @@ constexpr int32_t BADGE_NUM_LIMIT = 0;
 
 ErrCode AdvancedNotificationService::SetNotificationBadgeNum(int32_t num)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        ANS_LOGD("BundleOption is null.");
+        ANS_LOGD("null bundleOption");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
-            ANS_LOGD("ffrt enter!");
+            ANS_LOGD("called");
             result = NotificationPreferences::GetInstance()->SetTotalBadgeNums(bundleOption, num);
         }));
     notificationSvrQueue_->wait(handler);
@@ -61,7 +61,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_0);
     if (bundleOption == nullptr) {
-        ANS_LOGE("BundleOption is null.");
+        ANS_LOGE("null bundleOption");
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INVALID_BUNDLE));
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -86,18 +86,18 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        ANS_LOGE("Bundle is nullptr.");
+        ANS_LOGE("null bundle");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue_ is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(
         std::bind([&]() {
-            ANS_LOGD("ffrt enter!");
+            ANS_LOGD("called");
             result = NotificationPreferences::GetInstance()->SetShowBadge(bundle, enabled);
             if (result == ERR_OK) {
                 HandleBadgeEnabledChanged(bundle, enabled);
@@ -117,7 +117,7 @@ void AdvancedNotificationService::HandleBadgeEnabledChanged(
     sptr<EnabledNotificationCallbackData> enabledData = new (std::nothrow)
         EnabledNotificationCallbackData(bundleOption->GetBundleName(), bundleOption->GetUid(), enabled);
     if (enabledData == nullptr) {
-        ANS_LOGE("Failed to create badge enabled data object.");
+        ANS_LOGE("null enabledData");
         return;
     }
 
@@ -127,7 +127,7 @@ void AdvancedNotificationService::HandleBadgeEnabledChanged(
 ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -141,17 +141,17 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        ANS_LOGD("Failed to generateValidBundleOption.");
+        ANS_LOGE("null bundle");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
@@ -164,7 +164,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -172,12 +172,12 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is ineffective.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
@@ -190,9 +190,9 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
 
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
@@ -201,12 +201,12 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
         bundleName, instanceKey, callingUid, badgeNumber);
     if (badgeData == nullptr) {
-        ANS_LOGE("Failed to create BadgeNumberCallbackData.");
+        ANS_LOGE("null badgeData");
         return ERR_ANS_NO_MEMORY;
     }
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
     notificationSvrQueue_->wait(handler);
@@ -217,7 +217,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t badgeNumber)
 {
     if (bundleOption == nullptr) {
-        ANS_LOGE("SetBadgeNumberForDhByBundle bundleOption is null");
+        ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
     if (bundleOption->GetBundleName().empty()) {
@@ -250,11 +250,11 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
     }
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
             bundleOption->GetBundleName(), bundleOption->GetUid(), badgeNumber);
         if (badgeData == nullptr) {
-            ANS_LOGE("Failed to create badge number callback data.");
+            ANS_LOGE("null badgeData");
             result = ERR_ANS_NO_MEMORY;
         }
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
@@ -308,7 +308,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     }
 
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
             bundle->GetBundleName(), bundle->GetUid(), badgeNumber);
         if (badgeData == nullptr) {

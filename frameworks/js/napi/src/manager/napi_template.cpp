@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     TemplateName params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -60,7 +60,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
                 napi_get_boolean(env, asyncCallbackinfo->params.support, &result);
                 Common::CreateReturnValue(env, asyncCallbackinfo->info, result);
                 if (asyncCallbackinfo->info.callback != nullptr) {
-                    ANS_LOGD("Delete napiIsSupportTemplate callback reference.");
+                    ANS_LOGD("null callback");
                     napi_delete_reference(env, asyncCallbackinfo->info.callback);
                 }
                 napi_delete_async_work(env, asyncCallbackinfo->asyncWork);

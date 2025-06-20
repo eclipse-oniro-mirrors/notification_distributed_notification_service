@@ -123,7 +123,7 @@ ErrCode ReminderDataManager::CancelReminder(
     ANSR_LOGI("cancel reminder id: %{public}d", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, false);
     if (reminder == nullptr) {
-        ANSR_LOGW("Cancel reminder, not find the reminder in memory.");
+        ANSR_LOGW("null reminder");
         return CancelReminderToDb(reminderId, callingUid);
     }
     if (!CheckIsSameApp(reminder, callingUid)) {
@@ -163,7 +163,7 @@ sptr<ReminderRequest> ReminderDataManager::CheckExcludeDateParam(const int32_t r
 {
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, false);
     if (reminder == nullptr) {
-        ANSR_LOGW("Check reminder failed, not find the reminder");
+        ANSR_LOGW("null reminder");
         return nullptr;
     }
     if (!CheckIsSameApp(reminder, callingUid)) {
@@ -283,7 +283,7 @@ void ReminderDataManager::CancelRemindersImplLocked(const std::string& packageNa
     }
     if (store_ == nullptr) {
         MUTEX.unlock();
-        ANSR_LOGE("CancelRemindersImplLocked failed, store_ is null");
+        ANSR_LOGE("null store");
         return;
     }
     if (isCancelAllPackage) {
@@ -429,7 +429,7 @@ void ReminderDataManager::OnUserSwitch(const int32_t& userId)
 
 void ReminderDataManager::OnProcessDiedLocked(const int32_t callingUid)
 {
-    ANSR_LOGD("OnProcessDiedLocked, uid=%{public}d", callingUid);
+    ANSR_LOGD("called, uid=%{public}d", callingUid);
     std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
     std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
     for (auto it = showedReminderVector_.begin(); it != showedReminderVector_.end(); ++it) {
@@ -540,7 +540,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
     bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
-        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
+        ANSR_LOGW("null reminder: %{public}d", reminderId);
         return;
     }
     std::string packageName = reminder->GetBundleName();
@@ -631,7 +631,7 @@ void ReminderDataManager::StartLoadTimer()
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANSR_LOGE("Get timeServiceClient failed");
+        ANSR_LOGE("null timer");
         return;
     }
     std::lock_guard<std::mutex> locker(timeLoadMutex_);
@@ -645,7 +645,7 @@ void ReminderDataManager::StartLoadTimer()
 
 void ReminderDataManager::InitShareReminders(const bool registerObserver)
 {
-    ANSR_LOGD("Call.");
+    ANSR_LOGD("called");
     ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     ReminderDataShareHelper::GetInstance().UpdateCalendarUid();
     if (registerObserver) {
@@ -690,7 +690,7 @@ bool ReminderDataManager::CheckUpdateConditions(const sptr<ReminderRequest> &rem
         return false;
     }
     if (actionButtonMap.at(actionButtonType).dataShareUpdate == nullptr) {
-        ANSR_LOGI("dataShareUpdate is null");
+        ANSR_LOGI("null dataShareUpdate");
         return false;
     }
     if (actionButtonMap.at(actionButtonType).dataShareUpdate->uri == "" ||
@@ -724,7 +724,7 @@ void ReminderDataManager::UpdateAppDatabase(const sptr<ReminderRequest> &reminde
     // create datashareHelper
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = DataShare::DataShareHelper::Creator(uriStr, options);
     if (dataShareHelper == nullptr) {
-        ANSR_LOGE("create datashareHelper failed");
+        ANSR_LOGE("null dataShareHelper");
         return;
     }
     // gen uri equalTo valuesBucket
@@ -870,7 +870,7 @@ void ReminderDataManager::TerminateAlerting(const OHOS::EventFwk::Want &want)
     bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
-        ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
+        ANSR_LOGE("null reminder: %{public}d", reminderId);
         return;
     }
     TerminateAlerting(reminder, "timeOut");
@@ -885,7 +885,7 @@ void ReminderDataManager::TerminateAlerting(const uint16_t waitInSecond, const s
 void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminder, const std::string &reason)
 {
     if (reminder == nullptr) {
-        ANSR_LOGE("TerminateAlerting illegal.");
+        ANSR_LOGE("null reminder");
         return;
     }
     ANSR_LOGI("Terminate the alerting reminder, %{public}s, called by %{public}s",
@@ -976,7 +976,7 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     }
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
-        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
+        ANSR_LOGW("null reminder: %{public}d", reminderId);
         return;
     }
     if (HandleSysTimeChange(reminder)) {
@@ -1047,7 +1047,7 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
 
 bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder, const int8_t type)
 {
-    ANSR_LOGD("StartExtensionAbility");
+    ANSR_LOGD("called");
     if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
         std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
@@ -1059,7 +1059,7 @@ bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &rem
             int32_t result = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
             if (result != ERR_OK) {
-                ANSR_LOGE("StartExtensionAbility failed[%{public}d]", result);
+                ANSR_LOGE("failed[%{public}d]", result);
                 return false;
             }
         }
@@ -1127,7 +1127,7 @@ void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
     bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
-        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
+        ANSR_LOGW("null reminder: %{public}d", reminderId);
         return;
     }
     SnoozeReminderImpl(reminder);
@@ -1137,7 +1137,7 @@ void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
 
 void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
 {
-    ANSR_LOGI("Snooze the reminder request, %{public}s", reminder->Dump().c_str());
+    ANSR_LOGD("Snooze the reminder request, %{public}s", reminder->Dump().c_str());
     int32_t reminderId = reminder->GetReminderId();
     if (activeReminderId_ == reminderId) {
         ANSR_LOGD("Cancel active reminder, id=%{public}d", activeReminderId_.load());
@@ -1171,7 +1171,7 @@ void ReminderDataManager::StartRecentReminder()
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
     sptr<ReminderRequest> reminder = GetRecentReminder();
     if (reminder == nullptr) {
-        ANSR_LOGW("No reminder need to start");
+        ANSR_LOGE("null reminder");
         SetActiveReminder(reminder);
         return;
     }
@@ -1197,7 +1197,7 @@ void ReminderDataManager::StartRecentReminder()
 void ReminderDataManager::StopAlertingReminder(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
-        ANSR_LOGE("StopAlertingReminder illegal.");
+        ANSR_LOGE("null reminder");
         return;
     }
     if ((alertingReminderId_ == -1) || (reminder->GetReminderId() != alertingReminderId_)) {
@@ -1346,7 +1346,7 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
     // not add ReminderDataManager::MUTEX, as ShowActiveReminderExtendLocked has locked
     int32_t notificationId = reminder->GetNotificationId();
     bool isShare = reminder->IsShare();
-    ANSR_LOGD("HandleSameNotificationIdShowing notificationId=%{public}d", notificationId);
+    ANSR_LOGD("called, notificationId=%{public}d", notificationId);
     int32_t curReminderId = reminder->GetReminderId();
 
     for (auto it = reminderVector_.begin(); it != reminderVector_.end(); ++it) {
@@ -1374,7 +1374,7 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 
 void ReminderDataManager::Init()
 {
-    ANSR_LOGD("ReminderDataManager Init");
+    ANSR_LOGD("called");
     if (IsReminderAgentReady()) {
         return;
     }
@@ -1386,7 +1386,7 @@ void ReminderDataManager::Init()
     if (queue_ == nullptr) {
         queue_ = std::make_shared<ffrt::queue>("ReminderDataManager");
         if (queue_ == nullptr) {
-            ANSR_LOGE("create ffrt queue failed!");
+            ANSR_LOGE("null queue");
             return;
         }
     }
@@ -1415,7 +1415,7 @@ void ReminderDataManager::Init()
     auto callback = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
-            ANSR_LOGE("ReminderDataManager is nullptr.");
+            ANSR_LOGE("null manager");
             return;
         }
         manager->InitShareReminders(true);
@@ -1426,14 +1426,14 @@ void ReminderDataManager::Init()
 
 void ReminderDataManager::InitServiceHandler()
 {
-    ANSR_LOGD("InitServiceHandler started");
+    ANSR_LOGD("called");
     if (serviceQueue_ != nullptr) {
-        ANSR_LOGD("InitServiceHandler already init.");
+        ANSR_LOGD("null serviceQueue");
         return;
     }
     serviceQueue_ = std::make_shared<ffrt::queue>("ReminderService");
 
-    ANSR_LOGD("InitServiceHandler suceeded.");
+    ANSR_LOGD("suceeded");
 }
 
 void ReminderDataManager::CheckReminderTime(std::vector<sptr<ReminderRequest>>& immediatelyReminders,
@@ -1630,7 +1630,7 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
     if (soundPlayer_ == nullptr) {
         soundPlayer_ = Media::PlayerFactory::CreatePlayer();
         if (soundPlayer_ == nullptr) {
-            ANSR_LOGE("Fail to creat player.");
+            ANSR_LOGE("null soundPlayer");
             return;
         }
     }
@@ -1656,7 +1656,7 @@ void ReminderDataManager::StopSoundAndVibrationLocked(const sptr<ReminderRequest
 void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &reminder)
 {
     if (reminder == nullptr) {
-        ANSR_LOGE("Stop sound and vibration failed as reminder is null.");
+        ANSR_LOGE("null reminder");
         return;
     }
     if ((alertingReminderId_ == -1) || (reminder->GetReminderId() != alertingReminderId_)) {
@@ -1667,7 +1667,7 @@ void ReminderDataManager::StopSoundAndVibration(const sptr<ReminderRequest> &rem
     ANSR_LOGD("Stop sound and vibration, reminderId=%{public}d", reminder->GetReminderId());
 #ifdef PLAYER_FRAMEWORK_ENABLE
     if (soundPlayer_ == nullptr) {
-        ANSR_LOGW("Sound player is null");
+        ANSR_LOGW("null soundPlayer");
     } else {
         std::string customRingUri = reminder->GetCustomRingUri();
         if (customRingUri.empty()) {
@@ -1751,7 +1751,7 @@ void ReminderDataManager::StartTimer(const sptr<ReminderRequest> &reminderReques
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANSR_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANSR_LOGE("null timer");
         return;
     }
     time_t now;
@@ -1825,7 +1825,7 @@ void ReminderDataManager::StopTimer(TimerType type)
 {
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANSR_LOGE("Failed to stop timer due to get TimeServiceClient is null.");
+        ANSR_LOGE("null timer");
         return;
     }
     uint64_t timerId = 0;
@@ -1879,7 +1879,7 @@ void ReminderDataManager::ResetStates(TimerType type)
     }
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANSR_LOGE("Failed to destroy timer due to get TimeServiceClient is null.");
+        ANSR_LOGE("null timer");
         return;
     }
     if (timerId != 0) {
@@ -1893,7 +1893,7 @@ void ReminderDataManager::HandleCustomButtonClick(const OHOS::EventFwk::Want &wa
     bool isShare = want.GetBoolParam(ReminderRequest::PARAM_REMINDER_SHARE, false);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
-        ANSR_LOGE("Invalid reminder id: %{public}d", reminderId);
+        ANSR_LOGE("null reminder: %{public}d", reminderId);
         return;
     }
     if (!reminder->IsSystemApp()) {
@@ -1927,7 +1927,7 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
     ANSR_LOGI("click reminder[%{public}d] start", reminderId);
     sptr<ReminderRequest> reminder = FindReminderRequestLocked(reminderId, isShare);
     if (reminder == nullptr) {
-        ANSR_LOGW("Invalid reminder id: %{public}d", reminderId);
+        ANSR_LOGW("null reminder: %{public}d", reminderId);
         return;
     }
     CloseReminder(reminder, false);
@@ -1948,7 +1948,7 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
 
     auto client = AppExecFwk::AbilityManagerClient::GetInstance();
     if (client == nullptr) {
-        ANSR_LOGE("start ability failed, due to ability mgr client is nullptr.");
+        ANSR_LOGE("null client");
         return;
     }
     uint32_t specifyTokenId = static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID());
@@ -2017,7 +2017,7 @@ void ReminderDataManager::UpdateReminderLanguageLocked(const int32_t uid,
 
 void ReminderDataManager::OnLanguageChanged()
 {
-    ANSR_LOGI("System language config changed start.");
+    ANSR_LOGD("start");
     std::unordered_map<int32_t, std::vector<sptr<ReminderRequest>>> reminders;
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
@@ -2044,7 +2044,7 @@ void ReminderDataManager::OnLanguageChanged()
         ShowReminder((*it), false, false, false, false, false);
     }
     ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_LANGUAGE_CHANGE);
-    ANSR_LOGI("System language config changed end.");
+    ANSR_LOGD("end");
 }
 
 void ReminderDataManager::OnRemoveAppMgr()
@@ -2062,13 +2062,13 @@ bool ReminderDataManager::ConnectAppMgr()
     sptr<ISystemAbilityManager> systemAbilityManager =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityManager == nullptr) {
-        ANSR_LOGE("get SystemAbilityManager failed");
+        ANSR_LOGE("null systemAbilityManager");
         return false;
     }
 
     sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(APP_MGR_SERVICE_ID);
     if (remoteObject == nullptr) {
-        ANSR_LOGE("get app manager service failed");
+        ANSR_LOGE("null remoteObject");
         return false;
     }
 

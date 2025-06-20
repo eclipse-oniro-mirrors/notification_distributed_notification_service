@@ -342,7 +342,7 @@ void NotificationAnalyticsUtil::ReportDeleteFailedEvent(const sptr<NotificationR
 void NotificationAnalyticsUtil::ReportPublishSuccessEvent(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
-    ANS_LOGD("ReportPublishSuccessEvent enter");
+    ANS_LOGD("called");
     if (request == nullptr) {
         return;
     }
@@ -475,7 +475,7 @@ void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
     }
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANS_LOGE("null timer");
         g_reportLiveViewFlag = false;
         return;
     }
@@ -504,7 +504,7 @@ void NotificationAnalyticsUtil::ExecuteLiveViewReport()
     if (reportAggregateTimeId == 0) {
         sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
         if (aggregateTimer == nullptr) {
-            ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+            ANS_LOGE("null aggregateTimer");
             g_reportLiveViewFlag = false;
             return;
         }
@@ -517,7 +517,7 @@ void NotificationAnalyticsUtil::ExecuteLiveViewReport()
     }
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANS_LOGE("null timer");
         return;
     }
     auto triggerFunc = [] {
@@ -580,7 +580,7 @@ ReportCache NotificationAnalyticsUtil::AggregateLiveView()
 
 bool NotificationAnalyticsUtil::IsAllowedBundle(const sptr<NotificationRequest>& request)
 {
-    ANS_LOGD("IsAllowedBundle enter");
+    ANS_LOGD("called");
     std::string bundleName = request->GetOwnerBundleName();
     return DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReportTrustList(bundleName);
 }
@@ -588,7 +588,7 @@ bool NotificationAnalyticsUtil::IsAllowedBundle(const sptr<NotificationRequest>&
 std::string NotificationAnalyticsUtil::BuildAnsData(const sptr<NotificationRequest>& request,
     const HaMetaMessage& message)
 {
-    ANS_LOGD("BuildAnsData enter.");
+    ANS_LOGD("called");
     nlohmann::json ansData;
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (request->GetUnifiedGroupInfo() != nullptr &&
@@ -693,7 +693,7 @@ void NotificationAnalyticsUtil::CommonNotificationEvent(const sptr<NotificationR
 
 void NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(const sptr<NotificationRequest>& request, int32_t callUid)
 {
-    ANS_LOGD("ReportPublishSuccessEvent enter");
+    ANS_LOGD("called");
     if (request == nullptr) {
         return;
     }
@@ -715,7 +715,7 @@ void NotificationAnalyticsUtil::ReportSAPublishSuccessEvent(const sptr<Notificat
 
 void NotificationAnalyticsUtil::ReportPublishWithUserInput(const sptr<NotificationRequest>& request)
 {
-    ANS_LOGD("ReportPublishSuccessEvent enter");
+    ANS_LOGD("called");
     if (request == nullptr || !request->HasUserInputButton()) {
         return;
     }
@@ -986,7 +986,7 @@ void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t event
     if (reportTimerId == 0) {
         sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
         if (timer == nullptr) {
-            ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+            ANS_LOGE("null timer");
             return;
         }
         reportTimerId = timer->CreateTimer(reportTimeInfo);
@@ -1003,7 +1003,7 @@ void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t event
 
 void NotificationAnalyticsUtil::ReportBadgeChange(const sptr<BadgeNumberCallbackData> &badgeData)
 {
-    ANS_LOGD("ReportBadgeChange enter");
+    ANS_LOGD("called");
     if (badgeData == nullptr) {
         return;
     }
@@ -1038,7 +1038,7 @@ void NotificationAnalyticsUtil::ReportBadgeChange(const sptr<BadgeNumberCallback
 
 void NotificationAnalyticsUtil::ReportPublishBadge(const sptr<NotificationRequest>& request)
 {
-    ANS_LOGD("ReportPublishBadge enter");
+    ANS_LOGD("called");
     if (request == nullptr) {
         return;
     }
@@ -1148,7 +1148,7 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
         if (reportAggregateTimeId == 0) {
             sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
             if (aggregateTimer == nullptr) {
-                ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+                ANS_LOGE("null aggregateTimer");
                 return;
             }
             reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
@@ -1181,7 +1181,7 @@ void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_
     if (reportAggregateTimeId == 0) {
         sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
         if (aggregateTimer == nullptr) {
-            ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+            ANS_LOGE("null aggregateTimer");
             return;
         }
         reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
@@ -1198,7 +1198,7 @@ void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_
 
 ReportCache NotificationAnalyticsUtil::Aggregate()
 {
-    ANS_LOGI("Success list aggregated.");
+    ANS_LOGD("called");
     EventFwk::Want want;
     auto reportCachetemp = successReportCacheList.front();
 
@@ -1278,7 +1278,7 @@ void NotificationAnalyticsUtil::ExecuteCacheList()
 {
     if (reportCacheList.empty()) {
         g_reportFlag = false;
-        ANS_LOGI("reportCacheList is end");
+        ANS_LOGE("empty reportCacheList");
         return;
     }
     auto reportCache = reportCacheList.front();
@@ -1292,7 +1292,7 @@ void NotificationAnalyticsUtil::ExecuteCacheList()
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr || reportTimerId == 0) {
         g_reportFlag = false;
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANS_LOGE("null timer or reportTimerId");
         return;
     }
     timer->StartTimer(reportTimerId, NotificationAnalyticsUtil::GetCurrentTime() +
@@ -1456,7 +1456,7 @@ bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
     sptr<MiscServices::TimeServiceClient> timer =
         MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANS_LOGE("null timer");
         g_reportSlotFlag = false;
         return false;
     }
@@ -1488,7 +1488,7 @@ void NotificationAnalyticsUtil::ExecuteSlotReportList()
 
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
     if (timer == nullptr) {
-        ANS_LOGE("Failed to start timer due to get TimeServiceClient is null.");
+        ANS_LOGE("null timer");
         g_reportSlotFlag = false;
         return;
     }

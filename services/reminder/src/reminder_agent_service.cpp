@@ -63,10 +63,10 @@ sptr<ReminderAgentService> ReminderAgentService::GetInstance()
 ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, int32_t& reminderId)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     sptr<ReminderRequest> tarReminder = CreateReminderRequest(reminder);
     if (nullptr == tarReminder) {
-        ANSR_LOGE("Failed to create ReminderRequest.");
+        ANSR_LOGE("null tarReminder");
         return ERR_REMINDER_INVALID_PARAM;
     }
     if (!CheckReminderPermission()) {
@@ -107,10 +107,10 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
 ErrCode ReminderAgentService::UpdateReminder(const int32_t reminderId, const ReminderRequest& reminder)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     sptr<ReminderRequest> tarReminder = CreateReminderRequest(reminder);
     if (nullptr == tarReminder) {
-        ANSR_LOGE("Failed to create ReminderRequest.");
+        ANSR_LOGE("null tarReminder");
         return ERR_REMINDER_INVALID_PARAM;
     }
     if (!CheckReminderPermission()) {
@@ -136,7 +136,7 @@ ErrCode ReminderAgentService::UpdateReminder(const int32_t reminderId, const Rem
 ErrCode ReminderAgentService::CancelReminder(const int32_t reminderId)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     if (!CheckReminderPermission()) {
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -152,7 +152,7 @@ ErrCode ReminderAgentService::CancelReminder(const int32_t reminderId)
 ErrCode ReminderAgentService::CancelAllReminders()
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     if (!CheckReminderPermission()) {
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -172,7 +172,7 @@ ErrCode ReminderAgentService::CancelAllReminders()
 ErrCode ReminderAgentService::GetValidReminders(std::vector<ReminderRequestAdaptation>& reminders)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     if (!CheckReminderPermission()) {
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -189,7 +189,7 @@ ErrCode ReminderAgentService::GetValidReminders(std::vector<ReminderRequestAdapt
 ErrCode ReminderAgentService::AddExcludeDate(const int32_t reminderId, const int64_t date)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     if (!CheckReminderPermission()) {
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -205,7 +205,7 @@ ErrCode ReminderAgentService::AddExcludeDate(const int32_t reminderId, const int
 ErrCode ReminderAgentService::DelExcludeDates(const int32_t reminderId)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     if (!CheckReminderPermission()) {
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -221,7 +221,7 @@ ErrCode ReminderAgentService::DelExcludeDates(const int32_t reminderId)
 ErrCode ReminderAgentService::GetExcludeDates(const int32_t reminderId, std::vector<int64_t>& dates)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_OHOS);
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     if (!CheckReminderPermission()) {
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
@@ -258,11 +258,11 @@ void ReminderAgentService::TryUnloadService()
         tryUnloadTask_ = nullptr;
         return;
     }
-    ANSR_LOGD("call.");
+    ANSR_LOGD("called");
     ChangeReminderAgentLoadConfig(REMINDER_AGENT_SERVICE_UNLOAD_STATE);
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
-        ANSR_LOGE("Failed to get samgr.");
+        ANSR_LOGE("null samgrProxy");
         tryUnloadTask_ = nullptr;
         return;
     }
@@ -315,7 +315,7 @@ ErrCode ReminderAgentService::InitReminderRequest(sptr<ReminderRequest>& reminde
     const std::string& bundle, const int32_t callingUid)
 {
     if (reminder->GetWantAgentInfo() == nullptr || reminder->GetMaxScreenWantAgentInfo() == nullptr) {
-        ANSR_LOGE("WantAgentInfo is nullptr.");
+        ANSR_LOGE("null WantAgentInfo");
         return ERR_REMINDER_INVALID_PARAM;
     }
     std::string wantAgentName = reminder->GetWantAgentInfo()->pkgName;

@@ -307,7 +307,7 @@ bool AdvancedNotificationService::InitPublishProcess()
 ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<NotificationBundleOption>
     &bundleOption, bool &allowed)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -335,7 +335,7 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
 ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbMode(
     const std::string &phoneNumber, int32_t callerType)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (callingUid != NotificationConstant::ANS_UID &&
@@ -444,7 +444,7 @@ ErrCode AdvancedNotificationService::QueryContactByProfileId(const std::string &
 
 ErrCode AdvancedNotificationService::CancelGroup(const std::string &groupName, const std::string &instanceKey)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     int32_t reason = NotificationConstant::APP_CANCEL_GROPU_REASON_DELETE;
     if (groupName.empty()) {
@@ -530,7 +530,7 @@ void AdvancedNotificationService::ExcuteCancelGroupCancel(
 ErrCode AdvancedNotificationService::RemoveGroupByBundle(
     const sptr<NotificationBundleOption> &bundleOption, const std::string &groupName)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     const int32_t reason = NotificationConstant::APP_REMOVE_GROUP_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -687,7 +687,7 @@ void AdvancedNotificationService::ClearSlotTypeData(const sptr<NotificationReque
 
 ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<NotificationRequest> &request)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
@@ -1090,7 +1090,7 @@ bool AdvancedNotificationService::IsNeedToControllerByDisableNotification(const 
 
 void AdvancedNotificationService::SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     if (deviceType.empty()) {
         ANS_LOGE("deviceType is empty");
         return;
@@ -1148,7 +1148,7 @@ void AdvancedNotificationService::PublishSubscriberExistFlagEvent(bool headsetEx
 ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     if (bundleName.empty()) {
         std::string message = "bundle name is empty.";
@@ -1217,7 +1217,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(const st
 
 ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type)
 {
-    ANS_LOGI("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_8);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -1235,7 +1235,7 @@ ErrCode AdvancedNotificationService::SetHashCodeRule(const uint32_t type)
         return ERR_ANS_PERMISSION_DENIED;
     }
     ErrCode result = NotificationPreferences::GetInstance()->SetHashCodeRule(uid, type);
-    ANS_LOGI("SetHashCodeRule uid = %{public}d type =  %{public}d, result  %{public}d", uid, type, result);
+    ANS_LOGI("uid = %{public}d type = %{public}d, result = %{public}d", uid, type, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
 

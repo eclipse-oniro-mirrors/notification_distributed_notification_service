@@ -33,12 +33,12 @@ namespace NotificationNapi {
 napi_value Common::SetNotificationRequestByString(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
 
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
 
@@ -76,12 +76,12 @@ napi_value Common::SetNotificationRequestByString(
 napi_value Common::SetNotificationRequestByNumber(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
 
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
 
@@ -137,12 +137,12 @@ napi_value Common::SetNotificationRequestByNumber(
 napi_value Common::SetNotificationRequestByBool(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
 
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
     // isOngoing?: boolean
@@ -191,9 +191,9 @@ napi_value Common::SetNotificationRequestByBool(
 napi_value Common::SetNotificationRequestByWantAgent(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
     // wantAgent?: WantAgent
@@ -232,10 +232,10 @@ napi_value Common::SetNotificationRequestByWantAgent(
 napi_value Common::SetNotificationRequestByPixelMap(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
 
@@ -290,10 +290,10 @@ napi_value Common::SetNotificationRequestByPixelMap(
 napi_value Common::SetNotificationRequestByCustom(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
 
@@ -308,7 +308,7 @@ napi_value Common::SetNotificationRequestByCustom(
         }
         napi_set_named_property(env, result, "content", contentResult);
     } else {
-        ANS_LOGE("content is nullptr");
+        ANS_LOGE("null content");
         return NapiGetBoolean(env, false);
     }
 
@@ -400,9 +400,9 @@ napi_value Common::SetNotificationRequestByCustom(
 napi_value Common::SetNotificationActionButton(
     const napi_env &env, const std::shared_ptr<NotificationActionButton> &actionButton, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (actionButton == nullptr) {
-        ANS_LOGE("actionButton is null");
+        ANS_LOGE("null actionButton");
         return NapiGetBoolean(env, false);
     }
 
@@ -415,7 +415,7 @@ napi_value Common::SetNotificationActionButton(
     // wantAgent: WantAgent
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = actionButton->GetWantAgent();
     if (agent == nullptr) {
-        ANS_LOGE("wantAgent is null");
+        ANS_LOGE("null agent");
         napi_set_named_property(env, result, "wantAgent", NapiGetNull(env));
         return NapiGetBoolean(env, false);
     } else {
@@ -457,9 +457,9 @@ napi_value Common::SetNotificationActionButton(
 napi_value Common::SetNotificationActionButtonByExtras(
     const napi_env &env, const std::shared_ptr<NotificationActionButton> &actionButton, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!actionButton) {
-        ANS_LOGE("actionButton is null");
+        ANS_LOGE("null actionButton");
         return NapiGetBoolean(env, false);
     }
     // extras?: {[key: string]: any}
@@ -475,7 +475,7 @@ napi_value Common::SetNotificationActionButtonByExtras(
 napi_value Common::SetNotificationActionButtonByUserInput(
     const napi_env &env, const std::shared_ptr<NotificationUserInput> &userInput, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (!userInput) {
         return NapiGetBoolean(env, false);
@@ -538,10 +538,10 @@ napi_value Common::SetNotificationActionButtonByUserInput(
 napi_value Common::SetNotificationRequest(
     const napi_env &env, const OHOS::Notification::NotificationRequest *request, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
+        ANS_LOGE("null request");
         return NapiGetBoolean(env, false);
     }
 
@@ -571,7 +571,7 @@ napi_value Common::SetNotificationRequest(
 napi_value Common::GetNotificationRequestByNumber(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     // id?: number
     if (GetNotificationId(env, value, request) == nullptr) {
         return nullptr;
@@ -607,7 +607,7 @@ napi_value Common::GetNotificationRequestByNumber(
 napi_value Common::GetNotificationRequestByString(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     // classification?: string
     if (GetNotificationClassification(env, value, request) == nullptr) {
         return nullptr;
@@ -638,7 +638,7 @@ napi_value Common::GetNotificationRequestByString(
 napi_value Common::GetNotificationRequestByBool(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     // isOngoing?: boolean
     if (GetNotificationIsOngoing(env, value, request) == nullptr) {
         return nullptr;
@@ -694,7 +694,7 @@ napi_value Common::GetNotificationRequestByBool(
 napi_value Common::GetNotificationRequestByCustom(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     // content: NotificationContent
     if (GetNotificationContent(env, value, request) == nullptr) {
         return nullptr;
@@ -756,7 +756,7 @@ napi_value Common::GetNotificationRequestByCustom(
 
 napi_value Common::GetNotificationRequest(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!GetNotificationRequestByNumber(env, value, request)) {
         return nullptr;
     }
@@ -774,7 +774,7 @@ napi_value Common::GetNotificationRequest(const napi_env &env, const napi_value 
 
 napi_value Common::GetNotificationSmallIcon(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -793,7 +793,7 @@ napi_value Common::GetNotificationSmallIcon(const napi_env &env, const napi_valu
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
         Common::PictureScale(pixelMap);
@@ -805,7 +805,7 @@ napi_value Common::GetNotificationSmallIcon(const napi_env &env, const napi_valu
 
 napi_value Common::GetNotificationLargeIcon(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -824,7 +824,7 @@ napi_value Common::GetNotificationLargeIcon(const napi_env &env, const napi_valu
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
         Common::PictureScale(pixelMap);
@@ -837,7 +837,7 @@ napi_value Common::GetNotificationLargeIcon(const napi_env &env, const napi_valu
 napi_value Common::GetNotificationOverlayIcon(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -856,7 +856,7 @@ napi_value Common::GetNotificationOverlayIcon(
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
         Common::PictureScale(pixelMap);
@@ -869,7 +869,7 @@ napi_value Common::GetNotificationOverlayIcon(
 napi_value Common::GetNotificationSupportDisplayDevices(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool isArray = false;
     bool hasProperty = false;
@@ -914,7 +914,7 @@ napi_value Common::GetNotificationSupportDisplayDevices(
 napi_value Common::GetNotificationSupportOperateDevices(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool isArray = false;
     bool hasProperty = false;
@@ -959,7 +959,7 @@ napi_value Common::GetNotificationSupportOperateDevices(
 
 napi_value Common::GetNotificationId(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -988,7 +988,7 @@ napi_value Common::GetNotificationId(const napi_env &env, const napi_value &valu
 
 napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1045,7 +1045,7 @@ napi_value Common::GetNotificationSlotType(const napi_env &env, const napi_value
 
 napi_value Common::GetNotificationIsOngoing(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1072,7 +1072,7 @@ napi_value Common::GetNotificationIsOngoing(const napi_env &env, const napi_valu
 napi_value Common::GetNotificationIsUnremovable(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1099,7 +1099,7 @@ napi_value Common::GetNotificationIsUnremovable(
 napi_value Common::GetNotificationDeliveryTime(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1126,7 +1126,7 @@ napi_value Common::GetNotificationDeliveryTime(
 napi_value Common::GetNotificationtapDismissed(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1152,7 +1152,7 @@ napi_value Common::GetNotificationtapDismissed(
 
 napi_value Common::GetNotificationWantAgent(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool hasProperty = false;
     AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
@@ -1171,7 +1171,7 @@ napi_value Common::GetNotificationWantAgent(const napi_env &env, const napi_valu
         }
         napi_unwrap(env, result, (void **)&wantAgent);
         if (wantAgent == nullptr) {
-            ANS_LOGE("Invalid object wantAgent");
+            ANS_LOGE("null wantAgent");
             return nullptr;
         }
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> sWantAgent =
@@ -1184,7 +1184,7 @@ napi_value Common::GetNotificationWantAgent(const napi_env &env, const napi_valu
 
 napi_value Common::GetNotificationExtraInfo(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1214,7 +1214,7 @@ napi_value Common::GetNotificationExtraInfo(const napi_env &env, const napi_valu
 
 napi_value Common::GetNotificationGroupName(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1242,7 +1242,7 @@ napi_value Common::GetNotificationGroupName(const napi_env &env, const napi_valu
 napi_value Common::GetNotificationRemovalWantAgent(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool hasProperty = false;
     AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
@@ -1261,7 +1261,7 @@ napi_value Common::GetNotificationRemovalWantAgent(
         }
         napi_unwrap(env, result, (void **)&wantAgent);
         if (wantAgent == nullptr) {
-            ANS_LOGE("Invalid object removalWantAgent");
+            ANS_LOGE("null wantAgent");
             return nullptr;
         }
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> removeWantAgent =
@@ -1285,7 +1285,7 @@ napi_value Common::GetNotificationRemovalWantAgent(
 napi_value Common::GetNotificationMaxScreenWantAgent(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool hasProperty = false;
     AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
@@ -1304,7 +1304,7 @@ napi_value Common::GetNotificationMaxScreenWantAgent(
         }
         napi_unwrap(env, result, (void **)&wantAgent);
         if (wantAgent == nullptr) {
-            ANS_LOGE("Invalid object maxScreenWantAgent");
+            ANS_LOGE("null wantAgent");
             return nullptr;
         }
         std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> maxScreenWantAgent =
@@ -1318,7 +1318,7 @@ napi_value Common::GetNotificationMaxScreenWantAgent(
 napi_value Common::GetNotificationAutoDeletedTime(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1345,7 +1345,7 @@ napi_value Common::GetNotificationAutoDeletedTime(
 napi_value Common::GetNotificationClassification(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1403,7 +1403,7 @@ napi_value Common::GetNotificationSound(
 
     auto soundValue = AppExecFwk::GetPropertyValueByPropertyName(env, value, "sound", napi_string);
     if (soundValue == nullptr) {
-        ANS_LOGE("Wrong argument type. String sound expected.");
+        ANS_LOGE("null soundValue");
         std::string msg = "Incorrect parameter types. The type of sound must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1416,7 +1416,7 @@ napi_value Common::GetNotificationSound(
 
 napi_value Common::GetNotificationColor(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1447,7 +1447,7 @@ napi_value Common::GetNotificationColor(const napi_env &env, const napi_value &v
 napi_value Common::GetNotificationColorEnabled(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1474,7 +1474,7 @@ napi_value Common::GetNotificationColorEnabled(
 napi_value Common::GetNotificationIsAlertOnce(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1501,7 +1501,7 @@ napi_value Common::GetNotificationIsAlertOnce(
 napi_value Common::GetNotificationIsStopwatch(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1528,7 +1528,7 @@ napi_value Common::GetNotificationIsStopwatch(
 napi_value Common::GetNotificationIsCountDown(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1555,7 +1555,7 @@ napi_value Common::GetNotificationIsCountDown(
 napi_value Common::GetNotificationStatusBarText(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1582,7 +1582,7 @@ napi_value Common::GetNotificationStatusBarText(
 
 napi_value Common::GetNotificationLabel(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1610,7 +1610,7 @@ napi_value Common::GetNotificationLabel(const napi_env &env, const napi_value &v
 napi_value Common::GetNotificationBadgeIconStyle(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1637,7 +1637,7 @@ napi_value Common::GetNotificationBadgeIconStyle(
 napi_value Common::GetNotificationShowDeliveryTime(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1689,7 +1689,7 @@ napi_value Common::GetNotificationIsUpdateOnly(
 napi_value Common::GetNotificationIsRemoveAllowed(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1716,7 +1716,7 @@ napi_value Common::GetNotificationIsRemoveAllowed(
 napi_value Common::GetNotificationForceDistributed(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1743,7 +1743,7 @@ napi_value Common::GetNotificationForceDistributed(
 napi_value Common::GetNotificationIsNotDistributed(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
@@ -1770,7 +1770,7 @@ napi_value Common::GetNotificationIsNotDistributed(
 napi_value Common::GetNotificationActionButtons(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool isArray = false;
     napi_valuetype valuetype = napi_undefined;
@@ -1819,7 +1819,7 @@ napi_value Common::GetNotificationActionButtons(
 napi_value Common::GetNotificationActionButtonsDetailed(
     const napi_env &env, const napi_value &actionButton, std::shared_ptr<NotificationActionButton> &pActionButton)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (!GetNotificationActionButtonsDetailedBasicInfo(env, actionButton, pActionButton)) {
         return nullptr;
@@ -1836,7 +1836,7 @@ napi_value Common::GetNotificationActionButtonsDetailed(
 napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
     const napi_env &env, const napi_value &actionButton, std::shared_ptr<NotificationActionButton> &pActionButton)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
     char str[STR_MAX_SIZE] = {0};
@@ -1884,7 +1884,7 @@ napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
     }
     napi_unwrap(env, value, (void **)&wantAgentPtr);
     if (wantAgentPtr == nullptr) {
-        ANS_LOGE("Invalid object wantAgent");
+        ANS_LOGE("null wantAgent");
         return nullptr;
     }
     wantAgent = std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgentPtr);
@@ -1902,7 +1902,7 @@ napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
         }
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, value);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
     }
@@ -1914,14 +1914,14 @@ napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
 napi_value Common::GetNotificationActionButtonsDetailedByExtras(
     const napi_env &env, const napi_value &actionButton, std::shared_ptr<NotificationActionButton> &pActionButton)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;
     bool hasProperty = false;
 
     if (!pActionButton) {
-        ANS_LOGE("pActionButton is nullptr");
+        ANS_LOGE("null pActionButton");
         return nullptr;
     }
 
@@ -1948,7 +1948,7 @@ napi_value Common::GetNotificationActionButtonsDetailedByExtras(
 napi_value Common::GetNotificationBadgeNumber(
     const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value result = nullptr;

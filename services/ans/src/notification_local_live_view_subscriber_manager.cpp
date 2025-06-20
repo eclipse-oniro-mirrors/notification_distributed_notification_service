@@ -41,19 +41,19 @@ struct NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord
 
 NotificationLocalLiveViewSubscriberManager::NotificationLocalLiveViewSubscriberManager()
 {
-    ANS_LOGI("constructor");
+    ANS_LOGD("called");
     notificationButtonQueue_ = std::make_shared<ffrt::queue>("NotificationLocalLiveViewMgr");
     recipient_ = new (std::nothrow)
         RemoteDeathRecipient(std::bind(&NotificationLocalLiveViewSubscriberManager::OnRemoteDied,
             this, std::placeholders::_1));
     if (recipient_ == nullptr) {
-        ANS_LOGE("Failed to create RemoteDeathRecipient instance");
+        ANS_LOGE("null recipient");
     }
 }
 
 NotificationLocalLiveViewSubscriberManager::~NotificationLocalLiveViewSubscriberManager()
 {
-    ANS_LOGI("deconstructor");
+    ANS_LOGD("called");
     buttonRecordList_.clear();
 }
 
@@ -69,7 +69,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
-        ANS_LOGE("subscriber is null.");
+        ANS_LOGE("null subscriber");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -83,22 +83,22 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, callingUid);
     ErrCode result = ERR_ANS_TASK_ERR;
     if (bundleOption == nullptr) {
-        ANS_LOGE("Failed to create NotificationBundleOption instance");
+        ANS_LOGE("null bundleOption");
         return ERR_ANS_NO_MEMORY;
     }
     ANS_LOGD("Get userId succeeded, callingUid = <%{public}d> bundleName = <%{public}s>", callingUid, bundle.c_str());
     if (notificationButtonQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return result;
     }
-    ANS_LOGD("ffrt start!");
+    ANS_LOGD("start");
     ffrt::task_handle handler =
         notificationButtonQueue_->submit_h(std::bind([this, &subscriber, &bundleOption, &result]() {
-            ANS_LOGD("ffrt enter!");
+            ANS_LOGD("called");
             result = this->AddSubscriberInner(subscriber, bundleOption);
     }));
     notificationButtonQueue_->wait(handler);
-    ANS_LOGD("ffrt end!");
+    ANS_LOGD("end");
     return result;
 }
 
@@ -107,23 +107,23 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveLocalLiveViewSubscribe
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
-        ANS_LOGE("subscriber is null.");
+        ANS_LOGE("null subscriber");
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode result = ERR_ANS_TASK_ERR;
     if (notificationButtonQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return result;
     }
-    ANS_LOGD("ffrt start!");
+    ANS_LOGD("start");
     ffrt::task_handle handler = notificationButtonQueue_->submit_h(std::bind([this, &subscriber,
         &subscribeInfo, &result]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         result = this->RemoveSubscriberInner(subscriber, subscribeInfo);
     }));
     notificationButtonQueue_->wait(handler);
-    ANS_LOGD("ffrt end!");
+    ANS_LOGD("end");
     return result;
 }
 
@@ -132,27 +132,27 @@ void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponse(const spt
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationButtonQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyTriggerResponseFunc =
         std::bind(&NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner,
             this, notification, buttonOption);
 
-    ANS_LOGD("ffrt start!");
+    ANS_LOGD("start");
     notificationButtonQueue_->submit(NotifyTriggerResponseFunc);
-    ANS_LOGD("ffrt end!");
+    ANS_LOGD("end");
 }
 
 void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
-    ANS_LOGI("OnRemoteDied");
+    ANS_LOGD("called");
     if (notificationButtonQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     ffrt::task_handle handler = notificationButtonQueue_->submit_h(std::bind([this, object]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(object);
         if (record != nullptr) {
             ANS_LOGI("subscriber removed . userId = %{public}d", record->userId);
@@ -161,9 +161,9 @@ void NotificationLocalLiveViewSubscriberManager::OnRemoteDied(const wptr<IRemote
             buttonRecordList_.remove(record);
         }
     }));
-    ANS_LOGD("ffrt start!");
+    ANS_LOGD("start");
     notificationButtonQueue_->wait(handler);
-    ANS_LOGD("ffrt end!");
+    ANS_LOGD("end");
 }
 
 std::shared_ptr<NotificationLocalLiveViewSubscriberManager::LocalLiveViewSubscriberRecord> NotificationLocalLiveViewSubscriberManager::FindSubscriberRecord(
@@ -217,7 +217,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddSubscriberInner(
     if (record == nullptr) {
         record = CreateSubscriberRecord(subscriber, bundleOption);
         if (record == nullptr) {
-            ANS_LOGE("CreateSubscriberRecord failed.");
+            ANS_LOGE("null record");
             return ERR_ANS_NO_MEMORY;
         }
         buttonRecordList_.push_back(record);
@@ -238,7 +238,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
     std::shared_ptr<LocalLiveViewSubscriberRecord> record = FindSubscriberRecord(subscriber);
 
     if (record == nullptr) {
-        ANS_LOGE("subscriber not found.");
+        ANS_LOGE("null record");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -255,7 +255,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::RemoveSubscriberInner(
 void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner(
     const sptr<Notification> &notification, const sptr<NotificationButtonOption> buttonOption)
 {
-    ANS_LOGD("ffrt enter!");
+    ANS_LOGD("called");
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
 
     int32_t sendUserId;
@@ -267,12 +267,10 @@ void NotificationLocalLiveViewSubscriberManager::NotifyTriggerResponseInner(
         sendUserId = notification->GetUid();
         bundleName = notification->GetBundleName();
     }
-    ANS_LOGD("%{public}s sendUserId <%{public}d>, bundlename <%{public}s>",
-        __FUNCTION__, sendUserId, bundleName.c_str());
+    ANS_LOGD("sendUserId <%{public}d>, bundlename <%{public}s>", sendUserId, bundleName.c_str());
 
     for (auto record : buttonRecordList_) {
-        ANS_LOGD("%{public}s record->userId = <%{public}d>, bundlename <%{public}s>",
-            __FUNCTION__, record->userId, record->bundleName.c_str());
+        ANS_LOGD("record->userId = <%{public}d>, bundlename <%{public}s>", record->userId, record->bundleName.c_str());
         if (record->bundleName == bundleName && record->userId == sendUserId) {
             record->subscriber->OnResponse(notification->GetId(), buttonOption);
         }

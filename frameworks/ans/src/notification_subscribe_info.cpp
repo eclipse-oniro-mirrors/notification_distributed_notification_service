@@ -154,7 +154,7 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
     //read slotTypes_
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
-        ANS_LOGE("read slotType_ size failed.");
+        ANS_LOGE("Can't read size");
         return false;
     }
     if (size > MAX_SLOT_SIZE) {
@@ -164,7 +164,7 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
     for (uint32_t index = 0; index < size; index++) {
         int32_t slotType = -1;
         if (!parcel.ReadInt32(slotType)) {
-            ANS_LOGE("read Parcelable slotType failed.");
+            ANS_LOGE("Can't read slotType");
             return false;
         }
         slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));

@@ -73,7 +73,7 @@ NotificationMediaContent *NotificationMediaContent::FromJson(const nlohmann::jso
 
     auto pContent = new (std::nothrow) NotificationMediaContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create mediaContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 

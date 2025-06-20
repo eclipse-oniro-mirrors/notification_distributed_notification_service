@@ -44,7 +44,7 @@ inline bool IsContained(const std::vector<std::string> &vec, const std::string &
 ErrCode AdvancedNotificationService::GetActiveNotifications(
     std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -53,11 +53,11 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
     bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidated.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -73,20 +73,20 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
 
 ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
-        ANS_LOGE("BundleOption is nullptr.");
+        ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         size_t count = 0;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -102,7 +102,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
 
 ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<Notification>> &notifications)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -116,11 +116,11 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
             if (record->notification != nullptr && record->notification->request_ != nullptr) {
@@ -135,7 +135,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
 ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<sptr<Notification>> &notifications,
     int32_t slotTypeInt)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -149,11 +149,11 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
             if (record->notification != nullptr && record->notification->request_ != nullptr &&
@@ -169,7 +169,7 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotType(std::vector<s
 ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     const std::vector<std::string> &key, std::vector<sptr<Notification>> &notifications)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -182,11 +182,11 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         for (auto record : notificationList_) {
             if (IsContained(key, record->notification->GetKey())) {
                 notifications.push_back(record->notification);
@@ -201,7 +201,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
     const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
@@ -218,13 +218,13 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidity.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
 
         auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(), label, bundle->GetBundleName());
         if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
@@ -264,7 +264,7 @@ ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
 

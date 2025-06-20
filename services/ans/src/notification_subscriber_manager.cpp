@@ -56,7 +56,7 @@ const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
-    ANS_LOGI("constructor");
+    ANS_LOGD("called");
     notificationSubQueue_ = std::make_shared<ffrt::queue>("NotificationSubscriberMgr");
     recipient_ = new (std::nothrow)
         RemoteDeathRecipient(std::bind(&NotificationSubscriberManager::OnRemoteDied, this, std::placeholders::_1));
@@ -67,7 +67,7 @@ NotificationSubscriberManager::NotificationSubscriberManager()
 
 NotificationSubscriberManager::~NotificationSubscriberManager()
 {
-    ANS_LOGI("deconstructor");
+    ANS_LOGD("called");
     subscriberRecordList_.clear();
 }
 
@@ -83,7 +83,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
-        ANS_LOGE("subscriber is null.");
+        ANS_LOGE("null subscriber");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -91,7 +91,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
     if (subInfo == nullptr) {
         subInfo = new (std::nothrow) NotificationSubscribeInfo();
         if (subInfo == nullptr) {
-            ANS_LOGE("Failed to create NotificationSubscribeInfo ptr.");
+            ANS_LOGE("null subInfo");
             return ERR_ANS_NO_MEMORY;
         }
     }
@@ -113,7 +113,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
 
     ErrCode result = ERR_ANS_TASK_ERR;
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return result;
     }
 
@@ -146,13 +146,13 @@ ErrCode NotificationSubscriberManager::RemoveSubscriber(
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (subscriber == nullptr) {
-        ANS_LOGE("subscriber is null.");
+        ANS_LOGE("null subscriber");
         return ERR_ANS_INVALID_PARAM;
     }
 
     ErrCode result = ERR_ANS_TASK_ERR;
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return result;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_1);
@@ -177,7 +177,7 @@ void NotificationSubscriberManager::NotifyConsumed(
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
@@ -190,7 +190,7 @@ void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr || bundleName.empty()) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyConsumedFunc =
@@ -203,7 +203,7 @@ void NotificationSubscriberManager::NotifyApplicationInfoNeedChanged(const std::
 void NotificationSubscriberManager::NotifyApplicationInfochangedInner(const std::string& bundleName)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGI("NotifyApplicationInfochangedInner %{public}s", bundleName.c_str());
+    ANS_LOGD("bundleName: %{public}s", bundleName.c_str());
     for (auto record : subscriberRecordList_) {
         if (record->needNotifyApplicationChanged) {
             record->subscriber->OnApplicationInfoNeedChanged(bundleName);
@@ -222,7 +222,7 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
     }
 
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("Queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
 
@@ -243,7 +243,7 @@ void NotificationSubscriberManager::NotifyCanceled(
 #endif
 
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyCanceledFunc = std::bind(
@@ -273,7 +273,7 @@ void NotificationSubscriberManager::BatchNotifyCanceled(const std::vector<sptr<N
 void NotificationSubscriberManager::NotifyUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback NotifyUpdatedFunc =
@@ -286,7 +286,7 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const int32_t 
     const sptr<NotificationDoNotDisturbDate> &date)
 {
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback func =
@@ -300,7 +300,7 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChanged(
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback func =
@@ -313,7 +313,7 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChanged(const sptr<Enabled
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("Queue is nullptr.");
+        ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback func =
@@ -324,9 +324,9 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChanged(const sptr<Enabled
 
 void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
-    ANS_LOGI("OnRemoteDied");
+    ANS_LOGD("called");
     if (notificationSubQueue_ == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return;
     }
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([this, object]() {
@@ -433,7 +433,7 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
     if (record == nullptr) {
         record = CreateSubscriberRecord(subscriber);
         if (record == nullptr) {
-            ANS_LOGE("CreateSubscriberRecord failed.");
+            ANS_LOGE("null record");
             return ERR_ANS_NO_MEMORY;
         }
         subscriberRecordList_.push_back(record);
@@ -441,7 +441,7 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
         record->subscriber->AsObject()->AddDeathRecipient(recipient_);
 
         record->subscriber->OnConnected();
-        ANS_LOGI("subscriber is connected.");
+        ANS_LOGD("subscriber connected");
     }
 
     AddRecordInfo(record, subscribeInfo);
@@ -466,7 +466,7 @@ ErrCode NotificationSubscriberManager::RemoveSubscriberInner(
     std::shared_ptr<SubscriberRecord> record = FindSubscriberRecord(subscriber);
 
     if (record == nullptr) {
-        ANS_LOGE("subscriber not found.");
+        ANS_LOGE("null record");
         return ERR_ANS_INVALID_PARAM;
     }
 
@@ -487,7 +487,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     if (notification == nullptr) {
-        ANS_LOGE("[OnConsumed] fail: notification is nullptr.");
+        ANS_LOGE("null notification");
         return;
     }
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -508,7 +508,7 @@ void NotificationSubscriberManager::NotifyConsumedInner(
                 }
                 sptr<Notification> notificationStub = data.ReadParcelable<Notification>();
                 if (notificationStub == nullptr) {
-                    ANS_LOGE("ReadParcelable failed.");
+                    ANS_LOGE("null notificationStub");
                     continue;
                 }
                 record->subscriber->OnConsumed(notificationStub, notificationMap);
@@ -551,7 +551,7 @@ bool NotificationSubscriberManager::IsDeviceTypeSubscriberd(const std::string de
             return true;
         }
     }
-    ANS_LOGE("device not subscribe, device = %{public}s", deviceType.c_str());
+    ANS_LOGE("device = %{public}s", deviceType.c_str());
     return false;
 }
 
@@ -566,7 +566,7 @@ ErrCode NotificationSubscriberManager::IsDeviceTypeAffordConsume(
         }
         sptr<Notification> notification = new (std::nothrow) Notification(request);
         if (notification == nullptr) {
-            ANS_LOGE("Failed to create notification");
+            ANS_LOGE("null notification");
             return ERR_ANS_NO_MEMORY;
         }
         if (IsSubscribedBysubscriber(record, notification) && ConsumeRecordFilter(record, notification)) {
@@ -623,7 +623,7 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     if (notification == nullptr) {
-        ANS_LOGE("[OnCanceled] fail: notification is nullptr.");
+        ANS_LOGE("null notification");
         return;
     }
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
@@ -686,7 +686,7 @@ bool NotificationSubscriberManager::ConsumeRecordFilter(
 {
     NotificationRequest request = notification->GetNotificationRequest();
     // filterType
-    ANS_LOGI("filterType = %{public}u", record->filterType);
+    ANS_LOGD("filterType = %{public}u", record->filterType);
     if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION == request.GetSlotType()) {
         bool isQuickReply = request.HasUserInputButton();
         if (isQuickReply && (record->filterType & FILTETYPE_QUICK_REPLY_IM) > 0) {
@@ -769,7 +769,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
 {
     if (notificationMap == nullptr) {
-        ANS_LOGE("[OnUpdated] fail: notificationMap is nullptr.");
+        ANS_LOGE("null notificationMap");
         return;
     }
     for (auto record : subscriberRecordList_) {
@@ -781,7 +781,7 @@ void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const int
     const sptr<NotificationDoNotDisturbDate> &date)
 {
     if (date == nullptr) {
-        ANS_LOGE("[OnDoNotDisturbDateChange] fail: date is nullptr.");
+        ANS_LOGE("null date");
         return;
     }
     for (auto record : subscriberRecordList_) {
@@ -796,7 +796,7 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     if (callbackData == nullptr) {
-        ANS_LOGE("[OnBadgeEnabledChanged] fail: callbackData is nullptr.");
+        ANS_LOGE("null callbackData");
         return;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -818,7 +818,7 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     if (callbackData == nullptr) {
-        ANS_LOGE("[OnEnabledNotificationChanged] fail: callbackData is nullptr.");
+        ANS_LOGE("null callbackData");
         return;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -834,7 +834,7 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     if (notificationSubQueue_ == nullptr || badgeData == nullptr) {
-        ANS_LOGE("queue or badgeData is nullptr");
+        ANS_LOGE("null queue or badgeData");
         return;
     }
     std::function<void()> setBadgeNumberFunc = [this, badgeData] () {
@@ -856,7 +856,7 @@ void NotificationSubscriberManager::RegisterOnSubscriberAddCallback(
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback)
 {
     if (callback == nullptr) {
-        ANS_LOGE("Callback is nullptr");
+        ANS_LOGE("null callback");
         return;
     }
 
@@ -878,17 +878,17 @@ void NotificationSubscriberManager::IsDeviceFlag(const std::shared_ptr<Subscribe
     const sptr<Notification> &notification, bool &wearableFlag, bool &headsetFlag, bool &keyNodeFlag)
 {
     if (record == nullptr || notification == nullptr) {
-        ANS_LOGE("record or notification is nullptr.");
+        ANS_LOGE("null record or notification");
         return;
     }
     sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr.");
+        ANS_LOGE("null request");
         return;
     }
     auto flagsMap = request->GetDeviceFlags();
     if (flagsMap == nullptr || flagsMap->size() <= 0) {
-        ANS_LOGE("flagsMap is nullptr or flagsMap size <= 0.");
+        ANS_LOGE("null flagsMap or empty flagsMap");
         return;
     }
 
@@ -911,7 +911,7 @@ void NotificationSubscriberManager::IsDeviceFlag(const std::shared_ptr<Subscribe
     if (request->IsCommonLiveView()) {
         auto flags = request->GetFlags();
         if (flags == nullptr) {
-            ANS_LOGE("flags is nullptr.");
+            ANS_LOGE("null flags");
             return;
         }
         if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
@@ -925,12 +925,12 @@ void NotificationSubscriberManager::TrackCodeLog(
     const sptr<Notification> &notification, const bool &wearableFlag, const bool &headsetFlag, const bool &keyNodeFlag)
 {
     if (notification == nullptr) {
-        ANS_LOGE("notification is empty.");
+        ANS_LOGE("null notification");
         return;
     }
     sptr<NotificationRequest> request = notification->GetNotificationRequestPoint();
     if (request == nullptr) {
-        ANS_LOGE("request is nullptr.");
+        ANS_LOGE("null request");
         return;
     }
     auto slotType = request->GetSlotType();
@@ -962,7 +962,7 @@ ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<Notificati
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr || operationInfo == nullptr) {
-        ANS_LOGE("queue is nullptr");
+        ANS_LOGE("null queue");
         return ERR_ANS_TASK_ERR;
     }
 

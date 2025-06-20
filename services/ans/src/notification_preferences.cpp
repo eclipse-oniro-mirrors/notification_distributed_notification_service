@@ -517,7 +517,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbDate(const int32_t &userId,
 ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
     const sptr<NotificationDoNotDisturbDate> date)
 {
-    ANS_LOGE("enter.");
+    ANS_LOGE("called");
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -539,7 +539,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
 ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
     int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
@@ -592,7 +592,7 @@ bool NotificationPreferences::GetBundleInfo(NotificationPreferencesInfo &prefere
 ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> profiles)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     for (auto profile : profiles) {
         if (profile == nullptr) {
             ANS_LOGE("The profile is nullptr.");
@@ -633,7 +633,7 @@ void NotificationPreferences::UpdateProfilesUtil(std::vector<NotificationBundleO
 ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int64_t profileId,
     const std::string& name, const std::vector<NotificationBundleOption>& bundleList)
 {
-    ANS_LOGI("Called update Profile %{public}d %{public}s %{public}zu.",
+    ANS_LOGD("called, update Profile %{public}d %{public}s %{public}zu",
         userId, std::to_string(profileId).c_str(), bundleList.size());
     if (bundleList.empty()) {
         return ERR_ANS_INVALID_PARAM;
@@ -756,7 +756,7 @@ void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
 
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
@@ -770,7 +770,7 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<No
 ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t userId,
     std::vector<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     return preferencesInfo_.GetAllLiveViewEnabledBundles(userId, bundleOption);
 }
@@ -778,7 +778,7 @@ ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t user
 ErrCode NotificationPreferences::GetAllDistribuedEnabledBundles(int32_t userId,
     const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
@@ -1516,7 +1516,7 @@ void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationP
     if (!isCachedMirrorNotificationEnabledStatus_) {
         if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetMirrorNotificationEnabledStatus(
             mirrorNotificationEnabledStatus_)) {
-            ANS_LOGE("GetMirrorNotificationEnabledStatus failed from json");
+            ANS_LOGE("Get mirror status failed");
             return;
         }
         isCachedMirrorNotificationEnabledStatus_ = true;
@@ -1554,7 +1554,7 @@ uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     uint32_t result = 0;
     result = preferncesDB_->GetHashCodeRule(uid);
-    ANS_LOGI("GetHashCodeRule uid = %{public}d result = %{public}d", uid, result);
+    ANS_LOGI("uid = %{public}d result = %{public}d", uid, result);
     return result;
 }
 

@@ -34,7 +34,7 @@ namespace Notification {
 ErrCode AdvancedNotificationService::Cancel(int32_t notificationId,
     const std::string &label, const std::string &instanceKey)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -53,7 +53,7 @@ ErrCode AdvancedNotificationService::Cancel(int32_t notificationId,
 
 ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     const int reason = NotificationConstant::APP_CANCEL_ALL_REASON_DELETE;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -62,7 +62,7 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
     bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalidated.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ExcuteCancelAll(bundleOption, reason);
@@ -121,10 +121,10 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
 ErrCode AdvancedNotificationService::CancelAsBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, int32_t userId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     int32_t reason = NotificationConstant::APP_CANCEL_AS_BUNELE_REASON_DELETE;
     if (bundleOption == nullptr) {
-        ANS_LOGE("bundleOption is invalid");
+        ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
     int32_t errCode = ValidRightsForCancelAsBundle(notificationId, reason);
@@ -189,7 +189,7 @@ ErrCode AdvancedNotificationService::ValidRightsForCancelAsBundle(int32_t notifi
 ErrCode AdvancedNotificationService::CancelAsBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId)
 {
-    ANS_LOGD("%{public}s, uid = %{public}d", __FUNCTION__, bundleOption->GetUid());
+    ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
@@ -202,11 +202,11 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
 ErrCode AdvancedNotificationService::CancelAsBundle(
     int32_t notificationId, const std::string &representativeBundle, int32_t userId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
          representativeBundle, DEFAULT_UID);
     if (bundleOption == nullptr) {
-        ANS_LOGE("bundleOption is nullptr.");
+        ANS_LOGE("null bundleOption");
         return ERR_ANS_TASK_ERR;
     }
     return CancelAsBundle(bundleOption, notificationId, userId);
@@ -266,7 +266,7 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
 
 ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std::string &label, int32_t notificationId)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
@@ -274,13 +274,13 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     int32_t uid = IPCSkeleton::GetCallingUid();
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         sptr<Notification> notification = nullptr;
         for (auto record : notificationList_) {
             if ((record->bundleOption->GetBundleName().empty()) && (record->bundleOption->GetUid() == uid) &&
@@ -306,7 +306,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     int32_t notificationId, const std::string &label, int32_t removeReason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -354,7 +354,7 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
     int32_t notificationId, const std::string &label, int32_t &removeReason)
 {
     ErrCode result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    ANS_LOGD("ffrt enter!");
+    ANS_LOGD("called");
     bool isThirdParty = true;
     sptr<Notification> notification = nullptr;
     sptr<NotificationRequest> notificationRequest = nullptr;
@@ -421,7 +421,7 @@ ErrCode AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<Noti
     int32_t reason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -471,7 +471,7 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
     const sptr<NotificationBundleOption> &bundle, int32_t &reason)
 {
     std::vector<std::shared_ptr<NotificationRecord>> removeList;
-    ANS_LOGD("ffrt enter!");
+    ANS_LOGD("called");
     GetRemoveListForRemoveAll(bundleOption, bundle, removeList);
     std::vector<sptr<Notification>> notifications;
     std::vector<uint64_t> timerIds;
@@ -541,7 +541,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
     const std::vector<std::string> &keys, int32_t removeReason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -551,7 +551,7 @@ ErrCode AdvancedNotificationService::RemoveNotifications(
         return ERR_ANS_PERMISSION_DENIED;
     }
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("NotificationSvrQueue is nullptr.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -603,7 +603,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     const sptr<NotificationSlot> &slot, const int reason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -622,7 +622,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
     std::vector<uint64_t> timerIds;
     for (auto record : removeList) {
         if (record == nullptr) {
-            ANS_LOGE("record is nullptr");
+            ANS_LOGE("null record");
             continue;
         }
         notificationList_.remove(record);
@@ -652,7 +652,7 @@ void AdvancedNotificationService::GetRemoveListForRemoveNtfBySlot(const sptr<Not
 {
     for (auto record : notificationList_) {
         if (record == nullptr) {
-            ANS_LOGE("record is nullptr");
+            ANS_LOGE("null record");
             continue;
         }
         if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
@@ -713,7 +713,7 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
 
 ErrCode AdvancedNotificationService::Delete(const std::string &key, int32_t removeReason)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         std::string message = "not systemApp. key:" + key + ".";
@@ -746,7 +746,7 @@ ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const 
 {
     ErrCode result = ERR_OK;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         sptr<Notification> notification = nullptr;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
         std::string deviceId;
@@ -774,7 +774,7 @@ ErrCode AdvancedNotificationService::ExcuteDelete(const std::string &key, const 
 
 ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -788,12 +788,12 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
-        ANS_LOGD("bundle is false.");
+        ANS_LOGD("null bundle");
         return ERR_ANS_INVALID_BUNDLE;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
@@ -833,7 +833,7 @@ ErrCode AdvancedNotificationService::DeleteByBundle(const sptr<NotificationBundl
 
 ErrCode AdvancedNotificationService::DeleteAll()
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     const int32_t reason = NotificationConstant::CANCEL_ALL_REASON_DELETE;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -871,7 +871,7 @@ ErrCode AdvancedNotificationService::DeleteAll()
 
 void AdvancedNotificationService::ExcuteDeleteAll(ErrCode &result, const int32_t reason)
 {
-    ANS_LOGD("ffrt enter!");
+    ANS_LOGD("called");
     int32_t activeUserId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
         return;

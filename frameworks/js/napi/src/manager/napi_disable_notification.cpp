@@ -23,7 +23,7 @@ namespace NotificationNapi {
 napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
 {
 #ifdef DISABLE_NOTIFICATION_FEATURE_ENABLE
-    ANS_LOGD("enter NapiDisableNotificationFeature");
+    ANS_LOGD("called");
     NotificationDisable paras;
     if (!ParseDisableNotificationParameters(env, info, paras)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);

@@ -23,13 +23,13 @@ bool UvQueue::Call(napi_env env, OperationOnCallBack *data, uv_after_work_cb aft
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env, &loop);
     if (loop == nullptr) {
-        ANS_LOGW("loop is nullptr.");
+        ANS_LOGW("null loop");
         delete data;
         return false;
     }
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
-        ANS_LOGW("work is nullptr.");
+        ANS_LOGW("null work");
         delete data;
         return false;
     }

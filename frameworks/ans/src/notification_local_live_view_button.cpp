@@ -154,7 +154,7 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
 
     NotificationLocalLiveViewButton *button = new (std::nothrow) NotificationLocalLiveViewButton();
     if (button == nullptr) {
-        ANS_LOGE("Failed to create capsule instance");
+        ANS_LOGE("null button");
         return nullptr;
     }
 
@@ -172,7 +172,7 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
             }
             auto pIcon = AnsImageUtil::UnPackImage(iconObj.get<std::string>());
             if (pIcon == nullptr) {
-                ANS_LOGE("Failed to parse button icon");
+                ANS_LOGE("null pIcon");
                 delete button;
                 return nullptr;
             }
@@ -245,7 +245,7 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
         auto member = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (member == nullptr) {
             buttonIcons_.clear();
-            ANS_LOGE("Failed to read LocalLiveViewButton");
+            ANS_LOGE("null member");
             return false;
         }
 

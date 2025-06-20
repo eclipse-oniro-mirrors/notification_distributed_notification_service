@@ -20,7 +20,7 @@
 namespace OHOS::Notification {
 bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
     if (instance_ != nullptr) {
         result = instance_;
@@ -46,7 +46,7 @@ void AnsDialogHostClient::Destroy()
 bool AnsDialogHostClient::SetDialogCallbackInterface(
     std::unique_ptr<AnsDialogCallbackNativeInterface> dialogCallbackInterface)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
     if (dialogCallbackInterface == nullptr || AnsDialogHostClient::instance_ == nullptr) {
         return false;
@@ -57,7 +57,7 @@ bool AnsDialogHostClient::SetDialogCallbackInterface(
 
 ErrCode AnsDialogHostClient::OnDialogStatusChanged(const DialogStatusData& statusData)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (dialogCallbackInterface_ == nullptr) {
         ANS_LOGE("AnsDialogCallbackNativeInterface is null.");
         return ERR_OK;

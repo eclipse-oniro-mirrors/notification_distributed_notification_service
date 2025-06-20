@@ -22,7 +22,7 @@ const int IS_TEMPLATE_MAX_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, TemplateName& params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = IS_TEMPLATE_MAX_PARA;
     napi_value argv[IS_TEMPLATE_MAX_PARA] = {nullptr};
@@ -73,7 +73,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     TemplateName params;
     if (ParseParameters(env, info, params) == nullptr) {
@@ -83,7 +83,7 @@ napi_value IsSupportTemplate(napi_env env, napi_callback_info info)
     AsyncCallbackInfoTemplate *asyncCallbackinfo = new (std::nothrow)
         AsyncCallbackInfoTemplate {.env = env, .asyncWork = nullptr, .params = params};
     if (!asyncCallbackinfo) {
-        ANS_LOGD("AsyncCallbackinfo is nullptr.");
+        ANS_LOGD("null asyncCallbackinfo");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;

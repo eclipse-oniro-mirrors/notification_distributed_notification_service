@@ -133,7 +133,7 @@ uint8_t ReminderRequestAlarm::GetMinute() const
 
 bool ReminderRequestAlarm::UpdateNextReminder()
 {
-    ANSR_LOGD("UpdateNextReminder alarm time");
+    ANSR_LOGD("called");
     if (IsRepeatReminder()) {
         uint8_t letfSnoozeTimes = GetSnoozeTimesDynamic();
         if ((letfSnoozeTimes > 0) && (GetTimeInterval() > 0)) {
@@ -184,10 +184,10 @@ bool ReminderRequestAlarm::WriteParcel(Parcel &parcel) const
 
 ReminderRequestAlarm *ReminderRequestAlarm::Unmarshalling(Parcel &parcel)
 {
-    ANSR_LOGD("New alarm");
+    ANSR_LOGD("called");
     auto objptr = new (std::nothrow) ReminderRequestAlarm();
     if (objptr == nullptr) {
-        ANSR_LOGE("Failed to create reminder alarm due to no memory.");
+        ANSR_LOGE("null objptr");
         return objptr;
     }
     if (!objptr->ReadFromParcel(parcel)) {
