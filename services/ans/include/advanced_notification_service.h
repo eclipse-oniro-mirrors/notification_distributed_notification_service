@@ -1332,6 +1332,10 @@ public:
 
     bool IsDisableNotification(const std::string &bundleName);
 
+    bool IsDisableNotificationByKiosk(const std::string &bundleName);
+
+    bool IsDisableNotificationForSaByKiosk(const std::string &bundleName, const sptr<NotificationRequest> &request);
+
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
@@ -1651,6 +1655,7 @@ private:
         const bool easyAbroad);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
     ErrCode RegisterPushCallbackTokenCheck();
+    bool IsEnableNotificationByKioskAppTrustList(const std::string &bundleName);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

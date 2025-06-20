@@ -324,12 +324,15 @@ public:
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
     void AddDisableNotificationInfo(const std::string &value);
     ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
+    void SetkioskAppTrustList(const std::vector<std::string> &kioskAppTrustList);
+    bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList) const;
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
     std::map<int32_t, sptr<NotificationDoNotDisturbDate>> doNotDisturbDate_;
     std::map<std::string, sptr<NotificationDoNotDisturbProfile>> doNotDisturbProfiles_;
     std::map<std::string, BundleInfo> infos_;
+    std::vector<std::string> kioskAppTrustList_;
 
     struct DisableNotificationInfo {
         int32_t disabled = -1;

@@ -977,7 +977,8 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     ANS_LOGD("SetAdditionConfig called (%{public}s, %{public}s).", key.c_str(), value.c_str());
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_1);
     message.Message(" key:" + key + " value" + value);
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
         ANS_LOGE("Permission denied.");
         message.ErrorCode(ERR_ANS_PERMISSION_DENIED).Append(" Permission denied");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
