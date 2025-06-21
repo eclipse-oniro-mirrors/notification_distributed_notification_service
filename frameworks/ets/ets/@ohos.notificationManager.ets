@@ -680,8 +680,9 @@ export default namespace notificationManager {
             let ret : number = data as number;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret: number = -1;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         });
     }
 
@@ -798,8 +799,9 @@ export default namespace notificationManager {
             let ret : Array<NotificationSlot> = data as Array<NotificationSlot>;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : Array<NotificationSlot> = [];
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         });
     }
 
@@ -825,8 +827,9 @@ export default namespace notificationManager {
             let ret : NotificationSlot = data as NotificationSlot;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : NotificationSlot = { enabled: false, reminderMode: 0, authorizedStatus: 0 } as NotificationSlot;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         });
     }
 
@@ -968,8 +971,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -1003,8 +1007,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -1032,8 +1037,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -1151,8 +1157,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -1373,8 +1380,9 @@ export default namespace notificationManager {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
             callback(null, ret);
         }, (error: Error): void => {
+            let retData : Array<NotificationRequest> = [];
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, retData);
         })
     }
 
@@ -1415,8 +1423,9 @@ export default namespace notificationManager {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
             callback(null, ret);
         }, (error: Error): void => {
+            let retData : Array<NotificationRequest> = [];
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, retData);
         })
     }
 
@@ -1431,7 +1440,7 @@ export default namespace notificationManager {
             callback(null, ret);
         }, (error: Object): void => {
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, -1);
         })
     }
 
@@ -1491,8 +1500,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -1816,8 +1826,22 @@ export default namespace notificationManager {
             let ret : NotificationRequest = data as NotificationRequest;
             callback(null, ret);
         }, (error: Object): void => {
+            let retData: NotificationRequest = {
+            content:{},
+            creatorBundleName: undefined,
+            creatorUid:undefined,
+            creatorPid:undefined,
+            creatorUserId:undefined,
+            hashCode:undefined,
+            notificationFlags:undefined,
+            source : undefined,
+            deviceId : undefined,
+            agentBundle : undefined,
+            appInstanceKey : undefined,
+            badgeNumber : undefined
+            };
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, retData);
         })
     }
 
@@ -2121,8 +2145,9 @@ export default namespace notificationManager {
             let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
             callback(null, doNotDisturbDate);
         }, (error: Object): void => {
+            let doNotDisturbDate : DoNotDisturbDate = {};
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, doNotDisturbDate);
         })
     }
 
@@ -2150,8 +2175,9 @@ export default namespace notificationManager {
             let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
             callback(null, doNotDisturbDate);
         }, (error: Object): void => {
+            let doNotDisturbDate : DoNotDisturbDate = {};
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, doNotDisturbDate);
         });
     }
 
@@ -2179,8 +2205,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Object): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -2194,8 +2221,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Object): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -2454,8 +2482,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 
@@ -2492,8 +2521,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
     
@@ -2540,8 +2570,9 @@ export default namespace notificationManager {
             let ret : DeviceRemindType = data as DeviceRemindType;
             callback(null, ret);
         }, (error: Error): void => {
+            const defaultRemindType: DeviceRemindType = DeviceRemindType.IDLE_DONOT_REMIND;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, defaultRemindType);
         })
     }
 
@@ -2599,8 +2630,9 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             callback(null, ret);
         }, (error: Error): void => {
+            let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
-            callback(err, undefined);
+            callback(err, ret);
         })
     }
 }
