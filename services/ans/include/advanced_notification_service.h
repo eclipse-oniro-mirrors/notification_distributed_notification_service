@@ -1341,6 +1341,10 @@ public:
 
     bool IsDisableNotification(const std::string &bundleName);
 
+    bool IsDisableNotificationByKiosk(const std::string &bundleName);
+
+    bool IsDisableNotificationForSaByKiosk(const std::string &bundleName, const sptr<NotificationRequest> &request);
+
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
@@ -1669,6 +1673,7 @@ private:
     bool ExecuteDeleteDistributedNotification(std::shared_ptr<NotificationRecord>& record,
         std::vector<sptr<Notification>>& notifications, const int32_t removeReason);
     bool IsDistributedNotification(sptr<NotificationRequest> request);
+    bool IsEnableNotificationByKioskAppTrustList(const std::string &bundleName);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

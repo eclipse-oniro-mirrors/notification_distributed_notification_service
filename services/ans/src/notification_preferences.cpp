@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 
+#include "ability_manager_client.h"
 #include "access_token_helper.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
@@ -26,6 +27,7 @@
 #include "ans_trace_wrapper.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
+#include "in_process_call_wrapper.h"
 #include "nlohmann/json.hpp"
 #include "os_account_manager_helper.h"
 #include "notification_analytics_util.h"
@@ -1478,6 +1480,37 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
     return true;
 }
 
+bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (preferencesInfo_.GetkioskAppTrustList(kioskAppTrustList)) {
+        ANS_LOGD("info get disable notification success");
+        return true;
+    }
+    std::string value = "";
+    int32_t userId = -1;
+    if (GetKvFromDb("kiosk_app_trust_list", value, userId) != ERR_OK) {
+        ANS_LOGD("Get kiosk app trust list failed.");
+        return false;
+    }
+    if (value.empty() || !nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json string");
+        return false;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(value, nullptr, false);
+    if (jsonObject.is_null() || jsonObject.empty()) {
+        ANS_LOGE("Invalid JSON object");
+        return false;
+    }
+    if (jsonObject.is_discarded() || !jsonObject.is_array()) {
+        ANS_LOGE("Parse kiosk app trust list failed due to data is discarded or not array");
+        return false;
+    }
+    kioskAppTrustList = jsonObject.get<std::vector<std::string>>();
+    preferencesInfo_.SetkioskAppTrustList(kioskAppTrustList);
+    return true;
+}
+
 ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -1574,6 +1607,23 @@ bool NotificationPreferences::SetBundleRemoveFlag(const sptr<NotificationBundleO
         return false;
     }
     return preferncesDB_->SetBundleRemoveFlag(bundleOption, slotType, sourceType);
+}
+
+void NotificationPreferences::SetKioskModeStatus(bool isKioskMode)
+{
+    isKioskMode_ = isKioskMode;
+}
+
+bool NotificationPreferences::IsKioskMode()
+{
+    AAFwk::KioskStatus kioskStatus;
+    auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetKioskStatus(kioskStatus));
+    if (ret != ERR_OK) {
+        ANS_LOGE("Get KioskStatus failed");
+        return isKioskMode_;
+    }
+    isKioskMode_ = kioskStatus.isKioskMode_;
+    return isKioskMode_;
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER

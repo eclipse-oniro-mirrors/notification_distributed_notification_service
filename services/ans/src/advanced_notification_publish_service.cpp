@@ -783,6 +783,11 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
+        if (IsDisableNotificationForSaByKiosk(bundle, request)) {
+            ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (!bundleOption->GetBundleName().empty() &&
             !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && request->IsAgentNotification())) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
@@ -1067,6 +1072,47 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
         }
     } else {
         ANS_LOGD("no disabled has been set up or set disabled to close");
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsDisableNotificationByKiosk(const std::string &bundleName)
+{
+    bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
+    if (isKioskMode && !IsEnableNotificationByKioskAppTrustList(bundleName)) {
+        return true;
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsDisableNotificationForSaByKiosk(
+    const std::string &bundleName, const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        ANS_LOGE("request is nullptr");
+        return false;
+    }
+    bool isAppAgent = false;
+    if (request->IsAgentNotification() && !bundleName.empty()) {
+        isAppAgent = true;
+    }
+    bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
+    if (isKioskMode && isAppAgent && !IsEnableNotificationByKioskAppTrustList(bundleName)) {
+        return true;
+    }
+    return false;
+}
+
+bool AdvancedNotificationService::IsEnableNotificationByKioskAppTrustList(const std::string &bundleName)
+{
+    std::vector<std::string> kioskAppTrustList;
+    if (NotificationPreferences::GetInstance()->GetkioskAppTrustList(kioskAppTrustList)) {
+        auto it = std::find(kioskAppTrustList.begin(), kioskAppTrustList.end(), bundleName);
+        if (it != kioskAppTrustList.end()) {
+            return true;
+        }
+    } else {
+        ANS_LOGD("no kiosk app trust list has been set up");
     }
     return false;
 }

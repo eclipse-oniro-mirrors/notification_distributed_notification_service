@@ -389,5 +389,42 @@ HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0300, Tes
     ASSERT_EQ(res, ERR_OK);
     ASSERT_EQ(bundleOption.size(), 1);
 }
+
+/**
+ * @tc.name: SetkioskAppTrustList_0100
+ * @tc.desc: test SetkioskAppTrustList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetkioskAppTrustList_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    ASSERT_NE(preferencesInfo, nullptr);
+    std::vector<std::string> kioskAppTrustList;
+    kioskAppTrustList.push_back("testBundleName");
+    preferencesInfo->SetkioskAppTrustList(kioskAppTrustList);
+    ASSERT_EQ(preferencesInfo->kioskAppTrustList_.size(), 1);
+}
+
+/**
+ * @tc.name: GetkioskAppTrustList_0100
+ * @tc.desc: test GetkioskAppTrustList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetkioskAppTrustList_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    ASSERT_NE(preferencesInfo, nullptr);
+    std::vector<std::string> resultList;
+    auto ret = preferencesInfo->GetkioskAppTrustList(resultList);
+    ASSERT_EQ(ret, false);
+
+    std::vector<std::string> kioskAppTrustList;
+    kioskAppTrustList.push_back("testBundleName");
+    preferencesInfo->SetkioskAppTrustList(kioskAppTrustList);
+    ASSERT_EQ(preferencesInfo->kioskAppTrustList_.size(), 1);
+
+    ret = preferencesInfo->GetkioskAppTrustList(resultList);
+    ASSERT_EQ(ret, true);
+}
 }
 }

@@ -227,6 +227,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
                 .ErrorCode(result).Message("bundle in Disable Notification list, bundleName=" + bundle);
             return;
         }
+        if (IsDisableNotificationByKiosk(bundle)) {
+            ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (AssignValidNotificationSlot(record, bundleOption) != ERR_OK) {
             ANS_LOGE("Can not assign valid slot!");
         }

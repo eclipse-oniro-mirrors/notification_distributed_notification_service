@@ -443,6 +443,21 @@ bool NotificationPreferencesInfo::GetDisableNotificationInfo(NotificationDisable
     return true;
 }
 
+void NotificationPreferencesInfo::SetkioskAppTrustList(const std::vector<std::string> &kioskAppTrustList)
+{
+    kioskAppTrustList_ = kioskAppTrustList;
+}
+
+bool NotificationPreferencesInfo::GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList) const
+{
+    if (kioskAppTrustList_.empty()) {
+        ANS_LOGE("kioskAppTrustList is empty");
+        return false;
+    }
+    kioskAppTrustList = kioskAppTrustList_;
+    return true;
+}
+
 void NotificationPreferencesInfo::AddDisableNotificationInfo(const std::string &value)
 {
     NotificationDisable notificationDisable;
