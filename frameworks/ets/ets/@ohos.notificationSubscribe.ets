@@ -91,8 +91,7 @@ export default namespace notificationSubscribe {
         let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber) });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -110,8 +109,7 @@ export default namespace notificationSubscribe {
         let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber, info) });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -142,8 +140,7 @@ export default namespace notificationSubscribe {
         let p = taskpool.execute((): void => { notificationSubscribe.nativeUnSubscribe(subscriber) });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -182,8 +179,7 @@ export default namespace notificationSubscribe {
         });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -223,8 +219,7 @@ export default namespace notificationSubscribe {
         });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -260,8 +255,7 @@ export default namespace notificationSubscribe {
         });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -359,8 +353,7 @@ export default namespace notificationSubscribe {
         });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Object): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -396,8 +389,7 @@ export default namespace notificationSubscribe {
         });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Object): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
@@ -414,8 +406,7 @@ export default namespace notificationSubscribe {
         });
         p.then(
             (e: NullishType): void => {
-                let err: BusinessError<void> = {code: 0, data: undefined};
-                callback(err, undefined);
+                callback(null, undefined);
             }, (error: Object): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
