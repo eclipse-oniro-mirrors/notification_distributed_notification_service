@@ -659,6 +659,16 @@ public:
     static ErrCode RemoveNotifications();
 
     /**
+     * @brief Removes Distributed notifications in the system.
+     * @note Your application must have platform signature to use this method.
+     * @return Returns remove notifications result.
+     */
+    static ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+        const NotificationConstant::SlotType& slotType,
+        const NotificationConstant::DistributedDeleteType& deleteType,
+        const int32_t removeReason);
+
+    /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to
      * call this method.
      *

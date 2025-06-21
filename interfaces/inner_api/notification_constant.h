@@ -78,6 +78,13 @@ public:
         SA_SELF_BANNER_FLAG = 1 << 9,
     };
 
+    enum DistributedDeleteType {
+        ALL,
+        SLOT,
+        EXCLUDE_ONE_SLOT,
+        HASHCODES,
+    };
+
     enum class VisiblenessType {
         /**
          * the notification display effect has not been set by NotificationRequest::setVisibleness().
@@ -345,6 +352,16 @@ public:
      * Indicates that a notification is deleted because collaboration click.
      */
     static const int32_t DISTRIBUTED_COLLABORATIVE_CLICK_DELETE = 34;
+    
+    /**
+     * Indicates that a notification is deleted because distributed enable close removed.
+     */
+    static const int32_t DISTRIBUTED_ENABLE_CLOSE_DELETE = 35;
+
+    /**
+     * Indicates that a notification is deleted because distributed release removed.
+     */
+    static const int32_t DISTRIBUTED_RELEASE_DELETE = 36;
 
     /**
      * Indicates that a notification is deleted for other reasons.

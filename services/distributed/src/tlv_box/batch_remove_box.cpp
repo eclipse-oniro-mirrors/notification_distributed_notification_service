@@ -32,12 +32,12 @@ BatchRemoveNotificationBox::~BatchRemoveNotificationBox()
 BatchRemoveNotificationBox::BatchRemoveNotificationBox(std::shared_ptr<TlvBox> box) : BoxBase(box)
 {}
 
-bool BatchRemoveNotificationBox::SetNotificationHashCode(const std::string& hashCode)
+bool BatchRemoveNotificationBox::SetNotificationHashCodes(const std::string& hashCodes)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCodes));
 }
 
 bool BatchRemoveNotificationBox::SetNotificationSlotTypes(const std::string &slotTypes)
@@ -46,6 +46,38 @@ bool BatchRemoveNotificationBox::SetNotificationSlotTypes(const std::string &slo
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(BATCH_REMOVE_SLOT_TYPE, slotTypes));
+}
+
+bool BatchRemoveNotificationBox::SetLocalDeviceId(const std::string &deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
+bool BatchRemoveNotificationBox::GetNotificationHashCodes(std::string& hashCodes) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_HASHCODE, hashCodes);
+}
+
+bool BatchRemoveNotificationBox::GetNotificationSlotTypes(std::string& slotTypes) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(BATCH_REMOVE_SLOT_TYPE, slotTypes);
+}
+
+bool BatchRemoveNotificationBox::GetLocalDeviceId(std::string& deviceId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
 }
 }
 }

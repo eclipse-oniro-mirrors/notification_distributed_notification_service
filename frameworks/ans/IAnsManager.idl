@@ -105,6 +105,8 @@ interface OHOS.Notification.IAnsManager {
 
     void RemoveNotifications([in] String[] hashcodes, [in] int removeReason);
 
+    void RemoveDistributedNotifications([in] String[] hashcodes, [in] int slotTypeInt, [in] int deleteTypeInt, [in] int removeReason);
+
     void Delete([in] String key, [in] int removeReason);
 
     void DeleteByBundle([in] sptr<NotificationBundleOption> bundleOption);

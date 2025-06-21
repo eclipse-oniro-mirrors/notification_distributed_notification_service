@@ -36,6 +36,7 @@
 #include "int_wrapper.h"
 #include "string_wrapper.h"
 #include "distributed_subscribe_service.h"
+#include "remove_all_distributed_box.h"
 
 namespace OHOS {
 namespace Notification {
@@ -64,15 +65,27 @@ void DistributedPublishService::RemoveNotification(const std::shared_ptr<TlvBox>
 {
     std::string hashCode;
     int32_t slotType;
-    if (boxMessage == nullptr) {
-        ANS_LOGE("boxMessage is nullptr");
+    NotificationRemoveBox removeBox = NotificationRemoveBox(boxMessage);
+    removeBox.GetNotificationHashCode(hashCode);
+    removeBox.GetNotificationSlotType(slotType);
+
+    if (hashCode.empty()) {
+        ANS_LOGW("dans remove hashCode empty");
         return;
     }
-    boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hashCode);
-    boxMessage->GetInt32Value(NOTIFICATION_SLOT_TYPE, slotType);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    std::string deviceId;
+    removeBox.GetLocalDeviceId(deviceId);
+    std::shared_ptr<NotificationRemoveBox> forwardBox = MakeRemvoeBox(hashCode, slotType);
+    if (forwardBox != nullptr) {
+        ForWardRemove(forwardBox, deviceId);
+    }
+#else
+#endif
+    std::vector<std::string> hashCodes;
+    hashCodes.push_back(hashCode);
 
-    int result = IN_PROCESS_CALL(NotificationHelper::RemoveNotification(
-        hashCode, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+    int result = RemoveDistributedNotifications(hashCodes);
     std::string errorReason = "delete message failed";
     if (result == 0) {
         errorReason = "delete message success";
@@ -86,16 +99,16 @@ void DistributedPublishService::RemoveNotification(const std::shared_ptr<TlvBox>
 
 void DistributedPublishService::RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage)
 {
+    BatchRemoveNotificationBox removeBox = BatchRemoveNotificationBox(boxMessage);
     std::vector<std::string> hashCodes;
     std::string hashCodesString;
-    if (boxMessage == nullptr) {
-        ANS_LOGE("boxMessage is nullptr");
+    removeBox.GetNotificationHashCodes(hashCodesString);
+    if (hashCodesString.empty()) {
+        ANS_LOGW("dans remove hashCodesString empty");
         return;
     }
-    if (!boxMessage->GetStringValue(NOTIFICATION_HASHCODE, hashCodesString)) {
-        ANS_LOGE("failed GetStringValue from boxMessage");
-        return;
-    }
+    std::string slotTypesString;
+    removeBox.GetNotificationSlotTypes(slotTypesString);
     std::istringstream hashCodesStream(hashCodesString);
     std::string hashCode;
     while (hashCodesStream >> hashCode) {
@@ -104,17 +117,42 @@ void DistributedPublishService::RemoveNotifications(const std::shared_ptr<TlvBox
         }
     }
 
-    int result = IN_PROCESS_CALL(
-        NotificationHelper::RemoveNotifications(hashCodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
-    ANS_LOGI("dans batch remove message %{public}d.", result);
+#ifdef DISTRIBUTED_FEATURE_MASTER
+    std::string deviceId;
+    removeBox.GetLocalDeviceId(deviceId);
+    std::shared_ptr<BatchRemoveNotificationBox> forwardBox = MakeBatchRemvoeBox(hashCodes, slotTypesString);
+    if (forwardBox != nullptr) {
+        ForWardRemove(forwardBox, deviceId);
+    }
+#else
+#endif
+
+    int result = RemoveDistributedNotifications(hashCodes);
+    BatchRemoveReport(slotTypesString, result);
+    ANS_LOGI("dans br re:%{public}d., hs:%{public}s", result, hashCodesString.c_str());
+}
+
+int DistributedPublishService::RemoveDistributedNotifications(const std::vector<std::string>& hashcodes)
+{
+    int res = 0;
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (local.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        res = IN_PROCESS_CALL(NotificationHelper::RemoveNotifications(
+            hashcodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+    } else {
+        res = IN_PROCESS_CALL(NotificationHelper::RemoveDistributedNotifications(hashcodes,
+            NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
+            NotificationConstant::DistributedDeleteType::HASHCODES,
+            NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE));
+    }
+    return res;
+}
+
+void DistributedPublishService::BatchRemoveReport(const std::string &slotTypesString, const int result)
+{
     if (result == 0) {
         AnalyticsUtil::GetInstance().AbnormalReporting(DELETE_ERROR_EVENT_CODE, result, BRANCH4_ID,
             "delete message success");
-        std::string slotTypesString;
-        if (!boxMessage->GetStringValue(BATCH_REMOVE_SLOT_TYPE, slotTypesString)) {
-            ANS_LOGE("failed GetStringValue from boxMessage");
-            return;
-        }
         std::istringstream slotTypesStream(slotTypesString);
         std::string slotTypeString;
         while (slotTypesStream >> slotTypeString) {
@@ -133,9 +171,17 @@ void DistributedPublishService::OnRemoveNotification(const DistributedDeviceInfo
     std::string hashCode, int32_t slotTypes)
 {
     std::shared_ptr<NotificationRemoveBox> removeBox = std::make_shared<NotificationRemoveBox>();
+    if (removeBox == nullptr) {
+        ANS_LOGE("create batchRemoveBox err");
+        return;
+    }
+
     ANS_LOGI("dans OnCanceled %{public}s", hashCode.c_str());
     removeBox->SetNotificationHashCode(hashCode);
-    removeBox->setNotificationSlotType(slotTypes);
+    removeBox->SetNotificationSlotType(slotTypes);
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    removeBox->SetLocalDeviceId(local.deviceId_);
+
     if (!removeBox->Serialize()) {
         ANS_LOGW("dans OnCanceled serialize failed");
         return;
@@ -148,10 +194,14 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
     std::string hashCodes, std::string slotTypes)
 {
     std::shared_ptr<BatchRemoveNotificationBox> batchRemoveBox = std::make_shared<BatchRemoveNotificationBox>();
-    if (!hashCodes.empty()) {
-        batchRemoveBox->SetNotificationHashCode(hashCodes);
+    if (batchRemoveBox == nullptr) {
+        ANS_LOGE("create batchRemoveBox err");
+        return;
     }
+    batchRemoveBox->SetNotificationHashCodes(hashCodes);
     batchRemoveBox->SetNotificationSlotTypes(slotTypes);
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    batchRemoveBox->SetLocalDeviceId(local.deviceId_);
 
     if (!batchRemoveBox->Serialize()) {
         ANS_LOGW("dans OnCanceled serialize failed");
@@ -162,6 +212,96 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
+void DistributedPublishService::RemoveAllDistributedNotificaions(DistributedDeviceInfo& deviceInfo)
+{
+    std::shared_ptr<RemoveAllDistributedNotificationsBox> removeBox =
+        std::make_shared<RemoveAllDistributedNotificationsBox>();
+    if (removeBox == nullptr) {
+        ANS_LOGW("create box error");
+        return;
+    }
+
+    if (!removeBox->Serialize()) {
+        ANS_LOGW("dans OnCanceled serialize failed");
+        return;
+    }
+    ANS_LOGI("RemoveAllDistributedNotificaions ID:%{public}s",
+        StringAnonymous(deviceInfo.deviceId_).c_str());
+    DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_MESSAGE,
+        deviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);
+}
+
+bool DistributedPublishService::ForWardRemove(const std::shared_ptr<BoxBase>& boxMessage,
+    std::string& deviceId)
+{
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (local.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        ANS_LOGD("no need forward");
+        return false;
+    }
+    std::map<std::string, DistributedDeviceInfo> peerDevices;
+    DistributedDeviceService::GetInstance().GetDeviceList(peerDevices);
+    if (peerDevices.empty()) {
+        ANS_LOGW("no peerDevices");
+        return false;
+    }
+
+    for (auto peerDevice : peerDevices) {
+        auto peerDeviceInfo = peerDevice.second;
+        if (peerDeviceInfo.deviceId_ == deviceId) {
+            ANS_LOGD("no need ForWardRemove");
+            continue;
+        }
+        DistributedClient::GetInstance().SendMessage(boxMessage, TransDataType::DATA_TYPE_MESSAGE,
+            peerDeviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);
+        ANS_LOGI("ForWardRemove,deviceId:%{public}s", StringAnonymous(peerDeviceInfo.deviceId_).c_str());
+    }
+    return true;
+}
+
+std::shared_ptr<NotificationRemoveBox> DistributedPublishService::MakeRemvoeBox(
+    std::string &hashCode, int32_t &slotTypes)
+{
+    std::shared_ptr<NotificationRemoveBox> removeBox = std::make_shared<NotificationRemoveBox>();
+    if (removeBox == nullptr) {
+        ANS_LOGE("MakeRemvoeBox ERR");
+        return nullptr;
+    }
+    removeBox->SetNotificationHashCode(DISTRIBUTED_LABEL + hashCode);
+    removeBox->SetNotificationSlotType(slotTypes);
+
+    if (!removeBox->Serialize()) {
+        ANS_LOGW("dans OnCanceled serialize failed");
+        return nullptr;
+    }
+
+    return removeBox;
+}
+
+std::shared_ptr<BatchRemoveNotificationBox> DistributedPublishService::MakeBatchRemvoeBox(
+    std::vector<std::string>& hashCodes, std::string &slotTypes)
+{
+    std::shared_ptr<BatchRemoveNotificationBox> batchRemoveBox = std::make_shared<BatchRemoveNotificationBox>();
+    if (batchRemoveBox == nullptr) {
+        ANS_LOGE("MakeBatchRemvoeBox ERR");
+        return nullptr;
+    }
+    std::ostringstream keysStream;
+    for (auto hashCode : hashCodes) {
+        auto key = DISTRIBUTED_LABEL + hashCode;
+        keysStream << key << ' ';
+    }
+    std::string hashCodeStrings = keysStream.str();
+    batchRemoveBox->SetNotificationHashCodes(hashCodeStrings);
+    batchRemoveBox->SetNotificationSlotTypes(slotTypes);
+
+    if (!batchRemoveBox->Serialize()) {
+        ANS_LOGW("dans OnCanceled serialize failed");
+        return nullptr;
+    }
+    return batchRemoveBox;
+}
+
 void DistributedPublishService::SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce)
 {
     if (!DistributedDeviceService::GetInstance().IsSyncLiveView(peerDevice.deviceId_, isForce)) {
@@ -416,6 +556,15 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
 }
 
 #else
+void DistributedPublishService::RemoveAllDistributedNotifications()
+{
+    std::vector<std::string> hashcodes;
+    IN_PROCESS_CALL(NotificationHelper::RemoveDistributedNotifications(hashcodes,
+        NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
+        NotificationConstant::DistributedDeleteType::ALL,
+        NotificationConstant::DISTRIBUTED_RELEASE_DELETE));
+}
+
 void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox>& boxMessage)
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();

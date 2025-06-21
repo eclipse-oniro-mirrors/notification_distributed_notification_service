@@ -157,38 +157,21 @@ bool DistributedExtensionService::initConfig()
         return false;
     }
 
-    nlohmann::json localTypeJson = configJson[CFG_KEY_LOCAL_TYPE];
-    if (localTypeJson.is_null() || localTypeJson.empty()) {
-        ANS_LOGE("Dans initConfig local type as invalid json.");
-    } else {
-        deviceConfig_.localType = localTypeJson.get<std::string>();
-        ANS_LOGI("Dans initConfig local type %{public}s.", deviceConfig_.localType.c_str());
-    }
-
-    nlohmann::json supportJson = configJson[CFG_KEY_SUPPORT_DEVICES];
-    if (supportJson.is_null() || supportJson.empty() || !supportJson.is_array()) {
-        ANS_LOGE("Dans initConfig support type as invalid json.");
+    SetLocalType(configJson);
+    if (!SetSupportPeerDevice(configJson)) {
         return false;
     }
-
-    for (auto &deviceJson : supportJson) {
-        ANS_LOGI("Dans initConfig support type %{public}s.", deviceJson.get<std::string>().c_str());
-        deviceConfig_.supportPeerDevice.insert(deviceJson.get<std::string>());
-    }
-
-    nlohmann::json titleJson = configJson[CFG_KEY_TITLE_LENGTH];
-    if (titleJson.is_null() || titleJson.empty() || !titleJson.is_number_integer()) {
-        deviceConfig_.maxTitleLength = DEFAULT_TITLE_LENGTH;
-    } else {
-        deviceConfig_.maxTitleLength = titleJson.get<int32_t>();
-        ANS_LOGI("Dans initConfig title length %{public}d.", deviceConfig_.maxTitleLength);
-    }
-
+    SetMaxTitleLength(configJson);
     SetMaxContentLength(configJson);
     SetOperationReplyTimeout(configJson);
 
     deviceConfig_.collaborativeDeleteTypes = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteType();
     deviceConfig_.startAbilityTimeout = NotificationConfigParse::GetInstance()->GetStartAbilityTimeout();
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> map;
+    auto res = NotificationConfigParse::GetInstance()->GetCollaborativeDeleteTypeByDevice(map);
+    if (res && !map.empty()) {
+        deviceConfig_.collaborativeDeleteTypesByDevice = map;
+    }
     return true;
 }
 
@@ -483,6 +466,53 @@ void DistributedExtensionService::SetMaxContentLength(nlohmann::json &configJson
         deviceConfig_.maxContentLength = contentJson.get<int32_t>();
         ANS_LOGI("Dans initConfig content length %{public}d.", deviceConfig_.maxContentLength);
     }
+}
+
+bool DistributedExtensionService::SetLocalType(nlohmann::json &configJson)
+{
+    nlohmann::json localTypeJson = configJson[CFG_KEY_LOCAL_TYPE];
+    if (localTypeJson.is_null() || localTypeJson.empty()) {
+        ANS_LOGE("Dans initConfig local type as invalid json.");
+        return false;
+    }
+    
+    if (!localTypeJson.is_string()) {
+        ANS_LOGE("Dans initConfig local type not string");
+        return false;
+    }
+
+    deviceConfig_.localType = localTypeJson.get<std::string>();
+    ANS_LOGI("Dans initConfig local type %{public}s.", deviceConfig_.localType.c_str());
+    return true;
+}
+
+bool DistributedExtensionService::SetSupportPeerDevice(nlohmann::json &configJson)
+{
+    nlohmann::json supportJson = configJson[CFG_KEY_SUPPORT_DEVICES];
+    if (supportJson.is_null() || supportJson.empty() || !supportJson.is_array()) {
+        ANS_LOGE("Dans initConfig support type as invalid json.");
+        return false;
+    }
+
+    for (auto &deviceJson : supportJson) {
+        if (deviceJson.is_string()) {
+            deviceConfig_.supportPeerDevice.insert(deviceJson.get<std::string>());
+            ANS_LOGI("Dans initConfig support type %{public}s.", deviceJson.get<std::string>().c_str());
+        }
+    }
+    return true;
+}
+
+bool DistributedExtensionService::SetMaxTitleLength(nlohmann::json &configJson)
+{
+    nlohmann::json titleJson = configJson[CFG_KEY_TITLE_LENGTH];
+    if (titleJson.is_null() || titleJson.empty() || !titleJson.is_number_integer()) {
+        deviceConfig_.maxTitleLength = DEFAULT_TITLE_LENGTH;
+    } else {
+        deviceConfig_.maxTitleLength = titleJson.get<int32_t>();
+        ANS_LOGI("Dans initConfig title length %{public}d.", deviceConfig_.maxTitleLength);
+    }
+    return true;
 }
 }
 }

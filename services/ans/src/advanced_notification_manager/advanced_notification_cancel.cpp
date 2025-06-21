@@ -912,5 +912,206 @@ void AdvancedNotificationService::ExcuteDeleteAll(ErrCode &result, const int32_t
     BatchCancelTimer(timerIds);
     result = ERR_OK;
 }
+
+ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
+    const std::vector<std::string>& hashcodes, const int32_t slotTypeInt,
+    const int32_t deleteTypeInt, const int32_t removeReason)
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("app no controller");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("notificationSvrQueue is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
+    NotificationConstant::DistributedDeleteType deleteType =
+        static_cast<NotificationConstant::DistributedDeleteType>(deleteTypeInt);
+    
+    switch (deleteType) {
+        case NotificationConstant::DistributedDeleteType::ALL:
+            return RemoveAllDistributedNotifications(removeReason);
+        case NotificationConstant::DistributedDeleteType::SLOT:
+        case NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT:
+            return RemoveDistributedNotifications(slotType, removeReason, deleteType);
+        case NotificationConstant::DistributedDeleteType::HASHCODES:
+            return RemoveDistributedNotifications(hashcodes, removeReason);
+        default:
+            ANS_LOGW("no deleteType");
+            break;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
+    const std::vector<std::string>& hashcodes, const int32_t removeReason)
+{
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::vector<sptr<Notification>> notifications;
+        std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
+        for (auto record : notificationList_) {
+            auto notification = record->notification;
+            if (notification == nullptr) {
+                continue;
+            }
+
+            auto key = notification->GetKey();
+            if (std::find(hashcodes.begin(), hashcodes.end(), key) == hashcodes.end()) {
+                continue;
+            }
+            if (ExecuteDeleteDistributedNotification(record, notifications, removeReason)) {
+                deleteRecords.push_back(record);
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, removeReason);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, removeReason);
+        }
+        for (auto deleteRecord : deleteRecords) {
+            notificationList_.remove(deleteRecord);
+        }
+    }));
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
+    const NotificationConstant::SlotType& slotType, const int32_t removeReason,
+    const NotificationConstant::DistributedDeleteType& deleteType)
+{
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::vector<sptr<Notification>> notifications;
+        std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
+        for (auto record : notificationList_) {
+            auto notification = record->notification;
+            if (notification == nullptr) {
+                continue;
+            }
+            auto request = notification->GetNotificationRequestPoint();
+            if (request == nullptr) {
+                continue;
+            }
+            if (deleteType == NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT &&
+                request->GetSlotType() == slotType) {
+                ANS_LOGD("key:%{public}s,ty:%{public}d", request->GetKey().c_str(), request->GetSlotType());
+                continue;
+            }
+            if (deleteType == NotificationConstant::DistributedDeleteType::SLOT &&
+                request->GetSlotType() != slotType) {
+                ANS_LOGD("key:%{public}s,ty:%{public}d", request->GetKey().c_str(), request->GetSlotType());
+                continue;
+            }
+
+            if (ExecuteDeleteDistributedNotification(record, notifications, removeReason)) {
+                deleteRecords.push_back(record);
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, removeReason);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, removeReason);
+        }
+        for (auto deleteRecord : deleteRecords) {
+            notificationList_.remove(deleteRecord);
+        }
+    }));
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveAllDistributedNotifications(
+    const int32_t removeReason)
+{
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::vector<sptr<Notification>> notifications;
+        std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
+        for (auto record : notificationList_) {
+            if (ExecuteDeleteDistributedNotification(record, notifications, removeReason)) {
+                deleteRecords.push_back(record);
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, removeReason);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, removeReason);
+        }
+
+        for (auto deleteRecord : deleteRecords) {
+            notificationList_.remove(deleteRecord);
+        }
+    }));
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::ExecuteDeleteDistributedNotification(
+    std::shared_ptr<NotificationRecord>& record,
+    std::vector<sptr<Notification>>& notifications,
+    const int32_t removeReason)
+{
+    if (record == nullptr) {
+        ANS_LOGE("delete record is null");
+        return false;
+    }
+
+    auto notification = record->notification;
+    if (notification == nullptr) {
+        ANS_LOGE("delete notification is null");
+        return false;
+    }
+
+    auto request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("delete request is null");
+        return false;
+    }
+    if (IsDistributedNotification(request)) {
+        notifications.emplace_back(notification);
+        CancelTimer(notification->GetAutoDeletedTimer());
+        ProcForDeleteLiveView(record);
+        TriggerRemoveWantAgent(request, removeReason, record->isThirdparty);
+        CancelWantAgent(notification);
+        return true;
+    }
+    ANS_LOGD("delete not distributed, key:%{public}s", request->GetKey().c_str());
+    return false;
+}
+
+bool AdvancedNotificationService::IsDistributedNotification(sptr<NotificationRequest> request)
+{
+    if (request == nullptr) {
+        return false;
+    }
+
+    if (request->GetDistributedCollaborate()) {
+        return true;
+    }
+    return false;
+}
 }  // namespace Notification
 }  // namespace OHOS

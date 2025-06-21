@@ -420,6 +420,267 @@ HWTEST_F(AnsPublishServiceTest, DeleteAll_00001, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: RemoveDistributedNotifications_00001
+ * @tc.desc: delete distributed notificaitons test permission and param
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    
+    MockIsSystemApp(false);
+    std::vector<std::string> hashcodes;
+    auto ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99, 99, 99);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99, 99, 99);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->notificationSvrQueue_ = nullptr;
+    ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99, 99, 99);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+
+/**
+ * @tc.name: RemoveDistributedNotifications_00002
+ * @tc.desc: delete distributed notificaitons test permission and param
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::vector<std::string> hashcodes;
+    auto ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99, NotificationConstant::DistributedDeleteType::ALL, 99);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99, NotificationConstant::DistributedDeleteType::SLOT, 99);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99, NotificationConstant::DistributedDeleteType::HASHCODES, 99);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveDistributedNotifications_00003
+ * @tc.desc: delete distributed notificaitons test permission and param
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(true);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    request1->SetLabel("123");
+    sptr<Notification> notification1(new (std::nothrow) Notification(request1));
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request1;
+    record1->notification = notification1;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+
+    std::vector<std::string> hashcodes;
+    hashcodes.push_back(notification->GetKey());
+    auto ret = advancedNotificationService_->RemoveDistributedNotifications(
+        hashcodes, 99);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveDistributedNotifications_00004
+ * @tc.desc: delete distributed notificaitons test permission and param
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(true);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    request1->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<Notification> notification1(new (std::nothrow) Notification(request1));
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request1;
+    record1->notification = notification1;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+
+    std::vector<std::string> hashcodes;
+    hashcodes.push_back(notification->GetKey());
+    auto ret = advancedNotificationService_->RemoveDistributedNotifications(
+        NotificationConstant::SlotType::LIVE_VIEW, 99,
+        NotificationConstant::DistributedDeleteType::SLOT);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveDistributedNotifications_00005
+ * @tc.desc: delete distributed notificaitons test permission and param
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveDistributedNotifications_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(true);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    request1->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request1->SetDistributedCollaborate(true);
+    sptr<Notification> notification1(new (std::nothrow) Notification(request1));
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request1;
+    record1->notification = notification1;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+
+    std::vector<std::string> hashcodes;
+    hashcodes.push_back(notification->GetKey());
+    auto ret = advancedNotificationService_->RemoveDistributedNotifications(
+        NotificationConstant::SlotType::LIVE_VIEW, 99,
+        NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveAllDistributedNotifications_00001
+ * @tc.desc: delete ALL distributed notificaitons
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, RemoveAllDistributedNotifications_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(true);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    sptr<NotificationRequest> request1(new (std::nothrow) NotificationRequest());
+    request1->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    sptr<Notification> notification1(new (std::nothrow) Notification(request1));
+    auto record1 = std::make_shared<NotificationRecord>();
+    record1->request = request1;
+    record1->notification = notification1;
+    advancedNotificationService_->notificationList_.push_back(record1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+
+    std::vector<std::string> hashcodes;
+    hashcodes.push_back(notification->GetKey());
+    auto ret = advancedNotificationService_->RemoveAllDistributedNotifications(99);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: ExecuteDeleteDistributedNotification_00001
+ * @tc.desc: delete ALL distributed notificaitons
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, ExecuteDeleteDistributedNotification_00001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<Notification>> notifications;
+    std::shared_ptr<NotificationRecord> record;
+    auto res = advancedNotificationService_->ExecuteDeleteDistributedNotification(
+        record, notifications, 99);
+    ASSERT_FALSE(res);
+    ASSERT_EQ(notifications.size(), 0);
+
+    record = std::make_shared<NotificationRecord>();
+    res = advancedNotificationService_->ExecuteDeleteDistributedNotification(
+        record, notifications, 99);
+    ASSERT_FALSE(res);
+    ASSERT_EQ(notifications.size(), 0);
+
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(true);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    
+    res = advancedNotificationService_->ExecuteDeleteDistributedNotification(
+        record, notifications, 99);
+    ASSERT_TRUE(res);
+    ASSERT_EQ(notifications.size(), 1);
+}
+
+/**
+ * @tc.name: IsDistributedNotification_00001
+ * @tc.desc: delete ALL distributed notificaitons
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDistributedNotification_00001, Function | SmallTest | Level1)
+{
+    auto res = advancedNotificationService_->IsDistributedNotification(nullptr);
+    ASSERT_FALSE(res);
+
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetDistributedCollaborate(true);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    res = advancedNotificationService_->IsDistributedNotification(request);
+    ASSERT_TRUE(res);
+
+    request->SetDistributedCollaborate(false);
+    res = advancedNotificationService_->IsDistributedNotification(request);
+    ASSERT_FALSE(res);
+}
+
+/**
  * @tc.name: DeleteAll_00002
  * @tc.desc: Test DeleteAll,
  *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_NON_SYSTEM_APP

@@ -57,12 +57,18 @@ public:
     bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);
     bool GetAppAndDeviceRelationMap(std::map<std::string, std::string>& relationMap);
     std::unordered_set<std::string> GetCollaborativeDeleteType() const;
+    bool GetCollaborativeDeleteTypeByDevice(std::map<std::string, std::map<std::string,
+        std::unordered_set<std::string>>>& map) const;
     bool GetFilterUidAndBundleName(const std::string &key);
     void GetCollaborationFilter();
     bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
     uint32_t GetStartAbilityTimeout();
 
 private:
+    bool ParseCollaborativeDeleteTypesDevices(std::map<std::string, std::map<std::string,
+        std::unordered_set<std::string>>>& map, nlohmann::json& collaborativeDeleteTypes) const;
+    bool ParseDeviceSlotType(const nlohmann::json& device,
+        std::map<std::string, std::unordered_set<std::string>>& peerDeviceTypeMap) const;
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
     std::mutex mutex_;
@@ -95,6 +101,11 @@ public:
     #endif
     constexpr static const char* CFG_KEY_COLLABORATIVE_DELETE_TYPES = "collaborativeDeleteTypes";
     constexpr static const char* CFG_KEY_START_ABILITY_TIMEOUT = "startAbilityTimeout";
+    constexpr static const char* CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES = "collaborativeDeleteTypesDevices";
+    constexpr static const char* LOCAL_DEVICE_TYPE = "localDeviceType";
+    constexpr static const char* PEER_DELETE_FILTER_DEVICE = "peerDeleteFilterDevice";
+    constexpr static const char* PEER_DEVICE_TYPE = "peerDeviceType";
+    constexpr static const char* DELETE_SLOT_TYPE = "deleteSlotTypes";
 };
 } // namespace Notification
 } // namespace OHOS

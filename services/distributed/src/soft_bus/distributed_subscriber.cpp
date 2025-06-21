@@ -56,7 +56,9 @@ void DistribuedSubscriber::OnCanceled(const std::shared_ptr<Notification> &reque
     ANS_LOGI("Subscriber on canceled %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str());
-    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE) {
+    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE ||
+        deleteReason == NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE ||
+        deleteReason == NotificationConstant::DISTRIBUTED_RELEASE_DELETE) {
         ANS_LOGD("is cross device deletion");
         return;
     }
@@ -128,7 +130,9 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
     ANS_LOGI("Subscriber on batch canceled %{public}d %{public}s %{public}d %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str());
-    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE) {
+    if (deleteReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE ||
+        deleteReason == NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE ||
+        deleteReason == NotificationConstant::DISTRIBUTED_RELEASE_DELETE) {
         ANS_LOGD("is cross device deletion");
         return;
     }
@@ -185,6 +189,64 @@ bool DistribuedSubscriber::CheckNeedCollaboration(const std::shared_ptr<Notifica
 
 bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConstant::SlotType& slotType)
 {
+    auto type = SlotEnumToSring(slotType);
+    if (type.empty()) {
+        ANS_LOGW("slotType is undefine");
+        return false;
+    }
+
+    auto localDeviceType = DistributedDeviceService::DeviceTypeToTypeString(localDevice_.deviceType_);
+    auto peerDeviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice_.deviceType_);
+    if (localDeviceType.empty() || peerDeviceType.empty()) {
+        ANS_LOGW("localDeviceType OR  localDeviceType null");
+        return false;
+    }
+
+    if (!CheckTypeByCcmRule(type, localDeviceType, peerDeviceType)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool DistribuedSubscriber::CheckTypeByCcmRule(const std::string& slotType,
+    const std::string& localDeviceType, const std::string& peerDeviceType)
+{
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> deleteConfigDevice;
+    DistributedLocalConfig::GetInstance().GetCollaborativeDeleteTypesByDevices(deleteConfigDevice);
+    if (deleteConfigDevice.empty()) {
+        ANS_LOGW("distributed delete ccm is undefined");
+        return false;
+    }
+
+    auto peerdeleteConfigDeviceIt = deleteConfigDevice.find(localDeviceType);
+    if (peerdeleteConfigDeviceIt == deleteConfigDevice.end()) {
+        ANS_LOGW("peerdeleteConfigDevice err, local:%{public}s, per:%{public}s",
+            localDeviceType.c_str(), peerDeviceType.c_str());
+        return false;
+    }
+
+    auto peerdeleteConfigDevice = peerdeleteConfigDeviceIt->second;
+    auto deleteSlotTypeListIt = peerdeleteConfigDevice.find(peerDeviceType);
+    if (deleteSlotTypeListIt == peerdeleteConfigDevice.end()) {
+        ANS_LOGW("deleteSlotTypeList err, local:%{public}s, per:%{public}s",
+            localDeviceType.c_str(), peerDeviceType.c_str());
+        return false;
+    }
+
+    auto deleteSlotTypeList = deleteSlotTypeListIt->second;
+    if (deleteSlotTypeList.find(slotType) == deleteSlotTypeList.end()) {
+        ANS_LOGD("deleteSlotTypeList no slottype:%{public}s, local:%{public}s, per:%{public}s",
+            slotType.c_str(), localDeviceType.c_str(), peerDeviceType.c_str());
+        return false;
+    }
+
+    return true;
+}
+
+
+std::string DistribuedSubscriber::SlotEnumToSring(const NotificationConstant::SlotType& slotType)
+{
     std::string type;
     switch (slotType) {
         case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
@@ -215,11 +277,9 @@ bool DistribuedSubscriber::CheckCollaborativeRemoveType(const NotificationConsta
             type = "ILLEGAL_TYPE";
             break;
         default:
-            return false;
+            break;
     }
-    auto collaborativeDeleteTypes = DistributedLocalConfig::GetInstance().GetCollaborativeDeleteTypes();
-    return collaborativeDeleteTypes.find(type) != collaborativeDeleteTypes.end();
+    return type;
 }
-
 }
 }

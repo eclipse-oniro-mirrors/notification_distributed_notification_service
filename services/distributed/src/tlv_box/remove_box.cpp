@@ -41,7 +41,7 @@ bool NotificationRemoveBox::SetNotificationHashCode(const std::string& hashCode)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_HASHCODE, hashCode));
 }
 
-bool NotificationRemoveBox::setNotificationSlotType(int32_t slotType)
+bool NotificationRemoveBox::SetNotificationSlotType(int32_t slotType)
 {
     if (box_ == nullptr) {
         return false;
@@ -49,5 +49,37 @@ bool NotificationRemoveBox::setNotificationSlotType(int32_t slotType)
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_SLOT_TYPE, slotType));
 }
 
+
+bool NotificationRemoveBox::SetLocalDeviceId(const std::string &deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
+bool NotificationRemoveBox::GetNotificationHashCode(std::string& hashCode) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(NOTIFICATION_HASHCODE, hashCode);
+}
+
+bool NotificationRemoveBox::GetNotificationSlotType(int32_t &slotType) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(NOTIFICATION_SLOT_TYPE, slotType);
+}
+
+bool NotificationRemoveBox::GetLocalDeviceId(std::string& deviceId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
+}
 }
 }

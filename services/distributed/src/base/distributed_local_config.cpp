@@ -50,5 +50,10 @@ std::unordered_set<std::string> DistributedLocalConfig::GetCollaborativeDeleteTy
     return localConfig_.collaborativeDeleteTypes;
 }
 
+void DistributedLocalConfig::GetCollaborativeDeleteTypesByDevices(
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>>& config) const
+{
+    config =  localConfig_.collaborativeDeleteTypesByDevice;
+}
 }
 }

@@ -106,6 +106,12 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
     }
+
+    if (result == ERR_OK && !enabled) {
+        RemoveDistributedNotifications(slotType,
+            NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE,
+            NotificationConstant::DistributedDeleteType::SLOT);
+    }
     ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledBySlot result: %{public}d",
         slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
@@ -599,9 +605,10 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         ANS_LOGE("bundle is nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
+    
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle,
         deviceType, enabled);
-
+    
     ANS_LOGI("%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledByBundle result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), deviceType.c_str(), std::to_string(enabled).c_str(), result);
@@ -656,6 +663,12 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         changeInfo.liveViewChange = liveViewEnabled;
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+    }
+
+    if (result == ERR_OK && !enabled) {
+        RemoveDistributedNotifications(NotificationConstant::SlotType::LIVE_VIEW,
+            NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE,
+            NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT);
     }
     return result;
 }

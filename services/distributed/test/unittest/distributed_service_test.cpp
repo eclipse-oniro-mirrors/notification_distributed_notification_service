@@ -85,7 +85,7 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_00400, Function | SmallT
 {
     BatchRemoveNotificationBox batchRemoveBox;
     std::string hashCodes = "notificationId1 notificationId2";
-    batchRemoveBox.SetNotificationHashCode(hashCodes);
+    batchRemoveBox.SetNotificationHashCodes(hashCodes);
     DistributedPublishService::GetInstance().RemoveNotifications(batchRemoveBox.box_);
     ASSERT_NE(batchRemoveBox.box_, nullptr);
 }

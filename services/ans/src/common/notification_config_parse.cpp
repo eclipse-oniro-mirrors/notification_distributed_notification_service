@@ -482,5 +482,84 @@ bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) c
     return reporteTrustSet_.count(bundleName);
 }
 
+bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
+    std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
+    JsonPoint.append("/");
+    JsonPoint.append(CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES);
+    if (!GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("GetConfigJson faild");
+        return false;
+    }
+
+    if (root.find(CFG_KEY_NOTIFICATION_SERVICE) == root.end()) {
+        ANS_LOGE("appPrivileges null");
+        return false;
+    }
+
+    nlohmann::json collaborativeDeleteTypes =
+        root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES];
+
+    if (collaborativeDeleteTypes.is_null() || collaborativeDeleteTypes.empty() ||
+        !collaborativeDeleteTypes.is_array()) {
+        ANS_LOGE("get collaborativeDeleteTypes failed.");
+        return false;
+    }
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> tempMap;
+    if (!ParseCollaborativeDeleteTypesDevices(tempMap, collaborativeDeleteTypes)) {
+        return false;
+    }
+    resultMap = tempMap;
+    return true;
+}
+
+bool NotificationConfigParse::ParseCollaborativeDeleteTypesDevices(std::map<std::string,
+    std::map<std::string, std::unordered_set<std::string>>>& resultMap,
+    nlohmann::json& collaborativeDeleteTypes) const
+{
+    for (const auto& device : collaborativeDeleteTypes) {
+        if (!device.contains(LOCAL_DEVICE_TYPE) || !device[LOCAL_DEVICE_TYPE].is_string()) {
+            continue;
+        }
+        std::string localDeviceType = device[LOCAL_DEVICE_TYPE];
+
+        if (!device.contains(PEER_DELETE_FILTER_DEVICE) || !device[PEER_DELETE_FILTER_DEVICE].is_array()) {
+            continue;
+        }
+
+        std::map<std::string, std::unordered_set<std::string>> peerDeviceTypeMap;
+        ParseDeviceSlotType(device, peerDeviceTypeMap);
+        resultMap[localDeviceType] = peerDeviceTypeMap;
+    }
+    return true;
+}
+
+bool NotificationConfigParse::ParseDeviceSlotType(const nlohmann::json& device,
+    std::map<std::string, std::unordered_set<std::string>>& peerDeviceTypeMap) const
+{
+    for (const auto& peerDevice : device[PEER_DELETE_FILTER_DEVICE]) {
+        if (!peerDevice.contains(PEER_DEVICE_TYPE) || !peerDevice[PEER_DEVICE_TYPE].is_string()) {
+            continue;
+        }
+        std::string peerDeviceType = peerDevice[PEER_DEVICE_TYPE];
+
+        if (!peerDevice.contains(DELETE_SLOT_TYPE) || !peerDevice[DELETE_SLOT_TYPE].is_array()) {
+            continue;
+        }
+
+        std::unordered_set<std::string> deleteSlotTypes;
+        for (const auto& slotType : peerDevice[DELETE_SLOT_TYPE]) {
+            if (slotType.is_string()) {
+                deleteSlotTypes.insert(slotType);
+            }
+        }
+
+        peerDeviceTypeMap[peerDeviceType] = std::move(deleteSlotTypes);
+    }
+    return true;
+}
 } // namespace Notification
 } // namespace OHOS

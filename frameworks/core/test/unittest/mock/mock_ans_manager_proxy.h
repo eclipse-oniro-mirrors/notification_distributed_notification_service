@@ -182,7 +182,8 @@ public:
         ErrCode(const std::string&, const std::string&, int32_t, const std::vector<std::string>&));
     MOCK_METHOD4(SetTargetDeviceSwitch, ErrCode(const std::string&, const std::string&, bool, bool));
     MOCK_METHOD1(SetHashCodeRule, ErrCode(uint32_t));
-
+    MOCK_METHOD4(RemoveDistributedNotifications, ErrCode(const std::vector<std::string>& hashcodes,
+        const int32_t, const int32_t, const int32_t));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

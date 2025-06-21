@@ -67,6 +67,9 @@ private:
     ~DistributedExtensionService();
     void SetMaxContentLength(nlohmann::json &configJson);
     void SetOperationReplyTimeout(nlohmann::json &configJson);
+    bool SetLocalType(nlohmann::json &configJson);
+    bool SetSupportPeerDevice(nlohmann::json &configJson);
+    bool SetMaxTitleLength(nlohmann::json &configJson);
 
     std::mutex mapLock_;
     std::atomic<bool> dansRunning_ = false;

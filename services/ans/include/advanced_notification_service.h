@@ -391,6 +391,15 @@ public:
 
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
 
+    /**
+     * @brief Removes Distributed notifications in the system.
+     * @note Your application must have platform signature to use this method.
+     * @return Returns remove notifications result.
+     */
+    ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+        const int32_t slotTypeInt, const int32_t deleteTypeInt,
+        const int32_t removeReason) override;
+
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
     /**
@@ -1655,6 +1664,15 @@ private:
         const bool easyAbroad);
     void ClearSlotTypeData(const sptr<NotificationRequest> &request, int32_t callingUid, int32_t sourceType);
     ErrCode RegisterPushCallbackTokenCheck();
+    ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+        const int32_t removeReason);
+    ErrCode RemoveDistributedNotifications(const NotificationConstant::SlotType& slotType,
+        const int32_t removeReason,
+        const NotificationConstant::DistributedDeleteType& deleteType);
+    ErrCode RemoveAllDistributedNotifications(const int32_t removeReason);
+    bool ExecuteDeleteDistributedNotification(std::shared_ptr<NotificationRecord>& record,
+        std::vector<sptr<Notification>>& notifications, const int32_t removeReason);
+    bool IsDistributedNotification(sptr<NotificationRequest> request);
     bool IsEnableNotificationByKioskAppTrustList(const std::string &bundleName);
 
     template<typename T>

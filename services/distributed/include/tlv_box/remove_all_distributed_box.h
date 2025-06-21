@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_BATCH_REMOVE_NOTIFICATION_BOX_H
-#define BASE_NOTIFICATION_DISTRIBUTED_BATCH_REMOVE_NOTIFICATION_BOX_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_REMOVEALL_DISTRIBUTED_NOTIFICATIONS_BOX_H
+#define BASE_NOTIFICATION_DISTRIBUTED_REMOVEALL_DISTRIBUTED_NOTIFICATIONS_BOX_H
 
 #include <string>
 
@@ -23,18 +23,12 @@
 
 namespace OHOS {
 namespace Notification {
-class BatchRemoveNotificationBox : public BoxBase {
+class RemoveAllDistributedNotificationsBox : public BoxBase {
 public:
-    BatchRemoveNotificationBox();
-    ~BatchRemoveNotificationBox();
-    BatchRemoveNotificationBox(std::shared_ptr<TlvBox> box);
-    bool SetNotificationHashCodes(const std::string& hashCodes);
-    bool SetNotificationSlotTypes(const std::string &slotTypes);
-    bool SetLocalDeviceId(const std::string &deviceId);
-    bool GetNotificationHashCodes(std::string &hashCodes) const;
-    bool GetNotificationSlotTypes(std::string &slotType) const;
-    bool GetLocalDeviceId(std::string &deviceId) const;
+    RemoveAllDistributedNotificationsBox();
+    ~RemoveAllDistributedNotificationsBox();
+    RemoveAllDistributedNotificationsBox(std::shared_ptr<TlvBox> box);
 };
 }  // namespace Notification
 }  // namespace OHOS
-#endif // BASE_NOTIFICATION_DISTRIBUTED_BATCH_REMOVE_NOTIFICATION_BOX_H
+#endif // BASE_NOTIFICATION_DISTRIBUTED_REMOVEALL_DISTRIBUTED_NOTIFICATIONS_BOX_H

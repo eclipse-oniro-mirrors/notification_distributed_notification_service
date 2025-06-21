@@ -308,6 +308,15 @@ ErrCode NotificationHelper::RemoveNotifications()
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications();
 }
 
+ErrCode NotificationHelper::RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+    const NotificationConstant::SlotType& slotType,
+    const NotificationConstant::DistributedDeleteType& deleteType,
+    const int32_t removeReason)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->RemoveDistributedNotifications(
+        hashcodes, slotType, deleteType, removeReason);
+}
+
 ErrCode NotificationHelper::GetNotificationSlotsForBundle(
     const NotificationBundleOption &bundleOption, std::vector<sptr<NotificationSlot>> &slots)
 {
