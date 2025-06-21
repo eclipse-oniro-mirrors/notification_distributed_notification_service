@@ -184,6 +184,12 @@ bool NotificationConfigParse::IsReportTrustList(const std::string& bundleName) c
 {
     return true;
 }
+
+bool NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
+    std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
+{
+    return true;
+}
 } // namespace Notification
 } // namespace OHOS
 

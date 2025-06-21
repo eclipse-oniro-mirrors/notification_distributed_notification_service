@@ -34,6 +34,8 @@ public:
     int32_t GetContentLength() const;
     uint32_t GetStartAbilityTimeout() const;
     std::unordered_set<std::string> GetCollaborativeDeleteTypes() const;
+    void GetCollaborativeDeleteTypesByDevices(
+        std::map<std::string, std::map<std::string, std::unordered_set<std::string>>>& config) const;
 private:
     DistributedDeviceConfig localConfig_;
 };

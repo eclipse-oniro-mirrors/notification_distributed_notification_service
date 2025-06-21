@@ -21,6 +21,12 @@
 #include "request_box.h"
 #include "notification_request.h"
 #include "distributed_device_data.h"
+#ifdef DISTRIBUTED_FEATURE_MASTER
+#include "remove_box.h"
+#include "batch_remove_box.h"
+#else
+#endif
+
 
 namespace OHOS {
 namespace Notification {
@@ -29,12 +35,15 @@ public:
     static DistributedPublishService& GetInstance();
     void RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage);
+    void BatchRemoveReport(const std::string &slotTypesString, const int result);
+    int RemoveDistributedNotifications(const std::vector<std::string>& hashcodes);
     void OnRemoveNotification(const DistributedDeviceInfo& peerDevice,
         std::string hashCode, int32_t slotTypes);
     void OnRemoveNotifications(const DistributedDeviceInfo& peerDevice,
         std::string hashCodes, std::string slotTypes);
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
+    void RemoveAllDistributedNotificaions(DistributedDeviceInfo& deviceInfo);
     void SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
         const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
@@ -47,9 +56,14 @@ private:
         NotificationConstant::SlotType slotType, std::shared_ptr<NotificationRequestBox>& requestBox);
     void SetNotificationContent(const std::shared_ptr<NotificationContent> &content,
         NotificationContent::Type type, std::shared_ptr<NotificationRequestBox>& requestBox);
+    bool ForWardRemove(const std::shared_ptr<BoxBase>& boxMessage, std::string& deviceId);
+    std::shared_ptr<NotificationRemoveBox> MakeRemvoeBox(std::string &hashCode, int32_t &slotTypes);
+    std::shared_ptr<BatchRemoveNotificationBox> MakeBatchRemvoeBox(std::vector<std::string>& hashCodes,
+        std::string &slotTypes);
 #else
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);
+    void RemoveAllDistributedNotifications();
 private:
     void MakeExtendInfo(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationButtons(const NotificationRequestBox& box,

@@ -178,6 +178,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+        const int32_t slotTypeInt, const int32_t deleteTypeInt, const int32_t removeReason) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode RemoveNotifications(const std::vector<std::string>& hashcodes, int32_t removeReason) override
     {
         return ERR_ANS_INVALID_PARAM;

@@ -152,6 +152,18 @@ void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t dev
     }
     std::function<void()> subscribeTask = std::bind([deviceId, deviceType]() {
         DistributedSubscribeService::GetInstance().UnSubscribeNotification(deviceId, deviceType);
+        auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+        if (localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+            ANS_LOGD("watch not delete notifications");
+            return;
+        }
+        if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+            std::vector<std::string> hashcodes;
+            NotificationHelper::RemoveDistributedNotifications(hashcodes,
+                NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
+                NotificationConstant::DistributedDeleteType::ALL,
+                NotificationConstant::DISTRIBUTED_RELEASE_DELETE);
+        }
     });
     serviceQueue_->submit(subscribeTask);
 }
@@ -175,6 +187,15 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
                 DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
                 DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
             }
+        }
+
+        if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CLOSE) {
+            DistributedDeviceInfo device;
+            if (!DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(changeInfo.deviceId, device)) {
+                ANS_LOGW("get deviceId err");
+                return;
+            }
+            DistributedPublishService::GetInstance().RemoveAllDistributedNotificaions(device);
         }
 #else
         if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
@@ -446,6 +467,9 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
                 break;
             case NotificationEventType::SYNC_NOTIFICATION:
                 DistributedPublishService::GetInstance().PublishSynchronousLiveView(box);
+                break;
+            case NotificationEventType::REMOVE_ALL_DISTRIBUTED_NOTIFICATIONS:
+                DistributedPublishService::GetInstance().RemoveAllDistributedNotifications();
                 break;
 #endif
             default:

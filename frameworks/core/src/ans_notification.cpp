@@ -925,6 +925,20 @@ ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hash
     return proxy->RemoveNotifications(hashcodes, removeReason);
 }
 
+ErrCode AnsNotification::RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+    const NotificationConstant::SlotType& slotType,
+    const NotificationConstant::DistributedDeleteType& deleteType,
+    const int32_t removeReason)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->RemoveDistributedNotifications(hashcodes, slotType, deleteType, removeReason);
+}
+
 ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)
 {
     ANS_LOGI("called, bundleName:%{public}s", bundleOption.GetBundleName().c_str());

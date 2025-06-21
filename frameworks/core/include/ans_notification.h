@@ -591,6 +591,16 @@ public:
     ErrCode RemoveNotifications();
 
     /**
+     * @brief Removes Distributed notifications in the system.
+     * @note Your application must have platform signature to use this method.
+     * @return Returns remove notifications result.
+     */
+    ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
+        const NotificationConstant::SlotType& slotType,
+        const NotificationConstant::DistributedDeleteType& deleteType,
+        const int32_t removeReason);
+
+    /**
      * @brief Obtains all notification slots belonging to the specified bundle.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.

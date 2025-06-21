@@ -41,6 +41,7 @@ enum DeviceStatueChangeType {
     DEVICE_USING_CHANGE = 0,
     NOTIFICATION_ENABLE_CHANGE = 1,
     ALL_CONNECT_STATUS_CHANGE = 2,
+    DEVICE_USING_CLOSE = 3,
 };
 
 struct DeviceStatueChangeInfo {
@@ -58,6 +59,7 @@ struct DistributedDeviceConfig {
     std::string localType;
     std::set<std::string> supportPeerDevice;
     std::unordered_set<std::string> collaborativeDeleteTypes;
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> collaborativeDeleteTypesByDevice;
 };
 
 static std::string StringAnonymous(const std::string& data)

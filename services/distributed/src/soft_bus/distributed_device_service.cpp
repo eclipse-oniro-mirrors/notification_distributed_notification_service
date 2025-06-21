@@ -22,6 +22,7 @@
 #include "distributed_device_data.h"
 #include "notification_helper.h"
 #include "distributed_observer_service.h"
+#include "distributed_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -39,19 +40,19 @@ std::string DistributedDeviceService::DeviceTypeToTypeString(uint16_t deviceType
 {
     switch (deviceType) {
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH: {
-            return "wearable";
+            return DistributedService::WEARABLE_DEVICE_TYPE;
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
-            return "pad";
+            return DistributedService::PAD_DEVICE_TYPE;
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PC: {
-            return "pc";
+            return DistributedService::PC_DEVICE_TYPE;
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1: {
-            return "pc";
+            return DistributedService::PC_DEVICE_TYPE;
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE: {
-            return "phone";
+            return DistributedService::PHONE_DEVICE_TYPE;
         }
         default:
             return "";
@@ -283,6 +284,14 @@ std::map<std::string, DistributedDeviceInfo>& DistributedDeviceService::GetDevic
 {
     std::lock_guard<std::mutex> lock(mapLock_);
     return peerDevice_;
+}
+
+void DistributedDeviceService::GetDeviceList(std::map<std::string, DistributedDeviceInfo>& peerDevices)
+{
+    std::lock_guard<std::mutex> lock(mapLock_);
+    for (auto deviceItem : peerDevice_) {
+        peerDevices[deviceItem.first] = deviceItem.second;
+    }
 }
 
 int32_t DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
