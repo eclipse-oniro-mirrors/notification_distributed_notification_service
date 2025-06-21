@@ -211,9 +211,10 @@ struct AsyncCallbackInfoSubscribe {
 };
 
 struct OperationInfo {
-    bool withOperationInfo = false;
+    int32_t operationType;
     std::string actionName;
     std::string userInput;
+    int32_t btnIndex;
 };
 
 struct AsyncOperationCallbackInfo {

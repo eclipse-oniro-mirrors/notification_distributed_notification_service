@@ -323,6 +323,41 @@ bool NotificationRequestBox::SetDeviceId(const std::string& deviceId)
     return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
 }
 
+bool NotificationRequestBox::SetActionButtonsLength(const int32_t length)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(ACTION_BUTTONS_LENGTH, length));
+}
+
+bool NotificationRequestBox::SetActionButtonsTitle(const std::vector<std::string>& buttonsTitle)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    int32_t index = 0;
+    for (auto& buttonTitle : buttonsTitle) {
+        if (box_->PutValue(
+            std::make_shared<TlvItem>(ACTION_BUTTONS_TITILE_INDEX + index, buttonTitle))) {
+            index++;
+        }
+    }
+    return SetActionButtonsLength(index);
+}
+
+bool NotificationRequestBox::SetActionUserInputs(const std::vector<std::string>& userInputs)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    for (size_t i = 0; i < userInputs.size(); i++) {
+        box_->PutValue(
+            std::make_shared<TlvItem>(ACTION_USER_INPUTS + i, userInputs[i]));
+    }
+    return true;
+}
+
 #else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
@@ -584,6 +619,48 @@ bool NotificationRequestBox::GetDeviceId(std::string& deviceId) const
         return false;
     }
     return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
+}
+
+bool NotificationRequestBox::GetActionButtonsLength(int32_t& length) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(ACTION_BUTTONS_LENGTH, length);
+}
+
+bool NotificationRequestBox::GetActionButtonsTitle(std::vector<std::string>& buttonsTitle) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    int32_t length = 0;
+    if (!GetActionButtonsLength(length)) {
+        return false;
+    }
+    for (int i = 0; i < length; i++) {
+        std::string buttonTitle = "";
+        box_->GetStringValue(ACTION_BUTTONS_TITILE_INDEX + i, buttonTitle);
+        buttonsTitle.push_back(buttonTitle);
+    }
+    return true;
+}
+
+bool NotificationRequestBox::GetActionUserInputs(std::vector<std::string>& userInputs) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    int32_t length = 0;
+    if (!GetActionButtonsLength(length)) {
+        return false;
+    }
+    for (int i = 0; i < length; i++) {
+        std::string userInput = "";
+        box_->GetStringValue(ACTION_USER_INPUTS + i, userInput);
+        userInputs.push_back(userInput);
+    }
+    return true;
 }
 #endif
 }

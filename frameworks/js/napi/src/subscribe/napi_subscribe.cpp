@@ -45,15 +45,21 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
         return;
     }
     operationInfo->SetHashCode(asyncCallbackInfo->hashCode);
-    if (asyncCallbackInfo->operationInfo.withOperationInfo) {
+    if (asyncCallbackInfo->operationInfo.operationType ==
+        static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_REPLY)) {
         operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+        operationInfo->SetBtnIndex(asyncCallbackInfo->operationInfo.btnIndex);
         operationInfo->SetActionName(asyncCallbackInfo->operationInfo.actionName);
         operationInfo->SetUserInput(asyncCallbackInfo->operationInfo.userInput);
+    } else if (asyncCallbackInfo->operationInfo.operationType < OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW) {
+        operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
     } else {
-        operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
+        operationInfo->SetOperationType(static_cast<OperationType>(asyncCallbackInfo->operationInfo.operationType));
     }
     int32_t result = NotificationHelper::DistributeOperation(operationInfo, callback);
-    if (result != ERR_OK || !asyncCallbackInfo->operationInfo.withOperationInfo) {
+    if (result != ERR_OK ||
+        asyncCallbackInfo->operationInfo.operationType ==
+        static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_JUMP)) {
         callback->OnOperationCallback(result);
     }
 }

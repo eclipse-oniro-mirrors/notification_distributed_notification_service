@@ -1167,6 +1167,31 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0100, Function | Med
 }
 
 /*
+ * @tc.name: SubscribeNotificationSelf_0400
+ * @tc.desc: test SubscribeNotificationSelf with nullptr param.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0400, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->SubscribeNotificationSelf(nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+ 
+/*
+ * @tc.name: SubscribeNotificationSelf_0500
+ * @tc.desc: test SubscribeNotificationSelf ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0500, Function | MediumTest | Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    ErrCode ret = ans_->SubscribeNotificationSelf(subscriberPtr);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: SubscribeLocalLiveViewNotification_0100
  * @tc.desc: test SubscribeLocalLiveViewNotification ErrCode ERR_ANS_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
@@ -1306,6 +1331,18 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0400, Function | Mediu
     sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
     ErrCode ret1 = ans_->UnSubscribeNotification(subscriber, info);
     EXPECT_EQ(ret1, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_0700
+ * @tc.desc: test UnSubscribeNotification when subscriber is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0700, Function | MediumTest | Level1)
+{
+    ErrCode ret = ans_->UnSubscribeNotification(nullptr, nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 
 /*
@@ -2195,6 +2232,93 @@ HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0700, Function | MediumT
     info.AddDeviceType("phone");
     ErrCode ret = ans_->SubscribeNotification(subscriber, info);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_0500
+ * @tc.desc: test UnSubscribeNotification normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0500, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    subscriber.impl_ = nullptr;
+    ErrCode ret = ans_->UnSubscribeNotification(subscriber);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+ 
+/*
+ * @tc.name: UnSubscribeNotification_0600
+ * @tc.desc: test UnSubscribeNotification normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0600, Function | MediumTest | Level1)
+{
+    auto subscriber = TestAnsSubscriber();
+    subscriber.impl_ = nullptr;
+    auto info = NotificationSubscribeInfo();
+    ErrCode ret = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+ 
+/*
+ * @tc.name: SubscribeNotificationSelf_0600
+ * @tc.desc: test SubscribeNotificationSelf normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotificationSelf_0600, Function | MediumTest | Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    ErrCode ret = ans_->SubscribeNotificationSelf(subscriberPtr);
+    EXPECT_EQ(ret, ERR_OK);
+}
+ 
+/*
+ * @tc.name: SubscribeNotification_0800
+ * @tc.desc: test SubscribeNotification normal.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0800, Function | MediumTest | Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> infoPtr = new (std::nothrow) NotificationSubscribeInfo();
+    infoPtr->AddDeviceType("phone");
+    ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, infoPtr);
+    EXPECT_EQ(ret1, ERR_OK);
+    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, infoPtr);
+    EXPECT_EQ(ret2, ERR_OK);
+}
+ 
+/*
+ * @tc.name: SubscribeNotification_0900
+ * @tc.desc: test SubscribeNotification when subscribeInfo is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SubscribeNotification_0900, Function | MediumTest | Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    ErrCode ret1 = ans_->SubscribeNotification(subscriberPtr, nullptr);
+    EXPECT_EQ(ret1, ERR_OK);
+    ErrCode ret2 = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    EXPECT_EQ(ret2, ERR_OK);
+}
+ 
+/*
+ * @tc.name: UnSubscribeNotification_0800
+ * @tc.desc: test UnSubscribeNotification when subscriber not in list.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0800, Function | MediumTest | Level1)
+{
+    std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
+    ErrCode ret = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

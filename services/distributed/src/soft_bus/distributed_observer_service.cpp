@@ -16,6 +16,7 @@
 
 #include "distributed_service.h"
 #include "common_event_manager.h"
+#include "distributed_unlock_listener_oper_service.h"
 #include "common_event_support.h"
 #include "distributed_operation_helper.h"
 
@@ -46,6 +47,10 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
             return;
         }
         DistributedService::GetInstance().HandleBundlesEvent(bundleName, action);
+        return;
+    }
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
+        UnlockListenerOperService::GetInstance().ReplyOperationResponse();
         return;
     }
 #else
@@ -86,6 +91,7 @@ void OberverService::Init(uint16_t deviceType)
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
 #else
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
         deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||

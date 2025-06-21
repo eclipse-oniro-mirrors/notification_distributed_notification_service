@@ -69,6 +69,20 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("distributed unsubscribe all conncet failed, error: %{public}s", dlerror());
         return;
     }
+
+    liveViewMultiScreenSyncOper_ =
+        (LIVE_VIEW_MULTI_SCREEN_SYNC_OPER)dlsym(ExtensionHandle_, "LiveViewMultiScreenSyncOper");
+    if (liveViewMultiScreenSyncOper_ == nullptr) {
+        ANS_LOGE("distributed liveView multi-Screen sync failed, error: %{public}s", dlerror());
+        return;
+    }
+
+    restoreCollaborationWindow_ =
+        (RESTORE_COLLABORATION_WINDOW)dlsym(ExtensionHandle_, "RestoreCollaborationWindow");
+    if (restoreCollaborationWindow_ == nullptr) {
+        ANS_LOGE("distributed restore collaboration window failed, error: %{public}s", dlerror());
+        return;
+    }
     ANS_LOGI("distributed liveview all scenarios extension wrapper init success");
 }
 
@@ -82,6 +96,8 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
         triggerHandler_ = nullptr;
         updateLiveviewEncodeContent_ = nullptr;
         updateLiveviewDecodeContent_ = nullptr;
+        liveViewMultiScreenSyncOper_ = nullptr;
+        restoreCollaborationWindow_ = nullptr;
     }
     ANS_LOGI("distributed liveview all scenarios extension wrapper close success");
 }
@@ -132,5 +148,24 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
         return 0;
     }
     return unSubscribeHandler_();
+}
+
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::LiveViewMultiScreenSyncOper(
+    sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex)
+{
+    if (liveViewMultiScreenSyncOper_ == nullptr) {
+        ANS_LOGE("liveView multi-Screen sync wrapper symbol failed");
+        return 0;
+    }
+    return liveViewMultiScreenSyncOper_(request, operationType, btnIndex);
+}
+
+int32_t DistributedLiveviewAllScenariosExtensionWrapper::RestoreCollaborationWindow(const std::string &networkId)
+{
+    if (restoreCollaborationWindow_ == nullptr) {
+        ANS_LOGE("restore collaboration window wrapper symbol failed");
+        return 0;
+    }
+    return restoreCollaborationWindow_(networkId);
 }
 }

@@ -326,7 +326,8 @@ ErrCode DistributeOperationParamCheck(const sptr<NotificationOperationInfo>& ope
 
     OperationType operationType = operationInfo->GetOperationType();
     if (operationType != OperationType::DISTRIBUTE_OPERATION_JUMP &&
-        operationType != OperationType::DISTRIBUTE_OPERATION_REPLY) {
+        operationType != OperationType::DISTRIBUTE_OPERATION_REPLY &&
+        operationType < OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW) {
         ANS_LOGE("operation type is error.");
         return ERR_ANS_INVALID_PARAM;
     }
