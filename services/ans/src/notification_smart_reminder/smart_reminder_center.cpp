@@ -29,6 +29,9 @@
 #include "bundle_manager_helper.h"
 #include "int_wrapper.h"
 #include "string_wrapper.h"
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+#include "notification_extension_wrapper.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -259,6 +262,16 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
         make_shared<map<string, shared_ptr<NotificationFlags>>>();
     shared_ptr<NotificationFlags> defaultFlag = make_shared<NotificationFlags>();
     NotificationConstant::SlotType slotType = request->GetSlotType();
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    if (EXTENTION_WRAPPER->IsPrivilegeMessage(request)) {
+        ANS_LOGD("Privilege message handle ReminderDecisionProcess.");
+        (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = request->GetFlags();
+        request->SetDeviceFlags(notificationFlagsOfDevices);
+        return;
+    }
+#endif
+
     auto iter = currentReminderMethods_.find(slotType);
     if (iter != currentReminderMethods_.end()) {
         // Only config file can set reminder open now. Otherwise, change iter->second to 11111
