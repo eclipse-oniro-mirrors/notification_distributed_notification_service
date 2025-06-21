@@ -45,7 +45,7 @@ public:
     typedef bool (*NOTIFICATIONDIALOGCONTROL)();
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    typedef bool (*MODIFY_REMINDER_FLAGS)(const sptr<NotificationRequest> &request);
+    typedef bool (*IS_PRIVILEGE_MESSAGE)(const sptr<NotificationRequest> &request);
     typedef bool (*GET_PRIVILEGE_DIALOG_POPPED)(const sptr<NotificationBundleOption>& bundleOption,
         const int32_t &userId);
     typedef bool (*SET_DIALOG_OPENSUCCESS_TIMESTAMP)(const sptr<NotificationBundleOption>& bundleOption,
@@ -69,6 +69,7 @@ public:
     bool NotificationDialogControl();
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    bool IsPrivilegeMessage(const sptr<NotificationRequest> &request);
     bool GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
     bool SetDialogOpenSuccessTimeStamp(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
     bool SetDialogOpenSuccessTimeInterval(const sptr<NotificationBundleOption>& bundleOption, const int32_t &userId);
@@ -93,6 +94,7 @@ private:
     bool isRegisterDataSettingObserver = false;
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    IS_PRIVILEGE_MESSAGE isPrivilegeMessage_ = nullptr;
     GET_PRIVILEGE_DIALOG_POPPED getPrivilegeDialogPopped_ = nullptr;
     SET_DIALOG_OPENSUCCESS_TIMESTAMP setDialogOpenSuccessTimeStamp_ = nullptr;
     SET_DIALOG_OPENSUCCESS_TIMEINTERVAL setDialogOpenSuccessTimeInterval_ = nullptr;

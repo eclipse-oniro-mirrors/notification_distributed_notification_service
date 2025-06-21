@@ -108,6 +108,11 @@ void ExtensionWrapper::InitExtentionWrapper()
     }
 #endif
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    isPrivilegeMessage_ = (IS_PRIVILEGE_MESSAGE)dlsym(extensionWrapperHandle_, "IsPrivilegeMessage");
+    if (isPrivilegeMessage_ == nullptr) {
+        ANS_LOGE("extension wrapper isPrivilegeMessage_ symbol failed, error: %{public}s", dlerror());
+        return;
+    }
     handlePrivilegeMessage_ = (HANDLE_PRIVILEGE_MESSAGE)dlsym(extensionWrapperHandle_, "HandlePrivilegeMessage");
     if (handlePrivilegeMessage_ == nullptr) {
         ANS_LOGE("extension wrapper handlePrivilegeMessage_ symbol failed, error: %{public}s", dlerror());
@@ -234,6 +239,15 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+void ExtensionWrapper::IsPrivilegeMessage(const sptr<NotificationRequest> &request)
+{
+    if (isPrivilegeMessage_ == nullptr) {
+        ANS_LOGE("IsPrivilegeMessage wrapper symbol failed");
+        return;
+    }
+    return isPrivilegeMessage_(bundleOption, request, isAgentController);
+}
+
 void ExtensionWrapper::HandlePrivilegeMessage(const sptr<NotificationBundleOption>& bundleOption,
     const sptr<NotificationRequest> &request, bool isAgentController)
 {
