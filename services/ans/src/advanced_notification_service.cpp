@@ -719,6 +719,11 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
+        if (IsDisableNotificationByKiosk(ownerBundleName)) {
+            ANS_LOGE("bundle: %{public}s not in kiosk trust list", (request->GetOwnerBundleName()).c_str());
+            result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
+            return;
+        }
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
             !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid)) {
             result = ERR_ANS_INVALID_PARAM;

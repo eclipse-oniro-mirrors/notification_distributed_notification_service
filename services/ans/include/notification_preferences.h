@@ -503,6 +503,12 @@ public:
     bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);
 
+    void SetKioskModeStatus(bool isKioskMode);
+
+    bool IsKioskMode();
+
+    bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList);
+
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;
@@ -533,6 +539,7 @@ private:
     std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
+    bool isKioskMode_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

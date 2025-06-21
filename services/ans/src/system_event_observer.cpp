@@ -46,6 +46,8 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -152,6 +154,10 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START) {
         NotificationCloneManager::GetInstance().OnRestoreStart(want);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON) {
+        NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF) {
+        NotificationPreferences::GetInstance()->SetKioskModeStatus(false);
     } else {
         OnReceiveEventInner(data);
     }
