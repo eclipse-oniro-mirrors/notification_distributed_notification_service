@@ -335,6 +335,7 @@ napi_value Common::SetNotificationMultiLineContent(
     if (lineWantAgents.size() > 0) {
         napi_value lineWantAgentsArr = nullptr;
         int lineWantAgentCount = 0;
+        napi_create_array(env, &lineWantAgentsArr);
         for (auto item: lineWantAgents) {
             value = CreateWantAgentByJS(env, item);
             napi_set_element(env, lineWantAgentsArr, lineWantAgentCount++, value);
