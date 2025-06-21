@@ -23,7 +23,7 @@ const int UNSUBSCRIBE_MAX_PARA = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ParametersInfoUnsubscribe &paras)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = UNSUBSCRIBE_MAX_PARA;
     napi_value argv[UNSUBSCRIBE_MAX_PARA] = {nullptr};
@@ -65,7 +65,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value Unsubscribe(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("Unsubscribe start");
+    ANS_LOGD("called");
 
     ParametersInfoUnsubscribe paras;
     if (ParseParameters(env, info, paras) == nullptr) {
@@ -75,7 +75,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
     AsyncCallbackInfoUnsubscribe *asynccallbackinfo = new (std::nothrow)
         AsyncCallbackInfoUnsubscribe {.env = env, .asyncWork = nullptr, .objectInfo = paras.objectInfo};
     if (!asynccallbackinfo) {
-        ANS_LOGD("Asynccallbackinfo is nullptr.");
+        ANS_LOGD("null asynccallbackinfo");
         return Common::JSParaError(env, paras.callback);
     }
     napi_value promise = nullptr;
@@ -132,7 +132,7 @@ napi_value Unsubscribe(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("Unsubscribe callback is nullptr.");
+        ANS_LOGE("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -44,31 +44,31 @@ LocalLiveViewSubscriberInstance::~LocalLiveViewSubscriberInstance()
 
 void LocalLiveViewSubscriberInstance::OnDied()
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 }
 
 void LocalLiveViewSubscriberInstance::OnConnected()
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 }
 
 void LocalLiveViewSubscriberInstance::OnDisconnected()
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 }
 
 void UvQueueWorkOnResponse(uv_work_t *work, int status)
 {
-    ANS_LOGI("OnResponse uv_work_t start");
+    ANS_LOGD("called");
 
     if (work == nullptr) {
-        ANS_LOGE("work is nullptr");
+        ANS_LOGE("null work");
         return;
     }
 
     auto dataWorkerData = reinterpret_cast<LocalLiveViewReceiveDataWorker *>(work->data);
     if (dataWorkerData == nullptr) {
-        ANS_LOGD("dataWorkerData is null.");
+        ANS_LOGD("null dataWorkerData");
         delete work;
         work = nullptr;
         return;
@@ -79,7 +79,7 @@ void UvQueueWorkOnResponse(uv_work_t *work, int status)
     napi_value notificationId = nullptr;
     napi_open_handle_scope(dataWorkerData->env, &scope);
     if (scope == nullptr) {
-        ANS_LOGE("Scope is null");
+        ANS_LOGE("null scope");
         return;
     }
 
@@ -101,31 +101,31 @@ void UvQueueWorkOnResponse(uv_work_t *work, int status)
 
 void LocalLiveViewSubscriberInstance::OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     
     if (responseCallbackInfo_.ref == nullptr) {
-        ANS_LOGI("response callback unset");
+        ANS_LOGE("null ref");
         return;
     }
 
     if (buttonOption == nullptr) {
-        ANS_LOGE("buttonOption is null");
+        ANS_LOGE("null buttonOption");
         return;
     }
 
-    ANS_LOGI("OnResponse NotificationId = %{public}d", notificationId);
-    ANS_LOGI("OnResponse buttonOption size = %{public}s", buttonOption->GetButtonName().c_str());
+    ANS_LOGI("id = %{public}d", notificationId);
+    ANS_LOGI("button = %{public}s", buttonOption->GetButtonName().c_str());
 
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(responseCallbackInfo_.env, &loop);
     if (loop == nullptr) {
-        ANS_LOGE("loop instance is nullptr");
+        ANS_LOGE("null loop");
         return;
     }
 
     LocalLiveViewReceiveDataWorker *dataWorker = new (std::nothrow) LocalLiveViewReceiveDataWorker();
     if (dataWorker == nullptr) {
-        ANS_LOGE("DataWorker is nullptr.");
+        ANS_LOGE("null dataWorker");
         return;
     }
 
@@ -136,7 +136,7 @@ void LocalLiveViewSubscriberInstance::OnResponse(int32_t notificationId, sptr<No
 
     uv_work_t *work = new (std::nothrow) uv_work_t;
     if (work == nullptr) {
-        ANS_LOGE("new work failed");
+        ANS_LOGE("null work");
         delete dataWorker;
         dataWorker = nullptr;
         return;
@@ -189,14 +189,14 @@ bool HasNotificationSubscriber(const napi_env &env, const napi_value &value,
 napi_value GetNotificationSubscriber(
     const napi_env &env, const napi_value &value, LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     bool hasProperty = false;
     napi_valuetype valuetype = napi_undefined;
     napi_ref result = nullptr;
 
     subscriberInfo.subscriber = new (std::nothrow) LocalLiveViewSubscriberInstance();
     if (subscriberInfo.subscriber == nullptr) {
-        ANS_LOGE("subscriber is null");
+        ANS_LOGE("null subscriber");
         return nullptr;
     }
 
@@ -223,13 +223,13 @@ napi_value GetNotificationSubscriber(
 
 bool AddSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (subscriberInfo.ref == nullptr) {
-        ANS_LOGE("subscriberInfo.ref is null");
+        ANS_LOGE("null ref");
         return false;
     }
     if (subscriberInfo.subscriber == nullptr) {
-        ANS_LOGE("subscriberInfo.subscriber is null");
+        ANS_LOGE("null subscriber");
         return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -240,9 +240,9 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscrib
 
 bool DelSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscriberInstance *subscriber)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (subscriber == nullptr) {
-        ANS_LOGE("subscriber is null");
+        ANS_LOGE("null subscriber");
         return false;
     }
 
@@ -264,7 +264,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscrib
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     LocalLiveViewSubscriberInstance *&subscriber, napi_ref &callback)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = SUBSRIBE_MAX_PARA;
     napi_value argv[SUBSRIBE_MAX_PARA] = {nullptr};

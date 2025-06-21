@@ -1078,7 +1078,7 @@ std::string ReminderCommon::FindErrMsg(const napi_env &env, const int32_t errCod
 void ReminderCommon::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info,
     const napi_value &result, bool isThrow)
 {
-    ANSR_LOGI("enter errorCode=%{public}d", info.errorCode);
+    ANSR_LOGD("start, errorCode=%{public}d", info.errorCode);
     if (info.isCallback) {
         if (isThrow) {
             SetCallback(env, info.callback, info.errorCode, result);
@@ -1088,7 +1088,7 @@ void ReminderCommon::ReturnCallbackPromise(const napi_env &env, const CallbackPr
     } else {
         SetPromise(env, info, result);
     }
-    ANSR_LOGI("end");
+    ANSR_LOGD("end");
 }
 
 void ReminderCommon::SetCallback(

@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -49,7 +49,7 @@ void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status sta
 
 napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -89,7 +89,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiIsDistributedEnabled callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -98,11 +98,11 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
 
 napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        ANS_LOGD("ParseParameters is nullptr.");
+        ANS_LOGD("null ParseParameters");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -155,7 +155,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiEnableDistributed callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -164,7 +164,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
 
 napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -217,7 +217,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiEnableDistributedByBundle callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -226,7 +226,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
 
 napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -281,7 +281,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiEnableDistributedSelf callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -290,7 +290,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiIsDistributedEnableByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -317,7 +317,7 @@ void AsyncCompleteCallbackNapiIsDistributedEnableByBundle(napi_env env, napi_sta
 
 napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     IsEnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -364,7 +364,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiIsDistributedEnableByBundle callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -373,7 +373,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
 
 void AsyncCompleteCallbackNapiGetDeviceRemindType(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -405,7 +405,7 @@ void AsyncCompleteCallbackNapiGetDeviceRemindType(napi_env env, napi_status stat
 
 napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -444,7 +444,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiGetDeviceRemindType callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -453,7 +453,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
 
 napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -509,7 +509,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiSetSyncNotificationEnabledWithoutApp callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -518,7 +518,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
 
 napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     GetEnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -581,7 +581,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiGetSyncNotificationEnabledWithoutApp callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -590,7 +590,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
 
 napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     DeviceStatus paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -635,7 +635,7 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("NapiSetTargetDeviceStatus callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

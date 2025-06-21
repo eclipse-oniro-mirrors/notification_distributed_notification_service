@@ -92,7 +92,7 @@ NotificationDistributedOptions *NotificationDistributedOptions::FromJson(const n
 
     auto pOpt = new (std::nothrow) NotificationDistributedOptions();
     if (pOpt == nullptr) {
-        ANS_LOGE("Failed to create distributedOptions instance");
+        ANS_LOGE("null pOpt");
         return nullptr;
     }
 

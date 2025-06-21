@@ -108,7 +108,7 @@ NotificationMultiLineContent *NotificationMultiLineContent::FromJson(const nlohm
 
     auto pContent = new (std::nothrow) NotificationMultiLineContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create multiLineContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 

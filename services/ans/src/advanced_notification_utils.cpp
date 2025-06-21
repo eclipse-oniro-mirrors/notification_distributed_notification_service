@@ -563,7 +563,7 @@ void AdvancedNotificationService::RemoveDoNotDisturbProfileTrustList(
 void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    ANS_LOGI("enter OnBundleDataAdd,bundleName:%{public}s", bundleOption->GetBundleName().c_str());
+    ANS_LOGI("called, bundleName:%{public}s", bundleOption->GetBundleName().c_str());
     auto bundleInstall = [bundleOption, this]() {
         CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
         AppExecFwk::BundleInfo bundleInfo;
@@ -593,7 +593,7 @@ void AdvancedNotificationService::OnBundleDataAdd(const sptr<NotificationBundleO
 void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBundleOption> &bundleOption)
 {
     CHECK_BUNDLE_OPTION_IS_INVALID(bundleOption)
-    ANS_LOGI("enter OnBundleDataUpdate,bundleName:%{public}s", bundleOption->GetBundleName().c_str());
+    ANS_LOGI("called, bundleName:%{public}s", bundleOption->GetBundleName().c_str());
     AppExecFwk::BundleInfo bundleInfo;
     if (!GetBundleInfoByNotificationBundleOption(bundleOption, bundleInfo)) {
         ANS_LOGE("Failed to get BundleInfo using NotificationBundleOption.");
@@ -601,7 +601,7 @@ void AdvancedNotificationService::OnBundleDataUpdate(const sptr<NotificationBund
     }
 
     if (!bundleInfo.applicationInfo.allowEnableNotification) {
-        ANS_LOGE("Current application allowEnableNotification is false, do not record.");
+        ANS_LOGE("Do not record");
         return;
     }
     auto bundleUpdate = [bundleOption, bundleInfo, this]() {
@@ -628,14 +628,14 @@ void AdvancedNotificationService::OnBootSystemCompleted()
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 void AdvancedNotificationService::OnScreenOn()
 {
-    ANS_LOGI("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     localScreenOn_ = true;
     DistributedScreenStatusManager::GetInstance()->SetLocalScreenStatus(true);
 }
 
 void AdvancedNotificationService::OnScreenOff()
 {
-    ANS_LOGI("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     localScreenOn_ = false;
     DistributedScreenStatusManager::GetInstance()->SetLocalScreenStatus(false);
 }
@@ -1374,7 +1374,7 @@ ErrCode AdvancedNotificationService::ShellDump(const std::string &cmd, const std
 
 int AdvancedNotificationService::Dump(int fd, const std::vector<std::u16string> &args)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     std::string result;
     GetDumpInfo(args, result);
     int ret = dprintf(fd, "%s\n", result.c_str());
@@ -1544,7 +1544,7 @@ ErrCode AdvancedNotificationService::PrePublishRequest(const sptr<NotificationRe
 uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<NotificationRecord> &record,
     int64_t deleteTimePoint, int32_t reason)
 {
-    ANS_LOGD("Enter");
+    ANS_LOGD("called");
 
     wptr<AdvancedNotificationService> wThis = this;
     auto triggerFunc = [wThis, record, reason, deleteTimePoint] {
@@ -1571,7 +1571,7 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Noti
 
 void AdvancedNotificationService::CancelTimer(uint64_t timerId)
 {
-    ANS_LOGD("Enter");
+    ANS_LOGD("called");
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         return;
     }
@@ -1581,7 +1581,7 @@ void AdvancedNotificationService::CancelTimer(uint64_t timerId)
 
 void AdvancedNotificationService::BatchCancelTimer(std::vector<uint64_t> timerIds)
 {
-    ANS_LOGD("Enter");
+    ANS_LOGD("called");
     for (uint64_t timerId : timerIds) {
         CancelTimer(timerId);
     }
@@ -1828,7 +1828,7 @@ void AdvancedNotificationService::ResetDistributedEnabled()
 ErrCode AdvancedNotificationService::OnRecoverLiveView(
     const std::vector<std::string> &keys)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("NotificationSvrQueue is nullptr.");

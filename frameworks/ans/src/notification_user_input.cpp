@@ -61,7 +61,7 @@ std::shared_ptr<NotificationUserInput> NotificationUserInput::Create(const std::
 
     auto pUserInput = new (std::nothrow) NotificationUserInput(inputKey);
     if (pUserInput == nullptr) {
-        ANS_LOGE("create NotificationUserInput object failed");
+        ANS_LOGE("null pUserInput");
         return {};
     }
 
@@ -98,7 +98,7 @@ std::shared_ptr<NotificationUserInput> NotificationUserInput::Create(const std::
     auto pUserInput = new (std::nothrow)
         NotificationUserInput(inputKey, tag, options, permitFreeFormInput, permitMimeTypes, realAdditional, editType);
     if (pUserInput == nullptr) {
-        ANS_LOGE("create NotificationUserInput object failed");
+        ANS_LOGE("null pUserInput");
         return {};
     }
 
@@ -264,7 +264,7 @@ NotificationUserInput *NotificationUserInput::FromJson(const nlohmann::json &jso
 
     auto pUserInput = new (std::nothrow) NotificationUserInput();
     if (pUserInput == nullptr) {
-        ANS_LOGE("Failed to create userInput instance");
+        ANS_LOGE("null pUserInput");
         return nullptr;
     }
 
@@ -391,7 +391,7 @@ bool NotificationUserInput::ReadFromParcel(Parcel &parcel)
     if (valid) {
         additionalData_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
         if (!additionalData_) {
-            ANS_LOGE("Failed to read additionalData");
+            ANS_LOGE("null additionalData");
             return false;
         }
     }

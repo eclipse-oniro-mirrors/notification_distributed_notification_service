@@ -34,7 +34,7 @@ ErrCode SubscriberListener::OnConnected()
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnConnected();
@@ -46,7 +46,7 @@ ErrCode SubscriberListener::OnDisconnected()
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnDisconnected();
@@ -59,11 +59,11 @@ ErrCode SubscriberListener::OnConsumed(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     if (notificationMap == nullptr) {
-        ANS_LOGE("OnConsumed fail cause notificationMap is null.");
+        ANS_LOGE("null notificationMap");
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
@@ -115,7 +115,7 @@ ErrCode SubscriberListener::OnCanceled(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     if (notificationMap == nullptr) {
@@ -149,7 +149,7 @@ void SubscriberListener::OnBatchCanceled(const std::vector<sptr<Notification>> &
 {
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return;
     }
     std::vector<std::shared_ptr<Notification>> notificationList;
@@ -171,7 +171,7 @@ ErrCode SubscriberListener::OnCanceledList(const std::vector<sptr<Notification>>
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     if (subscriber->HasOnBatchCancelCallback()) {
@@ -194,7 +194,7 @@ ErrCode SubscriberListener::OnUpdated(const sptr<NotificationSortingMap> &notifi
 {
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnUpdate(std::make_shared<NotificationSortingMap>(*notificationMap));
@@ -205,7 +205,7 @@ ErrCode SubscriberListener::OnDoNotDisturbDateChange(const sptr<NotificationDoNo
 {
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnDoNotDisturbDateChange(std::make_shared<NotificationDoNotDisturbDate>(*date));
@@ -218,7 +218,7 @@ ErrCode SubscriberListener::OnEnabledNotificationChanged(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
@@ -230,7 +230,7 @@ ErrCode SubscriberListener::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
@@ -243,7 +243,7 @@ ErrCode SubscriberListener::OnBadgeEnabledChanged(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnBadgeEnabledChanged(callbackData);
@@ -253,10 +253,10 @@ ErrCode SubscriberListener::OnBadgeEnabledChanged(
 ErrCode SubscriberListener::OnApplicationInfoNeedChanged(const std::string& bundleName)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGW("OnApplicationInfoNeedChanged SubscriberListener 1.");
+    ANS_LOGD("called");
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGE("Subscriber is nullptr");
+        ANS_LOGE("null subscriber");
         return ERR_INVALID_DATA;
     }
     subscriber->OnApplicationInfoNeedChanged(bundleName);
@@ -269,7 +269,7 @@ ErrCode SubscriberListener::OnOperationResponse(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     auto subscriber = subscriber_.lock();
     if (subscriber == nullptr) {
-        ANS_LOGW("Subscriber is nullptr");
+        ANS_LOGW("null subscriber");
         return ERR_OK;
     }
     std::shared_ptr<NotificationOperationInfo> sharedNotification =

@@ -63,7 +63,7 @@ ErrCode NotificationCloneDisturb::OnBackup(nlohmann::json &jsonObject)
 
 void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
 {
-    ANS_LOGI("Notification disturb profile list on restore.");
+    ANS_LOGD("called");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
         ANS_LOGI("Notification disturb profile list is null or not array.");
         return;
@@ -117,7 +117,7 @@ void NotificationCloneDisturb::OnRestore(const nlohmann::json &jsonObject)
             ANS_LOGI("Clone queue left %{public}s %{public}zu.", std::to_string((*profile)->GetProfileId()).c_str(),
                 (*profile)->GetProfileTrustList().size());
         }
-        ANS_LOGI("Notification disturb profile list on restore end.");
+        ANS_LOGD("end");
     }));
 }
 
@@ -147,9 +147,9 @@ void NotificationCloneDisturb::GetProfileUid(int32_t userId, std::map<std::strin
 
 void NotificationCloneDisturb::OnUserSwitch(int32_t userId)
 {
-    ANS_LOGI("Handler user switch %{public}d", userId);
+    ANS_LOGD("Handler user switch %{public}d", userId);
     if (cloneDisturbQueue_ == nullptr) {
-        ANS_LOGW("Clone disturb queue is null.");
+        ANS_LOGW("null cloneDisturbQueue");
         return;
     }
     cloneDisturbQueue_->submit_h(std::bind([&, userId]() {
@@ -159,7 +159,7 @@ void NotificationCloneDisturb::OnUserSwitch(int32_t userId)
             ANS_LOGI("Clone queue left %{public}s %{public}zu.", std::to_string((*profile)->GetProfileId()).c_str(),
                 (*profile)->GetProfileTrustList().size());
         }
-        ANS_LOGI("Notification disturb profile list on recover end.");
+        ANS_LOGD("end");
     }));
 }
 
@@ -175,7 +175,7 @@ void NotificationCloneDisturb::OnRestoreStart(const std::string bundleName, int3
     NotificationBundleOption bundle(bundleName, uid);
     bundle.SetAppIndex(appIndex);
     if (cloneDisturbQueue_ == nullptr) {
-        ANS_LOGW("Clone disturb queue is null.");
+        ANS_LOGW("null cloneDisturbQueue");
         return;
     }
     cloneDisturbQueue_->submit_h(std::bind([&, bundle, userId]() {

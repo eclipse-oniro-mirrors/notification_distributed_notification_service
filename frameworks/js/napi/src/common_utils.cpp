@@ -54,7 +54,7 @@ napi_value Common::NapiGetUndefined(napi_env env)
 
 napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
 {
-    ANS_LOGI("enter, errorCode[%{public}d]", errCode);
+    ANS_LOGI("called, errorCode[%{public}d]", errCode);
     napi_value error = Common::NapiGetNull(env);
     if (errCode == ERR_OK && newType) {
         return error;
@@ -74,7 +74,7 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
 
 napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, std::string &msg)
 {
-    ANS_LOGI("enter, errorCode[%{public}d]", errCode);
+    ANS_LOGD("called, errorCode[%{public}d]", errCode);
     napi_value error = Common::NapiGetNull(env);
     if (errCode == ERR_OK) {
         return error;
@@ -94,14 +94,14 @@ napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, std::string &
 
 void Common::NapiThrow(napi_env env, int32_t errCode)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_throw(env, CreateErrorValue(env, errCode, true));
 }
 
 void Common::NapiThrow(napi_env env, int32_t errCode, std::string &msg)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_throw(env, CreateErrorValue(env, errCode, msg));
 }
@@ -119,10 +119,10 @@ napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
 void Common::PaddingCallbackPromiseInfo(
     const napi_env &env, const napi_ref &callback, CallbackPromiseInfo &info, napi_value &promise)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (callback) {
-        ANS_LOGD("Callback is not nullptr.");
+        ANS_LOGD("null callback");
         info.callback = callback;
         info.isCallback = true;
     } else {
@@ -135,7 +135,7 @@ void Common::PaddingCallbackPromiseInfo(
 
 void Common::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
 {
-    ANS_LOGD("enter errorCode=%{public}d", info.errorCode);
+    ANS_LOGD("start, errorCode=%{public}d", info.errorCode);
     if (info.isCallback) {
         SetCallback(env, info.callback, info.errorCode, result, false);
     } else {
@@ -147,7 +147,7 @@ void Common::ReturnCallbackPromise(const napi_env &env, const CallbackPromiseInf
 void Common::SetCallback(
     const napi_env &env, const napi_ref &callbackIn, const int32_t &errorCode, const napi_value &result, bool newType)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("start");
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
 
@@ -162,13 +162,13 @@ void Common::SetCallback(
         ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
     }
     NAPI_CALL_RETURN_VOID(env, napi_result);
-    ANS_LOGI("end");
+    ANS_LOGD("end");
 }
 
 void Common::SetCallback(
     const napi_env &env, const napi_ref &callbackIn, const napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("start");
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
 
@@ -180,13 +180,13 @@ void Common::SetCallback(
         ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
     }
     NAPI_CALL_RETURN_VOID(env, napi_result);
-    ANS_LOGI("end");
+    ANS_LOGD("end");
 }
 
 void Common::SetCallbackArg2(
     const napi_env &env, const napi_ref &callbackIn, const napi_value &result0, const napi_value &result1)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("start");
     napi_value result[ARGS_TWO] = {result0, result1};
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
@@ -199,13 +199,13 @@ void Common::SetCallbackArg2(
         ANS_LOGE("napi_call_function failed, result = %{public}d", napi_result);
     }
     NAPI_CALL_RETURN_VOID(env, napi_result);
-    ANS_LOGI("end");
+    ANS_LOGD("end");
 }
 
 void Common::SetPromise(const napi_env &env,
     const napi_deferred &deferred, const int32_t &errorCode, const napi_value &result, bool newType)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("start");
     if (errorCode == ERR_OK) {
         napi_resolve_deferred(env, deferred, result);
     } else {
@@ -228,7 +228,7 @@ napi_value Common::JSParaError(const napi_env &env, const napi_ref &callback)
 
 napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callback_info &info, napi_ref &callback)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = ONLY_CALLBACK_MAX_PARA;
     napi_value argv[ONLY_CALLBACK_MAX_PARA] = {nullptr};
@@ -256,7 +256,7 @@ napi_value Common::ParseParaOnlyCallback(const napi_env &env, const napi_callbac
 
 void Common::CreateReturnValue(const napi_env &env, const CallbackPromiseInfo &info, const napi_value &result)
 {
-    ANS_LOGD("enter errorCode=%{public}d", info.errorCode);
+    ANS_LOGD("start, errorCode=%{public}d", info.errorCode);
     int32_t errorCode = info.errorCode == ERR_OK ? ERR_OK : ErrorToExternal(info.errorCode);
     if (info.isCallback) {
         SetCallback(env, info.callback, errorCode, result, true);

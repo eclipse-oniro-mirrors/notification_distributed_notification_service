@@ -21,7 +21,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     SetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -79,7 +79,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiSetDoNotDisturbDate callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -88,7 +88,7 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
 napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     if (!ParseProfilesParameters(env, info, profiles)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -134,7 +134,7 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 
 napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
     if (!ParseProfilesParameters(env, info, profiles)) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -180,7 +180,7 @@ napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -206,7 +206,7 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbDate(napi_env env, napi_status stat
 
 napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     GetDoNotDisturbDateParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -255,7 +255,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiGetDoNotDisturbDate callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -264,7 +264,7 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
 
 napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -325,7 +325,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiSupportDoNotDisturbMode callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -334,7 +334,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetDoNotDisturbProfile(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("GetDoNotDisturbProfile complete enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -368,7 +368,7 @@ void AsyncCompleteCallbackNapiGetDoNotDisturbProfile(napi_env env, napi_status s
 
 napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("NapiGetDoNotDisturbProfile enter");
+    ANS_LOGD("called");
     GetDoNotDisturbProfileParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -406,7 +406,7 @@ napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("NapiGetDoNotDisturbProfile callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -108,7 +108,7 @@ void DistributedScreenStatusManager::GetKvDataManager()
 
 void DistributedScreenStatusManager::DeviceInitCallBack::OnRemoteDied()
 {
-    ANS_LOGW("DeviceInitCallBack OnRemoteDied");
+    ANS_LOGD("called");
 }
 
 bool DistributedScreenStatusManager::CheckKvDataManager()
@@ -117,7 +117,7 @@ bool DistributedScreenStatusManager::CheckKvDataManager()
         GetKvDataManager();
     }
     if (kvDataManager_ == nullptr) {
-        ANS_LOGE("kvDataManager is nullptr.");
+        ANS_LOGE("null kvDataManager");
         return false;
     }
     return true;
@@ -163,7 +163,7 @@ bool DistributedScreenStatusManager::CheckKvStore()
         GetKvStore();
     }
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("null kvStore");
         return false;
     }
     return true;
@@ -225,7 +225,7 @@ ErrCode DistributedScreenStatusManager::CheckRemoteDevicesIsUsing(bool &isUsing)
 ErrCode DistributedScreenStatusManager::SetLocalScreenStatus(bool screenOn)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    ANS_LOGI("%{public}s, screenOn:%{public}s", __FUNCTION__, screenOn ? "true" : "false");
+    ANS_LOGD("called, screenOn:%{public}s", screenOn ? "true" : "false");
     localScreenOn_ = screenOn;
     if (kvStore_ == nullptr) {
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;

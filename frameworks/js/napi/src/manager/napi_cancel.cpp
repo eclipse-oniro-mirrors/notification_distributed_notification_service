@@ -22,7 +22,7 @@ namespace OHOS {
 namespace NotificationNapi {
 napi_value NapiCancel(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("enter");
+    ANS_LOGD("called");
     ParametersInfoCancel paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -87,7 +87,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiCancel callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -96,7 +96,7 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
 
 napi_value NapiCancelAll(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -148,7 +148,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiCancelAll callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -157,7 +157,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
 
 napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     ParametersInfoCancelGroup params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -212,7 +212,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiCancelGroup callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -221,7 +221,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
 
 napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     ParametersInfoCancelAsBundle paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -285,7 +285,7 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiCancelAsBundle callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -24,7 +24,7 @@ namespace NotificationNapi {
 
 napi_value NapiPublish(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     TraceChainUtil traceChain = TraceChainUtil();
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
@@ -35,7 +35,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        ANS_LOGD("asynccallbackinfo is nullptr.");
+        ANS_LOGD("null asynccallbackinfo");
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
@@ -84,7 +84,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiPublish callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -93,7 +93,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
 
 napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     ParametersInfoPublish params;
     if (ParseShowOptions(env, info, params) == nullptr) {
         ANS_LOGW("parse showOptions failed");
@@ -103,7 +103,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoPublish {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
-        ANS_LOGW("failed to create asynccallbackinfo");
+        ANS_LOGW("null asynccallbackinfo");
         return Common::JSParaError(env, params.callback);
     }
     asynccallbackinfo->request = params.request;
@@ -150,7 +150,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
 
 napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     TraceChainUtil traceChain = TraceChainUtil();
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {
@@ -209,7 +209,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiPublishAsBundle callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -128,7 +128,7 @@ namespace CJSystemapi {
         CNotificationSlotV2* head =
             reinterpret_cast<CNotificationSlotV2 *>(malloc(sizeof(CNotificationSlotV2) * slots.size()));
         if (head == nullptr) {
-            LOGE("malloc CNotificationSlotV2 failed");
+            LOGE("null head");
             return notificationSlots;
         }
         int32_t count = 0;
@@ -138,7 +138,7 @@ namespace CJSystemapi {
                 continue;
             }
             if (!SetNotificationSlotV2(*vec, head[count])) {
-                LOGE("SetNotificationSlotV2 is nullptr.");
+                LOGE("null SetNotificationSlotV2");
                 continue;
             }
             count++;
@@ -197,7 +197,7 @@ namespace CJSystemapi {
             }
             head[count] = reinterpret_cast<CNotificationRequestV2 *>(malloc(sizeof(CNotificationRequestV2)));
             if (head[count] == nullptr) {
-                LOGE("NotificationManagerImplV2::GetActiveNotifications malloc CNotificationRequest failed");
+                LOGE("null head[count]");
                 for (int32_t i = 0 ; i < count; i++) {
                     free(head[i]);
                 }

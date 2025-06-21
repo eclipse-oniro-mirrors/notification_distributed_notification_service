@@ -47,7 +47,7 @@ DhNotificationCloneBundle::~DhNotificationCloneBundle()
 
 ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 {
-    ANS_LOGI("dh Notification bundle backup.");
+    ANS_LOGI("called");
     std::vector<NotificationCloneBundleInfo> cloneBundles;
     NotificationPreferences::GetInstance()->GetAllCLoneBundlesInfo(ZERO_USERID, cloneBundles);
 
@@ -68,7 +68,7 @@ ErrCode DhNotificationCloneBundle::OnBackup(nlohmann::json &jsonObject)
 
 void DhNotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject)
 {
-    ANS_LOGI("dh Notification bundle list on restore.");
+    ANS_LOGI("called");
     if (jsonObject.is_null() || !jsonObject.is_array()) {
         ANS_LOGI("dh Notification bundle list is null or not array.");
         return;
@@ -124,7 +124,7 @@ void DhNotificationCloneBundle::OnUserSwitch(int32_t userId)
 {
     ANS_LOGI("Handler user switch %{public}d", userId);
     if (dhCloneBundleQueue_ == nullptr) {
-        ANS_LOGW("Clone bundle queue is null.");
+        ANS_LOGW("null dhCloneBundleQueue");
         return;
     }
     dhCloneBundleQueue_->submit_h(std::bind([&, userId]() {

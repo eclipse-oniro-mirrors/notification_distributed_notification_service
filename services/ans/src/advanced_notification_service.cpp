@@ -119,7 +119,7 @@ std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> Advance
 
 ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<NotificationRequest> &request)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_14, EventBranchId::BRANCH_0);
     std::string bundle = GetClientBundleName();
@@ -321,7 +321,7 @@ void AdvancedNotificationService::InitDistributeCallBack()
 
 AdvancedNotificationService::AdvancedNotificationService()
 {
-    ANS_LOGI("constructor");
+    ANS_LOGD("called");
     notificationSvrQueue_ = std::make_shared<ffrt::queue>("NotificationSvrMain");
     if (!notificationSvrQueue_) {
         ANS_LOGE("ffrt create failed!");
@@ -364,7 +364,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
 AdvancedNotificationService::~AdvancedNotificationService()
 {
-    ANS_LOGI("deconstructor");
+    ANS_LOGD("called");
     NotificationSubscriberManager::GetInstance()->UnRegisterOnSubscriberAddCallback();
 
     StopFilters();
@@ -666,7 +666,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     const sptr<NotificationBundleOption> &bundleOption, bool isUpdateByOwner)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGI("PublishPreparedNotification");
+    ANS_LOGI("called");
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
@@ -770,17 +770,17 @@ void AdvancedNotificationService::QueryDoNotDisturbProfile(const int32_t &userId
 {
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelper>::GetInstance();
     if (datashareHelper == nullptr) {
-        ANS_LOGE("The data share helper is nullptr.");
+        ANS_LOGE("null datashareHelper");
         return;
     }
     Uri enableUri(datashareHelper->GetFocusModeEnableUri(userId));
     bool ret = datashareHelper->Query(enableUri, KEY_FOCUS_MODE_ENABLE, enable);
     if (!ret) {
-        ANS_LOGE("Query focus mode enable fail.");
+        ANS_LOGE("Query failed");
         return;
     }
     if (enable != DO_NOT_DISTURB_MODE) {
-        ANS_LOGI("Currently not is do not disturb mode.");
+        ANS_LOGI("Currently not is do not disturb mode");
         return;
     }
     Uri idUri(datashareHelper->GetFocusModeProfileUri(userId));
@@ -943,7 +943,7 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         }
     }
     if (record->request->IsSystemLiveView()) {
-        ANS_LOGI("System live view no need add sloty.");
+        ANS_LOGI("System live view no need add slot");
         return ERR_OK;
     }
     std::vector<sptr<NotificationSlot>> slots;
@@ -1170,7 +1170,7 @@ void AdvancedNotificationService::StopFilters()
 
 ErrCode AdvancedNotificationService::GetBundleImportance(int32_t &importance)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -1347,7 +1347,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             return ERR_OK;
         }
     }
-    ANS_LOGE("notification not exist,notification:%{public}d, bundleName:%{public}s, uid:%{public}d",
+    ANS_LOGE("notification:%{public}d, bundleName:%{public}s, uid:%{public}d",
         notificationKey.id, bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     return ERR_ANS_NOTIFICATION_NOT_EXISTS;
 }
@@ -1548,7 +1548,7 @@ ErrCode AdvancedNotificationService::PublishInNotificationList(const std::shared
 ErrCode AdvancedNotificationService::GetHasPoppedDialog(
     const sptr<NotificationBundleOption> bundleOption, bool &hasPopped)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     if (notificationSvrQueue_ == nullptr) {
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
@@ -1563,7 +1563,7 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
 
 void AdvancedNotificationService::ResetPushCallbackProxy(NotificationConstant::SlotType slotType)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(pushMutex_);
     if (pushCallBacks_.empty()) {
         ANS_LOGE("invalid proxy state");
@@ -1703,7 +1703,7 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
     }
 
     if (pushCallBacks_.find(slotType) == pushCallBacks_.end()) {
-        ANS_LOGI("pushCallback Unregistered, no need to check.");
+        ANS_LOGI("PushCallback unregistered");
         return false;
     }
 
@@ -1819,7 +1819,7 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
 
 void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode, int32_t reason)
 {
-    ANS_LOGD("Enter");
+    ANS_LOGD("called");
 
     for (const auto &record : notificationList_) {
         if (!record->request) {
@@ -1906,7 +1906,7 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
 ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<NotificationRequest> &request,
     std::string bundleName)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     if (request->GetSound().empty()) {
         ANS_LOGD("request sound length empty");
         return ERR_OK;

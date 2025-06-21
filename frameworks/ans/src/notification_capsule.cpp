@@ -130,7 +130,7 @@ NotificationCapsule *NotificationCapsule::FromJson(const nlohmann::json &jsonObj
 
     NotificationCapsule *capsule = new (std::nothrow) NotificationCapsule();
     if (capsule == nullptr) {
-        ANS_LOGE("Failed to create capsule instance");
+        ANS_LOGE("null capsule");
         return nullptr;
     }
 

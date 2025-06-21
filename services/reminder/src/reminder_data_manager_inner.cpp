@@ -117,7 +117,7 @@ bool ReminderDataManager::IsActionButtonDataShareValid(const sptr<ReminderReques
 void ReminderDataManager::HandleAutoDeleteReminder(const int32_t notificationId, const int32_t uid,
     const int64_t autoDeletedTime)
 {
-    ANSR_LOGI("auto delete reminder start");
+    ANSR_LOGD("called");
     std::vector<sptr<ReminderRequest>> showedReminder;
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
@@ -156,7 +156,7 @@ bool ReminderDataManager::GetCustomRingFileDesc(const sptr<ReminderRequest>& rem
     std::lock_guard<std::mutex> locker(resourceMutex_);
     soundResource_ = GetResourceMgr(reminder->GetBundleName(), reminder->GetUid());
     if (soundResource_ == nullptr) {
-        ANSR_LOGE("GetResourceMgr fail.");
+        ANSR_LOGE("null soundResource");
         return false;
     }
     auto result = soundResource_->GetRawFileDescriptor(reminder->GetCustomRingUri(), desc);
@@ -171,14 +171,14 @@ void ReminderDataManager::CloseCustomRingFileDesc(const int32_t reminderId, cons
 {
     std::lock_guard<std::mutex> locker(resourceMutex_);
     if (soundResource_ == nullptr) {
-        ANSR_LOGE("ResourceManager is nullptr.");
+        ANSR_LOGE("null soundResource");
         return;
     }
     auto result = soundResource_->CloseRawFileDescriptor(customRingUri);
     if (result != Global::Resource::SUCCESS) {
         ANSR_LOGE("CloseRawFileDescriptor fail[%{public}d]", static_cast<int32_t>(result));
     }
-    ANSR_LOGI("Stop custom sound, reminderId:[%{public}d].", reminderId);
+    ANSR_LOGI("reminderId:[%{public}d]", reminderId);
     soundResource_ = nullptr;
 }
 
@@ -262,7 +262,7 @@ void ReminderDataManager::AsyncStartExtensionAbility(const sptr<ReminderRequest>
 {
     auto manager = ReminderDataManager::GetInstance();
     if (manager == nullptr) {
-        ANSR_LOGE("ReminderDataManager is nullptr.");
+        ANSR_LOGE("null manager");
         return;
     }
     if (!manager->IsSystemReady()) {
@@ -403,7 +403,7 @@ void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &remin
 ErrCode ReminderDataManager::CancelReminderToDb(const int32_t reminderId, const int32_t callingUid)
 {
     if (store_ == nullptr) {
-        ANSR_LOGE("Store is nullptr.");
+        ANSR_LOGE("null store");
         return ERR_REMINDER_NOT_EXIST;
     }
     std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);

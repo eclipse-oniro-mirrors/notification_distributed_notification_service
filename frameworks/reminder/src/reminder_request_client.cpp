@@ -52,7 +52,7 @@ ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
     std::vector<sptr<NotificationSlot>> slotsSptr;
     sptr<NotificationSlot> slotSptr = new (std::nothrow) NotificationSlot(slot);
     if (slotSptr == nullptr) {
-        ANS_LOGE("Failed to create NotificationSlot ptr.");
+        ANS_LOGE("null slotSptr");
         return ERR_ANS_NO_MEMORY;
     }
     slotsSptr.emplace_back(slotSptr);
@@ -61,7 +61,7 @@ ErrCode ReminderRequestClient::AddNotificationSlot(const NotificationSlot &slot)
 
 ErrCode ReminderRequestClient::RemoveNotificationSlot(const NotificationConstant::SlotType &slotType)
 {
-    ANS_LOGI("enter RemoveNotificationSlot，slotType:%{public}d", slotType);
+    ANS_LOGD("called, slotType:%{public}d", slotType);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -185,7 +185,7 @@ sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
         }
         auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (samgrProxy == nullptr) {
-            ANS_LOGE("get samgr failed");
+            ANS_LOGE("null samgrProxy");
             return nullptr;
         }
         auto object = samgrProxy->CheckSystemAbility(REMINDER_AGENT_SERVICE_ID);
@@ -196,7 +196,7 @@ sptr<IReminderAgentService> ReminderRequestClient::GetReminderServiceProxy()
         }
     }
 
-    ANS_LOGE("object is null");
+    ANS_LOGE("null object");
     if (LoadReminderService()) {
         std::lock_guard<ffrt::mutex> lock(serviceLock_);
         if (proxy_ != nullptr) {
@@ -215,13 +215,13 @@ bool ReminderRequestClient::LoadReminderService()
     std::unique_lock<ffrt::mutex> lock(serviceLock_);
     sptr<ReminderServiceCallback> loadCallback = sptr<ReminderServiceCallback>(new ReminderServiceCallback());
     if (loadCallback == nullptr) {
-        ANS_LOGE("loadCallback is nullptr.");
+        ANS_LOGE("null loadCallback");
         return false;
     }
 
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
-        ANS_LOGE("get samgr failed");
+        ANS_LOGE("null samgrProxy");
         return false;
     }
 
@@ -242,7 +242,7 @@ bool ReminderRequestClient::LoadReminderService()
 
 void ReminderRequestClient::LoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject)
 {
-    ANS_LOGI("ReminderRequestClient FinishStartSA");
+    ANS_LOGD("called");
     std::lock_guard<ffrt::mutex> lock(serviceLock_);
     if (remoteObject != nullptr) {
         proxy_ = iface_cast<IReminderAgentService>(remoteObject);
@@ -260,10 +260,10 @@ void ReminderRequestClient::StartReminderAgentService()
 {
     auto reminderServiceProxy = GetReminderServiceProxy();
     if (reminderServiceProxy == nullptr) {
-        ANS_LOGE("StartReminderService failed");
+        ANS_LOGE("null reminderServiceProxy");
         return;
     }
-    ANS_LOGI("StartReminderService success");
+    ANS_LOGD("StartReminderService success");
 }
 
 }  // namespace Notification

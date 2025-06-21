@@ -56,16 +56,16 @@ const char *Common::GetPropertyNameByContentType(ContentType type)
 napi_value Common::SetNotificationContentDetailed(const napi_env &env, const ContentType &type,
     const std::shared_ptr<NotificationContent> &content, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value ret = NapiGetBoolean(env, false);
     if (!content) {
-        ANS_LOGE("content is null");
+        ANS_LOGE("null content");
         return ret;
     }
 
     std::shared_ptr<NotificationBasicContent> basicContent = content->GetNotificationContent();
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return ret;
     }
 
@@ -108,10 +108,10 @@ napi_value Common::SetNotificationContentDetailed(const napi_env &env, const Con
 napi_value Common::SetNotificationContent(
     const napi_env &env, const std::shared_ptr<NotificationContent> &content, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (content == nullptr) {
-        ANS_LOGE("content is null");
+        ANS_LOGE("null content");
         return NapiGetBoolean(env, false);
     }
 
@@ -135,10 +135,10 @@ napi_value Common::SetNotificationContent(
 napi_value Common::SetNotificationBasicContent(
     const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -161,17 +161,17 @@ napi_value Common::SetNotificationBasicContent(
 napi_value Common::SetNotificationLongTextContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
 
     OHOS::Notification::NotificationLongTextContent *longTextContent =
         static_cast<OHOS::Notification::NotificationLongTextContent *>(basicContent);
     if (longTextContent == nullptr) {
-        ANS_LOGE("longTextContent is null");
+        ANS_LOGE("null longTextContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -198,16 +198,16 @@ napi_value Common::SetNotificationLongTextContent(
 napi_value Common::SetNotificationPictureContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
     OHOS::Notification::NotificationPictureContent *pictureContent =
         static_cast<OHOS::Notification::NotificationPictureContent *>(basicContent);
     if (pictureContent == nullptr) {
-        ANS_LOGE("pictureContent is null");
+        ANS_LOGE("null pictureContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -244,16 +244,16 @@ napi_value Common::SetNotificationPictureContent(
 napi_value Common::SetNotificationConversationalContent(const napi_env &env,
     NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
     OHOS::Notification::NotificationConversationalContent *conversationalContent =
         static_cast<OHOS::Notification::NotificationConversationalContent *>(basicContent);
     if (conversationalContent == nullptr) {
-        ANS_LOGE("conversationalContent is null");
+        ANS_LOGE("null conversationalContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -293,16 +293,16 @@ napi_value Common::SetNotificationConversationalContent(const napi_env &env,
 napi_value Common::SetNotificationMultiLineContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
     OHOS::Notification::NotificationMultiLineContent *multiLineContent =
         static_cast<OHOS::Notification::NotificationMultiLineContent *>(basicContent);
     if (multiLineContent == nullptr) {
-        ANS_LOGE("multiLineContent is null");
+        ANS_LOGE("null multiLineContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -347,7 +347,7 @@ napi_value Common::SetNotificationMultiLineContent(
 
 napi_value Common::SetMessageUser(const napi_env &env, const MessageUser &messageUser, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
     // name: string
@@ -390,9 +390,9 @@ napi_value Common::SetMessageUser(const napi_env &env, const MessageUser &messag
 napi_value Common::SetConversationalMessages(const napi_env &env,
     const OHOS::Notification::NotificationConversationalContent *conversationalContent, napi_value &arr)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!conversationalContent) {
-        ANS_LOGE("conversationalContent is null");
+        ANS_LOGE("null conversationalContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -419,10 +419,10 @@ napi_value Common::SetConversationalMessages(const napi_env &env,
 napi_value Common::SetConversationalMessage(const napi_env &env,
     const std::shared_ptr<NotificationConversationalMessage> &conversationalMessage, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (conversationalMessage == nullptr) {
-        ANS_LOGE("conversationalMessage is null");
+        ANS_LOGE("null conversationalMessage");
         return NapiGetBoolean(env, false);
     }
 
@@ -456,11 +456,11 @@ napi_value Common::SetConversationalMessage(const napi_env &env,
 
 napi_value Common::GetNotificationContent(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, value, "content", napi_object);
     if (result == nullptr) {
-        ANS_LOGE("No content.");
+        ANS_LOGE("null result");
         return nullptr;
     }
 
@@ -518,7 +518,7 @@ napi_value Common::GetNotificationContent(const napi_env &env, const napi_value 
 napi_value Common::GetNotificationBasicContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -539,7 +539,7 @@ napi_value Common::GetNotificationBasicContent(
 
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     if (normalContent == nullptr) {
-        ANS_LOGE("normalContent is null");
+        ANS_LOGE("null normalContent");
         return nullptr;
     }
 
@@ -555,7 +555,7 @@ napi_value Common::GetNotificationBasicContent(
 napi_value Common::GetNotificationBasicContentDetailed(
     const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool hasProperty = false;
     char commonStr[COMMON_TEXT_SIZE] = {0};
@@ -565,7 +565,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
     // title: string
     auto value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "title", napi_string);
     if (value == nullptr) {
-        ANS_LOGE("Failed to get title from js.");
+        ANS_LOGE("null value");
         std::string msg = "Incorrect parameter types. The type of title must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -583,7 +583,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
     // text: string
     value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "text", napi_string);
     if (value == nullptr) {
-        ANS_LOGE("Failed to get text from js.");
+        ANS_LOGE("null value");
         std::string msg = "Incorrect parameter types. The type of text must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -603,7 +603,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
     if (hasProperty) {
         value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "additionalText", napi_string);
         if (value == nullptr) {
-            ANS_LOGE("Failed to get additionalText from js.");
+            ANS_LOGE("null value");
             std::string msg = "Incorrect parameter types. The type of additionalText must be string.";
             Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
@@ -620,7 +620,7 @@ napi_value Common::GetNotificationBasicContentDetailed(
 napi_value Common::GetNotificationLongTextContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -644,7 +644,7 @@ napi_value Common::GetNotificationLongTextContent(
     std::shared_ptr<OHOS::Notification::NotificationLongTextContent> longContent =
         std::make_shared<OHOS::Notification::NotificationLongTextContent>();
     if (longContent == nullptr) {
-        ANS_LOGE("longContent is null");
+        ANS_LOGE("null longContent");
         return nullptr;
     }
 
@@ -661,7 +661,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationLongTextContent> &longContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value longContentResult = nullptr;
@@ -746,7 +746,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
 napi_value Common::GetNotificationPictureContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -769,7 +769,7 @@ napi_value Common::GetNotificationPictureContent(
     std::shared_ptr<OHOS::Notification::NotificationPictureContent> pictureContent =
         std::make_shared<OHOS::Notification::NotificationPictureContent>();
     if (pictureContent == nullptr) {
-        ANS_LOGE("pictureContent is null");
+        ANS_LOGE("null pictureContent");
         return nullptr;
     }
     if (GetNotificationPictureContentDetailed(env, contentResult, pictureContent) == nullptr) {
@@ -784,7 +784,7 @@ napi_value Common::GetNotificationPictureContent(
 napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     const napi_value &contentResult, std::shared_ptr<OHOS::Notification::NotificationPictureContent> &pictureContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value pictureContentResult = nullptr;
@@ -855,7 +855,7 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
     pixelMap = Media::PixelMapNapi::GetPixelMap(env, pictureContentResult);
     if (pixelMap == nullptr) {
-        ANS_LOGE("Invalid object pixelMap");
+        ANS_LOGE("null pixelMap");
         return nullptr;
     }
     pictureContent->SetBigPicture(pixelMap);
@@ -866,7 +866,7 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
 napi_value Common::GetNotificationConversationalContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -894,7 +894,7 @@ napi_value Common::GetNotificationConversationalContent(
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> conversationalContent =
         std::make_shared<OHOS::Notification::NotificationConversationalContent>(user);
     if (conversationalContent == nullptr) {
-        ANS_LOGE("conversationalContent is null");
+        ANS_LOGE("null conversationalContent");
         return nullptr;
     }
 
@@ -919,7 +919,7 @@ napi_value Common::GetNotificationConversationalContent(
 napi_value Common::GetNotificationConversationalContentByUser(
     const napi_env &env, const napi_value &contentResult, MessageUser &user)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -948,7 +948,7 @@ napi_value Common::GetNotificationConversationalContentByUser(
 
 napi_value Common::GetMessageUser(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (GetMessageUserByString(env, result, messageUser) == nullptr) {
         return nullptr;
@@ -967,7 +967,7 @@ napi_value Common::GetMessageUser(const napi_env &env, const napi_value &result,
 
 napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1036,7 +1036,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
 
 napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1085,7 +1085,7 @@ napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &r
 
 napi_value Common::GetMessageUserByCustom(const napi_env &env, const napi_value &result, MessageUser &messageUser)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1105,7 +1105,7 @@ napi_value Common::GetMessageUserByCustom(const napi_env &env, const napi_value 
         std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, iconResult);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
         messageUser.SetPixelMap(pixelMap);
@@ -1118,7 +1118,7 @@ napi_value Common::GetNotificationConversationalContentTitle(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> &conversationalContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
@@ -1149,7 +1149,7 @@ napi_value Common::GetNotificationConversationalContentGroup(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> &conversationalContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
@@ -1178,7 +1178,7 @@ napi_value Common::GetNotificationConversationalContentMessages(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<OHOS::Notification::NotificationConversationalContent> &conversationalContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_valuetype valuetype = napi_undefined;
     napi_value conversationalContentResult = nullptr;
     bool hasProperty = false;
@@ -1223,7 +1223,7 @@ napi_value Common::GetNotificationConversationalContentMessages(
 napi_value Common::GetConversationalMessage(const napi_env &env, const napi_value &conversationalMessage,
     std::shared_ptr<NotificationConversationalMessage> &message)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     if (GetConversationalMessageBasicInfo(env, conversationalMessage, message) == nullptr) {
         return nullptr;
@@ -1237,7 +1237,7 @@ napi_value Common::GetConversationalMessage(const napi_env &env, const napi_valu
 napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const napi_value &conversationalMessage,
     std::shared_ptr<NotificationConversationalMessage> &message)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1309,7 +1309,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
 napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const napi_value &conversationalMessage,
     std::shared_ptr<NotificationConversationalMessage> &message)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
@@ -1358,7 +1358,7 @@ napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const 
 napi_value Common::GetNotificationMultiLineContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -1382,7 +1382,7 @@ napi_value Common::GetNotificationMultiLineContent(
     std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> multiLineContent =
         std::make_shared<OHOS::Notification::NotificationMultiLineContent>();
     if (multiLineContent == nullptr) {
-        ANS_LOGE("multiLineContent is null");
+        ANS_LOGE("null multiLineContent");
         return nullptr;
     }
 
@@ -1457,7 +1457,7 @@ napi_value Common::GetNotificationMultiLineContent(
 napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, const napi_value &result,
     std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool isArray = false;
     napi_valuetype valuetype = napi_undefined;
@@ -1497,7 +1497,7 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
 napi_value Common::GetNotificationContentLineWantAgents(const napi_env &env, const napi_value &result,
     std::shared_ptr<OHOS::Notification::NotificationMultiLineContent> &multiLineContent)
 {
-    ANS_LOGD("GetNotificationContentLineWantAgents enter");
+    ANS_LOGD("called");
 
     bool hasProperty;
     bool isArray;
@@ -1531,7 +1531,7 @@ napi_value Common::GetNotificationContentLineWantAgents(const napi_env &env, con
             AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
             napi_unwrap(env, wantAgentValue, (void **)&wantAgent);
             if (wantAgent == nullptr) {
-                ANS_LOGE("Invalid object lineWantAgents");
+                ANS_LOGE("null wantAgent");
                 return nullptr;
             }
             lineWantAgents.push_back(std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgent));
@@ -1550,14 +1550,14 @@ napi_value Common::GetLockScreenPicture(
     if (hasProperty) {
         auto value = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "lockscreenPicture", napi_object);
         if (value == nullptr) {
-            ANS_LOGE("Failed to get lockScreenPicture from js.");
+            ANS_LOGE("null value");
             std::string msg = "Incorrect parameter types. The type of lockscreenPicture must be object.";
             Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, value);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
         basicContent->SetLockScreenPicture(pixelMap);

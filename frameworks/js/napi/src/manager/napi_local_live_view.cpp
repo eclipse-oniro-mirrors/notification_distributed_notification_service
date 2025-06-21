@@ -24,7 +24,7 @@ const int32_t TRIGGER_PARA = 3;
 
 napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     LocalLiveViewSubscriberInstance *objectInfo = nullptr;
     if (ParseParameters(env, info, objectInfo, callback) == nullptr) {
@@ -93,7 +93,7 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiSubscribeLocalLiveView callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -108,7 +108,7 @@ napi_value NapiUnsubscriteLocalLiveView(napi_env env, napi_callback_info info)
 napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info &info,
     AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo, napi_ref &callback)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = TRIGGER_PARA;
     napi_value argv[TRIGGER_PARA] = {nullptr, nullptr};
@@ -128,7 +128,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     // argv[0]:BundleOption
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], asynccallbackinfo->bundleOption);
     if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed");
+        ANS_LOGE("null retValue");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
@@ -148,7 +148,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
     // argv[2]:buttonOption
     retValue = Common::GetButtonOption(env, argv[PARAM2], asynccallbackinfo->buttonOption);
     if (retValue == nullptr) {
-        ANS_LOGE("GetButtonOption failed");
+        ANS_LOGE("null retValue");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
@@ -157,7 +157,7 @@ napi_value ParseTriggerParameters(const napi_env &env, const napi_callback_info 
 
 napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
 
     AsyncCallbackInfoSubscribeLocalLiveView *asynccallbackinfo =
@@ -222,7 +222,7 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiSubscribeLocalLiveView callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

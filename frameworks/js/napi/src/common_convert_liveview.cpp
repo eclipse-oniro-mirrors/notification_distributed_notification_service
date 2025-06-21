@@ -35,16 +35,16 @@ namespace NotificationNapi {
 napi_value Common::SetNotificationLocalLiveViewContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("basicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
     OHOS::Notification::NotificationLocalLiveViewContent *localLiveViewContent =
         static_cast<OHOS::Notification::NotificationLocalLiveViewContent *>(basicContent);
     if (localLiveViewContent == nullptr) {
-        ANS_LOGE("localLiveViewContent is null");
+        ANS_LOGE("null localLiveViewContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -128,7 +128,7 @@ napi_value Common::SetNotificationLocalLiveViewContent(
 
 napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &capsule, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
     // title: string
@@ -176,7 +176,7 @@ napi_value Common::SetCapsule(const napi_env &env, const NotificationCapsule &ca
 
 napi_value Common::SetProgress(const napi_env &env, const NotificationProgress &progress, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
     // currentValue: int32_t
@@ -197,7 +197,7 @@ napi_value Common::SetProgress(const napi_env &env, const NotificationProgress &
 napi_value Common::SetTime(const napi_env &env, const NotificationTime &time,
     napi_value &result, bool isInitialTimeExist)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
     // initialTime: int32_t
@@ -276,7 +276,7 @@ napi_value Common::SetResourceObject(napi_env env, const std::shared_ptr<Resourc
 
 napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveViewButton &button, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value value = nullptr;
 
@@ -335,7 +335,7 @@ napi_value Common::SetButton(const napi_env &env, const NotificationLocalLiveVie
 napi_value Common::SetCardButton(const napi_env &env, const std::vector<NotificationIconButton> buttons,
     napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     int iconCount = 0;
     napi_value value = nullptr;
@@ -385,22 +385,22 @@ napi_value Common::SetCardButton(const napi_env &env, const std::vector<Notifica
 napi_value Common::SetNotificationLiveViewContent(
     const napi_env &env, NotificationBasicContent *basicContent, napi_value &result)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_value value = nullptr;
     if (basicContent == nullptr) {
-        ANS_LOGE("BasicContent is null");
+        ANS_LOGE("null basicContent");
         return NapiGetBoolean(env, false);
     }
 
     // lockScreenPicture?: pixelMap
     if (!SetLockScreenPicture(env, basicContent, result)) {
-        ANS_LOGE("lockScreenPicture is null");
+        ANS_LOGE("null lockScreenPicture");
         return NapiGetBoolean(env, false);
     }
 
     auto liveViewContent = static_cast<NotificationLiveViewContent *>(basicContent);
     if (liveViewContent == nullptr) {
-        ANS_LOGE("LiveViewContent is null");
+        ANS_LOGE("null liveViewContent");
         return NapiGetBoolean(env, false);
     }
 
@@ -432,7 +432,7 @@ napi_value Common::SetNotificationLiveViewContent(
 
     napi_value pictureMapObj = SetLiveViewPictureInfo(env, liveViewContent->GetPicture());
     if (pictureMapObj == nullptr) {
-        ANS_LOGE("Set live view picture map failed.");
+        ANS_LOGE("null pictureMapObj");
         return NapiGetBoolean(env, false);
     }
     napi_set_named_property(env, result, "pictureInfo", pictureMapObj);
@@ -443,7 +443,7 @@ napi_value Common::SetNotificationLiveViewContent(
 napi_value Common::SetLiveViewPictureInfo(
     const napi_env &env, const std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value pictureMapObj = nullptr;
     NAPI_CALL(env, napi_create_object(env, &pictureMapObj));
@@ -469,7 +469,7 @@ napi_value Common::SetLiveViewPictureInfo(
 napi_value Common::GetNotificationLocalLiveViewContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_valuetype valuetype = napi_undefined;
     napi_value contentResult = nullptr;
@@ -489,7 +489,7 @@ napi_value Common::GetNotificationLocalLiveViewContent(
     std::shared_ptr<OHOS::Notification::NotificationLocalLiveViewContent> localLiveViewContent =
         std::make_shared<OHOS::Notification::NotificationLocalLiveViewContent>();
     if (localLiveViewContent == nullptr) {
-        ANS_LOGE("localLiveViewContent is null");
+        ANS_LOGE("null localLiveViewContent");
         return nullptr;
     }
 
@@ -518,7 +518,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
     napi_value result = nullptr;
     int32_t intValue;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "capsule", &hasProperty));
 
@@ -589,7 +589,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         }
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid object pixelMap");
+            ANS_LOGE("null pixelMap");
             return nullptr;
         }
         capsule.SetIcon(pixelMap);
@@ -634,7 +634,7 @@ napi_value Common::GetNotificationLocalLiveViewCardButton(
 {
     napi_value buttonResult = nullptr;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_get_named_property(env, contentResult, "cardButtons", &buttonResult);
     
     // 解析iconbutton数组
@@ -652,7 +652,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
     const napi_env &env, const napi_value &capsuletResult,
     OHOS::Notification::NotificationCapsule &capsule)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     std::vector<NotificationIconButton> cardButtons;
     if (GetNotificationIconButton(env, capsuletResult, cardButtons, CAPSULE_BTN_MAX_SIZE) == nullptr) {
         return nullptr;
@@ -679,7 +679,7 @@ napi_value Common::GetNotificationIconButton(
     char str[STR_MAX_SIZE] = {0};
     bool hasProperty = false;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_is_array(env, buttonResult, &isArray);
     if (!isArray) {
         ANS_LOGE("Property names is expected to be an array.");
@@ -742,7 +742,7 @@ napi_value Common::GetNotificationIconButton(
             // icon?: image.PixelMap
             auto pixelMap = Media::PixelMapNapi::GetPixelMap(env, iconResource);
             if (pixelMap == nullptr) {
-                ANS_LOGE("Invalid pixelMap object is null.");
+                ANS_LOGE("null pixelMap");
             } else {
                 button.SetIconImage(pixelMap);
             }
@@ -847,7 +847,7 @@ napi_value Common::GetNotificationLocalLiveViewButton(
     char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_get_named_property(env, contentResult, "button", &buttonResult);
     NAPI_CALL(env, napi_typeof(env, buttonResult, &valuetype));
@@ -953,7 +953,7 @@ napi_value Common::GetNotificationLocalLiveViewProgress(const napi_env &env, con
     bool boolValue = false;
     napi_value progressResult = nullptr;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_get_named_property(env, contentResult, "progress", &progressResult);
     NAPI_CALL(env, napi_typeof(env, progressResult, &valuetype));
@@ -1025,7 +1025,7 @@ napi_value Common::GetNotificationLocalLiveViewTime(const napi_env &env, const n
     bool boolValue = false;
     napi_value timeResult = nullptr;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_get_named_property(env, contentResult, "time", &timeResult);
     NAPI_CALL(env, napi_typeof(env, timeResult, &valuetype));
@@ -1112,7 +1112,7 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
     napi_value result = nullptr;
     napi_valuetype valuetype = napi_undefined;
 
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     //title, text
     if (GetNotificationBasicContentDetailed(env, contentResult, content) == nullptr) {
@@ -1185,17 +1185,17 @@ napi_value Common::GetNotificationLocalLiveViewContentDetailed(
 napi_value Common::GetNotificationLiveViewContent(
     const napi_env &env, const napi_value &result, NotificationRequest &request)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value contentResult = AppExecFwk::GetPropertyValueByPropertyName(env, result, "liveView", napi_object);
     if (contentResult == nullptr) {
-        ANS_LOGE("Property liveView expected.");
+        ANS_LOGE("null contentResult");
         return nullptr;
     }
 
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
     if (liveViewContent == nullptr) {
-        ANS_LOGE("LiveViewContent is null");
+        ANS_LOGE("null liveViewContent");
         return nullptr;
     }
 
@@ -1212,11 +1212,11 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     const napi_env &env, const napi_value &contentResult,
     std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     // lockScreenPicture?: pixelMap
     if (GetLockScreenPicture(env, contentResult, liveViewContent) == nullptr) {
-        ANS_LOGE("Failed to get lockScreenPicture from liveView content.");
+        ANS_LOGE("null lockScreenPicture");
         return nullptr;
     }
 
@@ -1261,13 +1261,13 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     // pictureInfo?: {[key, string]: Array<image.pixelMap>}
     jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "pictureInfo", napi_object);
     if (jsValue == nullptr) {
-        ANS_LOGI("No picture maps.");
+        ANS_LOGE("null jsValue");
         return NapiGetNull(env);
     }
 
     std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
     if (GetLiveViewPictureInfo(env, jsValue, pictureMap) == nullptr) {
-        ANS_LOGE("Failed to get picture map from liveView content.");
+        ANS_LOGE("null LiveViewPictureInfo");
         return nullptr;
     }
     liveViewContent->SetPicture(pictureMap);
@@ -1279,7 +1279,7 @@ napi_value Common::GetLiveViewPictures(
     const napi_env &env, const napi_value &picturesObj,
     std::vector<std::shared_ptr<Media::PixelMap>> &pictures)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     bool isArray = false;
     napi_is_array(env, picturesObj, &isArray);
@@ -1305,7 +1305,7 @@ napi_value Common::GetLiveViewPictures(
 
         std::shared_ptr<Media::PixelMap> pixelMap = Media::PixelMapNapi::GetPixelMap(env, pictureObj);
         if (pixelMap == nullptr) {
-            ANS_LOGE("Invalid pixelMap.");
+            ANS_LOGE("null pixelMap");
             break;
         }
 
@@ -1319,7 +1319,7 @@ napi_value Common::GetLiveViewPictureInfo(
     const napi_env &env, const napi_value &pictureMapObj,
     std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_value pictureNamesObj = nullptr;
     uint32_t length = 0;

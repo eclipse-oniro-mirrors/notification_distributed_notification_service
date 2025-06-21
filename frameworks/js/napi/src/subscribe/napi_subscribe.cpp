@@ -27,21 +27,21 @@ namespace OHOS {
 namespace NotificationNapi {
 void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
 {
-    ANS_LOGI("DistributeOperation napi_create_async_work start");
+    ANS_LOGD("called");
     auto asyncCallbackInfo = static_cast<AsyncOperationCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        ANS_LOGE("asyncCallbackInfo is nullptr");
+        ANS_LOGE("null asyncCallbackInfo");
         return;
     }
     sptr<DistributedOperationCallback> callback = new (std::nothrow) DistributedOperationCallback(*asyncCallbackInfo);
     if (callback == nullptr) {
-        ANS_LOGE("NAPI_Lock create callback object fail");
+        ANS_LOGE("null callback");
         return;
     }
 
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
     if (operationInfo == nullptr) {
-        ANS_LOGE("create operationInfo failed");
+        ANS_LOGE("null operationInfo");
         return;
     }
     operationInfo->SetHashCode(asyncCallbackInfo->hashCode);
@@ -60,9 +60,9 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
 
 void NapiDistributeOperationCompleteCallback(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("DistributeOperation napi_create_async_work end");
+    ANS_LOGD("called");
     if (!data) {
-        ANS_LOGE("Invalid async callback data");
+        ANS_LOGE("null data");
         return;
     }
     auto distributeOperationInfo = static_cast<AsyncOperationCallbackInfo *>(data);
@@ -75,7 +75,7 @@ void NapiDistributeOperationCompleteCallback(napi_env env, napi_status status, v
 
 napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
@@ -156,7 +156,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiSubscribe callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -165,7 +165,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 
 napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     std::shared_ptr<SubscriberInstance> objectInfo = nullptr;
     NotificationSubscribeInfo subscriberInfo;
@@ -228,7 +228,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("NapiSubscribeSelf callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -237,7 +237,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
 
 napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("Unsubscribe start");
+    ANS_LOGD("called");
     ParametersInfoUnsubscribe paras;
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -304,7 +304,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiUnsubscribe callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -328,7 +328,7 @@ void AsyncDistributeOperationCall(napi_env env, AsyncOperationCallbackInfo* dist
 
 napi_value NapiDistributeOperation(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("Distribute operation called");
+    ANS_LOGD("called");
     std::string hashCode;
     napi_value thisVar = nullptr;
     OperationInfo operationInfo;

@@ -45,13 +45,13 @@ void JSPushCallBack::SetJsPushCallBackObject(NotificationConstant::SlotType slot
 bool JSPushCallBack::IsEqualPushCallBackObject(napi_value pushCallBackObject)
 {
     if (pushCallBackObject_ == nullptr) {
-        ANS_LOGE("pushCallBackObject_ nullptr");
+        ANS_LOGE("null pushCallBackObject");
         return false;
     }
     napi_value value = nullptr;
     napi_get_reference_value(env_, pushCallBackObject_, &value);
     if (value == nullptr) {
-        ANS_LOGE("Failed to get value");
+        ANS_LOGE("null value");
         return false;
     }
 
@@ -94,7 +94,7 @@ void CallBackReturn(const int32_t ret, const std::weak_ptr<PushCallBackParam> pu
 {
     auto callBackParam = pushCallBackParam.lock();
     if (callBackParam == nullptr) {
-        ANS_LOGI("Push callback param has been released");
+        ANS_LOGI("null callBackParam");
         return;
     }
 
@@ -106,9 +106,9 @@ void CallBackReturn(const int32_t ret, const std::weak_ptr<PushCallBackParam> pu
 
 napi_value JSPushCallBack::CheckPromiseCallback(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (info == nullptr) {
-        ANS_LOGE("CheckPromiseCallback, invalid input info");
+        ANS_LOGE("null info");
         return nullptr;
     }
 
@@ -138,14 +138,14 @@ int32_t JSPushCallBack::OnCheckNotification(
 
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
     if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
-        ANS_LOGE("pushCallBackObjects is nullptr");
+        ANS_LOGE("null pushCallBackObjects");
         return ERR_INVALID_STATE;
     }
 
     napi_value checkFunc = nullptr;
     napi_get_reference_value(env_, pushCallBackObjects_[outSlotType], &checkFunc);
     if (checkFunc == nullptr) {
-        ANS_LOGE("Failed to get checkFunc value");
+        ANS_LOGE("null checkFunc");
         return ERR_INVALID_STATE;
     }
     napi_value jsResult = nullptr;
@@ -231,7 +231,7 @@ void JSPushCallBack::HandleCheckPromise(
 int32_t JSPushCallBack::ConvertFunctionResult(napi_env env, napi_value funcResult)
 {
     if (funcResult == nullptr) {
-        ANS_LOGE("The funcResult is error.");
+        ANS_LOGE("null funcResult");
         return false;
     }
     napi_valuetype valueType = napi_undefined;

@@ -19,7 +19,7 @@ namespace OHOS {
 namespace Notification {
 void ReportTimerInfo::OnTrigger()
 {
-    ANS_LOGI("ReportTimerInfo is arrived.");
+    ANS_LOGD("called");
     auto callBack = GetCallBack();
     if (callBack != nullptr) {
         IN_PROCESS_CALL_WITHOUT_RET(callBack());

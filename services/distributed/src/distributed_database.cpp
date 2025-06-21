@@ -61,7 +61,7 @@ void DistributedDatabase::GetKvDataManager()
 
 void DistributedDatabase::DeviceInitCallBack::OnRemoteDied()
 {
-    ANS_LOGW("DeviceInitCallBack OnRemoteDied");
+    ANS_LOGD("called");
 }
 
 bool DistributedDatabase::CheckKvDataManager()
@@ -70,7 +70,7 @@ bool DistributedDatabase::CheckKvDataManager()
         GetKvDataManager();
     }
     if (kvDataManager_ == nullptr) {
-        ANS_LOGE("kvDataManager_ is nullptr.");
+        ANS_LOGE("null kvDataManager");
         return false;
     }
     return true;
@@ -127,7 +127,7 @@ bool DistributedDatabase::CheckKvStore()
         GetKvStore();
     }
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("null kvStore");
         return false;
     }
     return true;
@@ -143,7 +143,7 @@ bool DistributedDatabase::PutToDistributedDB(const std::string &key, const std::
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is null.");
+        ANS_LOGE("null kvStore");
         return false;
     }
 
@@ -168,7 +168,7 @@ bool DistributedDatabase::GetFromDistributedDB(const std::string &key, std::stri
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("null kvStore");
         return false;
     }
 
@@ -195,7 +195,7 @@ bool DistributedDatabase::GetEntriesFromDistributedDB(const std::string &prefixK
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore_ is nullptr.");
+        ANS_LOGE("null kvStore");
         return false;
     }
 
@@ -219,7 +219,7 @@ bool DistributedDatabase::DeleteToDistributedDB(const std::string &key)
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("null kvStore");
         return false;
     }
 
@@ -243,7 +243,7 @@ bool DistributedDatabase::ClearDataByDevice(const std::string &deviceId)
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
-        ANS_LOGE("kvStore is nullptr.");
+        ANS_LOGE("null kvStore");
         return false;
     }
 

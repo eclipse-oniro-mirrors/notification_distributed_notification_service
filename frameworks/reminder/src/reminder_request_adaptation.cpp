@@ -30,7 +30,7 @@ ReminderRequestAdaptation* ReminderRequestAdaptation::Unmarshalling(Parcel &parc
     ReminderRequest::ReadReminderTypeFormParcel(parcel, tarReminderType);
     auto reminderRequest = ReminderRequestFactory::CreateReminderRequest(tarReminderType);
     if (reminderRequest == nullptr) {
-        ANSR_LOGE("Failed to create reminder due to no memory.");
+        ANSR_LOGE("null reminderRequest");
         return nullptr;
     }
     if (!reminderRequest->ReadFromParcel(parcel)) {

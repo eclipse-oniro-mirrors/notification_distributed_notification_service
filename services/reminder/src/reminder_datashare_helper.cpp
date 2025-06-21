@@ -75,7 +75,7 @@ bool ReminderDataShareHelper::RegisterObserver()
     }
     auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
-        ANSR_LOGE("Create datashare helper failed.");
+        ANSR_LOGE("null helper");
         return false;
     }
     observer_ = std::make_shared<ReminderDataObserver>();
@@ -93,7 +93,7 @@ bool ReminderDataShareHelper::UnRegisterObserver()
     }
     auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
-        ANSR_LOGE("Create datashare helper failed.");
+        ANSR_LOGE("null helper");
         return false;
     }
     Uri uri(ReminderCalendarShareTable::PROXY);
@@ -107,7 +107,7 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
 {
     auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
-        ANSR_LOGE("Create datashare helper failed.");
+        ANSR_LOGE("null helper");
         return false;
     }
     int64_t timestamp = GetCurrentTime();
@@ -155,7 +155,7 @@ bool ReminderDataShareHelper::Update(const int32_t reminderId, const int32_t sta
 {
     auto helper = CreateDataShareHelper();
     if (helper == nullptr) {
-        ANSR_LOGE("Create datashare helper failed.");
+        ANSR_LOGE("null helper");
         return false;
     }
     std::string proxy = ReminderCalendarShareTable::PROXY;
@@ -195,7 +195,7 @@ void ReminderDataShareHelper::UpdateCalendarUid()
         for (const auto& metaData : moduleInfo.metadata) {
             if (metaData.name == "hmos.calendardata.reminderDbVersion") {
                 isNewRdbVer_ = true;
-                ANSR_LOGI("New calendar rdb version.");
+                ANSR_LOGE("New calendar rdb version");
                 return;
             }
         }
@@ -225,7 +225,7 @@ void ReminderDataShareHelper::OnDataInsertOrDelete()
     auto func = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
-            ANSR_LOGE("ReminderDataManager is nullptr.");
+            ANSR_LOGE("null manager");
             return;
         }
         manager->OnDataShareInsertOrDelete();
@@ -251,7 +251,7 @@ void ReminderDataShareHelper::OnDataUpdate(const DataShare::DataShareObserver::C
     auto func = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
-            ANSR_LOGE("ReminderDataManager is nullptr.");
+            ANSR_LOGE("null manager");
             return;
         }
         auto reminders = ReminderDataShareHelper::GetInstance().GetCacheReminders();
@@ -280,12 +280,12 @@ std::shared_ptr<DataShare::DataShareHelper> ReminderDataShareHelper::CreateDataS
 {
     sptr<ISystemAbilityManager> manager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (manager == nullptr) {
-        ANSR_LOGE("Get sa manager failed.");
+        ANSR_LOGE("null manager");
         return nullptr;
     }
     sptr<IRemoteObject> remoteObj = manager->GetSystemAbility(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID);
     if (remoteObj == nullptr) {
-        ANSR_LOGE("Get system ability failed.");
+        ANSR_LOGE("null remoteObj");
         return nullptr;
     }
 
@@ -304,7 +304,7 @@ std::shared_ptr<DataShare::DataShareHelper> ReminderDataShareHelper::CreateDataS
 bool ReminderDataShareHelper::ReleaseDataShareHelper(const std::shared_ptr<DataShare::DataShareHelper>& helper)
 {
     if (helper == nullptr) {
-        ANSR_LOGE("DataShareHelper is nullptr.");
+        ANSR_LOGE("null helper");
         return false;
     }
     return helper->Release();

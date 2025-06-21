@@ -63,7 +63,7 @@ void ReminderRequestTimer::SetInitInfo(const uint64_t countDownTimeInSeconds)
 
 uint64_t ReminderRequestTimer::PreGetNextTriggerTimeIgnoreSnooze(bool ignoreRepeat, bool forceToGetNext)
 {
-    ANSR_LOGD("countdown time not support PreGetNextTriggerTimeIgnoreSnooze");
+    ANSR_LOGD("called");
     return ReminderRequest::INVALID_LONG_LONG_VALUE;
 }
 
@@ -81,7 +81,7 @@ bool ReminderRequestTimer::OnTimeZoneChange()
 
 bool ReminderRequestTimer::UpdateNextReminder()
 {
-    ANSR_LOGD("countdown time not support repeat reminder, no need to update next triggerTime");
+    ANSR_LOGD("called");
     SetExpired(true);
     return false;
 }
@@ -138,7 +138,7 @@ ReminderRequestTimer *ReminderRequestTimer::Unmarshalling(Parcel &parcel)
 {
     auto objptr = new (std::nothrow) ReminderRequestTimer();
     if (objptr == nullptr) {
-        ANSR_LOGE("Failed to create reminder timer due to no memory.");
+        ANSR_LOGE("null objptr");
         return objptr;
     }
     if (!objptr->ReadFromParcel(parcel)) {

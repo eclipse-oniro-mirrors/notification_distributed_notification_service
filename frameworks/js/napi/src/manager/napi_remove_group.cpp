@@ -27,7 +27,7 @@ namespace {
 napi_value ParseParameters(
     const napi_env &env, const napi_callback_info &info, RemoveParamsGroupByBundle &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = REMOVE_GROUP_BY_BUNDLE_MAX_PARA;
     napi_value argv[REMOVE_GROUP_BY_BUNDLE_MAX_PARA] = {nullptr};
@@ -50,7 +50,7 @@ napi_value ParseParameters(
     }
     auto retValue = Common::GetBundleOption(env, argv[PARAM0], params.option);
     if (retValue == nullptr) {
-        ANS_LOGE("GetBundleOption failed.");
+        ANS_LOGE("null retValue");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
         return nullptr;
     }
@@ -91,9 +91,9 @@ napi_value ParseParameters(
 
 void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
-        ANS_LOGE("Invalid async callback data");
+        ANS_LOGE("null data");
         return;
     }
     AsyncCallbackInfoRemoveGroupByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoRemoveGroupByBundle *>(data);
@@ -111,7 +111,7 @@ void AsyncCompleteCallbackNapiRemoveGroupByBundle(napi_env env, napi_status stat
 
 napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     RemoveParamsGroupByBundle params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -154,7 +154,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiRemoveGroupByBundle callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

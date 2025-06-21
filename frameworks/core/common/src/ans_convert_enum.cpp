@@ -43,7 +43,7 @@ bool AnsEnumUtil::ContentTypeJSToC(const ContentType &inType, NotificationConten
             outType = NotificationContent::Type::LIVE_VIEW;
             break;
         default:
-            ANS_LOGE("ContentType %{public}d is an invalid value", inType);
+            ANS_LOGE("ContentType %{public}d", inType);
             return false;
     }
     return true;
@@ -74,7 +74,7 @@ bool AnsEnumUtil::ContentTypeCToJS(const NotificationContent::Type &inType, Cont
             outType = ContentType::NOTIFICATION_CONTENT_LIVE_VIEW;
             break;
         default:
-            ANS_LOGE("ContentType %{public}d is an invalid value", inType);
+            ANS_LOGE("ContentType %{public}d", inType);
             return false;
     }
     return true;
@@ -106,7 +106,7 @@ bool AnsEnumUtil::SlotTypeJSToC(const SlotType &inType, NotificationConstant::Sl
             outType = NotificationConstant::SlotType::OTHER;
             break;
         default:
-            ANS_LOGE("SlotType %{public}d is an invalid value", inType);
+            ANS_LOGE("SlotType %{public}d", inType);
             return false;
     }
     return true;
@@ -140,7 +140,7 @@ bool AnsEnumUtil::SlotTypeCToJS(const NotificationConstant::SlotType &inType, Sl
             outType = SlotType::OTHER_TYPES;
             break;
         default:
-            ANS_LOGE("SlotType %{public}d is an invalid value", inType);
+            ANS_LOGE("SlotType %{public}d", inType);
             return false;
     }
     return true;
@@ -166,7 +166,7 @@ bool AnsEnumUtil::SlotLevelJSToC(const SlotLevel &inLevel, NotificationSlot::Not
             outLevel = NotificationSlot::NotificationLevel::LEVEL_HIGH;
             break;
         default:
-            ANS_LOGE("SlotLevel %{public}d is an invalid value", inLevel);
+            ANS_LOGE("SlotLevel %{public}d", inLevel);
             return false;
     }
     return true;
@@ -189,7 +189,7 @@ bool AnsEnumUtil::LiveViewStatusJSToC(
             outType = NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
             break;
         default:
-            ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
+            ANS_LOGE("LiveViewStatus %{public}d", inType);
             return false;
     }
 
@@ -213,7 +213,7 @@ bool AnsEnumUtil::LiveViewTypesJSToC(
             outType = NotificationLocalLiveViewContent::LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
             break;
         default:
-            ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
+            ANS_LOGE("LiveViewTypes %{public}d", inType);
             return false;
     }
 
@@ -240,7 +240,7 @@ bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLe
             outLevel = SlotLevel::LEVEL_HIGH;
             break;
         default:
-            ANS_LOGE("SlotLevel %{public}d is an invalid value", inLevel);
+            ANS_LOGE("SlotLevel %{public}d", inLevel);
             return false;
     }
     return true;
@@ -372,7 +372,7 @@ void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
             break;
         default:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
-            ANS_LOGW("Reason %{public}d is an invalid value", inType);
+            ANS_LOGW("Reason %{public}d", inType);
             break;
     }
 }
@@ -393,7 +393,7 @@ bool AnsEnumUtil::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, Notifica
             outType = NotificationConstant::DoNotDisturbType::CLEARLY;
             break;
         default:
-            ANS_LOGE("DoNotDisturbType %{public}d is an invalid value", inType);
+            ANS_LOGE("DoNotDisturbType %{public}d", inType);
             return false;
     }
     return true;
@@ -415,7 +415,7 @@ bool AnsEnumUtil::DoNotDisturbTypeCToJS(const NotificationConstant::DoNotDisturb
             outType = DoNotDisturbType::TYPE_CLEARLY;
             break;
         default:
-            ANS_LOGE("DoNotDisturbType %{public}d is an invalid value", inType);
+            ANS_LOGE("DoNotDisturbType %{public}d", inType);
             return false;
     }
     return true;
@@ -437,7 +437,7 @@ bool AnsEnumUtil::DeviceRemindTypeCToJS(const NotificationConstant::RemindType &
             outType = DeviceRemindType::ACTIVE_REMIND;
             break;
         default:
-            ANS_LOGE("DeviceRemindType %{public}d is an invalid value", inType);
+            ANS_LOGE("DeviceRemindType %{public}d", inType);
             return false;
     }
     return true;
@@ -456,7 +456,7 @@ bool AnsEnumUtil::SourceTypeCToJS(const NotificationConstant::SourceType &inType
             outType = SourceType::TYPE_TIMER;
             break;
         default:
-            ANS_LOGE("SourceType %{public}d is an invalid value", inType);
+            ANS_LOGE("SourceType %{public}d", inType);
             return false;
     }
     return true;
@@ -479,7 +479,7 @@ bool AnsEnumUtil::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveVie
             outType = LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
             break;
         default:
-            ANS_LOGE("LiveViewStatus %{public}d is an invalid value", inType);
+            ANS_LOGE("LiveViewStatus %{public}d", inType);
             return false;
     }
 
@@ -502,7 +502,7 @@ bool AnsEnumUtil::LiveViewTypesCToJS(const NotificationLocalLiveViewContent::Liv
             outType = LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
             break;
         default:
-            ANS_LOGE("LiveViewTypes %{public}d is an invalid value", inType);
+            ANS_LOGE("LiveViewTypes %{public}d", inType);
             return false;
     }
 

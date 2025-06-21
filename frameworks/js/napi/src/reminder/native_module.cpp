@@ -25,7 +25,7 @@ namespace ReminderAgentNapi {
 EXTERN_C_START
 napi_value ReminderAgentInit(napi_env env, napi_value exports)
 {
-    ANSR_LOGI("ReminderAgentInit start");
+    ANSR_LOGD("called");
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("cancelReminder", CancelReminder),
         DECLARE_NAPI_FUNCTION("cancelAllReminders", CancelAllReminders),
@@ -41,7 +41,7 @@ napi_value ReminderAgentInit(napi_env env, napi_value exports)
 
 napi_value ConstantInit(napi_env env, napi_value exports)
 {
-    ANSR_LOGI("ConstantInit start");
+    ANSR_LOGD("called");
     napi_value objReminderType = nullptr;
     napi_create_object(env, &objReminderType);
 

@@ -28,7 +28,7 @@ namespace NotificationNapi {
 const int IS_NOTIFICATION_ENABLE_MAX_PARA = 2;
 void AsyncCompleteCallbackNapiEnableNotification(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -48,7 +48,7 @@ void AsyncCompleteCallbackNapiEnableNotification(napi_env env, napi_status statu
 
 napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     EnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -77,7 +77,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
                 std::string deviceId {""};
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetNotificationsEnabledForSpecifiedBundle(
                     asynccallbackinfo->params.option, deviceId, asynccallbackinfo->params.enable);
-                ANS_LOGI("asynccallbackinfo->info.errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+                ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
         AsyncCompleteCallbackNapiEnableNotification,
@@ -88,7 +88,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiEnableNotification callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -97,7 +97,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiIsNotificationEnabled(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -118,10 +118,10 @@ void AsyncCompleteCallbackNapiIsNotificationEnabled(napi_env env, napi_status st
 
 __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        ANS_LOGD("ParseParameters is nullptr.");
+        ANS_LOGD("null ParseParameters");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -129,7 +129,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
     AsyncCallbackInfoIsEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        ANS_LOGD("Asynccallbackinfo is nullptr.");
+        ANS_LOGD("null asynccallbackinfo");
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::JSParaError(env, params.callback);
     }
@@ -160,7 +160,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
                     asynccallbackinfo->info.errorCode = NotificationHelper::IsAllowedNotifySelf(
                         asynccallbackinfo->allowed);
                 }
-                ANS_LOGI("asynccallbackinfo->info.errorCode:%{public}d, allowed:%{public}d",
+                ANS_LOGI("errorCode:%{public}d, allowed:%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -172,7 +172,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiIsNotificationEnabled callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -181,7 +181,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
 
 napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -191,7 +191,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
     AsyncCallbackInfoIsEnable *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoIsEnable {.env = env, .asyncWork = nullptr, .params = params};
     if (!asynccallbackinfo) {
-        ANS_LOGD("Asynccallbackinfo is null.");
+        ANS_LOGD("null asynccallbackinfo");
         return Common::JSParaError(env, params.callback);
     }
     napi_value promise = nullptr;
@@ -213,7 +213,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                     asynccallbackinfo->info.errorCode =
                         NotificationHelper::IsAllowedNotifySelf(asynccallbackinfo->allowed);
                 }
-                ANS_LOGD("asynccallbackinfo->info.errorCode:%{public}d, allowed:%{public}d",
+                ANS_LOGD("errorCode: %{public}d, allowed:%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
             }
         },
@@ -225,7 +225,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiIsNotificationEnabledSelf callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -234,9 +234,9 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
 
 void NapiAsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (data == nullptr) {
-        ANS_LOGE("Invalid async callback data.");
+        ANS_LOGE("null data");
         return;
     }
     auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
@@ -252,7 +252,7 @@ void NapiAsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data
 
 napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 {
-    ANS_LOGI("NapiRequestEnableNotification enter");
+    ANS_LOGD("called");
     IsEnableParams params {};
     if (ParseRequestEnableParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -272,9 +272,9 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     napi_create_string_latin1(env, "RequestEnableNotification", NAPI_AUTO_LENGTH, &resourceName);
 
     auto ipcCall = [](napi_env env, void* data) {
-        ANS_LOGD("enter");
+        ANS_LOGD("called");
         if (data == nullptr) {
-            ANS_LOGE("data is invalid");
+            ANS_LOGE("null data");
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
@@ -291,8 +291,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             bool canPop = false;
             std::string bundleName {""};
             ErrCode errCode = NotificationHelper::CanPopEnableNotificationDialog(client, canPop, bundleName);
-            ANS_LOGI("CanPopEnableNotificationDialog result, errCode:%{public}d, canPop:%{public}d",
-                errCode, canPop);
+            ANS_LOGI("errCode:%{public}d, canPop:%{public}d", errCode, canPop);
             if (canPop == false) {
                 asynccallbackinfo->info.errorCode = errCode;
                 return;
@@ -305,12 +304,12 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             NotificationHelper::RequestEnableNotification(deviceId, client,
                 asynccallbackinfo->params.callerToken);
         }
-        ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
+        ANS_LOGI("errorCode: %{public}d", asynccallbackinfo->info.errorCode);
     };
     auto jsCb = [](napi_env env, napi_status status, void* data) {
-        ANS_LOGD("enter");
+        ANS_LOGD("called");
         if (data == nullptr) {
-            ANS_LOGE("data is nullptr");
+            ANS_LOGE("null data");
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
@@ -325,7 +324,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
         }
         ErrCode errCode = asynccallbackinfo->info.errorCode;
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
-            ANS_LOGE("error, code is %{public}d.", errCode);
+            ANS_LOGE("errCode: %{public}d", errCode);
             NapiAsyncCompleteCallbackRequestEnableNotification(env, static_cast<void*>(asynccallbackinfo));
             return;
         }
@@ -354,7 +353,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {
-        ANS_LOGD("napiRequestEnableNotification callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -363,7 +362,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
 
 napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback_info &info, IsEnableParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = IS_NOTIFICATION_ENABLE_MAX_PARA;
     napi_value argv[IS_NOTIFICATION_ENABLE_MAX_PARA] = {nullptr};
@@ -410,7 +409,7 @@ napi_value ParseRequestEnableParameters(const napi_env &env, const napi_callback
 
 void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("Called.");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -418,7 +417,7 @@ void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_
     napi_value result = nullptr;
     AsyncCallbackInfoEnableStatus *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableStatus *>(data);
     if (asynccallbackinfo == nullptr) {
-        ANS_LOGE("asynccallbackinfo is nullptr");
+        ANS_LOGE("null asynccallbackinfo");
         return;
     }
     if (asynccallbackinfo->info.errorCode != ERR_OK) {
@@ -447,12 +446,12 @@ void AsyncCompleteCallbackNapiGetAllNotificationEnableStatus(napi_env env, napi_
 
 napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("Called");
+    ANS_LOGD("called");
     napi_ref callback = nullptr;
     AsyncCallbackInfoEnableStatus *asynccallbackinfo =
         new (std::nothrow) AsyncCallbackInfoEnableStatus{ .env = env, .asyncWork = nullptr };
     if (asynccallbackinfo == nullptr) {
-        ANS_LOGE("asynccallbackinfo is nullptr");
+        ANS_LOGE("null asynccallbackinfo");
         Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
         return Common::NapiGetUndefined(env);
     }
@@ -487,7 +486,7 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
     }
 
     if (isCallback) {
-        ANS_LOGD("Callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;
@@ -496,10 +495,10 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
 
 napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     IsEnableParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
-        ANS_LOGD("ParseParameters is nullptr.");
+        ANS_LOGD("null ParseParameters");
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
@@ -514,19 +513,19 @@ napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info)
 bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
 {
     if (context == nullptr) {
-        ANS_LOGE("Get context failed");
+        ANS_LOGE("null context");
         return false;
     }
 
     std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> abilityContext =
         OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     if (abilityContext == nullptr) {
-        ANS_LOGE("abilityContext is null");
+        ANS_LOGE("null abilityContext");
         return false;
     }
     auto uiContent = abilityContext->GetUIContent();
     if (uiContent == nullptr) {
-        ANS_LOGE("uiContent is null");
+        ANS_LOGE("null uiContent");
         return false;
     }
 
@@ -557,7 +556,7 @@ bool CreateUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, s
     config.isProhibitBack = true;
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, uiExtensionCallbacks, config);
-    ANS_LOGI("Create end, sessionId: %{public}d", sessionId);
+    ANS_LOGI("sessionId: %{public}d", sessionId);
     if (sessionId == 0) {
         ANS_LOGE("Create component failed, sessionId is 0");
         return false;
@@ -590,7 +589,7 @@ ModalExtensionCallback::~ModalExtensionCallback()
  */
 void ModalExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want& result)
 {
-    ANS_LOGD("OnResult");
+    ANS_LOGD("called");
 }
 
 /*
@@ -598,7 +597,7 @@ void ModalExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want& res
  */
 void ModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
 {
-    ANS_LOGD("OnReceive");
+    ANS_LOGD("called");
 }
 
 /*
@@ -607,7 +606,7 @@ void ModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
  */
 void ModalExtensionCallback::OnRelease(int32_t releaseCode)
 {
-    ANS_LOGI("OnRelease");
+    ANS_LOGI("called");
     ReleaseOrErrorHandle(releaseCode);
 }
 
@@ -616,7 +615,7 @@ void ModalExtensionCallback::OnRelease(int32_t releaseCode)
  */
 void ModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
-    ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
+    ANS_LOGD("called, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
     NotificationHelper::RemoveEnableNotificationDialog();
 }
@@ -627,7 +626,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
  */
 void ModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
-    ANS_LOGD("OnRemoteReady");
+    ANS_LOGD("called");
 }
 
 /*
@@ -635,7 +634,7 @@ void ModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExt
  */
 void ModalExtensionCallback::OnDestroy()
 {
-    ANS_LOGD("OnDestroy");
+    ANS_LOGD("called");
 }
 
 
@@ -656,14 +655,14 @@ void ModalExtensionCallback::SetAbilityContext(std::shared_ptr<OHOS::AbilityRunt
 
 void ModalExtensionCallback::ReleaseOrErrorHandle(int32_t code)
 {
-    ANS_LOGD("ReleaseOrErrorHandle start");
+    ANS_LOGD("start");
     Ace::UIContent* uiContent = this->abilityContext_->GetUIContent();
     if (uiContent == nullptr) {
-        ANS_LOGE("uiContent is null");
+        ANS_LOGE("null uiContent");
         return;
     }
     uiContent->CloseModalUIExtension(this->sessionId_);
-    ANS_LOGD("ReleaseOrErrorHandle end");
+    ANS_LOGD("end");
     return;
 }
 

@@ -46,7 +46,7 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnConn
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->AddDeathRecipient(recipient_);
-        ANS_LOGD("%s, Add death recipient.", __func__);
+        ANS_LOGD("Add death recipient");
     }
     subscriber_.OnConnected();
     return ERR_OK;
@@ -58,7 +58,7 @@ ErrCode NotificationLocalLiveViewSubscriber::SubscriberLocalLiveViewImpl::OnDisc
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (proxy != nullptr) {
         proxy->AsObject()->RemoveDeathRecipient(recipient_);
-        ANS_LOGD("%s, Remove death recipient.", __func__);
+        ANS_LOGD("Remove death recipient");
     }
     subscriber_.OnDisconnected();
     return ERR_OK;

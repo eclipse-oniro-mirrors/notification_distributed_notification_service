@@ -118,7 +118,7 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
 
     auto *button = new (std::nothrow) NotificationIconButton();
     if (button == nullptr) {
-        ANS_LOGE("Failed to create icon button");
+        ANS_LOGE("null button");
         return nullptr;
     }
 
@@ -143,7 +143,7 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         }
         auto pIcon = AnsImageUtil::UnPackImage(resources);
         if (pIcon == nullptr) {
-            ANS_LOGE("Failed to parse button icon");
+            ANS_LOGE("null pIcon");
             delete button;
             button = nullptr;
         } else {
@@ -153,7 +153,7 @@ NotificationIconButton *NotificationIconButton::FromJson(const nlohmann::json &j
         auto resources = jsonObject.at("iconImage");
         auto pIcon = AnsImageUtil::UnPackImage(resources);
         if (pIcon == nullptr) {
-            ANS_LOGE("Failed to parse button icon");
+            ANS_LOGE("null pIcon");
             delete button;
             button = nullptr;
         } else {

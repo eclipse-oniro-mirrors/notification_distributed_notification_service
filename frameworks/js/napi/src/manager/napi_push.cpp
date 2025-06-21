@@ -101,7 +101,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     if (jsPushCallBack_ == nullptr) {
         jsPushCallBack_ = new (std::nothrow) OHOS::Notification::JSPushCallBack(env);
         if (jsPushCallBack_ == nullptr) {
-            ANS_LOGE("new JSPushCallBack failed");
+            ANS_LOGE("null jsPushCallBack_");
             ThrowError(env, ERROR_INTERNAL_ERROR);
             return undefined;
         }
@@ -110,7 +110,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     jsPushCallBack_->SetJsPushCallBackObject(outSlotType, argv[INDEX_TWO]);
     auto result = NotificationHelper::RegisterPushCallback(jsPushCallBack_->AsObject(), checkRequest);
     if (result != ERR_OK) {
-        ANS_LOGE("Register failed, result is %{public}d", result);
+        ANS_LOGE("result: %{public}d", result);
         ThrowError(env, OHOS::Notification::ErrorToExternal(result));
     }
     return undefined;
@@ -185,7 +185,7 @@ bool NapiPush::CheckCallerIsSystemApp()
 napi_value NapiPush::ParseCheckRequest(const napi_env &env,
     const napi_value &obj, sptr<NotificationCheckRequest> &checkRequest)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("start");
 
     if (!AppExecFwk::IsTypeForNapiValue(env, obj, napi_object)) {
         ANS_LOGE("Wrong argument type. Object expected.");

@@ -24,7 +24,7 @@ std::map<std::string, NotificationContent::Type> NotificationContent::convertStr
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationNormalContent> &normalContent)
 {
     if (!normalContent) {
-        ANS_LOGE("NotificationNormalContent can not be null");
+        ANS_LOGE("null normalContent");
         return;
     }
 
@@ -35,7 +35,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationNorma
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationLongTextContent> &longTextContent)
 {
     if (!longTextContent) {
-        ANS_LOGE("NotificationLongTextContent can not be null");
+        ANS_LOGE("null longTextContent");
         return;
     }
 
@@ -46,7 +46,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationLongT
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationPictureContent> &pictureContent)
 {
     if (!pictureContent) {
-        ANS_LOGE("NotificationPictureContent can not be null");
+        ANS_LOGE("null pictureContent");
         return;
     }
 
@@ -57,7 +57,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationPictu
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationConversationalContent> &conversationContent)
 {
     if (!conversationContent) {
-        ANS_LOGE("NotificationConversationalContent can not be null");
+        ANS_LOGE("null conversationContent");
         return;
     }
 
@@ -68,7 +68,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationConve
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationMultiLineContent> &multiLineContent)
 {
     if (!multiLineContent) {
-        ANS_LOGE("NotificationMultiLineContent can not be null");
+        ANS_LOGE("null multiLineContent");
         return;
     }
 
@@ -79,7 +79,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationMulti
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationMediaContent> &mediaContent)
 {
     if (!mediaContent) {
-        ANS_LOGE("NotificationMediaContent can not be null");
+        ANS_LOGE("null mediaContent");
         return;
     }
 
@@ -90,7 +90,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationMedia
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationLocalLiveViewContent> &localLiveViewContent)
 {
     if (!localLiveViewContent) {
-        ANS_LOGE("NotificationLocalLiveViewContent can not be null");
+        ANS_LOGE("null localLiveViewContent");
         return;
     }
 
@@ -102,7 +102,7 @@ NotificationContent::NotificationContent(const std::shared_ptr<NotificationLocal
 NotificationContent::NotificationContent(const std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     if (!liveViewContent) {
-        ANS_LOGE("NotificationLiveViewContent can not be null");
+        ANS_LOGE("null liveViewContent");
         return;
     }
 
@@ -168,13 +168,13 @@ NotificationContent *NotificationContent::FromJson(const nlohmann::json &jsonObj
     }
     const auto &jsonEnd = jsonObject.cend();
     if ((jsonObject.find("contentType") == jsonEnd) || (jsonObject.find("content") == jsonEnd)) {
-        ANS_LOGE("Incomplete NotificationContent json object. Cannot convert content from JSON.");
+        ANS_LOGE("Cannot convert content from JSON");
         return nullptr;
     }
 
     auto pContent = new (std::nothrow) NotificationContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create NotificationContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 
@@ -279,7 +279,7 @@ bool NotificationContent::ReadFromParcel(Parcel &parcel)
 bool NotificationContent::ConvertJsonToContent(NotificationContent *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return false;
     }
 
@@ -292,7 +292,7 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
 
     auto contentObj = jsonObject.at("content");
     if (contentObj.is_null()) {
-        ANS_LOGE("Invalid json object. Cannot convert content from JSON.");
+        ANS_LOGE("Cannot convert content from JSON");
         return false;
     }
 
@@ -324,7 +324,7 @@ bool NotificationContent::ConvertJsonToContent(NotificationContent *target, cons
             break;
     }
     if (pBasicContent == nullptr) {
-        ANS_LOGE("Parse content error!");
+        ANS_LOGE("null pBasicContent");
         return false;
     }
     target->content_ = std::shared_ptr<NotificationBasicContent>(pBasicContent);
@@ -351,7 +351,7 @@ bool NotificationContent::GetContentTypeByString(
         contentType = iterContentType->second;
         return true;
     }
-    ANS_LOGE("GetContentTypeByString failed as Invalid strContentType.");
+    ANS_LOGE("Invalid strContentType");
     return false;
 }
 }  // namespace Notification

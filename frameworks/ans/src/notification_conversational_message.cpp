@@ -98,7 +98,7 @@ NotificationConversationalMessage *NotificationConversationalMessage::FromJson(c
 
     auto pMessage = new (std::nothrow) NotificationConversationalMessage();
     if (pMessage == nullptr) {
-        ANS_LOGE("Failed to create conversationalMessage instance");
+        ANS_LOGE("null pMessage");
         return nullptr;
     }
 
@@ -196,7 +196,7 @@ bool NotificationConversationalMessage::ReadFromParcel(Parcel &parcel)
 
     auto pUser = parcel.ReadParcelable<MessageUser>();
     if (pUser == nullptr) {
-        ANS_LOGE("Failed to read sender");
+        ANS_LOGE("null pUser");
         return false;
     }
     sender_ = *pUser;

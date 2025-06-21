@@ -50,7 +50,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     const auto checkResult = CheckNotificationRequest(request);
     if (checkResult != ERR_OK) {
@@ -93,7 +93,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             ->GetType(request->GetRemovalWantAgent()->GetPendingWant()->GetTarget()));
         bool isSystemApp = AccessTokenHelper::IsSystemApp();
         if (!isSubsystem && !isSystemApp && operationType != OPERATION_TYPE_COMMON_EVENT) {
-            ANS_LOGI("SetRemovalWantAgent as nullptr");
+            ANS_LOGI("null SetRemovalWantAgent");
             request->SetRemovalWantAgent(nullptr);
         }
     }
@@ -164,11 +164,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
-        ANS_LOGE("Request object is nullptr");
+        ANS_LOGE("null request");
         message.ErrorCode(ERR_ANS_INVALID_PARAM).Message("Request object is nullptr");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
@@ -195,7 +195,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     record->bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (record->bundleOption == nullptr || bundleOption == nullptr) {
-        ANS_LOGE("Failed to create bundleOption");
+        ANS_LOGE("null bundleOption");
         message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create bundleOption");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NO_MEMORY;
@@ -203,14 +203,14 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
-        ANS_LOGE("Failed to create notification");
+        ANS_LOGE("null notification");
         message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Failed to create notification");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_NO_MEMORY;
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         message.ErrorCode(ERR_ANS_NO_MEMORY).Message("Serial queue is invalid.");
         NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
         return ERR_ANS_INVALID_PARAM;
@@ -290,7 +290,7 @@ ErrCode AdvancedNotificationService::PublishAsBundleWithMaxCapacity(
 
 ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const sptr<NotificationRequest> &request)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem) {
@@ -314,7 +314,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     sptr<NotificationBundleOption> bundleOption = nullptr;
     bundleOption = new (std::nothrow) NotificationBundleOption(std::string(), uid);
     if (bundleOption == nullptr) {
-        ANS_LOGE("Failed to create NotificationBundleOption instance");
+        ANS_LOGE("null bundleOption");
         return ERR_NO_MEMORY;
     }
 
@@ -328,17 +328,17 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     record->bundleOption = bundleOption;
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
-        ANS_LOGE("Failed to create Notification instance");
+        ANS_LOGE("null notification");
         return ERR_NO_MEMORY;
     }
     record->notification->SetSourceType(NotificationConstant::SourceType::TYPE_CONTINUOUS);
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
+        ANS_LOGD("called");
         if (!IsNotificationExists(record->notification->GetKey())) {
             AddToNotificationList(record);
         } else {
@@ -362,12 +362,12 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t 
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (!isSubSystem || callingUid != RESSCHED_UID) {
-        ANS_LOGE("caller is not ressched, callingUid: %{public}d", callingUid);
+        ANS_LOGE(" callingUid: %{public}d", callingUid);
         return ERR_ANS_NOT_SYSTEM_SERVICE;
     }
 
     if (!notificationSvrQueue_) {
-        ANS_LOGE("Serial queue is invalidated.");
+        ANS_LOGE("null notificationSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
@@ -380,7 +380,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t 
 ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<NotificationRequest> &request)
 {
     if (!request) {
-        ANSR_LOGE("ReminderRequest object is nullptr");
+        ANSR_LOGE("null request");
         return ERR_ANS_INVALID_PARAM;
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();

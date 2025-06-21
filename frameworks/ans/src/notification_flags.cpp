@@ -168,7 +168,7 @@ NotificationFlags *NotificationFlags::FromJson(const nlohmann::json &jsonObject)
 
     auto pFlags = new (std::nothrow) NotificationFlags();
     if (pFlags == nullptr) {
-        ANS_LOGE("Failed to create notificationFlags instance");
+        ANS_LOGE("null pFlags");
         return nullptr;
     }
 
@@ -215,7 +215,7 @@ NotificationFlags *NotificationFlags::Unmarshalling(Parcel &parcel)
 {
     auto templ = new (std::nothrow) NotificationFlags();
     if (templ == nullptr) {
-        ANS_LOGE("Failed to create NotificationFlags instance");
+        ANS_LOGE("null templ");
         return nullptr;
     }
     if (!templ->ReadFromParcel(parcel)) {
@@ -239,7 +239,7 @@ bool NotificationFlags::GetReminderFlagsByString(
     const std::string &strReminderFlags, std::shared_ptr<NotificationFlags> &reminderFlags)
 {
     if (strReminderFlags.size() <= SOUND_ENABLED_SEQ) {
-        ANS_LOGE("GetReminderFlagsByString failed as Invalid reminderFlags size.");
+        ANS_LOGE("GetReminderFlagsByString failed as Invalid reminderFlags size");
         return false;
     }
     for (int32_t seq = 0; seq < strReminderFlags.size(); seq++) {

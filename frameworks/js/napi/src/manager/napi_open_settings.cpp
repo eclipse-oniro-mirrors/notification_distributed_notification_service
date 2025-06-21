@@ -28,9 +28,9 @@ static std::atomic<bool> isExist = false;
 
 void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
 {
-    ANS_LOGD("enter NapiAsyncCompleteCallbackOpenSettings");
+    ANS_LOGD("called");
     if (data == nullptr) {
-        ANS_LOGE("Invalid async callback data.");
+        ANS_LOGE("null data");
         return;
     }
     auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
@@ -57,7 +57,7 @@ void NapiAsyncCompleteCallbackOpenSettings(napi_env env, void *data)
 
 napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("NapiOpenNotificationSettings start");
+    ANS_LOGD("start");
     OpenSettingsParams params {};
     if (ParseOpenSettingsParameters(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -78,16 +78,16 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
     auto createExtension = [](napi_env env, void* data) {
     };
     auto jsCb = [](napi_env env, napi_status status, void* data) {
-        ANS_LOGD("enter");
+        ANS_LOGD("called");
         if (data == nullptr) {
-            ANS_LOGE("data is invalid");
+            ANS_LOGE("null data");
             return;
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings*>(data);
         CreateExtension(asynccallbackinfo);
         ErrCode errCode = asynccallbackinfo->info.errorCode;
         if (errCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
-            ANS_LOGE("error, code is %{public}d.", errCode);
+            ANS_LOGE("errCode: %{public}d.", errCode);
             NapiAsyncCompleteCallbackOpenSettings(env, static_cast<void*>(asynccallbackinfo));
             if (errCode != ERROR_SETTING_WINDOW_EXIST) {
                 isExist.store(false);
@@ -113,13 +113,13 @@ napi_value NapiOpenNotificationSettings(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
-    ANS_LOGD("NapiOpenNotificationSettings end");
+    ANS_LOGD("end");
     return promise;
 }
 
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = OPEN_NOTIFICATION_SETTINGS_MAX_PARA;
     napi_value argv[OPEN_NOTIFICATION_SETTINGS_MAX_PARA] = {nullptr};
@@ -157,19 +157,19 @@ napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_
 bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> context, std::string &bundleName)
 {
     if (context == nullptr) {
-        ANS_LOGE("Get context failed");
+        ANS_LOGE("null context");
         return false;
     }
 
     std::shared_ptr<OHOS::AbilityRuntime::AbilityContext> abilityContext =
         OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
     if (abilityContext == nullptr) {
-        ANS_LOGE("abilityContext is null");
+        ANS_LOGE("null abilityContex");
         return false;
     }
     auto uiContent = abilityContext->GetUIContent();
     if (uiContent == nullptr) {
-        ANS_LOGE("uiContent is null");
+        ANS_LOGE("null uiContent");
         return false;
     }
 
@@ -215,7 +215,7 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
 bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo,
     JsAnsCallbackComplete complete)
 {
-    ANS_LOGD("enter JsAnsCallback::Init");
+    ANS_LOGD("called");
     if (env == nullptr || callbackInfo == nullptr || complete == nullptr) {
         ANS_LOGE("invalid data");
         return false;
@@ -228,7 +228,7 @@ bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo,
 
 void ProcessStatusChanged(int32_t code)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     std::unique_ptr<AsyncCallbackInfoOpenSettings> callbackInfo(callbackInfo_);
     if (env_ == nullptr || callbackInfo == nullptr || complete_ == nullptr) {
         ANS_LOGE("invalid data");
@@ -240,7 +240,7 @@ void ProcessStatusChanged(int32_t code)
     uv_loop_s* loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
-        ANS_LOGE("loop is nullptr");
+        ANS_LOGE("null loop");
         return;
     }
 
@@ -257,7 +257,7 @@ void ProcessStatusChanged(int32_t code)
 
     work->data = static_cast<void*>(workData.get());
     auto jsCb = [](uv_work_t* work, int status) {
-        ANS_LOGD("enter ProcessStatusChanged jsCb");
+        ANS_LOGD("called jsCb");
         std::unique_ptr<uv_work_t> workSP(work);
         if (work == nullptr || work->data == nullptr) {
             ANS_LOGE("invalid data");
@@ -308,7 +308,7 @@ void CreateExtension(AsyncCallbackInfoOpenSettings* asynccallbackinfo)
     } else {
         ANS_LOGD("un stage mode");
     }
-    ANS_LOGI("done, code is %{public}d.", asynccallbackinfo->info.errorCode);
+    ANS_LOGI("errorCode: %{public}d", asynccallbackinfo->info.errorCode);
 }
 
 SettingsModalExtensionCallback::SettingsModalExtensionCallback()
@@ -323,7 +323,7 @@ SettingsModalExtensionCallback::~SettingsModalExtensionCallback()
  */
 void SettingsModalExtensionCallback::OnResult(int32_t resultCode, const AAFwk::Want& result)
 {
-    ANS_LOGD("OnResult");
+    ANS_LOGD("called");
 }
 
 /*
@@ -331,7 +331,7 @@ void SettingsModalExtensionCallback::OnResult(int32_t resultCode, const AAFwk::W
  */
 void SettingsModalExtensionCallback::OnReceive(const AAFwk::WantParams& receive)
 {
-    ANS_LOGD("OnReceive");
+    ANS_LOGD("called");
 }
 
 /*
@@ -349,7 +349,7 @@ void SettingsModalExtensionCallback::OnRelease(int32_t releaseCode)
  */
 void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& name, const std::string& message)
 {
-    ANS_LOGE("OnError, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
+    ANS_LOGD("called, code = %{public}d,name = %{public}s, message = %{public}s", code, name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
     ProcessStatusChanged(code);
 }
@@ -360,7 +360,7 @@ void SettingsModalExtensionCallback::OnError(int32_t code, const std::string& na
  */
 void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)
 {
-    ANS_LOGI("OnRemoteReady");
+    ANS_LOGD("called");
     ProcessStatusChanged(0);
 }
 
@@ -369,7 +369,7 @@ void SettingsModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::Mo
  */
 void SettingsModalExtensionCallback::OnDestroy()
 {
-    ANS_LOGI("OnDestroy");
+    ANS_LOGD("called");
     isExist.store(false);
 }
 
@@ -392,14 +392,14 @@ void SettingsModalExtensionCallback::SetAbilityContext(
 
 void SettingsModalExtensionCallback::ReleaseOrErrorHandle(int32_t code)
 {
-    ANS_LOGD("ReleaseOrErrorHandle start");
+    ANS_LOGD("start");
     Ace::UIContent* uiContent = this->abilityContext_->GetUIContent();
     if (uiContent == nullptr) {
-        ANS_LOGE("uiContent is null");
+        ANS_LOGE("null uiContent");
         return;
     }
     uiContent->CloseModalUIExtension(this->sessionId_);
-    ANS_LOGD("ReleaseOrErrorHandle end");
+    ANS_LOGD("end");
     return;
 }
 

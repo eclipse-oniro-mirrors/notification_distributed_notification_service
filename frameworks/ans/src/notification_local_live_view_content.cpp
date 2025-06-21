@@ -194,7 +194,7 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
 
     auto pContent = new (std::nothrow) NotificationLocalLiveViewContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create localLiveViewContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 
@@ -353,7 +353,7 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     auto pCapsule = parcel.ReadParcelable<NotificationCapsule>();
     if (pCapsule == nullptr) {
-        ANS_LOGE("Failed to read capsule");
+        ANS_LOGE("null pCapsule");
         return false;
     }
     capsule_ = *pCapsule;
@@ -375,7 +375,7 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
     for (uint32_t i = 0; i < vsize; ++i) {
         auto btn = parcel.ReadParcelable<NotificationIconButton>();
         if (btn == nullptr) {
-            ANS_LOGE("Failed to read card button");
+            ANS_LOGE("null btn");
             return false;
         }
         card_button_.push_back(*btn);
@@ -385,7 +385,7 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     auto pProgress = parcel.ReadParcelable<NotificationProgress>();
     if (pProgress == nullptr) {
-        ANS_LOGE("Failed to read progress");
+        ANS_LOGE("null pProgress");
         return false;
     }
     progress_ = *pProgress;
@@ -394,7 +394,7 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     auto pTime = parcel.ReadParcelable<NotificationTime>();
     if (pTime == nullptr) {
-        ANS_LOGE("Failed to read time");
+        ANS_LOGE("null pTime");
         return false;
     }
     time_ = *pTime;

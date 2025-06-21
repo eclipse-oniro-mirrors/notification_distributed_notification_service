@@ -44,7 +44,7 @@ struct AsyncCallbackInfoConfig {
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, ConfigParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = SETADDITION_CONFIG_NUM;
     napi_value argv[SETADDITION_CONFIG_NUM] = {nullptr};
@@ -97,25 +97,25 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 void AsyncSetConfigComplete(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("NapiSetAdditionConfig work complete.");
+    ANS_LOGD("start");
     AsyncCallbackInfoConfig *asynccallbackinfo = static_cast<AsyncCallbackInfoConfig *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
         napi_create_int32(env, asynccallbackinfo->info.errorCode, &result);
         Common::CreateReturnValue(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
-            ANS_LOGD("Delete NapiSetAdditionConfig callback reference.");
+            ANS_LOGD("null callback");
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
     }
-    ANS_LOGD("NapiSetAdditionConfig work complete end.");
+    ANS_LOGD("end");
 }
 napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     ConfigParams paras {};
     if (ParseParameters(env, info, paras) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
@@ -151,7 +151,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("NapiSetAdditionConfig callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -108,7 +108,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[1]: callback
     if (argc >= PUBLISH_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGE("[reminderAgent]GetCallbak returns nullptr");
+            ANSR_LOGE("null GetCallback");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -118,7 +118,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
     // argv[0] : reminderRequest
     if (ReminderCommon::GetReminderRequest(env, argv[0], params.reminder) == nullptr) {
-        ANSR_LOGE("[reminderAgent]CreateReminder returns nullptr");
+        ANSR_LOGE("null GetReminderRequest");
         if (isThrow) {
             ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
         }
@@ -145,7 +145,7 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
     // argv[1]: callback
     if (argc >= ADD_SLOT_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGE("GetCallbak returns nullptr");
+            ANSR_LOGE("null GetCallback");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -181,7 +181,7 @@ napi_value ParseSlotParameters(const napi_env &env, const napi_callback_info &in
 napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
     AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
-    ANSR_LOGI("ParseCanCelParameter");
+    ANSR_LOGD("called");
     size_t argc = CANCEL_PARAM_LEN;
     napi_value argv[CANCEL_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -196,7 +196,7 @@ napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &i
     // argv[1]: callback
     if (argc >= CANCEL_PARAM_LEN) {
         if (GetCallback(env, argv[1], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGE("GetCallbak is nullptr");
+            ANSR_LOGE("null GetCallback");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -227,7 +227,7 @@ napi_value ParseCanCelParameter(const napi_env &env, const napi_callback_info &i
 napi_value ParseCanCelAllParameter(const napi_env &env, const napi_callback_info &info, Parameters &params,
     AsyncCallbackInfo &asyncCallbackInfo, bool isThrow)
 {
-    ANSR_LOGI("ParseCanCelAllParameter");
+    ANSR_LOGD("called");
     size_t argc = CANCEL_ALL_PARAM_LEN;
     napi_value argv[CANCEL_ALL_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -235,7 +235,7 @@ napi_value ParseCanCelAllParameter(const napi_env &env, const napi_callback_info
     // argv[0]: callback
     if (argc >= CANCEL_ALL_PARAM_LEN) {
         if (GetCallback(env, argv[0], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGE("getCallbak is nullptr");
+            ANSR_LOGE("null GetCallback");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -255,7 +255,7 @@ napi_value ParseGetValidParameter(const napi_env &env, const napi_callback_info 
     // argv[0]: callback
     if (argc >= GET_VALID_PARAM_LEN) {
         if (GetCallback(env, argv[0], asyncCallbackInfo) == nullptr) {
-            ANSR_LOGE("getCallbak is nullptr");
+            ANSR_LOGE("null GetCallback");
             if (isThrow) {
                 ReminderCommon::HandleErrCode(env, ERR_REMINDER_INVALID_PARAM);
             }
@@ -279,7 +279,7 @@ napi_value DealErrorReturn(const napi_env &env, const napi_ref &callbackIn, cons
 
 napi_value CancelReminderInner(napi_env env, napi_callback_info info, bool isThrow)
 {
-    ANSR_LOGI("Cancel reminder");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -348,7 +348,7 @@ napi_value CancelReminder(napi_env env, napi_callback_info info)
 
 napi_value CancelAllRemindersInner(napi_env env, napi_callback_info info, bool isThrow)
 {
-    ANSR_LOGI("Cancel all reminder");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -716,7 +716,7 @@ void ParseMaxScreenWantAgent(const napi_env &env, const ReminderRequest &reminde
 
 napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi_value &result)
 {
-    ANSR_LOGI("enter");
+    ANSR_LOGD("called");
     napi_value value = nullptr;
 
     napi_create_string_utf8(env, reminder.Dump().c_str(), NAPI_AUTO_LENGTH, &value);
@@ -817,7 +817,7 @@ void GetValidRemindersInner(napi_env env, const std::vector<ReminderRequestAdapt
     napi_create_array(env, &arr);
     for (auto& reminderRequestAdaptation : validReminders) {
         if (reminderRequestAdaptation.reminderRequest_ == nullptr) {
-            ANSR_LOGW("reminder is null");
+            ANSR_LOGW("null reminder");
             continue;
         }
         napi_value result = nullptr;
@@ -829,7 +829,7 @@ void GetValidRemindersInner(napi_env env, const std::vector<ReminderRequestAdapt
         napi_set_element(env, arr, count, result);
         count++;
     }
-    ANSR_LOGI("GetValid reminders count = %{public}d", count);
+    ANSR_LOGI("count = %{public}d", count);
 }
 
 void GetAllValidRemindersInner(napi_env env,
@@ -853,12 +853,12 @@ void GetAllValidRemindersInner(napi_env env,
         napi_set_element(env, arr, count, result);
         count++;
     }
-    ANSR_LOGI("GetAllValid reminders count = %{public}d", count);
+    ANSR_LOGI("count = %{public}d", count);
 }
 
 napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool isThrow)
 {
-    ANSR_LOGI("Get valid reminders");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -923,7 +923,7 @@ napi_value InnerGetValidReminders(napi_env env, napi_callback_info info, bool is
 
 napi_value InnerGetAllValidReminders(napi_env env, napi_callback_info info, bool isThrow)
 {
-    ANSR_LOGI("Get all valid reminders");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -1002,7 +1002,7 @@ napi_value GetAllValidReminders(napi_env env, napi_callback_info info)
 
 napi_value PublishReminderInner(napi_env env, napi_callback_info info, bool isThrow)
 {
-    ANSR_LOGI("PublishReminder");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -1084,7 +1084,7 @@ napi_value PublishReminder(napi_env env, napi_callback_info info)
 
 napi_value AddSlotInner(napi_env env, napi_callback_info info, bool isThrow)
 {
-    ANSR_LOGI("AddSlot");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -1155,7 +1155,7 @@ napi_value AddSlot(napi_env env, napi_callback_info info)
 
 napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
 {
-    ANSR_LOGI("ParseAddExcludeDateParameter");
+    ANSR_LOGD("called");
     size_t argc = ADD_EXCLUDE_DATE_PARAM_LEN;
     napi_value argv[ADD_EXCLUDE_DATE_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -1197,7 +1197,7 @@ napi_value ParseAddExcludeDateParameter(const napi_env &env, const napi_callback
 
 napi_value AddExcludeDate(napi_env env, napi_callback_info info)
 {
-    ANSR_LOGD("Call AddExcludeDate");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -1256,7 +1256,7 @@ napi_value AddExcludeDate(napi_env env, napi_callback_info info)
 
 napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
 {
-    ANSR_LOGI("ParseReminderIdParameter");
+    ANSR_LOGD("called");
     size_t argc = DEL_EXCLUDE_DATE_PARAM_LEN;
     napi_value argv[DEL_EXCLUDE_DATE_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -1284,7 +1284,7 @@ napi_value ParseReminderIdParameter(const napi_env &env, const napi_callback_inf
 
 napi_value DelExcludeDates(napi_env env, napi_callback_info info)
 {
-    ANSR_LOGD("Call DelExcludeDates");
+    ANSR_LOGD("called");
 
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
@@ -1349,7 +1349,7 @@ void GetExcludeDatesInner(napi_env env, const std::vector<int64_t>& dates, napi_
         napi_set_element(env, arr, count, result);
         count++;
     }
-    ANSR_LOGI("GetExcludeDates count = %{public}d", count);
+    ANSR_LOGI("count = %{public}d", count);
 }
 
 napi_value GetExcludeDates(napi_env env, napi_callback_info info)
@@ -1415,7 +1415,7 @@ napi_value GetExcludeDates(napi_env env, napi_callback_info info)
 
 napi_value ParseUpdateReminderParameter(const napi_env &env, const napi_callback_info &info, Parameters &params)
 {
-    ANSR_LOGD("ParseUpdateReminderParameter");
+    ANSR_LOGD("called");
     size_t argc = UPDATE_REMINDER_PARAM_LEN;
     napi_value argv[UPDATE_REMINDER_PARAM_LEN] = {nullptr};
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
@@ -1448,7 +1448,7 @@ napi_value ParseUpdateReminderParameter(const napi_env &env, const napi_callback
 
 napi_value UpdateReminder(napi_env env, napi_callback_info info)
 {
-    ANSR_LOGD("Call UpdateReminder");
+    ANSR_LOGD("called");
     AsyncCallbackInfo *asynccallbackinfo = new (std::nothrow) AsyncCallbackInfo(env);
     if (!asynccallbackinfo) {
         ANSR_LOGE("Low memory.");

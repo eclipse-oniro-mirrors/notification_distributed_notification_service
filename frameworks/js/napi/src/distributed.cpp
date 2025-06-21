@@ -33,7 +33,7 @@ const int32_t DISTURB_MODE_FLAG = 2;
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, DeviceStatus &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     size_t argc = SET_STATUS_PARA_NUM;
     napi_value argv[SET_STATUS_PARA_NUM] = {nullptr};
     napi_value thisVar = nullptr;
@@ -85,7 +85,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = ENABLED_MAX_PARA;
     napi_value argv[ENABLED_MAX_PARA] = {nullptr};
@@ -123,7 +123,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledByBundleParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = ENABLED_BUNDLE_MAX_PARA;
     napi_value argv[ENABLED_BUNDLE_MAX_PARA] = {nullptr};
@@ -176,7 +176,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnabledByBundleParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = IS_ENABLED_BUNDLE_MAX_PARA;
     napi_value argv[IS_ENABLED_BUNDLE_MAX_PARA] = {nullptr};
@@ -232,7 +232,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data.");
         return;
@@ -259,7 +259,7 @@ void AsyncCompleteCallbackIsDistributedEnabled(napi_env env, napi_status status,
 
 napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -308,7 +308,7 @@ napi_value IsDistributedEnabled(napi_env env, napi_callback_info info)
 
 napi_value EnableDistributed(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -370,7 +370,7 @@ napi_value EnableDistributed(napi_env env, napi_callback_info info)
 
 napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -432,7 +432,7 @@ napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info)
 
 napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -494,7 +494,7 @@ napi_value EnableDistributedSelf(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalid async callback data");
         return;
@@ -521,7 +521,7 @@ void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status 
 
 napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     IsEnabledByBundleParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -569,7 +569,7 @@ napi_value IsDistributedEnableByBundle(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Invalidity async callback data");
         return;
@@ -602,7 +602,7 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
 
 napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     napi_ref callback = nullptr;
     if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
@@ -649,7 +649,7 @@ napi_value GetDeviceRemindType(napi_env env, napi_callback_info info)
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledWithoutAppParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = ENABLED_SYNC_MAX_PARA;
     napi_value argv[ENABLED_SYNC_MAX_PARA] = {nullptr};
@@ -702,7 +702,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     EnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -764,7 +764,7 @@ napi_value SetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetEnabledWithoutAppParams &params)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     size_t argc = ENABLED_SYNC_MIN_PARA;
     napi_value argv[ENABLED_SYNC_MIN_PARA] = {nullptr};
@@ -807,7 +807,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 
 napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("called");
 
     GetEnabledWithoutAppParams params {};
     if (ParseParameters(env, info, params) == nullptr) {
@@ -868,7 +868,7 @@ napi_value GetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {
-        ANS_LOGD("GetSyncNotificationEnabledWithoutApp callback is nullptr.");
+        ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     }
     return promise;

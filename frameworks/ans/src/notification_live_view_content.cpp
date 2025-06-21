@@ -163,7 +163,7 @@ NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohman
 
     auto *pContent = new (std::nothrow) NotificationLiveViewContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create liveViewContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 

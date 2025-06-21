@@ -42,7 +42,7 @@ NotificationNormalContent *NotificationNormalContent::FromJson(const nlohmann::j
 
     auto pContent = new (std::nothrow) NotificationNormalContent();
     if (pContent == nullptr) {
-        ANS_LOGE("Failed to create normalContent instance");
+        ANS_LOGE("null pContent");
         return nullptr;
     }
 

@@ -201,7 +201,7 @@ void NotificationRequest::SetShowDeliveryTime(bool showDeliveryTime)
 void NotificationRequest::AddActionButton(const std::shared_ptr<NotificationActionButton> &actionButton)
 {
     if (!actionButton) {
-        ANS_LOGW("actionButton can not be null");
+        ANS_LOGW("null actionButton");
         return;
     }
 
@@ -246,7 +246,7 @@ void NotificationRequest::SetIsAgentNotification(bool isAgent)
 void NotificationRequest::AddMessageUser(const std::shared_ptr<MessageUser> &messageUser)
 {
     if (!messageUser) {
-        ANS_LOGE("messageUser can not be null");
+        ANS_LOGE("null messageUser");
         return;
     }
 
@@ -906,7 +906,7 @@ NotificationRequest *NotificationRequest::FromJson(const nlohmann::json &jsonObj
 
     auto pRequest = new (std::nothrow) NotificationRequest();
     if (pRequest == nullptr) {
-        ANS_LOGE("Failed to create request instance");
+        ANS_LOGE("null pRequest");
         return nullptr;
     }
 
@@ -1080,7 +1080,7 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteUint32(collaboratedReminderFlag_)) {
-        ANS_LOGE("Failed to write collaborated reminderflag");
+        ANS_LOGE("Failed to write collaborated reminderFlag");
         return false;
     }
 
@@ -1714,7 +1714,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         wantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
             parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
         if (!wantAgent_) {
-            ANS_LOGE("Failed to read wantAgent");
+            ANS_LOGE("null wantAgent");
             return false;
         }
     }
@@ -1724,7 +1724,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         removalWantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
             parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
         if (!removalWantAgent_) {
-            ANS_LOGE("Failed to read removalWantAgent");
+            ANS_LOGE("null removalWantAgent");
             return false;
         }
     }
@@ -1734,7 +1734,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         maxScreenWantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
             parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
         if (!maxScreenWantAgent_) {
-            ANS_LOGE("Failed to read maxScreenWantAgent");
+            ANS_LOGE("null maxScreenWantAgent");
             return false;
         }
     }
@@ -1743,7 +1743,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         additionalParams_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
         if (!additionalParams_) {
-            ANS_LOGE("Failed to read additionalParams");
+            ANS_LOGE("null additionalParams");
             return false;
         }
     }
@@ -1752,7 +1752,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         extendInfo_ = std::shared_ptr<AAFwk::WantParams>(parcel.ReadParcelable<AAFwk::WantParams>());
         if (!extendInfo_) {
-            ANS_LOGE("Failed to read extendInfo");
+            ANS_LOGE("null extendInfo");
             return false;
         }
     }
@@ -1766,7 +1766,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         bigIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!bigIcon_) {
-            ANS_LOGE("Failed to read bigIcon");
+            ANS_LOGE("null bigIcon");
             return false;
         }
     }
@@ -1775,7 +1775,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         overlayIcon_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!overlayIcon_) {
-            ANS_LOGE("Failed to read overlayIcon");
+            ANS_LOGE("null overlayIcon");
             return false;
         }
     }
@@ -1784,7 +1784,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         notificationContent_ = std::shared_ptr<NotificationContent>(parcel.ReadParcelable<NotificationContent>());
         if (!notificationContent_) {
-            ANS_LOGE("Failed to read notificationContent");
+            ANS_LOGE("null notificationContent");
             return false;
         }
     }
@@ -1795,7 +1795,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         auto member = std::shared_ptr<NotificationActionButton>(parcel.ReadParcelable<NotificationActionButton>());
         if (member == nullptr) {
             actionButtons_.clear();
-            ANS_LOGE("Failed to read actionButton");
+            ANS_LOGE("null member");
             return false;
         }
 
@@ -1812,7 +1812,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     for (uint64_t it = 0; it < vsize; ++it) {
         auto member = std::shared_ptr<MessageUser>(parcel.ReadParcelable<MessageUser>());
         if (member == nullptr) {
-            ANS_LOGE("Failed to read messageUser");
+            ANS_LOGE("null member");
             messageUsers_.clear();
             return false;
         }
@@ -1827,7 +1827,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
 
     auto pOpt = parcel.ReadParcelable<NotificationDistributedOptions>();
     if (pOpt == nullptr) {
-        ANS_LOGE("Failed to read distributedOptions");
+        ANS_LOGE("null pOpt");
         return false;
     }
     distributedOptions_ = *pOpt;
@@ -1838,7 +1838,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         notificationTemplate_ = std::shared_ptr<NotificationTemplate>(parcel.ReadParcelable<NotificationTemplate>());
         if (!notificationTemplate_) {
-            ANS_LOGE("Failed to read notificationTemplate");
+            ANS_LOGE("null notificationTemplate");
             return false;
         }
     }
@@ -1847,7 +1847,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     if (valid) {
         notificationFlags_ = std::shared_ptr<NotificationFlags>(parcel.ReadParcelable<NotificationFlags>());
         if (!notificationFlags_) {
-            ANS_LOGE("Failed to read notificationFlags");
+            ANS_LOGE("null notificationFlags");
             return false;
         }
     }
@@ -1870,7 +1870,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         unifiedGroupInfo_ =
             std::shared_ptr<NotificationUnifiedGroupInfo>(parcel.ReadParcelable<NotificationUnifiedGroupInfo>());
         if (!unifiedGroupInfo_) {
-            ANS_LOGE("Failed to read unifiedGroupInfo+");
+            ANS_LOGE("null unifiedGroupInfo");
             return false;
         }
     }
@@ -1880,7 +1880,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         notificationBundleOption_ =
             std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
         if (!notificationBundleOption_) {
-            ANS_LOGE("Failed to read notificationBundleOption");
+            ANS_LOGE("null notificationBundleOption");
             return false;
         }
     }
@@ -1890,7 +1890,7 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         agentBundle_ =
             std::shared_ptr<NotificationBundleOption>(parcel.ReadParcelable<NotificationBundleOption>());
         if (!agentBundle_) {
-            ANS_LOGE("Failed to read agentBundle");
+            ANS_LOGE("null agentBundle");
             return false;
         }
     }
@@ -2238,7 +2238,7 @@ void NotificationRequest::ConvertJsonToNumExt(
 void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return;
     }
 
@@ -2298,7 +2298,7 @@ void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nl
 void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return;
     }
 
@@ -2340,7 +2340,7 @@ void NotificationRequest::ConvertJsonToString(NotificationRequest *target, const
 void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return;
     }
 
@@ -2366,7 +2366,7 @@ void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const n
 void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return;
     }
 
@@ -2431,7 +2431,7 @@ void NotificationRequest::ConvertJsonToBoolExt(NotificationRequest *target, cons
 void NotificationRequest::ConvertJsonToPixelMap(NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return;
     }
 
@@ -2457,7 +2457,7 @@ bool NotificationRequest::ConvertJsonToNotificationContent(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return false;
     }
 
@@ -2468,7 +2468,7 @@ bool NotificationRequest::ConvertJsonToNotificationContent(
         if (!contentObj.is_null()) {
             auto pContent = NotificationJsonConverter::ConvertFromJson<NotificationContent>(contentObj);
             if (pContent == nullptr) {
-                ANS_LOGE("Failed to parse notification content!");
+                ANS_LOGE("null pContent");
                 return false;
             }
 
@@ -2483,7 +2483,7 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return false;
     }
     int32_t targetUid = -1;
@@ -2499,7 +2499,7 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
         for (auto &btnObj : buttonArr) {
             auto pBtn = NotificationActionButton::ConvertNotificationActionButton(targetUid, btnObj);
             if (pBtn == nullptr) {
-                ANS_LOGE("Failed to parse actionButton!");
+                ANS_LOGE("null pBtn");
                 return false;
             }
 
@@ -2514,7 +2514,7 @@ bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return false;
     }
 
@@ -2525,7 +2525,7 @@ bool NotificationRequest::ConvertJsonToNotificationDistributedOptions(
         if (!optObj.is_null()) {
             auto *pOpt = NotificationJsonConverter::ConvertFromJson<NotificationDistributedOptions>(optObj);
             if (pOpt == nullptr) {
-                ANS_LOGE("Failed to parse distributedOptions!");
+                ANS_LOGE("null pOpt");
                 return false;
             }
 
@@ -2541,7 +2541,7 @@ bool NotificationRequest::ConvertJsonToNotificationFlags(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter");
+        ANS_LOGE("null target");
         return false;
     }
 
@@ -2552,7 +2552,7 @@ bool NotificationRequest::ConvertJsonToNotificationFlags(
         if (!flagsObj.is_null()) {
             auto *pFlags = NotificationJsonConverter::ConvertFromJson<NotificationFlags>(flagsObj);
             if (pFlags == nullptr) {
-                ANS_LOGE("Failed to parse notificationFlags!");
+                ANS_LOGE("null pFlags");
                 return false;
             }
 
@@ -2567,7 +2567,7 @@ bool NotificationRequest::ConvertJsonToNotificationBundleOption(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter.");
+        ANS_LOGE("null target");
         return false;
     }
 
@@ -2578,7 +2578,7 @@ bool NotificationRequest::ConvertJsonToNotificationBundleOption(
         if (!bundleOptionObj.is_null()) {
             auto *pBundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(bundleOptionObj);
             if (pBundleOption == nullptr) {
-                ANS_LOGE("Failed to parse notificationBundleOption!");
+                ANS_LOGE("null pBundleOption");
                 return false;
             }
 
@@ -2593,7 +2593,7 @@ bool NotificationRequest::ConvertJsonToAgentBundle(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
     if (target == nullptr) {
-        ANS_LOGE("Invalid input parameter.");
+        ANS_LOGE("null target");
         return false;
     }
 
@@ -2604,7 +2604,7 @@ bool NotificationRequest::ConvertJsonToAgentBundle(
         if (!bundleOptionObj.is_null()) {
             auto *pBundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(bundleOptionObj);
             if (pBundleOption == nullptr) {
-                ANS_LOGE("Failed to parse agentBundle!");
+                ANS_LOGE("null pBundleOption");
                 return false;
             }
 
@@ -2873,13 +2873,13 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
 {
     auto content = GetContent();
     if (content == nullptr) {
-        ANS_LOGE("Invalid content in NotificationRequest");
+        ANS_LOGE("null content");
         return ERR_OK;
     }
 
     auto basicContent = GetContent()->GetNotificationContent();
     if (basicContent == nullptr) {
-        ANS_LOGE("Invalid content in NotificationRequest");
+        ANS_LOGE("null basicContent");
         return ERR_OK;
     }
 

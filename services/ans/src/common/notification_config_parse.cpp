@@ -292,7 +292,7 @@ bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std
         root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS];
     if (mirrorNotificationEnabledStatus.is_null() || !mirrorNotificationEnabledStatus.is_array() ||
         mirrorNotificationEnabledStatus.empty()) {
-        ANS_LOGE("mirrorNotificationEnabledStatus is invalid");
+        ANS_LOGE("Invalid mirror Status");
         return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -408,7 +408,7 @@ void NotificationConfigParse::GetCollaborationFilter()
 bool NotificationConfigParse::IsInCollaborationFilter(const std::string& bundleName, int32_t uid) const
 {
     if (uidList_.empty() && bundleNameList_.empty()) {
-        ANS_LOGE("UidList and bundleNameList empty.");
+        ANS_LOGE("empty uidList or bundleNameList");
         return false;
     }
 

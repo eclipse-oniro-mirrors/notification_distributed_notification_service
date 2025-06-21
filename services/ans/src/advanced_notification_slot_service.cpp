@@ -50,7 +50,7 @@ namespace {
 
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -102,7 +102,7 @@ ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<Notificatio
 
 ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>> &slots)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -129,7 +129,7 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
 ErrCode AdvancedNotificationService::GetSlotsByBundle(
     const sptr<NotificationBundleOption> &bundleOption, std::vector<sptr<NotificationSlot>> &slots)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -169,7 +169,7 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
     const sptr<NotificationBundleOption> &bundleOption, int32_t slotTypeInt,
     sptr<NotificationSlot> &slot)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -207,7 +207,7 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
 ErrCode AdvancedNotificationService::UpdateSlots(
     const sptr<NotificationBundleOption> &bundleOption, const std::vector<sptr<NotificationSlot>> &slots)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_6);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
@@ -256,7 +256,7 @@ ErrCode AdvancedNotificationService::UpdateSlots(
 
 ErrCode AdvancedNotificationService::RemoveAllSlots()
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -303,7 +303,7 @@ ErrCode AdvancedNotificationService::RemoveAllSlots()
 
 ErrCode AdvancedNotificationService::AddSlotByType(int32_t slotTypeInt)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
 
     if (!AccessTokenHelper::IsSystemApp() && slotType == NotificationConstant::SlotType::EMERGENCY_INFORMATION) {
@@ -385,7 +385,7 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
 ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
     uint32_t &slotFlags)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -421,7 +421,7 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
 
 ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         ANS_LOGD("Failed to generateBundleOption.");
@@ -450,7 +450,7 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
 ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
     uint32_t slotFlags)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     if (bundleOption == nullptr) {
         ANS_LOGE("BundleOption is null.");
         return ERR_ANS_INVALID_BUNDLE;
@@ -589,7 +589,7 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
     uint32_t slotFlags = defaultSlotFlags;
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {
-        ANS_LOGI("Failed to get slotflags for bundle, use default slotflags.");
+        ANS_LOGE("Failed to get slotflags for bundle, use default slotflags");
     }
 
     auto configSlotReminderMode =
@@ -674,7 +674,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(request);
     }
-    ANS_LOGI("SetFlags-GetRemindMode, notificationKey = %{public}s flags = %{public}d",
+    ANS_LOGI("notificationKey = %{public}s flags = %{public}d",
         request->GetKey().c_str(), flags->GetReminderFlags());
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
@@ -684,7 +684,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 
 ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
@@ -707,7 +707,7 @@ ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<Not
 
 ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
@@ -739,7 +739,7 @@ ErrCode AdvancedNotificationService::RemoveSlotByType(int32_t slotTypeInt)
 ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
     const sptr<NotificationBundleOption> &bundleOption, uint64_t &num)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
+    ANS_LOGD("called");
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {

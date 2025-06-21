@@ -304,7 +304,7 @@ void SmartReminderCenter::InitValidDevices(
         bool affordConsume = false;
         NotificationSubscriberManager::GetInstance()->IsDeviceTypeAffordConsume(deviceType, request, affordConsume);
         if (!affordConsume) {
-            ANS_LOGI("not afford consume, deviceType = %{public}s", deviceType.c_str());
+            ANS_LOGI("deviceType = %{public}s", deviceType.c_str());
             continue;
         }
 
@@ -369,8 +369,8 @@ void SmartReminderCenter::InitValidDevices(
     for (auto it = smartDevices.begin(); it != smartDevices.end(); ++it) {
         smartDevicesStr = smartDevicesStr + *it + StringUtils::SPLIT_CHAR;
     }
-    ANS_LOGI("sync device list: %{public}s", syncDevicesStr.c_str());
-    ANS_LOGI("smart device list: %{public}s", smartDevicesStr.c_str());
+    ANS_LOGI("sync device: %{public}s", syncDevicesStr.c_str());
+    ANS_LOGI("smart device: %{public}s", smartDevicesStr.c_str());
     return;
 }
 
@@ -712,8 +712,7 @@ void SmartReminderCenter::GetDeviceStatusByType(
         screenLocked = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
         bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, !screenLocked);
     }
-    ANS_LOGI("GetDeviceStatusByType deviceType: %{public}s, bitStatus: %{public}s.",
-        deviceType.c_str(), bitStatus.to_string().c_str());
+    ANS_LOGI("deviceType: %{public}s, bitStatus: %{public}s", deviceType.c_str(), bitStatus.to_string().c_str());
 }
 }  // namespace Notification
 }  // namespace OHOS

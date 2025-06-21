@@ -53,7 +53,7 @@ std::string AnsImageUtil::PackImage(const std::shared_ptr<Media::PixelMap> &pixe
     }
     auto pbuf = new (std::nothrow) uint8_t [size];
     if (pbuf == nullptr) {
-        ANS_LOGE("create buffer failed");
+        ANS_LOGE("null pbuf");
         return {};
     }
 
