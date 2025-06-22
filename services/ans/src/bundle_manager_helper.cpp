@@ -23,6 +23,7 @@
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "notification_analytics_util.h"
+#include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -273,11 +274,15 @@ bool BundleManagerHelper::GetBundleInfoV9(
     if (bundleMgr_ == nullptr) {
         return false;
     }
-    bool ret = false;
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    ret = bundleMgr_->GetBundleInfoV9(bundle, flag, bundleInfo, userId);
+    int32_t ret = bundleMgr_->GetBundleInfoV9(bundle, flag, bundleInfo, userId);
     IPCSkeleton::SetCallingIdentity(identity);
-    return ret;
+    if (ret != ERR_OK) {
+        ANS_LOGE("Bundle failed %{public}s %{public}d %{public}d %{public}d.", bundle.c_str(),
+            flag, userId, ret);
+        return false;
+    }
+    return true;
 }
 
 ErrCode BundleManagerHelper::GetApplicationInfo(const std::string &bundleName, int32_t flags, int32_t userId,
@@ -299,21 +304,19 @@ ErrCode BundleManagerHelper::GetApplicationInfo(const std::string &bundleName, i
 
 bool BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
 {
-    AppExecFwk::ApplicationInfo appInfo;
-    int32_t flags = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
-    ErrCode result = GetApplicationInfo(bundleName, flags, userId, appInfo);
-    if (result != ERR_OK) {
-        ANS_LOGE("Get installed bundle failed %{public}d.", result);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+    if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
+        ANS_LOGE("Get installed bundle failed.");
         return false;
     }
 
-    if (appInfo.bundleType != AppExecFwk::BundleType::APP) {
-        ANS_LOGD("Get not app %{public}s %{public}d", bundleName.c_str(), appInfo.bundleType);
-        return true;
-    }
-
-    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(), appInfo.isSystemApp);
-    return appInfo.isSystemApp;
+    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(),
+        bundleInfo.applicationInfo.isSystemApp);
+    return bundleInfo.applicationInfo.isSystemApp;
 }
 
 ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName,

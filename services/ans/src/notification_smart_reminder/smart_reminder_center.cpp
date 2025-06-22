@@ -32,6 +32,7 @@
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 #include "notification_extension_wrapper.h"
 #endif
+#include "os_account_manager_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -450,16 +451,20 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
 {
     std::string bundleName = request->GetOwnerBundleName();
     int32_t userId = request->GetOwnerUserId();
+    if (userId == SUBSCRIBE_USER_INIT) {
+        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    }
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager != nullptr) {
-        int32_t flags = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
-        AppExecFwk::ApplicationInfo appInfo;
-        if (bundleManager->GetApplicationInfo(bundleName, flags, userId, appInfo) != ERR_OK) {
+        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+        AppExecFwk::BundleInfo bundleInfo;
+        if (!bundleManager->GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
             ANS_LOGE("FillRequestExtendInfo, GetApplicationInfo error, type = %{public}s, bundleName = %{public}s",
                 deviceType.c_str(), bundleName.c_str());
             return;
         }
 
+        AppExecFwk::ApplicationInfo appInfo = bundleInfo.applicationInfo;
         AppExecFwk::BundleResourceInfo bundleResourceInfo;
         if (bundleManager->GetBundleResourceInfo(bundleName, bundleResourceInfo, appInfo.appIndex) != ERR_OK) {
             ANS_LOGE("FillRequestExtendInfo, GetBundleResourceInfo error, type = %{public}s, bundleName = %{public}s",
