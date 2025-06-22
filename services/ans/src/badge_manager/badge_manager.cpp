@@ -201,15 +201,15 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
         bundleName, instanceKey, callingUid, badgeNumber);
     if (badgeData == nullptr) {
-        ANS_LOGE("null badgeData");
+        ANS_LOGE("Null badgeData.");
         return ERR_ANS_NO_MEMORY;
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([badgeData]() {
         ANS_LOGD("called");
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
-    notificationSvrQueue_->wait(handler);
+
     return ERR_OK;
 }
 
@@ -237,9 +237,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_6);
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " badgeNumber: " + std::to_string(badgeNumber));
-    if (notificationSvrQueue_ == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -248,19 +245,24 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
         ANS_LOGE("Not system app.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        ANS_LOGD("called");
-        sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+
+    if (notificationSvrQueue_ == nullptr) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
             bundleOption->GetBundleName(), bundleOption->GetUid(), badgeNumber);
-        if (badgeData == nullptr) {
-            ANS_LOGE("null badgeData");
-            result = ERR_ANS_NO_MEMORY;
-        }
+    if (badgeData == nullptr) {
+        ANS_LOGE("Null badgeData.");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([badgeData]() {
+        ANS_LOGD("called");
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
-    notificationSvrQueue_->wait(handler);
-    return result;
+
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
@@ -272,9 +274,6 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_6);
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " badgeNumber: " + std::to_string(badgeNumber));
-    if (notificationSvrQueue_ == nullptr) {
-        return ERR_ANS_INVALID_PARAM;
-    }
 
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -307,18 +306,23 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         }
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
-        ANS_LOGD("called");
-        sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+    if (notificationSvrQueue_ == nullptr) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
             bundle->GetBundleName(), bundle->GetUid(), badgeNumber);
-        if (badgeData == nullptr) {
-            ANS_LOGE("Failed to create badge number callback data.");
-            result = ERR_ANS_NO_MEMORY;
-        }
+    if (badgeData == nullptr) {
+        ANS_LOGE("Null badgeData.");
+        return ERR_ANS_NO_MEMORY;
+    }
+
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([badgeData]() {
+        ANS_LOGD("called");
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
-    notificationSvrQueue_->wait(handler);
-    return result;
+
+    return ERR_OK;
 }
 } // Notification
 } // OHOS
