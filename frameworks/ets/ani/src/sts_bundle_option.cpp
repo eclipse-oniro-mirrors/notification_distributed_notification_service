@@ -26,12 +26,13 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
         ANS_LOGE("UnwrapBundleOption failed, has nullptr");
         return false;
     }
-    std::string bundleName;
+    std::string tempStr;
     ani_boolean isUndefined = ANI_TRUE;
-    if (GetPropertyString(env, obj, "bundle", isUndefined, bundleName) !=ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "bundle", isUndefined, tempStr) !=ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapBundleOption Get bundle failed");
         return false;
     }
+    std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     option.SetBundleName(bundleName);
     ani_double result = 0.0;
     if (GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {

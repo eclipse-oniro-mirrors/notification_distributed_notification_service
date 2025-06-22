@@ -22,6 +22,10 @@ namespace NotificationSts {
 constexpr const char* CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
 constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
 constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
+std::string GetResizeStr(std::string instr, int32_t length)
+{
+    return instr.length() <= length ? instr : instr.substr(0, length);
+}
 
 bool IsUndefine(ani_env *env, const ani_object &obj)
 {

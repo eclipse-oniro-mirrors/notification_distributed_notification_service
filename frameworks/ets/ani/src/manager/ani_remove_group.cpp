@@ -17,7 +17,6 @@
 
 #include "ans_log_wrapper.h"
 #include "sts_error_utils.h"
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
@@ -35,14 +34,15 @@ void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string gr
         NotificationSts::ThrowStsErroWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
         return ;
     }
-    std::string groupNameStr = "";
-    ani_status status = NotificationSts::GetStringByAniString(env, groupName, groupNameStr);
+    std::string tempStr = "";
+    ani_status status = NotificationSts::GetStringByAniString(env, groupName, tempStr);
     if (status !=  ANI_OK) {
         NotificationSts::ThrowStsErroWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
         return ;
     }
+    std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
     int returncode = OHOS::Notification::NotificationHelper::RemoveGroupByBundle(option, groupNameStr);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
     if (externalCode != ERR_OK) {
         ANS_LOGE("AniRemoveGroupByBundle -> error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

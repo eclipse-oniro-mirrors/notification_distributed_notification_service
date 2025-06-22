@@ -14,7 +14,6 @@
  */
 #include "ani_cance.h"
 
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
@@ -27,8 +26,8 @@ void AniCancelAll(ani_env* env)
 {
     ANS_LOGD("AniCancelAll notifications call");
     int returncode = Notification::NotificationHelper::CancelAllNotifications();
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniCancelAll -> error, errorCode: %{public}d", externalCode);
     }
@@ -39,8 +38,8 @@ void AniCancelWithId(ani_env* env, ani_double id)
 {
     ANS_LOGD("AniCancelWithId call,id : %{public}lf", id);
     int returncode = Notification::NotificationHelper::CancelNotification(static_cast<int32_t>(id));
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniCancelWithId -> error, errorCode: %{public}d", externalCode);
     }
@@ -50,16 +49,16 @@ void AniCancelWithId(ani_env* env, ani_double id)
 void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label)
 {
     ANS_LOGD("AniCancelWithIdLabel call");
-    std::string labelStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, label, labelStr)) {
+    std::string tempStr;
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr)) {
         NotificationSts::ThrowStsErroWithMsg(env, "Label parse failed!");
         return;
     }
-    
+    std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
     ANS_LOGD("Cancel by label id:%{public}lf label:%{public}s", id, labelStr.c_str());
     int returncode = Notification::NotificationHelper::CancelNotification(labelStr, static_cast<int32_t>(id));
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniCancelWithIdLabel -> error, errorCode: %{public}d", externalCode);
     }
@@ -78,8 +77,8 @@ void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id)
     ANS_LOGD("Cancel by bundle:%{public}s id:%{public}lf",
         option.GetBundleName().c_str(), id);
     int returncode = Notification::NotificationHelper::CancelAsBundle(option, static_cast<int32_t>(id));
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniCancelWithBundle -> error, errorCode: %{public}d", externalCode);
     }
@@ -96,17 +95,18 @@ void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
         ANS_LOGE("sts AniCancelWithIdOptinalLabel the label is undefined");
         ret = Notification::NotificationHelper::CancelNotification(static_cast<int32_t>(id));
     } else {
-        std::string labelStr;
-        if (ANI_OK != NotificationSts::GetStringByAniString(env, label, labelStr)) {
+        std::string tempStr;
+        if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr)) {
             OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
                 NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
             ANS_LOGE("sts AniCancelWithIdOptinalLabel ERROR_INTERNAL_ERROR");
             return;
         }
+        std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
         ANS_LOGD("sts AniCancelWithIdOptinalLabel id:%{public}lf label:%{public}s", id, labelStr.c_str());
         ret = Notification::NotificationHelper::CancelNotification(labelStr, id);
     }
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(ret);
+    int externalCode = NotificationSts::GetExternalCode(ret);
     if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("sts AniCancelWithIdOptinalLabel error, errorCode: %{public}d", externalCode);
@@ -131,8 +131,8 @@ void AniCancelAsBundle(ani_env *env, ani_double id, ani_string representativeBun
         convertedId, UserId, bundleStr.c_str());
 
     int returncode = Notification::NotificationHelper::CancelAsBundle(convertedId, bundleStr, UserId);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         ANS_LOGE("AniCancelAsBundle: CancelAsBundle retern erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -156,8 +156,8 @@ void AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBu
         option.GetBundleName().c_str(), option.GetUid(), idTest);
 
     int returncode =  Notification::NotificationHelper::CancelAsBundle(option, idTest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         ANS_LOGE("CancelAsBundle retern error. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -170,15 +170,16 @@ void AniCancelGroup(ani_env *env, ani_string groupName)
 {
     ANS_LOGD("AniCancelGroup enter");
 
-    std::string groupNameStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, groupNameStr)) {
+    std::string tempStr;
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, tempStr)) {
         NotificationSts::ThrowStsErroWithMsg(env, "AniCancelGroup: groupName parse failed!");
         return;
     }
+    std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
     ANS_LOGD("AniCancelGroup groupNameStr: %{public}s", groupNameStr.c_str());
     int returncode = Notification::NotificationHelper::CancelGroup(groupNameStr);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         ANS_LOGE("AniCancelGroup: CancelAsBundle retern erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

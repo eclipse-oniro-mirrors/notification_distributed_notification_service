@@ -33,7 +33,6 @@ namespace NotificationSts {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
-constexpr int32_t STR_MAX_SIZE = 204;
 void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions distributedOptions)
 {
     ANS_LOGD("UnWarpDistributedOptions start");
@@ -51,19 +50,27 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
         ANS_LOGD("UnWarpDistributedOptions: isDistributed get failed");
     }
     // supportDisplayDevices?: Array<string>;
-    std::vector<std::string> supportDisplayDevices = {};
+    std::vector<std::string> tempStrings = {};
     isUndefined = ANI_TRUE;
-    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, supportDisplayDevices) == ANI_OK
+    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, tempStrings) == ANI_OK
         && isUndefined == ANI_FALSE) {
+        std::vector<std::string> supportDisplayDevices = {};
+        for (auto device: tempStrings) {
+            supportDisplayDevices.emplace_back(GetResizeStr(device, STR_MAX_SIZE));
+        }
         distributedOptions.supportDisplayDevices = supportDisplayDevices;
     } else {
         ANS_LOGD("UnWarpDistributedOptions: supportDisplayDevices get failed");
     }
     // supportOperateDevices?: Array<string>;
-    std::vector<std::string> supportOperateDevices = {};
+    tempStrings.clear();
     isUndefined = ANI_TRUE;
-    if (GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, supportOperateDevices) == ANI_OK
+    if (GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, tempStrings) == ANI_OK
         && isUndefined == ANI_FALSE) {
+        std::vector<std::string> supportOperateDevices = {};
+        for (auto device: tempStrings) {
+            supportOperateDevices.emplace_back(GetResizeStr(device, STR_MAX_SIZE));
+        }
         distributedOptions.supportOperateDevices = supportOperateDevices;
     } else {
         ANS_LOGD("UnWarpDistributedOptions: supportOperateDevices get failed");
@@ -232,25 +239,16 @@ void GetNotificationRequestByString(ani_env *env, ani_object obj,
     std::string mString = "";
     ani_boolean isUndefined = ANI_TRUE;
     if (ANI_OK == GetPropertyString(env, obj, "classification", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        if (mString.length() > STR_MAX_SIZE) {
-            mString.resize(STR_MAX_SIZE);
-        }
-        request->SetClassification(mString);
+        request->SetClassification(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, obj, "appMessageId", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetAppMessageId(mString);
     }
     if (ANI_OK == GetPropertyString(env, obj, "label", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        if (mString.length() > STR_MAX_SIZE) {
-            mString.resize(STR_MAX_SIZE);
-        }
-        request->SetLabel(mString);
+        request->SetLabel(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, obj, "groupName", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        if (mString.length() > STR_MAX_SIZE) {
-            mString.resize(STR_MAX_SIZE);
-        }
-        request->SetGroupName(mString);
+        request->SetGroupName(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, obj, "sound", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetSound(mString);
@@ -673,19 +671,19 @@ void GetNotificationUnifiedGroupInfo(ani_env *env, ani_object obj,
     std::string mString = "";
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "key", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetKey(mString);
+        unifiedGroupInfo->SetKey(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "title", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetTitle(mString);
+        unifiedGroupInfo->SetTitle(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "content", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetContent(mString);
+        unifiedGroupInfo->SetContent(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "sceneName", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetSceneName(mString);
+        unifiedGroupInfo->SetSceneName(GetResizeStr(mString, STR_MAX_SIZE));
     }
     ani_ref extraInfoRef = {};
     status = GetPropertyRef(env, static_cast<ani_object>(infoRef), "extraInfo", isUndefind, extraInfoRef);

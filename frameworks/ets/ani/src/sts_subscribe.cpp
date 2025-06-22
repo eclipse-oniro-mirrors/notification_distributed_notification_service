@@ -15,7 +15,6 @@
 #include "sts_subscribe.h"
 
 #include "ans_log_wrapper.h"
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -63,9 +62,8 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         return;
     }
     ani_status status = ANI_OK;
-    int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(operationResult);
-    externalErrorCode =
-        (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? operationResult : externalErrorCode;
+    int32_t externalErrorCode = GetExternalCode(operationResult);
+    externalErrorCode = (externalErrorCode == ERR_OK) ? operationResult : externalErrorCode;
     ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrorCode);
 
     if (externalErrorCode == 0) {
@@ -616,9 +614,8 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
         status = NotificationHelper::SubscribeNotification(stsSubscriber);
     }
     if (status != ERR_OK) {
-        int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
-        externalErrorCode =
-            (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
+        int32_t externalErrorCode = GetExternalCode(status);
+        externalErrorCode = (externalErrorCode == ERR_OK) ? status : externalErrorCode;
         ANS_LOGD("SubscribeNotification faild. status %{public}d ErrorToExternal %{public}d",
             status, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
@@ -648,9 +645,8 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     if (ret) {
         int32_t status = NotificationHelper::UnSubscribeNotification(stsSubscriber);
         if (status != ERR_OK) {
-            int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
-            externalErrorCode =
-                (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
+            int32_t externalErrorCode = GetExternalCode(status);
+            externalErrorCode = (externalErrorCode == ERR_OK) ? status : externalErrorCode;
             ANS_LOGD("UnSubscribe faild. status %{public}d ErrorToExternal %{public}d",
                 status, externalErrorCode);
             std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
@@ -690,9 +686,8 @@ bool SubscriberInstanceManager::SubscribeSelf(ani_env *env, ani_object subscribe
     ErrCode status = ERR_OK;
     status = NotificationHelper::SubscribeNotificationSelf(stsSubscriber);
     if (status != ERR_OK) {
-        int32_t externalErrorCode = CJSystemapi::Notification::ErrorToExternal(status);
-        externalErrorCode =
-            (externalErrorCode == CJSystemapi::Notification::SUCCESS_CODE) ? status : externalErrorCode;
+        int32_t externalErrorCode = GetExternalCode(status);
+        externalErrorCode = (externalErrorCode == ERR_OK) ? status : externalErrorCode;
         ANS_LOGD("SubscribeNotificationSelf faild. status %{public}d ErrorToExternal %{public}d",
             status, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
@@ -760,7 +755,7 @@ bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &
         ANS_LOGD("UnWarpNotificationKey GetPropertyString label fail");
         return false;
     }
-    OutObj.label = label;
+    OutObj.label = GetResizeStr(label, STR_MAX_SIZE);
     ANS_LOGD("UnWarpNotificationKey id: %{public}d, label: %{public}s", OutObj.id, OutObj.label.c_str());
     return true;
 }
@@ -774,14 +769,12 @@ bool UnwarpOperationInfo(ani_env *env, const ani_object obj, StsNotificationOper
         ANS_LOGD("ConvertOperationInfoToNative GetStringOrUndefined actionName fail");
         return false;
     }
-    outObj.SetActionName(actionName);
+    outObj.SetActionName(GetResizeStr(actionName, STR_MAX_SIZE));
     if (GetPropertyString(env, obj, "userInput", isUndefined, userInput) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGD("ConvertOperationInfoToNative GetStringOrUndefined userInput fail");
         return false;
     }
-    outObj.SetUserInput(actionName);
-    ANS_LOGD("ConvertOperationInfoToNative actionName: %{public}s, userInput: %{public}s",
-        outObj.GetActionName().c_str(), outObj.GetUserInput().c_str());
+    outObj.SetUserInput(GetResizeStr(userInput, LONG_STR_MAX_SIZE));
     return true;
 }
 

@@ -51,19 +51,20 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
-    std::string bundleName = "";
+    std::string tempStr = "";
     ani_boolean isUndefined = ANI_TRUE;
-    if ((status = GetPropertyString(env, obj, "bundleName", isUndefined, bundleName)) != ANI_OK
+    if ((status = GetPropertyString(env, obj, "bundleName", isUndefined, tempStr)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         return ANI_INVALID_ARGS;
     }
+    std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     resource.bundleName = bundleName;
 
-    std::string moduleName = "";
-    if ((status = GetPropertyString(env, obj, "moduleName", isUndefined, moduleName)) != ANI_OK
+    if ((status = GetPropertyString(env, obj, "moduleName", isUndefined, tempStr)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         return ANI_INVALID_ARGS;
     }
+    std::string moduleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     resource.moduleName = moduleName;
 
     ani_double idAni = 0.0;

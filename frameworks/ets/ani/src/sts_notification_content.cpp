@@ -268,11 +268,12 @@ ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj, Notificati
     }
     ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_TRUE;
-    std::string name = "";
-    if ((status = GetPropertyString(env, obj, "name", isUndefined, name)) != ANI_OK || isUndefined == ANI_TRUE) {
+    std::string tempStr = "";
+    if ((status = GetPropertyString(env, obj, "name", isUndefined, tempStr)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnWarpNotificationIconButton: get name failed, status = %{public}d", status);
         return ANI_INVALID_ARGS;
     }
+    std::string name = GetResizeStr(tempStr, STR_MAX_SIZE);
     iconButton.SetName(name);
     ani_ref iconRef = {};
     if ((status = GetPropertyRef(env, obj, "iconResource", isUndefined, iconRef)) != ANI_OK
@@ -291,8 +292,8 @@ ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj, Notificati
         }
         iconButton.SetIconImage(pixelMap);
     }
-    std::string text = "";
-    if (GetPropertyString(env, obj, "text", isUndefined, text) == ANI_OK && isUndefined == ANI_FALSE) {
+    if (GetPropertyString(env, obj, "text", isUndefined, tempStr) == ANI_OK && isUndefined == ANI_FALSE) {
+        std::string text = GetResizeStr(tempStr, STR_MAX_SIZE);
         iconButton.SetName(text);
     } else {
         ANS_LOGD("UnWarpNotificationIconButton: get text failed");
@@ -362,7 +363,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     // names?: Array<string>
     if (GetPropertyStringArray(env, obj, "names", isUndefined, names) == ANI_OK && isUndefined == ANI_FALSE) {
         for (auto name: names) {
-            button.addSingleButtonName(name);
+            button.addSingleButtonName(GetResizeStr(name, STR_MAX_SIZE));
         }
     } else {
         ANS_LOGD("UnWarpNotificationLocalLiveViewButton get names failed.");
@@ -479,7 +480,7 @@ void UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule
     ani_boolean isUndefined = ANI_TRUE;
     std::string title = "";
     if (GetPropertyString(env, obj, "title", isUndefined, title) == ANI_OK && isUndefined == ANI_FALSE) {
-        capsule.SetTitle(title);
+        capsule.SetTitle(GetResizeStr(title, STR_MAX_SIZE));
     } else {
         ANS_LOGE("UnWarpNotificationCapsule: get title failed");
     }
@@ -487,14 +488,14 @@ void UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule
     isUndefined = ANI_TRUE;
     if (GetPropertyString(env, obj, "backgroundColor", isUndefined, backgroundColor) == ANI_OK
         && isUndefined == ANI_FALSE) {
-        capsule.SetBackgroundColor(backgroundColor);
+        capsule.SetBackgroundColor(GetResizeStr(backgroundColor, STR_MAX_SIZE));
     } else {
         ANS_LOGE("UnWarpNotificationCapsule: get backgroundColor failed");
     }
     std::string content = "";
     isUndefined = ANI_TRUE;
     if (GetPropertyString(env, obj, "content", isUndefined, content) == ANI_OK && isUndefined == ANI_FALSE) {
-        capsule.SetContent(content);
+        capsule.SetContent(GetResizeStr(content, STR_MAX_SIZE));
     } else {
         ANS_LOGE("UnWarpNotificationCapsule: get content failed");
     }
@@ -652,17 +653,17 @@ ani_status UnWarpNotificationBasicContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationBasicContent: get title failed, status = %{public}d", status);
         return ANI_INVALID_ARGS;
     }
-    basicContent->SetTitle(title);
+    basicContent->SetTitle(GetResizeStr(title, SHORT_TEXT_SIZE));
     std::string text;
     if ((status = GetPropertyString(env, obj, "text", isUndefined, text)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnWarpNotificationBasicContent: get text failed, status = %{public}d", status);
         return ANI_INVALID_ARGS;
     }
-    basicContent->SetText(text);
+    basicContent->SetText(GetResizeStr(text, COMMON_TEXT_SIZE));
     std::string additionalText;
     if (GetPropertyString(env, obj, "additionalText", isUndefined, additionalText) == ANI_OK
         && isUndefined == ANI_FALSE) {
-        basicContent->SetAdditionalText(additionalText);
+        basicContent->SetAdditionalText(GetResizeStr(additionalText, COMMON_TEXT_SIZE));
     } else {
         ANS_LOGD("UnWarpNotificationBasicContent: get additionalText failed");
     }
@@ -719,21 +720,21 @@ ani_status UnWarpNotificationLongTextContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationLongTextContent:get longText failed");
         return ANI_INVALID_ARGS;
     }
-    longTextContent->SetLongText(longText);
+    longTextContent->SetLongText(GetResizeStr(longText, COMMON_TEXT_SIZE));
     std::string briefText;
     if ((status = GetPropertyString(env, obj, "briefText", isUndefined, briefText)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnWarpNotificationLongTextContent:get briefText failed");
         return ANI_INVALID_ARGS;
     }
-    longTextContent->SetBriefText(briefText);
+    longTextContent->SetBriefText(GetResizeStr(briefText, SHORT_TEXT_SIZE));
     std::string expandedTitle;
     if ((status = GetPropertyString(env, obj, "expandedTitle", isUndefined, expandedTitle)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnWarpNotificationLongTextContent:get expandedTitle failed");
         return ANI_INVALID_ARGS;
     }
-    longTextContent->SetExpandedTitle(expandedTitle);
+    longTextContent->SetExpandedTitle(GetResizeStr(expandedTitle, SHORT_TEXT_SIZE));
     ANS_LOGD("UnWarpNotificationLongTextContent end");
     return status;
 }
@@ -758,7 +759,7 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationMultiLineContent: get longTitle failed");
         return ANI_INVALID_ARGS;
     }
-    multiLineContent->SetExpandedTitle(longTitle);
+    multiLineContent->SetExpandedTitle(GetResizeStr(longTitle, SHORT_TEXT_SIZE));
 
     std::string briefText;
     isUndefined = ANI_TRUE;
@@ -767,7 +768,7 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationMultiLineContent: get briefText failed");
         return ANI_INVALID_ARGS;
     }
-    multiLineContent->SetBriefText(briefText);
+    multiLineContent->SetBriefText(GetResizeStr(briefText, SHORT_TEXT_SIZE));
 
     std::vector<std::string> lines = {};
     isUndefined = ANI_TRUE;
@@ -777,7 +778,7 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
         return ANI_INVALID_ARGS;
     }
     for (auto line : lines) {
-        multiLineContent->AddSingleLine(line);
+        multiLineContent->AddSingleLine(GetResizeStr(line, SHORT_TEXT_SIZE));
     }
     ANS_LOGD("UnWarpNotificationMultiLineContent end");
     return status;
@@ -803,7 +804,7 @@ ani_status UnWarpNotificationPictureContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationPictureContent: get expandedTitle failed");
         return ANI_INVALID_ARGS;
     }
-    pictureContent->SetExpandedTitle(expandedTitle);
+    pictureContent->SetExpandedTitle(GetResizeStr(expandedTitle, SHORT_TEXT_SIZE));
 
     std::string briefText;
     if ((status = GetPropertyString(env, obj, "briefText", isUndefined, briefText)) != ANI_OK
@@ -811,7 +812,7 @@ ani_status UnWarpNotificationPictureContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationPictureContent: get briefText failed");
         return ANI_INVALID_ARGS;
     }
-    pictureContent->SetBriefText(briefText);
+    pictureContent->SetBriefText(GetResizeStr(briefText, SHORT_TEXT_SIZE));
     ani_ref pictureRef = {};
     if ((status = GetPropertyRef(env, obj, "picture", isUndefined, pictureRef)) != ANI_OK
         || isUndefined == ANI_TRUE || pictureRef == nullptr) {

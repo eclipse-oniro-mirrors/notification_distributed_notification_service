@@ -33,7 +33,7 @@ ani_status UnwrapNotificationUserInput(ani_env *env, ani_object param,
             ANS_LOGE("GetPropertyString 'inputKey' faild");
             return ANI_INVALID_ARGS;
         }
-    userInput = Notification::NotificationUserInput::Create(inputKey);
+    userInput = Notification::NotificationUserInput::Create(GetResizeStr(inputKey, STR_MAX_SIZE));
     return status;
 }
 
