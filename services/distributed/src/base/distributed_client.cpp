@@ -155,13 +155,29 @@ int32_t DistributedClient::SendMessage(const std::shared_ptr<BoxBase>& boxPtr, T
         AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH1_ID, errorReason);
         return result;
     }
-    result = ClientSendMsg(socketId, boxPtr->GetByteBuffer(), boxPtr->GetByteLength(), dataType);
-    if (result != ERR_OK) {
-        std::string errorReason = "Send failed type: " + std::to_string(type) + " , id: " + StringAnonymous(deviceId);
-        AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
-        AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH2_ID, errorReason);
+
+    if (dataType == TransDataType::DATA_TYPE_MESSAGE) {
+        result = ClientSendMessage(socketId, boxPtr->GetByteBuffer(), boxPtr->GetByteLength());
+        if (result != ERR_OK) {
+            std::string errorReason = "Send failed type: " + std::to_string(type) + " , id: " +
+                StringAnonymous(deviceId);
+            AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
+            AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH2_ID, errorReason);
+        }
+        return result;
     }
-    return result;
+
+    // async to send byte message
+    std::string errorReason = "Send failed type: " + std::to_string(type) + " , id: " + StringAnonymous(deviceId);
+    std::function<void()> sendByteTask = std::bind([boxPtr, socketId, eventType, errorReason]() {
+        int32_t res = ClientSendBytes(socketId, boxPtr->GetByteBuffer(), boxPtr->GetByteLength());
+        if (res != ERR_OK) {
+            AnalyticsUtil::GetInstance().SendEventReport(0, res, errorReason);
+            AnalyticsUtil::GetInstance().SendHaReport(eventType, res, BRANCH2_ID, errorReason);
+        }
+    });
+    ffrt::submit(sendByteTask);
+    return ERR_OK;
 }
 
 std::string DistributedClient::ShutdownReasonToString(ShutdownReason reason)
