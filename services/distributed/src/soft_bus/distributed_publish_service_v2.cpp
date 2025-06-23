@@ -37,6 +37,7 @@
 #include "string_wrapper.h"
 #include "distributed_subscribe_service.h"
 #include "remove_all_distributed_box.h"
+#include "bundle_resource_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -528,23 +529,28 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
     if (notificationRequest->GetLittleIcon() != nullptr) {
         requestBox->SetSmallIcon(notificationRequest->GetLittleIcon());
     }
-
     auto params = notificationRequest->GetExtendInfo();
-    if (params == nullptr) {
-        ANS_LOGI("Send request invalid extend info.");
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH || params == nullptr) {
+        ANS_LOGI("Send request no extend info %{public}d.", deviceType);
         return;
     }
     std::string content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME);
     if (!content.empty()) {
         requestBox->SetAppName(content);
+        if (notificationRequest->GetLittleIcon() == nullptr) {
+            AppExecFwk::BundleResourceInfo resourceInfo;
+            if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(content, resourceInfo) != 0) {
+                ANS_LOGW("Dans get bundle icon failed %{public}s.", content.c_str());
+                return;
+            }
+            std::shared_ptr<Media::PixelMap> iconPixelmap = AnsImageUtil::CreatePixelMapByString(resourceInfo.icon);
+            requestBox->SetSmallIcon(iconPixelmap);
+            ANS_LOGI("Dans self get bundle icon.");
+        }
     }
     content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL);
     if (!content.empty()) {
         requestBox->SetAppLabel(content);
-    }
-    content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_ICON);
-    if (!content.empty()) {
-        requestBox->SetAppIcon(content);
     }
     int32_t appIndex = params->GetIntParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, 0);
     requestBox->SetAppIndex(appIndex);
@@ -748,9 +754,6 @@ void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box
         }
         if (box.GetAppName(info)) {
             extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME, AAFwk::String::Box(info));
-        }
-        if (box.GetAppIcon(info)) {
-            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_ICON, AAFwk::String::Box(info));
         }
         if (box.GetDeviceId(info)) {
             DistributedDeviceInfo peerDevice;

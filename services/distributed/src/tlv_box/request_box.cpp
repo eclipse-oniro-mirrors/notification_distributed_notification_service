@@ -267,14 +267,6 @@ bool NotificationRequestBox::SetAutoDeleteTime(int64_t time)
     return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
 }
 
-bool NotificationRequestBox::SetAppIcon(const std::string& appIcon)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(APP_ICON, appIcon));
-}
-
 bool NotificationRequestBox::SetAppName(const std::string& appName)
 {
     if (box_ == nullptr) {
@@ -563,14 +555,6 @@ bool NotificationRequestBox::GetAppMessageId(std::string& appMessageId) const
         return false;
     }
     return box_->GetStringValue(NOTIFICATION_APP_MESSAGE_ID, appMessageId);
-}
-
-bool NotificationRequestBox::GetAppIcon(std::string& appIcon) const
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->GetStringValue(APP_ICON, appIcon);
 }
 
 bool NotificationRequestBox::GetAppName(std::string& appName) const

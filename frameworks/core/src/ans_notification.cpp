@@ -1605,7 +1605,8 @@ bool AnsNotification::CanPublishLiveViewContent(const NotificationRequest &reque
 ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
 {
     auto littleIcon = request.GetLittleIcon();
-    if (NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
+    bool collaborateFlag = request.GetDistributedCollaborate();
+    if (!collaborateFlag && NotificationRequest::CheckImageOverSizeForPixelMap(littleIcon, MAX_ICON_SIZE)) {
         ANS_LOGE("The size of little icon exceeds limit");
         return ERR_ANS_ICON_OVER_SIZE;
     }
