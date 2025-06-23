@@ -499,7 +499,7 @@ ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonO
         ANS_LOGE("UnWarpNotificationButtonOption: get buttonName failed");
         return ANI_INVALID_ARGS;
     }
-    buttonOption.SetButtonName(buttonName);
+    buttonOption.SetButtonName(GetResizeStr(buttonName, STR_MAX_SIZE));
     ANS_LOGD("UnWarpNotificationButtonOption end");
     return status;
 }

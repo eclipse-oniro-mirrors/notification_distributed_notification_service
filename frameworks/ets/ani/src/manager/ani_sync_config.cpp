@@ -14,7 +14,6 @@
  */
 #include "ani_sync_config.h"
 
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
@@ -49,8 +48,8 @@ ani_double AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value
         return RESULT_FAILED;
     }
     int returncode = Notification::NotificationHelper::SetAdditionConfig(keyStr, valueStr);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         ANS_LOGE("setAdditionalConfig -> error, errorCode: %{public}d", externalCode);
         AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return RESULT_FAILED;

@@ -14,7 +14,6 @@
  */
 #include "ani_publish.h"
 
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
 #include "sts_bundle_option.h"
@@ -37,7 +36,7 @@ void AniPublish(ani_env *env, ani_object obj)
         return;
     }
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
     if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
@@ -55,7 +54,7 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
     }
     notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
     if (externalCode != ERR_OK) {
         ANS_LOGE("AniPublishWithId error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -81,7 +80,7 @@ void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representat
     notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
     notificationRequest->SetOwnerBundleName(bundleStr);
     int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
     if (externalCode != ERR_OK) {
         ANS_LOGE("AniPublishAsBundle: PublishNotificationerror, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -112,7 +111,7 @@ void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeB
     notificationRequest->SetIsAgentNotification(true);
 
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
     if (externalCode != ERR_OK) {
         ANS_LOGE("AniPublishAsBundleWithBundleOption error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

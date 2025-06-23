@@ -222,12 +222,12 @@ bool ParseNotificationSlotByBasicType(ani_env *env, ani_object notificationSlotO
     ani_boolean isUndefined = ANI_TRUE;
     std::string desc = "";
     if (GetPropertyString(env, notificationSlotObj, "desc", isUndefined, desc) == ANI_OK && isUndefined == ANI_FALSE) {
-        slot.SetDescription(desc);
+        slot.SetDescription(GetResizeStr(desc, STR_MAX_SIZE));
     }
     std::string sound = "";
     if (GetPropertyString(env, notificationSlotObj, "sound", isUndefined, sound) == ANI_OK &&
         isUndefined == ANI_FALSE) {
-        slot.SetSound(Uri(sound));
+        slot.SetSound(Uri(GetResizeStr(sound, STR_MAX_SIZE)));
     }
     ani_double doubleValue = 0.0;
     if (GetPropertyDouble(env, notificationSlotObj, "lockscreenVisibility", isUndefined, doubleValue) == ANI_OK

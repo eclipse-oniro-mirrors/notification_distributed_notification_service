@@ -22,7 +22,6 @@
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "notification_helper.h"
-#include "inner_errors.h"
 
 constexpr const char* TYPE_STRING = "checkNotification";
 namespace OHOS {
@@ -77,7 +76,7 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     stsPushCallBack_->SetJsPushCallBackObject(env, outSlotType, fn);
     auto result = NotificationHelper::RegisterPushCallback(stsPushCallBack_->AsObject(), checkRequest);
     if (result != ERR_OK) {
-        int32_t externalCode = ERR_OK ? ERR_OK : CJSystemapi::Notification::ErrorToExternal(result);
+        int32_t externalCode = ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(result);
         ANS_LOGE("Register failed, result is %{public}d", externalCode);
         OHOS::NotificationSts::ThrowStsErrorWithCode(env, externalCode);
         return externalCode;

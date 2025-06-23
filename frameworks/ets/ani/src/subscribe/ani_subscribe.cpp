@@ -16,11 +16,11 @@
 
 #include <thread>
 #include <iostream>
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ani_remove.h"
 #include "ans_log_wrapper.h"
 #include "sts_subscribe.h"
+#include "sts_throw_erro.h"
 
 namespace OHOS {
 namespace NotificationSubScribeSts {
@@ -75,7 +75,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
     callback->SetVm(vm);
     int32_t result = Notification::NotificationHelper::DistributeOperation(info, callback);
     ANS_LOGD("StsDistributeOperation ret %{public}d. ErrorToExternal %{public}d",
-        result, CJSystemapi::Notification::ErrorToExternal(result));
+        result, NotificationSts::GetExternalCode(result));
     if (result != ERR_OK || noWithOperationInfo) {
         callback->OnStsOperationCallback(env, result);
     }

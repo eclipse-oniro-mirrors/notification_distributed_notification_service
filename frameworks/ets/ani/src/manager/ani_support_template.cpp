@@ -14,7 +14,6 @@
  */
 #include "ani_support_template.h"
 
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
@@ -27,17 +26,17 @@ namespace NotificationManagerSts {
 ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
 {
     ANS_LOGD("AniIsSupportTemplate call");
-    std::string templateNameStr;
-    if (NotificationSts::GetStringByAniString(env, templateName, templateNameStr) != ANI_OK) {
+    std::string tempStr;
+    if (NotificationSts::GetStringByAniString(env, templateName, tempStr) != ANI_OK) {
         NotificationSts::ThrowStsErroWithMsg(env, "templateName parse failed!");
         return NotificationSts::BoolToAniBoolean(false);
     }
-
+    std::string templateNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
     ANS_LOGD("AniIsSupportTemplate by templateName:%{public}s", templateNameStr.c_str());
     bool support = false;
     int returncode = Notification::NotificationHelper::IsSupportTemplate(templateNameStr, support);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsSupportTemplate -> error, errorCode: %{public}d", externalCode);
         return NotificationSts::BoolToAniBoolean(false);
@@ -54,8 +53,8 @@ ani_object AniGetDeviceRemindType(ani_env *env)
         Notification::NotificationConstant::RemindType::DEVICE_IDLE_REMIND;
     int returncode = Notification::NotificationHelper::GetDeviceRemindType(remindType);
 
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != CJSystemapi::Notification::SUCCESS_CODE) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniGetDeviceRemindType error, errorCode: %{public}d", externalCode);
         return nullptr;
