@@ -146,7 +146,7 @@ DeviceStatus DistributedDeviceStatus::GetMultiDeviceStatus(
 {
     std::lock_guard<std::mutex> lock(mapLock_);
     for (DeviceStatus device : deviceInfo_) {
-        if (device.deviceType == deviceType && (device.status & status) > 0) {
+        if (device.deviceType == deviceType && (device.status & status) == status) {
             return device;
         }
     }
