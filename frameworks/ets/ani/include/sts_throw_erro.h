@@ -56,9 +56,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MESSAGE {
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
 };
 
-inline int32_t GetExternalCode(uint32_t errCode)
-{
-    static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {
+static const std::vector<std::pair<uint32_t, int32_t>> ERRORS_CONVERT = {
         {ERR_ANS_PERMISSION_DENIED, ERROR_PERMISSION_DENIED},
         {ERR_ANS_NON_SYSTEM_APP, ERROR_NOT_SYSTEM_APP},
         {ERR_ANS_NOT_SYSTEM_SERVICE, ERROR_NOT_SYSTEM_APP},
@@ -97,10 +95,13 @@ inline int32_t GetExternalCode(uint32_t errCode)
         {ERR_ANS_NO_PROFILE_TEMPLATE, ERROR_NO_PROFILE_TEMPLATE},
         {ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION, ERROR_REJECTED_WITH_DISABLE_NOTIFICATION},
         {ERR_ANS_OPERATION_TIMEOUT, ERROR_DISTRIBUTED_OPERATION_TIMEOUT},
-    };
+};
 
+
+inline int32_t GetExternalCode(uint32_t errCode)
+{
     int32_t ExternalCode = ERROR_INTERNAL_ERROR;
-    for (const auto &errorConvert : errorsConvert) {
+    for (const auto &errorConvert : ERRORS_CONVERT) {
         if (errCode == errorConvert.first) {
             ExternalCode = errorConvert.second;
             break;
