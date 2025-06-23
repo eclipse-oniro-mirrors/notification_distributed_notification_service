@@ -156,21 +156,24 @@ ErrCode BundleResourceHelper::GetApplicationInfo(const std::string &appName, int
 
 bool BundleResourceHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
 {
-    AppExecFwk::ApplicationInfo appInfo;
-    int32_t flags = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
-    ErrCode result = GetApplicationInfo(bundleName, flags, userId, appInfo);
-    if (result != ERR_OK) {
-        ANS_LOGE("Get installed bundle failed %{public}d.", result);
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+
+    std::lock_guard<std::mutex> lock(connectionMutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
         return false;
     }
-
-    if (appInfo.bundleType != AppExecFwk::BundleType::APP) {
-        ANS_LOGD("Get not app %{public}s %{public}d", bundleName.c_str(), appInfo.bundleType);
-        return true;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    int32_t result = bundleMgr_->GetBundleInfoV9(bundleName, flags, bundleInfo, userId);
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (result != ERR_OK) {
+        ANS_LOGW("Get installed bundle %{public}s failed.", bundleName.c_str());
+        return false;
     }
-
-    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(), appInfo.isSystemApp);
-    return appInfo.isSystemApp;
+    ANS_LOGI("Get installed bundle %{public}s %{public}d.", bundleName.c_str(),
+        bundleInfo.applicationInfo.isSystemApp);
+    return bundleInfo.applicationInfo.isSystemApp;
 }
 }
 }
