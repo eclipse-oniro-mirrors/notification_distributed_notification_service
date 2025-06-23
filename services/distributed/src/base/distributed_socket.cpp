@@ -206,15 +206,17 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName,
     return ERR_OK;
 }
 
-int32_t ClientSendMsg(int32_t socketId, const void* data, int32_t length, TransDataType type)
+int32_t ClientSendBytes(int32_t socketId, const void* data, int32_t length)
 {
-    int32_t result = 0;
-    if (type == TransDataType::DATA_TYPE_BYTES) {
-        result = ::SendBytes(socketId, data, length);
-    } else if (type == TransDataType::DATA_TYPE_MESSAGE) {
-        result = ::SendMessage(socketId, data, length);
-    }
-    ANS_LOGI("socket Send %{public}d %{public}d %{public}d %{public}d", socketId, length, type, result);
+    int32_t result = ::SendBytes(socketId, data, length);
+    ANS_LOGI("Socket send byte %{public}d %{public}d %{public}d ", socketId, length, result);
+    return result;
+}
+
+int32_t ClientSendMessage(int32_t socketId, const void* data, int32_t length)
+{
+    int32_t result = ::SendMessage(socketId, data, length);
+    ANS_LOGI("Socket send message %{public}d %{public}d %{public}d ", socketId, length, result);
     return result;
 }
 
