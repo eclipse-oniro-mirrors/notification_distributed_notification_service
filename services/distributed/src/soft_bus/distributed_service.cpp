@@ -405,10 +405,8 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
 #ifdef DISTRIBUTED_FEATURE_MASTER
     if (matchType == MatchType::MATCH_SYN) {
         DistributedDeviceService::GetInstance().SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
-        DistributedBundleService::GetInstance().RequestBundlesIcon(peerDevice, true);
         DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, true);
     } else if (matchType == MatchType::MATCH_ACK) {
-        DistributedBundleService::GetInstance().RequestBundlesIcon(peerDevice, false);
         DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
         DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, false);
     }
