@@ -289,6 +289,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
     InitValidDevices(syncDevices, smartDevices, statusMap, request);
     if (syncDevices.size() <= 1) {
+        request->SetDeviceFlags(notificationFlagsOfDevices);
         return;
     }
 
@@ -400,7 +401,7 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     }
     // used device
     DeviceStatus deviceStatus = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->
-        GetMultiDeviceStatus(deviceType, STATUS_USED_FLAG);
+        GetMultiDeviceStatus(deviceType, STATUS_UNLOCKED_USED_FLAG);
     if (deviceStatus.deviceType.empty()) {
         ANS_LOGI("PC/PAD init, not get any used device, type = %{public}s", deviceType.c_str());
         return;
@@ -478,8 +479,6 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_NAME, AAFwk::String::Box(appInfo.name));
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_LABEL,
             AAFwk::String::Box(bundleResourceInfo.label));
-        extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_ICON,
-            AAFwk::String::Box(bundleResourceInfo.icon));
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_APP_INDEX,
             AAFwk::Integer::Box(appInfo.appIndex));
 
@@ -488,9 +487,8 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
         extendInfo->SetParam(EXTEND_INFO_PRE + "_" + EXTEND_INFO_USER_ID +  "_" + deviceType,
             AAFwk::Integer::Box(deviceStatus.userId));
         request->SetExtendInfo(extendInfo);
-        ANS_LOGI("FillRequestExtendInfo result: %{public}s %{public}s %{public}s %{public}d %{public}s %{public}d",
-            appInfo.name.c_str(), bundleResourceInfo.label.c_str(),
-            bundleResourceInfo.icon.c_str(), appInfo.appIndex,
+        ANS_LOGI("FillRequestExtendInfo result: %{public}s %{public}s %{public}d %{public}s %{public}d",
+            appInfo.name.c_str(), bundleResourceInfo.label.c_str(), appInfo.appIndex,
             deviceStatus.deviceId.c_str(), deviceStatus.userId);
         return;
     }

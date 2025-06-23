@@ -110,11 +110,10 @@ private:
     constexpr static const char* SPLIT_FLAG = "|";
     constexpr static const char* STATUS_UNUSED = "xxx0";
     constexpr static const char* STATUS_UNLOCK_OWNER = "x01x";
-    constexpr static const uint32_t STATUS_USED_FLAG = 1;
+    constexpr static const uint32_t STATUS_UNLOCKED_USED_FLAG = 3;
     const std::string EXTEND_INFO_PRE = "notification_collaboration";
     const std::string EXTEND_INFO_APP_NAME = "app_name";
     const std::string EXTEND_INFO_APP_LABEL = "app_label";
-    const std::string EXTEND_INFO_APP_ICON = "app_icon";
     const std::string EXTEND_INFO_APP_INDEX = "app_index";
     const std::string EXTEND_INFO_DEVICE_ID = "deviceId";
     const std::string EXTEND_INFO_USER_ID = "userId";
