@@ -52,11 +52,15 @@ bool GetEnableNotificationInfo(ani_env *env, ani_object content, std::shared_ptr
 void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
 {
     ANS_LOGD("enter");
-    std::string deviceId {""};
     sptr<AnsDialogHostClient> client = nullptr;
     if (!AnsDialogHostClient::CreateIfNullptr(client)) {
         ANS_LOGD("create client fail");
         info->errorCode = ERR_ANS_DIALOG_IS_POPPING;
+        return;
+    }
+    if (client == nullptr) {
+        ANS_LOGD("client is nullptr");
+        info->errorCode = ERROR_INTERNAL_ERROR;
         return;
     }
     if (info->context != nullptr) {
