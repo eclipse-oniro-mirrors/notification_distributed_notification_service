@@ -17,7 +17,6 @@
 #include "ani_ans_dialog_callback.h"
 #include "ans_log_wrapper.h"
 #include "sts_error_utils.h"
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
@@ -54,9 +53,13 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
 {
     ANS_LOGD("enter");
     sptr<AnsDialogHostClient> client = nullptr;
-    AnsDialogHostClient::CreateIfNullptr(client);
-    if (client == nullptr) {
+    if (!AnsDialogHostClient::CreateIfNullptr(client)) {
         ANS_LOGD("create client fail");
+        info->errorCode = ERR_ANS_DIALOG_IS_POPPING;
+        return;
+    }
+    if (client == nullptr) {
+        ANS_LOGD("client is nullptr");
         info->errorCode = ERROR_INTERNAL_ERROR;
         return;
     }
@@ -86,7 +89,7 @@ void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared
     if (env == nullptr || info == nullptr) return;
     ani_status status;
     int32_t errorCode = info->errorCode ==
-        ERR_OK ? ERR_OK : CJSystemapi::Notification::ErrorToExternal(info->errorCode);
+        ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
     if (errorCode == ERR_OK) {
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::createInt(env, errorCode);

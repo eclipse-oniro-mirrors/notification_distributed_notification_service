@@ -24,6 +24,12 @@
 
 namespace OHOS {
 namespace NotificationSts {
+constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t LONG_STR_MAX_SIZE = 1028;
+constexpr int32_t COMMON_TEXT_SIZE = 3074;
+constexpr int32_t SHORT_TEXT_SIZE = 1026;
+std::string GetResizeStr(std::string instr, int32_t length);
+
 bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);
@@ -47,6 +53,8 @@ ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_ref &outRef);
 ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<std::string> &res);
+ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<int64_t> &res);
 
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, const std::string value);

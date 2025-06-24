@@ -16,7 +16,7 @@
 import { BundleOption } from 'notification.NotificationCommonDef';
 import { BusinessError, AsyncCallback } from '@ohos.base';
 import { NotificationSlot } from 'notification.notificationSlot';
-import { NotificationRequest } from 'notification.notificationRequest';
+import { NotificationRequest, NotificationCheckRequest } from 'notification.notificationRequest';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NotificationBasicContent } from 'notification.notificationContent';
 import { NotificationLongTextContent } from 'notification.notificationContent';
@@ -27,10 +27,13 @@ import { NotificationTemplate } from 'notification.notificationTemplate';
 import { DistributedOptions } from 'notification.notificationRequest';
 import { NotificationLiveViewContent } from 'notification.notificationContent';
 import { UnifiedGroupInfo } from 'notification.notificationRequest';
+import { NotificationFilter } from 'notification.notificationRequest';
 import image from '@ohos.multimedia.image';
 
 type ResolveCallback<T> = (data: T) => void;
-type RejectCallback = (err: Object) => void;
+type RejectCallback = (err: Error) => void;
+type CallbackForCheckInfo =
+    (checkInfo: notificationManager.NotificationCheckInfo)=> notificationManager.NotificationCheckResult;
 
 const ERROR_OK = 0;
 const ERROR_PARAM_INVALID = 401;
@@ -120,6 +123,13 @@ export default namespace notificationManager {
         onResponse?: (notificationId: number, buttonOptions: ButtonOptions) => void;
     }
 
+    export enum DeviceRemindType {
+        IDLE_DONOT_REMIND = 0,
+        IDLE_REMIND = 1,
+        ACTIVE_DONOT_REMIND = 2,
+        ACTIVE_REMIND = 3,
+    }
+
     export native function nativeCancelAll(): void;
     export native function nativeCancelWithId(id: number): void;
     export native function nativeCancelWithIdLabel(id: number, label: string): void;
@@ -128,10 +138,13 @@ export default namespace notificationManager {
 
     export native function nativeDisplayBadge(bundle: BundleOption, enable: boolean): void;
     export native function nativeIsBadgeDisplayed(bundle: BundleOption): boolean;
+    export native function nativeSetBadgeNumber(badgeNumber: number): void;
+    export native function nativeSetBadgeNumberByBundle(bundle: BundleOption, badgeNumber: number): void;
 
     export native function nativeGetActiveNotificationCount(): number;
     export native function nativeGetActiveNotifications():Array<NotificationRequest>;
     export native function nativeGetAllActiveNotifications():Array<NotificationRequest>;
+    export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter): NotificationRequest;
 
     export native function nativeAddDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
     export native function nativeRemoveDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): void;
@@ -158,25 +171,106 @@ export default namespace notificationManager {
     export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
     export native function nativeRequestEnableNotification(content: UIAbilityContext): Promise<int>;
+    export native function nativeGetAllNotificationEnabledBundles(): Array<BundleOption>;
+    export native function nativeIsNotificationEnabledSync(): boolean;
+
+    export native function  nativeRemoveGroupByBundle(bundle: BundleOption, groupName: string): void;
+    
+    export native function nativeAddSlotByNotificationSlot(slot: NotificationSlot): void;
+    export native function nativeAddSlotBySlotType(type: SlotType): void;
+    export native function nativeAddSlots(slots: Array<NotificationSlot>): void;
+    export native function nativeGetSlot(slotType: SlotType): NotificationSlot;
+    export native function nativeGetSlots(): Array<NotificationSlot>;
+    export native function nativeRemoveSlot(slotType: SlotType): void;
+    export native function nativeRemoveAllSlots(): void;
+    export native function nativeSetSlotByBundle(bundle: BundleOption, slot: NotificationSlot): void;
+    export native function nativeGetSlotNumByBundle(bundle: BundleOption): number;
+    export native function nativeIsSupportTemplate(templateName: string): boolean;
+    export native function nativeSetDistributedEnable(enable: boolean): void;
+    export native function nativeIsDistributedEnabled(): boolean;
+    export native function nativeIsDistributedEnabledByBundle(bundle: BundleOption): boolean;
+    export native function nativeIsDistributedEnabledByBundleType(bundle: BundleOption, deviceType: string): boolean;
+    export native function nativeGetDeviceRemindType(): DeviceRemindType;
+    export native function nativeSetSyncNotificationEnabledWithoutApp(userId: number, enable: boolean): void;
+    export native function nativeGetSyncNotificationEnabledWithoutApp(userId: number): boolean;
+
+    export native function nativePublishAsBundle(request: NotificationRequest, representativeBundle: string, userId: number): void;
+    export native function nativePublishAsBundleWithBundleOption(representativeBundle: BundleOption, request: NotificationRequest): void;
+    export native function nativeCancelAsBundle(id: number, representativeBundle: string, userId: number): void;
+    export native function nativeCancelAsBundleWithBundleOption(representativeBundle: BundleOption, id: number): void;
+    export native function nativeCancelGroup(groupName: string): void;
+    export native function nativeSetDoNotDisturbDate(date: DoNotDisturbDate): void;
+    export native function nativeSetDoNotDisturbDateWithId(date: DoNotDisturbDate, userId: number): void;
+    export native function nativeGetDoNotDisturbDate(): DoNotDisturbDate;
+    export native function nativeGetDoNotDisturbDateWithId(userId: number): DoNotDisturbDate;
+    export native function nativeIsSupportDoNotDisturbMode(): boolean;
+    export native function nativeGetDoNotDisturbProfile(id: number): DoNotDisturbProfile;
+
+    export native function nativeOpenNotificationSettings(content: UIAbilityContext): Promise<int>;
+
+    export native function nativesetTargetDeviceStatus(deviceType: string, status: number): void;
+    export native function nativesetDistributedEnabledByBundle(bundle: BundleOption, deviceType: string, enable: boolean): void;
+    export native function nativesetSmartReminderEnabled(deviceType: string, enable: boolean): void;
+    export native function nativeisSmartReminderEnabled(deviceType: string): boolean;
+    export native function nativesetDistributedEnabledBySlot(slot: SlotType, deviceType: string, enabled: boolean): void;
+    export native function nativeisDistributedEnabledBySlot(slot: SlotType, deviceType: string): boolean;
+    export native function nativesetAdditionalConfig(key: string, value: string): int;
+    export native function nativesetDistributedEnableByBundle(bundle: BundleOption, enable: boolean):void;
+    export native function nativedisableNotificationFeature(disabled:boolean, bundleList: Array<string>):void;
+
+    function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
+    {
+        let error: BusinessError = successCallbackError
+        if (doNotDisturbDate == null) {
+            error = errorParamInvalid
+            return error;
+        }
+        return error;
+    }
+
+    function isInvalidParameter(slot: NotificationSlot): BusinessError
+    {
+        if (slot == null) {
+            return errorParamInvalid;
+        }
+        if (slot.lockscreenVisibility !== undefined && typeof slot.lockscreenVisibility === 'number') {
+            const num = slot.lockscreenVisibility ?? -1;
+            if (num < 0) {
+                return errorParamInvalid;
+            }
+        }
+        if (slot.lightColor !== undefined && typeof slot.lightColor === 'number') {
+            const num = slot.lightColor ?? -1;
+            if (num < 0) {
+                return errorParamInvalid;
+            }
+        }
+        if (slot.desc !== undefined && slot.desc?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if (slot.sound !== undefined && slot.sound?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if (slot.vibrationValues !== undefined && slot.vibrationValues?.length === 0) {
+            return errorParamInvalid;
+        }
+        return successCallbackError;
+    }
+
+    export native function nativeOn(
+        type: 'checkNotification', callback: CallbackForCheckInfo, checkRequest?: NotificationCheckRequest): int;
+    export native function nativeOff(
+        type: 'checkNotification', callback?: CallbackForCheckInfo): int;
 
     function isInvalidParameter(bundle: BundleOption): BusinessError
     {
-        let error: BusinessError = {
-            code: 0,
-            message: ""
-        }
+        let error: BusinessError = successCallbackError
         if (bundle == null) {
-            error = {
-                code: 401,
-                message: "BundleOption must be not Null"
-            }
+            error = errorParamInvalid
             return error;
         }
         if (bundle.bundle == null || bundle.bundle?.length === 0) {
-            error = {
-                code: 401,
-                message: "Incorrect parameter types. The type of bundle must be string."
-            }
+            error = errorParamInvalid
             return error;
         }
         return error;
@@ -184,226 +278,283 @@ export default namespace notificationManager {
 
     function isInvalidParameter(option: ButtonOptions): BusinessError
     {
-        let error: BusinessError = {
-            code: 0,
-            message: ""
-        }
+        let error: BusinessError = successCallbackError
         if (option == null) {
-            error = {
-                code: 401,
-                message: "ButtonOptions must be not Null"
-            }
+            error = errorParamInvalid
             return error;
         }
         if (option.buttonName == null || option.buttonName?.length === 0) {
-            error = {
-                code: 401,
-                message: "Incorrect parameter types. The type of buttonName must be string."
-            }
+            error = errorParamInvalid
             return error;
+        }
+        return error;
+    }
+    function isInvalidParameter(filter: NotificationFilter): BusinessError
+    {
+        let error: BusinessError = successCallbackError;
+        if (filter == null) {
+            return errorParamInvalid;
+        }
+        error = isInvalidParameter(filter.bundle);
+        if (error.code != 0) {
+            return error;
+        }
+        if (filter.notificationKey?.label !== undefined && filter.notificationKey?.label?.trim() === '') {
+            return errorParamInvalid;
+        }
+        if (filter?.extraInfoKeys !== undefined && filter?.extraInfoKeys?.length === 0) {
+            return errorParamInvalid;
         }
         return error;
     }
     function isInvalidContent(normal?: NotificationBasicContent): boolean
     {
         if (normal === null) {
-			return false;
-		}
-		if (!normal?.title || normal?.title?.trim() === '') {
-			return false;
-		}
-		if (!normal?.text || normal?.text?.trim() === '') {
-			return false;
-		}
-		if (normal?.additionalText !== undefined && normal?.additionalText?.trim() === '') {
-			return false;
-		}
-		if (normal?.lockscreenPicture != undefined && !(normal?.lockscreenPicture instanceof image.PixelMap)) {
-			return false;
-		}
-        
+            return false;
+        }
+        if (!normal?.title || normal?.title?.trim() === '') {
+            return false;
+        }
+        if (!normal?.text || normal?.text?.trim() === '') {
+            return false;
+        }
+        if (normal?.additionalText !== undefined && normal?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (normal?.lockscreenPicture != undefined && !(normal?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
         return true;
     }
     function isInvalidLongText(longText?: NotificationLongTextContent): boolean
     {
         if (longText === null) {
-			return false;
-		}
-		if (!longText?.longText || longText?.longText?.trim() === '') {
-			return false;
-		}
-		if (!longText?.briefText || longText?.briefText?.trim() === '') {
-			return false;
-		}
-		if (!longText?.expandedTitle || longText?.expandedTitle?.trim() === '') {
-			return false;
-		}
+            return false;
+        }
+        if (!longText?.title || longText?.title?.trim() === '') {
+            return false;
+        }
+        if (!longText?.text || longText?.text?.trim() === '') {
+            return false;
+        }
+        if (longText?.additionalText !== undefined && longText?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (longText?.lockscreenPicture != undefined && !(longText?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (!longText?.longText || longText?.longText?.trim() === '') {
+            return false;
+        }
+        if (!longText?.briefText || longText?.briefText?.trim() === '') {
+            return false;
+        }
+        if (!longText?.expandedTitle || longText?.expandedTitle?.trim() === '') {
+            return false;
+        }
         return true;
     }
     function isInvalidMultiLine(multiLine?: NotificationMultiLineContent): boolean
     {
         if (multiLine === null) {
-			return false
-		}
-		if (!multiLine?.briefText || multiLine?.briefText.trim() === '') {
-			return false;
-		}
-		if (!multiLine?.longTitle || multiLine?.longTitle.trim() === '') {
-			return false;
-		}
-		if (multiLine?.lines?.length === 0) {
-			return false;
-		}
-        
+            return false
+        }
+        if (!multiLine?.title || multiLine?.title?.trim() === '') {
+            return false;
+        }
+        if (!multiLine?.text || multiLine?.text?.trim() === '') {
+            return false;
+        }
+        if (multiLine?.additionalText !== undefined && multiLine?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (multiLine?.lockscreenPicture != undefined && !(multiLine?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (!multiLine?.briefText || multiLine?.briefText.trim() === '') {
+            return false;
+        }
+        if (!multiLine?.longTitle || multiLine?.longTitle.trim() === '') {
+            return false;
+        }
+        if (multiLine?.lines?.length === 0) {
+            return false;
+        }
         return true;
     }
     function isInvalidPicture(picture?: NotificationPictureContent): boolean
     {
         if (picture === null) {
-			return false;
-		}
-		if (!picture?.briefText || picture?.briefText?.trim() === '') {
-			return false;
-		}
-		if (!picture?.expandedTitle || picture?.expandedTitle?.trim() === '') {
-			return false;
-		}
-		if (!(picture?.picture instanceof image.PixelMap)) {
-			return false;
-		}
+            return false;
+        }
+        if (!picture?.title || picture?.title?.trim() === '') {
+            return false;
+        }
+        if (!picture?.text || picture?.text?.trim() === '') {
+            return false;
+        }
+        if (picture?.additionalText !== undefined && picture?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (picture?.lockscreenPicture != undefined && !(picture?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (!picture?.briefText || picture?.briefText?.trim() === '') {
+            return false;
+        }
+        if (!picture?.expandedTitle || picture?.expandedTitle?.trim() === '') {
+            return false;
+        }
+        if (!(picture?.picture instanceof image.PixelMap)) {
+            return false;
+        }
         return true;
     }
     function isInvalidSystemLiveView(systemLiveView?: NotificationSystemLiveViewContent): boolean
     {
         if (systemLiveView === null) {
-			return false
-		}
-		if (systemLiveView?.capsule !== undefined && systemLiveView?.capsule === null) {
-			return false
-		}
-		if (systemLiveView?.capsule?.title !== undefined && systemLiveView?.capsule?.title?.trim() === '') {
-			return false;
-		}
-		if (systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
-			return false;
-		}
-		if (systemLiveView?.capsule?.backgroundColor != undefined && systemLiveView?.capsule?.backgroundColor?.trim() === '') {
-			return false;
-		}
-		if (systemLiveView?.capsule?.content != undefined && systemLiveView?.capsule?.content?.trim() === '') {
-			return false;
-		}
-		if (systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
-			return false;
-		}
-		if (systemLiveView?.button !== undefined && systemLiveView?.button === null) {
-			return false;
-		}
-		if (systemLiveView?.button?.names != undefined && systemLiveView?.button?.names?.length === 0) {
-			return false;
-		}
-		if (systemLiveView?.button?.icons != undefined && systemLiveView?.button?.icons?.length === 0) {
-			return false;
-		}
-		if (systemLiveView?.button?.iconsResource != undefined && systemLiveView?.button?.iconsResource?.length === 0) {
-			return false;
-		}
-		
-		if (systemLiveView?.cardButtons !== undefined && systemLiveView?.cardButtons?.length === 0) {
-			return false;
-		}
+            return false
+        }
+        if (!systemLiveView?.title || systemLiveView?.title?.trim() === '') {
+            return false;
+        }
+        if (!systemLiveView?.text || systemLiveView?.text?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.additionalText !== undefined && systemLiveView?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.lockscreenPicture != undefined && !(systemLiveView?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (systemLiveView?.capsule !== undefined && systemLiveView?.capsule === null) {
+            return false
+        }
+        if (systemLiveView?.capsule?.title !== undefined && systemLiveView?.capsule?.title?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
+            return false;
+        }
+        if (systemLiveView?.capsule?.backgroundColor != undefined && systemLiveView?.capsule?.backgroundColor?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.capsule?.content != undefined && systemLiveView?.capsule?.content?.trim() === '') {
+            return false;
+        }
+        if (systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
+            return false;
+        }
+        if (systemLiveView?.button !== undefined && systemLiveView?.button === null) {
+            return false;
+        }
+        if (systemLiveView?.button?.names != undefined && systemLiveView?.button?.names?.length === 0) {
+            return false;
+        }
+        if (systemLiveView?.button?.icons != undefined && systemLiveView?.button?.icons?.length === 0) {
+            return false;
+        }
+        if (systemLiveView?.button?.iconsResource != undefined && systemLiveView?.button?.iconsResource?.length === 0) {
+            return false;
+        }
         
+        if (systemLiveView?.cardButtons !== undefined && systemLiveView?.cardButtons?.length === 0) {
+            return false;
+        }
         return true;
     }
     function isInvalidLiveView(liveView?: NotificationLiveViewContent): boolean
     {
         if (liveView === null) {
-			return false;
-		}
-		if (liveView?.extraInfo !== undefined && liveView?.extraInfo === null) {
-			return false;
-		}
-		if (liveView?.pictureInfo !== undefined && liveView?.pictureInfo === null) {
-			return false;
-		}
+            return false;
+        }
+        if (!liveView?.title || liveView?.title?.trim() === '') {
+            return false;
+        }
+        if (!liveView?.text || liveView?.text?.trim() === '') {
+            return false;
+        }
+        if (liveView?.additionalText !== undefined && liveView?.additionalText?.trim() === '') {
+            return false;
+        }
+        if (liveView?.lockscreenPicture != undefined && !(liveView?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (liveView?.extraInfo !== undefined && liveView?.extraInfo === null) {
+            return false;
+        }
+        if (liveView?.pictureInfo !== undefined && liveView?.pictureInfo === null) {
+            return false;
+        }
         return true;
     }
     function isInvalidTemplate(template?: NotificationTemplate): boolean
     {
         if (template === null) {
-			return false;
-		}
-		if (template?.name != undefined && template?.name?.trim() === '') {
-			return false;
-		}
-		if (template?.data != undefined && template?.data === null) {
-			return false;
-		}
+            return false;
+        }
+        if (template?.name != undefined && template?.name?.trim() === '') {
+            return false;
+        }
+        if (template?.data != undefined && template?.data === null) {
+            return false;
+        }
         return true;
     }
     function isInvalidDistributedOption(distributedOption?: DistributedOptions): boolean
     {
         if (distributedOption === null) {
-			return false
-		}
-		if (distributedOption?.supportDisplayDevices != undefined && distributedOption?.supportDisplayDevices?.length === 0) {
-			return false;
-		}
-		if (distributedOption?.supportOperateDevices != undefined && distributedOption?.supportOperateDevices?.length === 0) {
-			return false;
-		}
+            return false
+        }
+        if (distributedOption?.supportDisplayDevices != undefined && distributedOption?.supportDisplayDevices?.length === 0) {
+            return false;
+        }
+        if (distributedOption?.supportOperateDevices != undefined && distributedOption?.supportOperateDevices?.length === 0) {
+            return false;
+        }
         return true;
     }
     function isInvalidUnifiedGroupInfo(unifiedGroupInfo?: UnifiedGroupInfo): boolean
     {
         if (unifiedGroupInfo === null) {
-			return false;
-		}
-		if (unifiedGroupInfo?.key != undefined && unifiedGroupInfo?.key?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.title != undefined && unifiedGroupInfo?.title?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.content != undefined && unifiedGroupInfo?.content?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.sceneName != undefined && unifiedGroupInfo?.sceneName?.trim() === '') {
-			return false;
-		}
-		if (unifiedGroupInfo?.extraInfo != undefined && unifiedGroupInfo?.extraInfo == null) {
-			return false;
-		}
+            return false;
+        }
+        if (unifiedGroupInfo?.key != undefined && unifiedGroupInfo?.key?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.title != undefined && unifiedGroupInfo?.title?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.content != undefined && unifiedGroupInfo?.content?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.sceneName != undefined && unifiedGroupInfo?.sceneName?.trim() === '') {
+            return false;
+        }
+        if (unifiedGroupInfo?.extraInfo != undefined && unifiedGroupInfo?.extraInfo == null) {
+            return false;
+        }
         return true;
     }
     function isInvalidBundleOption(bundleOption?: BundleOption): boolean
     {
         if (bundleOption === null) {
-			return false;
-		}
-		if (bundleOption?.bundle != undefined && bundleOption?.bundle?.trim() === '') {
-			return false;
-		}
+            return false;
+        }
+        if (bundleOption?.bundle != undefined && bundleOption?.bundle?.trim() === '') {
+            return false;
+        }
         return true;
     }
     function isInvalidParameter(request: NotificationRequest): BusinessError
     {
-        let error: BusinessError = {
-            code: 0,
-            message: ""
-        }
+        let error: BusinessError = successCallbackError
         if (request == null) {
-            error = {
-                code: 401,
-                message: "request must be not Null"
-            }
+            error = errorParamInvalid
             return error;
         }
         if (request.content == null || request.content == undefined) {
-            error = {
-                code: 401,
-                message: "request.content must be not Null"
-            }
+            error = errorParamInvalid
             return error;
         }
         if (request.content?.normal !== undefined && !isInvalidContent(request.content.normal)) {
@@ -499,39 +650,74 @@ export default namespace notificationManager {
         return error;
     }
 
+    export function getSlotNumByBundle(bundle: BundleOption): Promise<number> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): number => { return nativeGetSlotNumByBundle(bundle); });
+            p.then((data: NullishType): void => {
+                let ret : number = data as number;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getSlotNumByBundle(bundle: BundleOption, callback: AsyncCallback<number>): void {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): number => { return nativeGetSlotNumByBundle(bundle); });
+        p.then((data: NullishType): void => {
+            let ret : number = data as number;
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, ret);
+        }, (error: Error): void => {
+            let ret: number = -1;
+            let err: BusinessError = error as BusinessError;
+            callback(err, ret);
+        });
+    }
+
     export function setNotificationEnable(bundle: BundleOption, enable: boolean): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
         return pPromise;
     }
-    
+
     export function setNotificationEnable(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativeSetNotificationEnable(bundle, enable); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -540,20 +726,18 @@ export default namespace notificationManager {
     export function isNotificationEnabled(bundleOption: BundleOption, callback: AsyncCallback<boolean>): void
     {
         let error: BusinessError = isInvalidParameter(bundleOption);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithBundleOption(bundleOption); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -563,7 +747,7 @@ export default namespace notificationManager {
     export function isNotificationEnabled(bundleOption: BundleOption): Promise<boolean>
     {
         let error: BusinessError = isInvalidParameter(bundleOption);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
@@ -573,7 +757,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -583,18 +767,14 @@ export default namespace notificationManager {
     export function isNotificationEnabled(userId: number, callback: AsyncCallback<boolean>): void
     {
         if (callback == null) {
-            let error: BusinessError = {
-                code: 410,
-                message : "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithId(userId); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -608,7 +788,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -618,18 +798,14 @@ export default namespace notificationManager {
     export function isNotificationEnabled(callback: AsyncCallback<boolean>): void
     {
         if (callback == null) {
-            let error: BusinessError = {
-                code: 410,
-                message : "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabled(); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -643,7 +819,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -658,13 +834,11 @@ export default namespace notificationManager {
         callback: AsyncCallback<void>): void
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute(
             (): void => { return nativeSetNotificationEnableSlotWithForce(bundle, type, enable, isForceControl);
@@ -672,7 +846,7 @@ export default namespace notificationManager {
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -682,7 +856,7 @@ export default namespace notificationManager {
         bundle: BundleOption, type: SlotType, enable: boolean, isForceControl?: boolean): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let forceControl: boolean = false;
@@ -695,7 +869,7 @@ export default namespace notificationManager {
                 });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -706,19 +880,17 @@ export default namespace notificationManager {
         bundle: BundleOption, type: SlotType, enable: boolean, callback: AsyncCallback<void>): void
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativeSetNotificationEnableSlot(bundle, type, enable); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -727,7 +899,7 @@ export default namespace notificationManager {
     export function isNotificationSlotEnabled(bundle: BundleOption, type: SlotType): Promise<boolean>
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
@@ -735,7 +907,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -745,20 +917,18 @@ export default namespace notificationManager {
     export function isNotificationSlotEnabled(bundle: BundleOption, type: SlotType, callback: AsyncCallback<boolean>): void
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): boolean => { return nativeIsNotificationSlotEnabled(bundle, type); });
         p.then((data: NullishType): void => {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
              let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
@@ -768,30 +938,28 @@ export default namespace notificationManager {
     export function getSlotsByBundle(bundle: BundleOption, callback: AsyncCallback<Array<NotificationSlot>>): void
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): Array<NotificationSlot> => { return nativeGetSlotsByBundle(bundle); });
         p.then((data: NullishType): void => {
             let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, slots);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let slots : Array<NotificationSlot> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, slots);
-        })             
+        })
     }
-    
+
     export function getSlotsByBundle(bundle: BundleOption): Promise<Array<NotificationSlot>>
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<Array<NotificationSlot>>(
@@ -800,7 +968,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let slots : Array<NotificationSlot> = data as Array<NotificationSlot>;
                 resolve(slots);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -809,14 +977,14 @@ export default namespace notificationManager {
 
     export function setSlotFlagsByBundle(bundle: BundleOption, slotFlags: number): Promise<void> {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetSlotFlagsByBundle(bundle, slotFlags); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -825,7 +993,7 @@ export default namespace notificationManager {
 
     export function getSlotFlagsByBundle(bundle: BundleOption): Promise<number> {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback): void => {
@@ -833,7 +1001,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : Double = data as Double;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -842,19 +1010,17 @@ export default namespace notificationManager {
 
     export function publish(request: NotificationRequest, callback: AsyncCallback<void>): void {
         let error: BusinessError = isInvalidParameter(request);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativePublish(request); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         });
@@ -862,14 +1028,14 @@ export default namespace notificationManager {
 
     export function publish(request: NotificationRequest): Promise<void> {
         let error: BusinessError = isInvalidParameter(request);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativePublish(request); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -878,34 +1044,32 @@ export default namespace notificationManager {
 
     export function publish(request: NotificationRequest, userId: number, callback: AsyncCallback<void>): void {
         let error: BusinessError = isInvalidParameter(request);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
     }
-    
+
     export function publish(request: NotificationRequest, userId: number): Promise<void> {
         let error: BusinessError = isInvalidParameter(request);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativePublishWithUserId(request, userId); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -916,20 +1080,20 @@ export default namespace notificationManager {
         bundle: BundleOption, notificationId: number, buttonOptions: ButtonOptions): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         error = isInvalidParameter(buttonOptions);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {
-                return nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions); 
+                return nativeTriggerSystemLiveView(bundle, notificationId, buttonOptions);
             });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -945,7 +1109,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeSubscribeSystemLiveView(subscriber); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -954,17 +1118,13 @@ export default namespace notificationManager {
 
     export function removeDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         if (!templates || templates.length === 0) {
-            let error: BusinessError = {
-                code: 401,
-                message: "templates must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeRemoveDoNotDisturbProfile(templates); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -973,17 +1133,13 @@ export default namespace notificationManager {
 
     export function addDoNotDisturbProfile(templates: Array<DoNotDisturbProfile>): Promise<void> {
         if (!templates || templates.length === 0) {
-            let error: BusinessError = {
-                code: 401,
-                message: "templates must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeAddDoNotDisturbProfile(templates); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -992,18 +1148,14 @@ export default namespace notificationManager {
 
     export function getAllActiveNotifications(callback: AsyncCallback<Array<NotificationRequest>>): void {
         if (!callback) {
-            let error: BusinessError = {
-                code: 401,
-                message: "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetAllActiveNotifications(); });
         p.then((data: NullishType): void => {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let retData : Array<NotificationRequest> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, retData);
@@ -1018,7 +1170,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
 		    	let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1031,7 +1183,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
 		    	let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1040,21 +1192,33 @@ export default namespace notificationManager {
 
     export function getActiveNotifications(callback: AsyncCallback<Array<NotificationRequest>>): void {
         if (!callback) {
-            let error: BusinessError = {
-                code: 401,
-                message: "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): Array<NotificationRequest> => { return nativeGetActiveNotifications(); });
         p.then((data: NullishType): void => {
             let ret : Array<NotificationRequest> = data as Array<NotificationRequest>;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let retData : Array<NotificationRequest> = [];
             let err: BusinessError = error as BusinessError;
             callback(err, retData);
+        })
+    }
+
+    export function getActiveNotificationCount(callback: AsyncCallback<number>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): number => { return nativeGetActiveNotificationCount(); });
+        p.then((data: NullishType): void => {
+            let ret : number = data as number;
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, ret);
+        }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, -1);
         })
     }
 
@@ -1064,7 +1228,7 @@ export default namespace notificationManager {
             p.then((data :NullishType): void => {
                 let ret : number = data as number;
                 resolve(ret);
-            }, (err:Object): void => {
+            }, (err:Error): void => {
                 reject(err);
             });
         });
@@ -1073,34 +1237,32 @@ export default namespace notificationManager {
 
     export function displayBadge(bundle: BundleOption, enable: boolean, callback: AsyncCallback<void>): void {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         if (callback == null) {
-            error.code = 401;
-            error.message = "callback must be not null";
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
         p.then((e: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
     }
-    
+
     export function displayBadge(bundle: BundleOption, enable: boolean): Promise<void> {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeDisplayBadge(bundle, enable); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1109,7 +1271,7 @@ export default namespace notificationManager {
 
     export function isBadgeDisplayed(bundle: BundleOption, callback: AsyncCallback<boolean>): void {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let p = taskpool.execute((): boolean => { return nativeIsBadgeDisplayed(bundle); });
@@ -1117,16 +1279,16 @@ export default namespace notificationManager {
             let ret : boolean = data as boolean;
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, ret);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let ret : boolean = false;
             let err: BusinessError = error as BusinessError;
             callback(err, ret);
         })
     }
-    
+
     export function isBadgeDisplayed(bundle: BundleOption): Promise<boolean> {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
@@ -1134,7 +1296,7 @@ export default namespace notificationManager {
             p.then((data: NullishType): void => {
                 let ret : boolean = data as boolean;
                 resolve(ret);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1143,14 +1305,14 @@ export default namespace notificationManager {
 
     export function cancel(bundle: BundleOption, id: number): Promise<void> {
         let error: BusinessError = isInvalidParameter(bundle);
-        if (error.code !== 0) {
+        if (error.code !== ERROR_OK) {
             throw error;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeCancelWithBundle(bundle, id); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1159,17 +1321,13 @@ export default namespace notificationManager {
 
     export function cancel(id: number, label?: string): Promise<void> {
         if (label == null || label?.length === 0) {
-            let error: BusinessError = {
-                code: 401,
-                message: "Incorrect parameter types. The type of label must be string."
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeCancelWithIdOptionalLabel(id, label); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1178,24 +1336,16 @@ export default namespace notificationManager {
 
     export function cancel(id: number, label: string, callback: AsyncCallback<void>): void {
         if (label == null || label?.length === 0) {
-            let error: BusinessError = {
-                code: 401,
-                message: "Incorrect parameter types. The type of label must be string."
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         if (callback == null) {
-            let error: BusinessError = {
-                code: 410,
-                message : "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativeCancelWithIdLabel(id, label); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1203,17 +1353,13 @@ export default namespace notificationManager {
 
     export function cancel(id: number, callback: AsyncCallback<void>): void {
         if (callback == null) {
-            let error: BusinessError = {
-                code: 410,
-                message : "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativeCancelWithId(id); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1224,7 +1370,7 @@ export default namespace notificationManager {
             let p = taskpool.execute((): void => { return nativeCancelAll(); });
             p.then((data: NullishType): void => {
                 resolve(undefined);
-            }, (error: Object): void => {
+            }, (error: Error): void => {
                 reject(error);
             });
         });
@@ -1233,17 +1379,13 @@ export default namespace notificationManager {
 
     export function cancelAll(callback: AsyncCallback<void>): void {
         if (callback == null) {
-            let error: BusinessError = {
-                code: 410,
-                message : "callback must be not null"
-            }
-            throw error;
+            throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => { return nativeCancelAll(); });
         p.then((data: NullishType): void => {
             let err: BusinessError = {code: 0, data: undefined};
             callback(err, undefined);
-        }, (error: Object): void => {
+        }, (error: Error): void => {
     	    let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
@@ -1269,7 +1411,7 @@ export default namespace notificationManager {
                         }
                     }
                 },
-                (error: Object): void => {
+                (error: Error): void => {
                     reject(error);
                 }
             )
@@ -1296,10 +1438,413 @@ export default namespace notificationManager {
                     }
                 }
             },
-            (error: Object): void => {
+            (error: Error): void => {
                 let err: BusinessError = error as BusinessError;
                 callback(err, undefined);
             }
         )
+    }
+
+    export interface NotificationCheckResult {
+        code: number;
+        message: string;
+    }
+
+    class NotificationCheckResultInner implements NotificationCheckResult {
+        public code: number = -1;
+        public message: string = '';
+    }
+
+    export interface NotificationCheckInfo {
+        bundleName: string;
+        notificationId: number;
+        label?: string;
+        contentType: ContentType;
+        creatorUserId: number;
+        slotType: SlotType;
+        extraInfos?: Record<string, Object>;
+    }
+
+    class NotificationCheckInfoInner implements NotificationCheckInfo {
+        public bundleName: string = '';
+        public notificationId: number = -1;
+        public label?: string;
+        public contentType: ContentType = ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
+        public creatorUserId: number = -1;
+        public slotType: SlotType = SlotType.UNKNOWN_TYPE;
+        public extraInfos?: Record<string, Object>;
+    }
+
+    export function setBadgeNumber(badgeNumber: number, callback: AsyncCallback<void>): void
+    {
+        if (callback == null) {
+           throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => { return nativeSetBadgeNumber(badgeNumber); });
+        p.then((data: NullishType): void => {
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, undefined);
+        }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        })
+    }
+
+    export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: number, callback: AsyncCallback<void>): void
+    {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        if (representativeBundle == null || representativeBundle?.length === 0) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => { return nativePublishAsBundle(request, representativeBundle, userId); });
+        p.then((data: NullishType): void => {
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, undefined);
+        }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        });
+    }
+
+    export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: number): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        if (representativeBundle == null || representativeBundle?.length === 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativePublishAsBundle(request, representativeBundle, userId); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function publishAsBundle(representativeBundle: BundleOption, request: NotificationRequest): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(request);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let err: BusinessError = isInvalidParameter(representativeBundle);
+        if (err.code !== ERROR_OK) {
+            throw err;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativePublishAsBundleWithBundleOption(representativeBundle, request); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function cancelAsBundle(id: number, representativeBundle: string, userId: number, callback: AsyncCallback<void>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        if (representativeBundle == null || representativeBundle?.length === 0) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => { return nativeCancelAsBundle(id, representativeBundle, userId); });
+        p.then((data: NullishType): void => {
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, undefined);
+        }, (error: Error): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        });
+    }
+
+    export function cancelAsBundle(id: number, representativeBundle: string, userId: number): Promise<void>
+    {
+        if (representativeBundle == null || representativeBundle?.length === 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeCancelAsBundle(id, representativeBundle, userId); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function cancelAsBundle(representativeBundle: BundleOption, id: number): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(representativeBundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeCancelAsBundleWithBundleOption(representativeBundle, id); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function cancelGroup(groupName: string, callback: AsyncCallback<void>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        if (groupName == null || groupName?.length === 0) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): void => { return nativeCancelGroup(groupName); });
+        p.then((data: NullishType): void => {
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, undefined);
+        }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        });
+    }
+
+    export function cancelGroup(groupName: string): Promise<void>
+    {
+        if (groupName == null || groupName?.length === 0) {
+            throw errorParamInvalid;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeCancelGroup(groupName); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setDoNotDisturbDate(date: DoNotDisturbDate, callback: AsyncCallback<void>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let error: BusinessError = isInvalidParameter(date);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDate(date); });
+        p.then((data: NullishType): void => {
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, undefined);
+        }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        });
+    }
+
+    export function setDoNotDisturbDate(date: DoNotDisturbDate): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(date);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDate(date); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: number, callback: AsyncCallback<void>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let error: BusinessError = isInvalidParameter(date);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDateWithId(date, userId); });
+        p.then((data: NullishType): void => {
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, undefined);
+        }, (error: Object): void => {
+            let err: BusinessError = error as BusinessError;
+            callback(err, undefined);
+        });
+    }
+
+    export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: number): Promise<void>
+    {
+        let error: BusinessError = isInvalidParameter(date);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => { return nativeSetDoNotDisturbDateWithId(date, userId); });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getDoNotDisturbDate(callback: AsyncCallback<DoNotDisturbDate>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDate(); });
+        p.then((data: NullishType): void => {
+            let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, doNotDisturbDate);
+        }, (error: Object): void => {
+            let doNotDisturbDate : DoNotDisturbDate = {};
+            let err: BusinessError = error as BusinessError;
+            callback(err, doNotDisturbDate);
+        })
+    }
+
+    export function getDoNotDisturbDate(): Promise<DoNotDisturbDate>
+    {
+        let pPromise = new Promise<DoNotDisturbDate>((resolve: ResolveCallback<DoNotDisturbDate>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDate(); });
+            p.then((data: NullishType): void => {
+                let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
+                resolve(doNotDisturbDate);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getDoNotDisturbDate(userId: number, callback: AsyncCallback<DoNotDisturbDate>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDateWithId(userId); });
+        p.then((data: NullishType): void => {
+            let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, doNotDisturbDate);
+        }, (error: Object): void => {
+            let doNotDisturbDate : DoNotDisturbDate = {};
+            let err: BusinessError = error as BusinessError;
+            callback(err, doNotDisturbDate);
+        });
+    }
+
+    export function getDoNotDisturbDate(userId: number): Promise<DoNotDisturbDate>
+    {
+        let pPromise = new Promise<DoNotDisturbDate>((resolve: ResolveCallback<DoNotDisturbDate>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDateWithId(userId); });
+            p.then((data: NullishType): void => {
+                let doNotDisturbDate : DoNotDisturbDate = data as DoNotDisturbDate;
+                resolve(doNotDisturbDate);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isSupportDoNotDisturbMode(callback: AsyncCallback<boolean>): void
+    {
+        if (callback == null) {
+            throw errorParamInvalid;
+        }
+        let p = taskpool.execute((): boolean => { return nativeIsSupportDoNotDisturbMode(); });
+        p.then((data: NullishType): void => {
+            let ret : boolean = data as boolean;
+            let err: BusinessError = {code: 0, data: undefined};
+            callback(err, ret);
+        }, (error: Object): void => {
+            let ret : boolean = false;
+            let err: BusinessError = error as BusinessError;
+            callback(err, ret);
+        })
+    }
+
+    export function isSupportDoNotDisturbMode(): Promise<boolean>
+    {
+        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): boolean => { return nativeIsSupportDoNotDisturbMode(); });
+            p.then((data: NullishType): void => {
+                let ret : boolean = data as boolean;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getDoNotDisturbProfile(id: number): Promise<DoNotDisturbProfile>
+    {
+        let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfile(id); });
+            p.then((data: NullishType): void => {
+                let ret : DoNotDisturbProfile = data as DoNotDisturbProfile;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function isSmartReminderEnabled(deviceType: string): Promise<boolean>
+    {
+        let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): boolean => { return nativeisSmartReminderEnabled(deviceType); });
+            p.then((data: NullishType): void => {
+                let ret : boolean = data as boolean;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function setDistributedEnabledBySlot(slot: SlotType, deviceType: string, enabled: boolean): Promise<void>
+    {
+        let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): void => {
+                return nativesetDistributedEnabledBySlot(slot, deviceType, enabled); 
+            });
+            p.then((data: NullishType): void => {
+                resolve(undefined);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
     }
 }

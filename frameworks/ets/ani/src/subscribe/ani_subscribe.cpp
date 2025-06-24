@@ -16,11 +16,11 @@
 
 #include <thread>
 #include <iostream>
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ani_remove.h"
 #include "ans_log_wrapper.h"
 #include "sts_subscribe.h"
+#include "sts_throw_erro.h"
 
 namespace OHOS {
 namespace NotificationSubScribeSts {
@@ -39,6 +39,10 @@ static const char *SUBSCRIBE_SIGNATURE =
    "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
 static const char *UNSUBSCRIBE_SIGNATURE =
    "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
+static const char *REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE =
+   "Lnotification/NotificationCommonDef/BundleOption;:V";
+static const char *REMOVEALL_FOR_USERID_STGNATURE = "D:V";
+static const char *REMOVEALL_SIGNATURE = ":V";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
@@ -46,7 +50,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
     ani_object aniPromise {};
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
-        ANS_LOGD("Promise_New faild");
+        ANS_LOGE("Promise_New faild");
         return nullptr;
     }
     bool noWithOperationInfo = false;
@@ -71,7 +75,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
     callback->SetVm(vm);
     int32_t result = Notification::NotificationHelper::DistributeOperation(info, callback);
     ANS_LOGD("StsDistributeOperation ret %{public}d. ErrorToExternal %{public}d",
-        result, CJSystemapi::Notification::ErrorToExternal(result));
+        result, NotificationSts::GetExternalCode(result));
     if (result != ERR_OK || noWithOperationInfo) {
         callback->OnStsOperationCallback(env, result);
     }
@@ -90,6 +94,12 @@ void AniUnSubscribe(ani_env *env, ani_object obj)
     OHOS::NotificationSts::SubscriberInstanceManager::GetInstance()->UnSubscribe(env, obj);
 }
 
+void AniSubscribeSelf(ani_env *env, ani_object obj)
+{
+    ANS_LOGD("StsSubscribeSelf enter");
+    OHOS::NotificationSts::SubscriberInstanceManager::GetInstance()->SubscribeSelf(env, obj);
+}
+
 void AniSubScribeRegistryInit(ani_env *env)
 {
     ANS_LOGD("AniSubScribeRegistryInit call");
@@ -101,7 +111,8 @@ void AniSubScribeRegistryInit(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function {"nativeRemove", REMOVE_FOR_BUNDLE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForBundle)},
+        ani_native_function {"nativeRemove",
+            REMOVE_FOR_BUNDLE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForBundle)},
         ani_native_function {"nativeRemove",
             REMOVE_FOR_HASHCODE_SIGNATURE, reinterpret_cast<void *>(AniRemoveForHashCode)},
         ani_native_function {"nativeRemove",
@@ -110,6 +121,12 @@ void AniSubScribeRegistryInit(ani_env *env)
             DISTRIBUTE_OPERATION_SIGNATURE, reinterpret_cast<void *>(AniDistributeOperation)},
         ani_native_function {"nativeSubscribe", SUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniSubscribe)},
         ani_native_function {"nativeUnSubscribe", UNSUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniUnSubscribe)},
+        ani_native_function {"nativeSubscribeSelf", UNSUBSCRIBE_SIGNATURE, reinterpret_cast<void *>(AniSubscribeSelf)},
+        ani_native_function {"nativeRemoveAllForBundle",
+            REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE, reinterpret_cast<void *>(AniRemoveAllForBundle)},
+        ani_native_function {"nativeRemoveAllForUserId",
+            REMOVEALL_FOR_USERID_STGNATURE, reinterpret_cast<void *>(AniRemoveAllForUserId)},
+        ani_native_function {"nativeRemoveAll", REMOVEALL_SIGNATURE, reinterpret_cast<void *>(AniRemoveAll)},
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);

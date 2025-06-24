@@ -26,7 +26,7 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
         ANS_LOGE("invalid parameter value");
         return false;
     }
-    std::vector<std::string> res;
+    std::vector<std::string> res = {};
     ani_double userId = 0.0;
     ani_double filterLimit = 0.0;
     std::string deviceType;
@@ -35,6 +35,10 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
         || isUndefined == ANI_TRUE
         || res.empty()) {
         ANS_LOGE("UnWarpStringArrayOrUndefinedByProperty faild");
+    }
+    std::vector<std::string> bundleNames = {};
+    for (auto bundleName : res) {
+        bundleNames.emplace_back(GetResizeStr(bundleName, STR_MAX_SIZE));
     }
     if (ANI_OK != GetPropertyDouble(env, value, "userId", isUndefined, userId) || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetDoubleOrUndefined faild");
@@ -45,10 +49,10 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     if (ANI_OK != GetPropertyDouble(env, value, "filterLimit", isUndefined, filterLimit) || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetDoubleOrUndefined faild");
     }
-    info.AddAppNames(res);
+    info.AddAppNames(bundleNames);
     info.AddAppUserId(static_cast<int32_t>(userId));
     info.SetFilterType(static_cast<int32_t>(filterLimit));
-    info.AddDeviceType(deviceType);
+    info.AddDeviceType(GetResizeStr(deviceType, STR_MAX_SIZE));
     ANS_LOGD("userId %{public}d deviceType %{public}s filterLimit %{public}d",
         info.GetAppUserId(), info.GetDeviceType().c_str(), info.GetFilterType());
     return true;

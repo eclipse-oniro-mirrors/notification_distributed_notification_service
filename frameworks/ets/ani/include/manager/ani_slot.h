@@ -27,6 +27,15 @@ ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, 
 void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enum_item  type, ani_boolean enable);
 void AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object bundleOption, ani_enum_item  type,
     ani_boolean enable, ani_boolean isForceControl);
+void AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlotObj);
+void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj);
+void AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj);
+ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj);
+ani_object AniGetSlots(ani_env *env);
+void AniRemoveSlot(ani_env *env, ani_enum_item enumObj);
+void AniRemoveAllSlots(ani_env *env);
+void AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slotObj);
+ani_double AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

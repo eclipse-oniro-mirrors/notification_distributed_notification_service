@@ -15,6 +15,7 @@
 #include "sts_notification_manager.h"
 #include "sts_common.h"
 #include "ani_common_util.h"
+#include "ani_common_want.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -217,6 +218,74 @@ bool StsSlotLevelUtils::StsToC(const STSSlotLevel inLevel, SlotLevel &outLevel)
     return true;
 }
 
+bool StsDoNotDisturbTypeUtils::StsToC(const STSDoNotDisturbType inType,
+    OHOS::Notification::NotificationConstant::DoNotDisturbType &outType)
+{
+    switch (inType) {
+        case STSDoNotDisturbType::TYPE_NONE:
+            outType = Notification::NotificationConstant::DoNotDisturbType::NONE;
+            break;
+        case STSDoNotDisturbType::TYPE_ONCE:
+            outType = Notification::NotificationConstant::DoNotDisturbType::ONCE;
+            break;
+        case STSDoNotDisturbType::TYPE_DAILY:
+            outType = Notification::NotificationConstant::DoNotDisturbType::DAILY;
+            break;
+        case STSDoNotDisturbType::TYPE_CLEARLY:
+            outType = Notification::NotificationConstant::DoNotDisturbType::CLEARLY;
+            break;
+        default:
+            ANS_LOGE("STSDoNotDisturbType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool StsRemindTypeUtils::StsToC(const STSRemindType inType, RemindType &outType)
+{
+    switch (inType) {
+        case STSRemindType::IDLE_DONOT_REMIND:
+            outType = RemindType::DEVICE_IDLE_DONOT_REMIND;
+            break;
+        case STSRemindType::IDLE_REMIND:
+            outType = RemindType::DEVICE_IDLE_REMIND;
+            break;
+        case STSRemindType::ACTIVE_DONOT_REMIND:
+            outType = RemindType::DEVICE_ACTIVE_DONOT_REMIND;
+            break;
+        case STSRemindType::ACTIVE_REMIND:
+            outType = RemindType::DEVICE_ACTIVE_REMIND;
+            break;
+        default:
+            ANS_LOGE("STSRemindType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool StsRemindTypeUtils::CToSts(const RemindType inType, STSRemindType &outType)
+{
+    switch (inType) {
+        case RemindType::NONE:
+        case RemindType::DEVICE_IDLE_DONOT_REMIND:
+            outType = STSRemindType::IDLE_DONOT_REMIND;
+            break;
+        case RemindType::DEVICE_IDLE_REMIND:
+            outType = STSRemindType::IDLE_REMIND;
+            break;
+        case RemindType::DEVICE_ACTIVE_DONOT_REMIND:
+            outType = STSRemindType::ACTIVE_DONOT_REMIND;
+            break;
+        case RemindType::DEVICE_ACTIVE_REMIND:
+            outType = STSRemindType::ACTIVE_REMIND;
+            break;
+        default:
+            ANS_LOGE("RemindType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
 StsNotificationLocalLiveViewSubscriber::StsNotificationLocalLiveViewSubscriber()
 {}
 
@@ -382,6 +451,38 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
     return true;
 }
 
+bool DoNotDisturbTypeEtsToC(ani_env *env, ani_enum_item enumItem,
+    Notification::NotificationConstant::DoNotDisturbType &doNotDisturbType)
+{
+    ANS_LOGD("DoNotDisturbTypeEtsToC call");
+    STSDoNotDisturbType stsDoNotDisturbType = TYPE_NONE;
+    if (!EnumConvertAniToNative(env, enumItem, stsDoNotDisturbType)
+        || !StsDoNotDisturbTypeUtils::StsToC(stsDoNotDisturbType, doNotDisturbType)) {
+        ANS_LOGE("DoNotDisturbTypeEtsToC failed");
+        return false;
+    }
+    return true;
+}
+
+bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem)
+{
+    STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
+    StsRemindTypeUtils::CToSts(remindType, stsRemindType);
+    EnumConvertNativeToAni(env,
+        "L@ohos/notificationManager/notificationManager/RemindType;", stsRemindType, enumItem);
+    return true;
+}
+
+bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType)
+{
+    STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
+    if (EnumConvertAniToNative(env, enumItem, stsRemindType)) {
+        StsRemindTypeUtils::StsToC(stsRemindType, remindType);
+        return true;
+    }
+    return false;
+}
+
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
     ButtonOption &buttonOption)
 {
@@ -398,7 +499,7 @@ ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonO
         ANS_LOGE("UnWarpNotificationButtonOption: get buttonName failed");
         return ANI_INVALID_ARGS;
     }
-    buttonOption.SetButtonName(buttonName);
+    buttonOption.SetButtonName(GetResizeStr(buttonName, STR_MAX_SIZE));
     ANS_LOGD("UnWarpNotificationButtonOption end");
     return status;
 }
@@ -460,6 +561,209 @@ bool WarpNotificationDoNotDisturbDate(
         return false;
     }
     ANS_LOGD("WarpNotificationDoNotDisturbDate end");
+    return true;
+}
+
+bool SetCheckInfoContentType(ani_env *env, ani_object &obj, const std::string &name, ContentType type)
+{
+    if (env == nullptr || obj == nullptr || name.empty()) {
+        ANS_LOGE("InvalidParam");
+        return false;
+    }
+    STSContentType stsType = NOTIFICATION_CONTENT_BASIC_TEXT;
+    ani_enum_item item;
+    if (!StsContentTypeUtils::CToSts(type, stsType)) {
+        ANS_LOGE("CToSts 'contentType' faild.");
+        return false;
+    }
+    if (!EnumConvertNativeToAni(env, "L@ohos/notificationManager/notificationManager/ContentType;", stsType, item)) {
+        ANS_LOGE("EnumConvertNativeToAni 'contentType' faild.");
+        return false;
+    }
+    if (!SetPropertyByRef(env, obj, name.c_str(), static_cast<ani_ref>(item))) {
+        ANS_LOGE("SetPropertyByRef 'contentType' faild.");
+        return false;
+    }
+    return true;
+}
+
+bool SetCheckInfoSlotType(ani_env *env, ani_object &obj, const std::string &name, SlotType type)
+{
+    if (env == nullptr || obj == nullptr || name.empty()) {
+        ANS_LOGE("InvalidParam");
+        return false;
+    }
+    STSSlotType stsType = UNKNOWN_TYPE;
+    ani_enum_item item;
+    if (!StsSlotTypeUtils::CToSts(type, stsType)) {
+        ANS_LOGE("CToSts 'slotType' faild.");
+        return false;
+    }
+    if (!EnumConvertNativeToAni(env, "L@ohos/notificationManager/notificationManager/SlotType;", stsType, item)) {
+        ANS_LOGE("EnumConvertNativeToAni 'slotType' faild.");
+        return false;
+    }
+    if (!SetPropertyByRef(env, obj, name.c_str(), static_cast<ani_ref>(item))) {
+        ANS_LOGE("SetPropertyByRef 'slotType' faild.");
+        return false;
+    }
+    return true;
+}
+
+bool SetNotificationCheckInfoNumber(
+    ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
+{
+    ani_status status = ANI_OK;
+    // notificationId: number;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
+        outObj, "notificationId", static_cast<ani_double>(data->GetNotifyId())))) {
+            ANS_LOGE("WarpNotificationCheckInfo. set 'notificationId' faild. status %{public}d", status);
+            return false;
+        }
+    // creatorUserId: number;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
+        outObj, "creatorUserId", static_cast<ani_double>(data->GetCreatorUserId())))) {
+            ANS_LOGE("WarpNotificationCheckInfo. set 'creatorUserId' faild. status %{public}d", status);
+            return false;
+        }
+    return true;
+}
+
+bool SetNotificationCheckInfoString(
+    ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
+{
+    // bundleName: string;
+    if (!SetPropertyOptionalByString(env, outObj, "bundleName", data->GetPkgName())) {
+        ANS_LOGE("WarpNotificationCheckInfo set 'bundleName' faild");
+        return false;
+    }
+    // label?: string;
+    if (!data->GetLabel().empty() && !SetPropertyOptionalByString(env, outObj, "label", data->GetLabel())) {
+        ANS_LOGE("WarpNotificationCheckInfo set 'label' faild");
+        return false;
+    }
+    return true;
+}
+
+bool SetNotificationCheckInfoEnum(
+    ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
+{
+    // contentType: ContentType;
+    if (!SetCheckInfoContentType(env, outObj, "contentType", static_cast<ContentType>(data->GetContentType()))) {
+        ANS_LOGE("WarpNotificationCheckInfo set 'contentType' faild");
+        return false;
+    }
+    // slotType: SlotType;
+    if (!SetCheckInfoSlotType(env, outObj, "slotType", static_cast<SlotType>(data->GetSlotType()))) {
+        ANS_LOGE("WarpNotificationCheckInfo set 'slotType' faild");
+        return false;
+    }
+    return true;
+}
+
+bool SetNotificationCheckInfo(
+    ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
+{
+    if (!SetNotificationCheckInfoNumber(env, data, outObj)) {
+        ANS_LOGE("SetNotificationCheckInfoNumber faild");
+        return false;
+    }
+    if (!SetNotificationCheckInfoString(env, data, outObj)) {
+        ANS_LOGE("SetNotificationCheckInfoString faild");
+        return false;
+    }
+    if (!SetNotificationCheckInfoEnum(env, data, outObj)) {
+        ANS_LOGE("SetNotificationCheckInfoEnum faild");
+        return false;
+    }
+    // extraInfos?: Record<string, Object>;
+    if (data->GetExtraInfo() != nullptr) {
+        ani_ref extraInfos = OHOS::AppExecFwk::WrapWantParams(env, *(data->GetExtraInfo()));
+        if (extraInfos == nullptr) {
+            ANS_LOGE("WrapWantParams 'extraInfos' faild");
+            return false;
+        }
+        if (!SetPropertyByRef(env, outObj, "extraInfos", extraInfos)) {
+            ANS_LOGE("WarpNotificationCheckInfo set 'extraInfos' faild");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool WarpNotificationCheckInfo(
+    ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
+{
+    ani_object obj;
+    ani_class cls;
+    if (env == nullptr || data == nullptr) {
+        ANS_LOGE("InvalidParam");
+        return false;
+    }
+    if (!CreateClassObjByClassName(
+        env, "L@ohos/notificationManager/notificationManager/NotificationCheckInfoInner;", cls, obj)) {
+            ANS_LOGE("WarpNotificationCheckInfo create faild");
+            return false;
+        }
+    if (!SetNotificationCheckInfo(env, data, obj)) {
+        ANS_LOGE("SetNotificationCheckInfo faild");
+        return false;
+    }
+    outObj = obj;
+    return true;
+}
+
+void GetDoNotDisturbDateByDoNotDisturbType(ani_env *env, ani_object obj, NotificationDoNotDisturbDate &doNotDisturbDate)
+{
+    ANS_LOGD("GetDoNotDisturbDateByDoNotDisturbType start");
+    if (env == nullptr || obj == nullptr) {
+        ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType failed, has nullptr");
+        return;
+    }
+    ani_status status = ANI_ERROR;
+    ani_boolean isUndefined = ANI_OK;
+    ani_ref doNotDisturbTypeRef = {};
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "doNotDisturbType", isUndefined, doNotDisturbTypeRef))
+        || isUndefined == ANI_TRUE || doNotDisturbTypeRef == nullptr) {
+        ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType: get Ref failed");
+        return;
+    }
+    NotificationConstant::DoNotDisturbType type = NotificationConstant::DoNotDisturbType::NONE;
+
+    if (!DoNotDisturbTypeEtsToC(env, static_cast<ani_enum_item>(doNotDisturbTypeRef), type)) {
+        ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType: SlotTypeEtsToC failed");
+        return;
+    }
+    doNotDisturbDate.SetDoNotDisturbType(type);
+    ANS_LOGD("GetDoNotDisturbDateByDoNotDisturbType end");
+}
+
+bool UnWarpNotificationDoNotDisturbDate(
+    ani_env* env,
+    const ani_object doNotDisturbDateObj,
+    NotificationDoNotDisturbDate& doNotDisturbDate)
+{
+    ani_boolean isUndefined = false;
+    ani_double mDouble = 0.0;
+    if (env == nullptr) {
+        ANS_LOGE("UnWarpNotificationDoNotDisturbDate: Invalid input parameters");
+        return false;
+    }
+    GetDoNotDisturbDateByDoNotDisturbType(env, doNotDisturbDateObj, doNotDisturbDate);
+
+    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "begin", isUndefined, mDouble)
+        && isUndefined == ANI_FALSE) {
+        doNotDisturbDate.SetBeginDate(static_cast<int32_t>(mDouble));
+    }
+    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "end", isUndefined, mDouble)
+        && isUndefined == ANI_FALSE) {
+        doNotDisturbDate.SetEndDate(static_cast<int32_t>(mDouble));
+    }
+    if (doNotDisturbDate.GetBeginDate() >= doNotDisturbDate.GetEndDate()) {
+        ANS_LOGE("Invalid time range");
+        return false;
+    }
+    ANS_LOGD("Successfully parsed DoNotDisturbDate");
     return true;
 }
 } // namespace NotificationSts
