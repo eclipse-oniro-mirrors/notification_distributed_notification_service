@@ -52,7 +52,7 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
         operationInfo->SetActionName(asyncCallbackInfo->operationInfo.actionName);
         operationInfo->SetUserInput(asyncCallbackInfo->operationInfo.userInput);
     } else if (asyncCallbackInfo->operationInfo.operationType < OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW) {
-        operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+        operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
     } else {
         operationInfo->SetOperationType(static_cast<OperationType>(asyncCallbackInfo->operationInfo.operationType));
     }
