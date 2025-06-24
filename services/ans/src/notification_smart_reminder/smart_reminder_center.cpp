@@ -38,9 +38,7 @@ namespace OHOS {
 namespace Notification {
 using namespace std;
 constexpr int32_t CONTROL_BY_SMART_REMINDER = 1 << 15;
-namespace {
-    const std::string ANS_VOIP = "ANS_VOIP";
-}
+
 SmartReminderCenter::SmartReminderCenter()
 {
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetCollaborationFilter();
@@ -507,7 +505,7 @@ void SmartReminderCenter::HandleReminderMethods(
 {
     std::string classfication = request->GetClassification();
     if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
-        classfication == ANS_VOIP) {
+        classfication == NotificationConstant::ANS_VOIP) {
         ANS_LOGI("VOIP or CALL is not affected with SmartReminder");
         return;
     }

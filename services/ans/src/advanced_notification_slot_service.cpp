@@ -676,6 +676,10 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
     ANS_LOGI("notificationKey = %{public}s flags = %{public}d",
         request->GetKey().c_str(), flags->GetReminderFlags());
+    if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
+        request->GetSlotType() == NotificationConstant::LIVE_VIEW) {
+        return;
+    }
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif

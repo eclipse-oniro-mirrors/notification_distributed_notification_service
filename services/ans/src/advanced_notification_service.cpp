@@ -103,7 +103,6 @@ constexpr int32_t FIRST_USERID = 0;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 const std::string INTELLIGENT_EXPERIENCE = "1";
-const std::string ANS_VOIP = "ANS_VOIP";
 const std::string ANS_VERIFICATION_CODE = "ANS_VERIFICATION_CODE";
 constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
@@ -2083,7 +2082,7 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
 
 void AdvancedNotificationService::SetClassificationWithVoip(const sptr<NotificationRequest> &request)
 {
-    if (!request->GetClassification().empty() && request->GetClassification() != ANS_VOIP) {
+    if (!request->GetClassification().empty() && request->GetClassification() != NotificationConstant::ANS_VOIP) {
         return;
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
@@ -2097,7 +2096,7 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
         auto localLiveViewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
             requestContent->GetNotificationContent());
         if (localLiveViewContent->GetType() == TYPE_CODE_VOIP) {
-            request->SetClassification(ANS_VOIP);
+            request->SetClassification(NotificationConstant::ANS_VOIP);
         }
     }
 }

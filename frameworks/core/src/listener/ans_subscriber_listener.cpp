@@ -67,8 +67,12 @@ ErrCode SubscriberListener::OnConsumed(
         return ERR_INVALID_DATA;
     }
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    auto deviceType = subscriber->GetDeviceType();
+    if (subscriber->SyncLiveViewVoip(deviceType, sharedNotification)) {
+        ANS_LOGI("Sync LIVE_VIEW VOIP.");
+    }
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    if (!subscriber->ProcessSyncDecision(subscriber->GetDeviceType(), sharedNotification)) {
+    else if (!subscriber->ProcessSyncDecision(deviceType, sharedNotification)) {
         return ERR_INVALID_OPERATION;
     }
 #endif
