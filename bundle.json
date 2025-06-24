@@ -109,7 +109,6 @@
         "json",
         "libxml2",
         "node",
-        "googletest",
         "icu",
         "node",
         "cJSON",
