@@ -195,7 +195,8 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     return status;
 }
 
-void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef) {
+void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef)
+{
     if (env == nullptr || obj == nullptr || name == nullptr) {
         return;
     }

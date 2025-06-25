@@ -54,7 +54,6 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
         NotificationSts::ThrowStsErroWithMsg(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
         return nullptr;
     }
-    ANS_LOGD("sts GetSlotsByBundle end, ret: %{public}d", externalCode);
     return outAniObj;
 }
 
