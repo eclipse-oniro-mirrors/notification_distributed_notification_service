@@ -35,8 +35,8 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
     ANS_LOGD("AniIsSupportTemplate by templateName:%{public}s", templateNameStr.c_str());
     bool support = false;
     int returncode = Notification::NotificationHelper::IsSupportTemplate(templateNameStr, support);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsSupportTemplate -> error, errorCode: %{public}d", externalCode);
         return NotificationSts::BoolToAniBoolean(false);
@@ -53,8 +53,8 @@ ani_object AniGetDeviceRemindType(ani_env *env)
         Notification::NotificationConstant::RemindType::DEVICE_IDLE_REMIND;
     int returncode = Notification::NotificationHelper::GetDeviceRemindType(remindType);
 
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniGetDeviceRemindType error, errorCode: %{public}d", externalCode);
         return nullptr;

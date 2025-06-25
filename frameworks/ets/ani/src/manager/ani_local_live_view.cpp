@@ -43,8 +43,8 @@ void AniTriggerSystemLiveView(
     }
     int returncode = OHOS::Notification::NotificationHelper::TriggerLocalLiveView(bundleOption,
         static_cast<int32_t>(notificationId), buttonOption);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniTriggerSystemLiveView error, errorCode: %{public}d", externalCode);
     }
@@ -59,8 +59,8 @@ void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
     localLiveViewSubscriber->SetStsNotificationLocalLiveViewSubscriber(env, subscriberObj);
     int returncode
         = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(*localLiveViewSubscriber, false);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSubscribeSystemLiveView error, errorCode: %{public}d", externalCode);
     }

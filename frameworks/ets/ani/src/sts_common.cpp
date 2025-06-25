@@ -61,6 +61,7 @@ ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res)
         ANS_LOGE("GetStringByAniString fail, has nullptr");
         return ANI_INVALID_ARGS;
     }
+    res = "";
     ani_size sz {};
     ani_status status = ANI_ERROR;
     if ((status = env->String_GetUTF8Size(str, &sz)) != ANI_OK) {
@@ -192,6 +193,21 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     }
     ANS_LOGD("Object_CallMethodByName_Double sucess, status: %{public}f", outvalue);
     return status;
+}
+
+void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef) {
+    if (env == nullptr || obj == nullptr || name == nullptr) {
+        return;
+    }
+    outRef = nullptr;
+    isUndefined = ANI_TRUE;
+    if (env->Object_GetPropertyByName_Ref(obj, name, &outRef) != ANI_OK) {
+        return;
+    }
+    if (outRef == nullptr) {
+        return;
+    }
+    env->Reference_IsUndefined(outRef, &isUndefined);
 }
 
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef)

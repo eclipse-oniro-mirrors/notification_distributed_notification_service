@@ -62,11 +62,10 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         return;
     }
     ani_status status = ANI_OK;
-    int32_t externalErrorCode = GetExternalCode(operationResult);
-    externalErrorCode = (externalErrorCode == ERR_OK) ? operationResult : externalErrorCode;
+    int32_t externalErrorCode = (operationResult == ERR_OK) ? operationResult : GetExternalCode(operationResult);
     ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrorCode);
 
-    if (externalErrorCode == 0) {
+    if (externalErrorCode == ERR_OK) {
         ANS_LOGD("OnStsOperationCallback Resolve");
         ani_object ret = OHOS::AppExecFwk::createInt(env, externalErrorCode);
         if (ANI_OK != (status = env->PromiseResolver_Resolve(resolver_, static_cast<ani_ref>(ret)))) {

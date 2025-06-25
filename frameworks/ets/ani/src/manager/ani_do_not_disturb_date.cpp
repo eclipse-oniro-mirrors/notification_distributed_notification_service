@@ -35,8 +35,8 @@ void AniSetDoNotDisturbDate(ani_env *env, ani_object date)
     }
 
     int returncode = Notification::NotificationHelper::SetDoNotDisturbDate(doNotDisturbDate);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("SetDoNotDisturbDate error. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -56,8 +56,8 @@ void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double user
 
     const int32_t id = static_cast<int32_t>(userId);
     int returncode = Notification::NotificationHelper::SetDoNotDisturbDate(id, doNotDisturbDate);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("SetDoNotDisturbDate erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -73,8 +73,8 @@ ani_object AniGetDoNotDisturbDate(ani_env *env)
 
     ANS_LOGD("AniGetDoNotDisturbDate enter");
     int returncode = Notification::NotificationHelper::GetDoNotDisturbDate(doNotDisturbDate);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetDoNotDisturbDate retern erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -100,8 +100,8 @@ ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_double userId)
     
     const int32_t id = static_cast<int32_t>(userId);
     int returncode = Notification::NotificationHelper::GetDoNotDisturbDate(id, doNotDisturbDate);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetDoNotDisturbDate erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
@@ -122,8 +122,8 @@ ani_boolean AniIsSupportDoNotDisturbMode(ani_env *env)
     bool supportDoNotDisturbMode = false;
     ANS_LOGD("AniIsSupportDoNotDisturbMode enter");
     int returncode = Notification::NotificationHelper::DoesSupportDoNotDisturbMode(supportDoNotDisturbMode);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+   if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("DoesSupportDoNotDisturbMode error. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
