@@ -41,7 +41,7 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
         ANS_LOGE("AniIsSupportTemplate -> error, errorCode: %{public}d", externalCode);
         return NotificationSts::BoolToAniBoolean(false);
     }
-    ANS_LOGD("AniIsSupportTemplate end, support: %{public}d, returncode: %{public}d", support, externalCode);
+    ANS_LOGD("AniIsSupportTemplate end, support: %{public}d, returncode: %{public}d", support, returncode);
     return NotificationSts::BoolToAniBoolean(support);
 }
 
@@ -64,7 +64,7 @@ ani_object AniGetDeviceRemindType(ani_env *env)
         NotificationSts::ThrowStsErroWithMsg(env, "AniGetDeviceRemindType:failed to WrapNotificationSlotArray");
         return nullptr;
     }
-    ANS_LOGD("AniGetDeviceRemindType end, ret: %{public}d", externalCode);
+    ANS_LOGD("AniGetDeviceRemindType end, ret: %{public}d", returncode);
     return remindTypeItem;
 }
 }
