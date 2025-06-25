@@ -1249,7 +1249,59 @@ void AdvancedNotificationService::OnUserRemoved(const int32_t &userId)
 
 void AdvancedNotificationService::OnUserStopped(int32_t userId)
 {
-    DeleteAllByUserInner(userId, NotificationConstant::USER_LOGOUT_REASON_DELETE, true, true);
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
+ 
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        DeleteAllByUserStopped(userId);
+    }));
+}
+
+void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
+{
+    std::vector<std::string> keys = GetNotificationKeys(nullptr);
+    std::vector<sptr<Notification>> notifications;
+    std::vector<uint64_t> timerIds;
+    for (auto key : keys) {
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+        std::string deviceId;
+        std::string bundleName;
+        GetDistributedInfo(key, deviceId, bundleName);
+#endif
+        sptr<Notification> notification = nullptr;
+        for (auto record : notificationList_) {
+            if ((record->notification->GetKey() == key) &&
+                (record->notification->GetRecvUserId() == userId)) {
+                ProcForDeleteLiveView(record);
+                notification = record->notification;
+                notificationList_.remove(record);
+                break;
+            }
+        }
+ 
+        if (notification == nullptr) {
+            continue;
+        }
+        if (notification->GetRecvUserId() == userId) {
+            UpdateRecentNotification(notification, true, NotificationConstant::USER_LOGOUT_REASON_DELETE);
+            notifications.emplace_back(notification);
+            timerIds.emplace_back(notification->GetAutoDeletedTimer());
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+            DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+        }
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            SendNotificationsOnCanceled(notifications, nullptr, NotificationConstant::USER_LOGOUT_REASON_DELETE);
+        }
+    }
+ 
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+            notifications, nullptr, NotificationConstant::USER_LOGOUT_REASON_DELETE);
+    }
+    BatchCancelTimer(timerIds);
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)

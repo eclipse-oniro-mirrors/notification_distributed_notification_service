@@ -913,6 +913,7 @@ public:
     void OnResourceRemove(int32_t userId);
     void OnUserStopped(int32_t userId);
     void OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption);
+    void DeleteAllByUserStopped(int32_t userId);
 
     /**
      * @brief Obtains the event of bundle install.
