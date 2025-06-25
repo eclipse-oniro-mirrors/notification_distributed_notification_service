@@ -108,11 +108,11 @@ void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
     }
     if (ret != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(ret);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("sts AniCancelWithIdOptinalLabel error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    ANS_LOGD("sts AniCancelWithIdOptinalLabel end, externalCode: %{public}d", externalCode);
+    ANS_LOGD("sts AniCancelWithIdOptinalLabel end");
 }
 
 void AniCancelAsBundle(ani_env *env, ani_double id, ani_string representativeBundle, ani_double userId)

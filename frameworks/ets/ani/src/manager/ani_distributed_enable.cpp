@@ -43,11 +43,11 @@ ani_boolean AniIsDistributedEnabled(ani_env* env)
     int returncode = Notification::NotificationHelper::IsDistributedEnabled(enabled);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsDistributedEnabled -> error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return NotificationSts::BoolToAniBoolean(false);
     }
-    ANS_LOGD("AniIsDistributedEnabled end, enabled: %{public}d, returncode: %{public}d", enabled, externalCode);
+    ANS_LOGD("AniIsDistributedEnabled end");
     return NotificationSts::BoolToAniBoolean(enabled);
 }
 
@@ -63,10 +63,10 @@ ani_boolean AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj)
     int returncode = Notification::NotificationHelper::IsDistributedEnableByBundle(option, enabled);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsDistributedEnabledByBundle -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
-    ANS_LOGD("AniIsDistributedEnabledByBundle end, enabled: %{public}d, returncode: %{public}d", enabled, externalCode);
+    ANS_LOGD("AniIsDistributedEnabledByBundle end");
     return NotificationSts::BoolToAniBoolean(enabled);
 }
 
@@ -89,10 +89,10 @@ ani_boolean AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, an
     int returncode = Notification::NotificationHelper::IsDistributedEnabledByBundle(option, deviceTypeStr, enabled);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsDistributedEnabledByBundle -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
-    ANS_LOGD("AniIsDistributedEnabledByBundle end, enabled: %{public}d, returncode: %{public}d", enabled, externalCode);
+    ANS_LOGD("AniIsDistributedEnabledByBundle end");
     return NotificationSts::BoolToAniBoolean(enabled);
 }
 
@@ -117,7 +117,7 @@ void AniSetDistributedEnableByBundle(ani_env *env, ani_object obj, ani_boolean e
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    ANS_LOGD("sts setDistributedEnableByBundle end, ret: %{public}d", externalCode);
+    ANS_LOGD("sts setDistributedEnableByBundle end");
 }
 
 void AniSetDistributedEnableByBundleAndType(ani_env *env,
@@ -149,7 +149,7 @@ void AniSetDistributedEnableByBundleAndType(ani_env *env,
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    ANS_LOGD("sts setDistributedEnabledByBundle end, ret: %{public}d", externalCode);
+    ANS_LOGD("sts setDistributedEnabledByBundle end");
 }
 
 void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_double status)
@@ -170,7 +170,7 @@ void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_double st
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    ANS_LOGD("sts setTargetDeviceStatus end, externalCode: %{public}d", externalCode);
+    ANS_LOGD("sts setTargetDeviceStatus end");
 }
 
 ani_boolean AniIsSmartReminderEnabled(ani_env *env, ani_string deviceType)
