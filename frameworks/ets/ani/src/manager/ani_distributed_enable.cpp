@@ -248,7 +248,6 @@ void AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_string 
     int returncode = ERR_OK;
     returncode = Notification::NotificationHelper::SetDistributedEnabledBySlot(slotType,
         deviceTypeStr, NotificationSts::AniBooleanToBool(enable));
-
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("setDistributedEnabledBySlot error, errorCode: %{public}d", externalCode);

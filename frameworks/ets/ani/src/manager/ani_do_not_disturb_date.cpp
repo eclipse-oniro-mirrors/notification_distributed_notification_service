@@ -122,7 +122,7 @@ ani_boolean AniIsSupportDoNotDisturbMode(ani_env *env)
     bool supportDoNotDisturbMode = false;
     ANS_LOGD("AniIsSupportDoNotDisturbMode enter");
     int returncode = Notification::NotificationHelper::DoesSupportDoNotDisturbMode(supportDoNotDisturbMode);
-   if (returncode != ERR_OK) {
+    if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("DoesSupportDoNotDisturbMode error. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);

@@ -48,11 +48,9 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
 ani_object AniGetDeviceRemindType(ani_env *env)
 {
     ANS_LOGD("AniGetDeviceRemindType enter");
-
     Notification::NotificationConstant::RemindType remindType =
         Notification::NotificationConstant::RemindType::DEVICE_IDLE_REMIND;
     int returncode = Notification::NotificationHelper::GetDeviceRemindType(remindType);
-
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
