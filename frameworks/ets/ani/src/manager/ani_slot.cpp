@@ -273,7 +273,6 @@ void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enu
     bool isForceControl = false;
     returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
         NotificationSts::AniBooleanToBool(enable), isForceControl);
-
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetNotificationEnableSlot error, errorCode: %{public}d", externalCode);
@@ -294,11 +293,8 @@ void AniSetNotificationEnableSlotWithForce(ani_env *env,
         NotificationSts::ThrowStsErroWithMsg(env, "SetNotificationEnableSlotWithForce ERROR_INTERNAL_ERROR");
         return;
     }
-    int returncode = 0;
-
-    returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
+    int returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
         NotificationSts::AniBooleanToBool(enable), NotificationSts::AniBooleanToBool(isForceControl));
-
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);

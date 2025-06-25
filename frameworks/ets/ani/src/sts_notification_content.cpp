@@ -442,7 +442,8 @@ bool WarpNotificationLocalLiveViewButton(
     return true;
 }
 
-bool getCapsuleByIcon(ani_env *env, ani_object obj, std::shared_ptr<PixelMap> &pixelMap) {
+bool getCapsuleByIcon(ani_env *env, ani_object obj, std::shared_ptr<PixelMap> &pixelMap)
+{
     ani_boolean isUndefined = ANI_TRUE;
     pixelMap = nullptr;
     ani_ref tempRef = nullptr;
@@ -457,7 +458,8 @@ bool getCapsuleByIcon(ani_env *env, ani_object obj, std::shared_ptr<PixelMap> &p
     return true;
 }
 
-bool getCapsuleByButtons(ani_env *env, ani_object obj, std::vector<NotificationIconButton> &iconButtons) {
+bool getCapsuleByButtons(ani_env *env, ani_object obj, std::vector<NotificationIconButton> &iconButtons)
+{
     ani_boolean isUndefined = ANI_TRUE;
     iconButtons = {};
     ani_ref tempRef = nullptr;
@@ -475,7 +477,8 @@ bool getCapsuleByButtons(ani_env *env, ani_object obj, std::vector<NotificationI
     return true;
 }
 
-bool getCapsuleByString(ani_env *env, ani_object obj, const char *name, std::string &out) {
+bool getCapsuleByString(ani_env *env, ani_object obj, const char *name, std::string &out)
+{
     ani_boolean isUndefined = ANI_TRUE;
     out = "";
     ani_ref tempRef = nullptr;
@@ -493,7 +496,8 @@ bool getCapsuleByString(ani_env *env, ani_object obj, const char *name, std::str
     return true;
 }
 
-bool getCapsuleByDouble(ani_env *env, ani_object obj, const char *name, double &out) {
+bool getCapsuleByDouble(ani_env *env, ani_object obj, const char *name, double &out)
+{
     ani_boolean isUndefined = ANI_TRUE;
     out = ERR_OK;
     ani_ref tempRef = nullptr;
