@@ -21,6 +21,8 @@ namespace OHOS {
 namespace NotificationManagerSts {
 void AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable);
 ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj);
+void AniSetBadgeNumber(ani_env *env, ani_double badgeNumber);
+void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_double badgeNumber);
 }
 }
 #endif

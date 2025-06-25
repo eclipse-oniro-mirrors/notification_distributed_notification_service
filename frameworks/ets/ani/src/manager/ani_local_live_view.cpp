@@ -14,7 +14,6 @@
  */
 #include "ani_local_live_view.h"
 
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
@@ -36,7 +35,7 @@ void AniTriggerSystemLiveView(
         return;
     }
     NotificationSts::ButtonOption buttonOption;
-    if (!NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption)) {
+    if (NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption) != ANI_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
@@ -44,8 +43,8 @@ void AniTriggerSystemLiveView(
     }
     int returncode = OHOS::Notification::NotificationHelper::TriggerLocalLiveView(bundleOption,
         static_cast<int32_t>(notificationId), buttonOption);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniTriggerSystemLiveView error, errorCode: %{public}d", externalCode);
     }
@@ -60,8 +59,8 @@ void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
     localLiveViewSubscriber->SetStsNotificationLocalLiveViewSubscriber(env, subscriberObj);
     int returncode
         = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(*localLiveViewSubscriber, false);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSubscribeSystemLiveView error, errorCode: %{public}d", externalCode);
     }

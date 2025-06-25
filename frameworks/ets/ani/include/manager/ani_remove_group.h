@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUBLISH_H
-#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_PUBLISH_H
+#ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_REMOVE_GROUP_H
+#define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_REMOVE_GROUP_H
 #include "ani.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
-void AniPublish(ani_env *env, ani_object obj);
-void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId);
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_double userId);
-void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_object request);
+void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

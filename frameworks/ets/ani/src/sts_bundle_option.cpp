@@ -26,12 +26,13 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
         ANS_LOGE("UnwrapBundleOption failed, has nullptr");
         return false;
     }
-    std::string bundleName;
+    std::string tempStr;
     ani_boolean isUndefined = ANI_TRUE;
-    if (GetPropertyString(env, obj, "bundle", isUndefined, bundleName) !=ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "bundle", isUndefined, tempStr) !=ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapBundleOption Get bundle failed");
         return false;
     }
+    std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     option.SetBundleName(bundleName);
     ani_double result = 0.0;
     if (GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
@@ -42,6 +43,37 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     }
     ANS_LOGD("UnwrapBundleOption end");
     return true;
+}
+
+ani_object GetAniArrayBundleOption(ani_env* env,
+    const std::vector<BundleOption> &bundleOptions)
+{
+    ANS_LOGD("GetAniArrayActionButton call");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniArrayActionButton failed, has nullptr");
+        return nullptr;
+    }
+    ani_object arrayObj = newArrayClass(env, bundleOptions.size());
+    if (arrayObj == nullptr) {
+        ANS_LOGE("GetAniArrayActionButton: arrayObj is nullptr");
+        return nullptr;
+    }
+    int32_t index = 0;
+    for (auto &option : bundleOptions) {
+        std::shared_ptr<BundleOption> optSp = std::make_shared<BundleOption>(option);
+        ani_object item;
+        if (!WrapBundleOption(env, optSp, item) || item == nullptr) {
+            ANS_LOGE("GetAniArrayActionButton: item is nullptr");
+            return nullptr;
+        }
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+            ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
+            return nullptr;
+        }
+        index ++;
+    }
+    ANS_LOGD("GetAniArrayActionButton end");
+    return arrayObj;
 }
 
 bool UnwrapArrayBundleOption(ani_env *env,
@@ -95,7 +127,7 @@ bool WrapBundleOption(ani_env* env,
     }
     // bundle: string;
     ani_string stringValue = nullptr;
-    if (!GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
+    if (ANI_OK != GetAniStringByString(env, bundleOption->GetBundleName(), stringValue)
         || !CallSetter(env, bundleCls, bundleObject, "bundle", stringValue)) {
         ANS_LOGE("WrapBundleOption: set bundle failed");
         return false;

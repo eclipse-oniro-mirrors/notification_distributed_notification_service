@@ -26,6 +26,7 @@ bool WrapBundleOption(ani_env* env,
     const std::shared_ptr<BundleOption> &bundleOption, ani_object &bundleObject);
 
 bool UnwrapArrayBundleOption(ani_env *env, ani_ref arrayObj, std::vector<BundleOption>& options);
+ani_object GetAniArrayBundleOption(ani_env* env, const std::vector<BundleOption> &bundleOptions);
 }
 }
 

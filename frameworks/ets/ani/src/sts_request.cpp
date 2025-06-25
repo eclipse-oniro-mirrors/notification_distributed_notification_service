@@ -25,13 +25,14 @@
 #include "ans_log_wrapper.h"
 #include "want_params.h"
 #include "ani_common_want.h"
+#include "sts_bundle_option.h"
+#include "sts_subscribe.h"
 
 namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
-constexpr int32_t STR_MAX_SIZE = 204;
 void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions distributedOptions)
 {
     ANS_LOGD("UnWarpDistributedOptions start");
@@ -49,19 +50,27 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
         ANS_LOGD("UnWarpDistributedOptions: isDistributed get failed");
     }
     // supportDisplayDevices?: Array<string>;
-    std::vector<std::string> supportDisplayDevices = {};
+    std::vector<std::string> tempStrings = {};
     isUndefined = ANI_TRUE;
-    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, supportDisplayDevices) == ANI_OK
+    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, tempStrings) == ANI_OK
         && isUndefined == ANI_FALSE) {
+        std::vector<std::string> supportDisplayDevices = {};
+        for (auto device: tempStrings) {
+            supportDisplayDevices.emplace_back(GetResizeStr(device, STR_MAX_SIZE));
+        }
         distributedOptions.supportDisplayDevices = supportDisplayDevices;
     } else {
         ANS_LOGD("UnWarpDistributedOptions: supportDisplayDevices get failed");
     }
     // supportOperateDevices?: Array<string>;
-    std::vector<std::string> supportOperateDevices = {};
+    tempStrings.clear();
     isUndefined = ANI_TRUE;
-    if (GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, supportOperateDevices) == ANI_OK
+    if (GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, tempStrings) == ANI_OK
         && isUndefined == ANI_FALSE) {
+        std::vector<std::string> supportOperateDevices = {};
+        for (auto device: tempStrings) {
+            supportOperateDevices.emplace_back(GetResizeStr(device, STR_MAX_SIZE));
+        }
         distributedOptions.supportOperateDevices = supportOperateDevices;
     } else {
         ANS_LOGD("UnWarpDistributedOptions: supportOperateDevices get failed");
@@ -230,25 +239,16 @@ void GetNotificationRequestByString(ani_env *env, ani_object obj,
     std::string mString = "";
     ani_boolean isUndefined = ANI_TRUE;
     if (ANI_OK == GetPropertyString(env, obj, "classification", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        if (mString.length() > STR_MAX_SIZE) {
-            mString.resize(STR_MAX_SIZE);
-        }
-        request->SetClassification(mString);
+        request->SetClassification(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, obj, "appMessageId", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetAppMessageId(mString);
     }
     if (ANI_OK == GetPropertyString(env, obj, "label", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        if (mString.length() > STR_MAX_SIZE) {
-            mString.resize(STR_MAX_SIZE);
-        }
-        request->SetLabel(mString);
+        request->SetLabel(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, obj, "groupName", isUndefined, mString) && isUndefined == ANI_FALSE) {
-        if (mString.length() > STR_MAX_SIZE) {
-            mString.resize(STR_MAX_SIZE);
-        }
-        request->SetGroupName(mString);
+        request->SetGroupName(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, obj, "sound", isUndefined, mString) && isUndefined == ANI_FALSE) {
         request->SetSound(mString);
@@ -671,19 +671,19 @@ void GetNotificationUnifiedGroupInfo(ani_env *env, ani_object obj,
     std::string mString = "";
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "key", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetKey(mString);
+        unifiedGroupInfo->SetKey(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "title", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetTitle(mString);
+        unifiedGroupInfo->SetTitle(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "content", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetContent(mString);
+        unifiedGroupInfo->SetContent(GetResizeStr(mString, STR_MAX_SIZE));
     }
     if (ANI_OK == GetPropertyString(env, static_cast<ani_object>(infoRef), "sceneName", isUndefind, mString)
         && isUndefind == ANI_FALSE) {
-        unifiedGroupInfo->SetSceneName(mString);
+        unifiedGroupInfo->SetSceneName(GetResizeStr(mString, STR_MAX_SIZE));
     }
     ani_ref extraInfoRef = {};
     status = GetPropertyRef(env, static_cast<ani_object>(infoRef), "extraInfo", isUndefind, extraInfoRef);
@@ -1146,10 +1146,6 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
 
 ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests)
 {
-    if (requests.empty()) {
-        ANS_LOGE("actionButtons is empty");
-        return nullptr;
-    }
     ani_object arrayObj = newArrayClass(env, requests.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr");
@@ -1175,10 +1171,6 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
 
 ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests)
 {
-    if (requests.empty()) {
-        ANS_LOGE("actionButtons is empty");
-        return nullptr;
-    }
     ani_object arrayObj = newArrayClass(env, requests.size());
     if (arrayObj == nullptr) {
         ANS_LOGE("arrayObj is nullptr");
@@ -1202,6 +1194,127 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
         index ++;
     }
     return arrayObj;
+}
+
+bool GetCheckRequestContent(ani_env *env, ani_object obj, NotificationContent::Type &outContentType)
+{
+    ani_status status = ANI_OK;
+    ani_ref contentAniType;
+    STSContentType contentType = NOTIFICATION_CONTENT_BASIC_TEXT;
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(obj, "contentType", &contentAniType))) {
+        ANS_LOGE("GetCheckRequestContent get contentType faild. status %{public}d", status);
+        return false;
+    }
+    if (contentAniType == nullptr ||
+        !EnumConvertAniToNative(env, static_cast<ani_enum_item>(contentAniType), contentType)) {
+            ANS_LOGE("EnumConvertAniToNative contentType faild");
+            return false;
+        }
+    if (!StsContentTypeUtils::StsToC(contentType, outContentType)) {
+        ANS_LOGE("StsToC contentType faild");
+        return false;
+    }
+    return true;
+}
+
+bool GetCheckRequestSlotType(ani_env *env, ani_object obj, NotificationConstant::SlotType &outSlotType)
+{
+    ani_status status = ANI_OK;
+    ani_ref slotAniType;
+    STSSlotType slotType = UNKNOWN_TYPE;
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(obj, "slotType", &slotAniType))) {
+        ANS_LOGE("UnWarpNotificationCheckRequest get slotType faild. status %{public}d", status);
+        return false;
+    }
+    if (slotAniType == nullptr || !EnumConvertAniToNative(env, static_cast<ani_enum_item>(slotAniType), slotType)) {
+        ANS_LOGE("EnumConvertAniToNative slotType faild");
+        return false;
+    }
+    if (!StsSlotTypeUtils::StsToC(slotType, outSlotType)) {
+        ANS_LOGE("StsToC slotType faild");
+        return false;
+    }
+    return true;
+}
+
+bool UnWarpNotificationCheckRequest(ani_env *env, ani_object obj, sptr<NotificationCheckRequest> &checkRequest)
+{
+    if (env == nullptr || obj == nullptr || checkRequest == nullptr) {
+        ANS_LOGE("UnWarpNotificationCheckRequest invalid parameters");
+        return false;
+    }
+    ani_status status = ANI_OK;
+    ani_ref extraInfoKeysObj;
+    NotificationContent::Type outContentType = NotificationContent::Type::NONE;
+    NotificationConstant::SlotType outSlotType = NotificationConstant::SlotType::OTHER;
+    std::vector<std::string> extraInfoKeys;
+    // contentType: notificationManager.ContentType;
+    if (!GetCheckRequestContent(env, obj, outContentType)) {
+        ANS_LOGE("GetCheckRequestContent faild.");
+        return false;
+    }
+    checkRequest->SetContentType(outContentType);
+    // slotType: notificationManager.SlotType;
+    if (!GetCheckRequestSlotType(env, obj, outSlotType)) {
+        ANS_LOGE("GetCheckRequestSlotType faild.");
+        return false;
+    }
+    checkRequest->SetSlotType(outSlotType);
+    // extraInfoKeys: Array<string>;
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(obj, "extraInfoKeys", &extraInfoKeysObj))) {
+        ANS_LOGE("UnWarpNotificationCheckRequest get extraInfoKeys faild. status %{public}d", status);
+        return false;
+    }
+    if (!GetStringArrayByAniObj(env, static_cast<ani_object>(extraInfoKeysObj), extraInfoKeys)) {
+        ANS_LOGE("UnWarpNotificationCheckRequest. extraInfoKeys GetStringArrayByAniObj faild.");
+        return false;
+    }
+    checkRequest->SetExtraKeys(extraInfoKeys);
+    ANS_LOGD("contentType %{public}d slotType %{public}d",
+        checkRequest->GetContentType(), checkRequest->GetSlotType());
+    for (auto &it : checkRequest->GetExtraKeys()) {
+        ANS_LOGD("extrakey %{public}s", it.c_str());
+    }
+    return true;
+}
+
+bool UnWarpNotificationFilter(ani_env *env, ani_object obj, LiveViewFilter& filter)
+{
+    ANS_LOGD("UnWarpNotificationFilter call");
+    if (env == nullptr || obj == nullptr) {
+        ANS_LOGE("UnWarpNotificationFilter failed, has nullptr");
+        return false;
+    }
+
+    ani_status status = ANI_OK;
+    ani_boolean isUndefined = ANI_TRUE;
+    ani_ref bundleObj = {};
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "bundle", isUndefined, bundleObj))
+        || isUndefined == ANI_TRUE) {
+        ANS_LOGE("UnWarpNotificationFilter:get bundle failed. status %{public}d", status);
+        return false;
+    }
+    if (!OHOS::NotificationSts::UnwrapBundleOption(env, static_cast<ani_object>(bundleObj), filter.bundle)) {
+        ANS_LOGE("UnWarpNotificationFilter:UnwrapBundleOption failed");
+        return false;
+    }
+
+    ani_ref notificationKeyObj = {};
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "notificationKey", isUndefined, notificationKeyObj))
+        || isUndefined == ANI_TRUE) {
+        ANS_LOGE("UnWarpNotificationFilter:get notificationKey failed. status %{public}d", status);
+        return false;
+    }
+
+    if (OHOS::NotificationSts::UnWarpNotificationKey(env, static_cast<ani_object>(notificationKeyObj),
+        filter.notificationKey)) {
+        ANS_LOGD("UnWarpNotificationFilter:UnWarpNotificationKey label is undefined");
+    }
+
+    if (ANI_OK != (status = GetPropertyStringArray(env, obj, "extraInfoKeys", isUndefined, filter.extraInfoKeys))) {
+        ANS_LOGD("UnWarpNotificationFilter:get extraInfoKeysObj failed. status %{public}d", status);
+    }
+    return true;
 }
 } // namespace NotificationSts
 } // OHOS

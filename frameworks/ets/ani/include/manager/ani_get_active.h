@@ -22,6 +22,7 @@ namespace NotificationManagerSts {
 ani_double AniGetActiveNotificationCount(ani_env *env);
 ani_object AniGetAllActiveNotifications(ani_env *env);
 ani_object AniGetActiveNotifications(ani_env *env);
+ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

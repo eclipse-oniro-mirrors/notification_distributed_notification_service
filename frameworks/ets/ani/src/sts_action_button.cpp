@@ -146,7 +146,7 @@ bool SetNotificationActionButtonByRequiredParameter(
     }
     ani_string stringValue;
     // title: string;
-    if (!GetAniStringByString(env, actionButton->GetTitle(), stringValue)) {
+    if (ANI_OK != GetAniStringByString(env, actionButton->GetTitle(), stringValue)) {
         ANS_LOGE("SetActionButtonByRequiredParameter: Get title failed");
         return false;
     }

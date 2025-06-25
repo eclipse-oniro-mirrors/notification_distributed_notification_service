@@ -14,9 +14,9 @@
  */
 #include "ani_publish.h"
 
-#include "inner_errors.h"
 #include "notification_helper.h"
 #include "ans_log_wrapper.h"
+#include "sts_bundle_option.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
 #include "sts_request.h"
@@ -36,9 +36,8 @@ void AniPublish(ani_env *env, ani_object obj)
         return;
     }
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
-        ANS_LOGE("AniPublish error, errorCode: %{public}d", externalCode);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniPublish end");
@@ -50,18 +49,74 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
     //NotificationRequest request;
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
-        ANS_LOGE("UnWarpNotificationRequest failed");
         NotificationSts::ThrowStsErroWithMsg(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
         return;
     }
     notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
-    int externalCode = CJSystemapi::Notification::ErrorToExternal(returncode);
-    if (externalCode != 0) {
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
         ANS_LOGE("AniPublishWithId error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniPublishWithId end");
+}
+
+void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_double userId)
+{
+    ANS_LOGD("AniPublishAsBundle enter");
+    std::string bundleStr;
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
+        NotificationSts::ThrowStsErroWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
+        return;
+    }
+
+    std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
+    if (NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest) != ANI_OK) {
+        ANS_LOGE("AniPublishAsBundle failed");
+        NotificationSts::ThrowStsErroWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
+        return;
+    }
+    notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
+    notificationRequest->SetOwnerBundleName(bundleStr);
+    int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("AniPublishAsBundle: PublishNotificationerror, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+
+    ANS_LOGD("AniPublishAsBundle end");
+}
+
+void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_object request)
+{
+    ANS_LOGE("AniPublishAsBundleWithBundleOption enter");
+    std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
+    if (NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest) != ANI_OK) {
+        NotificationSts::ThrowStsErroWithMsg(env, "AniPublishAsBundleWithBundleOption ERROR_INTERNAL_ERROR");
+        return;
+    }
+
+    BundleOption option;
+    if (NotificationSts::UnwrapBundleOption(env, representativeBundle, option) != true) {
+        NotificationSts::ThrowStsErroWithMsg(env, "UnwrapBundleOption ERROR_INTERNAL_ERROR");
+        return;
+    }
+
+    ANS_LOGD("AniPublishAsBundleWithBundleOption: bundle %{public}s  uid: %{public}d",
+        option.GetBundleName().c_str(), option.GetUid());
+    notificationRequest->SetOwnerBundleName(option.GetBundleName());
+    notificationRequest->SetOwnerUid(option.GetUid());
+    notificationRequest->SetIsAgentNotification(true);
+
+    int returncode = NotificationHelper::PublishNotification(*notificationRequest);
+    int externalCode = NotificationSts::GetExternalCode(returncode);
+    if (externalCode != ERR_OK) {
+        ANS_LOGE("AniPublishAsBundleWithBundleOption error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+    ANS_LOGD("AniPublishAsBundleWithBundleOption end");
 }
 } // namespace NotificationManagerSts
 } // namespace OHOS
