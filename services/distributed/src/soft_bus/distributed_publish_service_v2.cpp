@@ -212,7 +212,7 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-void DistributedPublishService::RemoveAllDistributedNotificaions(DistributedDeviceInfo& deviceInfo)
+void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDeviceInfo& deviceInfo)
 {
     std::shared_ptr<RemoveAllDistributedNotificationsBox> removeBox =
         std::make_shared<RemoveAllDistributedNotificationsBox>();
@@ -225,7 +225,7 @@ void DistributedPublishService::RemoveAllDistributedNotificaions(DistributedDevi
         ANS_LOGW("dans OnCanceled serialize failed");
         return;
     }
-    ANS_LOGI("RemoveAllDistributedNotificaions ID:%{public}s",
+    ANS_LOGI("RemoveAllDistributedNotifications ID:%{public}s",
         StringAnonymous(deviceInfo.deviceId_).c_str());
     DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_MESSAGE,
         deviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);

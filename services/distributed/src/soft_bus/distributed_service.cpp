@@ -195,7 +195,7 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
                 ANS_LOGW("get deviceId err");
                 return;
             }
-            DistributedPublishService::GetInstance().RemoveAllDistributedNotificaions(device);
+            DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(device);
         }
 #else
         if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
