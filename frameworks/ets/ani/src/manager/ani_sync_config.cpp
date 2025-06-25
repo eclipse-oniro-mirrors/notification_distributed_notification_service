@@ -48,8 +48,8 @@ ani_double AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value
         return RESULT_FAILED;
     }
     int returncode = Notification::NotificationHelper::SetAdditionConfig(keyStr, valueStr);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("setAdditionalConfig -> error, errorCode: %{public}d", externalCode);
         AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return RESULT_FAILED;

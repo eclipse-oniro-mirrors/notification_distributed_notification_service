@@ -39,13 +39,13 @@ void AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable)
         ANS_LOGE("sts DisplayBadge ERROR_INTERNAL_ERROR");
         return;
     }
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("sts DisplayBadge error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
-    ANS_LOGD("DisplayBadgeAni end, ret: %{public}d", externalCode);
+    ANS_LOGD("DisplayBadgeAni end");
 }
 
 ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
@@ -67,14 +67,13 @@ ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
         }
     }
 
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("sts IsBadgeDisplayed error, errorCode: %{public}d", externalCode);
+        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return NotificationSts::BoolToAniBoolean(false);
     }
-    ANS_LOGD("sts IsBadgeDisplayed end, isDisplayed: %{public}d, returncode: %{public}d", isDisplayed,
-        externalCode);
+    ANS_LOGD("sts IsBadgeDisplayed end, isDisplayed: %{public}d", isDisplayed);
     return NotificationSts::BoolToAniBoolean(isDisplayed);
 }
 
@@ -82,8 +81,8 @@ void AniSetBadgeNumber(ani_env *env, ani_double badgeNumber)
 {
     ANS_LOGD("sts AniSetBadgeNumber call, BadgeNumber: %{public}lf", badgeNumber);
     int returncode = Notification::NotificationHelper::SetBadgeNumber(static_cast<int32_t>(badgeNumber));
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("sts AniSetBadgeNumber error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
@@ -104,12 +103,12 @@ void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_double badgeNum
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         return;
     }
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("sts AniSetBadgeNumberByBundle error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
-    ANS_LOGD("AniSetBadgeNumberByBundle end, ret: %{public}d", externalCode);
+    ANS_LOGD("AniSetBadgeNumberByBundle end");
 }
 }
 }

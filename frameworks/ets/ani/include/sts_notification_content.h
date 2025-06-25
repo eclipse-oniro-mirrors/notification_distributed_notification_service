@@ -75,7 +75,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
 bool WarpNotificationLocalLiveViewButton(ani_env *env, const NotificationLocalLiveViewButton &button,
     ani_object &buttonObject);
 
-void UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule &capsule);
+bool UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule &capsule);
 bool WarpNotificationCapsule(ani_env *env, const NotificationCapsule &capsule, ani_object &capsuleObject);
 
 ani_status UnWarpNotificationBasicContent(ani_env *env, ani_object obj,
