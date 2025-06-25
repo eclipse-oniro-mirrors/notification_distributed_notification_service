@@ -56,6 +56,8 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
 ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<int64_t> &res);
 
+void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef);
+
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, const std::string value);
 bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
