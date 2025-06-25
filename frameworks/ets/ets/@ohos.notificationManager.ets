@@ -427,23 +427,13 @@ export default namespace notificationManager {
         if (systemLiveView?.lockscreenPicture != undefined && !(systemLiveView?.lockscreenPicture instanceof image.PixelMap)) {
             return false;
         }
-        if (systemLiveView?.capsule !== undefined && systemLiveView?.capsule === null) {
-            return false
-        }
-        if (systemLiveView?.capsule?.title !== undefined && systemLiveView?.capsule?.title?.trim() === '') {
-            return false;
-        }
-        if (systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
-            return false;
-        }
-        if (systemLiveView?.capsule?.backgroundColor != undefined && systemLiveView?.capsule?.backgroundColor?.trim() === '') {
-            return false;
-        }
-        if (systemLiveView?.capsule?.content != undefined && systemLiveView?.capsule?.content?.trim() === '') {
-            return false;
-        }
-        if (systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
-            return false;
+        if (systemLiveView?.capsule !== undefined) {
+            if (systemLiveView?.capsule?.icon != undefined && !(systemLiveView?.capsule?.icon instanceof image.PixelMap)) {
+                return false;
+            }
+            if (systemLiveView?.capsule?.capsuleButtons != undefined && systemLiveView?.capsule?.capsuleButtons?.length === 0) {
+                return false;
+            }
         }
         if (systemLiveView?.button !== undefined && systemLiveView?.button === null) {
             return false;

@@ -42,8 +42,8 @@ void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string gr
     }
     std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
     int returncode = OHOS::Notification::NotificationHelper::RemoveGroupByBundle(option, groupNameStr);
-    int externalCode = NotificationSts::GetExternalCode(returncode);
-    if (externalCode != ERR_OK) {
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniRemoveGroupByBundle -> error, errorCode: %{public}d", externalCode);
         OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
