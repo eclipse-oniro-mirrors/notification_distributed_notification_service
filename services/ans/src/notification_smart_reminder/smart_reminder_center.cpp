@@ -362,16 +362,8 @@ void SmartReminderCenter::InitValidDevices(
                 request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
                 continue;
             }
-            // app-open, smart-close not watch
-            if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) != 0 &&
-                deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE) != 0) {
-                syncDevices.insert(deviceType);
-                continue;
-            }
-            // app-open, smart-close watch
-            if (!CompareStatus(STATUS_UNUSED, status)) {
-                syncDevices.insert(deviceType);
-            }
+            // app-open, smart-close
+            syncDevices.insert(deviceType);
         }
     }
     string syncDevicesStr;
