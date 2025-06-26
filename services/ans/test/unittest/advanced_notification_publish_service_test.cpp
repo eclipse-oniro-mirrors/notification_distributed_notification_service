@@ -2614,11 +2614,11 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_001, Function 
 
     request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
-    request->isAgent_ = false;
+    request->isAgent_ = true;
     result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
     EXPECT_FALSE(result);
 
-    request->isAgent_ = true;
+    request->isAgent_ = false;
     bundleName = "";
     result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
     EXPECT_FALSE(result);
@@ -2634,7 +2634,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_002, Function 
     std::string bundleName = "com.test.example";
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
-    request->isAgent_ = true;
+    request->isAgent_ = false;
     NotificationPreferences::GetInstance()->isKioskMode_ = true;
     NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
     bool result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);

@@ -1093,7 +1093,7 @@ bool AdvancedNotificationService::IsDisableNotificationForSaByKiosk(
         return false;
     }
     bool isAppAgent = false;
-    if (request->IsAgentNotification() && !bundleName.empty()) {
+    if (!request->IsAgentNotification() && !bundleName.empty()) {
         isAppAgent = true;
     }
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
