@@ -43,7 +43,7 @@ public:
         std::string hashCodes, std::string slotTypes);
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
-    void RemoveAllDistributedNotificaions(DistributedDeviceInfo& deviceInfo);
+    void RemoveAllDistributedNotifications(DistributedDeviceInfo& deviceInfo);
     void SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
         const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
