@@ -126,8 +126,12 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
     auto status = liveViewContent->GetLiveViewStatus();
     switch (status) {
         case NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE: {
-            SetFinishTimer(record);
-            SetUpdateTimer(record);
+            if (record->notification->GetFinishTimer() == NotificationConstant::INVALID_TIMER_ID) {
+                SetFinishTimer(record);
+            }
+            if (record->notification->GetUpdateTimer() == NotificationConstant::INVALID_TIMER_ID) {
+                SetUpdateTimer(record);
+            }
             CancelArchiveTimer(record);
             return;
         }
