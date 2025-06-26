@@ -621,7 +621,8 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_method ctor;
-    if (ANI_OK != (status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor))) {
+    if (ANI_OK != (status = env->Class_FindMethod(
+        cls, "<ctor>", "X{C{escompat.Date}C{std.core.Numeric}C{std.core.String}}:V", &ctor))) {
         ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }
