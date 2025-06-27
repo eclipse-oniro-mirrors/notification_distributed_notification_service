@@ -239,13 +239,13 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-void ExtensionWrapper::IsPrivilegeMessage(const sptr<NotificationRequest> &request)
+bool ExtensionWrapper::IsPrivilegeMessage(const sptr<NotificationRequest> &request)
 {
     if (isPrivilegeMessage_ == nullptr) {
         ANS_LOGE("IsPrivilegeMessage wrapper symbol failed");
-        return;
+        return false;
     }
-    return isPrivilegeMessage_(bundleOption, request, isAgentController);
+    return isPrivilegeMessage_(request);
 }
 
 void ExtensionWrapper::HandlePrivilegeMessage(const sptr<NotificationBundleOption>& bundleOption,
