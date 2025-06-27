@@ -398,10 +398,14 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     const auto removalWantAgent = request->GetRemovalWantAgent();
     const auto isLocalWantAgent = (wantAgent != nullptr && wantAgent->IsLocal()) ||
         (removalWantAgent != nullptr && removalWantAgent->IsLocal());
-    bool isSpecifiedAccess = (isSystemApp || isSubsystem) && isAgentController;
-    if (isLocalWantAgent && !isSpecifiedAccess) {
-        ANSR_LOGE("Local wantAgent does not support non system app");
+    if (isLocalWantAgent && !(isSystemApp || isSubsystem)) {
+        ANS_LOGE("Local wantAgent does not support non system app");
         return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (isLocalWantAgent && !isAgentController) {
+        ANS_LOGE("Local wantAgent does not support permission denied");
+        return ERR_ANS_PERMISSION_DENIED;
     }
     return ERR_OK;
 }
