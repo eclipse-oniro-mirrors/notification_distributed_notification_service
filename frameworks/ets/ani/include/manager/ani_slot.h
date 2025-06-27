@@ -32,7 +32,7 @@ void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj);
 void AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj);
 ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj);
 ani_object AniGetSlots(ani_env *env);
-ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item  type);
+ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type);
 void AniRemoveSlot(ani_env *env, ani_enum_item enumObj);
 void AniRemoveAllSlots(ani_env *env);
 void AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slotObj);

@@ -357,7 +357,7 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_double slotFlags)
     }
 }
 
-ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item  type)
+ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type)
 {
     ANS_LOGD("AniGetSlotByBundle enter");
     Notification::NotificationBundleOption option;
