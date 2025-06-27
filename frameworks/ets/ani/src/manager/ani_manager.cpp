@@ -122,6 +122,8 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniAddSlots)},
     ani_native_function {"nativeGetSlot", nullptr,
         reinterpret_cast<void *>(AniGetSlot)},
+    ani_native_function {"nativeGetSlotByBundle", nullptr,
+        reinterpret_cast<void *>(AniGetSlotByBundle)},
     ani_native_function {"nativeGetSlots", nullptr,
         reinterpret_cast<void *>(AniGetSlots)},
     ani_native_function {"nativeRemoveSlot", nullptr,
