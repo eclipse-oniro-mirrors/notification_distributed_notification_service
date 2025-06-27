@@ -395,7 +395,9 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     }
     if (requestPoint->IsCommonLiveView()) {
         std::vector<uint8_t> buffer;
-        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(requestPoint, buffer);
+        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewEncodeContent(
+            requestPoint, buffer, deviceType);
         requestBox->SetCommonLiveView(buffer);
     }
     SetNotificationExtendInfo(requestPoint, peerDevice.deviceType_, requestBox);
@@ -821,7 +823,10 @@ void DistributedPublishService::MakeNotificationContent(const NotificationReques
             request->SetContent(content);
             std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
             liveviewContent->SetExtraInfo(extraInfo);
-            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewDecodeContent(request, buffer);
+            auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+            std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(localDevice.deviceType_);
+            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewDecodeContent(
+                request, buffer, deviceType);
         }
         return;
     }
