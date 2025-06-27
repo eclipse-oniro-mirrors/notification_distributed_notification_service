@@ -29,10 +29,11 @@ public:
     void InitExtentionWrapper();
     void CloseExtentionWrapper();
     typedef ErrCode (*UPDATE_LIVEVIEW_ENCODE_CONTENT)(const sptr<NotificationRequest> &request,
-        std::vector<uint8_t> &buffer);
-    ErrCode UpdateLiveviewEncodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer);
+        std::vector<uint8_t> &buffer, const std::string& deviceType);
+    ErrCode UpdateLiveviewEncodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer,
+        const std::string& deviceType);
     typedef ErrCode (*UPDATE_LIVEVIEW_DECODE_CONTENT)(const sptr<NotificationRequest> &request,
-        std::vector<uint8_t> &buffer);
+        std::vector<uint8_t> &buffer, const std::string& deviceType);
     typedef ErrCode (*TRIGGER_PUSH_WANT_AGENT)(const sptr<NotificationRequest> &request,
         int32_t actionType, const AAFwk::WantParams extraInfo);
     typedef ErrCode (*SUBSCRIBE_ALL_CONNECT)();
@@ -40,7 +41,8 @@ public:
     typedef ErrCode (*LIVE_VIEW_MULTI_SCREEN_SYNC_OPER)(
         sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
     typedef ErrCode (*RESTORE_COLLABORATION_WINDOW)(const std::string &networkId);
-    ErrCode UpdateLiveviewDecodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer);
+    ErrCode UpdateLiveviewDecodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer,
+        const std::string& deviceType);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
         const AAFwk::WantParams extraInfo);
     ErrCode SubscribeAllConnect();
