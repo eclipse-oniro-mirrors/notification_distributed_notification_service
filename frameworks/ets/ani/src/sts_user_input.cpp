@@ -47,7 +47,7 @@ ani_object WarpUserInput(ani_env *env, std::shared_ptr<Notification::Notificatio
     ani_object userInputObject = nullptr;
     ani_status status = ANI_OK;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationUserInput/NotificationUserInputInner;", userInputCls, userInputObject)) {
+        "notification.notificationUserInput.NotificationUserInputInner", userInputCls, userInputObject)) {
             ANS_LOGE("Create faild");
             return nullptr;
         }

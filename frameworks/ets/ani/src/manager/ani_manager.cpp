@@ -43,7 +43,7 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeCancelWithBundle", nullptr, reinterpret_cast<void *>(AniCancelWithBundle)},
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
-    ani_native_function {"nativeGetActiveNotificationCount", ":D",
+    ani_native_function {"nativeGetActiveNotificationCount", ":d",
         reinterpret_cast<void *>(AniGetActiveNotificationCount)},
     ani_native_function {"nativeGetActiveNotifications", nullptr,
         reinterpret_cast<void *>(AniGetActiveNotifications)},
@@ -77,7 +77,7 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeSetNotificationEnable",
         nullptr, reinterpret_cast<void *>(AniSetNotificationEnable)},
     ani_native_function {"nativeRequestEnableNotification",
-        "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+        "C{application.UIAbilityContext.UIAbilityContext}:C{std.core.Promise}",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
     ani_native_function {"nativePublishAsBundle", nullptr, reinterpret_cast<void *>(AniPublishAsBundle)},
     ani_native_function {"nativePublishAsBundleWithBundleOption", nullptr,
@@ -96,17 +96,17 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniIsSupportDoNotDisturbMode)},
     ani_native_function {"nativeGetDoNotDisturbProfile", nullptr, reinterpret_cast<void *>(AniGetDoNotDisturbProfile)},
     ani_native_function {"nativeOn",
-        "Lstd/core/String;"
-        "Lstd/core/Function1;"
-        "Lnotification/notificationRequest/NotificationCheckRequest;"
-        ":I",
+        "C{std.core.String}"
+        "C{std.core.Function1}"
+        "C{notification.notificationRequest.NotificationCheckRequest}"
+        ":i",
         reinterpret_cast<void *>(AniOn)},
-    ani_native_function {"nativeOff", "Lstd/core/String;Lstd/core/Function1;:I", reinterpret_cast<void *>(AniOff)},
+    ani_native_function {"nativeOff", "C{std.core.String}C{std.core.Function1}:i", reinterpret_cast<void *>(AniOff)},
     ani_native_function {"nativeGetAllNotificationEnabledBundles", nullptr,
         reinterpret_cast<void *>(AniGetAllNotificationEnabledBundles)},
     ani_native_function {"nativeIsNotificationEnabledSync", nullptr,
         reinterpret_cast<void *>(AniIsNotificationEnabledSync)},
-    ani_native_function {"nativeSetBadgeNumber", "D:V",
+    ani_native_function {"nativeSetBadgeNumber", "d:",
         reinterpret_cast<void *>(AniSetBadgeNumber)},
     ani_native_function {"nativeSetBadgeNumberByBundle", nullptr,
         reinterpret_cast<void *>(AniSetBadgeNumberByBundle)},
@@ -135,7 +135,7 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetSlotNumByBundle", nullptr,
         reinterpret_cast<void *>(AniGetSlotNumByBundle)},
     ani_native_function {"nativeOpenNotificationSettings",
-        "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
+        "C{application.UIAbilityContext.UIAbilityContext}:C{std.core.Promise}",
         reinterpret_cast<void *>(AniOpenNotificationSettings)},
     ani_native_function {"nativesetTargetDeviceStatus", nullptr,
         reinterpret_cast<void *>(AniSetTargetDeviceStatus)},
@@ -177,7 +177,7 @@ void AniNotificationManagerRegistryInit(ani_env *env)
         ANS_LOGD("ResetError failed");
     }
     ani_namespace ns;
-    status = env->FindNamespace("L@ohos/notificationManager/notificationManager;", &ns);
+    status = env->FindNamespace("@ohos.notificationManager.notificationManager", &ns);
     if (status != ANI_OK) {
         ANS_LOGE("FindNamespace notificationManager failed status : %{public}d", status);
         return;
