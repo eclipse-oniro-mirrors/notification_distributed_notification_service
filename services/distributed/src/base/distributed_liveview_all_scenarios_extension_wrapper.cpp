@@ -39,7 +39,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
     }
 
     updateLiveviewEncodeContent_ = (UPDATE_LIVEVIEW_ENCODE_CONTENT)dlsym(ExtensionHandle_,
-        "UpdateLiveviewEncodeContent");
+        "UpdateLiveviewEncodeTlv");
     if (updateLiveviewEncodeContent_ == nullptr) {
         ANS_LOGE("distributed liveview all scenarios extension wrapper dlsym updateLiveviewEncodeContent_ failed, "
             "error: %{public}s", dlerror());
@@ -47,7 +47,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
     }
 
     updateLiveviewDecodeContent_ = (UPDATE_LIVEVIEW_DECODE_CONTENT)dlsym(ExtensionHandle_,
-        "UpdateLiveviewDecodeContent");
+        "UpdateLiveviewDecodeTlv");
     if (updateLiveviewDecodeContent_ == nullptr) {
         ANS_LOGE("distributed liveview all scenarios extension wrapper dlsym updateLiveviewDecodeContent_ failed, "
             "error: %{public}s", dlerror());
@@ -103,23 +103,23 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewEncodeContent(
-    const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer)
+    const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer, const std::string& deviceType)
 {
     if (updateLiveviewEncodeContent_ == nullptr) {
         ANS_LOGE("distributed UpdateLiveviewEncodeContent wrapper symbol failed");
         return 0;
     }
-    return updateLiveviewEncodeContent_(request, buffer);
+    return updateLiveviewEncodeContent_(request, buffer, deviceType);
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewDecodeContent(
-    const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer)
+    const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer, const std::string& deviceType)
 {
     if (updateLiveviewDecodeContent_ == nullptr) {
         ANS_LOGE("distributed UpdateLiveviewDecodeContent wrapper symbol failed");
         return 0;
     }
-    return updateLiveviewDecodeContent_(request, buffer);
+    return updateLiveviewDecodeContent_(request, buffer, deviceType);
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
