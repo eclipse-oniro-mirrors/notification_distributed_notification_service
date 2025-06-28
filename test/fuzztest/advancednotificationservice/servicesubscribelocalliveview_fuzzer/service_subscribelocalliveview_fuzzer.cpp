@@ -16,6 +16,7 @@
 
 #include <fuzzer/FuzzedDataProvider.h>
 #include "advanced_notification_service.h"
+#include "notification_subscribe_info.h"
 #include "ans_permission_def.h"
 #include "mock_notification_request.h"
 
@@ -23,6 +24,15 @@ namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->InitPublishProcess();
+        service->CreateDialogManager();
+
+        sptr<Notification::NotificationSubscribeInfo> info = new Notification::NotificationSubscribeInfo();
+        bool isNative = fuzzData->ConsumeBool();
+
+        service->SubscribeLocalLiveView(nullptr, info, isNative);
+        service->SubscribeLocalLiveView(nullptr, isNative);
         return true;
     }
 }

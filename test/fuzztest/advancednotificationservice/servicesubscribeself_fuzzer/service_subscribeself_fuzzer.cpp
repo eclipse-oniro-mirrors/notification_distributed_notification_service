@@ -23,6 +23,11 @@ namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->InitPublishProcess();
+        service->CreateDialogManager();
+
+        service->SubscribeSelf(nullptr);
         return true;
     }
 }
