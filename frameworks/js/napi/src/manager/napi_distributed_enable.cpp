@@ -27,7 +27,6 @@ const int SET_SMART_REMINDER_ENABLE_MAX_PARA = 2;
 const int SET_SMART_REMINDER_ENABLE_MIN_PARA = 1;
 const int SET_DISTRIBUTED_ENABLE_BY_SLOT_PARA = 3;
 const int GET_DISTRIBUTED_ENABLE_BY_SLOT_PARA = 2;
-static const std::set<std::string> DEVICE_TYPES = {"headset", "liteWearable", "wearable"};
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, DistributedEnableParams &params)
 {
@@ -381,11 +380,6 @@ napi_value ParseParameters(const napi_env &env,
     napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
     if (std::strlen(str) == 0) {
         ANS_LOGE("Property deviceType is empty");
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
-        return nullptr;
-    }
-    if (DEVICE_TYPES.find(str) == DEVICE_TYPES.end()) {
-        ANS_LOGE("Property deviceType is not allowed");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
