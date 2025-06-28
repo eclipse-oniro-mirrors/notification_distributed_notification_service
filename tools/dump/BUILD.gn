@@ -71,7 +71,7 @@ ohos_executable("anm") {
 
   install_enable = false
   if (build_variant == "root") {
-    install_enable = false
+    install_enable = true
   }
 
   part_name = "${component_name}"
