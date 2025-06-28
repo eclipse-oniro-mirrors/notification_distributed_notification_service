@@ -20,6 +20,7 @@
 #include "parcel.h"
 #include "pixel_map.h"
 #include "want_params.h"
+#include "want_agent.h"
 
 namespace OHOS {
 namespace Notification {
@@ -147,6 +148,16 @@ public:
 
     bool GetIsOnlyLocalUpdate() const;
 
+    void SetExtensionWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
+
+    const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> GetExtensionWantAgent() const;
+
+    void SetUid(const int32_t uid);
+
+    int32_t GetUid() const;
+
+    bool MarshallingExtensionWantAgent(Parcel &parcel) const;
+
 protected:
     /**
      * @brief Read a NotificationLiveViewContent object from a Parcel.
@@ -163,6 +174,8 @@ private:
     std::shared_ptr<AAFwk::WantParams> extraInfo_ {};
     PictureMap pictureMap_ {};
     bool isOnlyLocalUpdate_ = false;
+    int32_t uid_ = -1;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> extensionWantAgent_ {};
 };
 }  // namespace Notification
 }  // namespace OHOS

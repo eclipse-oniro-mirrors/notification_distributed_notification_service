@@ -437,6 +437,14 @@ napi_value Common::SetNotificationLiveViewContent(
     }
     napi_set_named_property(env, result, "pictureInfo", pictureMapObj);
 
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = liveViewContent->GetExtensionWantAgent();
+    if (agent) {
+        napi_value wantAgent = nullptr;
+        wantAgent = CreateWantAgentByJS(env, agent);
+        napi_set_named_property(env, result, "extensionWantAgent", wantAgent);
+    } else {
+        napi_set_named_property(env, result, "extensionWantAgent", NapiGetNull(env));
+    }
     return NapiGetBoolean(env, true);
 }
 
@@ -1272,6 +1280,46 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     }
     liveViewContent->SetPicture(pictureMap);
 
+    if (GetLiveViewWantAgent(env, contentResult, liveViewContent) == nullptr) {
+        ANS_LOGD("no live view wantAgent");
+        return nullptr;
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetLiveViewWantAgent(const napi_env &env, const napi_value &value,
+    std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
+{
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("null liveViewContent");
+        return nullptr;
+    }
+
+    bool hasProperty = false;
+    AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
+    napi_value result = nullptr;
+    napi_valuetype valuetype = napi_undefined;
+
+    NAPI_CALL(env, napi_has_named_property(env, value, "extensionWantAgent", &hasProperty));
+    if (hasProperty) {
+        napi_get_named_property(env, value, "extensionWantAgent", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_object) {
+            ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of wantAgent must be object.";
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
+        napi_unwrap(env, result, (void **)&wantAgent);
+        if (wantAgent == nullptr) {
+            ANS_LOGE("null wantAgent");
+            return nullptr;
+        }
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> sWantAgent =
+            std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgent);
+        liveViewContent->SetExtensionWantAgent(sWantAgent);
+    }
     return NapiGetNull(env);
 }
 

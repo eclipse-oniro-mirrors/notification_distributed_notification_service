@@ -19,6 +19,7 @@
 #include "ans_ipc_common_utils.h"
 #include "ans_log_wrapper.h"
 #include "want_params_wrapper.h"
+#include "want_agent_helper.h"
 #include "ans_const_define.h"
 
 namespace OHOS {
@@ -74,6 +75,27 @@ bool NotificationLiveViewContent::GetIsOnlyLocalUpdate() const
     return isOnlyLocalUpdate_;
 }
 
+void NotificationLiveViewContent::SetExtensionWantAgent(
+    const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent)
+{
+    extensionWantAgent_ = wantAgent;
+}
+
+const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> NotificationLiveViewContent::GetExtensionWantAgent() const
+{
+    return extensionWantAgent_;
+}
+
+void NotificationLiveViewContent::SetUid(const int32_t uid)
+{
+    uid_ = uid;
+}
+
+int32_t NotificationLiveViewContent::GetUid() const
+{
+    return uid_;
+}
+
 std::string NotificationLiveViewContent::Dump()
 {
     std::string extraStr{"null"};
@@ -95,7 +117,8 @@ std::string NotificationLiveViewContent::Dump()
     return "NotificationLiveViewContent{ " + NotificationBasicContent::Dump() +
         ", status = " + std::to_string(static_cast<int32_t>(liveViewStatus_)) + ", version = " +
         std::to_string(static_cast<int32_t>(version_)) + ", extraInfo = " + extraStr +
-        ", isOnlyLocalUpdate_ = " + (GetIsOnlyLocalUpdate()?"true":"false") + pictureStr + "}";
+        ", isOnlyLocalUpdate_ = " + (GetIsOnlyLocalUpdate()?"true":"false") + pictureStr +
+        ", extensionWantAgent_ = " + (extensionWantAgent_ ? "not null" : "null") + "}";
 }
 
 bool NotificationLiveViewContent::PictureToJson(nlohmann::json &jsonObject) const
@@ -132,6 +155,10 @@ bool NotificationLiveViewContent::ToJson(nlohmann::json &jsonObject) const
     }
 
     jsonObject["isLocalUpdateOnly"] = isOnlyLocalUpdate_;
+    if (extensionWantAgent_ != nullptr) {
+        jsonObject["extensionWantAgent"] = AbilityRuntime::WantAgent::WantAgentHelper::ToString(extensionWantAgent_);
+        jsonObject["uid"] = uid_;
+    }
 
     return PictureToJson(jsonObject);
 }
@@ -190,6 +217,18 @@ NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohman
         pContent->isOnlyLocalUpdate_ = jsonObject.at("isOnlyLocalUpdate").get<bool>();
     }
     pContent->ConvertPictureFromJson(jsonObject);
+
+    if (jsonObject.find("uid") != jsonEnd && jsonObject.at("uid").is_number_integer()) {
+        pContent->uid_ =jsonObject.at("uid").get<int32_t>();
+    }
+
+    if (jsonObject.find("extensionWantAgent") != jsonEnd && jsonObject.at("extensionWantAgent").is_string()) {
+        auto extensionWantAgentString  = jsonObject.at("extensionWantAgent").get<std::string>();
+        pContent->extensionWantAgent_ = AbilityRuntime::WantAgent::WantAgentHelper::FromString(
+            extensionWantAgentString, pContent->uid_);
+    } else {
+        ANS_LOGW("no want");
+    }
     return pContent;
 }
 
@@ -233,7 +272,30 @@ bool NotificationLiveViewContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    return MarshallingPictureMap(parcel);
+    bool res = MarshallingPictureMap(parcel);
+    if (!res) {
+        return res;
+    }
+    return MarshallingExtensionWantAgent(parcel);
+}
+
+bool NotificationLiveViewContent::MarshallingExtensionWantAgent(Parcel &parcel) const
+{
+    bool valid{false};
+
+    valid = extensionWantAgent_ ? true : false;
+    if (!parcel.WriteBool(valid)) {
+        ANS_LOGE("Failed to write the flag which indicate whether wantAgent is null");
+        return false;
+    }
+
+    if (valid) {
+        if (!parcel.WriteParcelable(extensionWantAgent_.get())) {
+            ANS_LOGE("Failed to write wantAgent");
+            return false;
+        }
+    }
+    return true;
 }
 
 NotificationLiveViewContent *NotificationLiveViewContent::Unmarshalling(Parcel &parcel)
@@ -283,6 +345,15 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
         pictureMap_[key] = pixelMapVec;
     }
 
+    valid = parcel.ReadBool();
+    if (valid) {
+        extensionWantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
+            parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
+        if (!extensionWantAgent_) {
+            ANS_LOGE("null wantAgent");
+            return false;
+        }
+    }
     return true;
 }
 

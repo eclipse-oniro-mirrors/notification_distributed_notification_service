@@ -237,6 +237,9 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     ANS_LOGI("Enter.");
     auto content = std::static_pointer_cast<NotificationLiveViewContent>(
         request->GetContent()->GetNotificationContent());
+    if (request->GetOwnerUid() != DEFAULT_UID) {
+        content->SetUid(request->GetOwnerUid());
+    }
     if (content->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END &&
         request->GetAutoDeletedTime() == NotificationConstant::NO_DELAY_DELETE_TIME) {
         ANS_LOGI("Don't need set to db when liveview is in end status and no delay delete time.");

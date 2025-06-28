@@ -1306,6 +1306,25 @@ void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &noti
             }
         }
     }
+
+    if (!notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+        return;
+    }
+    if (content == nullptr) {
+        return;
+    }
+    auto notificationContent = content->GetNotificationContent();
+    if (notificationContent == nullptr) {
+        return;
+    }
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(notificationContent);
+    if (liveViewContent == nullptr) {
+        return;
+    }
+    auto want = liveViewContent->GetExtensionWantAgent();
+    if (want != nullptr) {
+        CancelOnceWantAgent(want);
+    }
 }
 
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,

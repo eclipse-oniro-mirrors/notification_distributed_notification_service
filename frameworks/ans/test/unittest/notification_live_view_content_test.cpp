@@ -21,6 +21,8 @@
 #include "notification_live_view_content.h"
 #undef private
 #undef protected
+#include "want_params_wrapper.h"
+#include "want_agent_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -114,7 +116,7 @@ HWTEST_F(NotificationLiveViewContentTest, Dump_00001, Function | SmallTest | Lev
     auto rrc = std::make_shared<NotificationLiveViewContent>();
     std::string ret = "NotificationLiveViewContent{ title = , text = , "
     "additionalText = , lockScreenPicture = null, status = 0, version = -1, extraInfo = null, "
-    "isOnlyLocalUpdate_ = false, pictureMap = {}}";
+    "isOnlyLocalUpdate_ = false, pictureMap = {}, extensionWantAgent_ = null}";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -141,7 +143,8 @@ HWTEST_F(NotificationLiveViewContentTest, Dump_00002, Function | SmallTest | Lev
 
     std::string ret = "NotificationLiveViewContent{ title = title, text = text, "
         "additionalText = addText, lockScreenPicture = null, status = 0, version = -1, extraInfo = null, "
-        "isOnlyLocalUpdate_ = false, pictureMap = { { key = test, value = not empty } }}";
+        "isOnlyLocalUpdate_ = false, pictureMap = { { key = test, value = not empty } }, "
+        "extensionWantAgent_ = null}";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }
@@ -326,6 +329,38 @@ HWTEST_F(NotificationLiveViewContentTest, MarshallingPictureMap_00003, Function 
     Parcel parcel;
     bool isSuccess = liveViewContent->MarshallingPictureMap(parcel);
     EXPECT_EQ(isSuccess, true);
+}
+
+/**
+ * @tc.name: GetUid_00001
+ * @tc.desc: Test uid
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, GetUid_00001, Function | SmallTest | Level1)
+{
+    NotificationLiveViewContent liveViewContent;
+    liveViewContent.SetUid(100);
+    auto uid = liveViewContent.GetUid();
+    ASSERT_EQ(uid, 100);
+}
+
+/**
+ * @tc.name: GetExtensionWantAgent_00001
+ * @tc.desc: Test extensionWantAgent_
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, GetExtensionWantAgent_00001, Function | SmallTest | Level1)
+{
+    AbilityRuntime::WantAgent::WantAgentInfo paramsInfo;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>();
+    ASSERT_NE(wantAgent, nullptr);
+    NotificationLiveViewContent liveViewContent;
+    liveViewContent.SetExtensionWantAgent(wantAgent);
+    auto want = liveViewContent.GetExtensionWantAgent();
+    ASSERT_NE(want, nullptr);
 }
 }
 }
