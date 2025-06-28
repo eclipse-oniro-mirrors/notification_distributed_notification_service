@@ -356,5 +356,31 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_double slotFlags)
         AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 }
+
+ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_item type)
+{
+    ANS_LOGD("AniGetSlotByBundle enter");
+    Notification::NotificationBundleOption option;
+    Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
+    if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)
+        || !NotificationSts::SlotTypeEtsToC(env, type, slotType)) {
+        NotificationSts::ThrowStsErroWithMsg(env, "GetSlotByBundle : erro arguments.");
+        return nullptr;
+    }
+    sptr<Notification::NotificationSlot> slot = nullptr;
+    int returncode = Notification::NotificationHelper::GetNotificationSlotForBundle(option, slotType, slot);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("GetSlotByBundle -> error, errorCode: %{public}d", externalCode);
+        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullptr;
+    }
+    ani_object infoObj;
+    if (!NotificationSts::WrapNotificationSlot(env, slot, infoObj) || infoObj == nullptr) {
+        NotificationSts::ThrowStsErroWithMsg(env, "WrapNotificationSlot Failed");
+        return nullptr;
+    }
+    return infoObj;
+}
 }
 }
