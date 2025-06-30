@@ -682,17 +682,19 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
-    HandleFlagsWithRequest(request);
+    HandleFlagsWithRequest(request, bundleOption);
 }
 
-void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<NotificationRequest> &request)
+void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<NotificationRequest> &request,
+    const sptr<NotificationBundleOption> &bundleOption)
 {
+    auto flags = request->GetFlags();
     NotificationConstant::ENABLE_STATUS enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
     if (request->IsCommonLiveView()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(request);
     } else if (!request->IsSystemLiveView()) {
-        result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
         if (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
             flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
             flags->SetLockScreenVisblenessEnabled(false);

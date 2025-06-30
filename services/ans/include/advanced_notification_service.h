@@ -1241,7 +1241,8 @@ public:
     void SetRequestBySlotType(const sptr<NotificationRequest> &request,
         const sptr<NotificationBundleOption> &bundleOption);
 
-    void HandleFlagsWithRequest(const sptr<NotificationRequest> &request);
+    void HandleFlagsWithRequest(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption);
 
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
