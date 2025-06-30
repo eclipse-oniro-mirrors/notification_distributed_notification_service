@@ -28,9 +28,8 @@ namespace Notification {
         service->InitPublishProcess();
         service->CreateDialogManager();
 
-        sptr<Notification::NotificationSubscribeInfo> info = new Notification::NotificationSubscribeInfo();
+        sptr<Notification::NotificationSubscribeInfo> info = ObjectBuilder<NotificationSubscribeInfo>::Build(fuzzData);
         bool isNative = fuzzData->ConsumeBool();
-
         service->SubscribeLocalLiveView(nullptr, info, isNative);
         service->SubscribeLocalLiveView(nullptr, isNative);
         return true;

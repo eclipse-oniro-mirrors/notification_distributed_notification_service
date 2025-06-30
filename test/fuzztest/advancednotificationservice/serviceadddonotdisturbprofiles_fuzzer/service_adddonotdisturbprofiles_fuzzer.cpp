@@ -28,11 +28,13 @@ namespace Notification {
         service->InitPublishProcess();
         service->CreateDialogManager();
 
-        std::vector<sptr<Notification::NotificationDoNotDisturbProfile>> profiles;
-        sptr<Notification::NotificationDoNotDisturbProfile> profile =
-            new Notification::NotificationDoNotDisturbProfile();
-        profiles.emplace_back(profile);
-
+        std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+        size_t numProfiles = fuzzData->ConsumeIntegralInRange<size_t>(0, 6);
+        for (size_t i = 0; i < numProfiles; ++i) {
+            sptr<NotificationDoNotDisturbProfile> profile =
+                ObjectBuilder<NotificationDoNotDisturbProfile>::Build(fuzzData);
+            profiles.push_back(profile);
+        }
         service->AddDoNotDisturbProfiles(profiles);
         return true;
     }

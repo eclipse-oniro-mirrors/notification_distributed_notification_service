@@ -169,8 +169,6 @@ NotificationRequest* ObjectBuilder<NotificationRequest>::Build(FuzzedDataProvide
     return request;
 }
 
-
-
 } // namespace Notification
 } // namespace OHOS
 

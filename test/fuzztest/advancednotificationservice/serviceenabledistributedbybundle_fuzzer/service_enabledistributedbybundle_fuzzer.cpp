@@ -28,7 +28,7 @@ namespace Notification {
         service->InitPublishProcess();
         service->CreateDialogManager();
 
-        sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData); 
+        sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
         bool enabled = fuzzData->ConsumeBool();
         service->EnableDistributedByBundle(bundleOption, enabled);
         return true;
