@@ -159,6 +159,7 @@ export default namespace notificationManager {
     export native function nativeGetSlotFlagsByBundle(bundle: BundleOption): int;
     export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: number): void;
     export native function nativeGetSlotsByBundle(bundle: BundleOption): Array<NotificationSlot>;
+    export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType): NotificationSlot;
 
     export native function nativeIsNotificationSlotEnabled(bundle: BundleOption, type: SlotType): boolean;
     export native function nativeSetNotificationEnableSlot(
@@ -953,6 +954,23 @@ export default namespace notificationManager {
             let p = taskpool.execute((): number => { return nativeGetSlotFlagsByBundle(bundle); });
             p.then((data: NullishType): void => {
                 let ret : Double = data as Double;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
+    }
+
+    export function getSlotByBundle(bundle: BundleOption, slotType: SlotType): Promise<NotificationSlot> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let pPromise = new Promise<NotificationSlot>((resolve: ResolveCallback<NotificationSlot>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): NotificationSlot => { return nativeGetSlotByBundle(bundle, slotType); });
+            p.then((data: NullishType): void => {
+                let ret : NotificationSlot = data as NotificationSlot;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);
