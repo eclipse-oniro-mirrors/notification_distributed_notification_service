@@ -1327,7 +1327,7 @@ public:
      *
      * @return Return the check result, ERR_OK: check pass, others: not pass.
      */
-    ErrCode CheckImageSizeForContent() const;
+    ErrCode CheckImageSizeForContent(bool collaborateFlag = false) const;
 
     /**
      * @brief Set notification isCoverActionButtons value.
@@ -1548,7 +1548,8 @@ private:
     static bool ConvertJsonToNotificationFlags(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckImageSizeForConverSation(std::shared_ptr<NotificationBasicContent> &content);
     static ErrCode CheckImageSizeForPicture(std::shared_ptr<NotificationBasicContent> &content);
-    static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
+    static ErrCode CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content,
+        bool collaborateFlag = false);
     static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
     static bool ConvertJsonToAgentBundle(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);

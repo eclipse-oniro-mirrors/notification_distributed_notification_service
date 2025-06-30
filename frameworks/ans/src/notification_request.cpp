@@ -2846,7 +2846,8 @@ ErrCode NotificationRequest::CheckImageSizeForPicture(std::shared_ptr<Notificati
     return ERR_OK;
 }
 
-ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content)
+ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content,
+    bool collaborateFlag)
 {
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto pictureMap = liveViewContent->GetPicture();
@@ -2860,7 +2861,7 @@ ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<Notificat
             return ERR_ANS_INVALID_PARAM;
         }
         for (const auto &pixelMap : pixelMapRecord.second) {
-            if (CheckImageOverSizeForPixelMap(pixelMap, MAX_ICON_SIZE)) {
+            if (!collaborateFlag && CheckImageOverSizeForPixelMap(pixelMap, MAX_ICON_SIZE)) {
                 ANS_LOGE("The size of big picture in PictureContent exceeds limit.");
                 return ERR_ANS_ICON_OVER_SIZE;
             }
@@ -2869,7 +2870,7 @@ ErrCode NotificationRequest::CheckImageSizeForLiveView(std::shared_ptr<Notificat
     return ERR_OK;
 }
 
-ErrCode NotificationRequest::CheckImageSizeForContent() const
+ErrCode NotificationRequest::CheckImageSizeForContent(bool collaborateFlag) const
 {
     auto content = GetContent();
     if (content == nullptr) {
@@ -2897,7 +2898,7 @@ ErrCode NotificationRequest::CheckImageSizeForContent() const
         case NotificationContent::Type::PICTURE:
             return CheckImageSizeForPicture(basicContent);
         case NotificationContent::Type::LIVE_VIEW:
-            return CheckImageSizeForLiveView(basicContent);
+            return CheckImageSizeForLiveView(basicContent, collaborateFlag);
         default:
             return ERR_OK;
     }
