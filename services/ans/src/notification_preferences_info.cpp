@@ -241,6 +241,24 @@ bool NotificationPreferencesInfo::GetBundleInfo(
     return false;
 }
 
+void NotificationPreferencesInfo::SetSilentReminderInfo(SilentReminderInfo &info)
+{
+    std::string bundleKey = info.bundleName.append(std::to_string(info.uid));
+    silentReminderInfos_.insert_or_assign(bundleKey, info);
+}
+
+bool NotificationPreferencesInfo::GetSilentReminderInfo(
+    const sptr<NotificationBundleOption> &bundleOption, SilentReminderInfo &info) const
+{
+    std::string bundleKey = bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid());
+    auto iter = silentReminderInfos_.find(bundleKey);
+    if (iter != silentReminderInfos_.end()) {
+        info = iter->second;
+        return true;
+    }
+    return false;
+}
+
 bool NotificationPreferencesInfo::RemoveBundleInfo(const sptr<NotificationBundleOption> &bundleOption)
 {
     std::string bundleKey = bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid());
@@ -363,6 +381,11 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
             slotInfo.isForceControl_ = slot->GetForceControl();
             cloneBundleInfo.AddSlotInfo(slotInfo);
         }
+        auto silentReminderIter = silentReminderInfos_.find(bundleItem.second);
+        if (silentReminderIter != silentReminderInfos_.end()) {
+            auto enableStatus = silentReminderIter->second.enableStatus;
+            cloneBundleInfo.SetSilentReminderEnabled(enableStatus);
+        }
         cloneBundles.emplace_back(cloneBundleInfo);
     }
     ANS_LOGI("GetAllCLoneBundlesInfo size: %{public}zu.", cloneBundles.size());
@@ -407,6 +430,12 @@ void NotificationPreferencesInfo::RemoveDoNotDisturbDate(const int32_t userId)
 void NotificationPreferencesInfo::SetBundleInfoFromDb(BundleInfo &info, std::string bundleKey)
 {
     infos_.insert_or_assign(bundleKey, info);
+}
+
+void NotificationPreferencesInfo::SetSilentReminderInfoFromDb(
+    SilentReminderInfo &silentReminderInfo, std::string bundleKey)
+{
+    silentReminderInfos_.insert_or_assign(bundleKey, silentReminderInfo);
 }
 
 void NotificationPreferencesInfo::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)

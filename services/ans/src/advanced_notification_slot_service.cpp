@@ -131,6 +131,7 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
 {
     ANS_LOGD("called");
 
+    std::vector<sptr<NotificationSlot>> slots_temp;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is false.");
@@ -158,6 +159,17 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slots.clear();
+        }
+        NotificationConstant::ENABLE_STATUS enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+        result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        if (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+            for (auto slot : slots) {
+                sptr<NotificationSlot> value(new NotificationSlot(*slot));
+                value->SetReminderMode(1 << 5);
+                slots_temp.emplace_back(value);
+                ANS_LOGD("GetSlotsByBundle ReminderMode:%{public}d", slot->GetReminderMode());
+            }
+            slots =  slots_temp;
         }
     }));
 
@@ -670,12 +682,31 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
+    HandleFlagsWithRequest(request, bundleOption);
+}
+
+void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<NotificationRequest> &request,
+    const sptr<NotificationBundleOption> &bundleOption)
+{
+    auto flags = request->GetFlags();
+    NotificationConstant::ENABLE_STATUS enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
     if (request->IsCommonLiveView()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(request);
+    } else if (!request->IsSystemLiveView()) {
+        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        if (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
+            flags->SetLockScreenVisblenessEnabled(false);
+            flags->SetBannerEnabled(false);
+            flags->SetLightScreenEnabled(false);
+            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
+            request->SetFlags(flags);
+        }
     }
-    ANS_LOGI("notificationKey = %{public}s flags = %{public}d",
-        request->GetKey().c_str(), flags->GetReminderFlags());
+    ANS_LOGI("Key = %{public}s flags = %{public}d class = %{public}s silent = %{public}d",
+        request->GetKey().c_str(), flags->GetReminderFlags(),
+        request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW) {
         return;
@@ -683,7 +714,6 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif
-    ANS_LOGI("classification:%{public}s", request->GetClassification().c_str());
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot)

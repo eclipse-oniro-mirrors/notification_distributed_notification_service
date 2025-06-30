@@ -518,6 +518,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         DeleteDuplicateMsgs(bundleOption);
     }));
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
+    NotificationPreferences::GetInstance()->RemoveSilentEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
@@ -1938,32 +1939,8 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             return;
         }
         bundle->SetAppIndex(cloneBundleInfo.GetAppIndex());
-        if (NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
-            cloneBundleInfo.GetEnableNotification()) == ERR_OK) {
-            SetSlotFlagsTrustlistsAsBundle(bundle);
-            sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow) EnabledNotificationCallbackData(
-                bundle->GetBundleName(), bundle->GetUid(), cloneBundleInfo.GetEnableNotification());
-            if (bundleData == nullptr) {
-                return;
-            }
-            NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
-        } else {
-            ANS_LOGW("Set notification enable failed.");
-            return;
-        }
-
-        if (cloneBundleInfo.GetSlotInfo().empty()) {
-            PublishSlotChangeCommonEvent(bundle);
-        }
-        if (NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(bundle,
-            cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
-            ANS_LOGW("Set notification slot failed.");
-            return;
-        }
-        if (UpdateSlotReminderModeBySlotFlags(bundle, cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
-            ANS_LOGW("Set notification reminder slot failed.");
-            return;
-        }
+        UpdateCloneBundleInfoForEnable(cloneBundleInfo, bundle);
+        UpdateCloneBundleInfoFoSlot(cloneBundleInfo, bundle);
 
         if (NotificationPreferences::GetInstance()->SetShowBadge(bundle, cloneBundleInfo.GetIsShowBadge()) == ERR_OK) {
             HandleBadgeEnabledChanged(bundle, cloneBundleInfo.GetIsShowBadge());
@@ -1971,14 +1948,63 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             ANS_LOGW("Set notification badge failed.");
         }
 
-        for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
-            if (SetEnabledForBundleSlotInner(bundle, bundle, cloneSlot.slotType_, cloneSlot.enable_,
-                cloneSlot.isForceControl_) != ERR_OK) {
-                ANS_LOGW("Set notification slots failed %{public}s.", cloneSlot.Dump().c_str());
-            }
-        }
+        UpdateCloneBundleInfoFoSilentReminder(cloneBundleInfo, bundle);
     }));
 }
 
+void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(
+    const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
+{
+    if (NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
+        cloneBundleInfo.GetEnableNotification()) == ERR_OK) {
+        SetSlotFlagsTrustlistsAsBundle(bundle);
+        sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow) EnabledNotificationCallbackData(
+            bundle->GetBundleName(), bundle->GetUid(), cloneBundleInfo.GetEnableNotification());
+        if (bundleData == nullptr) {
+            return;
+        }
+        NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
+    } else {
+        ANS_LOGW("Set notification enable failed.");
+        return;
+    }
+}
+
+void AdvancedNotificationService::UpdateCloneBundleInfoFoSlot(
+    const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
+{
+    if (cloneBundleInfo.GetSlotInfo().empty()) {
+        PublishSlotChangeCommonEvent(bundle);
+    }
+    if (NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(bundle,
+        cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
+        ANS_LOGW("Set notification slot failed.");
+        return;
+    }
+    if (UpdateSlotReminderModeBySlotFlags(bundle, cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
+        ANS_LOGW("Set notification reminder slot failed.");
+        return;
+    }
+
+    for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
+        if (SetEnabledForBundleSlotInner(bundle, bundle, cloneSlot.slotType_, cloneSlot.enable_,
+            cloneSlot.isForceControl_) != ERR_OK) {
+            ANS_LOGW("Set notification slots failed %{public}s.", cloneSlot.Dump().c_str());
+        }
+    }
+}
+
+void AdvancedNotificationService::UpdateCloneBundleInfoFoSilentReminder(
+    const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
+{
+    auto enableStatus = cloneBundleInfo.GetSilentReminderEnabled();
+    if (enableStatus != NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE &&
+        enableStatus != NotificationConstant::ENABLE_STATUS::DEFAULT_TRUE) {
+        if (NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundle,
+            enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE ? true : false) != ERR_OK) {
+            ANS_LOGW("SetSilentReminderEnabled failed.");
+        }
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS

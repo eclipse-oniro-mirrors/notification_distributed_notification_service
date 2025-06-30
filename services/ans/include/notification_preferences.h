@@ -321,6 +321,31 @@ public:
         const std::string &deviceType, const bool enabled);
 
     /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption, const bool enabled);
+ 
+    /**
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsSilentReminderEnabled(
+        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::ENABLE_STATUS &enableStatus);
+
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.
@@ -443,6 +468,7 @@ public:
     void RemoveSettings(int32_t userId);
     void RemoveAnsBundleDbInfo(const sptr<NotificationBundleOption> &bundleOption);
     void RemoveEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption);
+    void RemoveSilentEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption);
     int32_t SetKvToDb(const std::string &key, const std::string &value, const int32_t &userId);
     int32_t SetByteToDb(const std::string &key, const std::vector<uint8_t> &value, const int32_t &userId);
     int32_t GetKvFromDb(const std::string &key, std::string &value, const int32_t &userId);

@@ -2130,6 +2130,52 @@ ErrCode AnsNotification::IsDistributedEnabledByBundle(const NotificationBundleOp
     return proxy->IsDistributedEnabledByBundle(bo, deviceType, enabled);
 }
 
+ErrCode AnsNotification::SetSilentReminderEnabled(const NotificationBundleOption &bundleOption,
+    const bool enabled)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("SetSilentReminderEnabledCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+ 
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("Fail: bundleOption is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->SetSilentReminderEnabled(bo, enabled);
+}
+ 
+ErrCode AnsNotification::IsSilentReminderEnabled(const NotificationBundleOption &bundleOption,
+    int32_t &enableStatus)
+{
+    ANS_LOGD("enter");
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("IsSilentReminderEnabledCallback fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+ 
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("Fail: bundleOption is empty.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->IsSilentReminderEnabled(bo, enableStatus);
+}
+
 ErrCode AnsNotification::SetSmartReminderEnabled(const std::string &deviceType, const bool enabled)
 {
     ANS_LOGD("called");

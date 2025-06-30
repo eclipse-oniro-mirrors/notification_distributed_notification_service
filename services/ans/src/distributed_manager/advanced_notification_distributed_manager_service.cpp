@@ -95,7 +95,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enabled);
     if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
-        NotificationConstant::ENABLE_STATUS notification = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+        NotificationConstant::ENABLE_STATUS notification = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType,
             notification) != ERR_OK) {
             ANS_LOGW("Get notification distributed failed %{public}s!", deviceType.c_str());

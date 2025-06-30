@@ -1061,6 +1061,30 @@ public:
         const std::string &deviceType, bool &enabled) override;
 
     /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override;
+ 
+    /*
+     * @brief Get whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications. The value
+     *                true indicates that notifications are allowed, and the value false indicates that
+     *                notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    ErrCode IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption, int32_t &enableStatus) override;
+
+    /**
      * @brief configuring Whether to Synchronize Common Notifications to Target Devices.
      *
      * @param deviceType Target device type.
@@ -1217,6 +1241,9 @@ public:
     void SetRequestBySlotType(const sptr<NotificationRequest> &request,
         const sptr<NotificationBundleOption> &bundleOption);
 
+    void HandleFlagsWithRequest(const sptr<NotificationRequest> &request,
+        const sptr<NotificationBundleOption> &bundleOption);
+
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
 
@@ -1332,6 +1359,15 @@ public:
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+
+    void UpdateCloneBundleInfoForEnable(
+        const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
+
+    void UpdateCloneBundleInfoFoSlot(
+        const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
+
+    void UpdateCloneBundleInfoFoSilentReminder(
+        const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
 
     void TryStartReminderAgentService();
 

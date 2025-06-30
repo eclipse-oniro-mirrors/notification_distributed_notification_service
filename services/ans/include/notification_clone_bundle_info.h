@@ -22,6 +22,7 @@
 #include "notification_constant.h"
 #include "notification_bundle_option.h"
 #include "notification_do_not_disturb_profile.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -55,6 +56,9 @@ public:
     void SetEnableNotification(const bool &enable);
     bool GetEnableNotification() const;
 
+    void SetSilentReminderEnabled(const NotificationConstant::ENABLE_STATUS &silentReminderEnabled);
+    NotificationConstant::ENABLE_STATUS GetSilentReminderEnabled() const;
+
     void AddSlotInfo(const SlotInfo &slotInfo);
     std::vector<SlotInfo> GetSlotInfo() const;
 
@@ -71,6 +75,7 @@ private:
     bool isShowBadge_ = false;
     bool isEnabledNotification_ = false;
     std::vector<SlotInfo> slotsInfo_;
+    NotificationConstant::ENABLE_STATUS silentReminderEnabled_;
 };
 } // namespace Notification
 } // namespace OHOS

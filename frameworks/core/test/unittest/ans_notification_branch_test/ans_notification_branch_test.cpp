@@ -727,6 +727,18 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
+    const bool enabled) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t &enableStatusInt) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

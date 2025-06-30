@@ -1100,6 +1100,62 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
+ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
+    const bool enabled)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
+    silentReminderInfo.bundleName = bundleOption->GetBundleName();
+    silentReminderInfo.uid = bundleOption->GetUid();
+    silentReminderInfo.enableStatus =
+        enabled ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE;
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->SetSilentReminderEnabled(silentReminderInfo);
+    if (storeDBResult) {
+        preferencesInfo_.SetSilentReminderInfo(silentReminderInfo);
+    }
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+ 
+ErrCode NotificationPreferences::IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
+    NotificationConstant::ENABLE_STATUS &enableStatus)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+ 
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
+    if (preferencesInfo_.GetSilentReminderInfo(bundleOption, silentReminderInfo)) {
+        enableStatus = silentReminderInfo.enableStatus;
+        return ERR_OK;
+    }
+    silentReminderInfo.bundleName = bundleOption->GetBundleName();
+    silentReminderInfo.uid = bundleOption->GetUid();
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->IsSilentReminderEnabled(silentReminderInfo);
+    if (storeDBResult) {
+        enableStatus = silentReminderInfo.enableStatus;
+        preferencesInfo_.SetSilentReminderInfo(silentReminderInfo);
+    }
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<NotificationBundleOption> &bundleOption)
+{
+    ANS_LOGE("%{public}s", __FUNCTION__);
+    if (preferncesDB_ != nullptr && bundleOption != nullptr) {
+        std::lock_guard<std::mutex> lock(preferenceMutex_);
+        preferncesDB_->RemoveSilentEnabledDbByBundle(bundleOption->GetBundleName(), bundleOption->GetUid());
+    }
+}
+
 ErrCode NotificationPreferences::SetDistributedEnabled(
     const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enableStatus)
 {
@@ -1116,7 +1172,7 @@ ErrCode NotificationPreferences::IsDistributedEnabled(
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
-    enableStatus = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+    enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
     storeDBResult = preferncesDB_->GetDistributedEnabled(deviceType, enableStatus);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }

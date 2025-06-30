@@ -4530,5 +4530,107 @@ HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00005, Funct
     auto reminderType = advancedNotificationService_->GetRemindType();
     ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_ACTIVE_DONOT_REMIND);
 }
+
+/**
+ * @tc.name      : SetSilentReminderEnabled_00001
+ * @tc.number    :
+ * @tc.desc      : test SetSilentReminderEnabled
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00001, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    ErrCode  ret = advancedNotificationService.SetSilentReminderEnabled(nullptr, true);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+    std::string bundleName = "test11";
+    int32_t uid = -1;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
+
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(false, 0);
+    ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+
+    MockQueryForgroundOsAccountId(true, 100);
+    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name      : SetSilentReminderEnabled_00001
+ * @tc.number    :
+ * @tc.desc      : test SetSilentReminderEnabled
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00002, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    std::string bundleName = "test11";
+    int32_t uid = 1;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
+    int32_t enableStatusInt;
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 100);
+
+    ErrCode ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(enableStatusInt, 0);
+
+    ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
+    ASSERT_EQ(ret, ERR_OK);
+
+    ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
+    ASSERT_EQ(ret, ERR_OK);
+    ASSERT_EQ(enableStatusInt, 2);
+}
+
+/**
+ * @tc.name      : SetSilentReminderEnabled_00001
+ * @tc.number    :
+ * @tc.desc      : test SetSilentReminderEnabled
+ */
+HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Function | SmallTest | Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    int32_t enableStatusInt;
+
+    ErrCode  ret = advancedNotificationService.IsSilentReminderEnabled(nullptr, enableStatusInt);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+
+    std::string bundleName = "test11";
+    int32_t uid = -1;
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleName, uid));
+
+    MockIsSystemApp(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
+    ASSERT_EQ(ret, ERR_ANS_NON_SYSTEM_APP);
+
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
+    ASSERT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(false, 0);
+    ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_BUNDLE);
+
+    MockQueryForgroundOsAccountId(true, 100);
+    advancedNotificationService.notificationSvrQueue_ = nullptr;
+    ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
+    ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
 }  // namespace Notification
 }  // namespace OHOS

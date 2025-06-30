@@ -154,17 +154,22 @@ public:
 
     enum class ENABLE_STATUS {
         /**
-         * the device type notification switch never been set.
+         * the switch never been set, default status is false.
          */
-        ENABLE_NONE,
+        DEFAULT_FALSE,
 
         /**
-         * the device type notification switch is enabled
+         * the switch never been set, default status is true.
+         */
+        DEFAULT_TRUE,
+
+        /**
+         * the switch is enabled
          */
         ENABLE_TRUE,
 
         /**
-         * the device type notification switch is disable
+         * the switch is disable
          */
         ENABLE_FALSE
     };
