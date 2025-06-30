@@ -1669,6 +1669,8 @@ public:
 
     static napi_value GetHashCodes(const napi_env &env, const napi_value &value, std::vector<std::string> &hashCodes);
 
+    static napi_value GetLiveViewWantAgent(const napi_env &env, const napi_value &value,
+        std::shared_ptr<NotificationLiveViewContent> &liveViewContent);
     /**
      * @brief Gets a NotificationKey object from specified js object
      *
