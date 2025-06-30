@@ -1617,7 +1617,7 @@ ErrCode AnsNotification::CheckImageSize(const NotificationRequest &request)
         return ERR_ANS_ICON_OVER_SIZE;
     }
 
-    ErrCode err = request.CheckImageSizeForContent();
+    ErrCode err = request.CheckImageSizeForContent(collaborateFlag);
     if (err != ERR_OK) {
         return err;
     }
