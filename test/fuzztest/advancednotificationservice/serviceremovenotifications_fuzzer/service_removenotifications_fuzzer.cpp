@@ -27,8 +27,13 @@ namespace Notification {
         service->InitPublishProcess();
         service->CreateDialogManager();
 
-        int32_t userId = fdp->ConsumeIntegral<int32_t>();
-        return Notification::NotificationHelper::RemoveNotifications(userId);
+        int32_t removeReason = fuzzData->ConsumeIntegral<int32_t>();
+        std::vector<std::string> keys;
+        size_t numKeys = fuzzData->ConsumeIntegralInRange<size_t>(0, 6);
+        for (size_t i = 0; i < numKeys; ++i) {
+            keys.emplace_back(fuzzData->ConsumeRandomLengthString());
+        }
+        service->RemoveNotifications(keys, removeReason);
         return true;
     }
 }

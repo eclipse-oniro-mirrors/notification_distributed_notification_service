@@ -28,16 +28,16 @@ NotificationSubscribeInfo* ObjectBuilder<NotificationSubscribeInfo>::Build(Fuzze
 {
     auto subscribeInfo = new NotificationSubscribeInfo();
 
-    subscribeInfo->AddAppName(fdp->->ConsumeRandomLengthString());
+    subscribeInfo->AddAppName(fdp->ConsumeRandomLengthString());
     subscribeInfo->AddAppUserId(fdp->ConsumeIntegral<int32_t>());
-    subscribeInfo->AddDeviceType(fdp->->ConsumeRandomLengthString());
+    subscribeInfo->AddDeviceType(fdp->ConsumeRandomLengthString());
     subscribeInfo->SetSubscriberUid(fdp->ConsumeIntegral<int32_t>());
     subscribeInfo->SetFilterType(fdp->ConsumeIntegral<uint32_t>());
     subscribeInfo->SetNeedNotifyResponse(fdp->ConsumeBool());
 
     std::vector<NotificationConstant::SlotType> slotTypes;
-    auto slotTypeCnt = fdp->ConsumeIntegralInRange<uint32_t>(0, 6);
-    for (auto i = 0; i  < slotTypeCnt; ++i) {
+    size_t slotTypeCnt = fdp->ConsumeIntegralInRange<uint32_t>(0, 6);
+    for (size_t i = 0; i  < slotTypeCnt; ++i) {
         auto slotType = static_cast<NotificationConstant::SlotType>(
             fdp->ConsumeIntegralInRange<int32_t>(0, 7));
         slotTypes.push_back(slotType);

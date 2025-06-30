@@ -19,6 +19,7 @@
 #include "notification_do_not_disturb_profile.h"
 #include "ans_permission_def.h"
 #include "mock_notification_request.h"
+#include "mock_notification_donotdisturb_profile.h"
 
 namespace OHOS {
 namespace Notification {

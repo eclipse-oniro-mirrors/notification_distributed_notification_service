@@ -30,9 +30,8 @@ NotificationOperationInfo* ObjectBuilder<NotificationOperationInfo>::Build(Fuzze
     operationInfo->SetUserInput(fdp->ConsumeRandomLengthString());
     operationInfo->SetHashCode(fdp->ConsumeRandomLengthString());
     operationInfo->SetEventId(fdp->ConsumeRandomLengthString());
-    operationInfo->SetOperationType(static_cast<OHOS::Notification::OperationType>(
+    operationInfo->SetOperationType(static_cast<OperationType>(
         fdp->ConsumeIntegralInRange<int>(0, 1)));
-    operationInfo->SetBtnIndex(fdp->ConsumeIntegral<int32_t>());
     
     return operationInfo;
 }

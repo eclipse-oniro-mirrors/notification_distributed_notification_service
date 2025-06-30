@@ -19,6 +19,7 @@
 #include "notification_subscribe_info.h"
 #include "ans_permission_def.h"
 #include "mock_notification_request.h"
+#include "mock_notification_subscribe_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -28,7 +29,7 @@ namespace Notification {
         service->InitPublishProcess();
         service->CreateDialogManager();
 
-        sptr<Notification::NotificationSubscribeInfo> info = ObjectBuilder<NotificationSubscribeInfo>::Build(fuzzData);
+        sptr<NotificationSubscribeInfo> info = ObjectBuilder<NotificationSubscribeInfo>::Build(fuzzData);
         bool isNative = fuzzData->ConsumeBool();
         service->SubscribeLocalLiveView(nullptr, info, isNative);
         service->SubscribeLocalLiveView(nullptr, isNative);
