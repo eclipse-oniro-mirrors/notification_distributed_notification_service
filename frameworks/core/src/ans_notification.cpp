@@ -2485,5 +2485,15 @@ ErrCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<Notifica
     }
     return proxy->GetAllNotificationsBySlotType(notifications, slotType);
 }
+
+ErrCode AnsNotification::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetDistributedDevicelist(deviceTypes);
+}
 }  // namespace Notification
 }  // namespace OHOS

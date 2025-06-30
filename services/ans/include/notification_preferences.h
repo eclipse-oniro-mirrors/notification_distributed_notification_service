@@ -535,6 +535,23 @@ public:
 
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList);
 
+    /**
+     * @brief Set distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @param userId Indicates userId
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetDistributedDevicelist(std::vector<std::string> &deviceTypes, const int32_t &userId);
+
+    /**
+     * @brief Get distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
+
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;

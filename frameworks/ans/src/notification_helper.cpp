@@ -747,5 +747,10 @@ ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetHashCodeRule(type);
 }
+
+ErrCode NotificationHelper::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedDevicelist(deviceTypes);
+}
 }  // namespace Notification
 }  // namespace OHOS

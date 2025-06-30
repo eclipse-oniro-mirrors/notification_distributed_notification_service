@@ -1723,5 +1723,86 @@ HWTEST_F(NotificationPreferencesDatabaseTest, DelCloneProfileInfo_0205, TestSize
     result = preferncesDB_->DelBatchCloneProfileInfo(100, deleteProfileInfo);
     ASSERT_EQ(result, true);
 }
+
+/**
+ * @tc.name: PutDistributedDevicelist_0100
+ * @tc.desc: Test PutDistributedDevicelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedDevicelist_0100, TestSize.Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::string deviceTypes = "deviceTypes";
+    int32_t userId = 100;
+    auto ret = preferncesDB_->PutDistributedDevicelist(deviceTypes, userId);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: PutDistributedDevicelist_0200
+ * @tc.desc: Test PutDistributedDevicelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, PutDistributedDevicelist_0200, TestSize.Level1)
+{
+    preferncesDB_ = std::make_unique<NotificationPreferencesDatabase>();
+    ASSERT_NE(preferncesDB_, nullptr);
+    std::string deviceTypes = "deviceTypes";
+    int32_t userId = 100;
+    auto ret = preferncesDB_->PutDistributedDevicelist(deviceTypes, userId);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetDistributedDevicelist_0100
+ * @tc.desc: Test GetDistributedDevicelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedDevicelist_0100, TestSize.Level1)
+{
+    std::string deviceTypes;
+    int32_t userId = 100;
+    auto ret = preferncesDB_->PutDistributedDevicelist(deviceTypes, userId);
+    ASSERT_EQ(ret, true);
+    ret = preferncesDB_->GetDistributedDevicelist(deviceTypes);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetDistributedDevicelist_0200
+ * @tc.desc: Test GetDistributedDevicelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedDevicelist_0200, TestSize.Level1)
+{
+    std::string deviceTypes = "deviceTypes";
+    int32_t userId = 100;
+    auto ret = preferncesDB_->PutDistributedDevicelist(deviceTypes, userId);
+    ASSERT_EQ(ret, true);
+    ret = preferncesDB_->GetDistributedDevicelist(deviceTypes);
+    ASSERT_EQ(ret, true);
+    ASSERT_EQ(deviceTypes.empty(), false);
+}
+
+/**
+ * @tc.name: GetDistributedDevicelist_0300
+ * @tc.desc: Test GetDistributedDevicelist
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedDevicelist_0300, TestSize.Level1)
+{
+    std::string deviceTypes1 = "deviceTypes1";
+    int32_t userId1 = 100;
+    auto ret = preferncesDB_->PutDistributedDevicelist(deviceTypes1, userId1);
+    ASSERT_EQ(ret, true);
+    std::string deviceTypes2 = "deviceTypes2";
+    int32_t userId2 = 101;
+    ret = preferncesDB_->PutDistributedDevicelist(deviceTypes2, userId2);
+    ASSERT_EQ(ret, true);
+    std::string deviceTypes;
+    ret = preferncesDB_->GetDistributedDevicelist(deviceTypes);
+    ASSERT_EQ(ret, true);
+    ASSERT_EQ(deviceTypes, deviceTypes1);
+}
 }  // namespace Notification
 }  // namespace OHOS

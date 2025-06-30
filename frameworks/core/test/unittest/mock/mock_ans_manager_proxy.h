@@ -188,6 +188,7 @@ public:
         const bool enabled));
     MOCK_METHOD2(IsSilentReminderEnabled, ErrCode(const sptr<NotificationBundleOption> &bundleOption,
         int32_t &enableStatusInt));
+    MOCK_METHOD1(GetDistributedDevicelist, ErrCode(std::vector<std::string>& deviceList));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

@@ -1362,6 +1362,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode SetHashCodeRule(const uint32_t type);
+
+    /**
+     * @brief get distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
 };
 }  // namespace Notification
 }  // namespace OHOS

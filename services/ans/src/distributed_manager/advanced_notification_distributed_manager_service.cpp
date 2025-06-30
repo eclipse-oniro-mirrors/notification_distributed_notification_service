@@ -728,7 +728,30 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    return NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    auto result =
+        NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    if (result == ERR_OK && isAuth) {
+        std::vector<std::string> deviceTypes;
+        if (NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes) == ERR_OK) {
+            auto it = std::find(deviceTypes.begin(), deviceTypes.end(), deviceType);
+            if (it == deviceTypes.end()) {
+                deviceTypes.push_back(deviceType);
+                NotificationPreferences::GetInstance()->SetDistributedDevicelist(deviceTypes, userId);
+            }
+        }
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGW("Not system app or SA!");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+    return NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes);
 }
 
 ErrCode AdvancedNotificationService::GetDeviceRemindType(int32_t& remindTypeInt)
