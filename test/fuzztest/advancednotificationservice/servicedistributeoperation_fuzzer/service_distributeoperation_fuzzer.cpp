@@ -18,11 +18,18 @@
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
 #include "mock_notification_request.h"
+#include "mock_notification_operation_info.h"
 
 namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service = AdvancedNotificationService::GetInstance();
+        service->InitPublishProcess();
+        service->CreateDialogManager();
+
+        sptr<NotificationOperationInfo> operationInfo = ObjectBuilder<NotificationOperationInfo>::Build(fuzzData);
+        service->DistributeOperation(operationInfo, nullptr);
         return true;
     }
 }
