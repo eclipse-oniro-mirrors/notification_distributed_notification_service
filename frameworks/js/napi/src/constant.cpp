@@ -358,7 +358,6 @@ napi_value EnableStatusInit(napi_env env, napi_value exports)
     SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::ENABLE_TRUE, "ENABLE_TRUE");
     SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::ENABLE_FALSE, "ENABLE_FALSE");
 
-    
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("EnableStatus", obj),
     };

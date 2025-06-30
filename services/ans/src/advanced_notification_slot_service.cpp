@@ -682,11 +682,16 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     }
 
     request->SetFlags(flags);
+    HandleFlagsWithRequest(request);
+}
+
+void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<NotificationRequest> &request)
+{
     NotificationConstant::ENABLE_STATUS enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
     if (request->IsCommonLiveView()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(request);
-    }else if (!request->IsSystemLiveView()) {
+    } else if (!request->IsSystemLiveView()) {
         result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
         if (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
             flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
@@ -697,8 +702,9 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
             request->SetFlags(flags);
         }
     }
-    ANS_LOGI("notificationKey = %{public}s flags = %{public}d silentReminderEnabled = %{public}d",
-        request->GetKey().c_str(), flags->GetReminderFlags(), enableStatus);
+    ANS_LOGI("Key = %{public}s flags = %{public}d class = %{public}s silent = %{public}d",
+        request->GetKey().c_str(), flags->GetReminderFlags(),
+        request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW) {
         return;
@@ -706,7 +712,6 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
 #endif
-    ANS_LOGI("classification:%{public}s", request->GetClassification().c_str());
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot)

@@ -116,7 +116,8 @@ napi_value NapiSetSilentReminderEnabled(napi_env env, napi_callback_info info)
         resourceName,
         [](napi_env env, void *data) {
             ANS_LOGD("NapiSetSilentReminderEnabled work excute.");
-            AsyncCallbackSilentReminderEnable *asynccallbackinfo = static_cast<AsyncCallbackSilentReminderEnable *>(data);
+            AsyncCallbackSilentReminderEnable *asynccallbackinfo =
+                static_cast<AsyncCallbackSilentReminderEnable *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode = NotificationHelper::SetSilentReminderEnabled(
                     asynccallbackinfo->params.option, asynccallbackinfo->params.enabled);
@@ -130,7 +131,6 @@ napi_value NapiSetSilentReminderEnabled(napi_env env, napi_callback_info info)
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
  
     return promise;
- 
 }
  
 void AsyncCompleteCallbackNapiIsSilentReminderEnabled(napi_env env, napi_status status, void *data)

@@ -1241,6 +1241,8 @@ public:
     void SetRequestBySlotType(const sptr<NotificationRequest> &request,
         const sptr<NotificationBundleOption> &bundleOption);
 
+    void HandleFlagsWithRequest(const sptr<NotificationRequest> &request);
+
     // Might fail if ces subscribe failed, if failed, dialogManager_ will be set nullptr
     bool CreateDialogManager();
 
@@ -1356,6 +1358,15 @@ public:
     ErrCode UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused) override;
 
     void UpdateCloneBundleInfo(const NotificationCloneBundleInfo cloneBundleInfo);
+
+    void UpdateCloneBundleInfoForEnable(
+        const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
+
+    void UpdateCloneBundleInfoFoSlot(
+        const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
+
+    void UpdateCloneBundleInfoFoSilentReminder(
+        const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
 
     void TryStartReminderAgentService();
 
