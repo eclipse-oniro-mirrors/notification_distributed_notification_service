@@ -184,6 +184,10 @@ public:
     MOCK_METHOD1(SetHashCodeRule, ErrCode(uint32_t));
     MOCK_METHOD4(RemoveDistributedNotifications, ErrCode(const std::vector<std::string>& hashcodes,
         const int32_t, const int32_t, const int32_t));
+    MOCK_METHOD2(SetSilentReminderEnabled, ErrCode(const sptr<NotificationBundleOption> &bundleOption,
+        const bool enabled));
+    MOCK_METHOD2(IsSilentReminderEnabled, ErrCode(const sptr<NotificationBundleOption> &bundleOption,
+        int32_t &enableStatusInt));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

@@ -27,11 +27,18 @@
 #include "advanced_notification_service.h"
 #include "notification_clone_bundle_info.h"
 #include "notification_disable.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
 class NotificationPreferencesInfo final {
 public:
+
+    struct SilentReminderInfo {
+        std::string bundleName;
+        int32_t uid;
+        NotificationConstant::ENABLE_STATUS enableStatus {NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE};
+    };
     class BundleInfo final {
     public:
         BundleInfo();
@@ -260,6 +267,20 @@ public:
     bool GetBundleInfo(const sptr<NotificationBundleOption> &bundleOption, BundleInfo &info) const;
 
     /**
+     * set silent reminder info into preferences info.
+     * @param info Indicates the bundle.
+     */
+    void SetSilentReminderInfo(SilentReminderInfo &info);
+
+    /**
+     * get silent reminder info from preferences info.
+     * @param bundleOption Indicates the bundle info label.
+     * @param info Indicates the silent reminder info.
+     * @return Whether to get silent reminder info success.
+     */
+    bool GetSilentReminderInfo(const sptr<NotificationBundleOption> &bundleOption, SilentReminderInfo &info) const;
+
+    /**
      * remove bundle info from preferences info.
      * @param bundleOption Indicates the bundle info label.
      * @return Whether to remove bundle info success.
@@ -313,6 +334,7 @@ public:
     void RemoveNotificationEnable(const int32_t userId);
     void RemoveDoNotDisturbDate(const int32_t userId);
     void SetBundleInfoFromDb(BundleInfo &info, std::string bundleKey);
+    void SetSilentReminderInfoFromDb(SilentReminderInfo &silentReminderInfo, std::string bundleKey);
     std::string MakeDoNotDisturbProfileKey(int32_t userId, int64_t profileId);
     void AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     void RemoveDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
@@ -333,6 +355,7 @@ private:
     std::map<std::string, sptr<NotificationDoNotDisturbProfile>> doNotDisturbProfiles_;
     std::map<std::string, BundleInfo> infos_;
     std::vector<std::string> kioskAppTrustList_;
+    std::unordered_map<std::string, SilentReminderInfo> silentReminderInfos_;
 
     struct DisableNotificationInfo {
         int32_t disabled = -1;

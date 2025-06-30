@@ -638,6 +638,16 @@ ErrCode NotificationHelper::IsSmartReminderEnabled(const std::string &deviceType
     return DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(deviceType, enabled);
 }
 
+ErrCode NotificationHelper::SetSilentReminderEnabled(const NotificationBundleOption &bundleOption, const bool enabled)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetSilentReminderEnabled(bundleOption, enabled);
+}
+ 
+ErrCode NotificationHelper::IsSilentReminderEnabled(const NotificationBundleOption &bundleOption, int32_t &enableStatus)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+}
+
 ErrCode NotificationHelper::SetDistributedEnabledBySlot(
     const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
 {

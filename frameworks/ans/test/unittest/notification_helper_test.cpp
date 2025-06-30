@@ -1319,5 +1319,49 @@ HWTEST_F(NotificationHelperTest, DisableNotificationFeature_00001, Function | Sm
     ErrCode ret = notificationHelper.DisableNotificationFeature(notificationDisable);
     EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: SilentReminderEnabled_00001
+ * @tc.desc: Test SetSilentReminderEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetSilentReminderEnabled_00001, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    NotificationBundleOption bo;
+    bo.SetBundleName("bundleName");
+    bo.SetUid(1);
+    ErrCode ret = notificationHelper.SetSilentReminderEnabled(bo, true);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SilentReminderEnabled_00002
+ * @tc.desc: Test SetSilentReminderEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, SetSilentReminderEnabled_00002, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    NotificationBundleOption bo;
+    bo.SetUid(1);
+    ErrCode ret = notificationHelper.SetSilentReminderEnabled(bo, true);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: IsSilentReminderEnabled_00001
+ * @tc.desc: Test SetSilentReminderEnabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, IsSilentReminderEnabled_00001, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    NotificationBundleOption bo;
+    bo.SetUid(1);
+    int32_t enableStatus = 0;
+    ErrCode ret = notificationHelper.IsSilentReminderEnabled(bo, enableStatus);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
 }
 }

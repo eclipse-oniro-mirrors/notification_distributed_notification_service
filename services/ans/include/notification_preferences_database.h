@@ -113,6 +113,26 @@ public:
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
      *
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool SetSilentReminderEnabled(
+        const NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo);
+ 
+    /**
+     * @brief Get distributed enable notification in the of  bundle into disturbe DB.
+     *
+     * @param bundleInfo Indicates bundle info.
+     * @param enabled Indicates to whether to enabled
+     * @return Return true on success, false on failure.
+     */
+    bool IsSilentReminderEnabled(
+        NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo);
+
+    /**
+     * @brief Put distributed enable notification in the of  bundle into disturbe DB.
+     *
      * @param deviceType Indicates device type.
      * @param enabled Indicates to whether to enabled
      * @return Return true on success, false on failure.
@@ -294,6 +314,7 @@ public:
     bool RemoveNotificationEnable(const int32_t userId);
     bool RemoveDoNotDisturbDate(const int32_t userId);
     bool RemoveAnsBundleDbInfo(std::string bundleName, int32_t uid);
+    bool RemoveSilentEnabledDbByBundle(std::string bundleName, int32_t uid);
     bool AddDoNotDisturbProfiles(int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     bool RemoveDoNotDisturbProfiles(
         int32_t userId, const std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
@@ -406,12 +427,15 @@ private:
     int64_t StringToInt64(const std::string &str) const;
     void StringSplit(const std::string content, char delim, std::vector<std::string>& result) const;
     bool IsSlotKey(const std::string &bundleKey, const std::string &key) const;
+    bool IsSilentReminderKey(const std::string &bundleKey, const std::string &key) const;
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
 
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,
         const std::pair<std::string, std::string> &entry, const int32_t &userId);
+    void ParseSilentReminderFromDisturbeDB(NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo,
+        const std::pair<std::string, std::string> &entry);
     void ParseBundlePropertyFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &bundleKey, const std::pair<std::string, std::string> &entry);
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
@@ -453,6 +477,8 @@ private:
         const std::string &deviceType, const int32_t userId) const;
     std::string GenerateBundleLablel(
         const std::string &deviceType, const std::string &deviceId, const int32_t userId) const;
+    std::string GenerateSilentReminderKey(
+        const NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo) const;
     void GetDoNotDisturbType(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbBeginDate(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbEndDate(NotificationPreferencesInfo &info, int32_t userId);

@@ -101,6 +101,7 @@ ohos_source_set("ans_service_sources") {
     "src/distributed_manager/advanced_notification_distributed_manager_service.cpp",
     "src/disturb_manager/advanced_notification_disturb_manager_service.cpp",
     "src/enable_manager/enable_manager.cpp",
+    "src/enable_manager/silent_reminder_manager.cpp",
     "src/event_report.cpp",
     "src/liveview_all_scenarios_extension_wrapper.cpp",
     "src/notification_dialog.cpp",

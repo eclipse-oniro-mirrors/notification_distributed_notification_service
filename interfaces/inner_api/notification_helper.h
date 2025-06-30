@@ -1178,6 +1178,28 @@ public:
     static ErrCode SetSmartReminderEnabled(const std::string &deviceType, const bool enabled);
 
     /**
+     * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    static ErrCode IsSilentReminderEnabled(const NotificationBundleOption &bundleOption, int32_t &enableStatus);
+ 
+    /**
+     * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param enabled Specifies whether to allow the given application to publish notifications.
+     *                The value true indicates that notifications are allowed, and the value
+     *                false indicates that notifications are not allowed.
+     * @return Returns set notifications enabled for specified bundle result.
+     */
+    static ErrCode SetSilentReminderEnabled(const NotificationBundleOption &bundleOption, const bool enabled);
+
+    /**
      * @brief Set the channel switch for collaborative reminders.
        The caller must have system permissions to call this method.
      *

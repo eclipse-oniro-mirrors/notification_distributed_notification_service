@@ -88,6 +88,7 @@ ohos_shared_library("notificationmanager") {
     "napi_push.cpp",
     "napi_push_callback.cpp",
     "napi_remove_group.cpp",
+    "napi_silent_reminder_enable.cpp",
     "napi_slot.cpp",
     "napi_sync_config.cpp",
     "napi_template.cpp",

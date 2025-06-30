@@ -518,6 +518,7 @@ void AdvancedNotificationService::OnBundleRemoved(const sptr<NotificationBundleO
         DeleteDuplicateMsgs(bundleOption);
     }));
     NotificationPreferences::GetInstance()->RemoveEnabledDbByBundle(bundleOption);
+    NotificationPreferences::GetInstance()->RemoveSilentEnabledDbByBundle(bundleOption);
 #ifdef ENABLE_ANS_AGGREGATION
     EXTENTION_WRAPPER->UpdateByBundle(bundleOption->GetBundleName(),
         NotificationConstant::PACKAGE_REMOVE_REASON_DELETE);
@@ -1975,6 +1976,15 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
             if (SetEnabledForBundleSlotInner(bundle, bundle, cloneSlot.slotType_, cloneSlot.enable_,
                 cloneSlot.isForceControl_) != ERR_OK) {
                 ANS_LOGW("Set notification slots failed %{public}s.", cloneSlot.Dump().c_str());
+            }
+        }
+
+        auto enableStatus = cloneBundleInfo.GetSilentReminderEnabled();
+        if (enableStatus != NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE &&
+            enableStatus != NotificationConstant::ENABLE_STATUS::DEFAULT_TRUE) {
+            if (NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundle,
+                enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE ? true : false) != ERR_OK) {
+                ANS_LOGW("SetSilentReminderEnabled failed.");
             }
         }
     }));

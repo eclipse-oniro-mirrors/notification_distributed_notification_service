@@ -279,6 +279,10 @@ interface OHOS.Notification.IAnsManager {
 
     void SetSmartReminderEnabled([in] String deviceType, [in] boolean enabled);
 
+    void IsSilentReminderEnabled([in] sptr<NotificationBundleOption> bundleOption, [out] int enabled);
+
+    void SetSilentReminderEnabled([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+
     void IsDistributedEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [out] boolean enabled);
 
     void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id);

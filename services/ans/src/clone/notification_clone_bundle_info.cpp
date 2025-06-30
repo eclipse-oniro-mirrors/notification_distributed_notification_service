@@ -30,6 +30,7 @@ constexpr const char *BUNDLE_INFO_SLOT_LIST = "slotList";
 constexpr const char *BUNDLE_INFO_SLOT_TYPE = "slotType";
 constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
 constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
+constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -92,6 +93,17 @@ bool NotificationCloneBundleInfo::GetEnableNotification() const
     return isEnabledNotification_;
 }
 
+void NotificationCloneBundleInfo::SetSilentReminderEnabled(
+    const NotificationConstant::ENABLE_STATUS &silentReminderEnabled)
+{
+    silentReminderEnabled_ = silentReminderEnabled;
+}
+
+NotificationConstant::ENABLE_STATUS NotificationCloneBundleInfo::GetSilentReminderEnabled() const
+{
+    return silentReminderEnabled_;
+}
+
 void NotificationCloneBundleInfo::AddSlotInfo(const SlotInfo &slotInfo)
 {
     for (auto& item : slotsInfo_) {
@@ -128,6 +140,7 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
     jsonObject[BUNDLE_INFO_SLOT_FLAGS] =  slotFlags_;
     jsonObject[BUNDLE_INFO_SHOW_BADGE] =  isShowBadge_ ? 1 : 0;
     jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] =  isEnabledNotification_ ? 1 : 0;
+    jsonObject[BUNDLE_INFO_SILENT_REMINDER] =  static_cast<int32_t>(silentReminderEnabled_);
 }
 
 void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject)
@@ -183,6 +196,10 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
         int32_t enabledNotification = jsonObject.at(BUNDLE_INFO_ENABLE_NOTIFICATION).get<int32_t>();
         isEnabledNotification_ = (enabledNotification == CONST_ENABLE_INT);
     }
+    if (jsonObject.contains(BUNDLE_INFO_SILENT_REMINDER) && jsonObject[BUNDLE_INFO_SILENT_REMINDER].is_number()) {
+        int32_t silentReminderEnabled = jsonObject.at(BUNDLE_INFO_SILENT_REMINDER).get<int32_t>();
+        silentReminderEnabled_ = static_cast<NotificationConstant::ENABLE_STATUS>(silentReminderEnabled);
+    }
     SlotsFromJson(jsonObject);
 }
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
@@ -206,6 +223,7 @@ std::string NotificationCloneBundleInfo::Dump() const
             ", ShowBadge = " + std::to_string(isShowBadge_) +
             ", isEnabled = " + std::to_string(isEnabledNotification_) +
             ", slotsInfo = " + slotDump +
+            ", silentReminderEnabled = " + std::to_string(static_cast<int32_t>(silentReminderEnabled_)) +
             " }";
 }
 }

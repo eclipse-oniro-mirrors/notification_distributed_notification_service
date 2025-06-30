@@ -36,6 +36,7 @@
 #include "napi_distributed_enable.h"
 #include "napi_sync_config.h"
 #include "napi_open_settings.h"
+#include "napi_silent_reminder_enable.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -100,6 +101,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setTargetDeviceStatus", NapiSetTargetDeviceStatus),
         DECLARE_NAPI_FUNCTION("requestEnableNotification", NapiRequestEnableNotification),
         DECLARE_NAPI_FUNCTION("getNotificationSetting", NapiGetNotificationSettings),
+        DECLARE_NAPI_FUNCTION("setSilentReminderEnabled", NapiSetSilentReminderEnabled),
+        DECLARE_NAPI_FUNCTION("isSilentReminderEnabled", NapiIsSilentReminderEnabled),
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
         DECLARE_NAPI_FUNCTION("displayBadge", NapiDisplayBadge),

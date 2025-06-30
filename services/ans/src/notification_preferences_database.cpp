@@ -115,6 +115,11 @@ const static std::string KEY_SMART_REMINDER_ENABLE_NOTIFICATION = "enabledSmartR
 /**
  * Indicates that disturbe key which bundle enable notification.
  */
+const static std::string KEY_SILENT_REMINDER_ENABLE_NOTIFICATION = "enabledSilentReminder";
+
+/**
+ * Indicates that disturbe key which bundle enable notification.
+ */
 const static std::string KEY_ENABLE_SLOT_DISTRIBUTED_NOTIFICATION = "enabledSlotDistributedNotification";
 
 /**
@@ -1151,11 +1156,14 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPrefe
         rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
         ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
         NotificationPreferencesInfo::BundleInfo bunldeInfo;
+        NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
         std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
         bool badgeEnableExist = false;
         for (auto bundleEntry : bundleEntries) {
             if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
                 ParseSlotFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry, userId);
+            } else if (IsSilentReminderKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
+                ParseSilentReminderFromDisturbeDB(silentReminderInfo, bundleEntry);
             } else {
                 ParseBundlePropertyFromDisturbeDB(bunldeInfo, bundleKey, bundleEntry);
             }
@@ -1170,6 +1178,7 @@ void NotificationPreferencesDatabase::ParseBundleFromDistureDB(NotificationPrefe
         }
 
         info.SetBundleInfoFromDb(bunldeInfo, bundleKey);
+        info.SetSilentReminderInfoFromDb(silentReminderInfo, bundleKey);
     }
 }
 
@@ -1190,6 +1199,15 @@ void NotificationPreferencesDatabase::ParseSlotFromDisturbeDB(NotificationPrefer
     std::string findString = GenerateSlotKey(bundleKey, typeStr) + KEY_UNDER_LINE;
     ParseSlot(findString, slot, entry, userId);
     bundleInfo.SetSlot(slot);
+}
+
+void NotificationPreferencesDatabase::ParseSilentReminderFromDisturbeDB(
+    NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo,
+    const std::pair<std::string, std::string> &entry)
+{
+    bool enable = static_cast<bool>(StringToInt(entry.second));
+    silentReminderInfo.enableStatus =
+        enable ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE;
 }
 
 void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
@@ -1361,6 +1379,16 @@ bool NotificationPreferencesDatabase::IsSlotKey(const std::string &bundleKey, co
     return false;
 }
 
+bool NotificationPreferencesDatabase::IsSilentReminderKey(const std::string &bundleKey, const std::string &key) const
+{
+    std::string tempStr = FindLastString(bundleKey, key);
+    size_t pos = tempStr.find_first_of(KEY_UNDER_LINE);
+    if (!tempStr.compare(KEY_SILENT_REMINDER_ENABLE_NOTIFICATION)) {
+        return true;
+    }
+    return false;
+}
+
 std::string NotificationPreferencesDatabase::GenerateSlotKey(
     const std::string &bundleKey, const std::string &type, const std::string &subType) const
 {
@@ -1381,6 +1409,14 @@ std::string NotificationPreferencesDatabase::GenerateSlotKey(
     }
     ANS_LOGD("Slot key is : %{public}s.", key.c_str());
     return key;
+}
+
+std::string NotificationPreferencesDatabase::GenerateSilentReminderKey(
+    const NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo) const
+{
+    std::string bundleKey = std::string().append(silentReminderInfo.bundleName)
+        .append(std::to_string(silentReminderInfo.uid));
+    return GenerateBundleKey(bundleKey, KEY_SILENT_REMINDER_ENABLE_NOTIFICATION);
 }
 
 std::string NotificationPreferencesDatabase::GenerateBundleKey(
@@ -1802,6 +1838,28 @@ bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleNa
     return true;
 }
 
+bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string bundleName, int32_t uid)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("RdbStore is nullptr.");
+        return false;
+    }
+ 
+    // return std::string(KEY_SILENT_REMINDER_ENABLE_NOTIFICATION).append(
+    //     bundleInfo.GetBundleName()).append(std::to_string(bundleInfo.GetBundleUid()));
+    std::string key = GenerateSilentReminderKey({bundleName, uid, NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE});
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    int32_t result = rdbDataManager_->DeleteData(key, userId);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("Delete Silent db info failed, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
+        return false;
+    }
+ 
+    ANS_LOGE("Remove Silent db info, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
+    return true;
+}
+
 bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bundleName, const int32_t &bundleUid)
 {
     if (!CheckRdbStore()) {
@@ -2133,7 +2191,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabled(
     std::string key = std::string(KEY_DISTRIBUTED_NOTIFICATION_SWITCH).append(KEY_MIDDLE_LINE).append(
         deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
     bool result = false;
-    enabled = NotificationConstant::ENABLE_STATUS::ENABLE_NONE;
+    enabled = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
@@ -2170,6 +2228,62 @@ ErrCode NotificationPreferencesDatabase::GetDistributedAuthStatus(
             case NativeRdb::E_OK: {
                 result = true;
                 isAuth = StringToInt(value) != 0;
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::SetSilentReminderEnabled(
+    const NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo)
+{
+    if (silentReminderInfo.bundleName.empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(silentReminderInfo.uid, userId);
+
+    std::string key = GenerateSilentReminderKey(silentReminderInfo);
+    bool enableStatus = false;
+    if (silentReminderInfo.enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+        enableStatus = true;
+    }
+    int32_t result = PutDataToDB(key, static_cast<int32_t>(enableStatus), userId);
+    ANS_LOGI("SilentReminder result:%{public}d, key:%{public}s, enableStatus:%{public}d",
+        result, key.c_str(), silentReminderInfo.enableStatus);
+    return (result == NativeRdb::E_OK);
+}
+ 
+bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
+    NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo)
+{
+    if (silentReminderInfo.bundleName.empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+ 
+    std::string key = GenerateSilentReminderKey(silentReminderInfo);
+    bool result = false;
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(silentReminderInfo.uid, userId);
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                silentReminderInfo.enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                NotificationConstant::ENABLE_STATUS enableStatus =
+                    StringToInt(value) ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE :
+                    NotificationConstant::ENABLE_STATUS::ENABLE_FALSE;
+                silentReminderInfo.enableStatus = enableStatus;
                 break;
             }
             default:
