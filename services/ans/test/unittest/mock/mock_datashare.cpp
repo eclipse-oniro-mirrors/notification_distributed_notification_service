@@ -321,11 +321,6 @@ public:
     {
         return {};
     }
-
-    int OpenFileWithErrCode(Uri &uri, const std::string &mode, int32_t &errCode) override
-    {
-        return 0;
-    }
 };
 
 std::shared_ptr<DataShareHelper> DataShareHelper::Creator(const sptr<IRemoteObject> &token, const std::string &strUri,
