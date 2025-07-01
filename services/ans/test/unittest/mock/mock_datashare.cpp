@@ -167,6 +167,11 @@ public:
         return 0;
     }
 
+    int OpenFileWithErrCode(Uri &uri, const std::string &mode, int32_t &errCode) override
+    {
+        return 0;
+    }
+
     int OpenRawFile(Uri &uri, const std::string &mode) override
     {
         return 0;
