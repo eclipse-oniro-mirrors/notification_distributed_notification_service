@@ -23,6 +23,10 @@ namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service = AdvancedNotificationService::GetInstance();
+        std::string representativeBundle = fuzzData->ConsumeRandomLengthString();
+        bool canPublish;
+        service->CanPublishAsBundle(representativeBundle, canPublish);
         return true;
     }
 }
