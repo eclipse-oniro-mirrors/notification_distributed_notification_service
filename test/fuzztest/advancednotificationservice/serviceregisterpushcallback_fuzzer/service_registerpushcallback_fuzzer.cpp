@@ -17,12 +17,29 @@
 #include <fuzzer/FuzzedDataProvider.h>
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
-#include "mock_notification_request.h"
+#include "mock_notification_check_request.h"
+#include "push_callback_stub.h"
 
 namespace OHOS {
 namespace Notification {
+
+class FuzzTestPushCallBackStub : public PushCallBackStub {
+public:
+    int32_t OnCheckNotification(
+        const std::string &notificationData,
+        const std::shared_ptr<PushCallBackParam> &pushCallBackParam) override
+    {
+        return 0;
+    }
+};
+
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service = AdvancedNotificationService::GetInstance();
+        sptr<IRemoteObject> pushCallback = new (std::nothrow) FuzzTestPushCallBackStub();
+        sptr<NotificationCheckRequest> notificationCheckRequest =
+            ObjectBuilder<NotificationCheckRequest>::Build(fuzzData);
+        service->RegisterPushCallback(pushCallback, notificationCheckRequest);
         return true;
     }
 }
@@ -33,6 +50,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }
