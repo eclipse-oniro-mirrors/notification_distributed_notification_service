@@ -587,6 +587,11 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode IsSmartReminderEnabled(const std::string& deviceType, bool& enabled) override
     {
         return ERR_ANS_INVALID_PARAM;

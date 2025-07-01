@@ -127,6 +127,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", NapiGetDeviceRemindType),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", NapiSetSyncNotificationEnabledWithoutApp),
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", NapiIsSmartReminderEnabled),
+        DECLARE_NAPI_FUNCTION("setDistributedEnabled", NapiSetDistributedEnabled),
+        DECLARE_NAPI_FUNCTION("getDistributedDeviceList", NapiGetDistributedDeviceList),
 #else
         DECLARE_NAPI_FUNCTION("isDistributedEnabled", Common::NapiReturnFalseCbNewType),
         DECLARE_NAPI_FUNCTION("setDistributedEnable", Common::NapiReturnCapErrCb),
@@ -138,6 +140,8 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getDeviceRemindType", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("setSyncNotificationEnabledWithoutApp", Common::NapiReturnCapErrCb),
         DECLARE_NAPI_FUNCTION("isSmartReminderEnabled", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("setDistributedEnabled", Common::NapiReturnCapErr),
+        DECLARE_NAPI_FUNCTION("getDistributedDeviceList", Common::NapiReturnCapErr),
 #endif
         
 #ifdef ANS_FEATURE_DISTURB_MANAGER

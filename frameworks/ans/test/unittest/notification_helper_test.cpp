@@ -1363,5 +1363,18 @@ HWTEST_F(NotificationHelperTest, IsSilentReminderEnabled_00001, Function | Small
     ErrCode ret = notificationHelper.IsSilentReminderEnabled(bo, enableStatus);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: GetDistributedDevicelist_0100
+ * @tc.desc: Test GetDistributedDevicelist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationHelperTest, GetDistributedDevicelist_0100, Function | SmallTest | Level1)
+{
+    std::vector<std::string> deviceTypes;
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.GetDistributedDevicelist(deviceTypes);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }
 }

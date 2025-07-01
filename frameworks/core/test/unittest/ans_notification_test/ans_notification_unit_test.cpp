@@ -1769,6 +1769,18 @@ HWTEST_F(AnsNotificationUnitTest, CancelAsBundle_0100, Function | MediumTest | L
 }
 
 /*
+ * @tc.name: GetDistributedDevicelist_0100
+ * @tc.desc: test GetDistributedDevicelist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetDistributedDevicelist_0100, Function | MediumTest | Level1)
+{
+    std::vector<std::string> deviceTypes;
+    ErrCode ret = ans_->GetDistributedDevicelist(deviceTypes);
+    EXPECT_EQ(ret, ERR_ANS_SERVICE_NOT_CONNECTED);
+}
+
+/*
  * @tc.name: GetNotificationSettings_0100
  * @tc.desc: test GetNotificationSetting.
  * @tc.type: FUNC
@@ -2319,6 +2331,18 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_0800, Function | Mediu
     std::shared_ptr<TestAnsSubscriber> subscriberPtr = std::make_shared<TestAnsSubscriber>();
     ErrCode ret = ans_->UnSubscribeNotification(subscriberPtr, nullptr);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetDistributedDevicelist_0200
+ * @tc.desc: test GetDistributedDevicelist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetDistributedDevicelist_0200, Function | MediumTest | Level1)
+{
+    std::vector<std::string> deviceTypes;
+    ErrCode ret = ans_->GetDistributedDevicelist(deviceTypes);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

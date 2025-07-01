@@ -1377,6 +1377,14 @@ public:
      */
     ErrCode SetHashCodeRule(const uint32_t type);
 
+    /**
+     * @brief get distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
+
 private:
     /**
      * @brief Gets Ans Manager proxy.

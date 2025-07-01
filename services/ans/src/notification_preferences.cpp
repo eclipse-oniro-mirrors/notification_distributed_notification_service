@@ -1567,6 +1567,48 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
     return true;
 }
 
+ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::string> &deviceTypes, const int32_t &userId)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    nlohmann::json deviceTypesJson = deviceTypes;
+    std::string deviceTypesjsonString = deviceTypesJson.dump();
+    storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+ErrCode NotificationPreferences::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::string value = "";
+    auto storeDBResult = preferncesDB_->GetDistributedDevicelist(value);
+    if (!storeDBResult) {
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    if (value.empty()) {
+        ANS_LOGE("Empty json");
+        return ERR_OK;
+    }
+
+    if (!nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json string");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    nlohmann::json jsonObject = nlohmann::json::parse(value, nullptr, false);
+    if (jsonObject.is_null() || jsonObject.empty()) {
+        ANS_LOGE("Invalid JSON object");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    if (jsonObject.is_discarded() || !jsonObject.is_array()) {
+        ANS_LOGE("Parse device type list failed due to data is discarded or not array");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    deviceTypes = jsonObject.get<std::vector<std::string>>();
+    return ERR_OK;
+}
+
 ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& deviceType, bool existFlag)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

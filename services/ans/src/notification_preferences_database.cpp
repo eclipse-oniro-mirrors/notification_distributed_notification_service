@@ -268,6 +268,11 @@ static const char* const KEY_DISTRIBUTED_NOTIFICATION_SWITCH = "distributedNotif
  */
 static const char* const KEY_ENABLE_DISTRIBUTED_AUTH_STATUS = "enabledDistributedAuthStatus";
 
+/**
+ * Indicates that distributed device list.
+ */
+static const char* const KEY_DISTRIBUTED_DEVICE_LIST = "distributedDeviceList";
+
 NotificationPreferencesDatabase::NotificationPreferencesDatabase()
 {
     NotificationRdbConfig notificationRdbConfig;
@@ -2303,6 +2308,45 @@ ErrCode NotificationPreferencesDatabase::SetDistributedAuthStatus(
     int32_t result = PutDataToDB(key, static_cast<int32_t>(isAuth), userId);
     ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);
     return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::PutDistributedDevicelist(const std::string &deviceTypes, const int32_t &userId)
+{
+    ANS_LOGD("%{public}s, deviceTypes: %{public}s, userId: %{public}d", __FUNCTION__, deviceTypes.c_str(), userId);
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->InsertData(KEY_DISTRIBUTED_DEVICE_LIST, deviceTypes, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetDistributedDevicelist(std::string &deviceTypes)
+{
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    bool result = false;
+    GetValueFromDisturbeDB(KEY_DISTRIBUTED_DEVICE_LIST, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                deviceTypes = value;
+                break;
+            }
+            default:
+                result = false;
+                break;
+        }
+    });
+    return result;
 }
 
 bool NotificationPreferencesDatabase::GetDistributedEnabledForBundle(const std::string deviceType,

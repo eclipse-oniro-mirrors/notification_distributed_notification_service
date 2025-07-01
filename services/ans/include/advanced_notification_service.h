@@ -1135,6 +1135,14 @@ public:
         const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth) override;
 
     /**
+     * @brief get distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes) override;
+
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.

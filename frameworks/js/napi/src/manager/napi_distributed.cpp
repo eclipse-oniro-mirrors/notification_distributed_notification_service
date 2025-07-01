@@ -47,16 +47,51 @@ void AsyncCompleteCallbackNapiIsDistributedEnabled(napi_env env, napi_status sta
     }
 }
 
+napi_value DoIsDistributedEnabledWithDeviceType(napi_env env, napi_callback_info info, EnabledParams &params)
+{
+    auto asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackInfoIsEnabled{ .env = env, .asyncWork = nullptr, .deviceType = params.deviceType };
+    if (!asynccallbackinfo) {
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "isDistributedEnabled", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(
+        env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiIsDistributedEnabled work excute.");
+            AsyncCallbackInfoIsEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnabled *>(data);
+
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::IsDistributedEnabled(asynccallbackinfo->deviceType, asynccallbackinfo->enable);
+                ANS_LOGI("IsDistributedEnabled enable = %{public}d", asynccallbackinfo->enable);
+            }
+        },
+        AsyncCompleteCallbackNapiIsDistributedEnabled, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
+
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
+}
+
 napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
-
-    napi_ref callback = nullptr;
-    if (Common::ParseParaOnlyCallback(env, info, callback) == nullptr) {
+    EnabledParams params{};
+    if (ParseIsDistributedEnabledParams(env, info, params) == nullptr) {
         Common::NapiThrow(env, ERROR_PARAM_INVALID);
         return Common::NapiGetUndefined(env);
     }
 
+    if (!params.deviceType.empty()) {
+        return DoIsDistributedEnabledWithDeviceType(env, info, params);
+    }
+
+    napi_ref callback = params.callback;
     auto asynccallbackinfo = new (std::nothrow) AsyncCallbackInfoIsEnabled {.env = env, .asyncWork = nullptr};
     if (!asynccallbackinfo) {
         return Common::JSParaError(env, callback);
@@ -160,6 +195,58 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+napi_value NapiSetDistributedEnabled(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("called");
+    EnabledParams params{};
+    if (ParseSetDistributedEnabledParams(env, info, params) == nullptr) {
+        ANS_LOGD("null ParseSetDistributedEnabledParams");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID);
+        return Common::NapiGetUndefined(env);
+    }
+    AsyncCallbackInfoEnabled *asynccallbackinfo =
+        new (std::nothrow) AsyncCallbackInfoEnabled{ .env = env, .asyncWork = nullptr, .params = params };
+    if (!asynccallbackinfo) {
+        ANS_LOGD("Create asyncCallbackinfo fail.");
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "setDistributedEnabled", NAPI_AUTO_LENGTH, &resourceName);
+    // Async function call
+    napi_create_async_work(
+        env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiSetDistributedEnabled work excute.");
+            AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode = NotificationHelper::SetDistributedEnabled(
+                    asynccallbackinfo->params.deviceType, asynccallbackinfo->params.enable);
+                ANS_LOGD("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+            }
+        },
+        [](napi_env env, napi_status status, void *data) {
+            ANS_LOGD("NapiSetDistributedEnabled work complete.");
+            AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
+            if (asynccallbackinfo) {
+                Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+                if (asynccallbackinfo->info.callback != nullptr) {
+                    ANS_LOGD("Delete napiSetDistributedEnabled callback reference.");
+                    napi_delete_reference(env, asynccallbackinfo->info.callback);
+                }
+                napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+                delete asynccallbackinfo;
+                asynccallbackinfo = nullptr;
+            }
+            ANS_LOGD("NapiSetDistributedEnabled work complete end.");
+        },
+        (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
 }
 
 napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
@@ -640,6 +727,73 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
     } else {
         return promise;
     }
+}
+
+void AsyncCompleteCallbackNapiGetDistributedDeviceList(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("called");
+    if (!data) {
+        ANS_LOGE("null data");
+        return;
+    }
+    napi_value result = nullptr;
+    auto asynccallbackinfo = reinterpret_cast<AsynCallbackInfoGetDistributedDeviceList *>(data);
+    if (asynccallbackinfo) {
+        ANS_LOGD("Asynccallbackinfo conversion is success.");
+        if (asynccallbackinfo->info.errorCode != ERR_OK) {
+            result = Common::NapiGetNull(env);
+        } else {
+            napi_value arr = nullptr;
+            napi_create_array(env, &arr);
+            size_t count = 0;
+            for (auto vec : asynccallbackinfo->deviceList) {
+                napi_value vecValue = nullptr;
+                ANS_LOGI("deviceType = %{public}s", vec.c_str());
+                napi_create_string_utf8(env, vec.c_str(), NAPI_AUTO_LENGTH, &vecValue);
+                napi_set_element(env, arr, count, vecValue);
+                count++;
+            }
+            result = arr;
+        }
+        Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+        if (asynccallbackinfo->info.callback != nullptr) {
+            ANS_LOGD("Delete napiGetDistributedDeviceList callback reference.");
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+    }
+}
+
+napi_value NapiGetDistributedDeviceList(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("called");
+    AsynCallbackInfoGetDistributedDeviceList *asynccallbackinfo =
+        new (std::nothrow) AsynCallbackInfoGetDistributedDeviceList{ .env = env, .asyncWork = nullptr };
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERROR_INTERNAL_ERROR);
+        return Common::JSParaError(env, nullptr);
+    }
+
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getDistributedDeviceList", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_create_async_work(
+        env, nullptr, resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiGetDistributedDeviceList work excute.");
+            auto asynccallbackinfo = reinterpret_cast<AsynCallbackInfoGetDistributedDeviceList *>(data);
+            if (asynccallbackinfo) {
+                asynccallbackinfo->info.errorCode =
+                    NotificationHelper::GetDistributedDevicelist(asynccallbackinfo->deviceList);
+            }
+        },
+        AsyncCompleteCallbackNapiGetDistributedDeviceList, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);
+    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    return promise;
 }
 }  // namespace NotificationNapi
 }  // namespace OHOS
