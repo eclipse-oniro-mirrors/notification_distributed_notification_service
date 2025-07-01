@@ -26,7 +26,7 @@ namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
-        auto service = AdvancedNotificationService::GetInstance();        
+        auto service = AdvancedNotificationService::GetInstance();
         std::vector<sptr<NotificationSlot>> slots;
         service->GetSlots(slots);
         return true;

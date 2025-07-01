@@ -21,27 +21,32 @@
 namespace OHOS {
 namespace Notification {
 
+constexpr uint32_t MAX_SLOT_TYPE = 5;
+constexpr uint32_t MAX_STR_LENGTH = 20;
+constexpr uint32_t MAX_FLAGS = 63;
+constexpr uint32_t MAX_VISIBLENESS_STATUS = 2;
+
 template <>
 NotificationSlot* ObjectBuilder<NotificationSlot>::Build(FuzzedDataProvider *fdp)
 {
     NotificationSlot* slot = new NotificationSlot(static_cast<OHOS::Notification::NotificationConstant::SlotType>(
-        fdp->ConsumeIntegralInRange<int>(0, 5)));
+        fdp->ConsumeIntegralInRange<int>(0, MAX_SLOT_TYPE)));
     slot->SetEnableLight(fdp->ConsumeBool());
     slot->SetEnableVibration(fdp->ConsumeBool());
-    slot->SetDescription(fdp->ConsumeRandomLengthString(20));
+    slot->SetDescription(fdp->ConsumeRandomLengthString(MAX_STR_LENGTH));
     slot->SetLedLightColor(fdp->ConsumeIntegral<int32_t>());
     slot->SetLevel(static_cast<OHOS::Notification::NotificationSlot::NotificationLevel>(
-        dp->ConsumeIntegralInRange<int32_t>(0, 5)));
-    slot->SetSlotFlags(dp->ConsumeIntegralInRange<int32_t>(0, 63));
+        dp->ConsumeIntegralInRange<int32_t>(0, MAX_SLOT_TYPE)));
+    slot->SetSlotFlags(dp->ConsumeIntegralInRange<int32_t>(0, MAX_FLAGS));
     slot->SetVisibleness(static_cast<OHOS::Notification::NotificationConstant::VisiblenessType>(
-        fdp->ConsumeIntegralInRange<int>(0, 2)));
+        fdp->ConsumeIntegralInRange<int>(0, VISIBLENESS_STATUS)));
     slot->EnableBypassDnd(fdp->ConsumeBool());
     slot->EnableBadge(fdp->ConsumeBool());
     slot->SetEnable(fdp->ConsumeBool());
     slot->SetForceControl(fdp->ConsumeBool());
     slot->SetAuthorizedStatus(dp->ConsumeIntegralInRange<int32_t>(0, 1));
     slot->SetAuthHintCnt(dp->ConsumeIntegralInRange<int32_t>(0, 1));
-    slot->SetReminderMode(dp->ConsumeIntegralInRange<int32_t>(0, 63));
+    slot->SetReminderMode(dp->ConsumeIntegralInRange<int32_t>(0, MAX_FLAGS));
     
     ANS_LOGE("Build mock veriables");
     return slot;
