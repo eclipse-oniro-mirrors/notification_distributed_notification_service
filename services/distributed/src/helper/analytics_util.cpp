@@ -49,9 +49,10 @@ void AnalyticsUtil::SendHaReport(int32_t eventCode, int32_t errorCode, uint32_t 
 
 void AnalyticsUtil::SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason)
 {
-    if (sendReportCallback_ != nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
-        sendReportCallback_(messageType, errCode, errorReason);
+    if (sendReportCallback_ == nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
+        return;
     }
+    sendReportCallback_(messageType, errCode, errorReason);
 }
 
 void AnalyticsUtil::OperationalReporting(int branchId, int32_t slotType)

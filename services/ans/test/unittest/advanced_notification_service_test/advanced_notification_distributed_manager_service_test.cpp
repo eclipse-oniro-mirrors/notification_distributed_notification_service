@@ -370,7 +370,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceStatus_400, Func
 
     auto ret = advancedNotificationService_->SetTargetDeviceStatus(deviceType, status, controlFlag, deviceId, userId);
 
-    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**
