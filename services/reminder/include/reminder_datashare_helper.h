@@ -46,6 +46,11 @@ public:
     bool Query(std::map<std::string, sptr<ReminderRequest>>& reminders);
 
     /**
+     * @brief Search value from uri.
+     */
+    bool Query(Uri& uri, const std::string& key, std::string& value);
+
+    /**
      * @brief Update the reminder state.
      * state is ReminderCalendarShareTable::STATE_*
      */
@@ -97,7 +102,7 @@ private:
      * @brief Build datasharehelper, need to release it after use,
      * call ReleaseDataShareHelper.
      */
-    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper(const std::string& uriStr);
     bool ReleaseDataShareHelper(const std::shared_ptr<DataShare::DataShareHelper>& helper);
 
     /**
