@@ -18,7 +18,9 @@
 
 namespace OHOS {
 namespace NotificationNapi {
-constexpr int8_t DISABLE_MAX_PARA = 2;
+constexpr int8_t DISABLE_MAX_PARA = 3;
+constexpr int8_t DISABLE_MIN_PARA = 2;
+constexpr int32_t MAX_USER_ID = 10736;
 
 bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool &disabled)
 {
@@ -79,6 +81,24 @@ bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std
     return true;
 }
 
+bool ParseUserIdParameters(const napi_env &env, const napi_value &value, int32_t &userId)
+{
+    napi_status status = napi_get_value_int32(env, value, &userId);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to parse the third parameter as number");
+        std::string msg = "Third argument must be a number";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    if (userId < 0 || userId > MAX_USER_ID) {
+        ANS_LOGE("Invalid userId");
+        std::string msg = "UserId must be a non-negative integer and less than " + std::to_string(MAX_USER_ID);
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return false;
+    }
+    return true;
+}
+
 bool ParseDisableNotificationParameters(
     const napi_env &env, const napi_callback_info &info, NotificationDisable &param)
 {
@@ -87,10 +107,10 @@ bool ParseDisableNotificationParameters(
     napi_value argv[DISABLE_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
     NAPI_CALL_BASE(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL), false);
-    if (argc != DISABLE_MAX_PARA) {
+    if (argc > DISABLE_MAX_PARA || argc < DISABLE_MIN_PARA) {
         ANS_LOGE("wrong number of arguments");
         std::string msg =
-            "Wrong number of arguments.The number of parameters is not " + std::to_string(DISABLE_MAX_PARA);
+            "Wrong number of arguments. Expected 2 or 3, but get " + std::to_string(argc);
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
@@ -105,6 +125,14 @@ bool ParseDisableNotificationParameters(
         return false;
     }
     param.SetBundleList(bundleList);
+
+    if (argc == DISABLE_MAX_PARA) {
+        int32_t userId = SUBSCRIBE_USER_INIT;
+        if (!ParseUserIdParameters(env, argv[PARAM2], userId)) {
+            return false;
+        }
+        param.SetUserId(userId);
+    }
     return true;
 }
 }

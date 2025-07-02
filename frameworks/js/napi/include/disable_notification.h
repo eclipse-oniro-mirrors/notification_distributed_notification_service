@@ -31,6 +31,7 @@ struct AsyncCallbackInfoDisableNotification {
 
 bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool &disabled);
 bool ParseBundleListParameters(const napi_env &env, const napi_value &value, std::vector<std::string> &bundleList);
+bool ParseUserIdParameters(const napi_env &env, const napi_value &value, int32_t &userId);
 bool ParseDisableNotificationParameters(
     const napi_env &env, const napi_callback_info &info, NotificationDisable &paras);
 }  // namespace NotificationNapi

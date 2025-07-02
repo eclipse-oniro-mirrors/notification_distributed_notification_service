@@ -1804,5 +1804,21 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedDevicelist_0300, Tes
     ASSERT_EQ(ret, true);
     ASSERT_EQ(deviceTypes, deviceTypes1);
 }
+
+/**
+ * @tc.name: SetDisableNotificationInfo_0400
+ * @tc.desc: test SetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDisableNotificationInfo_0400, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesDatabase> notificationPreferencesDatabase =
+        std::make_shared<NotificationPreferencesDatabase>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationDisable->SetUserId(101);
+    EXPECT_TRUE(notificationPreferencesDatabase->SetDisableNotificationInfo(notificationDisable));
+}
 }  // namespace Notification
 }  // namespace OHOS

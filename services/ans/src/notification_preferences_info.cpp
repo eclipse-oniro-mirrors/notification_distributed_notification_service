@@ -448,7 +448,18 @@ void NotificationPreferencesInfo::SetDisableNotificationInfo(const sptr<Notifica
         ANS_LOGE("the bundle list is empty");
         return;
     }
-    DisableNotificationInfo disableNotificationInfo;
+    if (notificationDisable->GetUserId() > 0) {
+        DisableNotificationInfo disableNotificationInfo;
+        if (notificationDisable->GetDisabled()) {
+            disableNotificationInfo.disabled = 1;
+        } else {
+            disableNotificationInfo.disabled = 0;
+        }
+        disableNotificationInfo.bundleList = notificationDisable->GetBundleList();
+        userDisableNotificationInfo_.insert_or_assign(notificationDisable->GetUserId(), disableNotificationInfo);
+        return;
+    }
+    
     if (notificationDisable->GetDisabled()) {
         disableNotificationInfo_.disabled = 1;
     } else {
@@ -526,6 +537,28 @@ ErrCode NotificationPreferencesInfo::GetAllLiveViewEnabledBundles(const int32_t 
         }
     }
     return ERR_OK;
+}
+
+bool NotificationPreferencesInfo::GetUserDisableNotificationInfo(
+    int32_t userId, NotificationDisable &notificationDisable)
+{
+    auto itr = userDisableNotificationInfo_.find(userId);
+    if (itr != userDisableNotificationInfo_.end()) {
+        if (itr->second.disabled == -1) {
+            ANS_LOGD("notificationDisable is invalid");
+            return false;
+        }
+        if (itr->second.bundleList.empty()) {
+            ANS_LOGE("notificationDisable bundleList is empty");
+            return false;
+        }
+        notificationDisable.SetDisabled(itr->second.disabled);
+        notificationDisable.SetBundleList(itr->second.bundleList);
+    } else {
+        ANS_LOGE("userDisableNotificationInfo not found for userId: %{public}d", userId);
+        return false;
+    }
+    return true;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -2762,7 +2762,11 @@ bool NotificationPreferencesDatabase::SetDisableNotificationInfo(const sptr<Noti
         return false;
     }
     std::string value = notificationDisable->ToJson();
-    int32_t result = rdbDataManager_->InsertData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    int32_t userId = notificationDisable->GetUserId();
+    if (userId == SUBSCRIBE_USER_INIT) {
+        userId = ZERO_USER_ID;
+    }
+    int32_t result = rdbDataManager_->InsertData(KEY_DISABLE_NOTIFICATION, value, userId);
     return (result == NativeRdb::E_OK);
 }
 
@@ -2774,6 +2778,23 @@ bool NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationDis
     }
     std::string value;
     int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("query data failed");
+        return false;
+    }
+    notificationDisable.FromJson(value);
+    return true;
+}
+
+bool NotificationPreferencesDatabase::GetUserDisableNotificationInfo(
+    int32_t userId, NotificationDisable &notificationDisable)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null rdbStore");
+        return false;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_DISABLE_NOTIFICATION, value, userId);
     if (result != NativeRdb::E_OK) {
         ANS_LOGE("query data failed");
         return false;

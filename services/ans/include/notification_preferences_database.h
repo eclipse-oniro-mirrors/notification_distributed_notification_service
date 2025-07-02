@@ -354,6 +354,7 @@ public:
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
     bool SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     bool GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
     bool IsDistributedEnabledEmptyForBundle(

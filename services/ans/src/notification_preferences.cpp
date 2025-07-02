@@ -1536,6 +1536,28 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
     return true;
 }
 
+bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable)
+{
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    if (preferencesInfo_.GetUserDisableNotificationInfo(userId, notificationDisable)) {
+        ANS_LOGD("info get disable notification success");
+        return true;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    if (preferncesDB_->GetUserDisableNotificationInfo(userId, notificationDisable)) {
+        ANS_LOGD("db get disable notification success");
+        sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
+        preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
+    } else {
+        ANS_LOGD("db get disable notification fail");
+        return false;
+    }
+    return true;
+}
+
 bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

@@ -28,8 +28,10 @@ public:
 
     void SetDisabled(bool disabled);
     void SetBundleList(const std::vector<std::string> &bundleList);
+    void SetUserId(int32_t userId);
     bool GetDisabled() const;
     std::vector<std::string> GetBundleList() const;
+    int32_t GetUserId() const;
     bool Marshalling(Parcel &parcel) const override;
     bool ReadFromParcel(Parcel &parcel);
 
@@ -40,6 +42,7 @@ public:
 private:
     bool disabled_ = false;
     std::vector<std::string> bundleList_;
+    int32_t userId_ = -1;
 };
 }
 }
