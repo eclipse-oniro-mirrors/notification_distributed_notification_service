@@ -56,6 +56,7 @@ void StsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData &da
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
     if (aniResult != ANI_OK) {
         ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        AnsDialogHostClient::Destroy();
         return;
     }
     if (complete_) {
@@ -64,8 +65,10 @@ void StsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData &da
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
         ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        AnsDialogHostClient::Destroy();
         return;
     }
+    AnsDialogHostClient::Destroy();
 }
 
 int32_t StsAnsDialogCallback::GetErrCodeFromStatus(EnabledDialogStatus status)

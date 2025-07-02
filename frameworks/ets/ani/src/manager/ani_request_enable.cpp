@@ -72,6 +72,7 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
             errCode, canPop);
         if (canPop == false) {
             info->errorCode = errCode;
+            AnsDialogHostClient::Destroy();
             return;
         }
         info->bundleName = bundleName;
@@ -169,11 +170,13 @@ void RequestEnableComplete(ani_env *env, std::shared_ptr<EnableNotificationInfo>
             info->errorCode = ERR_ANS_DIALOG_POP_SUCCEEDED;
         } else {
             info->errorCode = ERROR_INTERNAL_ERROR;
+            AnsDialogHostClient::Destroy();
             NotificationHelper::RemoveEnableNotificationDialog();
         }
     }
     if (info->errorCode != ERR_ANS_DIALOG_POP_SUCCEEDED) {
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
+        AnsDialogHostClient::Destroy();
         StsAsyncCompleteCallbackRequestEnableNotification(env, info);
         return;
     }
@@ -183,6 +186,7 @@ void RequestEnableComplete(ani_env *env, std::shared_ptr<EnableNotificationInfo>
         !AnsDialogHostClient::SetDialogCallbackInterface(std::move(StsCallback))
     ) {
         ANS_LOGE("error");
+        AnsDialogHostClient::Destroy();
         info->errorCode = ERROR_INTERNAL_ERROR;
         StsAsyncCompleteCallbackRequestEnableNotification(env, info);
         return;
