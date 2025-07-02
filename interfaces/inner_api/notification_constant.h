@@ -429,6 +429,7 @@ public:
     constexpr static const char* PC_DEVICE_TYPE = "pc";
     constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "pc", "pad"};
     constexpr static const char* ANS_VOIP = "ANS_VOIP";
+    constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
 };
 }  // namespace Notification
 }  // namespace OHOS
