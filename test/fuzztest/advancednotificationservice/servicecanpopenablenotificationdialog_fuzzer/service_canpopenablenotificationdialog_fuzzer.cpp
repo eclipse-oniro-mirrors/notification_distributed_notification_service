@@ -29,7 +29,7 @@ namespace Notification {
         service->CreateDialogManager();
         bool enable = fuzzData->ConsumeBool();
         std::string stringData = fuzzData->ConsumeRandomLengthString();
-        sptr<IAnsDialogCallback> callback = new Notification::AnsDialogCallbackProxy(nullptr);
+        sptr<IAnsDialogCallback> callback = new AnsDialogCallbackProxy(nullptr);
         service->CanPopEnableNotificationDialog(callback, enable, stringData);
         return true;
     }
