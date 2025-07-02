@@ -2671,11 +2671,11 @@ ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const s
         return ERR_ANS_NO_MEMORY;
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([badgeData]() {
         ANS_LOGD("ffrt enter!");
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
-    notificationSvrQueue_->wait(handler);
+
     return ERR_OK;
 }
 
@@ -2707,19 +2707,19 @@ ErrCode AdvancedNotificationService::SetBadgeNumberForDhByBundle(
         ANS_LOGE("Not system app.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
-    ErrCode result = ERR_OK;
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+        bundleOption->GetBundleName(), bundleOption->GetUid(), badgeNumber);
+    if (badgeData == nullptr) {
+        ANS_LOGE("Failed to create badge number callback data.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([badgeData]() {
         ANS_LOGD("ffrt enter!");
-        sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
-            bundleOption->GetBundleName(), bundleOption->GetUid(), badgeNumber);
-        if (badgeData == nullptr) {
-            ANS_LOGE("Failed to create badge number callback data.");
-            result = ERR_ANS_NO_MEMORY;
-        }
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
-    notificationSvrQueue_->wait(handler);
-    return result;
+
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
@@ -2766,18 +2766,18 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         }
     }
 
-    ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
+    sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
+        bundle->GetBundleName(), bundle->GetUid(), badgeNumber);
+    if (badgeData == nullptr) {
+        ANS_LOGE("Failed to create badge number callback data.");
+        return ERR_ANS_NO_MEMORY;
+    }
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h([badgeData]() {
         ANS_LOGD("ffrt enter!");
-        sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(
-            bundle->GetBundleName(), bundle->GetUid(), badgeNumber);
-        if (badgeData == nullptr) {
-            ANS_LOGE("Failed to create badge number callback data.");
-            result = ERR_ANS_NO_MEMORY;
-        }
         NotificationSubscriberManager::GetInstance()->SetBadgeNumber(badgeData);
     });
-    notificationSvrQueue_->wait(handler);
-    return result;
+
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
