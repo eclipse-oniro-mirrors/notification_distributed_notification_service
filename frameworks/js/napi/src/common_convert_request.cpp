@@ -1843,12 +1843,6 @@ napi_value Common::GetNotificationActionButtonsDetailedBasicInfo(
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, value, str, STR_MAX_SIZE - 1, &strLen));
     title = str;
-    if (title.empty()) {
-        ANS_LOGE("Property title in actionButton cannot be empty, but get an empty title in publish process.");
-        std::string msg = "Incorrect parameter types.The content of property title in actionButton cannot be empty.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
 
     // wantAgent: WantAgent
     NAPI_CALL(env, napi_has_named_property(env, actionButton, "wantAgent", &hasProperty));
