@@ -353,13 +353,13 @@ napi_value EnableStatusInit(napi_env env, napi_value exports)
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
     
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::DEFAULT_FALSE, "DEFAULT_FALSE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::DEFAULT_TRUE, "DEFAULT_TRUE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::ENABLE_TRUE, "ENABLE_TRUE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::ENABLE_FALSE, "ENABLE_FALSE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)EnabledStatus::DEFAULT_FALSE, "DEFAULT_FALSE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)EnabledStatus::DEFAULT_TRUE, "DEFAULT_TRUE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)EnabledStatus::ENABLED_TRUE, "ENABLED_TRUE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)EnabledStatus::ENABLED_FALSE, "ENABLED_FALSE");
 
     napi_property_descriptor exportFuncs[] = {
-        DECLARE_NAPI_PROPERTY("EnableStatus", obj),
+        DECLARE_NAPI_PROPERTY("EnabledStatus", obj),
     };
 
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
