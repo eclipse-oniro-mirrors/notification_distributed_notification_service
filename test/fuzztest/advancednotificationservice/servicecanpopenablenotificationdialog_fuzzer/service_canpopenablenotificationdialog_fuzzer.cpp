@@ -15,6 +15,7 @@
 #include "service_canpopenablenotificationdialog_fuzzer.h"
 
 #include <fuzzer/FuzzedDataProvider.h>
+#include "ans_dialog_callback_proxy.h"
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
 #include "mock_notification_request.h"
