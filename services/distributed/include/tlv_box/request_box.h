@@ -53,10 +53,8 @@ public:
     bool SetFinishTime(int64_t time);
     bool SetAutoDeleteTime(int64_t time);
     bool SetAppMessageId(const std::string& appMessageId);
-    bool SetAppName(const std::string& appName);
-    bool SetAppLabel(const std::string& appLabel);
-    bool SetAppIndex(const int32_t& appIndex);
-    bool SetNotificationUserId(const int32_t& userId);
+    bool SetReceiverUserId(const int32_t& userId);
+    bool SetBoxExtendInfo(const std::string& extendInfo);
     bool SetDeviceUserId(const int32_t& userId);
     bool SetDeviceId(const std::string& deviceId);
     bool SetActionButtonsLength(const int32_t length);
@@ -86,10 +84,8 @@ public:
     bool GetFinishTime(int64_t& time) const;
     bool GetAutoDeleteTime(int64_t& time) const;
     bool GetAppMessageId(std::string& appMessageId) const;
-    bool GetAppName(std::string& appName) const;
-    bool GetAppLabel(std::string& appLabel) const;
-    bool GetAppIndex(int32_t& appIndex) const;
-    bool GetNotificationUserId(int32_t& userId) const;
+    bool GetReceiverUserId(int32_t& userId) const;
+    bool GetBoxExtendInfo(std::string& extendInfo) const;
     bool GetDeviceUserId(int32_t& userId) const;
     bool GetDeviceId(std::string& deviceId) const;
     bool GetActionButtonsLength(int32_t& length) const;
