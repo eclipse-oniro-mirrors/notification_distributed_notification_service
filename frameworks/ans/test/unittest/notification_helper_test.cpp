@@ -1374,7 +1374,7 @@ HWTEST_F(NotificationHelperTest, GetDistributedDevicelist_0100, Function | Small
     std::vector<std::string> deviceTypes;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetDistributedDevicelist(deviceTypes);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_PERMISSION_DENIED);
 }
 }
 }

@@ -645,6 +645,11 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
     auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
         enabled ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
     if (result == ERR_OK) {
@@ -675,6 +680,11 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &dev
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
     }
 
     NotificationConstant::ENABLE_STATUS enableStatus;
@@ -750,6 +760,11 @@ ErrCode AdvancedNotificationService::GetDistributedDevicelist(std::vector<std::s
     if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGW("Not system app or SA!");
         return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
     }
     return NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes);
 }
