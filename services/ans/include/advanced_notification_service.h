@@ -1740,6 +1740,8 @@ private:
     void SetChainIdToExtraInfo(const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId);
 
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
+    ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,
+        bool isAgentController, bool isSystemComp);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

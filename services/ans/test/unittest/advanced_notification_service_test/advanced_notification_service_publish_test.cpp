@@ -1851,5 +1851,67 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0500, Level1)
 
     ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(request), ERR_OK);
 }
+
+/**
+ * @tc.number    : CheckNotificationRequest_0600
+ * @tc.name      : CheckNotificationRequest_0600
+ * @tc.desc      : Test CheckNotificationRequest method when request has linesWantAgent
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequest_0600, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    auto request = new NotificationRequest();
+    const std::shared_ptr<NotificationMultiLineContent> multiLineContent =
+        std::make_shared<NotificationMultiLineContent>();
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents;
+    lineWantAgents.emplace_back(wantAgent);
+    lineWantAgents.emplace_back(wantAgent);
+    lineWantAgents.emplace_back(wantAgent);
+    multiLineContent->AddSingleLine("test1");
+    multiLineContent->AddSingleLine("test2");
+    multiLineContent->AddSingleLine("test3");
+    multiLineContent->SetLineWantAgents(lineWantAgents);
+    const std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(multiLineContent);
+    request->SetContent(content);
+    MockSystemApp();
+
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequest(request), ERR_OK);
+}
+
+/**
+ * @tc.number    : CheckNotificationRequestLineWantAgents_0100
+ * @tc.name      : CheckNotificationRequestLineWantAgents_0100
+ * @tc.desc      : Test CheckNotificationRequestLineWantAgents method when request has local wantAgent
+ * @tc.require   : I5TIQR
+ */
+HWTEST_F(AdvancedNotificationServiceTest, CheckNotificationRequestLineWantAgents_0100, Level1)
+{
+    AdvancedNotificationService advancedNotificationService;
+    const std::shared_ptr<NotificationMultiLineContent> multiLineContent =
+        std::make_shared<NotificationMultiLineContent>();
+    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
+    std::shared_ptr<AbilityRuntime::WantAgent::LocalPendingWant> localPendingWant =
+        std::make_shared<AbilityRuntime::WantAgent::LocalPendingWant>("TestBundleName", want, 0);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
+        std::make_shared<AbilityRuntime::WantAgent::WantAgent>(localPendingWant);
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> lineWantAgents;
+    lineWantAgents.emplace_back(wantAgent);
+    lineWantAgents.emplace_back(wantAgent);
+    lineWantAgents.emplace_back(wantAgent);
+    multiLineContent->AddSingleLine("test1");
+    multiLineContent->AddSingleLine("test2");
+    multiLineContent->AddSingleLine("test3");
+    multiLineContent->SetLineWantAgents(lineWantAgents);
+    const std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(multiLineContent);
+    MockIsSystemApp(false);
+
+    ASSERT_EQ(advancedNotificationService.CheckNotificationRequestLineWantAgents(content, true, true), ERR_OK);
+}
 }  // namespace Notification
 }  // namespace OHOS
