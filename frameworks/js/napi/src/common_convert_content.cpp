@@ -330,7 +330,7 @@ napi_value Common::SetNotificationMultiLineContent(
     }
     napi_set_named_property(env, result, "lines", arr);
 
-    //lineWantAgents: Array<WantAgent>
+    //lineWantAgents?: Array<WantAgent>
     auto lineWantAgents = multiLineContent->GetLineWantAgents();
     if (lineWantAgents.size() > 0) {
         napi_value lineWantAgentsArr = nullptr;
@@ -1441,7 +1441,7 @@ napi_value Common::GetNotificationMultiLineContent(
         return nullptr;
     }
 
-    // lineWantAgents: Array<WantAgent>
+    // lineWantAgents?: Array<WantAgent>
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "lineWantAgents", &hasProperty));
     if (hasProperty) {
         if (GetNotificationContentLineWantAgents(env, contentResult, multiLineContent) == nullptr) {
@@ -1515,7 +1515,7 @@ napi_value Common::GetNotificationContentLineWantAgents(const napi_env &env, con
         if (!isArray) {
             ANS_LOGE("lineWantAgents is expected to be an array.");
             std::string msg = "Incorrect parameter types. The type of lineWantAgents must be array.";
-            Common::NapiThrow(env, ERROR_PARAM_INVALID);
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
         napi_get_array_length(env, value, &length);
@@ -1526,13 +1526,19 @@ napi_value Common::GetNotificationContentLineWantAgents(const napi_env &env, con
             if (valuetype != napi_object) {
                 ANS_LOGE("Wrong agrument type. Object expected.");
                 std::string msg = "Incorrect parameter types. The type of lineWantAgents item must be object.";
-                Common::NapiThrow(env, ERROR_PARAM_INVALID);
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             AbilityRuntime::WantAgent::WantAgent *wantAgent = nullptr;
             napi_unwrap(env, wantAgentValue, (void **)&wantAgent);
             if (wantAgent == nullptr) {
                 ANS_LOGE("Invalid object lineWantAgents");
+                return nullptr;
+            }
+            if (lineWantAgents.size() >= multiLineContent->GetAllLines().size()) {
+                ANS_LOGE("lineWantAgents size is larger than lines size.");
+                std::string msg = "Incorrect parameter types. LineWantAgents size is larger than lines size.";
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
             }
             lineWantAgents.push_back(std::make_shared<AbilityRuntime::WantAgent::WantAgent>(*wantAgent));
