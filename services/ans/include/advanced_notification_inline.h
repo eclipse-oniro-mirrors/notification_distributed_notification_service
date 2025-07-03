@@ -39,7 +39,7 @@ inline std::string GetClientBundleNameByUid(int32_t callingUid)
     return bundle;
 }
 
-inline std::string GetClientBundleName()
+inline std::string __attribute__((weak)) GetClientBundleName()
 {
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     return GetClientBundleNameByUid(callingUid);
