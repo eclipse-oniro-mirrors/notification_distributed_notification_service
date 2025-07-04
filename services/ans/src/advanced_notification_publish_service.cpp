@@ -162,7 +162,9 @@ ErrCode AdvancedNotificationService::SetCollaborateRequest(const sptr<Notificati
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
-    request->SetCreatorPid(pid);
+    if (request->GetCreatorPid() == 0) {
+        request->SetCreatorPid(pid);
+    }
     if (request->GetOwnerUid() == DEFAULT_UID) {
         request->SetOwnerUid(uid);
     }
@@ -238,13 +240,20 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     SetCollaborateRequest(request);
     record->request = request;
+    sptr<NotificationSlot> slot = new (std::nothrow) NotificationSlot(request->GetSlotType());
+    if (slot == nullptr) {
+        ANS_LOGE("Failed to create NotificationSlot instance");
+        return ERR_NO_MEMORY;
+    }
+    slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+    record->slot = slot;
     record->notification = new (std::nothrow) Notification(request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification");
         return ERR_ANS_NO_MEMORY;
     }
     record->bundleOption = new (std::nothrow) NotificationBundleOption(request->GetCreatorBundleName(), 0);
-    record->notification->SetKey(request->GetLabel() + request->GetDistributedHashCode());
+    record->notification->SetKey("ans_distributed" + request->GetDistributedHashCode());
     if (CollaborateFilter(request) != ERR_OK) {
         return ERR_ANS_NOT_ALLOWED;
     }

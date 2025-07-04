@@ -1491,6 +1491,10 @@ public:
 
     uint32_t GetCollaboratedReminderFlag() const;
 
+    std::string CollaborationToJson() const;
+
+    static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).

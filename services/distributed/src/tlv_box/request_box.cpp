@@ -323,6 +323,14 @@ bool NotificationRequestBox::SetActionButtonsTitle(const std::vector<std::string
     return SetActionButtonsLength(index);
 }
 
+bool NotificationRequestBox::SetNotificationBasicInfo(const std::string& basicInfo)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BASIC_INFO, basicInfo));
+    return true;
+}
 #else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
@@ -584,6 +592,15 @@ bool NotificationRequestBox::GetActionButtonsTitle(std::vector<std::string>& but
         box_->GetStringValue(ACTION_BUTTONS_TITILE_INDEX + i, buttonTitle);
         buttonsTitle.push_back(buttonTitle);
     }
+    return true;
+}
+
+bool NotificationRequestBox::GetNotificationBasicInfo(std::string& basicInfo) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    box_->GetStringValue(NOTIFICATION_BASIC_INFO, basicInfo);
     return true;
 }
 #endif
