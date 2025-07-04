@@ -646,7 +646,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
     }
 
     auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
-        enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+        enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
     if (result == ERR_OK) {
         bool liveViewEnabled = false;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(

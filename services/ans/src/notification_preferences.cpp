@@ -1113,7 +1113,8 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
     silentReminderInfo.bundleName = bundleOption->GetBundleName();
     silentReminderInfo.uid = bundleOption->GetUid();
     silentReminderInfo.enableStatus =
-        enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+        enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetSilentReminderEnabled(silentReminderInfo);
     if (storeDBResult) {
@@ -1152,7 +1153,7 @@ void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<Notificat
     if (preferncesDB_ != nullptr && bundleOption != nullptr) {
         std::lock_guard<std::mutex> lock(preferenceMutex_);
         preferncesDB_->RemoveSilentEnabledDbByBundle(bundleOption->GetBundleName(), bundleOption->GetUid());
-        preferncesDB_->RemoveSilentReminderInfo(bundleOption);
+        preferencesInfo_->RemoveSilentReminderInfo(bundleOption);
     }
 }
 
