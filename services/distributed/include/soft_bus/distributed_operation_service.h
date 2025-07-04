@@ -35,15 +35,13 @@ public:
         OperationType operationType, uint32_t result);
     int32_t TriggerReplyApplication(const std::string& hashCode, const NotificationResponseBox& responseBox);
     void TriggerJumpApplication(const std::string& hashCode);
-    void DealNonMultiScreenSyncOper(const std::string& hashCode, const int32_t operationType,
-        const int32_t matchType, const NotificationResponseBox &responseBox);
-    void DealMultiScreenSyncOper(const std::string& hashCode, const int32_t operationType,
-        const int32_t matchType, const NotificationResponseBox &responseBox);
+    void TriggerByOperationType(
+        const std::string& hashCode, const int32_t operationType, const NotificationResponseBox& responseBox);
 #else
     int32_t OnOperationResponse(const std::shared_ptr<NotificationOperationInfo>& operationInfo,
         const DistributedDeviceInfo& device);
     void ResponseOperationResult(const std::string& hashCode, const NotificationResponseBox& responseBox);
-    void LaunchProjectionApp(const DistributedDeviceInfo& device, const DistributedDeviceInfo& localDevice);
+    void LaunchProjectionApp(const DistributedDeviceInfo& peerDevice, const DistributedDeviceInfo& localDevice);
 #endif
 };
 }

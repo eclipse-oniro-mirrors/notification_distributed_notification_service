@@ -65,25 +65,28 @@ private:
 class UnlockListenerOperService {
 public:
     static UnlockListenerOperService& GetInstance();
-    void AddWantAgent(const std::string& hashCode,
-        const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr);
+    void AddDelayTask(const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex);
     void ReplyOperationResponse();
     void HandleOperationTimeOut(const std::string& hashCode);
     void RemoveOperationResponse(const std::string& hashCode);
-    ErrCode LaunchWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr);
+    void TriggerByJumpType(const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex);
 
 private:
     UnlockListenerOperService();
     ~UnlockListenerOperService() = default;
 
     int64_t GetCurrentTime();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> GetNtfWantAgentPtr(const std::string& hashCode);
+    ErrCode LaunchWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr);
+    ErrCode GetNtfBtnWantAgentPtr(const std::string& hashCode,
+        const int32_t btnIndex, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& wantAgentPtr);
 
 private:
     std::mutex mapLock_;
     std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
     std::vector<std::string> hashCodeOrder_;
     std::map<std::string, uint64_t> timerMap_;
-    std::map<std::string, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgentMap_;
+    std::map<std::string, std::pair<int32_t, int32_t>> delayTaskMap_;
 };
 } // namespace OHOS
 } // namespace Notification

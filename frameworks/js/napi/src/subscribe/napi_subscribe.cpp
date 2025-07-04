@@ -45,21 +45,27 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
         return;
     }
     operationInfo->SetHashCode(asyncCallbackInfo->hashCode);
-    if (asyncCallbackInfo->operationInfo.operationType ==
-        static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_REPLY)) {
+    if (asyncCallbackInfo->operationInfo.operationType == NotificationConstant::DISTRIBUTE_JUMP_INVALID &&
+        asyncCallbackInfo->operationInfo.withOperationInfo) {
         operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
-        operationInfo->SetBtnIndex(asyncCallbackInfo->operationInfo.btnIndex);
         operationInfo->SetActionName(asyncCallbackInfo->operationInfo.actionName);
         operationInfo->SetUserInput(asyncCallbackInfo->operationInfo.userInput);
-    } else if (asyncCallbackInfo->operationInfo.operationType < OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW) {
+    } else if (asyncCallbackInfo->operationInfo.operationType == NotificationConstant::DISTRIBUTE_JUMP_INVALID) {
         operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
+    } else if (asyncCallbackInfo->operationInfo.operationType >= NotificationConstant::DISTRIBUTE_JUMP_BY_LIVE_VIEW ||
+        asyncCallbackInfo->operationInfo.operationType == NotificationConstant::DISTRIBUTE_JUMP_BY_NTF ||
+        asyncCallbackInfo->operationInfo.operationType == NotificationConstant::DISTRIBUTE_JUMP_BY_BTN) {
+        operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE);
+        operationInfo->SetJumpType(asyncCallbackInfo->operationInfo.operationType);
+        operationInfo->SetBtnIndex(asyncCallbackInfo->operationInfo.btnIndex);
     } else {
-        operationInfo->SetOperationType(static_cast<OperationType>(asyncCallbackInfo->operationInfo.operationType));
+        ANS_LOGE("invalid param, operationType: %{public}d", asyncCallbackInfo->operationInfo.operationType);
+        callback->OnOperationCallback(ERR_ANS_INVALID_PARAM);
+        return;
     }
     int32_t result = NotificationHelper::DistributeOperation(operationInfo, callback);
     if (result != ERR_OK ||
-        asyncCallbackInfo->operationInfo.operationType ==
-        static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_JUMP)) {
+        operationInfo->GetOperationType() != OperationType::DISTRIBUTE_OPERATION_REPLY) {
         callback->OnOperationCallback(result);
     }
 }

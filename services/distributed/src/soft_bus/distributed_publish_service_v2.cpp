@@ -477,13 +477,10 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
         ANS_LOGE("Check actionButtons is null.");
         return;
     }
-    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
-        if (notificationRequest->IsCommonLiveView()) {
-            return;
-        }
+    if ((deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) &&
+        !notificationRequest->IsCommonLiveView()) {
         std::vector<std::string> buttonsTitle;
-        std::vector<std::string> userInputs;
         size_t length = actionButtons.size();
         if (length > NotificationConstant::MAX_BTN_NUM) {
             length = NotificationConstant::MAX_BTN_NUM;
@@ -492,16 +489,13 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
             if (actionButtons[i] == nullptr) {
                 return;
             }
-            buttonsTitle.push_back(actionButtons[i]->GetTitle());
-            std::string inputKey = "";
             if (actionButtons[i]->GetUserInput() != nullptr) {
-                userInputs.push_back(actionButtons[i]->GetUserInput()->GetInputKey());
-            } else {
-                userInputs.push_back(inputKey);
+                ANS_LOGI("distributed override reply button.");
+                continue;
             }
+            buttonsTitle.push_back(actionButtons[i]->GetTitle());
         }
         requestBox->SetActionButtonsTitle(buttonsTitle);
-        requestBox->SetActionUserInputs(userInputs);
         return;
     }
     if (slotType == NotificationConstant::SlotType::SOCIAL_COMMUNICATION) {
@@ -687,27 +681,12 @@ void DistributedPublishService::MakePadNotificationButtons(
         return;
     }
     std::vector<std::string> buttonsTitle;
-    std::vector<std::string> userInputs;
-    if (!box.GetActionButtonsTitle(buttonsTitle) ||
-        !box.GetActionUserInputs(userInputs) || buttonsTitle.size() <= 0) {
-        ANS_LOGI("Notification [hashCode: %{public}s] has no button.", request->GetNotificationHashCode().c_str());
-        return;
-    }
-    if (buttonsTitle.size() != userInputs.size()) {
-        ANS_LOGE("Notification [hashCode: %{public}s] inner error, button property size not same.",
-            request->GetNotificationHashCode().c_str());
+    if (!box.GetActionButtonsTitle(buttonsTitle) || buttonsTitle.size() <= 0) {
         return;
     }
     for (size_t i = 0; i < buttonsTitle.size(); i++) {
         std::shared_ptr<NotificationActionButton> actionButton =
             NotificationActionButton::Create(nullptr, buttonsTitle[i], nullptr);
-        std::shared_ptr<NotificationUserInput> userInput;
-        if (userInputs[i].length() > 0) {
-            userInput = NotificationUserInput::Create(userInputs[i]);
-        }
-        if (userInput) {
-            actionButton->AddNotificationUserInput(userInput);
-        }
         request->AddActionButton(actionButton);
     }
 }

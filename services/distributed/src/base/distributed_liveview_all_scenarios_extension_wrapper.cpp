@@ -70,10 +70,16 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
-    liveViewMultiScreenSyncOper_ =
-        (LIVE_VIEW_MULTI_SCREEN_SYNC_OPER)dlsym(ExtensionHandle_, "LiveViewMultiScreenSyncOper");
-    if (liveViewMultiScreenSyncOper_ == nullptr) {
-        ANS_LOGE("distributed liveView multi-Screen sync failed, error: %{public}s", dlerror());
+    InitDistributedCollaborateClick();
+    ANS_LOGI("distributed liveview all scenarios extension wrapper init success");
+}
+
+void DistributedLiveviewAllScenariosExtensionWrapper::InitDistributedCollaborateClick()
+{
+    distributedLiveViewOperation_ =
+        (DISTRIBUTED_LIVE_VIEW_OPERATION)dlsym(ExtensionHandle_, "DistributedLiveViewOperation");
+    if (distributedLiveViewOperation_ == nullptr) {
+        ANS_LOGE("distributed liveView operation failed, error: %{public}s", dlerror());
         return;
     }
 
@@ -83,7 +89,13 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("distributed restore collaboration window failed, error: %{public}s", dlerror());
         return;
     }
-    ANS_LOGI("distributed liveview all scenarios extension wrapper init success");
+
+    distributedAncoNotificationClick_ =
+        (DISTRIBUTED_ANCO_NOTIFICATION_CLICK)dlsym(ExtensionHandle_, "DistributedAncoNotificationClick");
+    if (distributedAncoNotificationClick_ == nullptr) {
+        ANS_LOGE("distributed anco notification click failed, error: %{public}s", dlerror());
+        return;
+    }
 }
 
 void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
@@ -96,7 +108,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
         triggerHandler_ = nullptr;
         updateLiveviewEncodeContent_ = nullptr;
         updateLiveviewDecodeContent_ = nullptr;
-        liveViewMultiScreenSyncOper_ = nullptr;
+        distributedLiveViewOperation_ = nullptr;
         restoreCollaborationWindow_ = nullptr;
     }
     ANS_LOGI("distributed liveview all scenarios extension wrapper close success");
@@ -150,14 +162,14 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
     return unSubscribeHandler_();
 }
 
-ErrCode DistributedLiveviewAllScenariosExtensionWrapper::LiveViewMultiScreenSyncOper(
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveViewOperation(
     sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex)
 {
-    if (liveViewMultiScreenSyncOper_ == nullptr) {
-        ANS_LOGE("liveView multi-Screen sync wrapper symbol failed");
+    if (distributedLiveViewOperation_ == nullptr) {
+        ANS_LOGE("distributed liveView operation wrapper symbol failed");
         return 0;
     }
-    return liveViewMultiScreenSyncOper_(request, operationType, btnIndex);
+    return distributedLiveViewOperation_(request, operationType, btnIndex);
 }
 
 int32_t DistributedLiveviewAllScenariosExtensionWrapper::RestoreCollaborationWindow(const std::string &networkId)
@@ -167,5 +179,15 @@ int32_t DistributedLiveviewAllScenariosExtensionWrapper::RestoreCollaborationWin
         return 0;
     }
     return restoreCollaborationWindow_(networkId);
+}
+
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::DistributedAncoNotificationClick(
+    const sptr<NotificationRequest> &request, bool &triggerWantInner)
+{
+    if (distributedAncoNotificationClick_ == nullptr) {
+        ANS_LOGE("distributed anco notification click wrapper symbol failed");
+        return 0;
+    }
+    return distributedAncoNotificationClick_(request, triggerWantInner);
 }
 }

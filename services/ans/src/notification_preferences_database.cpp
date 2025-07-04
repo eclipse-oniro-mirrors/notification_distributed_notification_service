@@ -2216,12 +2216,18 @@ bool NotificationPreferencesDatabase::GetDistributedEnabled(
     return result;
 }
 
-ErrCode NotificationPreferencesDatabase::GetDistributedAuthStatus(
-    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+bool NotificationPreferencesDatabase::GetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool &isAuth)
 {
-    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, userId: %{public}d",
-        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), userId);
-    std::string key = GenerateBundleLablel(deviceType, deviceId, userId);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, targetUserId: %{public}d",
+        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), targetUserId);
+    std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     bool result = false;
     isAuth = false;
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
@@ -2299,12 +2305,18 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
     return result;
 }
 
-ErrCode NotificationPreferencesDatabase::SetDistributedAuthStatus(
-    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+bool NotificationPreferencesDatabase::SetDistributedAuthStatus(
+    const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool isAuth)
 {
-    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, userId: %{public}d",
-        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), userId);
-    std::string key = GenerateBundleLablel(deviceType, deviceId, userId);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+    ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, targetUserId: %{public}d",
+        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), targetUserId);
+    std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     int32_t result = PutDataToDB(key, static_cast<int32_t>(isAuth), userId);
     ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);
     return (result == NativeRdb::E_OK);

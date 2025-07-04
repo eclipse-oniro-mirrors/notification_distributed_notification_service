@@ -76,12 +76,20 @@ bool NotificationResponseBox::SetOperationType(int32_t type)
     return box_->PutValue(std::make_shared<TlvItem>(OPERATION_TYPE, type));
 }
 
-bool NotificationResponseBox::SetOperationBtnIndex(int32_t index)
+bool NotificationResponseBox::SetOperationBtnIndex(const int32_t index)
 {
     if (box_ == nullptr) {
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(OPERATION_BTN_INDEX, index));
+}
+
+bool NotificationResponseBox::SetOperationJumpType(const int32_t jumpType)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(OPERATION_JUMP_TYPE, jumpType));
 }
 
 bool NotificationResponseBox::SetMatchType(int32_t type)
@@ -106,14 +114,6 @@ bool NotificationResponseBox::SetResponseResult(int32_t result)
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(RESULT_CODE, result));
-}
-
-bool NotificationResponseBox::SetLocalDeviceType(const int32_t& deviceType)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_TYPE, deviceType));
 }
 
 bool NotificationResponseBox::GetNotificationHashCode(std::string& hashCode) const
@@ -164,6 +164,14 @@ bool NotificationResponseBox::GetOperationBtnIndex(int32_t& index) const
     return box_->GetInt32Value(OPERATION_BTN_INDEX, index);
 }
 
+bool NotificationResponseBox::GetOperationJumpType(int32_t& jumpType) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetInt32Value(OPERATION_JUMP_TYPE, jumpType);
+}
+
 bool NotificationResponseBox::GetMatchType(int32_t& type) const
 {
     if (box_ == nullptr) {
@@ -186,14 +194,6 @@ bool NotificationResponseBox::GetResponseResult(int32_t& result) const
         return false;
     }
     return box_->GetInt32Value(RESULT_CODE, result);
-}
-
-bool NotificationResponseBox::GetLocalDeviceType(int32_t& deviceType) const
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->GetInt32Value(LOCAL_DEVICE_TYPE, deviceType);
 }
 } // namespace Notification
 } // namespace OHOS

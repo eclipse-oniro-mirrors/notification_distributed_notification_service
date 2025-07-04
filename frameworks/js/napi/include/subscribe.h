@@ -16,6 +16,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_INCLUDE_SUBSCRIBE_H
 
 #include "common.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -211,7 +212,8 @@ struct AsyncCallbackInfoSubscribe {
 };
 
 struct OperationInfo {
-    int32_t operationType;
+    bool withOperationInfo = false;
+    int32_t operationType = NotificationConstant::DISTRIBUTE_JUMP_INVALID;
     std::string actionName;
     std::string userInput;
     int32_t btnIndex;

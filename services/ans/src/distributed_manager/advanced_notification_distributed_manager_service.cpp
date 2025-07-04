@@ -333,7 +333,7 @@ ErrCode DistributeOperationParamCheck(const sptr<NotificationOperationInfo>& ope
     OperationType operationType = operationInfo->GetOperationType();
     if (operationType != OperationType::DISTRIBUTE_OPERATION_JUMP &&
         operationType != OperationType::DISTRIBUTE_OPERATION_REPLY &&
-        operationType < OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW) {
+        operationType != OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
         ANS_LOGE("operation type is error.");
         return ERR_ANS_INVALID_PARAM;
     }
@@ -385,7 +385,7 @@ ErrCode AdvancedNotificationService::DistributeOperation(const sptr<Notification
                 ANS_LOGI("Not collaborate hashcode %{public}s.", hashCode.c_str());
                 continue;
             }
-            result = NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo);
+            result = NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo, request);
             return;
         }
         ANS_LOGI("DistributeOperation not exist hashcode.");

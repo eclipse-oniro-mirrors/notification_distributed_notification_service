@@ -80,9 +80,29 @@ int32_t NotificationOperationInfo::GetBtnIndex() const
     return btnIndex_;
 }
 
-void NotificationOperationInfo::SetBtnIndex(const int32_t& btnIndex)
+void NotificationOperationInfo::SetBtnIndex(const int32_t btnIndex)
 {
     btnIndex_ = btnIndex;
+}
+
+int32_t NotificationOperationInfo::GetJumpType() const
+{
+    return jumpType_;
+}
+
+void NotificationOperationInfo::SetJumpType(const int32_t jumpType)
+{
+    jumpType_ = jumpType;
+}
+
+std::string NotificationOperationInfo::GetNotificationUdid() const
+{
+    return notificationUdid_;
+}
+
+void NotificationOperationInfo::SetNotificationUdid(const std::string& udid)
+{
+    notificationUdid_ = udid;
 }
 
 std::string NotificationOperationInfo::Dump()
@@ -93,6 +113,7 @@ std::string NotificationOperationInfo::Dump()
         ", actionName = " + actionName_ +
         ", operationType = " + std::to_string(static_cast<int32_t>(operationType_)) +
         ", btnIndex = " + std::to_string(btnIndex_) +
+        ", jumpType = " + std::to_string(jumpType_) +
         " }";
 }
 
@@ -123,8 +144,18 @@ bool NotificationOperationInfo::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(static_cast<int32_t>(btnIndex_))) {
-        ANS_LOGE("Failed to write operationType");
+    if (!parcel.WriteInt32(btnIndex_)) {
+        ANS_LOGE("Failed to write btnIndex");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(jumpType_)) {
+        ANS_LOGE("Failed to write jumpType");
+        return false;
+    }
+
+    if (!parcel.WriteString(notificationUdid_)) {
+        ANS_LOGE("Failed to write notificationUdid");
         return false;
     }
 
@@ -155,7 +186,14 @@ bool NotificationOperationInfo::ReadFromParcel(Parcel &parcel)
 
     operationType_ = static_cast<OperationType>(parcel.ReadInt32());
 
-    btnIndex_ = static_cast<int32_t>(parcel.ReadInt32());
+    btnIndex_ = parcel.ReadInt32();
+
+    jumpType_ = parcel.ReadInt32();
+
+    if (!parcel.ReadString(notificationUdid_)) {
+        ANS_LOGE("Failed to read notificationUdid");
+        return false;
+    }
 
     return true;
 }

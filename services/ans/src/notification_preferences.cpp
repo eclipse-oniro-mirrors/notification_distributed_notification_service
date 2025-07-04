@@ -1178,22 +1178,22 @@ ErrCode NotificationPreferences::IsDistributedEnabled(
 }
 
 ErrCode NotificationPreferences::GetDistributedAuthStatus(
-    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth)
+    const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool &isAuth)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
-    storeDBResult = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    storeDBResult = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
 ErrCode NotificationPreferences::SetDistributedAuthStatus(
-    const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
+    const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool isAuth)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
-    storeDBResult = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    storeDBResult = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

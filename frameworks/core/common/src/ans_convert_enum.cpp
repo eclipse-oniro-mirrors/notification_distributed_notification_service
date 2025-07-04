@@ -285,6 +285,9 @@ bool AnsEnumUtil::ReasonCToJS(const int &inType, int &outType)
         case NotificationConstant::USER_LOGOUT_REASON_DELETE:
             outType = static_cast<int32_t>(RemoveReason::USER_LOGOUT_REASON_DELETE);
             break;
+        case NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
+            break;
         case NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE:
             outType = static_cast<int32_t>(RemoveReason::DISTRIBUTED_ENABLE_CLOSE_DELETE);
             break;

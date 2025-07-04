@@ -382,7 +382,7 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
             notificationRequest = record->request;
             isThirdParty = record->isThirdparty;
 
-            if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
+            if (!IsReasonClickDelete(removeReason)) {
                 ProcForDeleteLiveView(record);
             }
 
@@ -400,10 +400,16 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
         DoDistributedDelete(deviceId, bundleName, notification);
 #endif
     }
-    if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
+    if (!IsReasonClickDelete(removeReason)) {
         TriggerRemoveWantAgent(notificationRequest, removeReason, isThirdParty);
     }
     return result;
+}
+
+bool AdvancedNotificationService::IsReasonClickDelete(const int32_t removeReason)
+{
+    return removeReason == NotificationConstant::CLICK_REASON_DELETE ||
+        removeReason == NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE;
 }
 
 ErrCode AdvancedNotificationService::RemoveAllNotificationsForDisable(

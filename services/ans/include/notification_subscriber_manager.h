@@ -132,9 +132,14 @@ public:
     /**
      * @brief Distribution operation based on hashCode.
      *
-     * @param notification Indicates the Notification object.
+     * @param operationInfo Indicates the Notification params.
+     * @param request Indicates the Notification request.
      */
-    ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo);
+    ErrCode DistributeOperation(
+        const sptr<NotificationOperationInfo>& operationInfo, const sptr<NotificationRequest>& request);
+ 
+    ErrCode DistributeOperationTask(const sptr<NotificationOperationInfo>& operationInfo,
+        const sptr<NotificationRequest>& request, int32_t &funcResult);
 
     void RegisterOnSubscriberAddCallback(std::function<void(const std::shared_ptr<SubscriberRecord> &)> callback);
 
