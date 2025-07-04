@@ -1743,6 +1743,7 @@ private:
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,
         bool isAgentController, bool isSystemComp);
+    bool IsReasonClickDelete(const int32_t removeReason);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

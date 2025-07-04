@@ -59,7 +59,6 @@ public:
     bool SetDeviceId(const std::string& deviceId);
     bool SetActionButtonsLength(const int32_t length);
     bool SetActionButtonsTitle(const std::vector<std::string>& buttonsTitle);
-    bool SetActionUserInputs(const std::vector<std::string>& userInputs);
 #else
     bool GetNotificationHashCode(std::string& hasdCode) const;
     bool GetSlotType(int32_t& type) const;
@@ -90,7 +89,6 @@ public:
     bool GetDeviceId(std::string& deviceId) const;
     bool GetActionButtonsLength(int32_t& length) const;
     bool GetActionButtonsTitle(std::vector<std::string>& buttonsTitle) const;
-    bool GetActionUserInputs(std::vector<std::string>& userInputs) const;
 #endif
 };
 }  // namespace Notification

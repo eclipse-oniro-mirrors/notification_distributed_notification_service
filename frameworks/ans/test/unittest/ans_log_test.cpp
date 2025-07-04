@@ -364,6 +364,9 @@ HWTEST_F(AnsLogTest, AnsConvertTest_008, TestSize.Level1)
     inType = NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_COLLABORATIVE_DELETE));
+    inType = NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE));
     inType = NotificationConstant::APP_CANCEL_REASON_OTHER;
     NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
     EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_REASON_OTHER));

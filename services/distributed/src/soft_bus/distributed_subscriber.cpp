@@ -149,9 +149,14 @@ void DistribuedSubscriber::OnBatchCanceled(const std::vector<std::shared_ptr<Not
 
 ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo)
 {
-    ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s.",
+    DistributedDeviceInfo operRespDevice;
+    DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(operationInfo->GetNotificationUdid(), operRespDevice);
+    ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s, OperRespDeviceId: %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
-        StringAnonymous(localDevice_.deviceId_).c_str());
+        StringAnonymous(localDevice_.deviceId_).c_str(), operRespDevice.deviceId_.c_str());
+    if (operRespDevice.deviceId_.compare(peerDevice_.deviceId_) != 0) {
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
     return DistributedService::GetInstance().OnOperationResponse(operationInfo, peerDevice_);
 }
 

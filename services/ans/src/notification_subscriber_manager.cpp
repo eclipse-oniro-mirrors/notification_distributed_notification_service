@@ -53,6 +53,8 @@ struct NotificationSubscriberManager::SubscriberRecord {
 
 const uint32_t FILTETYPE_IM = 1 << 0;
 const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
+static const std::string EXTENDINFO_INFO_PRE = "notification_collaboration_";
+static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
 
 NotificationSubscriberManager::NotificationSubscriberManager()
 {
@@ -958,7 +960,8 @@ void NotificationSubscriberManager::TrackCodeLog(
     }
 }
 
-ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo)
+ErrCode NotificationSubscriberManager::DistributeOperation(
+    const sptr<NotificationOperationInfo>& operationInfo, const sptr<NotificationRequest>& request)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (notificationSubQueue_ == nullptr || operationInfo == nullptr) {
@@ -969,19 +972,32 @@ ErrCode NotificationSubscriberManager::DistributeOperation(const sptr<Notificati
     ErrCode result = ERR_OK;
     int32_t funcResult = -1;
     ffrt::task_handle handler = notificationSubQueue_->submit_h(std::bind([&]() {
-        for (const auto& record : subscriberRecordList_) {
-            if (record == nullptr) {
-                continue;
-            }
-            if (record->needNotifyResponse && record->subscriber != nullptr) {
-                result = record->subscriber->OnOperationResponse(operationInfo, funcResult);
-                return;
-            }
-            result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
-        }
+        result = DistributeOperationTask(operationInfo, request, funcResult);
     }));
     notificationSubQueue_->wait(handler);
     ANS_LOGI("Subscriber manager operation %{public}s %{public}d", operationInfo->GetHashCode().c_str(), result);
+    return result;
+}
+
+ErrCode NotificationSubscriberManager::DistributeOperationTask(const sptr<NotificationOperationInfo>& operationInfo,
+    const sptr<NotificationRequest>& request, int32_t &funcResult)
+{
+    ErrCode result = ERR_OK;
+    for (const auto& record : subscriberRecordList_) {
+        if (record == nullptr) {
+            continue;
+        }
+        if (record->needNotifyResponse && record->subscriber != nullptr) {
+            std::string notificationUdid =
+                request->GetExtendInfo()->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID);
+            operationInfo->SetNotificationUdid(notificationUdid);
+            result = record->subscriber->OnOperationResponse(operationInfo, funcResult);
+            if (result == ERR_OK) {
+                return result;
+            }
+        }
+        result = ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
     return result;
 }
 }  // namespace Notification

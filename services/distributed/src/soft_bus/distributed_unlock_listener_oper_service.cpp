@@ -16,7 +16,9 @@
 #ifdef DISTRIBUTED_FEATURE_MASTER
 #include "distributed_unlock_listener_oper_service.h"
 
+#include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "notification_constant.h"
 #include "notification_helper.h"
 #include "time_service_client.h"
@@ -47,8 +49,8 @@ UnlockListenerOperService::UnlockListenerOperService()
     ANS_LOGI("Operation service init successfully.");
 }
 
-void UnlockListenerOperService::AddWantAgent(const std::string& hashCode,
-    const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr)
+void UnlockListenerOperService::AddDelayTask(
+    const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex)
 {
     int32_t timeout = OPERATION_TIMEOUT;
     int64_t expiredTime = GetCurrentTime() + timeout;
@@ -61,12 +63,12 @@ void UnlockListenerOperService::AddWantAgent(const std::string& hashCode,
     uint64_t timerId = timer->CreateTimer(timerInfo);
     timer->StartTimer(timerId, expiredTime);
     std::lock_guard<std::mutex> lock(mapLock_);
-    auto iterWantAgent = wantAgentMap_.find(hashCode);
-    if (iterWantAgent != wantAgentMap_.end()) {
-        ANS_LOGW("Operation wantAgent has same key %{public}s.", hashCode.c_str());
-        wantAgentMap_.erase(iterWantAgent);
+    auto iterDelayTask = delayTaskMap_.find(hashCode);
+    if (iterDelayTask != delayTaskMap_.end()) {
+        ANS_LOGW("Operation delayTask has same key %{public}s.", hashCode.c_str());
+        delayTaskMap_.erase(iterDelayTask);
     }
-    wantAgentMap_.insert_or_assign(hashCode, wantAgentPtr);
+    delayTaskMap_.insert_or_assign(hashCode, std::make_pair(jumpType, btnIndex));
 
     auto iterTimer = timerMap_.find(hashCode);
     if (iterTimer != timerMap_.end()) {
@@ -90,9 +92,9 @@ void UnlockListenerOperService::AddWantAgent(const std::string& hashCode,
 void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashCode)
 {
     std::lock_guard<std::mutex> lock(mapLock_);
-    auto iterWantAgent = wantAgentMap_.find(hashCode);
-    if (iterWantAgent != wantAgentMap_.end()) {
-        wantAgentMap_.erase(iterWantAgent);
+    auto iterDelayTask = delayTaskMap_.find(hashCode);
+    if (iterDelayTask != delayTaskMap_.end()) {
+        delayTaskMap_.erase(iterDelayTask);
         ANS_LOGI("Operation wantAgent erase %{public}s", hashCode.c_str());
     }
 
@@ -116,14 +118,11 @@ void UnlockListenerOperService::ReplyOperationResponse()
 {
     std::lock_guard<std::mutex> lock(mapLock_);
     ANS_LOGI("UnlockListenerOperService ReplyOperationResponse hashCodeOrder size %{public}u", hashCodeOrder_.size());
-    std::vector<std::string> hashcodesToDel;
     for (std::string hashCode : hashCodeOrder_) {
-        auto iterWantAgent = wantAgentMap_.find(hashCode);
-        if (iterWantAgent != wantAgentMap_.end()) {
-            if (LaunchWantAgent(iterWantAgent->second) == ERR_OK) {
-                hashcodesToDel.push_back(hashCode);
-            }
-            wantAgentMap_.erase(iterWantAgent);
+        auto iterDelayTask = delayTaskMap_.find(hashCode);
+        if (iterDelayTask != delayTaskMap_.end()) {
+            TriggerByJumpType(hashCode, iterDelayTask->second.first, iterDelayTask->second.second);
+            delayTaskMap_.erase(iterDelayTask);
         }
 
         auto iterTimer = timerMap_.find(hashCode);
@@ -136,8 +135,6 @@ void UnlockListenerOperService::ReplyOperationResponse()
             timerMap_.erase(iterTimer);
         }
     }
-    NotificationHelper::RemoveNotifications(
-        hashcodesToDel, NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
     hashCodeOrder_.clear();
 }
 
@@ -152,6 +149,113 @@ void UnlockListenerOperService::HandleOperationTimeOut(const std::string& hashCo
     operationQueue_->submit_h([&, hashCode]() {
         RemoveOperationResponse(hashCode);
     });
+}
+
+void UnlockListenerOperService::TriggerByJumpType(
+    const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex)
+{
+    sptr<NotificationRequest> notificationRequest = nullptr;
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
+        ANS_LOGE("Check notificationRequest is null.");
+        return;
+    }
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = nullptr;
+    if (jumpType >= NotificationConstant::DISTRIBUTE_JUMP_BY_LIVE_VIEW) {
+        if (!notificationRequest->IsCommonLiveView()) {
+            ANS_LOGE("jumpType for liveView but notification not liveView.");
+            return;
+        }
+        ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedLiveViewOperation(
+            notificationRequest, jumpType, btnIndex);
+        ANS_LOGI("DistributedLiveViewOperation res: %{public}d.", static_cast<int32_t>(res));
+        return;
+    }
+    bool triggerWantInner;
+    ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedAncoNotificationClick(
+        notificationRequest, triggerWantInner);
+    if (res != ERR_OK) {
+        return;
+    }
+    if (triggerWantInner && res == ERR_OK) {
+        std::vector<std::string> hashcodes;
+        hashcodes.push_back(hashCode);
+        NotificationHelper::RemoveNotifications(
+            hashcodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
+        return;
+    }
+    if (jumpType == NotificationConstant::DISTRIBUTE_JUMP_BY_NTF) {
+        wantAgentPtr = GetNtfWantAgentPtr(hashCode);
+    } else if (jumpType == NotificationConstant::DISTRIBUTE_JUMP_BY_BTN) {
+        GetNtfBtnWantAgentPtr(hashCode, btnIndex, wantAgentPtr);
+    }
+
+    if (wantAgentPtr == nullptr) {
+        ANS_LOGE("DealMultiScreenSyncOper fail cause wantAgentPtr is null.");
+        return;
+    }
+    if (LaunchWantAgent(wantAgentPtr) == ERR_OK) {
+        std::vector<std::string> hashcodes;
+        hashcodes.push_back(hashCode);
+        NotificationHelper::RemoveNotifications(
+            hashcodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
+    }
+}
+
+ErrCode UnlockListenerOperService::GetNtfBtnWantAgentPtr(const std::string& hashCode,
+    const int32_t btnIndex, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& wantAgentPtr)
+{
+    sptr<NotificationRequest> notificationRequest = nullptr;
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
+        ANS_LOGE("Check notificationRequest is null.");
+        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
+    }
+
+    auto actionButtons = notificationRequest->GetActionButtons();
+    if (actionButtons.empty() || actionButtons.size() <= static_cast<unsigned long>(btnIndex) || btnIndex < 0) {
+        ANS_LOGE("Check actionButtons is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    std::shared_ptr<NotificationActionButton> clickedBtn;
+    int32_t replyBtnNum = 0;
+    for (int i = 0; i < static_cast<int32_t>(actionButtons.size()) &&
+        btnIndex + replyBtnNum < static_cast<int32_t>(actionButtons.size()); i++) {
+        if (actionButtons[i] == nullptr) {
+            ANS_LOGE("NotificationRequest button is invalid, button index: %{public}d.", i);
+            return ERR_ANS_INVALID_PARAM;
+        }
+        if (actionButtons[i]->GetUserInput() != nullptr) {
+            replyBtnNum++;
+            continue;
+        }
+        if (btnIndex + replyBtnNum == i) {
+            clickedBtn = actionButtons[i];
+        }
+    }
+    if (clickedBtn == nullptr) {
+        ANS_LOGE("NotificationRequest btnIndex is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    wantAgentPtr = clickedBtn->GetWantAgent();
+    if (wantAgentPtr == nullptr) {
+        ANS_LOGE("Check wantAgentPtr is null.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return ERR_OK;
+}
+
+std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> UnlockListenerOperService::GetNtfWantAgentPtr(
+    const std::string& hashCode)
+{
+    sptr<NotificationRequest> notificationRequest = nullptr;
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
+        ANS_LOGE("Check notificationRequest is null.");
+        return nullptr;
+    }
+    return notificationRequest->GetWantAgent();
 }
 
 ErrCode UnlockListenerOperService::LaunchWantAgent(

@@ -1026,7 +1026,8 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | 
     info->SetNeedNotifyResponse(true);
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.DistributeOperation(operationInfo);
+    sptr request = new (std::nothrow) NotificationRequest();
+    notificationSubscriberManager.DistributeOperation(operationInfo, request);
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);

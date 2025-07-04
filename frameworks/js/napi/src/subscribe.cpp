@@ -1741,6 +1741,7 @@ napi_value GetParamOperationInfoSub(const napi_env &env, const napi_value &conte
  
 napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content, OperationInfo& operationInfo)
 {
+    operationInfo.withOperationInfo = true;
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, content, &valuetype));
     if (valuetype != napi_object) {
@@ -1783,6 +1784,9 @@ napi_value GetParamOperationInfo(const napi_env &env, const napi_value &content,
         operationInfo.userInput = str;
     }
 
+    if (!operationInfo.userInput.empty()) {
+        return Common::NapiGetNull(env);
+    }
     return GetParamOperationInfoSub(env, content, operationInfo);
 }
 

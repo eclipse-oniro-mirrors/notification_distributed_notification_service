@@ -1389,7 +1389,8 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         }
         notification = record->notification;
         // delete or delete all, call the function
-        if (removeReason != NotificationConstant::CLICK_REASON_DELETE) {
+        if (removeReason != NotificationConstant::CLICK_REASON_DELETE &&
+            removeReason != NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE) {
             ProcForDeleteLiveView(record);
             if (!isCancel) {
                 TriggerRemoveWantAgent(record->request, removeReason, record->isThirdparty);

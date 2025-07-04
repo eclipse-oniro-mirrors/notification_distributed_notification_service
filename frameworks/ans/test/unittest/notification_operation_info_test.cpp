@@ -33,6 +33,19 @@ public:
 };
 
 /**
+ * @tc.name: SetJumpType_0100
+ * @tc.desc: Test SetJumpType.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationOperationInfoTest, SetJumpType_0100, Function | SmallTest | Level1)
+{
+    NotificationOperationInfo notificationOperationInfo;
+    notificationOperationInfo.SetJumpType(1);
+    EXPECT_EQ(notificationOperationInfo.GetJumpType(), 1);
+}
+
+/**
  * @tc.name: SetBtnIndex_0100
  * @tc.desc: Test SetBtnIndex.
  * @tc.type: FUNC
@@ -55,11 +68,12 @@ HWTEST_F(NotificationOperationInfoTest, Dump_0100, Function | SmallTest | Level1
 {
     NotificationOperationInfo notificationOperationInfo;
     std::string expString = "NotificationOperationInfo{ hashCode = hashCode, eventId = 1, actionName = actionName, " \
-    "operationType = 0, btnIndex = 2 }";
+    "operationType = 0, btnIndex = 2, jumpType = 1 }";
     notificationOperationInfo.SetHashCode("hashCode");
     notificationOperationInfo.SetEventId("1");
     notificationOperationInfo.SetActionName("actionName");
     notificationOperationInfo.SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
+    notificationOperationInfo.SetJumpType(1);
     notificationOperationInfo.SetBtnIndex(2);
     EXPECT_EQ(notificationOperationInfo.Dump(), expString);
 }
@@ -79,10 +93,14 @@ HWTEST_F(NotificationOperationInfoTest, Marshalling_0100, Function | SmallTest |
     notificationOperationInfo.SetActionName("actionName");
     notificationOperationInfo.SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP);
     notificationOperationInfo.SetBtnIndex(2);
+    notificationOperationInfo.SetJumpType(1);
+    notificationOperationInfo.SetNotificationUdid("udid");
     EXPECT_TRUE(notificationOperationInfo.Marshalling(parcel));
     NotificationOperationInfo ntfOperInfoRes;
     EXPECT_TRUE(ntfOperInfoRes.ReadFromParcel(parcel));
     EXPECT_EQ(ntfOperInfoRes.GetBtnIndex(), 2);
+    EXPECT_EQ(ntfOperInfoRes.GetJumpType(), 1);
+    EXPECT_EQ(ntfOperInfoRes.GetNotificationUdid(), "udid");
 }
 }
 }

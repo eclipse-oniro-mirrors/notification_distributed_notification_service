@@ -406,24 +406,24 @@ public:
      *
      * @param deviceType Type of the target device whose status you want to set.
      * @param deviceId The id of the target device.
-     * @param userId The userid of the target device.
+     * @param targetUserId The userid of the target device.
      * @param isAuth Return The authorization status.
      * @return Returns get result.
      */
     ErrCode GetDistributedAuthStatus(
-        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool &isAuth);
+        const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool &isAuth);
 
     /**
      * @brief Set the target device's authorization status.
      *
      * @param deviceType Type of the target device whose status you want to set.
      * @param deviceId The id of the target device.
-     * @param userId The userid of the target device.
+     * @param targetUserId The userid of the target device.
      * @param isAuth The authorization status.
      * @return Returns set result.
      */
     ErrCode SetDistributedAuthStatus(
-        const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth);
+        const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool isAuth);
 
     /**
      * @brief Set the channel switch for collaborative reminders.

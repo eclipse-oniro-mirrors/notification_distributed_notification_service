@@ -323,18 +323,6 @@ bool NotificationRequestBox::SetActionButtonsTitle(const std::vector<std::string
     return SetActionButtonsLength(index);
 }
 
-bool NotificationRequestBox::SetActionUserInputs(const std::vector<std::string>& userInputs)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    for (size_t i = 0; i < userInputs.size(); i++) {
-        box_->PutValue(
-            std::make_shared<TlvItem>(ACTION_USER_INPUTS + i, userInputs[i]));
-    }
-    return true;
-}
-
 #else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
 {
@@ -595,23 +583,6 @@ bool NotificationRequestBox::GetActionButtonsTitle(std::vector<std::string>& but
         std::string buttonTitle = "";
         box_->GetStringValue(ACTION_BUTTONS_TITILE_INDEX + i, buttonTitle);
         buttonsTitle.push_back(buttonTitle);
-    }
-    return true;
-}
-
-bool NotificationRequestBox::GetActionUserInputs(std::vector<std::string>& userInputs) const
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    int32_t length = 0;
-    if (!GetActionButtonsLength(length)) {
-        return false;
-    }
-    for (int i = 0; i < length; i++) {
-        std::string userInput = "";
-        box_->GetStringValue(ACTION_USER_INPUTS + i, userInput);
-        userInputs.push_back(userInput);
     }
     return true;
 }

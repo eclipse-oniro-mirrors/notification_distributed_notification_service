@@ -407,7 +407,15 @@ public:
 
     static constexpr int32_t ANS_UID = 5523;
 
-    static constexpr int32_t MAX_BTN_NUM = 3;
+    static const int32_t MAX_BTN_NUM = 3;
+ 
+    static const int32_t DISTRIBUTE_JUMP_INVALID = -1;
+ 
+    static const int32_t DISTRIBUTE_JUMP_BY_NTF = 0;
+ 
+    static const int32_t DISTRIBUTE_JUMP_BY_BTN = 1;
+ 
+    static const int32_t DISTRIBUTE_JUMP_BY_LIVE_VIEW = 32;
 
     // live view max size is 512KB(extra size) + 8KB(base size) = 520KB
     static constexpr uint64_t NOTIFICATION_MAX_LIVE_VIEW_SIZE = 520ULL * 1024ULL;

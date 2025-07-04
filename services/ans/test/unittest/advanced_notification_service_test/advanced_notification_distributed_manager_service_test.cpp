@@ -187,7 +187,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_1
 HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_200, Function | SmallTest | Level1)
 {
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
-    operationInfo->SetOperationType(static_cast<OperationType>(2));
+    operationInfo->SetOperationType(static_cast<OperationType>(5));
     sptr<IAnsOperationCallback> callback = nullptr;
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);

@@ -47,23 +47,32 @@ DistributedOperationService& DistributedOperationService::GetInstance()
 void DistributedOperationService::HandleNotificationOperation(const std::shared_ptr<TlvBox>& boxMessage)
 {
     int32_t operationType = 0;
+    int32_t jumpType = 0;
     int32_t matchType = 0;
     int32_t peerDeviceType = DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
     std::string hashCode;
     NotificationResponseBox responseBox = NotificationResponseBox(boxMessage);
     responseBox.GetOperationType(operationType);
+    responseBox.GetOperationJumpType(jumpType);
     responseBox.GetMatchType(matchType);
     responseBox.GetNotificationHashCode(hashCode);
-    responseBox.GetLocalDeviceType(peerDeviceType);
-    ANS_LOGI("handle response, hashCode: %{public}s, operationType: %{public}d, matchType: %{public}d \
-        peerDeviceType: %{public}d.", hashCode.c_str(), operationType, matchType, peerDeviceType);
+    ANS_LOGI("handle response, hashCode: %{public}s, operationType: %{public}d, matchType: %{public}d, \
+        jumpType: %{public}d.", hashCode.c_str(), operationType, matchType, jumpType);
 #ifdef DISTRIBUTED_FEATURE_MASTER
-    if (peerDeviceType != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
-        peerDeviceType != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
-        DealNonMultiScreenSyncOper(hashCode, operationType, matchType, responseBox);
+    if (matchType != MatchType::MATCH_SYN) {
         return;
     }
-    DealMultiScreenSyncOper(hashCode, operationType, matchType, responseBox);
+    if (static_cast<OperationType>(operationType) == DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
+        int32_t btnIndex;
+        responseBox.GetOperationBtnIndex(btnIndex);
+        if (!ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
+            UnlockListenerOperService::GetInstance().TriggerByJumpType(hashCode, jumpType, btnIndex);
+            return;
+        }
+        UnlockListenerOperService::GetInstance().AddDelayTask(hashCode, jumpType, btnIndex);
+        return;
+    }
+    TriggerByOperationType(hashCode, operationType, responseBox);
 #else
     if (matchType == MatchType::MATCH_ACK) {
         ResponseOperationResult(hashCode, responseBox);
@@ -145,47 +154,6 @@ static ErrCode GetNotificationButtonWantPtr(const std::string& hashCode, const s
         return ERR_ANS_INVALID_PARAM;
     }
     return ERR_OK;
-}
-
-static ErrCode GetNotificationButtonWantAgentPtr(const std::string& hashCode,
-    const int32_t btnIndex, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& wantAgentPtr)
-{
-    sptr<NotificationRequest> notificationRequest = nullptr;
-    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
-    if (result != ERR_OK || notificationRequest == nullptr) {
-        ANS_LOGE("Check notificationRequest is null.");
-        return ERR_ANS_NOTIFICATION_NOT_EXISTS;
-    }
-
-    auto actionButtons = notificationRequest->GetActionButtons();
-    if (actionButtons.empty() || actionButtons.size() <= static_cast<unsigned long>(btnIndex)) {
-        ANS_LOGE("Check actionButtons is null.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    auto clickedBtn = actionButtons[btnIndex];
-    if (clickedBtn == nullptr) {
-        ANS_LOGE("NotificationRequest button is invalid, btnIndex: %{public}d.", btnIndex);
-        return ERR_ANS_INVALID_PARAM;
-    }
-
-    wantAgentPtr = clickedBtn->GetWantAgent();
-    if (wantAgentPtr == nullptr) {
-        ANS_LOGE("Check wantAgentPtr is null.");
-        return ERR_ANS_INVALID_PARAM;
-    }
-    return ERR_OK;
-}
-
-static std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> GetNotificationWantAgentPtr(const std::string& hashCode)
-{
-    sptr<NotificationRequest> notificationRequest = nullptr;
-    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
-    if (result != ERR_OK || notificationRequest == nullptr) {
-        ANS_LOGE("Check notificationRequest is null.");
-        return nullptr;
-    }
-    return notificationRequest->GetWantAgent();
 }
 
 static std::shared_ptr<AAFwk::Want> GetNotificationWantPtr(const std::string& hashCode)
@@ -330,65 +298,15 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
     }
 }
 
-void DistributedOperationService::DealNonMultiScreenSyncOper(const std::string& hashCode,
-    const int32_t operationType, const int32_t matchType, const NotificationResponseBox &responseBox)
+void DistributedOperationService::TriggerByOperationType(
+    const std::string& hashCode, const int32_t operationType, const NotificationResponseBox& responseBox)
 {
-    if (matchType != MatchType::MATCH_SYN) {
-        return;
-    }
     if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_JUMP) {
         TriggerJumpApplication(hashCode);
     } else if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         ErrCode result = TriggerReplyApplication(hashCode, responseBox);
         ReplyOperationResponse(hashCode, responseBox, OperationType::DISTRIBUTE_OPERATION_REPLY, result);
     }
-}
-
-void DistributedOperationService::DealMultiScreenSyncOper(const std::string& hashCode,
-    const int32_t operationType, const int32_t matchType, const NotificationResponseBox &responseBox)
-{
-    if (matchType != MatchType::MATCH_SYN) {
-        return;
-    }
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = nullptr;
-    if (operationType >= static_cast<int32_t>(OperationType::DISTRIBUTE_OPERATION_FOR_LIVE_VIEW)) {
-        sptr<NotificationRequest> notificationRequest = nullptr;
-        auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
-        if (result != ERR_OK || notificationRequest == nullptr) {
-            ANS_LOGE("Check notificationRequest is null.");
-            return;
-        }
-        if (!notificationRequest->IsCommonLiveView()) {
-            ANS_LOGE("operationType for liveView but notification not liveView.");
-            return;
-        }
-        int32_t btnIndex;
-        responseBox.GetOperationBtnIndex(btnIndex);
-        ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->LiveViewMultiScreenSyncOper(
-            notificationRequest, operationType, btnIndex);
-        ANS_LOGI("LiveViewMultiScreenSyncOper res: %{public}d.", static_cast<int32_t>(res));
-        return;
-    } else if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_JUMP) {
-        wantAgentPtr = GetNotificationWantAgentPtr(hashCode);
-    } else if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_REPLY) {
-        int32_t btnIndex;
-        responseBox.GetOperationBtnIndex(btnIndex);
-        GetNotificationButtonWantAgentPtr(hashCode, btnIndex, wantAgentPtr);
-    }
-
-    if (wantAgentPtr == nullptr) {
-        ANS_LOGE("DealMultiScreenSyncOper fail cause wantAgentPtr is null.");
-        return;
-    }
-    if (!ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked() &&
-        UnlockListenerOperService::GetInstance().LaunchWantAgent(wantAgentPtr) == ERR_OK) {
-        std::vector<std::string> hashcodes;
-        hashcodes.push_back(hashCode);
-        NotificationHelper::RemoveNotifications(
-            hashcodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
-        return;
-    }
-    UnlockListenerOperService::GetInstance().AddWantAgent(hashCode, wantAgentPtr);
 }
 #else
 
@@ -411,21 +329,22 @@ int32_t DistributedOperationService::OnOperationResponse(
             ANS_LOGW("dans OnResponse SetMessageType failed");
             return ERR_ANS_TASK_ERR;
         }
-        ANS_LOGI("dans OnResponse clicked btnIndex: %{public}d", operationInfo->GetBtnIndex());
-        if (0 <= operationInfo->GetBtnIndex() && operationInfo->GetBtnIndex() < NotificationConstant::MAX_BTN_NUM) {
-            responseBox->SetOperationBtnIndex(operationInfo->GetBtnIndex());
-        }
         responseBox->SetActionName(operationInfo->GetActionName());
         responseBox->SetUserInput(operationInfo->GetUserInput());
     }
 
+    if (type == OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
+        responseBox->SetOperationJumpType(operationInfo->GetJumpType());
+        if (operationInfo->GetBtnIndex() >= 0 && operationInfo->GetBtnIndex() < NotificationConstant::MAX_BTN_NUM) {
+            responseBox->SetOperationBtnIndex(operationInfo->GetBtnIndex());
+        }
+    }
     auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
     responseBox->SetMatchType(MatchType::MATCH_SYN);
     responseBox->SetOperationType(static_cast<int32_t>(type));
     responseBox->SetNotificationHashCode(hashCode);
     responseBox->SetOperationEventId(operationInfo->GetEventId());
     responseBox->SetLocalDeviceId(localDevice.deviceId_);
-    responseBox->SetLocalDeviceType(localDevice.deviceType_);
     if (!responseBox->Serialize()) {
         ANS_LOGW("dans OnResponse serialize failed");
         return ERR_ANS_TASK_ERR;
@@ -454,18 +373,18 @@ void DistributedOperationService::ResponseOperationResult(const std::string& has
 }
 
 void DistributedOperationService::LaunchProjectionApp(
-    const DistributedDeviceInfo& device, const DistributedDeviceInfo& localDevice)
+    const DistributedDeviceInfo& peerDevice, const DistributedDeviceInfo& localDevice)
 {
     if ((localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
         localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) ||
-        device.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         ANS_LOGI("Can not launch projectionApp");
         return;
     }
     int32_t result =
-        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->RestoreCollaborationWindow(device.networkId_);
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->RestoreCollaborationWindow(peerDevice.networkId_);
     ANS_LOGI("RestoreCollaborationWindow result: %{public}d, networkId: %{public}s",
-        result, device.networkId_.c_str());
+        result, peerDevice.networkId_.c_str());
 }
 #endif
 }
