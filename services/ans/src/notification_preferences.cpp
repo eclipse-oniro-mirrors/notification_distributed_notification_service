@@ -1153,7 +1153,7 @@ void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<Notificat
     if (preferncesDB_ != nullptr && bundleOption != nullptr) {
         std::lock_guard<std::mutex> lock(preferenceMutex_);
         preferncesDB_->RemoveSilentEnabledDbByBundle(bundleOption->GetBundleName(), bundleOption->GetUid());
-        preferencesInfo_->RemoveSilentReminderInfo(bundleOption);
+        preferencesInfo_.RemoveSilentReminderInfo(bundleOption);
     }
 }
 
