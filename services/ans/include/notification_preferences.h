@@ -343,7 +343,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode IsSilentReminderEnabled(
-        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::ENABLE_STATUS &enableStatus);
+        const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &enableStatus);
 
     /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
@@ -389,7 +389,7 @@ public:
      * @return Returns configuring Whether to Synchronize Common Notifications to Target Devices result.
      */
     ErrCode SetDistributedEnabled(
-        const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enableStatus);
+        const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enableStatus);
 
     /**
      * @brief Querying Whether to Synchronize Common Devices to Target Devices.
@@ -399,7 +399,7 @@ public:
      * @return Returns Whether to Synchronize Common Notifications to Target Devices result.
      */
     ErrCode IsDistributedEnabled(
-        const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enableStatus);
+        const std::string &deviceType, NotificationConstant::SWITCH_STATE &enableStatus);
 
     /**
      * @brief Get the target device's authorization status.

@@ -94,12 +94,12 @@ bool NotificationCloneBundleInfo::GetEnableNotification() const
 }
 
 void NotificationCloneBundleInfo::SetSilentReminderEnabled(
-    const NotificationConstant::ENABLE_STATUS &silentReminderEnabled)
+    const NotificationConstant::SWITCH_STATE &silentReminderEnabled)
 {
     silentReminderEnabled_ = silentReminderEnabled;
 }
 
-NotificationConstant::ENABLE_STATUS NotificationCloneBundleInfo::GetSilentReminderEnabled() const
+NotificationConstant::SWITCH_STATE NotificationCloneBundleInfo::GetSilentReminderEnabled() const
 {
     return silentReminderEnabled_;
 }
@@ -198,7 +198,10 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
     }
     if (jsonObject.contains(BUNDLE_INFO_SILENT_REMINDER) && jsonObject[BUNDLE_INFO_SILENT_REMINDER].is_number()) {
         int32_t silentReminderEnabled = jsonObject.at(BUNDLE_INFO_SILENT_REMINDER).get<int32_t>();
-        silentReminderEnabled_ = static_cast<NotificationConstant::ENABLE_STATUS>(silentReminderEnabled);
+        if (silentReminderEnabled >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) &&
+            silentReminderEnabled <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            silentReminderEnabled_ = static_cast<NotificationConstant::SWITCH_STATE>(silentReminderEnabled);
+        }
     }
     SlotsFromJson(jsonObject);
 }

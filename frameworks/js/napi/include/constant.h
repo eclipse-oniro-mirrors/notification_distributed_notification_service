@@ -31,7 +31,7 @@ napi_value DoNotDisturbTypeInit(napi_env env, napi_value exports);
 napi_value DeviceRemindTypeInit(napi_env env, napi_value exports);
 napi_value ConstantInit(napi_env env, napi_value exports);
 napi_value LiveViewStatusInit(napi_env env, napi_value exports);
-napi_value EnableStatusInit(napi_env env, napi_value exports);
+napi_value SwitchStateInit(napi_env env, napi_value exports);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

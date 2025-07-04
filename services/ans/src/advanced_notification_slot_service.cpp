@@ -160,9 +160,9 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
             result = ERR_OK;
             slots.clear();
         }
-        NotificationConstant::ENABLE_STATUS enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
-        if (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
             for (auto slot : slots) {
                 sptr<NotificationSlot> value(new NotificationSlot(*slot));
                 value->SetReminderMode(1 << 5);
@@ -689,13 +689,13 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
     const sptr<NotificationBundleOption> &bundleOption)
 {
     auto flags = request->GetFlags();
-    NotificationConstant::ENABLE_STATUS enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     if (request->IsCommonLiveView()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewVoiceContent(request);
     } else if (!request->IsSystemLiveView()) {
         NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
-        if (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
             flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
             flags->SetLockScreenVisblenessEnabled(false);
             flags->SetBannerEnabled(false);

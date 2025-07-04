@@ -56,8 +56,8 @@ public:
     void SetEnableNotification(const bool &enable);
     bool GetEnableNotification() const;
 
-    void SetSilentReminderEnabled(const NotificationConstant::ENABLE_STATUS &silentReminderEnabled);
-    NotificationConstant::ENABLE_STATUS GetSilentReminderEnabled() const;
+    void SetSilentReminderEnabled(const NotificationConstant::SWITCH_STATE &silentReminderEnabled);
+    NotificationConstant::SWITCH_STATE GetSilentReminderEnabled() const;
 
     void AddSlotInfo(const SlotInfo &slotInfo);
     std::vector<SlotInfo> GetSlotInfo() const;
@@ -75,7 +75,7 @@ private:
     bool isShowBadge_ = false;
     bool isEnabledNotification_ = false;
     std::vector<SlotInfo> slotsInfo_;
-    NotificationConstant::ENABLE_STATUS silentReminderEnabled_;
+    NotificationConstant::SWITCH_STATE silentReminderEnabled_;
 };
 } // namespace Notification
 } // namespace OHOS

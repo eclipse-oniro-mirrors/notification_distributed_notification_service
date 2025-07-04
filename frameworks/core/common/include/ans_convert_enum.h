@@ -135,11 +135,11 @@ enum class LiveViewTypes {
     LIVE_VIEW_INSTANT_BANNER
 };
 
-enum class EnabledStatus {
-    DEFAULT_FALSE,
-    DEFAULT_TRUE,
-    ENABLED_TRUE,
-    ENABLED_FALSE
+enum class SwitchState {
+    USER_MODIFIED_OFF,
+    USER_MODIFIED_ON,
+    SYSTEM_DEFAULT_OFF,
+    SYSTEM_DEFAULT_ON
 };
 
 class AnsEnumUtil {

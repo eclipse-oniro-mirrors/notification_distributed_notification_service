@@ -37,7 +37,7 @@ public:
     struct SilentReminderInfo {
         std::string bundleName;
         int32_t uid;
-        NotificationConstant::ENABLE_STATUS enableStatus {NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE};
+        NotificationConstant::SWITCH_STATE enableStatus {NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF};
     };
     class BundleInfo final {
     public:
@@ -279,6 +279,13 @@ public:
      * @return Whether to get silent reminder info success.
      */
     bool GetSilentReminderInfo(const sptr<NotificationBundleOption> &bundleOption, SilentReminderInfo &info) const;
+
+    /**
+     * remove silent reminder info from preferences info.
+     * @param bundleOption Indicates the silent reminder info label.
+     * @return Whether to remove silent reminder info success.
+     */
+    bool RemoveSilentReminderInfo(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * remove bundle info from preferences info.

@@ -259,6 +259,17 @@ bool NotificationPreferencesInfo::GetSilentReminderInfo(
     return false;
 }
 
+bool NotificationPreferencesInfo::RemoveSilentReminderInfo(const sptr<NotificationBundleOption> &bundleOption)
+{
+    std::string bundleKey = bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid());
+    auto iter = silentReminderInfos_.find(bundleKey);
+    if (iter != silentReminderInfos_.end()) {
+        silentReminderInfos_.erase(iter);
+        return true;
+    }
+    return false;
+}
+
 bool NotificationPreferencesInfo::RemoveBundleInfo(const sptr<NotificationBundleOption> &bundleOption)
 {
     std::string bundleKey = bundleOption->GetBundleName() + std::to_string(bundleOption->GetUid());

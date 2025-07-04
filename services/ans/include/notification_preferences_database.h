@@ -137,7 +137,7 @@ public:
      * @param enabled Indicates to whether to enabled
      * @return Return true on success, false on failure.
      */
-    bool PutDistributedEnabled(const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enabled);
+    bool PutDistributedEnabled(const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled);
 
     /**
      * @brief get distributed enable notification in the of  bundle into disturbe DB.
@@ -146,7 +146,7 @@ public:
      * @param enabled Indicates to whether to enabled
      * @return Return true on success, false on failure.
      */
-    bool GetDistributedEnabled(const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enabled);
+    bool GetDistributedEnabled(const std::string &deviceType, NotificationConstant::SWITCH_STATE &enabled);
 
     /**
      * @brief Get the target device's authorization status.

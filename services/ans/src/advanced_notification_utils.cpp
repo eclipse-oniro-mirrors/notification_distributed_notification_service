@@ -1998,10 +1998,10 @@ void AdvancedNotificationService::UpdateCloneBundleInfoFoSilentReminder(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {
     auto enableStatus = cloneBundleInfo.GetSilentReminderEnabled();
-    if (enableStatus != NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE &&
-        enableStatus != NotificationConstant::ENABLE_STATUS::DEFAULT_TRUE) {
+    if (enableStatus != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF &&
+        enableStatus != NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
         if (NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundle,
-            enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE ? true : false) != ERR_OK) {
+            enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ? true : false) != ERR_OK) {
             ANS_LOGW("SetSilentReminderEnabled failed.");
         }
     }
