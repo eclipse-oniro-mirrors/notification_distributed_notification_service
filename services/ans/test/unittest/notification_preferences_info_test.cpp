@@ -426,5 +426,41 @@ HWTEST_F(NotificationPreferencesInfoTest, GetkioskAppTrustList_0100, TestSize.Le
     ret = preferencesInfo->GetkioskAppTrustList(resultList);
     ASSERT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0500
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0500, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationDisable->SetUserId(101);
+    preferencesInfo->SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    bool ret = preferencesInfo->GetUserDisableNotificationInfo(101, disable);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0600
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0600, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    notificationDisable->SetDisabled(false);
+    notificationDisable->SetBundleList({ "com.example.app" });
+    notificationDisable->SetUserId(101);
+    preferencesInfo->SetDisableNotificationInfo(notificationDisable);
+    NotificationDisable disable;
+    bool ret = preferencesInfo->GetUserDisableNotificationInfo(101, disable);
+    EXPECT_TRUE(ret);
+}
 }
 }

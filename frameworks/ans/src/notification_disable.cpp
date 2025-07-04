@@ -24,6 +24,7 @@ namespace Notification {
 namespace {
 constexpr const char *DISABLED = "disabled";
 constexpr const char *BUNDLELIST = "bundleList";
+constexpr const char *USERID = "userId";
 constexpr int32_t MAX_NOTIFICATION_DISABLE_NUM = 1000;
 } // namespace
 void NotificationDisable::SetDisabled(bool disabled)
@@ -36,6 +37,11 @@ void NotificationDisable::SetBundleList(const std::vector<std::string> &bundleLi
     bundleList_ = bundleList;
 }
 
+void NotificationDisable::SetUserId(int32_t userId)
+{
+    userId_ = userId;
+}
+
 bool NotificationDisable::GetDisabled() const
 {
     return disabled_;
@@ -44,6 +50,11 @@ bool NotificationDisable::GetDisabled() const
 std::vector<std::string> NotificationDisable::GetBundleList() const
 {
     return bundleList_;
+}
+
+int32_t NotificationDisable::GetUserId() const
+{
+    return userId_;
 }
 
 bool NotificationDisable::Marshalling(Parcel &parcel) const
@@ -67,6 +78,10 @@ bool NotificationDisable::Marshalling(Parcel &parcel) const
             return false;
         }
     }
+    if (!parcel.WriteInt32(userId_)) {
+        ANS_LOGE("Failed to write userId");
+        return false;
+    }
     return true;
 }
 
@@ -85,6 +100,7 @@ bool NotificationDisable::ReadFromParcel(Parcel &parcel)
             return false;
         }
     }
+    userId_ = parcel.ReadInt32();
     return true;
 }
 
@@ -103,6 +119,7 @@ std::string NotificationDisable::ToJson()
     nlohmann::json jsonObject;
     jsonObject[DISABLED] = disabled_;
     jsonObject[BUNDLELIST] = nlohmann::json(bundleList_);
+    jsonObject[USERID] = userId_;
     return jsonObject.dump();
 }
 
@@ -127,6 +144,9 @@ void NotificationDisable::FromJson(const std::string &jsonObj)
     }
     if (jsonObject.find(BUNDLELIST) != jsonEnd && jsonObject.at(BUNDLELIST).is_array()) {
         bundleList_ = jsonObject.at(BUNDLELIST).get<std::vector<std::string>>();
+    }
+    if (jsonObject.find(USERID) != jsonEnd && jsonObject.at(USERID).is_number_integer()) {
+        userId_ = jsonObject.at(USERID).get<int32_t>();
     }
 }
 }

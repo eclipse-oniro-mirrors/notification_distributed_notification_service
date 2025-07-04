@@ -2640,5 +2640,80 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_002, Function 
     bool result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: IsDisableNotification_003
+ * @tc.desc: Test IsDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotification_003, Function | SmallTest | Level1)
+{
+    bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
+    if (defaultPolicy) {
+        system::SetBoolParameter("persist.edm.notification_disable", false);
+    }
+    std::string bundleName = "com.testDisableNotification.example";
+    NotificationDisable notificationDisable;
+    std::vector<std::string> bundleList = {bundleName};
+    notificationDisable.SetDisabled(true);
+    notificationDisable.SetBundleList(bundleList);
+    notificationDisable.SetUserId(100);
+    sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
+    NotificationPreferences::GetInstance()->preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
+    bool result = advancedNotificationService_->IsDisableNotification(bundleName);
+    ASSERT_FALSE(result);
+    system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
+}
+
+/**
+ * @tc.name: IsDisableNotification_004
+ * @tc.desc: Test IsDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotification_004, Function | SmallTest | Level1)
+{
+    bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
+    if (defaultPolicy) {
+        system::SetBoolParameter("persist.edm.notification_disable", false);
+    }
+    std::string bundleName = "com.testDisableNotification.example";
+    NotificationDisable notificationDisable;
+    std::vector<std::string> bundleList = {bundleName};
+    notificationDisable.SetDisabled(false);
+    notificationDisable.SetBundleList(bundleList);
+    notificationDisable.SetUserId(101);
+    sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
+    NotificationPreferences::GetInstance()->preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
+    bool result = advancedNotificationService_->IsDisableNotification(bundleName);
+    ASSERT_FALSE(result);
+    system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
+}
+
+/**
+ * @tc.name: IsDisableNotification_005
+ * @tc.desc: Test IsDisableNotification
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotification_005, Function | SmallTest | Level1)
+{
+    bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
+    if (defaultPolicy) {
+        system::SetBoolParameter("persist.edm.notification_disable", false);
+    }
+    std::string bundleName = "com.testDisableNotification.example";
+    NotificationDisable notificationDisable;
+    std::vector<std::string> bundleList = {bundleName};
+    notificationDisable.SetDisabled(true);
+    notificationDisable.SetBundleList(bundleList);
+    notificationDisable.SetUserId(101);
+    sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
+    NotificationPreferences::GetInstance()->preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
+    bool result = advancedNotificationService_->IsDisableNotification(bundleName);
+    ASSERT_TRUE(result);
+    system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
+}
 }  // namespace Notification
 }  // namespace OHOS
