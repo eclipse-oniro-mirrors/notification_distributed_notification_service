@@ -206,6 +206,7 @@ public:
     enum class RingChannel : uint8_t {
         ALARM,
         MEDIA,
+        NOTIFICATION,  // for calendar
     };
 
     struct ButtonWantAgent {

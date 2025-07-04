@@ -20,6 +20,9 @@ namespace OHOS {
 namespace NotificationNapi {
 const int ENABLED_MAX_PARA = 2;
 const int ENABLED_MIN_PARA = 1;
+const int ARGC_ZERO = 0;
+const int ARGC_ONE = 1;
+const int ARGC_TWO = 2;
 const int ENABLED_BUNDLE_MAX_PARA = 3;
 const int ENABLED_BUNDLE_MIN_PARA = 2;
 const int IS_ENABLED_BUNDLE_MAX_PARA = 2;
@@ -118,6 +121,89 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         napi_create_reference(env, argv[PARAM1], 1, &params.callback);
     }
 
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseSetDistributedEnabledParams(const napi_env &env, const napi_callback_info &info, EnabledParams &params)
+{
+    ANS_LOGD("called");
+    size_t argc = ARGC_TWO;
+    napi_value argv[ARGC_TWO] = { nullptr };
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < ARGC_TWO) {
+        ANS_LOGE("Wrong number of arguments.");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+    napi_valuetype valuetype = napi_undefined;
+
+    // argv[0]: enable
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+    if (valuetype != napi_boolean) {
+        ANS_LOGE("Wrong argument type. Bool expected.");
+        std::string msg = "Incorrect parameter types.The type of enable must be boolean.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    napi_get_value_bool(env, argv[PARAM0], &params.enable);
+
+    // argv[1]: deviceType
+    NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
+    if (valuetype != napi_string) {
+        ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types.The type of deviceType must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    char str[STR_MAX_SIZE] = { 0 };
+    size_t strLen = 0;
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
+    if (std::strlen(str) == 0) {
+        ANS_LOGE("Property deviceType is empty");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+    params.deviceType = str;
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseIsDistributedEnabledParams(const napi_env &env, const napi_callback_info &info, EnabledParams &params)
+{
+    ANS_LOGD("called");
+    size_t argc = ARGC_ONE;
+    napi_value argv[ARGC_ONE] = { nullptr };
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc < ARGC_ZERO) {
+        ANS_LOGE("Wrong number of arguments");
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    // argv[0]: callback or deviceType
+    napi_valuetype valuetype = napi_undefined;
+    if (argc >= ARGC_ONE) {
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
+        if (valuetype == napi_function) {
+            napi_create_reference(env, argv[PARAM0], 1, &params.callback);
+        } else if (valuetype == napi_string) {
+            char str[STR_MAX_SIZE] = { 0 };
+            size_t strLen = 0;
+            NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
+            if (std::strlen(str) == 0) {
+                ANS_LOGE("Property deviceType is empty");
+                Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+                return nullptr;
+            }
+            params.deviceType = str;
+        } else {
+            ANS_LOGE("Wrong argument type. Callback or String expected.");
+            Common::NapiThrow(env, ERROR_PARAM_INVALID, INCORRECT_PARAMETER_TYPES);
+            return nullptr;
+        }
+    }
     return Common::NapiGetNull(env);
 }
 

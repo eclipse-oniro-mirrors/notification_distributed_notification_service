@@ -355,6 +355,7 @@ public:
     ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
     void SetkioskAppTrustList(const std::vector<std::string> &kioskAppTrustList);
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList) const;
+    bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
 
 private:
     std::map<int32_t, bool> isEnabledAllNotification_;
@@ -369,6 +370,7 @@ private:
         std::vector<std::string> bundleList;
     };
     DisableNotificationInfo disableNotificationInfo_;
+    std::map<int32_t, DisableNotificationInfo> userDisableNotificationInfo_;
 };
 }  // namespace Notification
 }  // namespace OHOS

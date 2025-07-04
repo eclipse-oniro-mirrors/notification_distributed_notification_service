@@ -354,6 +354,7 @@ public:
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
     bool SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     bool GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
     bool IsDistributedEnabledEmptyForBundle(
@@ -391,6 +392,23 @@ public:
      */
     void ParseBundleFromDistureDB(NotificationPreferencesInfo &info,
         const std::unordered_map<std::string, std::string> &entries, const int32_t &userId);
+
+    /**
+     * @brief Put distributed device list into disturbe DB.
+     *
+     * @param deviceTypes Indicates device types.
+     * @param userId Indicates userId
+     * @return Return true on success, false on failure.
+     */
+    bool PutDistributedDevicelist(const std::string &deviceTypes, const int32_t &userId);
+
+    /**
+     * @brief get distributed device list from disturbe DB.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Return true on success, false on failure.
+     */
+    bool GetDistributedDevicelist(std::string &deviceTypes);
 
 private:
     bool CheckRdbStore();

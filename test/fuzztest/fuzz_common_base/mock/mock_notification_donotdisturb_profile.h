@@ -17,7 +17,7 @@
 #define MOCK_NOTIFICATION_DONOT_DISTURB_PROFILE_BUILDER_H
 
 #include "mock_fuzz_object.h"
-#include "notification_bundle_option.h"
+#include "mock_notification_bundle_option.h"
 #include "notification_do_not_disturb_profile.h"
 
 namespace OHOS {

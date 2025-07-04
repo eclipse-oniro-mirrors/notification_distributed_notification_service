@@ -267,36 +267,21 @@ bool NotificationRequestBox::SetAutoDeleteTime(int64_t time)
     return box_->PutValue(std::make_shared<TlvItem>(AUTO_DELETE_TIME, time));
 }
 
-bool NotificationRequestBox::SetAppName(const std::string& appName)
+
+bool NotificationRequestBox::SetReceiverUserId(const int32_t& userId)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(APP_NAME, appName));
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_RECEIVE_USERID, userId));
 }
 
-bool NotificationRequestBox::SetAppLabel(const std::string& appLabel)
+bool NotificationRequestBox::SetBoxExtendInfo(const std::string& extendInfo)
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(APP_LABEL, appLabel));
-}
-
-bool NotificationRequestBox::SetAppIndex(const int32_t& appIndex)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(APP_INDEX, appIndex));
-}
-
-bool NotificationRequestBox::SetNotificationUserId(const int32_t& userId)
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_USERID, userId));
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_EXTENDINFO, extendInfo));
 }
 
 bool NotificationRequestBox::SetDeviceUserId(const int32_t& userId)
@@ -304,7 +289,7 @@ bool NotificationRequestBox::SetDeviceUserId(const int32_t& userId)
     if (box_ == nullptr) {
         return false;
     }
-    return box_->PutValue(std::make_shared<TlvItem>(DEVICE_USERID, userId));
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_USERID, userId));
 }
 
 bool NotificationRequestBox::SetDeviceId(const std::string& deviceId)
@@ -557,36 +542,20 @@ bool NotificationRequestBox::GetAppMessageId(std::string& appMessageId) const
     return box_->GetStringValue(NOTIFICATION_APP_MESSAGE_ID, appMessageId);
 }
 
-bool NotificationRequestBox::GetAppName(std::string& appName) const
+bool NotificationRequestBox::GetBoxExtendInfo(std::string& extendInfo) const
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->GetStringValue(APP_NAME, appName);
+    return box_->GetStringValue(NOTIFICATION_EXTENDINFO, extendInfo);
 }
 
-bool NotificationRequestBox::GetAppLabel(std::string& appLabel) const
+bool NotificationRequestBox::GetReceiverUserId(int32_t& userId) const
 {
     if (box_ == nullptr) {
         return false;
     }
-    return box_->GetStringValue(APP_LABEL, appLabel);
-}
-
-bool NotificationRequestBox::GetAppIndex(int32_t& appIndex) const
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->GetInt32Value(APP_INDEX, appIndex);
-}
-
-bool NotificationRequestBox::GetNotificationUserId(int32_t& userId) const
-{
-    if (box_ == nullptr) {
-        return false;
-    }
-    return box_->GetInt32Value(NOTIFICATION_USERID, userId);
+    return box_->GetInt32Value(NOTIFICATION_RECEIVE_USERID, userId);
 }
 
 bool NotificationRequestBox::GetDeviceUserId(int32_t& userId) const
@@ -594,7 +563,7 @@ bool NotificationRequestBox::GetDeviceUserId(int32_t& userId) const
     if (box_ == nullptr) {
         return false;
     }
-    return box_->GetInt32Value(DEVICE_USERID, userId);
+    return box_->GetInt32Value(LOCAL_DEVICE_USERID, userId);
 }
 
 bool NotificationRequestBox::GetDeviceId(std::string& deviceId) const

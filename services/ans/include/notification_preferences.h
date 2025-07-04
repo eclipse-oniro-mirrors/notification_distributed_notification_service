@@ -504,6 +504,7 @@ public:
         const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
     ErrCode SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
     ErrCode SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
     /**
@@ -534,6 +535,23 @@ public:
     bool IsKioskMode();
 
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList);
+
+    /**
+     * @brief Set distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @param userId Indicates userId
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetDistributedDevicelist(std::vector<std::string> &deviceTypes, const int32_t &userId);
+
+    /**
+     * @brief Get distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
 
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,

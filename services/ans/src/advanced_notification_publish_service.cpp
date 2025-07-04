@@ -1074,6 +1074,21 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
                 return true;
             }
         }
+    }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+        ANS_LOGD("GetCurrentActiveUserId failed");
+        return false;
+    }
+    if (NotificationPreferences::GetInstance()->GetUserDisableNotificationInfo(userId, notificationDisable)) {
+        if (notificationDisable.GetDisabled()) {
+            ANS_LOGD("get disabled is open");
+            std::vector<std::string> bundleList = notificationDisable.GetBundleList();
+            auto it = std::find(bundleList.begin(), bundleList.end(), bundleName);
+            if (it != bundleList.end()) {
+                return true;
+            }
+        }
     } else {
         ANS_LOGD("no disabled has been set up or set disabled to close");
     }

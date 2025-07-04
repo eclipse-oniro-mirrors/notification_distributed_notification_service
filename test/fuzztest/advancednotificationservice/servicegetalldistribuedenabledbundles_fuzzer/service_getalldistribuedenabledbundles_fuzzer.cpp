@@ -18,11 +18,23 @@
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
 #include "mock_notification_request.h"
+#include "mock_notification_bundle_option.h"
 
 namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service =  AdvancedNotificationService::GetInstance();
+        service->InitPublishProcess();
+        service->CreateDialogManager();
+        std::string stringData = fuzzData->ConsumeRandomLengthString();
+        std::vector<NotificationBundleOption> bundelOptions;
+        int32_t bundleNum = fuzzData->ConsumeIntegral<uint32_t>();
+        for (int i = 0; i < bundleNum; i++) {
+            NotificationBundleOption bundleOption = *(ObjectBuilder<NotificationBundleOption>::Build(fuzzData));
+            bundelOptions.emplace_back(bundleOption);
+        }
+        service->GetAllDistribuedEnabledBundles(stringData, bundelOptions);
         return true;
     }
 }
@@ -33,6 +45,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

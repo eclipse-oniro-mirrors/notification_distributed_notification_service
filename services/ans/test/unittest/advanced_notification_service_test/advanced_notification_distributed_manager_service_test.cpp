@@ -784,5 +784,53 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_200, F
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
+/**
+ * @tc.name: GetDistributedDevicelist_0100
+ * @tc.desc: Test GetDistributedDevicelist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedDevicelist_0100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    std::vector<std::string> deviceTypes;
+    auto ret = advancedNotificationService_->GetDistributedDevicelist(deviceTypes);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetDistributedDevicelist_0200
+ * @tc.desc: Test GetDistributedDevicelist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedDevicelist_0200, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    std::vector<std::string> deviceTypes;
+    auto ret = advancedNotificationService_->GetDistributedDevicelist(deviceTypes);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: GetDistributedDevicelist_0300
+ * @tc.desc: Test GetDistributedDevicelist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedDevicelist_0300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    const std::string deviceType = "testDeviceType";
+    const std::string deviceId = "testDeviceId";
+    int32_t userId = 100;
+    bool isAuth = true;
+    auto ret = advancedNotificationService_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    std::vector<std::string> deviceTypes;
+    ret = advancedNotificationService_->GetDistributedDevicelist(deviceTypes);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_NE(deviceTypes.size(), 0);
+}
 }  // namespace Notification
 }  // namespace OHOS

@@ -141,5 +141,17 @@ HWTEST_F(NotificationDisableTest, FromJson_0100, Function | SmallTest | Level1)
     notificationDisable.FromJson(jsonObjString);
     ASSERT_FALSE(notificationDisable.GetDisabled());
 }
+
+/**
+ * @tc.name: GetUserId_0100
+ * @tc.desc: Test GetUserId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, GetUserId_0100, Function | SmallTest | Level1)
+{
+    NotificationDisable notificationDisable;
+    notificationDisable.SetUserId(1);
+    EXPECT_EQ(notificationDisable.GetUserId(), 1);
+}
 }
 }

@@ -1135,6 +1135,14 @@ public:
         const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth) override;
 
     /**
+     * @brief get distributed device list.
+     *
+     * @param deviceTypes Indicates device types.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes) override;
+
+    /**
      * @brief Get Enable smartphone to collaborate with other devices for intelligent reminders
      *
      * @param deviceType Indicates the type of the device running the application.
@@ -1732,6 +1740,8 @@ private:
     void SetChainIdToExtraInfo(const sptr<NotificationRequest> &request, OHOS::HiviewDFX::HiTraceId traceId);
 
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
+    ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,
+        bool isAgentController, bool isSystemComp);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

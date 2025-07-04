@@ -31,6 +31,8 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info);
 napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info);
 napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_info info);
 napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info);
+napi_value NapiSetDistributedEnabled(napi_env env, napi_callback_info info);
+napi_value NapiGetDistributedDeviceList(napi_env env, napi_callback_info info);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

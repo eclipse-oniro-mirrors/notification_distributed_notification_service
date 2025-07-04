@@ -23,6 +23,10 @@ namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        auto service = AdvancedNotificationService::GetInstance();
+        std::string groupName = fuzzData->ConsumeRandomLengthString();
+        std::string instanceKey = fuzzData->ConsumeRandomLengthString();
+        service->CancelGroup(groupName, instanceKey);
         return true;
     }
 }

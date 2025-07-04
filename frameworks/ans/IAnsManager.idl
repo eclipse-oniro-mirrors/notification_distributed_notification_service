@@ -182,6 +182,8 @@ interface OHOS.Notification.IAnsManager {
 
     void IsDistributedEnabled([out] boolean enabled);
 
+    void GetDistributedDevicelist([out] String[] deviceTypes);
+
     void SetDistributedEnabledBySlot(
         [in] int slotTypeInt, [in] String deviceType, [in] boolean enabled);
 

@@ -35,6 +35,7 @@
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
 #include "string_wrapper.h"
+#include "want_params_wrapper.h"
 #include "distributed_subscribe_service.h"
 #include "remove_all_distributed_box.h"
 #include "bundle_resource_helper.h"
@@ -538,28 +539,24 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
     }
     std::string content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME);
     if (!content.empty()) {
-        requestBox->SetAppName(content);
-        if (notificationRequest->GetLittleIcon() == nullptr) {
-            AppExecFwk::BundleResourceInfo resourceInfo;
-            if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(content, resourceInfo) != 0) {
-                ANS_LOGW("Dans get bundle icon failed %{public}s.", content.c_str());
-                return;
-            }
-            std::shared_ptr<Media::PixelMap> iconPixelmap = AnsImageUtil::CreatePixelMapByString(resourceInfo.icon);
-            requestBox->SetSmallIcon(iconPixelmap);
-            ANS_LOGI("Dans self get bundle icon.");
+        AppExecFwk::BundleResourceInfo resourceInfo;
+        if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(content, resourceInfo) != 0) {
+            ANS_LOGW("Dans get bundle icon failed %{public}s.", content.c_str());
+            return;
         }
+        std::shared_ptr<Media::PixelMap> icon = AnsImageUtil::CreatePixelMapByString(resourceInfo.icon);
+        requestBox->SetSmallIcon(icon);
     }
-    content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL);
-    if (!content.empty()) {
-        requestBox->SetAppLabel(content);
-    }
-    int32_t appIndex = params->GetIntParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, 0);
-    requestBox->SetAppIndex(appIndex);
+
     std::string key = EXTENDINFO_INFO_PRE + EXTENDINFO_USERID +
         DistributedDeviceService::DeviceTypeToTypeString(deviceType);
-    int32_t userId = params->GetIntParam(key, DEFAULT_USER_ID);
-    requestBox->SetNotificationUserId(userId);
+    int32_t userId = params->GetIntParam(key, -1);
+    if (userId != -1) {
+        requestBox->SetReceiverUserId(userId);
+    }
+    params->DumpInfo(0);
+    AAFwk::WantParamWrapper wantWrapper(*params);
+    requestBox->SetBoxExtendInfo(wantWrapper.ToString());
     requestBox->SetDeviceUserId(DistributedSubscribeService::GetCurrentActiveUserId());
 }
 
@@ -743,23 +740,23 @@ void DistributedPublishService::MakeNotificationReminderFlag(const NotificationR
 void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box,
     sptr<NotificationRequest>& request)
 {
-    std::string info;
+    std::string contentInfo;
     std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    if (box.GetBoxExtendInfo(contentInfo)) {
+        if (!contentInfo.empty()) {
+            AAFwk::WantParams extendInfoParams = AAFwk::WantParamWrapper::ParseWantParams(contentInfo);
+            extendInfo = std::make_shared<AAFwk::WantParams>(extendInfoParams);
+        }
+    }
     extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG, AAFwk::Boolean::Box(true));
     auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
     if (local.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
         extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_ENABLE_CHECK, AAFwk::Boolean::Box(false));
     } else {
         extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_ENABLE_CHECK, AAFwk::Boolean::Box(true));
-        if (box.GetAppLabel(info)) {
-            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL, AAFwk::String::Box(info));
-        }
-        if (box.GetAppName(info)) {
-            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME, AAFwk::String::Box(info));
-        }
-        if (box.GetDeviceId(info)) {
+        if (box.GetDeviceId(contentInfo)) {
             DistributedDeviceInfo peerDevice;
-            if (DistributedDeviceService::GetInstance().GetDeviceInfo(info, peerDevice)) {
+            if (DistributedDeviceService::GetInstance().GetDeviceInfo(contentInfo, peerDevice)) {
                 std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
                 extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICETYPE, AAFwk::String::Box(deviceType));
                 extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID, AAFwk::String::Box(peerDevice.udid_));
@@ -767,15 +764,11 @@ void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box
         }
         std::string localType = DistributedDeviceService::DeviceTypeToTypeString(local.deviceType_);
         extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_LOCALTYPE, AAFwk::String::Box(localType));
-        int32_t appIndex;
-        if (box.GetAppIndex(appIndex)) {
-            extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, AAFwk::Integer::Box(appIndex));
-        }
         int32_t userId;
         if (box.GetDeviceUserId(userId)) {
             extendInfo->SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_USERID, AAFwk::Integer::Box(userId));
         }
-        if (box.GetNotificationUserId(userId)) {
+        if (box.GetReceiverUserId(userId)) {
             request->SetReceiverUserId(userId);
         }
     }

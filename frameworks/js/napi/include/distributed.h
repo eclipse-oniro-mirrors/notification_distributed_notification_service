@@ -28,11 +28,13 @@ struct AsyncCallbackInfoIsEnabled {
     napi_async_work asyncWork = nullptr;
     CallbackPromiseInfo info;
     bool enable = false;
+    std::string deviceType;
 };
 
 struct EnabledParams {
     napi_ref callback = nullptr;
     bool enable = false;
+    std::string deviceType;
 };
 
 struct AsyncCallbackInfoEnabled {
@@ -116,6 +118,13 @@ struct AsynDeviceStatusConfig {
     CallbackPromiseInfo info;
 };
 
+struct AsynCallbackInfoGetDistributedDeviceList {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    std::vector<std::string> deviceList;
+};
+
 napi_value IsDistributedEnabled(napi_env env, napi_callback_info info);
 napi_value EnableDistributed(napi_env env, napi_callback_info info);
 napi_value EnableDistributedByBundle(napi_env env, napi_callback_info info);
@@ -131,6 +140,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, IsEnabledByBundleParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, EnabledWithoutAppParams &params);
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, GetEnabledWithoutAppParams &params);
+napi_value ParseSetDistributedEnabledParams(const napi_env &env, const napi_callback_info &info, EnabledParams &params);
+napi_value ParseIsDistributedEnabledParams(const napi_env &env, const napi_callback_info &info, EnabledParams &params);
 }  // namespace NotificationNapi
 }  // namespace OHOS
 

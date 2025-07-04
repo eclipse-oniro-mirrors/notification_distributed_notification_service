@@ -1288,6 +1288,7 @@ void ReminderDataManager::HandleImmediatelyShow(
     bool isAlerting = false;
     std::unordered_map<std::string, int32_t> limits;
     int32_t totalCount = 0;
+    sptr<ReminderRequest> playSoundReminder = nullptr;
     for (auto it = showImmediately.begin(); it != showImmediately.end(); ++it) {
         if ((*it)->IsShowing()) {
             continue;
@@ -1300,12 +1301,16 @@ void ReminderDataManager::HandleImmediatelyShow(
         }
         if (((*it)->GetRingDuration() > 0) && !isAlerting) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), true, false, isSysTimeChanged, true, true);
+            playSoundReminder = (*it);
             isAlerting = true;
         } else {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
             ShowReminder((*it), false, false, isSysTimeChanged, false, isAlerting);
         }
+    }
+    if (playSoundReminder != nullptr) {
+        std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
+        ShowReminder(playSoundReminder, true, false, isSysTimeChanged, true, true);
     }
 }
 
@@ -1605,9 +1610,7 @@ void ReminderDataManager::SetPlayerParam(const sptr<ReminderRequest> reminder)
         }
         ANSR_LOGI("Play custom sound, reminderId:[%{public}d].", reminder->GetReminderId());
     }
-    int32_t STREAM_ALARM = reminder->GetRingChannel() == ReminderRequest::RingChannel::MEDIA ?
-        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA) :
-        static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+    int32_t STREAM_ALARM = ConvertRingChannel(reminder->GetRingChannel());
     constexpr int32_t DEFAULT_VALUE = 0;  // CONTENT_UNKNOWN
     Media::Format format;
     (void)format.PutIntValue(Media::PlayerKeys::CONTENT_TYPE, DEFAULT_VALUE);
@@ -1641,8 +1644,15 @@ void ReminderDataManager::PlaySoundAndVibration(const sptr<ReminderRequest> &rem
         audioManager->ActivateAudioSession(strategy);
     }
     SetPlayerParam(reminder);
-    soundPlayer_->PrepareAsync();
-    soundPlayer_->Play();
+    if (reminder->IsShare()) {
+        if (CheckSoundConfig(reminder)) {
+            soundPlayer_->PrepareAsync();
+            soundPlayer_->Play();
+        }
+    } else {
+        soundPlayer_->PrepareAsync();
+        soundPlayer_->Play();
+    }
 #endif
     SetAlertingReminder(reminder);
 }

@@ -396,6 +396,16 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
 
     const auto wantAgent = request->GetWantAgent();
     const auto removalWantAgent = request->GetRemovalWantAgent();
+
+    auto content = request->GetContent();
+    if (content != nullptr && content->GetContentType() == NotificationContent::Type::MULTILINE) {
+        ErrCode checkCode = CheckNotificationRequestLineWantAgents(content, isAgentController,
+            isSystemApp || isSubsystem);
+        if (checkCode != ERR_OK) {
+            return checkCode;
+        }
+    }
+
     const auto isLocalWantAgent = (wantAgent != nullptr && wantAgent->IsLocal()) ||
         (removalWantAgent != nullptr && removalWantAgent->IsLocal());
     if (isLocalWantAgent && !(isSystemApp || isSubsystem)) {
@@ -410,5 +420,29 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     return ERR_OK;
 }
 
+ErrCode AdvancedNotificationService::CheckNotificationRequestLineWantAgents(
+    const std::shared_ptr<NotificationContent> &content, bool isAgentController, bool isSystemComp)
+{
+    auto multiLineContent =
+        std::static_pointer_cast<NotificationMultiLineContent>(content->GetNotificationContent());
+    if (multiLineContent != nullptr) {
+        auto lineWantAgents = multiLineContent->GetLineWantAgents();
+        if (lineWantAgents.size() > 0) {
+            if (!isAgentController) {
+                ANS_LOGE("LineWantAgents does not support permission denied");
+                return ERR_ANS_PERMISSION_DENIED;
+            }
+            auto lineWantAgentsIter = std::find_if(lineWantAgents.begin(), lineWantAgents.end(),
+                [&](auto& lineWantAgent) {
+                    return (lineWantAgent != nullptr && lineWantAgent->IsLocal());
+                });
+            if (lineWantAgentsIter != lineWantAgents.end() && !isSystemComp) {
+                ANS_LOGE("Local wantAgent does not support non system app");
+                return ERR_ANS_NON_SYSTEM_APP;
+            }
+        }
+    }
+    return ERR_OK;
+}
 } // Notification
 } // OHOS

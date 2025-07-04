@@ -22,7 +22,8 @@ template("advancednotificationservice_fuzztest_target") {
   
   ohos_fuzztest(target_name) {
     module_out_path = service_fuzz_test_path
-    sources = invoker.sources_value
+    sources = [ "${component_path}/test/fuzztest/fuzz_common_base/mock/mock_notification_func.cpp", ]
+    sources += invoker.sources_value
     fuzz_config_file = invoker.fuzz_config_file_value
     include_dirs = [ "${services_path}/ans/include" ]
     cflags = [

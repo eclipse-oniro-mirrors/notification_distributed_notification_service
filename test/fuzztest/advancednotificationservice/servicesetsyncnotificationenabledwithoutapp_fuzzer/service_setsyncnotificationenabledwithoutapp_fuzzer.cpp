@@ -23,6 +23,10 @@ namespace OHOS {
 namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
+        int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
+        bool enabled = fuzzData->ConsumeBool();
+        auto service = AdvancedNotificationService::GetInstance();
+        service->SetSyncNotificationEnabledWithoutApp(userId, enabled);
         return true;
     }
 }
@@ -33,6 +37,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider fdp(data, size);
+    std::vector<std::string> requestPermission = {
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
+        OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
+    };
+    MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     return 0;
 }

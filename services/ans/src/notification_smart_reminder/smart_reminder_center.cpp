@@ -496,14 +496,23 @@ void SmartReminderCenter::HandleReminderMethods(
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
 {
     std::string classfication = request->GetClassification();
-    if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0 &&
-        classfication == NotificationConstant::ANS_VOIP) {
-        ANS_LOGI("VOIP or CALL is not affected with SmartReminder");
+    
+    if (syncDevices.find(deviceType) == syncDevices.end()) {
         return;
     }
 
-    if (syncDevices.find(deviceType) == syncDevices.end()) {
-        return;
+    if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
+        ANS_LOGI("VOIP CALL");
+        if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+            return;
+        }
+        if (deviceType.compare(NotificationConstant::PAD_DEVICE_TYPE) == 0 ||
+            deviceType.compare(NotificationConstant::PC_DEVICE_TYPE) == 0) {
+            std::shared_ptr<NotificationFlags> reminderFlags;
+            NotificationFlags::GetReminderFlagsByString(NotificationConstant::PC_PAD_VOIP_FLAG, reminderFlags);
+            (*notificationFlagsOfDevices)[deviceType] = reminderFlags;
+            return;
+        }
     }
 
     if (smartDevices.find(deviceType) == smartDevices.end()) {
