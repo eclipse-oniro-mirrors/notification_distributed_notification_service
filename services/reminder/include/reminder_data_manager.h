@@ -426,8 +426,6 @@ private:
     void InitTimerInfo(std::shared_ptr<ReminderTimerInfo> &timerInfo,
         const sptr<ReminderRequest> &reminderRequest, TimerType reminderType) const;
 
-    void GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const;
-
     /**
      * Find the reminder from reminderVector_ by reminder id.
      *
@@ -687,6 +685,9 @@ private:
      * @brief Load reminder from datashare.
      */
     void LoadShareReminders();
+
+    int32_t ConvertRingChannel(ReminderRequest::RingChannel channel);
+    bool CheckSoundConfig(const sptr<ReminderRequest> reminder);
 
     /**
      * @brief Load reminder from datashare.

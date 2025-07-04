@@ -15,6 +15,7 @@
 
 #include "reminder_request_timer.h"
 #include "reminder_datashare_helper.h"
+#include "reminder_calendar_share_table.h"
 #include "reminderdatasharehelper_fuzzer.h"
 #include <fuzzer/FuzzedDataProvider.h>
 
@@ -40,7 +41,7 @@ namespace OHOS {
         helper.OnDataInsertOrDelete();
         DataShare::DataShareObserver::ChangeInfo info;
         helper.OnDataUpdate(info);
-        auto result = helper.CreateDataShareHelper();
+        auto result = helper.CreateDataShareHelper(Notification::ReminderCalendarShareTable::PROXY);
         helper.ReleaseDataShareHelper(result);
         helper.GetColumns();
         helper.CreateReminder(info);

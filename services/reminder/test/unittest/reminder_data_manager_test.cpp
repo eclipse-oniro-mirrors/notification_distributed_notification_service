@@ -433,7 +433,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     manager->HandleSameNotificationIdShowing(reminder);
     manager->Init();
     manager->InitUserId();
-    manager->GetImmediatelyShowRemindersLocked(vec);
     manager->IsAllowedNotify(reminder);
     manager->IsAllowedNotify(nullptr);
     manager->IsReminderAgentReady();
@@ -1052,7 +1051,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_021, Level1)
     ReminderDataShareHelper::GetInstance().OnDataUpdate(info);
     ReminderDataShareHelper::GetInstance().UnRegisterObserver();
     ReminderDataShareHelper::GetInstance().UnRegisterObserver();
-    auto helper = ReminderDataShareHelper::GetInstance().CreateDataShareHelper();
+    auto helper = ReminderDataShareHelper::GetInstance().CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     ReminderDataShareHelper::GetInstance().ReleaseDataShareHelper(helper);
 
     ReminderDataShareHelper::ReminderDataObserver observer;
@@ -1589,6 +1588,57 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_035, Level1)
     count = 200;
     manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
     EXPECT_TRUE(manager != nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_036
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_036, Level1)
+{
+    auto ret = manager->ConvertRingChannel(ReminderRequest::RingChannel::ALARM);
+    EXPECT_TRUE(ret == AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+    ret = manager->ConvertRingChannel(ReminderRequest::RingChannel::MEDIA);
+    EXPECT_TRUE(ret == AudioStandard::StreamUsage::STREAM_USAGE_MEDIA);
+    ret = manager->ConvertRingChannel(ReminderRequest::RingChannel::NOTIFICATION);
+    EXPECT_TRUE(ret == AudioStandard::StreamUsage::STREAM_USAGE_NOTIFICATION);
+    ret = manager->ConvertRingChannel(static_cast<ReminderRequest::RingChannel>(-1));
+    EXPECT_TRUE(ret == AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_037
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_037, Level1)
+{
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->InitBundleName("com.test.test");
+    calendar->InitUid(999);
+    calendar->SetShare(true);
+    manager->PlaySoundAndVibration(calendar);
+    auto ret = manager->CheckSoundConfig(calendar);
+    EXPECT_TRUE(ret == false);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_038
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_038, Level1)
+{
+    std::string uriStr = "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_100"
+        "?Proxy=true&key=focus_mode_enable";
+    Uri enableUri(uriStr);
+    std::string enable;
+    auto ret = ReminderDataShareHelper::GetInstance().Query(enableUri, "focus_mode_enable", enable);
+    EXPECT_TRUE(ret == false);
 }
 }  // namespace Notification
 }  // namespace OHOS

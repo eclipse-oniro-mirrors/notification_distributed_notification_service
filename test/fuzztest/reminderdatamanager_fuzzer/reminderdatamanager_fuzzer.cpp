@@ -94,7 +94,6 @@ namespace OHOS {
         manager->CancelNotification(reminder);
         manager->CheckReminderLimitExceededLocked(callingUid, reminder);
         std::vector<sptr<Notification::ReminderRequest>> reminders;
-        manager->GetImmediatelyShowRemindersLocked(reminders);
         manager->AddToShowedReminders(reminder);
 
         manager->IsAllowedNotify(reminder);

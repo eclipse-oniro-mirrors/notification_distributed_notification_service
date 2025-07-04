@@ -42,6 +42,7 @@
 #include "config_policy_utils.h"
 #include "hitrace_meter_adapter.h"
 #include "notification_helper.h"
+#include "reminder_datashare_helper.h"
 #ifdef HAS_HISYSEVENT_PART
 #include <sys/statfs.h>
 #include "hisysevent.h"
@@ -60,6 +61,10 @@ constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 // The maximun number of system that can be start extension count
 constexpr int32_t TOTAL_MAX_NUMBER_START_EXTENSION = 100;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
+static constexpr const char* USER_SETINGS_DATA_SECURE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
+static constexpr const char* FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
+static constexpr const char* FOCUS_MODE_ENABLE = "focus_mode_enable";
 }
 
 static uint64_t GetRemainPartitionSize(const std::string& partitionName)
@@ -415,20 +420,6 @@ ErrCode ReminderDataManager::CancelReminderToDb(const int32_t reminderId, const 
     return ERR_OK;
 }
 
-void ReminderDataManager::GetImmediatelyShowRemindersLocked(std::vector<sptr<ReminderRequest>> &reminders) const
-{
-    std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-    for (auto reminderSptr : reminderVector_) {
-        if (!(reminderSptr->ShouldShowImmediately())) {
-            break;
-        }
-        if (reminderSptr->GetReminderType() != ReminderRequest::ReminderType::TIMER) {
-            reminderSptr->SetSnoozeTimesDynamic(0);
-        }
-        reminders.push_back(reminderSptr);
-    }
-}
-
 bool ReminderDataManager::IsAllowedNotify(const sptr<ReminderRequest> &reminder) const
 {
     if (reminder == nullptr) {
@@ -478,6 +469,52 @@ void ReminderDataManager::ReportUserDataSizeEvent()
         "FILE_OR_FOLDER_PATH", paths,
         "FILE_OR_FOLDER_SIZE", folderSize);
 #endif
+}
+
+bool ReminderDataManager::CheckSoundConfig(const sptr<ReminderRequest> reminder)
+{
+#ifdef PLAYER_FRAMEWORK_ENABLE
+    NotificationBundleOption option;
+    option.SetBundleName(reminder->GetBundleName());
+    option.SetUid(reminder->GetUid());
+    uint32_t slotFlags;
+    ErrCode err = NotificationHelper::GetNotificationSlotFlagsAsBundle(option, slotFlags);
+    if (err != ERR_OK) {
+        ANSR_LOGE("GetNotificationSlotFlagsAsBundle failed.");
+        return false;
+    }
+    if (!(slotFlags & 1)) {
+        return false;
+    }
+    std::string uriStr = USER_SETINGS_DATA_SECURE_URI + std::to_string(reminder->GetUserId())
+        + FOCUS_MODE_ENABLE_URI;
+    Uri enableUri(uriStr);
+    std::string enable;
+    bool ret = ReminderDataShareHelper::GetInstance().Query(enableUri, FOCUS_MODE_ENABLE, enable);
+    if (!ret) {
+        ANSR_LOGE("Query focus mode enable failed.");
+        return false;
+    }
+    if (enable.compare("1") == 0) {
+        ANSR_LOGI("Currently not is do not disurb mode.");
+        return false;
+    }
+#endif
+    return true;
+}
+
+int32_t ReminderDataManager::ConvertRingChannel(ReminderRequest::RingChannel channel)
+{
+    switch (channel) {
+        case ReminderRequest::RingChannel::ALARM:
+            return static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+        case ReminderRequest::RingChannel::MEDIA:
+            return static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_MEDIA);
+        case ReminderRequest::RingChannel::NOTIFICATION:
+            return static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_NOTIFICATION);
+        default:
+            return static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
+    }
 }
 }
 }
