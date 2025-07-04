@@ -107,5 +107,6 @@ group("fuzztest") {
     "serviceupdatenotificationtimerbyuid_fuzzer:ServiceUpdateNotificationTimerByUidFuzzTest",
     "serviceisdistributedenabledbyslot_fuzzer:ServiceIsDistributedEnabledBySlotFuzzTest",
     "serviceremovedistributednotifications_fuzzer:ServiceRemoveDistributedNotificationsFuzzTest",
+    "servicepublishpreparednotification_fuzzer:ServicePublishPreparedNotificationFuzzTest",
   ]
 }

@@ -27,24 +27,47 @@
 namespace OHOS {
 namespace Notification {
 
+const int INDEX_ZERO = 0;
+const int INDEX_ONE = 1;
+const int INDEX_TWO = 2;
+const int INDEX_THREE = 3;
+
 template <>
 NotificationContent* ObjectBuilder<NotificationContent>::Build(FuzzedDataProvider *fdp)
 {
-    int caseNum = fdp->ConsumeIntegralInRange(0, 5);
+    int caseNum = fdp->ConsumeIntegralInRange(0, 4);
     ANS_LOGE("Build mock veriables");
     switch (caseNum) {
-        case 0:
-            return reinterpret_cast<NotificationContent*>(ObjectBuilder<NotificationLiveViewContent>::Build(fdp));
-        case 1:
-            return reinterpret_cast<NotificationContent*>(ObjectBuilder<NotificationConversationalContent>::Build(fdp));
-        case 2:
-            return reinterpret_cast<NotificationContent*>(ObjectBuilder<NotificationMediaContent>::Build(fdp));
-        case 3:
-            return reinterpret_cast<NotificationContent*>(ObjectBuilder<NotificationMultiLineContent>::Build(fdp));
-        case 4:
-            return reinterpret_cast<NotificationContent*>(ObjectBuilder<NotificationNormalContent>::Build(fdp));
-        default:
-            return reinterpret_cast<NotificationContent*>(ObjectBuilder<NotificationLiveViewContent>::Build(fdp));
+        case INDEX_ZERO: {
+            std::shared_ptr<NotificationConversationalContent> conversationalContent (
+                ObjectBuilder<NotificationConversationalContent>::Build(fdp));
+            return new NotificationContent(conversationalContent);
+            break;
+        }
+        case INDEX_ONE: {
+            std::shared_ptr<NotificationMediaContent> mediaContent (
+                ObjectBuilder<NotificationMediaContent>::Build(fdp));
+            return new NotificationContent(mediaContent);
+            break;
+        }
+        case INDEX_TWO: {
+            std::shared_ptr<NotificationMultiLineContent> multiContent (
+                ObjectBuilder<NotificationMultiLineContent>::Build(fdp));
+            return new NotificationContent(multiContent);
+            break;
+        }
+        case INDEX_THREE: {
+            std::shared_ptr<NotificationNormalContent> normalContent (
+                ObjectBuilder<NotificationNormalContent>::Build(fdp));
+            return new NotificationContent(normalContent);
+            break;
+        }
+        default: {
+            std::shared_ptr<NotificationNormalContent> defaultNormalContent (
+                ObjectBuilder<NotificationNormalContent>::Build(fdp));
+            return new NotificationContent(defaultNormalContent);
+            break;
+        }
     }
 }
 

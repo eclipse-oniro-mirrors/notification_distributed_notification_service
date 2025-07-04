@@ -137,7 +137,14 @@ NotificationRequest* ObjectBuilder<NotificationRequest>::Build(FuzzedDataProvide
     GenerateStringTypeVeriables(fdp, request);
     GenerateEnumTypeVeriables(fdp, request);
 
-    request->SetContent(ObjectBuilder<NotificationContent>::BuildSharedPtr(fdp));
+    if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType()) {
+        std::shared_ptr<NotificationLiveViewContent> liveViewContent (
+            ObjectBuilder<NotificationLiveViewContent>::Build(fdp));
+        std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+        request->SetContent(content);
+    } else {
+        request->SetContent(ObjectBuilder<NotificationContent>::BuildSharedPtr(fdp));
+    }
     request->SetTemplate(ObjectBuilder<NotificationTemplate>::BuildSharedPtr(fdp));
     request->SetBundleOption(ObjectBuilder<NotificationBundleOption>::BuildSharedPtr(fdp));
     request->SetAgentBundle(ObjectBuilder<NotificationBundleOption>::BuildSharedPtr(fdp));
