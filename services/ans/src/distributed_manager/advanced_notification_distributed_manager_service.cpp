@@ -23,6 +23,8 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
+#include "common_event_manager.h"
+#include "common_event_publish_info.h"
 #include "errors.h"
 
 #include "ipc_skeleton.h"
@@ -46,6 +48,9 @@
 namespace OHOS {
 namespace Notification {
 using namespace OHOS::AccountSA;
+
+const static std::string NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE =
+    "notification.event.DISTRIBUTED_DEVICE_TYPES_CHANGE";
 
 ErrCode AdvancedNotificationService::IsDistributedEnabled(bool &enabled)
 {
@@ -732,6 +737,33 @@ ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
     return NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 }
 
+void AdvancedNotificationService::UpdateDistributedDeviceList(const std::string &deviceType, int32_t userId)
+{
+    std::vector<std::string> deviceTypes;
+    auto result = NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes);
+    if (result != ERR_OK) {
+        ANS_LOGE("Get distributed device list failed");
+        return;
+    }
+    auto it = std::find(deviceTypes.begin(), deviceTypes.end(), deviceType);
+    if (it == deviceTypes.end()) {
+        deviceTypes.push_back(deviceType);
+        result = NotificationPreferences::GetInstance()->SetDistributedDevicelist(deviceTypes, userId);
+        if (result != ERR_OK) {
+            ANS_LOGE("Set distributed device list failed");
+            return;
+        }
+        EventFwk::Want want;
+        want.SetAction(NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE);
+        EventFwk::CommonEventData commonData{ want };
+        EventFwk::CommonEventPublishInfo publishInfo;
+        publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
+        if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
+            ANS_LOGE("Publish common event failed");
+        }
+    }
+}
+
 ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
     const std::string &deviceType, const std::string &deviceId, int32_t userId, bool isAuth)
 {
@@ -746,14 +778,7 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
     auto result =
         NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
     if (result == ERR_OK && isAuth) {
-        std::vector<std::string> deviceTypes;
-        if (NotificationPreferences::GetInstance()->GetDistributedDevicelist(deviceTypes) == ERR_OK) {
-            auto it = std::find(deviceTypes.begin(), deviceTypes.end(), deviceType);
-            if (it == deviceTypes.end()) {
-                deviceTypes.push_back(deviceType);
-                NotificationPreferences::GetInstance()->SetDistributedDevicelist(deviceTypes, userId);
-            }
-        }
+        UpdateDistributedDeviceList(deviceType, userId);
     }
     return result;
 }
