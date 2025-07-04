@@ -840,6 +840,62 @@ std::string NotificationRequest::Dump()
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
 }
 
+std::string NotificationRequest::CollaborationToJson() const
+{
+    nlohmann::json jsonObject;
+    jsonObject["id"]              = notificationId_;
+    jsonObject["autoDeletedTime"] = autoDeletedTime_;
+
+    jsonObject["groupName"]         = groupName_;
+    jsonObject["label"]             = label_;
+    jsonObject["classification"]    = classification_;
+    jsonObject["isRemoveAllowed"]   = isRemoveAllowed_;
+
+    jsonObject["tapDismissed"]     = tapDismissed_;
+    jsonObject["isOngoing"]        = inProgress_;
+    jsonObject["isAlertOnce"]      = alertOneTime_;
+    jsonObject["isUnremovable"]    = unremovable_;
+
+    jsonObject["creatorBundleName"] = GetOwnerBundleName();
+    jsonObject["creatorUid"]        = GetOwnerUid();
+    jsonObject["creatorPid"]        = GetCreatorPid();
+    jsonObject["creatorInstanceKey"] = creatorInstanceKey_;
+    jsonObject["appInstanceKey"]    = appInstanceKey_;
+    jsonObject["notificationControlFlags"] = notificationControlFlags_;
+
+    if (agentBundle_ != nullptr) {
+        nlohmann::json bundleOptionObj;
+        if (!NotificationJsonConverter::ConvertToJson(agentBundle_.get(), bundleOptionObj)) {
+            ANS_LOGE("Cannot convert agentBundle to JSON.");
+            return std::string();
+        }
+        jsonObject["agentBundle"] = bundleOptionObj;
+    }
+
+    return jsonObject.dump();
+}
+
+NotificationRequest *NotificationRequest::CollaborationFromJson(const std::string& basicInfo)
+{
+    nlohmann::json jsonObject = nlohmann::json::parse(basicInfo, nullptr, false);
+    if (jsonObject.is_null() or !jsonObject.is_object()) {
+        ANS_LOGE("Invalid JSON object");
+        return nullptr;
+    }
+
+    auto pRequest = new (std::nothrow) NotificationRequest();
+    if (pRequest == nullptr) {
+        ANS_LOGE("null pRequest");
+        return nullptr;
+    }
+
+    ConvertJsonToNum(pRequest, jsonObject);
+    ConvertJsonToString(pRequest, jsonObject);
+    ConvertJsonToBool(pRequest, jsonObject);
+    ConvertJsonToAgentBundle(pRequest, jsonObject);
+    return pRequest;
+}
+
 bool NotificationRequest::ToJson(nlohmann::json &jsonObject) const
 {
     jsonObject["version"]         = 1;
@@ -2416,6 +2472,10 @@ void NotificationRequest::ConvertJsonToBool(NotificationRequest *target, const n
         target->distributedCollaborate_ = jsonObject.at("distributedCollaborate").get<bool>();
     }
 
+    if (jsonObject.find("isRemoveAllowed") != jsonEnd && jsonObject.at("isRemoveAllowed").is_boolean()) {
+        target->isRemoveAllowed_ = jsonObject.at("isRemoveAllowed").get<bool>();
+    }
+
     ConvertJsonToBoolExt(target, jsonObject);
 }
 
@@ -2762,7 +2822,7 @@ std::string NotificationRequest::GetBaseKey(const std::string &deviceId)
 
     if (distributedCollaborate_) {
         ANS_LOGI("NotificationRequest use collaborate!");
-        return label_ + distributedHashCode_;
+        return "ans_distributed" + distributedHashCode_;
     }
 
     std::stringstream stream;

@@ -375,17 +375,18 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
         requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
     auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        requestBox->SetNotificationBasicInfo(requestPoint->CollaborationToJson());
+    }
     requestBox->SetDeviceId(local.deviceId_);
     requestBox->SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
     requestBox->SetFinishTime(requestPoint->GetFinishDeadLine());
     requestBox->SetNotificationHashCode(request->GetKey());
     requestBox->SetSlotType(static_cast<int32_t>(requestPoint->GetSlotType()));
     requestBox->SetContentType(static_cast<int32_t>(requestPoint->GetNotificationType()));
-    if (isSyncNotification) {
-        requestBox->SetReminderFlag(0);
-    } else {
-        requestBox->SetReminderFlag(requestPoint->GetFlags()->GetReminderFlags());
-    }
+
+    int32_t reminderFlag = isSyncNotification ? 0 : requestPoint->GetFlags()->GetReminderFlags();
+    requestBox->SetReminderFlag(reminderFlag);
     if (!requestPoint->GetAppMessageId().empty()) {
         requestBox->SetAppMessageId(requestPoint->GetAppMessageId());
     }
@@ -574,6 +575,14 @@ void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox
     int32_t slotType = 0;
     int32_t contentType = 0;
     NotificationRequestBox requestBox = NotificationRequestBox(boxMessage);
+    std::string basicInfo;
+    if (requestBox.GetNotificationBasicInfo(basicInfo)) {
+        request = NotificationRequest::CollaborationFromJson(basicInfo);
+        if (request == nullptr) {
+            ANS_LOGE("NotificationRequest is nullptr");
+            return;
+        }
+    }
     bool isCommonLiveView = false;
     if (requestBox.GetSlotType(slotType) && requestBox.GetContentType(contentType)) {
         isCommonLiveView =
@@ -713,7 +722,6 @@ void DistributedPublishService::MakeNotificationReminderFlag(const NotificationR
         request->SetDistributedHashCode(context);
     }
     request->SetDistributedCollaborate(true);
-    request->SetLabel(DISTRIBUTED_LABEL);
 }
 
 void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box,
