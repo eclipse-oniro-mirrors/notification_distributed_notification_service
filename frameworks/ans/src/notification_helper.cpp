@@ -311,10 +311,10 @@ ErrCode NotificationHelper::RemoveNotifications()
 ErrCode NotificationHelper::RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
     const NotificationConstant::SlotType& slotType,
     const NotificationConstant::DistributedDeleteType& deleteType,
-    const int32_t removeReason)
+    const int32_t removeReason, const std::string& deviceId)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->RemoveDistributedNotifications(
-        hashcodes, slotType, deleteType, removeReason);
+        hashcodes, slotType, deleteType, removeReason, deviceId);
 }
 
 ErrCode NotificationHelper::GetNotificationSlotsForBundle(

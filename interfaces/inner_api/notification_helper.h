@@ -666,7 +666,7 @@ public:
     static ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
         const NotificationConstant::SlotType& slotType,
         const NotificationConstant::DistributedDeleteType& deleteType,
-        const int32_t removeReason);
+        const int32_t removeReason, const std::string& deviceId = "");
 
     /**
      * @brief Obtains all active notifications in the current system. The caller must have system permissions to

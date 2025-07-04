@@ -928,7 +928,7 @@ ErrCode AnsNotification::RemoveNotifications(const std::vector<std::string> hash
 ErrCode AnsNotification::RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
     const NotificationConstant::SlotType& slotType,
     const NotificationConstant::DistributedDeleteType& deleteType,
-    const int32_t removeReason)
+    const int32_t removeReason, const std::string& deviceId)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -936,7 +936,8 @@ ErrCode AnsNotification::RemoveDistributedNotifications(const std::vector<std::s
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
 
-    return proxy->RemoveDistributedNotifications(hashcodes, slotType, deleteType, removeReason);
+    return proxy->RemoveDistributedNotifications(hashcodes, slotType, deleteType,
+        removeReason, deviceId);
 }
 
 ErrCode AnsNotification::RemoveNotificationsByBundle(const NotificationBundleOption &bundleOption)

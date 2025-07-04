@@ -179,7 +179,8 @@ public:
     }
 
     ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
-        const int32_t slotTypeInt, const int32_t deleteTypeInt, const int32_t removeReason) override
+        const int32_t slotTypeInt, const int32_t deleteTypeInt, const int32_t removeReason,
+        const std::string& deviceId = "") override
     {
         return ERR_ANS_INVALID_PARAM;
     }

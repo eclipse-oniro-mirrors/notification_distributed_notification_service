@@ -83,6 +83,7 @@ public:
         SLOT,
         EXCLUDE_ONE_SLOT,
         HASHCODES,
+        DEVICE_ID,
     };
 
     enum class VisiblenessType {

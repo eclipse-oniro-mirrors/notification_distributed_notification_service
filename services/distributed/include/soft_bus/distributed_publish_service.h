@@ -63,7 +63,7 @@ private:
 #else
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);
-    void RemoveAllDistributedNotifications();
+    void RemoveAllDistributedNotifications(const std::shared_ptr<TlvBox>& boxMessage);
 private:
     void MakeExtendInfo(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationButtons(const NotificationRequestBox& box,

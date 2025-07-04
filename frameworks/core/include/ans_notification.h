@@ -598,7 +598,7 @@ public:
     ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
         const NotificationConstant::SlotType& slotType,
         const NotificationConstant::DistributedDeleteType& deleteType,
-        const int32_t removeReason);
+        const int32_t removeReason, const std::string& deviceId = "");
 
     /**
      * @brief Obtains all notification slots belonging to the specified bundle.
