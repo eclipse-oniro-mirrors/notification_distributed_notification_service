@@ -1696,6 +1696,7 @@ private:
     void CancelWantAgent(const sptr<Notification> &notification);
     void CancelOnceWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &wantAgent);
     void PublishSubscriberExistFlagEvent(bool headsetExistFlag, bool wearableExistFlag);
+    void UpdateDistributedDeviceList(const std::string &deviceType, int32_t userId);
     void SetClassificationWithVoip(const sptr<NotificationRequest> &request);
     void UpdateCollaborateTimerInfo(const std::shared_ptr<NotificationRecord> &record);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
