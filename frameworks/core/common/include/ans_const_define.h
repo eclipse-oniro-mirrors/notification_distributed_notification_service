@@ -57,6 +57,8 @@ constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
 constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
+constexpr int32_t PKG_INSTALL_STATUS_UNKMOWN = -1;
+constexpr int32_t PKG_INSTALL_STATUS_UNINSTALL = 0;
 
 // Default sound for notification
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");

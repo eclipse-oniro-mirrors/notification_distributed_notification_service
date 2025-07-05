@@ -76,6 +76,7 @@ interface OHOS.Notification.IAnsManager {
         [in] sptr<NotificationBundleOption> bundleOption,
         [in] int notificationId,
         [in] String label,
+        [in] int userId,
         [in] String[] extraInfoKeys,
         [out] null_sptr<NotificationRequest> request);
 

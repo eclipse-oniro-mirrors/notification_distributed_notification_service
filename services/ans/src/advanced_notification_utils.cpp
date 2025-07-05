@@ -88,6 +88,7 @@ constexpr char KEY_TABLE_VERSION[] = "tableVersion";
 constexpr char SPLIT_FLAG[] = "-";
 constexpr int32_t KEYWORD_SIZE = 4;
 constexpr int32_t MIN_VERSION = 1;
+constexpr int32_t OPERATION_TYPE_COMMON_EVENT = 4;
 const std::unordered_map<std::string, std::string> HIDUMPER_CMD_MAP = {
     { "--help", HELP_NOTIFICATION_OPTION },
     { "--active", ACTIVE_NOTIFICATION_OPTION },
@@ -2003,6 +2004,20 @@ void AdvancedNotificationService::UpdateCloneBundleInfoFoSilentReminder(
         if (NotificationPreferences::GetInstance()->SetSilentReminderEnabled(bundle,
             enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ? true : false) != ERR_OK) {
             ANS_LOGW("SetSilentReminderEnabled failed.");
+        }
+    }
+}
+
+void AdvancedNotificationService::CheckRemovalWantAgent(const sptr<NotificationRequest> &request)
+{
+    if (request->GetRemovalWantAgent() != nullptr && request->GetRemovalWantAgent()->GetPendingWant() != nullptr) {
+        uint32_t operationType = (uint32_t)(request->GetRemovalWantAgent()->GetPendingWant()
+            ->GetType(request->GetRemovalWantAgent()->GetPendingWant()->GetTarget()));
+        bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+        bool isSystemApp = AccessTokenHelper::IsSystemApp();
+        if (!isSubsystem && !isSystemApp && operationType != OPERATION_TYPE_COMMON_EVENT) {
+            ANS_LOGI("null SetRemovalWantAgent");
+            request->SetRemovalWantAgent(nullptr);
         }
     }
 }

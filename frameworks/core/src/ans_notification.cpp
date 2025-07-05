@@ -1099,8 +1099,8 @@ ErrCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilter &fil
         ANS_LOGE("null bundleOption");
         return ERR_ANS_INVALID_PARAM;
     }
-    return proxy->GetActiveNotificationByFilter(bo, filter.notificationKey.id, filter.notificationKey.label,
-        filter.extraInfoKeys, request);
+    return proxy->GetActiveNotificationByFilter(bo, filter.notificationKey.id,
+        filter.notificationKey.label, filter.userId, filter.extraInfoKeys, request);
 }
 
 ErrCode AnsNotification::IsAllowedNotify(const NotificationBundleOption &bundleOption, bool &allowed)

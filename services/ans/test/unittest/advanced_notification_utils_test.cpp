@@ -205,7 +205,8 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00001, Function | SmallTest
     sptr<NotificationRequest> newRequest;
     auto bundleOption = new NotificationBundleOption("test", 1);
     int notificationId = 1;
-    ASSERT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label, keys, newRequest),
+    int32_t userId = -1;
+    ASSERT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label ,userId, keys, newRequest),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
@@ -222,8 +223,9 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00002, Function | SmallTest
     sptr<NotificationRequest> newRequest;
     sptr<NotificationBundleOption> bundle;
     int notificationId = 1;
+    int32_t userId = -1;
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(
-        bundle, notificationId, label, keys, newRequest),
+        bundle, notificationId, label, userId, keys, newRequest),
         (int)ERR_ANS_INVALID_BUNDLE);
 }
 
@@ -238,6 +240,7 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00003, Function | SmallTest
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     std::string label = "testLabel";
     int notificationId = 1;
+    int32_t userId = -1;
 
     sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
     oldRequest->SetSlotType(slotType);
@@ -264,19 +267,19 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00003, Function | SmallTest
     std::vector<std::string> keys;
     sptr<NotificationRequest> newRequest;
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
-        notificationId, label, keys, newRequest), (int)ERR_ANS_PERMISSION_DENIED);
+        notificationId, label, userId, keys, newRequest), (int)ERR_ANS_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
-        notificationId, label, keys, newRequest), (int)ERR_OK);
+        notificationId, label, userId, keys, newRequest), (int)ERR_OK);
 
     keys.emplace_back("test1");
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle,
-        notificationId, label, keys, newRequest), (int)ERR_OK);
+        notificationId, label, userId, keys, newRequest), (int)ERR_OK);
     
     sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption("test1", 1);
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundle1,
-        notificationId, label, keys, newRequest), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+        notificationId, label, userId, keys, newRequest), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**

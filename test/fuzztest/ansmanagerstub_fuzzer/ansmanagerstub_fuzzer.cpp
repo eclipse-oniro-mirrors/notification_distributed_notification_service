@@ -194,6 +194,7 @@ namespace OHOS {
         uint32_t slotFlags;
         service->GetSlotFlagsAsBundle(bundleOption, slotFlags);
         service->GetActiveNotificationByFilter(bundleOption, notificationId, stringData, keys, request);
+        service->GetActiveNotificationByFilter(bundleOption, notificationId, stringData, userId, keys, request);
         service->GetSlotByBundle(bundleOption, slotType, slot);
         std::vector<Notification::NotificationBundleOption> bundleOptions;
         service->GetAllNotificationEnabledBundles(bundleOptions);

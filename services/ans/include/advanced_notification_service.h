@@ -299,7 +299,7 @@ public:
 
     ErrCode GetActiveNotificationByFilter(
         const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
-        const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request) override;
+        int32_t userId, const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request) override;
 
     /**
      * @brief Checks whether your application has permission to publish notifications by calling
@@ -1403,6 +1403,8 @@ public:
      */
     ErrCode SetHashCodeRule(const uint32_t type) override;
 
+    ErrCode AtomicServicePublish(const sptr<NotificationRequest> &request);
+
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1608,7 +1610,7 @@ private:
     void DoNotDisturbUpdataReminderFlags(const std::shared_ptr<NotificationRecord> &record);
     ErrCode CheckCommonParams();
     std::shared_ptr<NotificationRecord> GetRecordFromNotificationList(
-        int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName);
+        int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName, int32_t userId);
     std::shared_ptr<NotificationRecord> MakeNotificationRecord(
         const sptr<NotificationRequest> &request, const sptr<NotificationBundleOption> &bundleOption);
     ErrCode IsAllowedNotifyForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
@@ -1744,6 +1746,13 @@ private:
     ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,
         bool isAgentController, bool isSystemComp);
     bool IsReasonClickDelete(const int32_t removeReason);
+    void CheckRemovalWantAgent(const sptr<NotificationRequest> &request);
+    bool IsAtomicServiceNotification(const sptr<NotificationRequest> &request);
+    ErrCode SetCreatorInfoWithAtomicService(const sptr<NotificationRequest> &request);
+    AnsStatus CheckAndPrepareNotificationInfoWithAtomicService(
+        const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);
+    AnsStatus ExecutePublishProcess(
+        const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
 
 private:
     static sptr<AdvancedNotificationService> instance_;

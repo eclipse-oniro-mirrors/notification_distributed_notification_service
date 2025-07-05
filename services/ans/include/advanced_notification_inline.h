@@ -24,6 +24,7 @@
 #include "os_account_manager_helper.h"
 #include "notification_preferences.h"
 #include "notification_analytics_util.h"
+#include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace Notification {
@@ -142,6 +143,20 @@ inline void ReportDeleteFailedEventPushByNotification(const sptr<Notification> &
     haMetaMessage = AddInformationInMessage(haMetaMessage, reason, message);
     NotificationAnalyticsUtil::ReportDeleteFailedEvent(
         notification->GetNotificationRequestPoint(), haMetaMessage);
+}
+
+inline ErrCode PermissionVerification()
+{
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    return ERR_OK;
 }
 }  // namespace Notification
 }  // namespace OHOS
