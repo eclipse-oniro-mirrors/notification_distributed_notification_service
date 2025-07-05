@@ -151,6 +151,11 @@ void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t dev
         return;
     }
     std::function<void()> subscribeTask = std::bind([deviceId, deviceType]() {
+        DistributedDeviceInfo device;
+        if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+            ANS_LOGW("Dans bundle get device info failed %{public}s.", StringAnonymous(deviceId).c_str());
+            return;
+        }
         DistributedSubscribeService::GetInstance().UnSubscribeNotification(deviceId, deviceType);
         auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
         if (localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
@@ -161,8 +166,9 @@ void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t dev
             std::vector<std::string> hashcodes;
             NotificationHelper::RemoveDistributedNotifications(hashcodes,
                 NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
-                NotificationConstant::DistributedDeleteType::ALL,
-                NotificationConstant::DISTRIBUTED_RELEASE_DELETE);
+                NotificationConstant::DistributedDeleteType::DEVICE_ID,
+                NotificationConstant::DISTRIBUTED_RELEASE_DELETE,
+                device.udid_);
         }
     });
     serviceQueue_->submit(subscribeTask);
@@ -467,7 +473,7 @@ void DistributedService::OnHandleMsg(std::shared_ptr<TlvBox>& box)
                 DistributedPublishService::GetInstance().PublishSynchronousLiveView(box);
                 break;
             case NotificationEventType::REMOVE_ALL_DISTRIBUTED_NOTIFICATIONS:
-                DistributedPublishService::GetInstance().RemoveAllDistributedNotifications();
+                DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(box);
                 break;
 #endif
             default:

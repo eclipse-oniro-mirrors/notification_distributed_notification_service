@@ -33,5 +33,21 @@ RemoveAllDistributedNotificationsBox::RemoveAllDistributedNotificationsBox(
     std::shared_ptr<TlvBox> box) : BoxBase(box)
 {
 }
+
+bool RemoveAllDistributedNotificationsBox::SetLocalDeviceId(const std::string &deviceId)
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
+bool RemoveAllDistributedNotificationsBox::GetLocalDeviceId(std::string& deviceId) const
+{
+    if (box_ == nullptr) {
+        return false;
+    }
+    return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
+}
 }
 }

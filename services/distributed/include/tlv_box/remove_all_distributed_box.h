@@ -28,6 +28,8 @@ public:
     RemoveAllDistributedNotificationsBox();
     ~RemoveAllDistributedNotificationsBox();
     RemoveAllDistributedNotificationsBox(std::shared_ptr<TlvBox> box);
+    bool SetLocalDeviceId(const std::string &deviceId);
+    bool GetLocalDeviceId(std::string &deviceId) const;
 };
 }  // namespace Notification
 }  // namespace OHOS

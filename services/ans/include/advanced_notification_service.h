@@ -398,7 +398,7 @@ public:
      */
     ErrCode RemoveDistributedNotifications(const std::vector<std::string>& hashcodes,
         const int32_t slotTypeInt, const int32_t deleteTypeInt,
-        const int32_t removeReason) override;
+        const int32_t removeReason, const std::string& deviceId = "") override;
 
     ErrCode GetUnifiedGroupInfoFromDb(std::string &enable);
 
@@ -1715,6 +1715,8 @@ private:
     ErrCode RemoveDistributedNotifications(const NotificationConstant::SlotType& slotType,
         const int32_t removeReason,
         const NotificationConstant::DistributedDeleteType& deleteType);
+    ErrCode RemoveDistributedNotificationsByDeviceId(const std::string& deviceId,
+        const int32_t removeReason);
     ErrCode RemoveAllDistributedNotifications(const int32_t removeReason);
     bool ExecuteDeleteDistributedNotification(std::shared_ptr<NotificationRecord>& record,
         std::vector<sptr<Notification>>& notifications, const int32_t removeReason);

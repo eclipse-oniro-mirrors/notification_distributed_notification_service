@@ -921,7 +921,7 @@ void AdvancedNotificationService::ExcuteDeleteAll(ErrCode &result, const int32_t
 
 ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     const std::vector<std::string>& hashcodes, const int32_t slotTypeInt,
-    const int32_t deleteTypeInt, const int32_t removeReason)
+    const int32_t deleteTypeInt, const int32_t removeReason, const std::string& deviceId)
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -951,10 +951,62 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
             return RemoveDistributedNotifications(slotType, removeReason, deleteType);
         case NotificationConstant::DistributedDeleteType::HASHCODES:
             return RemoveDistributedNotifications(hashcodes, removeReason);
+        case NotificationConstant::DistributedDeleteType::DEVICE_ID:
+            return RemoveDistributedNotificationsByDeviceId(deviceId, removeReason);
         default:
             ANS_LOGW("no deleteType");
             break;
     }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::RemoveDistributedNotificationsByDeviceId(
+    const std::string& deviceId, const int32_t removeReason)
+{
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([=]() {
+        std::vector<sptr<Notification>> notifications;
+        std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
+        for (auto record : notificationList_) {
+            auto notification = record->notification;
+            if (notification == nullptr) {
+                continue;
+            }
+            auto request = notification->GetNotificationRequestPoint();
+            if (request == nullptr) {
+                continue;
+            }
+            auto extendInfo = request->GetExtendInfo();
+            if (extendInfo == nullptr) {
+                continue;
+            }
+            auto key = ANS_EXTENDINFO_INFO_PRE + ANS_EXTENDINFO_DEVICE_ID;
+            auto id = extendInfo->GetStringParam(key);
+            if (id.empty()) {
+                continue;
+            }
+            if (id != deviceId) {
+                continue;
+            }
+
+            if (ExecuteDeleteDistributedNotification(record, notifications, removeReason)) {
+                deleteRecords.push_back(record);
+            }
+            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+                std::vector<sptr<Notification>> currNotificationList = notifications;
+                NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                    currNotificationList, nullptr, removeReason);
+                notifications.clear();
+            }
+        }
+
+        if (!notifications.empty()) {
+            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
+                notifications, nullptr, removeReason);
+        }
+        for (auto deleteRecord : deleteRecords) {
+            notificationList_.remove(deleteRecord);
+        }
+    }));
     return ERR_OK;
 }
 

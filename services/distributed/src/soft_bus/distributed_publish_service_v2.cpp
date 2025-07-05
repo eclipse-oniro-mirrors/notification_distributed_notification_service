@@ -222,6 +222,8 @@ void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDev
         ANS_LOGW("create box error");
         return;
     }
+    auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
+    removeBox->SetLocalDeviceId(local.deviceId_);
 
     if (!removeBox->Serialize()) {
         ANS_LOGW("dans OnCanceled serialize failed");
@@ -556,13 +558,22 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
 }
 
 #else
-void DistributedPublishService::RemoveAllDistributedNotifications()
+void DistributedPublishService::RemoveAllDistributedNotifications(const std::shared_ptr<TlvBox>& boxMessage)
 {
+    RemoveAllDistributedNotificationsBox removeBox = RemoveAllDistributedNotificationsBox(boxMessage);
+    std::string deviceId;
+    removeBox.GetLocalDeviceId(deviceId);
+    DistributedDeviceInfo device;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+        ANS_LOGW("Dans bundle get device info failed %{public}s.", StringAnonymous(deviceId).c_str());
+        return;
+    }
     std::vector<std::string> hashcodes;
     IN_PROCESS_CALL(NotificationHelper::RemoveDistributedNotifications(hashcodes,
         NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
-        NotificationConstant::DistributedDeleteType::ALL,
-        NotificationConstant::DISTRIBUTED_RELEASE_DELETE));
+        NotificationConstant::DistributedDeleteType::DEVICE_ID,
+        NotificationConstant::DISTRIBUTED_RELEASE_DELETE,
+        device.udid_));
 }
 
 void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox>& boxMessage)
