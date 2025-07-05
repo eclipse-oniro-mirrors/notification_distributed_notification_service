@@ -167,7 +167,6 @@ namespace OHOS {
         service->GetActiveNotificationNums(num);
         service->GetAllActiveNotifications(notificationsVector);
         service->GetSpecialActiveNotifications(keys, notificationsVector);
-        service->GetActiveNotificationByFilter(bundleOption, notificationId, stringData, keys, notificationRequest);
         service->GetActiveNotificationByFilter(
             bundleOption, notificationId, stringData, userId, keys, notificationRequest);
         service->CanPublishAsBundle(stringData, canPublish);
