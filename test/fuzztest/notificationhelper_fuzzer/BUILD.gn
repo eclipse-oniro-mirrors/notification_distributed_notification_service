@@ -21,7 +21,10 @@ ohos_fuzztest("NotificationHelperFuzzTest") {
   module_out_path = service_fuzz_test_path
   fuzz_config_file = "${component_path}/test/fuzztest/notificationhelper_fuzzer"
 
-  include_dirs = [ "${component_path}/test/fuzztest/fuzz_common_base" ]
+  include_dirs = [
+    "${component_path}/test/fuzztest/fuzz_common_base",
+    "${component_path}/test/fuzztest/fuzz_common_base/mock",
+  ]
   cflags = [
     "-g",
     "-O0",
