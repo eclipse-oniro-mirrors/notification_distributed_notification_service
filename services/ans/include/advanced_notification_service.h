@@ -1747,7 +1747,6 @@ private:
         bool isAgentController, bool isSystemComp);
     bool IsReasonClickDelete(const int32_t removeReason);
     void CheckRemovalWantAgent(const sptr<NotificationRequest> &request);
-    bool IsAtomicServiceNotification(const sptr<NotificationRequest> &request);
     ErrCode SetCreatorInfoWithAtomicService(const sptr<NotificationRequest> &request);
     AnsStatus CheckAndPrepareNotificationInfoWithAtomicService(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);

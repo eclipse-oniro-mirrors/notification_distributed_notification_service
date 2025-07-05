@@ -54,6 +54,8 @@ const std::size_t NotificationRequest::MAX_ACTION_BUTTONS {3};
 const std::size_t NotificationRequest::MAX_MESSAGE_USERS {1000};
 
 constexpr int32_t MAX_MAP_SIZE = 1000;
+constexpr int32_t PKG_INSTALL_STATUS_UNKMOWN = -1;
+constexpr int32_t PKG_INSTALL_STATUS_UNINSTALL = 0;
 
 NotificationRequest::NotificationRequest(int32_t notificationId) : notificationId_(notificationId)
 {
@@ -3129,6 +3131,25 @@ void NotificationRequest::AdddeviceStatu(const std::string &deviceType,
 const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() const
 {
     return deviceStatus_;
+}
+
+bool AdvancedNotificationService::IsAtomicServiceNotification(const sptr<NotificationRequest> &request)
+{
+    if (!IsCommonLiveView() || !IsAgentNotification()) {
+        ANS_LOGD("not commonLiveView or not agent");
+        return false;
+    }
+
+    if (extendInfo_ == nullptr) {
+        ANS_LOGD("extend info is null.");
+        return false;
+    }
+    int32_t installedStatus = extendInfo_->GetIntParam("autoServiceIntallStatus", PKG_INSTALL_STATUS_UNKMOWN);
+    if (installedStatus == PKG_INSTALL_STATUS_UNINSTALL) {
+        ANS_LOGD("AtomicServiceNotification.");
+        return true;
+    }
+    return false;
 }
 }  // namespace Notification
 }  // namespace OHOS

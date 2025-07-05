@@ -699,7 +699,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return ERR_ANS_NO_MEMORY;
     }
     record->isThirdparty = isThirdparty;
-    record->isAtomicService = IsAtomicServiceNotification(request);
+    record->isAtomicService = request->IsAtomicServiceNotification();
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
         message.ErrorCode(result);

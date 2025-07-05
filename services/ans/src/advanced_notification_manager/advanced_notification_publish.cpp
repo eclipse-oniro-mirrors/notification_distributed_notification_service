@@ -62,7 +62,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         return CollaboratePublish(request);
     }
 
-    if (IsAtomicServiceNotification(request)) {
+    if (request->IsAtomicServiceNotification()) {
         return AtomicServicePublish(request);
     }
 

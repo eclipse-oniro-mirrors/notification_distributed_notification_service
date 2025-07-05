@@ -159,24 +159,5 @@ AnsStatus AdvancedNotificationService::ExecutePublishProcess(
     return AnsStatus();
 }
 
-bool AdvancedNotificationService::IsAtomicServiceNotification(const sptr<NotificationRequest> &request)
-{
-    if (!request->IsCommonLiveView() || !request->IsAgentNotification()) {
-        ANS_LOGD("not commonLiveView or not agent");
-        return false;
-    }
-
-    auto params = request->GetExtendInfo();
-    if (params == nullptr) {
-        ANS_LOGD("extend info is null.");
-        return false;
-    }
-    int32_t installedStatus = params->GetIntParam("autoServiceIntallStatus", PKG_INSTALL_STATUS_UNKMOWN);
-    if (installedStatus == PKG_INSTALL_STATUS_UNINSTALL) {
-        ANS_LOGD("AtomicServiceNotification.");
-        return true;
-    }
-    return false;
-}
 }
 }
