@@ -36,6 +36,8 @@
 #include "mock_ipc_skeleton.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
+#include "want_params.h"
+#include "int_wrapper.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -2714,6 +2716,60 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_005, Function | SmallTest 
     bool result = advancedNotificationService_->IsDisableNotification(bundleName);
     ASSERT_TRUE(result);
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
+}
+
+/*
+ * @tc.name: AtomicServicePublish_0100
+ * @tc.desc: test PublishNotification with common liveView.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0100, Function | MediumTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetIsAgentNotification(true);
+    request->SetOwnerBundleName("test.com");
+    request->SetOwnerUserId(100);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("autoServiceIntallStatus", AAFwk::Integer::Box(0));
+    request->SetExtendInfo(extendInfo);
+    auto params = request->GetExtendInfo();
+    int32_t installedStatus = params->GetIntParam("autoServiceIntallStatus", 0);
+    auto ret = advancedNotificationService_->Publish("", request);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: AtomicServicePublish_0100
+ * @tc.desc: test PublishNotification with common liveView.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0200, Function | MediumTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetIsAgentNotification(true);
+    request->SetOwnerBundleName("test.com");
+    request->SetOwnerUserId(-1);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("autoServiceIntallStatus", AAFwk::Integer::Box(0));
+    request->SetExtendInfo(extendInfo);
+    auto ret = advancedNotificationService_->Publish("", request);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

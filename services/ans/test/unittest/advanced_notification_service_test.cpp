@@ -3745,8 +3745,9 @@ HWTEST_F(AdvancedNotificationServiceTest, GetActiveNotificationByFilter_0001, Fu
     int32_t notificationId = 1;
     std::string label = "GetActiveNotificationByFilter's label";
     std::vector<std::string> extraInfoKeys;
+    int32_t userId = -1;
 
-    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundleOption, notificationId, label,
+    ASSERT_EQ(advancedNotificationService_->GetActiveNotificationByFilter(bundleOption, notificationId, label, userId,
         extraInfoKeys, req), (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 
     GTEST_LOG_(INFO) << "GetActiveNotificationByFilter_0001 test end";
@@ -3999,7 +4000,7 @@ HWTEST_F(AdvancedNotificationServiceTest, GetRecordFromNotificationList_00001, F
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
 
     auto res = advancedNotificationService_->GetRecordFromNotificationList(
-        1, SYSTEM_APP_UID, "label", TEST_DEFUALT_BUNDLE);
+        1, SYSTEM_APP_UID, "label", TEST_DEFUALT_BUNDLE, -1);
     EXPECT_NE(res, nullptr);
 }
 

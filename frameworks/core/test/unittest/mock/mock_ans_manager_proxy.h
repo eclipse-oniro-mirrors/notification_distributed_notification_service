@@ -61,10 +61,11 @@ public:
     MOCK_METHOD2(GetAllNotificationsBySlotType, ErrCode(std::vector<sptr<Notification>>&, int32_t));
     MOCK_METHOD2(GetSpecialActiveNotifications,
         ErrCode(const std::vector<std::string>&, std::vector<sptr<Notification>>&));
-    MOCK_METHOD5(GetActiveNotificationByFilter, ErrCode(
+    MOCK_METHOD6(GetActiveNotificationByFilter, ErrCode(
         const sptr<NotificationBundleOption>&,
         int32_t,
         const std::string&,
+        int32_t,
         const std::vector<std::string>&,
         sptr<NotificationRequest>&));
     MOCK_METHOD2(CanPublishAsBundle, ErrCode(const std::string&, bool&));

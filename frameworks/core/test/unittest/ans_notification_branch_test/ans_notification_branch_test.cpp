@@ -582,7 +582,7 @@ public:
     }
 
     ErrCode GetActiveNotificationByFilter(const sptr<NotificationBundleOption> &bundleOption,
-        int32_t notificationId, const std::string &label, const std::vector<std::string>& extraInfoKeys,
+        int32_t notificationId, const std::string &label, int32_t userId, const std::vector<std::string>& extraInfoKeys,
         sptr<NotificationRequest> &request) override
     {
         return ERR_ANS_INVALID_PARAM;

@@ -48,6 +48,7 @@ struct NotificationKey {
 
 struct LiveViewFilter {
     NotificationBundleOption bundle;
+    int32_t userId {-1};
     NotificationKey notificationKey;
     std::vector<std::string> extraInfoKeys;
 };
@@ -1494,6 +1495,8 @@ public:
     std::string CollaborationToJson() const;
 
     static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
+
+    bool IsAtomicServiceNotification();
 
 private:
     /**

@@ -699,6 +699,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         return ERR_ANS_NO_MEMORY;
     }
     record->isThirdparty = isThirdparty;
+    record->isAtomicService = request->IsAtomicServiceNotification();
     ErrCode result = CheckPublishPreparedNotification(record, isSystemApp);
     if (result != ERR_OK) {
         message.ErrorCode(result);
@@ -946,8 +947,8 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
             slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
         }
     }
-    if (record->request->IsSystemLiveView()) {
-        ANS_LOGI("System live view no need add slot");
+    if (record->request->IsSystemLiveView() || record->isAtomicService) {
+        ANS_LOGI("System live view or stomicService no need add slot");
         return ERR_OK;
     }
     std::vector<sptr<NotificationSlot>> slots;
@@ -1485,13 +1486,14 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedN
 }
 
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNotificationList(
-    int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName)
+    int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName, int32_t userId)
 {
     for (auto &record : notificationList_) {
         if ((record->notification->GetLabel() == label) &&
             (record->notification->GetId() == notificationId) &&
             (record->bundleOption->GetUid() == uid) &&
-            (record->bundleOption->GetBundleName() == bundleName)) {
+            (record->bundleOption->GetBundleName() == bundleName) &&
+            (record->notification->GetRecvUserId() == userId || userId == -1)) {
             return record;
         }
     }
@@ -1986,16 +1988,19 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
     const std::shared_ptr<NotificationRecord> &record, bool isSystemApp, bool isUpdateByOwner,
     const bool isAgentController)
 {
-    auto result = AssignValidNotificationSlot(record, record->bundleOption);
+    ErrCode result = ERR_OK;
+    result = AssignValidNotificationSlot(record, record->bundleOption);
     if (result != ERR_OK) {
         ANS_LOGE("Can not assign valid slot!");
         return result;
     }
 
-    result = Filter(record);
-    if (result != ERR_OK) {
-        ANS_LOGE("Reject by filters: %{public}d", result);
-        return result;
+    if (!record->isAtomicService) {
+        result = Filter(record);
+        if (result != ERR_OK) {
+            ANS_LOGE("Reject by filters: %{public}d", result);
+            return result;
+        }
     }
 
     if (isSystemApp) {

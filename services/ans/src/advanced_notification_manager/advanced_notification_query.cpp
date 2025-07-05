@@ -199,10 +199,13 @@ ErrCode AdvancedNotificationService::GetSpecialActiveNotifications(
 
 ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId, const std::string &label,
-    const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request)
+    int32_t userId, const std::vector<std::string> &extraInfoKeys, sptr<NotificationRequest> &request)
 {
     ANS_LOGD("called");
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr && userId != -1 && !bundleOption->GetBundleName().empty()) {
+        bundle = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), 0);
+    }
     if (bundle == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
     }
@@ -226,7 +229,8 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("called");
 
-        auto record = GetRecordFromNotificationList(notificationId, bundle->GetUid(), label, bundle->GetBundleName());
+        auto record = GetRecordFromNotificationList(
+            notificationId, bundle->GetUid(), label, bundle->GetBundleName(), userId);
         if ((record == nullptr) || (!record->request->IsCommonLiveView())) {
             return;
         }

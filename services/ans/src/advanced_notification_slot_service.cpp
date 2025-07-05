@@ -530,8 +530,8 @@ ErrCode AdvancedNotificationService::AssignValidNotificationSlot(const std::shar
         }
 
         GenerateSlotReminderMode(slot, bundleOption);
-        if (record->request->IsSystemLiveView()) {
-            ANS_LOGI("System live view no need add sloty.");
+        if (record->request->IsSystemLiveView() || record->isAtomicService) {
+            ANS_LOGI("System live view or atomicService no need add sloty.");
             result = ERR_OK;
         } else {
             std::vector<sptr<NotificationSlot>> slots;

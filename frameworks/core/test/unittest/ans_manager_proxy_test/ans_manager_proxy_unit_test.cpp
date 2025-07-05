@@ -6977,11 +6977,12 @@ HWTEST_F(AnsManagerProxyUnitTest, GetActiveNotificationByFilterTest_0100, Functi
     int32_t notificationId = 0;
     std::string label = "label";
     std::vector<std::string> extraInfoKeys;
+    int32_t userId = -1;
 
     NotificationRequest request(1);
     sptr<NotificationRequest> liveViewRequest = new (std::nothrow) NotificationRequest(request);
 
-    int32_t result = proxy->GetActiveNotificationByFilter(bundleOption, notificationId, label,
+    int32_t result = proxy->GetActiveNotificationByFilter(bundleOption, notificationId, label, userId,
         extraInfoKeys, liveViewRequest);
     EXPECT_EQ(ERR_OK, result);
 }
