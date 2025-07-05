@@ -91,7 +91,7 @@ ErrCode AdvancedNotificationService::IsSilentReminderEnabled(const sptr<Notifica
         return ERR_ANS_INVALID_BUNDLE;
     }
 
-    NotificationConstant::ENABLE_STATUS enableStatus;
+    NotificationConstant::SWITCH_STATE enableStatus;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");

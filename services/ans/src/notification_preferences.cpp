@@ -1113,7 +1113,8 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
     silentReminderInfo.bundleName = bundleOption->GetBundleName();
     silentReminderInfo.uid = bundleOption->GetUid();
     silentReminderInfo.enableStatus =
-        enabled ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE;
+        enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetSilentReminderEnabled(silentReminderInfo);
     if (storeDBResult) {
@@ -1123,9 +1124,8 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
 }
  
 ErrCode NotificationPreferences::IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
-    NotificationConstant::ENABLE_STATUS &enableStatus)
+    NotificationConstant::SWITCH_STATE &enableStatus)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -1153,11 +1153,12 @@ void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<Notificat
     if (preferncesDB_ != nullptr && bundleOption != nullptr) {
         std::lock_guard<std::mutex> lock(preferenceMutex_);
         preferncesDB_->RemoveSilentEnabledDbByBundle(bundleOption->GetBundleName(), bundleOption->GetUid());
+        preferencesInfo_.RemoveSilentReminderInfo(bundleOption);
     }
 }
 
 ErrCode NotificationPreferences::SetDistributedEnabled(
-    const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enableStatus)
+    const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
@@ -1167,12 +1168,12 @@ ErrCode NotificationPreferences::SetDistributedEnabled(
 }
 
 ErrCode NotificationPreferences::IsDistributedEnabled(
-    const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enableStatus)
+    const std::string &deviceType, NotificationConstant::SWITCH_STATE &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<std::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
-    enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+    enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     storeDBResult = preferncesDB_->GetDistributedEnabled(deviceType, enableStatus);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }

@@ -100,13 +100,13 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enabled);
     if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
-        NotificationConstant::ENABLE_STATUS notification = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+        NotificationConstant::SWITCH_STATE notification = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType,
             notification) != ERR_OK) {
             ANS_LOGW("Get notification distributed failed %{public}s!", deviceType.c_str());
         }
         DeviceStatueChangeInfo changeInfo;
-        changeInfo.enableChange = (notification == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) ? true : false;
+        changeInfo.enableChange = (notification == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ? true : false;
         changeInfo.liveViewChange = enabled;
         changeInfo.changeType = DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE;
         DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
@@ -661,7 +661,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
     }
 
     auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
-        enabled ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+        enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
     if (result == ERR_OK) {
         bool liveViewEnabled = false;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
@@ -697,9 +698,9 @@ ErrCode AdvancedNotificationService::IsDistributedEnabled(const std::string &dev
         return ERR_ANS_PERMISSION_DENIED;
     }
 
-    NotificationConstant::ENABLE_STATUS enableStatus;
+    NotificationConstant::SWITCH_STATE enableStatus;
     ErrCode errResult = NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType, enableStatus);
-    enabled = (enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE);
+    enabled = (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     return errResult;
 }
 

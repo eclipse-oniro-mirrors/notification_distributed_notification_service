@@ -220,9 +220,9 @@ ErrCode AdvancedNotificationService::CollaborateFilter(const sptr<NotificationRe
         }
         return ERR_OK;
     }
-    NotificationConstant::ENABLE_STATUS enable;
+    NotificationConstant::SWITCH_STATE enable;
     result = NotificationPreferences::GetInstance()->IsDistributedEnabled(localType, enable);
-    if (result != ERR_OK || enable != NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+    if (result != ERR_OK || enable != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
         ANS_LOGW("Get notification distributed failed %{public}d %{public}d.", result, enable);
         return ERR_ANS_NOT_ALLOWED;
     }

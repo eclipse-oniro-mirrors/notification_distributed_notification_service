@@ -2508,12 +2508,12 @@ HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | 
 
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     NotificationPreferences::GetInstance()->SetDistributedEnabled(
-        localType, NotificationConstant::ENABLE_STATUS::ENABLE_TRUE);
+        localType, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_OK);
 
     NotificationPreferences::GetInstance()->SetDistributedEnabled(
-        localType, NotificationConstant::ENABLE_STATUS::ENABLE_FALSE);
+        localType, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
     ret = advancedNotificationService_->CollaborateFilter(request);
     ASSERT_EQ(ret, (int)ERR_ANS_NOT_ALLOWED);
 

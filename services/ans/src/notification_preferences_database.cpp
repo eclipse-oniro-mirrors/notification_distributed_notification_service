@@ -1212,7 +1212,8 @@ void NotificationPreferencesDatabase::ParseSilentReminderFromDisturbeDB(
 {
     bool enable = static_cast<bool>(StringToInt(entry.second));
     silentReminderInfo.enableStatus =
-        enable ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE : NotificationConstant::ENABLE_STATUS::ENABLE_FALSE;
+        enable ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
 }
 
 void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
@@ -1852,7 +1853,8 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
  
     // return std::string(KEY_SILENT_REMINDER_ENABLE_NOTIFICATION).append(
     //     bundleInfo.GetBundleName()).append(std::to_string(bundleInfo.GetBundleUid()));
-    std::string key = GenerateSilentReminderKey({bundleName, uid, NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE});
+    std::string key = GenerateSilentReminderKey(
+        {bundleName, uid, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF});
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     int32_t result = rdbDataManager_->DeleteData(key, userId);
@@ -2166,7 +2168,7 @@ int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, con
 }
 
 bool NotificationPreferencesDatabase::PutDistributedEnabled(
-    const std::string &deviceType, const NotificationConstant::ENABLE_STATUS &enabled)
+    const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enabled)
 {
     ANS_LOGD("%{public}s, deviceType: %{public}s, enabled: %{public}d",
         __FUNCTION__, deviceType.c_str(), static_cast<int32_t>(enabled));
@@ -2184,7 +2186,7 @@ bool NotificationPreferencesDatabase::PutDistributedEnabled(
 }
 
 bool NotificationPreferencesDatabase::GetDistributedEnabled(
-    const std::string &deviceType, NotificationConstant::ENABLE_STATUS &enabled)
+    const std::string &deviceType, NotificationConstant::SWITCH_STATE &enabled)
 {
     ANS_LOGD("%{public}s, deviceType: %{public}s", __FUNCTION__, deviceType.c_str());
     int32_t userId = SUBSCRIBE_USER_INIT;
@@ -2196,7 +2198,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabled(
     std::string key = std::string(KEY_DISTRIBUTED_NOTIFICATION_SWITCH).append(KEY_MIDDLE_LINE).append(
         deviceType).append(KEY_MIDDLE_LINE).append(std::to_string(userId));
     bool result = false;
-    enabled = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+    enabled = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     GetValueFromDisturbeDB(key, userId, [&](const int32_t &status, std::string &value) {
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
@@ -2205,7 +2207,7 @@ bool NotificationPreferencesDatabase::GetDistributedEnabled(
             }
             case NativeRdb::E_OK: {
                 result = true;
-                enabled = static_cast<NotificationConstant::ENABLE_STATUS>(StringToInt(value));
+                enabled = static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value));
                 break;
             }
             default:
@@ -2261,7 +2263,7 @@ bool NotificationPreferencesDatabase::SetSilentReminderEnabled(
 
     std::string key = GenerateSilentReminderKey(silentReminderInfo);
     bool enableStatus = false;
-    if (silentReminderInfo.enableStatus == NotificationConstant::ENABLE_STATUS::ENABLE_TRUE) {
+    if (silentReminderInfo.enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
         enableStatus = true;
     }
     int32_t result = PutDataToDB(key, static_cast<int32_t>(enableStatus), userId);
@@ -2286,14 +2288,14 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
         switch (status) {
             case NativeRdb::E_EMPTY_VALUES_BUCKET: {
                 result = true;
-                silentReminderInfo.enableStatus = NotificationConstant::ENABLE_STATUS::DEFAULT_FALSE;
+                silentReminderInfo.enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
                 break;
             }
             case NativeRdb::E_OK: {
                 result = true;
-                NotificationConstant::ENABLE_STATUS enableStatus =
-                    StringToInt(value) ? NotificationConstant::ENABLE_STATUS::ENABLE_TRUE :
-                    NotificationConstant::ENABLE_STATUS::ENABLE_FALSE;
+                NotificationConstant::SWITCH_STATE enableStatus =
+                    StringToInt(value) ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+                    NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
                 silentReminderInfo.enableStatus = enableStatus;
                 break;
             }

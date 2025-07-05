@@ -152,26 +152,26 @@ public:
         CLOSE
     };
 
-    enum class ENABLE_STATUS {
+    enum class SWITCH_STATE {
         /**
-         * the switch never been set, default status is false.
+         * Represents an off state that was explicitly set bt the user.
          */
-        DEFAULT_FALSE,
+        SYSTEM_DEFAULT_OFF,
 
         /**
-         * the switch never been set, default status is true.
+         * Represents an on state that was explicitly set bt the user.
          */
-        DEFAULT_TRUE,
+        SYSTEM_DEFAULT_ON,
 
         /**
-         * the switch is enabled
+         * Represents an initial off state before any user modification.
          */
-        ENABLE_TRUE,
+        USER_MODIFIED_OFF,
 
         /**
-         * the switch is disable
+         * Represents an initial on state before any user modification.
          */
-        ENABLE_FALSE
+        USER_MODIFIED_ON
     };
 
     enum class DANS_SUPPORT_STATUS {

@@ -346,20 +346,20 @@ napi_value LiveViewStatusInit(napi_env env, napi_value exports)
     return exports;
 }
 
-napi_value EnableStatusInit(napi_env env, napi_value exports)
+napi_value SwitchStateInit(napi_env env, napi_value exports)
 {
     ANS_LOGD("%{public}s, called", __func__);
 
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
     
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::DEFAULT_FALSE, "DEFAULT_FALSE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::DEFAULT_TRUE, "DEFAULT_TRUE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::ENABLE_TRUE, "ENABLE_TRUE");
-    SetNamedPropertyByInteger(env, obj, (int32_t)EnableStatus::ENABLE_FALSE, "ENABLE_FALSE");
+    SetNamedPropertyByInteger(env, obj, (int32_t)SwitchState::USER_MODIFIED_OFF, "USER_MODIFIED_OFF");
+    SetNamedPropertyByInteger(env, obj, (int32_t)SwitchState::USER_MODIFIED_ON, "USER_MODIFIED_ON");
+    SetNamedPropertyByInteger(env, obj, (int32_t)SwitchState::SYSTEM_DEFAULT_OFF, "SYSTEM_DEFAULT_OFF");
+    SetNamedPropertyByInteger(env, obj, (int32_t)SwitchState::SYSTEM_DEFAULT_ON, "SYSTEM_DEFAULT_ON");
 
     napi_property_descriptor exportFuncs[] = {
-        DECLARE_NAPI_PROPERTY("EnableStatus", obj),
+        DECLARE_NAPI_PROPERTY("SwitchState", obj),
     };
 
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
@@ -382,7 +382,7 @@ napi_value ConstantInit(napi_env env, napi_value exports)
     DeviceRemindTypeInit(env, exports);
     NotificationFlagTypeInit(env, exports);
     LiveViewStatusInit(env, exports);
-    EnableStatusInit(env, exports);
+    SwitchStateInit(env, exports);
     return exports;
 }
 }  // namespace NotificationNapi
