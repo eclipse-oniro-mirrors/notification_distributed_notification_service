@@ -206,7 +206,7 @@ HWTEST_F(AnsUtilsTest, GetActiveNotificationByFilter_00001, Function | SmallTest
     auto bundleOption = new NotificationBundleOption("test", 1);
     int notificationId = 1;
     int32_t userId = -1;
-    ASSERT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label ,userId, keys, newRequest),
+    ASSERT_EQ(ans.GetActiveNotificationByFilter(bundleOption, notificationId, label, userId, keys, newRequest),
         (int)ERR_ANS_INVALID_PARAM);
 }
 
