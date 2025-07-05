@@ -3133,7 +3133,7 @@ const std::map<std::string, std::string> NotificationRequest::GetdeviceStatus() 
     return deviceStatus_;
 }
 
-bool AdvancedNotificationService::IsAtomicServiceNotification(const sptr<NotificationRequest> &request)
+bool NotificationRequest::IsAtomicServiceNotification(const sptr<NotificationRequest> &request)
 {
     if (!IsCommonLiveView() || !IsAgentNotification()) {
         ANS_LOGD("not commonLiveView or not agent");
