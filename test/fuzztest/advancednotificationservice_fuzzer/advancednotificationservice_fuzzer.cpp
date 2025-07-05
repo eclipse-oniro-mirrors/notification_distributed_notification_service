@@ -254,7 +254,6 @@ namespace OHOS {
         std::shared_ptr<Notification::NotificationRecord> record =
             service->MakeNotificationRecord(request, bundleOption);
         record->slot = new Notification::NotificationSlot(Notification::NotificationConstant::SlotType::LIVE_VIEW);
-        service->PublishPreparedNotification(request, bundleOption, fuzzData->ConsumeBool());
         service->QueryDoNotDisturbProfile(randomInt32, randomString, randomString);
         service->CheckDoNotDisturbProfile(record);
         service->DoNotDisturbUpdataReminderFlags(record);
