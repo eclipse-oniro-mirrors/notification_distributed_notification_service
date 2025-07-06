@@ -384,7 +384,7 @@ void DistributedOperationService::LaunchProjectionApp(
     int32_t result =
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->RestoreCollaborationWindow(peerDevice.networkId_);
     ANS_LOGI("RestoreCollaborationWindow result: %{public}d, networkId: %{public}s",
-        result, peerDevice.networkId_.c_str());
+        result, StringAnonymous(peerDevice.networkId_).c_str());
 }
 #endif
 }
