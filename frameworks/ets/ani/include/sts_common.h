@@ -46,7 +46,7 @@ ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64
 ani_status GetPropertyString(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, std::string &outStr);
 ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
-    ani_boolean isUndefined, bool outvalue);
+    ani_boolean isUndefined, bool &outvalue);
 ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_double &outvalue);
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,
@@ -64,15 +64,15 @@ bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value);
 bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, double value);
-bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
+bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object &object, const std::string &fieldName,
     const std::vector<std::int64_t> &values);
 
 // property
-bool SetPropertyOptionalByBoolean(ani_env *env, ani_object object, const char *name, bool value);
-bool SetPropertyOptionalByDouble(ani_env *env, ani_object object, const char *name, double value);
-bool SetPropertyOptionalByString(ani_env *env, ani_object object, const char *name, const std::string value);
-bool SetPropertyOptionalByInt(ani_env *env, ani_object object, const char *name, int32_t value);
-bool SetPropertyByRef(ani_env *env, ani_object object, const char *name, ani_ref value);
+bool SetPropertyOptionalByBoolean(ani_env *env, ani_object &object, const char *name, bool value);
+bool SetPropertyOptionalByDouble(ani_env *env, ani_object &object, const char *name, double value);
+bool SetPropertyOptionalByString(ani_env *env, ani_object &object, const char *name, const std::string value);
+bool SetPropertyOptionalByInt(ani_env *env, ani_object &object, const char *name, int32_t value);
+bool SetPropertyByRef(ani_env *env, ani_object &object, const char *name, ani_ref value);
 
 bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &cls, ani_object &outAniObj);
 
@@ -87,7 +87,7 @@ inline ani_boolean BoolToAniBoolean(bool value)
 }
 
 template<typename valueType>
-static bool CallSetter(ani_env* env, ani_class cls, ani_object object, const char* propertyName, valueType value)
+static bool CallSetter(ani_env* env, ani_class cls, ani_object &object, const char* propertyName, valueType value)
 {
     if (env == nullptr || cls == nullptr || object == nullptr) {
         return false;
@@ -115,7 +115,7 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object object, const cha
     return true;
 }
 
-[[maybe_unused]]static bool CallSetterNull(ani_env* env, ani_class cls, ani_object object, const char* propertyName)
+[[maybe_unused]]static bool CallSetterNull(ani_env* env, ani_class cls, ani_object &object, const char* propertyName)
 {
     ani_ref nullRef = nullptr;
     ani_status status = env->GetNull(&nullRef);

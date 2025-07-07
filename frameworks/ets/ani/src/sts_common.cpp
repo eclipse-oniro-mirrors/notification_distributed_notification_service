@@ -138,7 +138,7 @@ ani_status GetPropertyString(ani_env *env, ani_object obj, const char *name,
 }
 
 ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
-    ani_boolean isUndefined, bool outvalue)
+    ani_boolean isUndefined, bool &outvalue)
 {
     ANS_LOGD("GetPropertyBool start");
     if (env == nullptr || obj == nullptr || name == nullptr) {
@@ -559,7 +559,7 @@ ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64
     return arrayObj;
 }
 
-bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object object, const std::string &fieldName,
+bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object &object, const std::string &fieldName,
     const std::vector<std::int64_t> &values)
 {
     if (env == nullptr || cls == nullptr || object == nullptr || fieldName.empty()) {
@@ -658,7 +658,7 @@ ani_object CreateInt(ani_env *env, int32_t value)
     return outObj;
 }
 
-bool SetPropertyOptionalByBoolean(ani_env *env, ani_object object, const char *name, bool value)
+bool SetPropertyOptionalByBoolean(ani_env *env, ani_object &object, const char *name, bool value)
 {
     ANS_LOGD("enter SetPropertyOptionalByBoolean");
     if (env == nullptr || object == nullptr || name == nullptr) {
@@ -673,7 +673,7 @@ bool SetPropertyOptionalByBoolean(ani_env *env, ani_object object, const char *n
     return SetPropertyByRef(env, object, name, boolObj);
 }
 
-bool SetPropertyOptionalByDouble(ani_env *env, ani_object object, const char *name, double value)
+bool SetPropertyOptionalByDouble(ani_env *env, ani_object &object, const char *name, double value)
 {
     ANS_LOGD("enter SetPropertyOptionalByDouble");
     if (env == nullptr || object == nullptr || name == nullptr) {
@@ -688,7 +688,7 @@ bool SetPropertyOptionalByDouble(ani_env *env, ani_object object, const char *na
     return SetPropertyByRef(env, object, name, doubleObj);
 }
 
-bool SetPropertyOptionalByString(ani_env *env, ani_object object, const char *name, const std::string value)
+bool SetPropertyOptionalByString(ani_env *env, ani_object &object, const char *name, const std::string value)
 {
     ANS_LOGD("enter SetPropertyOptionalByString");
     if (env == nullptr || object == nullptr || name == nullptr) {
@@ -708,7 +708,7 @@ bool SetPropertyOptionalByString(ani_env *env, ani_object object, const char *na
     return SetPropertyByRef(env, object, name, static_cast<ani_ref>(stringObj));
 }
 
-bool SetPropertyOptionalByInt(ani_env *env, ani_object object, const char *name, int32_t value)
+bool SetPropertyOptionalByInt(ani_env *env, ani_object &object, const char *name, int32_t value)
 {
     ANS_LOGD("enter SetPropertyOptionalByInt");
     if (env == nullptr || object == nullptr || name == nullptr) {
@@ -723,7 +723,7 @@ bool SetPropertyOptionalByInt(ani_env *env, ani_object object, const char *name,
     return SetPropertyByRef(env, object, name, IntObj);
 }
 
-bool SetPropertyByRef(ani_env *env, ani_object object, const char *name, ani_ref value)
+bool SetPropertyByRef(ani_env *env, ani_object &object, const char *name, ani_ref value)
 {
     ANS_LOGD("enter SetPropertyByRef");
     ani_status status = ANI_OK;
