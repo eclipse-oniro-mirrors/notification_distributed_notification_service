@@ -424,17 +424,13 @@ ErrCode AdvancedNotificationService::CheckNotificationRequestLineWantAgents(
     if (multiLineContent != nullptr) {
         auto lineWantAgents = multiLineContent->GetLineWantAgents();
         if (lineWantAgents.size() > 0) {
+            if (!isSystemComp) {
+                ANS_LOGE("Local wantAgent does not support non system app");
+                return ERR_ANS_NON_SYSTEM_APP;
+            }
             if (!isAgentController) {
                 ANS_LOGE("LineWantAgents does not support permission denied");
                 return ERR_ANS_PERMISSION_DENIED;
-            }
-            auto lineWantAgentsIter = std::find_if(lineWantAgents.begin(), lineWantAgents.end(),
-                [&](auto& lineWantAgent) {
-                    return (lineWantAgent != nullptr && lineWantAgent->IsLocal());
-                });
-            if (lineWantAgentsIter != lineWantAgents.end() && !isSystemComp) {
-                ANS_LOGE("Local wantAgent does not support non system app");
-                return ERR_ANS_NON_SYSTEM_APP;
             }
         }
     }
