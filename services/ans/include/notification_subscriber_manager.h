@@ -147,11 +147,7 @@ public:
 
     std::list<std::shared_ptr<SubscriberRecord>> GetSubscriberRecords();
 
-    void IsDeviceFlag(const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification,
-        bool &wearableFlag, bool &headsetFlag, bool &keyNodeFlag);
-
-    void TrackCodeLog(const sptr<Notification> &notification, const bool &wearableFlag, const bool &headsetFlag,
-        const bool &keyNodeFlag);
+    void TrackCodeLog(const sptr<Notification> &notification);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     bool GetIsEnableEffectedRemind();

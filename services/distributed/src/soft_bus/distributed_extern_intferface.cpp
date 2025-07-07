@@ -31,9 +31,12 @@ extern "C" {
 #endif
 
 SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    DistributedDeviceConfig config)
+    DistributedDeviceConfig config, DistributedHaCallbacks callbacks)
 {
     ANS_LOGI("InitLocalDevice %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), (int32_t)(deviceType));
+        AnalyticsUtil::GetInstance().InitOperationCallback(callbacks.haOperationCallback);
+    AnalyticsUtil::GetInstance().InitHACallBack(callbacks.haMaintenanceCallback);
+    AnalyticsUtil::GetInstance().InitSendReportCallBack(callbacks.hiSysEventCallback);
     DistributedLocalConfig::GetInstance().SetLocalDevice(config);
     return DistributedService::GetInstance().InitService(deviceId, deviceType);
 }
@@ -41,7 +44,7 @@ SYMBOL_EXPORT int32_t InitLocalDevice(const std::string &deviceId, uint16_t devi
 SYMBOL_EXPORT void AddDevice(const std::string &deviceId, const std::string &udid, uint16_t deviceType,
     const std::string &networkId)
 {
-    ANS_LOGI("InitLocalDevice %{public}s %{public}d %{public}s.", StringAnonymous(deviceId).c_str(),
+    ANS_LOGI("AddDevice %{public}s %{public}d %{public}s.", StringAnonymous(deviceId).c_str(),
         (int32_t)(deviceType), StringAnonymous(networkId).c_str());
     DistributedDeviceInfo peerDevice = DistributedDeviceInfo(deviceType, deviceId, networkId);
     peerDevice.udid_ = udid;
@@ -74,18 +77,6 @@ SYMBOL_EXPORT void RefreshDevice(const std::string &deviceId, uint16_t deviceTyp
 SYMBOL_EXPORT void ReleaseLocalDevice()
 {
     DistributedService::GetInstance().DestroyService();
-}
-
-SYMBOL_EXPORT void InitHACallBack(
-    std::function<void(int32_t, int32_t, uint32_t, std::string)> callback)
-{
-    AnalyticsUtil::GetInstance().InitHACallBack(callback);
-}
-
-SYMBOL_EXPORT void InitSendReportCallBack(
-    std::function<void(int32_t, int32_t, std::string)> callback)
-{
-    AnalyticsUtil::GetInstance().InitSendReportCallBack(callback);
 }
 
 #ifdef __cplusplus

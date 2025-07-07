@@ -35,7 +35,7 @@ public:
     static DistributedPublishService& GetInstance();
     void RemoveNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void RemoveNotifications(const std::shared_ptr<TlvBox>& boxMessage);
-    void BatchRemoveReport(const std::string &slotTypesString, const int result);
+    void BatchRemoveReport(const std::string &slotTypesString, const std::string &deviceId, const int result);
     int RemoveDistributedNotifications(const std::vector<std::string>& hashcodes);
     void OnRemoveNotification(const DistributedDeviceInfo& peerDevice,
         std::string hashCode, int32_t slotTypes);

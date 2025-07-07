@@ -62,14 +62,26 @@ private:
     std::string timerHashCode_;
 };
 
+struct NotifictionJumpInfo {
+public:
+    NotifictionJumpInfo() {}
+    NotifictionJumpInfo(int32_t jump, int32_t index, int32_t typeId)
+        : jumpType(jump), btnIndex(index), deviceTypeId(typeId) {}
+    int32_t jumpType;
+    int32_t btnIndex;
+    int32_t deviceTypeId;
+};
+
 class UnlockListenerOperService {
 public:
     static UnlockListenerOperService& GetInstance();
-    void AddDelayTask(const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex);
+    void AddDelayTask(const std::string& hashCode, const int32_t jumpType, const int32_t deviceType,
+        const int32_t btnIndex);
     void ReplyOperationResponse();
     void HandleOperationTimeOut(const std::string& hashCode);
     void RemoveOperationResponse(const std::string& hashCode);
-    void TriggerByJumpType(const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex);
+    void TriggerByJumpType(const std::string& hashCode, const int32_t jumpType,
+        const int32_t deviceType, const int32_t btnIndex);
 
 private:
     UnlockListenerOperService();
@@ -86,7 +98,7 @@ private:
     std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
     std::vector<std::string> hashCodeOrder_;
     std::map<std::string, uint64_t> timerMap_;
-    std::map<std::string, std::pair<int32_t, int32_t>> delayTaskMap_;
+    std::map<std::string, NotifictionJumpInfo> delayTaskMap_;
 };
 } // namespace OHOS
 } // namespace Notification

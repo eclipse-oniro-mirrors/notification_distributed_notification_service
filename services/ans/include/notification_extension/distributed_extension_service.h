@@ -61,6 +61,7 @@ public:
     void SendReportCallback(int32_t messageType, int32_t errCode, std::string reason);
     int32_t GetOperationReplyTimeout();
     int32_t TransDeviceIdToUdid(const std::string& networkId, std::string& udid);
+    void HaOperationCallback(const std::string& deviceType, int32_t sceneType, int32_t slotType, std::string reason);
 
 private:
     DistributedExtensionService();

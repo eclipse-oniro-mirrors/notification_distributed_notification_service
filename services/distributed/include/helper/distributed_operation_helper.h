@@ -30,6 +30,7 @@ namespace OHOS {
 namespace Notification {
 
 struct OperationInfo {
+    int32_t deviceTypeId;
     OperationType type;
     std::string eventId;
     AAFwk::Want want;

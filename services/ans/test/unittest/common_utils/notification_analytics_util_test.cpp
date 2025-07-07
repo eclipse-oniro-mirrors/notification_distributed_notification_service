@@ -128,124 +128,6 @@ HWTEST_F(NotificationAnalyticsUtilTest, DeleteReason_100, Function | SmallTest |
 }
 
 /**
- * @tc.name: SyncWatch_100
- * @tc.desc: Test SyncWatch.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, SyncWatch_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    bool isLiveView = false;
-    message.SyncWatch(isLiveView);
-    isLiveView = true;
-    message.SyncWatch(isLiveView);
-
-    ASSERT_EQ(message.syncLiveViewWatch_, 1);
-    ASSERT_EQ(message.syncWatch_, 1);
-}
-
-/**
- * @tc.name: SyncHeadSet_100
- * @tc.desc: Test SyncHeadSet.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, SyncHeadSet_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    bool isLiveView = false;
-    message.SyncHeadSet(isLiveView);
-    isLiveView = true;
-    message.SyncHeadSet(isLiveView);
-
-    ASSERT_EQ(message.syncLiveViewHeadSet_, 1);
-    ASSERT_EQ(message.syncHeadSet_, 1);
-}
-
-/**
- * @tc.name: SyncWatchHeadSet_100
- * @tc.desc: Test SyncWatchHeadSet.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, SyncWatchHeadSet_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    bool isLiveView = false;
-    message.SyncWatchHeadSet(isLiveView);
-    isLiveView = true;
-    message.SyncWatchHeadSet(isLiveView);
-
-    ASSERT_EQ(message.syncLiveViewWatchHeadSet_, 1);
-    ASSERT_EQ(message.syncWatchHeadSet_, 1);
-}
-
-/**
- * @tc.name: KeyNode_100
- * @tc.desc: Test KeyNode.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, KeyNode_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    bool isKeyNode = false;
-    message.KeyNode(isKeyNode);
-    ASSERT_EQ(message.keyNode_, 0);
-
-    isKeyNode = true;
-    message.KeyNode(isKeyNode);
-    ASSERT_EQ(message.keyNode_, 1);
-}
-
-/**
- * @tc.name: DelByWatch_100
- * @tc.desc: Test DelByWatch.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DelByWatch_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    bool isLiveView = false;
-    message.DelByWatch(isLiveView);
-    isLiveView = true;
-    message.DelByWatch(isLiveView);
-
-    ASSERT_EQ(message.liveViewDelByWatch_, 1);
-    ASSERT_EQ(message.delByWatch_, 1);
-}
-
-/**
- * @tc.name: ClickByWatch_100
- * @tc.desc: Test ClickByWatch.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, ClickByWatch_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    message.ClickByWatch();
-
-    ASSERT_EQ(message.clickByWatch_, 1);
-}
-
-/**
- * @tc.name: ReplyByWatch_100
- * @tc.desc: Test ReplyByWatch.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, ReplyByWatch_100, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-
-    message.ReplyByWatch();
-
-    ASSERT_EQ(message.replyByWatch_, 1);
-}
-
-/**
  * @tc.name: ReportDeleteFailedEvent_100
  * @tc.desc: Test ReportDeleteFailedEvent.
  * @tc.type: FUNC
@@ -283,6 +165,106 @@ HWTEST_F(NotificationAnalyticsUtilTest, ReportDeleteFailedEvent_200, Function | 
     NotificationAnalyticsUtil::ReportDeleteFailedEvent(request, message);
 
     ASSERT_NE(message.agentBundleName_, bundle);
+}
+
+/**
+ * @tc.name: Operation_100
+ * @tc.desc: Test Operation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, Operation_100, Function | SmallTest | Level1)
+{
+    HaOperationMessage operationMessage = HaOperationMessage(false);
+    std::vector<std::string> deviceTypes;
+    deviceTypes.push_back("abc");
+    deviceTypes.push_back("pc");
+    deviceTypes.push_back("pad");
+    operationMessage.KeyNode(true).SyncPublish(deviceTypes);
+    operationMessage.ToJson();
+    ASSERT_EQ(operationMessage.notificationData.countTime, 2);
+    operationMessage.ResetData();
+
+    operationMessage = HaOperationMessage(true);
+    deviceTypes.clear();
+    deviceTypes.push_back("abc");
+    deviceTypes.push_back("wearable");
+    deviceTypes.push_back("headset");
+    operationMessage.KeyNode(false).SyncPublish(deviceTypes);
+    operationMessage.ToJson();
+    ASSERT_EQ(operationMessage.liveViewData.countTime, 2);
+    ASSERT_EQ(operationMessage.liveViewData.syncWatchHead, 1);
+}
+
+/**
+ * @tc.name: Operation_200
+ * @tc.desc: Test Operation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, Operation_200, Function | SmallTest | Level1)
+{
+    HaOperationMessage operationMessage = HaOperationMessage(false);
+    operationMessage.SyncDelete("pc", std::string()).SyncClick("pc").SyncReply("pc");
+    operationMessage.SyncDelete("pcb", std::string()).SyncClick("pcb").SyncReply("pcb");
+    operationMessage.ToJson();
+
+    ASSERT_EQ(operationMessage.notificationData.countTime, 3);
+    operationMessage.ResetData();
+
+    operationMessage = HaOperationMessage(true);
+    operationMessage.ResetData();
+    operationMessage.SyncDelete("pc", std::string()).SyncClick("pc").SyncReply("pc");
+    operationMessage.SyncDelete("pcb", std::string()).SyncClick("pcb").SyncReply("pcb");
+    operationMessage.ToJson();
+    ASSERT_EQ(operationMessage.liveViewData.countTime, 3);
+}
+
+/**
+ * @tc.name: Operation_300
+ * @tc.desc: Test Operation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, Operation_300, Function | SmallTest | Level1)
+{
+    HaOperationMessage operationMessage = HaOperationMessage(false);
+    operationMessage.ResetData();
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), false);
+
+    operationMessage.isLiveView_ = true;
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), false);
+
+    operationMessage.isLiveView_ = false;
+    operationMessage.liveViewData.keyNode++;
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), false);
+
+    operationMessage.isLiveView_ = true;
+    operationMessage.liveViewData.countTime = 10000;
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), true);
+
+    operationMessage.liveViewData.countTime = 10;
+    operationMessage.liveViewData.time = 0;
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), true);
+
+    operationMessage.isLiveView_ = false;
+    operationMessage.notificationData.countTime = 10000;
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), true);
+
+    operationMessage.notificationData.countTime = 10;
+    operationMessage.notificationData.time = 0;
+    ASSERT_EQ(operationMessage.DetermineWhetherToSend(), true);
+    operationMessage.ResetData();
+}
+
+/**
+ * @tc.name: Operation_400
+ * @tc.desc: Test Operation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, Operation_400, Function | SmallTest | Level1)
+{
+    HaOperationMessage operationMessage = HaOperationMessage(true);
+    operationMessage.liveViewData.keyNode++;
+    NotificationAnalyticsUtil::ReportOperationsDotEvent(operationMessage);
+    ASSERT_EQ(operationMessage.liveViewData.keyNode, 0);
 }
 
 /**
@@ -365,135 +347,6 @@ HWTEST_F(NotificationAnalyticsUtilTest, SetControlFlags_200, Function | SmallTes
     auto ret = NotificationAnalyticsUtil::SetControlFlags(flags, controlFlags);
 
     ASSERT_EQ(ret, 0);
-}
-
-/**
- * @tc.name: DetermineWhetherToSend_100
- * @tc.desc: Test DetermineWhetherToSend when key node is not 0.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DetermineWhetherToSend_100, Function | SmallTest | Level1)
-{
-    uint32_t slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    HaMetaMessage::keyNode_ = 1;
-
-    auto ret = NotificationAnalyticsUtil::DetermineWhetherToSend(slotType);
-
-    ASSERT_TRUE(ret);
-    HaMetaMessage::keyNode_ = 0;
-}
-
-/**
- * @tc.name: DetermineWhetherToSend_200
- * @tc.desc: Test DetermineWhetherToSend when slot type is LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DetermineWhetherToSend_200, Function | SmallTest | Level1)
-{
-    uint32_t slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    HaMetaMessage::keyNode_ = 0;
-    HaMetaMessage::liveViewTime_ = 0;
-
-    auto ret = NotificationAnalyticsUtil::DetermineWhetherToSend(slotType);
-
-    ASSERT_TRUE(ret);
-    HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
-}
-
-/**
- * @tc.name: DetermineWhetherToSend_300
- * @tc.desc: Test DetermineWhetherToSend when slot type is LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DetermineWhetherToSend_300, Function | SmallTest | Level1)
-{
-    uint32_t slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    HaMetaMessage::keyNode_ = 0;
-    HaMetaMessage::syncLiveViewWatch_ = 1000;
-
-    auto ret = NotificationAnalyticsUtil::DetermineWhetherToSend(slotType);
-
-    ASSERT_TRUE(ret);
-    HaMetaMessage::syncLiveViewWatch_ = 0;
-}
-
-/**
- * @tc.name: DetermineWhetherToSend_400
- * @tc.desc: Test DetermineWhetherToSend when slot type is LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DetermineWhetherToSend_400, Function | SmallTest | Level1)
-{
-    uint32_t slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    HaMetaMessage::keyNode_ = 0;
-
-    auto ret = NotificationAnalyticsUtil::DetermineWhetherToSend(slotType);
-
-    ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: DetermineWhetherToSend_500
- * @tc.desc: Test DetermineWhetherToSend when slot type is not LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DetermineWhetherToSend_500, Function | SmallTest | Level1)
-{
-    uint32_t slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    HaMetaMessage::keyNode_ = 0;
-    HaMetaMessage::time_ = 0;
-    
-    auto ret = NotificationAnalyticsUtil::DetermineWhetherToSend(slotType);
-
-    ASSERT_TRUE(ret);
-    HaMetaMessage::time_ = NotificationAnalyticsUtil::GetCurrentTime();
-}
-
-/**
- * @tc.name: DetermineWhetherToSend_600
- * @tc.desc: Test DetermineWhetherToSend when slot type is not LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, DetermineWhetherToSend_600, Function | SmallTest | Level1)
-{
-    uint32_t slotType = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-    HaMetaMessage::keyNode_ = 0;
-    HaMetaMessage::syncWatch_ = 1000;
-    
-    auto ret = NotificationAnalyticsUtil::DetermineWhetherToSend(slotType);
-
-    ASSERT_TRUE(ret);
-    HaMetaMessage::syncWatch_ = 0;
-}
-
-/**
- * @tc.name: BuildAnsData_200
- * @tc.desc: Test BuildAnsData when slot type is LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, BuildAnsData_200, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-    message.slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
-
-    auto ret = NotificationAnalyticsUtil::BuildAnsData(message);
-
-    ASSERT_TRUE(ret.find("keyNode") != std::string::npos);
-}
-
-/**
- * @tc.name: BuildAnsData_300
- * @tc.desc: Test BuildAnsData when slot type is not LIVE_VIEW.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationAnalyticsUtilTest, BuildAnsData_300, Function | SmallTest | Level1)
-{
-    HaMetaMessage message;
-    message.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
-
-    auto ret = NotificationAnalyticsUtil::BuildAnsData(message);
-
-    ASSERT_FALSE(ret.find("keyNode") != std::string::npos);
 }
 
 /**

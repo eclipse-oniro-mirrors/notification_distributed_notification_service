@@ -80,6 +80,8 @@ void OperationService::TriggerOperation(std::string eventId)
         auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->StartAbility(iter->second.want));
         std::string errorReason = "pull up success";
         if (ret == ERR_OK) {
+            AnalyticsUtil::GetInstance().OperationalReporting(iter->second.deviceTypeId,
+                HaOperationType::COLLABORATE_JUMP, NotificationConstant::SlotType::LIVE_VIEW);
             AnalyticsUtil::GetInstance().SendHaReport(MODIFY_ERROR_EVENT_CODE,
                 NotificationConstant::SlotType::LIVE_VIEW, BRANCH3_ID, errorReason, ANS_CUSTOMIZE_CODE);
         } else {

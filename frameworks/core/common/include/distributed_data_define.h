@@ -44,6 +44,18 @@ enum DeviceStatueChangeType {
     DEVICE_USING_CLOSE = 3,
 };
 
+enum HaOperationType {
+    COLLABORATE_DELETE = 0,
+    COLLABORATE_REPLY = 1,
+    COLLABORATE_JUMP = 2,
+};
+
+struct DistributedHaCallbacks {
+    std::function<void(int32_t, int32_t, std::string)> hiSysEventCallback;
+    std::function<void(int32_t, int32_t, uint32_t, std::string)> haMaintenanceCallback;
+    std::function<void(const std::string&, int32_t, int32_t, std::string)> haOperationCallback;
+};
+
 struct DeviceStatueChangeInfo {
     int32_t changeType;
     std::string deviceId;

@@ -75,9 +75,9 @@ void DistributedPublishService::RemoveNotification(const std::shared_ptr<TlvBox>
         ANS_LOGW("dans remove hashCode empty");
         return;
     }
-#ifdef DISTRIBUTED_FEATURE_MASTER
     std::string deviceId;
     removeBox.GetLocalDeviceId(deviceId);
+#ifdef DISTRIBUTED_FEATURE_MASTER
     std::shared_ptr<NotificationRemoveBox> forwardBox = MakeRemvoeBox(hashCode, slotType);
     if (forwardBox != nullptr) {
         ForWardRemove(forwardBox, deviceId);
@@ -91,8 +91,13 @@ void DistributedPublishService::RemoveNotification(const std::shared_ptr<TlvBox>
     std::string errorReason = "delete message failed";
     if (result == 0) {
         errorReason = "delete message success";
+        int32_t deviceType = DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+        DistributedDeviceInfo device;
+        if (DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+            deviceType = device.deviceType_;
+        }
         AnalyticsUtil::GetInstance().AbnormalReporting(DELETE_ERROR_EVENT_CODE, result, BRANCH4_ID, errorReason);
-        AnalyticsUtil::GetInstance().OperationalReporting(OPERATION_DELETE_BRANCH, slotType);
+        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_DELETE, slotType);
     } else {
         AnalyticsUtil::GetInstance().AbnormalReporting(DELETE_ERROR_EVENT_CODE, result, BRANCH3_ID, errorReason);
     }
@@ -118,10 +123,9 @@ void DistributedPublishService::RemoveNotifications(const std::shared_ptr<TlvBox
             hashCodes.push_back(hashCode);
         }
     }
-
-#ifdef DISTRIBUTED_FEATURE_MASTER
     std::string deviceId;
     removeBox.GetLocalDeviceId(deviceId);
+#ifdef DISTRIBUTED_FEATURE_MASTER
     std::shared_ptr<BatchRemoveNotificationBox> forwardBox = MakeBatchRemvoeBox(hashCodes, slotTypesString);
     if (forwardBox != nullptr) {
         ForWardRemove(forwardBox, deviceId);
@@ -130,7 +134,7 @@ void DistributedPublishService::RemoveNotifications(const std::shared_ptr<TlvBox
 #endif
 
     int result = RemoveDistributedNotifications(hashCodes);
-    BatchRemoveReport(slotTypesString, result);
+    BatchRemoveReport(slotTypesString, deviceId, result);
     ANS_LOGI("dans br re:%{public}d., hs:%{public}s", result, hashCodesString.c_str());
 }
 
@@ -150,8 +154,14 @@ int DistributedPublishService::RemoveDistributedNotifications(const std::vector<
     return res;
 }
 
-void DistributedPublishService::BatchRemoveReport(const std::string &slotTypesString, const int result)
+void DistributedPublishService::BatchRemoveReport(const std::string &slotTypesString, const std::string &deviceId,
+    const int result)
 {
+    int32_t deviceType = DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
+    DistributedDeviceInfo device;
+    if (DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+        deviceType = device.deviceType_;
+    }
     if (result == 0) {
         AnalyticsUtil::GetInstance().AbnormalReporting(DELETE_ERROR_EVENT_CODE, result, BRANCH4_ID,
             "delete message success");
@@ -159,8 +169,8 @@ void DistributedPublishService::BatchRemoveReport(const std::string &slotTypesSt
         std::string slotTypeString;
         while (slotTypesStream >> slotTypeString) {
             if (!slotTypeString.empty()) {
-                AnalyticsUtil::GetInstance().OperationalReporting(OPERATION_DELETE_BRANCH,
-                    atoi(slotTypeString.c_str()));
+                AnalyticsUtil::GetInstance().OperationalReporting(deviceType,
+                    HaOperationType::COLLABORATE_DELETE, atoi(slotTypeString.c_str()));
             }
         }
     } else {
