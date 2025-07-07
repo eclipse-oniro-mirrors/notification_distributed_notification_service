@@ -92,6 +92,7 @@
         "init",
         "eventhandler",
         "c_utils",
+        "runtime_core",
         "i18n",
         "device_manager",
         "kv_store",
@@ -132,7 +133,8 @@
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_notification",
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
           "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification",
-          "//base/notification/distributed_notification_service/frameworks/reminder:reminder_client"
+          "//base/notification/distributed_notification_service/frameworks/reminder:reminder_client",
+          "//base/notification/distributed_notification_service/frameworks/ets:ani_packages"
         ],
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
