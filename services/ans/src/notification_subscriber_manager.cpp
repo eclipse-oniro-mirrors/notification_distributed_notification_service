@@ -987,9 +987,11 @@ ErrCode NotificationSubscriberManager::DistributeOperationTask(const sptr<Notifi
         if (record == nullptr) {
             continue;
         }
+        std::string notificationUdid = "";
+        if (request != nullptr && request->GetExtendInfo() != nullptr) {
+            notificationUdid = request->GetExtendInfo()->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID);
+        }
         if (record->needNotifyResponse && record->subscriber != nullptr) {
-            std::string notificationUdid =
-                request->GetExtendInfo()->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID);
             operationInfo->SetNotificationUdid(notificationUdid);
             result = record->subscriber->OnOperationResponse(operationInfo, funcResult);
             if (result == ERR_OK) {
