@@ -36,7 +36,9 @@ namespace OHOS {
         notificationSortingMap.SetNotificationSorting(sortingList);
         notificationSortingMap.Dump();
         Parcel parcel;
-        return notificationSortingMap.Marshalling(parcel);
+        notificationSortingMap.Marshalling(parcel);
+        notificationSortingMap.Unmarshalling(parcel);
+        return true;
     }
 }
 

@@ -55,6 +55,7 @@ group("fuzztest") {
     "notificationmultilinecontent_fuzzer:NotificationMultiLineContentFuzzTest",
     "notificationmultilinecontentannex_fuzzer:NotificationMultiLineContentAnnexFuzzTest",
     "notificationnormalcontent_fuzzer:NotificationNormalContentFuzzTest",
+    "notificationparcel_fuzzer:NotificationParcelFuzzTest",
     "notificationpicturecontent_fuzzer:NotificationPictureContentFuzzTest",
     "notificationpicturecontentannex_fuzzer:NotificationPictureContentAnnexFuzzTest",
     "notificationrequest_fuzzer:NotificationRequestFuzzTest",
