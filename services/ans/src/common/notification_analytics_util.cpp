@@ -37,6 +37,7 @@
 namespace OHOS {
 namespace Notification {
 constexpr char MESSAGE_DELIMITER = '#';
+constexpr const int32_t SYNC_WATCH_HEADSET = 2;
 constexpr const int32_t PUBLISH_ERROR_EVENT_CODE = 0;
 constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
@@ -79,19 +80,6 @@ static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowC
 static std::map<std::string, BadgeInfo> badgeInfos;
 static std::map<std::string, ReportLiveViewMessage> liveViewMessages;
 
-int32_t HaMetaMessage::syncWatch_ = 0;
-int32_t HaMetaMessage::syncHeadSet_ = 0;
-int32_t HaMetaMessage::syncWatchHeadSet_ = 0;
-int32_t HaMetaMessage::keyNode_ = 0;
-int64_t HaMetaMessage::time_ = NotificationAnalyticsUtil::GetCurrentTime();
-int32_t HaMetaMessage::syncLiveViewWatch_ = 0;
-int32_t HaMetaMessage::syncLiveViewHeadSet_ = 0;
-int32_t HaMetaMessage::syncLiveViewWatchHeadSet_ = 0;
-int64_t HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
-int32_t HaMetaMessage::delByWatch_ = 0;
-int32_t HaMetaMessage::liveViewDelByWatch_ = 0;
-int32_t HaMetaMessage::clickByWatch_ = 0;
-int32_t HaMetaMessage::replyByWatch_ = 0;
 static std::mutex reportCacheMutex_;
 static uint64_t reportTimerId = 0;
 static std::list<ReportCache> reportCacheList;
@@ -127,6 +115,8 @@ static std::shared_ptr<ReportTimerInfo> liveViewTimeInfo = std::make_shared<Repo
 static int32_t LIVEVIEW_REPORT_INTERVAL = 2 * NotificationConstant::HOUR_TO_MS;
 static const int32_t LIVE_VIEW_CREATE = 0;
 static bool g_reportLiveViewFlag = false;
+OperationalData HaOperationMessage::notificationData = OperationalData();
+OperationalData HaOperationMessage::liveViewData = OperationalData();
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -226,71 +216,177 @@ HaMetaMessage& HaMetaMessage::DeleteReason(int32_t deleteReason)
     return *this;
 }
 
-HaMetaMessage& HaMetaMessage::SyncWatch(bool isLiveView)
-{
-    if (isLiveView) {
-        HaMetaMessage::syncLiveViewWatch_++;
-    } else {
-        HaMetaMessage::syncWatch_++;
-    }
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::SyncHeadSet(bool isLiveView)
-{
-    if (isLiveView) {
-        HaMetaMessage::syncLiveViewHeadSet_++;
-    } else {
-        HaMetaMessage::syncHeadSet_++;
-    }
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::SyncWatchHeadSet(bool isLiveView)
-{
-    if (isLiveView) {
-        HaMetaMessage::syncLiveViewWatchHeadSet_++;
-    } else {
-        HaMetaMessage::syncWatchHeadSet_++;
-    }
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::KeyNode(bool isKeyNode)
-{
-    if (isKeyNode) {
-        HaMetaMessage::keyNode_++;
-    }
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::DelByWatch(bool isLiveView)
-{
-    if (isLiveView) {
-        HaMetaMessage::liveViewDelByWatch_++;
-    } else {
-        HaMetaMessage::delByWatch_++;
-    }
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::ClickByWatch()
-{
-    HaMetaMessage::clickByWatch_++;
-    return *this;
-}
-
-HaMetaMessage& HaMetaMessage::ReplyByWatch()
-{
-    HaMetaMessage::replyByWatch_++;
-    return *this;
-}
-
 std::string HaMetaMessage::Build() const
 {
     return std::to_string(sceneId_) + MESSAGE_DELIMITER +
         std::to_string(branchId_) + MESSAGE_DELIMITER + std::to_string(errorCode_) +
         MESSAGE_DELIMITER + message_ + MESSAGE_DELIMITER;
+}
+
+void OperationalMeta::ToJson(nlohmann::json& jsonObject)
+{
+    jsonObject["s"] = syncTime;
+    jsonObject["d"] = delTime;
+    jsonObject["c"] = clickTime;
+    jsonObject["r"] = replyTime;
+}
+
+OperationalData::OperationalData()
+{
+    for (std::string deviceType : NotificationConstant::DEVICESTYPES) {
+        dataMap.insert({deviceType, OperationalMeta()});
+    }
+    time = NotificationAnalyticsUtil::GetCurrentTime();
+}
+
+void OperationalData::ToJson(nlohmann::json& jsonObject)
+{
+    for (auto& deviceData : dataMap) {
+        nlohmann::json dataJson;
+        deviceData.second.ToJson(dataJson);
+        jsonObject[deviceData.first] = dataJson;
+    }
+
+    jsonObject["key"] = keyNode;
+    jsonObject["both"] = syncWatchHead;
+}
+
+HaOperationMessage& HaOperationMessage::KeyNode(bool keyNodeFlag)
+{
+    if (keyNodeFlag) {
+        liveViewData.keyNode++;
+    }
+    return *this;
+}
+
+std::string HaOperationMessage::ToJson()
+{
+    nlohmann::json jsonMessage;
+    nlohmann::json jsonObject;
+    if (isLiveView_) {
+        liveViewData.ToJson(jsonMessage);
+        jsonObject["liveview"] = jsonMessage;
+    } else {
+        notificationData.ToJson(jsonMessage);
+        jsonObject["notification"] =  jsonMessage;
+    }
+    return jsonObject.dump();
+}
+
+void SetPublishTime(const std::vector<std::string>& deviceTypes, OperationalData& data)
+{
+    int32_t isWatchHeadSet = 0;
+    for (auto& device : deviceTypes) {
+        if (data.dataMap.find(device) != data.dataMap.end()) {
+            data.dataMap[device].syncTime++;
+            if (device == NotificationConstant::HEADSET_DEVICE_TYPE ||
+                device == NotificationConstant::WEARABLE_DEVICE_TYPE ||
+                device == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
+                isWatchHeadSet++;
+            }
+            data.countTime++;
+        }
+    }
+    if (isWatchHeadSet >= SYNC_WATCH_HEADSET) {
+        data.syncWatchHead++;
+    }
+}
+
+HaOperationMessage& HaOperationMessage::SyncPublish(std::vector<std::string>& deviceTypes)
+{
+    if (isLiveView_) {
+        SetPublishTime(deviceTypes, liveViewData);
+    } else {
+        SetPublishTime(deviceTypes, notificationData);
+    }
+    return *this;
+}
+
+HaOperationMessage& HaOperationMessage::SyncDelete(std::string deviceType, const std::string& reason)
+{
+    if (isLiveView_) {
+        if (liveViewData.dataMap.find(deviceType) != liveViewData.dataMap.end()) {
+            liveViewData.dataMap[deviceType].delTime++;
+            liveViewData.countTime++;
+        }
+    } else {
+        if (notificationData.dataMap.find(deviceType) != notificationData.dataMap.end()) {
+            notificationData.dataMap[deviceType].delTime++;
+            notificationData.countTime++;
+        }
+    }
+    return *this;
+}
+
+HaOperationMessage& HaOperationMessage::SyncClick(std::string deviceType)
+{
+    if (isLiveView_) {
+        if (liveViewData.dataMap.find(deviceType) != liveViewData.dataMap.end()) {
+            liveViewData.dataMap[deviceType].clickTime++;
+            liveViewData.countTime++;
+        }
+    } else {
+        if (notificationData.dataMap.find(deviceType) != notificationData.dataMap.end()) {
+            notificationData.dataMap[deviceType].clickTime++;
+            notificationData.countTime++;
+        }
+    }
+    return *this;
+}
+
+HaOperationMessage& HaOperationMessage::SyncReply(std::string deviceType)
+{
+    if (isLiveView_) {
+        if (liveViewData.dataMap.find(deviceType) != liveViewData.dataMap.end()) {
+            liveViewData.dataMap[deviceType].replyTime++;
+            liveViewData.countTime++;
+        }
+    } else {
+        if (notificationData.dataMap.find(deviceType) != notificationData.dataMap.end()) {
+            notificationData.dataMap[deviceType].replyTime++;
+            notificationData.countTime++;
+        }
+    }
+    return *this;
+}
+
+bool HaOperationMessage::DetermineWhetherToSend()
+{
+    if (isLiveView_ && liveViewData.keyNode != 0) {
+        return true;
+    }
+    if (isLiveView_) {
+        if (liveViewData.countTime >= NOTIFICATION_MAX_DATA ||
+            (NotificationAnalyticsUtil::GetCurrentTime() - liveViewData.time) >= MAX_TIME) {
+            return true;
+        }
+    } else {
+        if (notificationData.countTime >= NOTIFICATION_MAX_DATA ||
+            (NotificationAnalyticsUtil::GetCurrentTime() - notificationData.time) >= MAX_TIME) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ResetOperationalData(OperationalData& data)
+{
+    data.countTime = 0;
+    data.keyNode = 0;
+    data.syncWatchHead = 0;
+    data.time = NotificationAnalyticsUtil::GetCurrentTime();
+    for (auto& item : data.dataMap) {
+        item.second = { 0 };
+    }
+}
+
+void HaOperationMessage::ResetData()
+{
+    if (isLiveView_) {
+        ResetOperationalData(liveViewData);
+    } else {
+        ResetOperationalData(notificationData);
+    }
 }
 
 void NotificationAnalyticsUtil::MakeRequestBundle(const sptr<NotificationRequest>& request)
@@ -1317,20 +1413,24 @@ int64_t NotificationAnalyticsUtil::GetCurrentTime()
     return duration.count();
 }
 
-void NotificationAnalyticsUtil::ReportOperationsDotEvent(const HaMetaMessage& message)
+void NotificationAnalyticsUtil::ReportOperationsDotEvent(HaOperationMessage& operationMessage)
 {
+    if (!operationMessage.DetermineWhetherToSend()) {
+        return;
+    }
+
     if (!ReportFlowControl(ANS_CUSTOMIZE_CODE)) {
-        ANS_LOGE("Publish event failed, reason:%{public}s", message.Build().c_str());
+        ANS_LOGE("Publish event failed, reason:%{public}s", operationMessage.ToJson().c_str());
         return;
     }
     EventFwk::Want want;
+    HaMetaMessage message;
     std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message);
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
-    if (!NotificationAnalyticsUtil::DetermineWhetherToSend(message.slotType_)) {
-        return;
-    }
-    std::string ansData = NotificationAnalyticsUtil::BuildAnsData(message);
+    std::string ansData = operationMessage.ToJson();
     want.SetParam("ansData", ansData);
+    ANS_LOGI("Publish operation event :%{public}s", operationMessage.ToJson().c_str());
+    operationMessage.ResetData();
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));
 }
 
@@ -1347,69 +1447,6 @@ void NotificationAnalyticsUtil::ReportPublishFailedEvent(const HaMetaMessage& me
     want.SetParam("typeCode", message.typeCode_);
 
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, PUBLISH_ERROR_EVENT_CODE));
-}
-
-bool NotificationAnalyticsUtil::DetermineWhetherToSend(uint32_t slotType)
-{
-    if (HaMetaMessage::keyNode_ != 0) {
-        return true;
-    }
-    if (slotType == NotificationConstant::SlotType::LIVE_VIEW) {
-        if ((NotificationAnalyticsUtil::GetCurrentTime() - HaMetaMessage::liveViewTime_) >= MAX_TIME) {
-            return true;
-        } else if (HaMetaMessage::syncLiveViewWatch_ + HaMetaMessage::syncLiveViewHeadSet_ +
-                       HaMetaMessage::syncLiveViewWatchHeadSet_ + HaMetaMessage::liveViewDelByWatch_ +
-                       HaMetaMessage::clickByWatch_ >=
-                   NOTIFICATION_MAX_DATA) {
-            return true;
-        }
-    } else {
-        if ((NotificationAnalyticsUtil::GetCurrentTime() - HaMetaMessage::time_) >= MAX_TIME) {
-            return true;
-        } else if (HaMetaMessage::syncWatch_ + HaMetaMessage::syncHeadSet_ + HaMetaMessage::syncWatchHeadSet_ +
-                       HaMetaMessage::delByWatch_ + HaMetaMessage::replyByWatch_ >=
-                   NOTIFICATION_MAX_DATA) {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::string NotificationAnalyticsUtil::BuildAnsData(const HaMetaMessage& message)
-{
-    nlohmann::json ansData;
-    ansData["subCode"] = std::to_string(SUB_CODE);
-    nlohmann::json data;
-    data["slotType"] = std::to_string(message.slotType_);
-    if (message.slotType_ == NotificationConstant::SlotType::LIVE_VIEW) {
-        data["syncWatch"] = std::to_string(HaMetaMessage::syncLiveViewWatch_);
-        data["syncHeadSet"] = std::to_string(HaMetaMessage::syncLiveViewHeadSet_);
-        data["syncWatchHeadSet"] = std::to_string(HaMetaMessage::syncLiveViewWatchHeadSet_);
-        data["keyNode"] = std::to_string(HaMetaMessage::keyNode_);
-        data["delByWatch"] = std::to_string(HaMetaMessage::liveViewDelByWatch_);
-        data["clickByWatch"] = std::to_string(HaMetaMessage::clickByWatch_);
-        HaMetaMessage::syncLiveViewWatch_ = 0;
-        HaMetaMessage::syncLiveViewHeadSet_ = 0;
-        HaMetaMessage::syncLiveViewWatchHeadSet_ = 0;
-        HaMetaMessage::keyNode_ = 0;
-        HaMetaMessage::liveViewDelByWatch_ = 0;
-        HaMetaMessage::clickByWatch_ = 0;
-        HaMetaMessage::liveViewTime_ = NotificationAnalyticsUtil::GetCurrentTime();
-    } else {
-        data["syncWatch"] = std::to_string(HaMetaMessage::syncWatch_);
-        data["syncHeadSet"] = std::to_string(HaMetaMessage::syncHeadSet_);
-        data["syncWatchHeadSet"] = std::to_string(HaMetaMessage::syncWatchHeadSet_);
-        data["delByWatch"] = std::to_string(HaMetaMessage::delByWatch_);
-        data["replyByWatch"] = std::to_string(HaMetaMessage::replyByWatch_);
-        HaMetaMessage::syncWatch_ = 0;
-        HaMetaMessage::syncHeadSet_ = 0;
-        HaMetaMessage::syncWatchHeadSet_ = 0;
-        HaMetaMessage::delByWatch_ = 0;
-        HaMetaMessage::replyByWatch_ = 0;
-        HaMetaMessage::time_ = NotificationAnalyticsUtil::GetCurrentTime();
-    }
-    ansData["data"] = data.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-    return ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
 }
 
 void NotificationAnalyticsUtil::ReportSkipFailedEvent(const HaMetaMessage& message)

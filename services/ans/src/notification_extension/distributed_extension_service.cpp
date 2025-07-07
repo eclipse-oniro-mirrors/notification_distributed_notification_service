@@ -29,7 +29,7 @@ using namespace DistributedHardware;
 
 using DeviceCallback = std::function<bool(std::string, int32_t, bool)>;
 typedef int32_t (*INIT_LOCAL_DEVICE)(const std::string &deviceId, uint16_t deviceType,
-    DistributedDeviceConfig config);
+    DistributedDeviceConfig config, DistributedHaCallbacks callbacks);
 typedef void (*RELEASE_LOCAL_DEVICE)();
 typedef void (*ADD_DEVICE)(const std::string &deviceId, const std::string &udId,
     uint16_t deviceType, const std::string &networkId);
@@ -199,25 +199,21 @@ int32_t DistributedExtensionService::InitDans()
         return -1;
     }
 
+    DistributedHaCallbacks distributedCallbacks = {
+        std::bind(&DistributedExtensionService::SendReportCallback, this, std::placeholders::_1,
+            std::placeholders::_2, std::placeholders::_3),
+        std::bind(&DistributedExtensionService::HADotCallback, this, std::placeholders::_1,
+            std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
+        std::bind(&DistributedExtensionService::HaOperationCallback, this, std::placeholders::_1,
+            std::placeholders::_2, std::placeholders::_3, std::placeholders::_4),
+    };
+
     ANS_LOGI("Dans get local device %{public}s, %{public}d, %{public}d, %{public}d.",
         StringAnonymous(deviceInfo.deviceId).c_str(), deviceInfo.deviceTypeId,
         deviceConfig_.maxTitleLength, deviceConfig_.maxContentLength);
-    if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceConfig_) != 0) {
+    if (handler(deviceInfo.deviceId, deviceInfo.deviceTypeId, deviceConfig_, distributedCallbacks) != 0) {
         dansRunning_.store(false);
         return -1;
-    }
-
-    INIT_HA_CALLBACK haHandler = (INIT_HA_CALLBACK)dansHandler_->GetProxyFunc("InitHACallBack");
-    if (haHandler != nullptr) {
-        haHandler(std::bind(&DistributedExtensionService::HADotCallback, this, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-    }
-
-    INIT_SENDREPORT_CALLBACK sendHandler =
-        (INIT_SENDREPORT_CALLBACK)dansHandler_->GetProxyFunc("InitSendReportCallBack");
-    if (sendHandler != nullptr) {
-        sendHandler(std::bind(&DistributedExtensionService::SendReportCallback, this, std::placeholders::_1,
-        std::placeholders::_2, std::placeholders::_3));
     }
 
     dansRunning_.store(true);
@@ -291,6 +287,31 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
     distributedQueue_->submit(onlineTask);
 }
 
+void DistributedExtensionService::HaOperationCallback(const std::string& deviceType, int32_t sceneType,
+    int32_t slotType, std::string reason)
+{
+    bool isLiveView = (slotType == NotificationConstant::SlotType::LIVE_VIEW);
+    ANS_LOGI("HaOperationCallback %{public}s %{public}d %{public}d.", deviceType.c_str(), sceneType, slotType);
+    HaOperationMessage operation = HaOperationMessage(isLiveView);
+    switch (sceneType) {
+        case HaOperationType::COLLABORATE_DELETE: {
+            operation.SyncDelete(deviceType, reason);
+            break;
+        }
+        case HaOperationType::COLLABORATE_REPLY: {
+            operation.SyncReply(deviceType);
+            break;
+        }
+        case HaOperationType::COLLABORATE_JUMP: {
+            operation.SyncClick(deviceType);
+            break;
+        }
+        default:
+            return;
+    }
+    NotificationAnalyticsUtil::ReportOperationsDotEvent(operation);
+}
+
 void DistributedExtensionService::HADotCallback(int32_t code, int32_t ErrCode, uint32_t branchId, std::string reason)
 {
     ANS_LOGI("Dans ha callback %{public}d, %{public}d, %{public}s.", code, ErrCode, reason.c_str());
@@ -311,27 +332,6 @@ void DistributedExtensionService::HADotCallback(int32_t code, int32_t ErrCode, u
                                     .ErrorCode(ErrCode)
                                     .Message(reason);
         NotificationAnalyticsUtil::ReportDeleteFailedEvent(message);
-    } else if (code == ANS_CUSTOMIZE_CODE) {
-        if (branchId == BRANCH_3) {
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
-                                        .ClickByWatch()
-                                        .SlotType(ErrCode);
-            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
-        } else if (branchId == BRANCH_4) {
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
-                                        .ReplyByWatch()
-                                        .SlotType(ErrCode);
-            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
-        } else {
-            bool isLiveView = false;
-            if (ErrCode == NotificationConstant::SlotType::LIVE_VIEW) {
-                isLiveView = true;
-            }
-            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_1, branchId)
-                                        .DelByWatch(isLiveView)
-                                        .SlotType(ErrCode);
-            NotificationAnalyticsUtil::ReportOperationsDotEvent(message);
-        }
     } else if (code == MODIFY_ERROR_EVENT_CODE) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_20, branchId)
                                     .ErrorCode(ErrCode)

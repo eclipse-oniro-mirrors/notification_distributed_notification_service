@@ -83,6 +83,47 @@ enum EventBranchId {
     BRANCH_19 = 19,
     BRANCH_20 = 20,
 };
+
+class OperationalMeta {
+public:
+    void ToJson(nlohmann::json& jsonObject);
+public:
+    int32_t syncTime;
+    int32_t delTime;
+    int32_t clickTime;
+    int32_t replyTime;
+};
+
+class OperationalData {
+public:
+    OperationalData();
+    void ToJson(nlohmann::json& jsonObject);
+public:
+    int32_t syncWatchHead = 0;
+    int32_t keyNode = 0;
+    int64_t time;
+    int64_t countTime = 0;
+    std::map<std::string, OperationalMeta> dataMap;
+};
+
+class HaOperationMessage {
+public:
+    HaOperationMessage() {}
+    HaOperationMessage(bool isLiveView) : isLiveView_(isLiveView) {}
+    void ResetData();
+    std::string ToJson();
+    bool DetermineWhetherToSend();
+    HaOperationMessage& KeyNode(bool keyNodeFlag);
+    HaOperationMessage& SyncPublish(std::vector<std::string>& deviceTypes);
+    HaOperationMessage& SyncDelete(std::string deviceType, const std::string& reason);
+    HaOperationMessage& SyncClick(std::string deviceType);
+    HaOperationMessage& SyncReply(std::string deviceType);
+public:
+    bool isLiveView_ = false;
+    static OperationalData notificationData;
+    static OperationalData liveViewData;
+};
+
 class HaMetaMessage {
 public:
     HaMetaMessage() = default;
@@ -101,14 +142,7 @@ public:
     HaMetaMessage& TypeCode(int32_t typeCode);
     HaMetaMessage& NotificationId(int32_t notificationId);
     HaMetaMessage& SlotType(int32_t slotType);
-    HaMetaMessage& SyncWatch(bool isLiveView);
-    HaMetaMessage& SyncHeadSet(bool isLiveView);
-    HaMetaMessage& SyncWatchHeadSet(bool isLiveView);
-    HaMetaMessage& KeyNode(bool isKeyNode);
-    HaMetaMessage& DelByWatch(bool isLiveView);
     HaMetaMessage& DeleteReason(int32_t deleteReason);
-    HaMetaMessage& ClickByWatch();
-    HaMetaMessage& ReplyByWatch();
     std::string GetMessage() const;
     HaMetaMessage& Checkfailed(bool checkfailed);
     bool NeedReport() const;
@@ -127,19 +161,6 @@ public:
     std::string path_;
     bool checkfailed_ = true;
     int32_t deleteReason_ = -1;
-    static int32_t syncWatch_;
-    static int32_t syncHeadSet_;
-    static int32_t syncWatchHeadSet_;
-    static int32_t delByWatch_;
-    static int32_t clickByWatch_;
-    static int32_t replyByWatch_;
-    static int32_t keyNode_;
-    static int64_t time_;
-    static int32_t syncLiveViewWatch_;
-    static int32_t syncLiveViewHeadSet_;
-    static int32_t syncLiveViewWatchHeadSet_;
-    static int64_t liveViewTime_;
-    static int32_t liveViewDelByWatch_;
 };
 
 struct FlowControllerOption {
@@ -194,7 +215,7 @@ public:
 
     static int64_t GetCurrentTime();
 
-    static void ReportOperationsDotEvent(const HaMetaMessage& message);
+    static void ReportOperationsDotEvent(HaOperationMessage& message);
 
     static void ReportPublishFailedEvent(const HaMetaMessage& message);
 
@@ -253,8 +274,6 @@ private:
     static void ReportCommonEvent(const ReportCache& reportCache);
 
     static bool DetermineWhetherToSend(uint32_t slotType);
-
-    static std::string BuildAnsData(const HaMetaMessage& message);
 
     static void AddToBadgeInfos(std::string bundle, BadgeInfo& badgeInfo);
 

@@ -41,18 +41,20 @@ public:
     static AnalyticsUtil& GetInstance();
     void InitHACallBack(std::function<void(int32_t, int32_t, uint32_t, std::string)> callback);
     void InitSendReportCallBack(std::function<void(int32_t, int32_t, std::string)> callback);
+    void InitOperationCallback(std::function<void(const std::string&, int32_t, int32_t, std::string)> callback);
     void SendHaReport(int32_t eventCode, int32_t errorCode, uint32_t branchId,
         const std::string& errorReason, int32_t code = -1);
     void SendEventReport(int32_t messageType, int32_t errCode, const std::string& errorReason);
     void AbnormalReporting(int32_t eventCode, int result, uint32_t branchId,
         const std::string &errorReason);
-    void OperationalReporting(int branchId, int32_t slotType);
-
+    void OperationalReporting(int32_t deviceType, int32_t sceneType, int32_t slotType,
+        const std::string& reason = std::string());
 private:
     AnalyticsUtil() = default;
     ~AnalyticsUtil() = default;
     std::function<void(int32_t, int32_t, uint32_t, std::string)> haCallback_ = nullptr;
     std::function<void(int32_t, int32_t, std::string)> sendReportCallback_ = nullptr;
+    std::function<void(const std::string&, int32_t, int32_t, std::string)> operationCallback_ = nullptr;
 };
 } // namespace Notification
 } // namespace OHOS

@@ -33,10 +33,11 @@ public:
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void ReplyOperationResponse(const std::string& hashCode, const NotificationResponseBox& responseBox,
         OperationType operationType, uint32_t result);
-    int32_t TriggerReplyApplication(const std::string& hashCode, const NotificationResponseBox& responseBox);
-    void TriggerJumpApplication(const std::string& hashCode);
-    void TriggerByOperationType(
-        const std::string& hashCode, const int32_t operationType, const NotificationResponseBox& responseBox);
+    int32_t TriggerReplyApplication(const std::string& hashCode, const int32_t deviceType,
+        const NotificationResponseBox& responseBox);
+    void TriggerJumpApplication(const std::string& hashCode, const int32_t deviceType);
+    void TriggerByOperationType(const std::string& hashCode, const int32_t deviceType,
+        const int32_t operationType, const NotificationResponseBox& responseBox);
 #else
     int32_t OnOperationResponse(const std::shared_ptr<NotificationOperationInfo>& operationInfo,
         const DistributedDeviceInfo& device);

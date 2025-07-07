@@ -22,6 +22,8 @@
 #include "notification_constant.h"
 #include "notification_helper.h"
 #include "time_service_client.h"
+#include "analytics_util.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -49,8 +51,8 @@ UnlockListenerOperService::UnlockListenerOperService()
     ANS_LOGI("Operation service init successfully.");
 }
 
-void UnlockListenerOperService::AddDelayTask(
-    const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex)
+void UnlockListenerOperService::AddDelayTask(const std::string& hashCode, const int32_t jumpType,
+    const int32_t deviceType, const int32_t btnIndex)
 {
     int32_t timeout = OPERATION_TIMEOUT;
     int64_t expiredTime = GetCurrentTime() + timeout;
@@ -68,7 +70,8 @@ void UnlockListenerOperService::AddDelayTask(
         ANS_LOGW("Operation delayTask has same key %{public}s.", hashCode.c_str());
         delayTaskMap_.erase(iterDelayTask);
     }
-    delayTaskMap_.insert_or_assign(hashCode, std::make_pair(jumpType, btnIndex));
+    NotifictionJumpInfo jumpInfo = NotifictionJumpInfo(jumpType, btnIndex, deviceType);
+    delayTaskMap_.insert_or_assign(hashCode, jumpInfo);
 
     auto iterTimer = timerMap_.find(hashCode);
     if (iterTimer != timerMap_.end()) {
@@ -121,7 +124,8 @@ void UnlockListenerOperService::ReplyOperationResponse()
     for (std::string hashCode : hashCodeOrder_) {
         auto iterDelayTask = delayTaskMap_.find(hashCode);
         if (iterDelayTask != delayTaskMap_.end()) {
-            TriggerByJumpType(hashCode, iterDelayTask->second.first, iterDelayTask->second.second);
+            TriggerByJumpType(hashCode, iterDelayTask->second.jumpType, iterDelayTask->second.deviceTypeId,
+                iterDelayTask->second.btnIndex);
             delayTaskMap_.erase(iterDelayTask);
         }
 
@@ -151,8 +155,8 @@ void UnlockListenerOperService::HandleOperationTimeOut(const std::string& hashCo
     });
 }
 
-void UnlockListenerOperService::TriggerByJumpType(
-    const std::string& hashCode, const int32_t jumpType, const int32_t btnIndex)
+void UnlockListenerOperService::TriggerByJumpType(const std::string& hashCode, const int32_t jumpType,
+    const int32_t deviceType, const int32_t btnIndex)
 {
     sptr<NotificationRequest> notificationRequest = nullptr;
     auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
@@ -160,6 +164,7 @@ void UnlockListenerOperService::TriggerByJumpType(
         ANS_LOGE("Check notificationRequest is null.");
         return;
     }
+    NotificationConstant::SlotType slotType = notificationRequest->GetSlotType();
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = nullptr;
     if (jumpType >= NotificationConstant::DISTRIBUTE_JUMP_BY_LIVE_VIEW) {
         if (!notificationRequest->IsCommonLiveView()) {
@@ -168,20 +173,21 @@ void UnlockListenerOperService::TriggerByJumpType(
         }
         ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedLiveViewOperation(
             notificationRequest, jumpType, btnIndex);
+        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP, slotType);
         ANS_LOGI("DistributedLiveViewOperation res: %{public}d.", static_cast<int32_t>(res));
         return;
     }
     bool triggerWantInner;
-    ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedAncoNotificationClick(
-        notificationRequest, triggerWantInner);
-    if (res != ERR_OK) {
+    if (DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedAncoNotificationClick(
+        notificationRequest, triggerWantInner) != ERR_OK) {
         return;
     }
-    if (triggerWantInner && res == ERR_OK) {
+    if (triggerWantInner) {
         std::vector<std::string> hashcodes;
         hashcodes.push_back(hashCode);
         NotificationHelper::RemoveNotifications(
             hashcodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
+        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP, slotType);
         return;
     }
     if (jumpType == NotificationConstant::DISTRIBUTE_JUMP_BY_NTF) {
@@ -195,6 +201,7 @@ void UnlockListenerOperService::TriggerByJumpType(
         return;
     }
     if (LaunchWantAgent(wantAgentPtr) == ERR_OK) {
+        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP, slotType);
         std::vector<std::string> hashcodes;
         hashcodes.push_back(hashCode);
         NotificationHelper::RemoveNotifications(

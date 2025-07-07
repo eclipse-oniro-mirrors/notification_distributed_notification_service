@@ -34,6 +34,12 @@ void AnalyticsUtil::InitSendReportCallBack(std::function<void(int32_t, int32_t, 
     sendReportCallback_ = callback;
 }
 
+void AnalyticsUtil::InitOperationCallback(
+    std::function<void(const std::string&, int32_t, int32_t, std::string)>callback)
+{
+    operationCallback_ = callback;
+}
+
 void AnalyticsUtil::SendHaReport(int32_t eventCode, int32_t errorCode, uint32_t branchId,
     const std::string& errorReason, int32_t code)
 {
@@ -55,13 +61,14 @@ void AnalyticsUtil::SendEventReport(int32_t messageType, int32_t errCode, const 
     sendReportCallback_(messageType, errCode, errorReason);
 }
 
-void AnalyticsUtil::OperationalReporting(int branchId, int32_t slotType)
+void AnalyticsUtil::OperationalReporting(int32_t deviceType, int32_t sceneType, int32_t slotType,
+    const std::string& reason)
 {
-    if (haCallback_ == nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
+    if (operationCallback_ == nullptr || !DistributedDeviceService::GetInstance().IsReportDataByHa()) {
         return;
     }
-    std::string reason;
-    haCallback_(ANS_CUSTOMIZE_CODE, slotType, branchId, reason);
+    std::string deviceString = DistributedDeviceService::DeviceTypeToTypeString(deviceType);
+    operationCallback_(deviceString, sceneType, slotType, reason);
 }
 
 void AnalyticsUtil::AbnormalReporting(int32_t eventCode, int result, uint32_t branchId,

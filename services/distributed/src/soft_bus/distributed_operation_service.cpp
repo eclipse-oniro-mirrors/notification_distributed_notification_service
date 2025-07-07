@@ -62,17 +62,24 @@ void DistributedOperationService::HandleNotificationOperation(const std::shared_
     if (matchType != MatchType::MATCH_SYN) {
         return;
     }
+    std::string deviceId;
+    DistributedDeviceInfo device;
+    if (responseBox.GetLocalDeviceId(deviceId)) {
+        if (DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
+            peerDeviceType = device.deviceType_;
+        }
+    }
     if (static_cast<OperationType>(operationType) == DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
         int32_t btnIndex;
         responseBox.GetOperationBtnIndex(btnIndex);
         if (!ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
-            UnlockListenerOperService::GetInstance().TriggerByJumpType(hashCode, jumpType, btnIndex);
+            UnlockListenerOperService::GetInstance().TriggerByJumpType(hashCode, jumpType, peerDeviceType, btnIndex);
             return;
         }
-        UnlockListenerOperService::GetInstance().AddDelayTask(hashCode, jumpType, btnIndex);
+        UnlockListenerOperService::GetInstance().AddDelayTask(hashCode, jumpType, peerDeviceType, btnIndex);
         return;
     }
-    TriggerByOperationType(hashCode, operationType, responseBox);
+    TriggerByOperationType(hashCode, peerDeviceType, operationType, responseBox);
 #else
     if (matchType == MatchType::MATCH_ACK) {
         ResponseOperationResult(hashCode, responseBox);
@@ -215,7 +222,7 @@ void DistributedOperationService::ReplyOperationResponse(const std::string& hash
 }
 
 int32_t DistributedOperationService::TriggerReplyApplication(const std::string& hashCode,
-    const NotificationResponseBox& responseBox)
+    const int32_t deviceType, const NotificationResponseBox& responseBox)
 {
     std::string actionName;
     std::string userInput;
@@ -245,7 +252,7 @@ int32_t DistributedOperationService::TriggerReplyApplication(const std::string& 
     ANS_LOGI("StartAbility result:%{public}d", ret);
     if (ret == ERR_OK) {
         TriggerReplyWantAgent(request, actionName, ERR_OK, "");
-        AnalyticsUtil::GetInstance().OperationalReporting(BRANCH4_ID,
+        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_REPLY,
             NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     } else {
         TriggerReplyWantAgent(request, actionName, ret, "ability reply failed");
@@ -256,7 +263,7 @@ int32_t DistributedOperationService::TriggerReplyApplication(const std::string& 
     return ERR_OK;
 }
 
-void DistributedOperationService::TriggerJumpApplication(const std::string& hashCode)
+void DistributedOperationService::TriggerJumpApplication(const std::string& hashCode, const int32_t deviceType)
 {
     auto wantPtr = GetNotificationWantPtr(hashCode);
     if (wantPtr == nullptr) {
@@ -274,6 +281,7 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
 
     if (ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
         OperationInfo info;
+        info.deviceTypeId = deviceType;
         info.type = OperationType::DISTRIBUTE_OPERATION_JUMP;
         info.eventId = std::to_string(GetCurrentTime());
         sptr<UnlockScreenCallback> listener = new (std::nothrow) UnlockScreenCallback(info.eventId);
@@ -290,7 +298,8 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
         auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
         ANS_LOGI("StartAbility result:%{public}d", ret);
         if (ret == ERR_OK) {
-            AnalyticsUtil::GetInstance().OperationalReporting(BRANCH3_ID, NotificationConstant::SlotType::LIVE_VIEW);
+            AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP,
+                NotificationConstant::SlotType::LIVE_VIEW);
         } else {
              AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, 0, ret, "pull up failed");
         }
@@ -298,13 +307,13 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
     }
 }
 
-void DistributedOperationService::TriggerByOperationType(
-    const std::string& hashCode, const int32_t operationType, const NotificationResponseBox& responseBox)
+void DistributedOperationService::TriggerByOperationType(const std::string& hashCode, const int32_t deviceType,
+    const int32_t operationType, const NotificationResponseBox& responseBox)
 {
     if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_JUMP) {
-        TriggerJumpApplication(hashCode);
+        TriggerJumpApplication(hashCode, deviceType);
     } else if (static_cast<OperationType>(operationType) == OperationType::DISTRIBUTE_OPERATION_REPLY) {
-        ErrCode result = TriggerReplyApplication(hashCode, responseBox);
+        ErrCode result = TriggerReplyApplication(hashCode, deviceType, responseBox);
         ReplyOperationResponse(hashCode, responseBox, OperationType::DISTRIBUTE_OPERATION_REPLY, result);
     }
 }
