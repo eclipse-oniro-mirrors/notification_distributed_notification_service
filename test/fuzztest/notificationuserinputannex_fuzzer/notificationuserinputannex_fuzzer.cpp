@@ -33,6 +33,9 @@ namespace OHOS {
         Notification::NotificationUserInput userInput(stringData);
         std::map<std::string, std::shared_ptr<Uri>> results;
         notificationUserInput.AddMimeInputToWant(userInput, want, results);
+        nlohmann::json jsonObj;
+        notificationUserInput.ToJson(jsonObj);
+        notificationUserInput.FromJson(jsonObj);
         std::string inputKey = fdp->ConsumeRandomLengthString();
         std::string tag = fdp->ConsumeRandomLengthString();
         std::vector<std::string> options;

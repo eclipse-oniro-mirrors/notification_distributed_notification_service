@@ -37,6 +37,10 @@ namespace OHOS {
         notificationMediaContent.GetShownActions();
         // test Dump function
         notificationMediaContent.Dump();
+        // test Json function
+        nlohmann::json jsonObj;
+        notificationMediaContent.ToJson(jsonObj);
+        notificationMediaContent.FromJson(jsonObj);
         // test Unmarshalling function
         Parcel parcel;
         notificationMediaContent.Unmarshalling(parcel);
