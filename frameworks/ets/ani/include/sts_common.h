@@ -46,7 +46,7 @@ ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64
 ani_status GetPropertyString(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, std::string &outStr);
 ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
-    ani_boolean isUndefined, bool outvalue);
+    ani_boolean &isUndefined, bool &outvalue);
 ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_double &outvalue);
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,

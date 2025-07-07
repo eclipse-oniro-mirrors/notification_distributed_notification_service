@@ -138,7 +138,7 @@ ani_status GetPropertyString(ani_env *env, ani_object obj, const char *name,
 }
 
 ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
-    ani_boolean isUndefined, bool outvalue)
+    ani_boolean &isUndefined, bool &outvalue)
 {
     ANS_LOGD("GetPropertyBool start");
     if (env == nullptr || obj == nullptr || name == nullptr) {
