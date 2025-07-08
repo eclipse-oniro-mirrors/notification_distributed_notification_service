@@ -391,11 +391,9 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     }
     ANS_LOGI("IsNeedSilent: policy: %{public}s, repeat: %{public}s, callerType: %{public}d",
         policy.c_str(), repeat_call.c_str(), callerType);
-    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE &&
-        callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
-        if (datashareHelper->isRepeatCall(phoneNumber)) {
-            return 1;
-        }
+    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE && callerType == 0 &&
+        atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE && datashareHelper->isRepeatCall(phoneNumber)) {
+        return 1;
     }
     bool isAccountVerified = true;
     ErrCode account_ret = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, isAccountVerified);
