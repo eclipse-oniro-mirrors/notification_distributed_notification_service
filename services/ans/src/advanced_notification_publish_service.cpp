@@ -410,6 +410,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
             isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
             break;
+            
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
     return isNeedSilent;
