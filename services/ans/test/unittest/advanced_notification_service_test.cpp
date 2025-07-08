@@ -41,6 +41,7 @@
 #include "notification_subscriber.h"
 #include "notification_subscriber_manager.h"
 #include "mock_push_callback_stub.h"
+#include "os_account_manager_helper.h"
 #include "system_event_observer.h"
 #include "notification_constant.h"
 #include "want_agent_info.h"
@@ -4632,6 +4633,27 @@ HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Functio
     advancedNotificationService.notificationSvrQueue_ = nullptr;
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : DisableNotificationFeature_00002
+ * @tc.name      : Test DisableNotificationFeature
+ * @tc.desc      : Test DisableNotificationFeature
+ * @tc.require   : issueI5S4VP
+ */
+HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
+    int32_t userId = -1;
+    EXPECT_EQ(OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId), ERR_OK);
+    notificationDisable->SetDisabled(true);
+    notificationDisable->SetUserId(userId);
+    auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_OK);
+    userId++;
+    notificationDisable->SetUserId(userId);
+    ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

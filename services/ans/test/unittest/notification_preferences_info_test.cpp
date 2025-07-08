@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -461,6 +461,29 @@ HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0600, TestS
     NotificationDisable disable;
     bool ret = preferencesInfo->GetUserDisableNotificationInfo(101, disable);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: GetDisableNotificationInfo_0700
+ * @tc.desc: test GetDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetDisableNotificationInfo_0700, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    NotificationPreferencesInfo::DisableNotificationInfo disableNotificationInfo;
+    disableNotificationInfo.disabled = -1;
+    preferencesInfo->userDisableNotificationInfo_.insert_or_assign(101, disableNotificationInfo);
+    NotificationDisable disable;
+    bool ret = preferencesInfo->GetUserDisableNotificationInfo(101, disable);
+    EXPECT_FALSE(ret);
+    disableNotificationInfo.disabled = 1;
+    preferencesInfo->userDisableNotificationInfo_.insert_or_assign(101, disableNotificationInfo);
+    ret = preferencesInfo->GetUserDisableNotificationInfo(101, disable);
+    EXPECT_FALSE(ret);
+    ret = preferencesInfo->GetUserDisableNotificationInfo(102, disable);
+    EXPECT_FALSE(ret);
+    preferencesInfo->userDisableNotificationInfo_.clear();
 }
 }
 }

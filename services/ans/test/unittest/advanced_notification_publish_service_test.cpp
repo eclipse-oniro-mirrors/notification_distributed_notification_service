@@ -38,6 +38,7 @@
 #include "string_wrapper.h"
 #include "want_params.h"
 #include "int_wrapper.h"
+#include "os_account_manager_helper.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -2655,16 +2656,19 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_003, Function | SmallTest 
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
     }
+    int32_t userId = -1;
+    EXPECT_EQ(OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId), ERR_OK);
     std::string bundleName = "com.testDisableNotification.example";
     NotificationDisable notificationDisable;
     std::vector<std::string> bundleList = {bundleName};
     notificationDisable.SetDisabled(true);
     notificationDisable.SetBundleList(bundleList);
-    notificationDisable.SetUserId(100);
+    notificationDisable.SetUserId(userId);
     sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
     NotificationPreferences::GetInstance()->preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
     bool result = advancedNotificationService_->IsDisableNotification(bundleName);
-    ASSERT_FALSE(result);
+    EXPECT_TRUE(result);
+    NotificationPreferences::GetInstance()->preferencesInfo_.userDisableNotificationInfo_.clear();
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
 }
 
@@ -2680,16 +2684,19 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_004, Function | SmallTest 
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
     }
+    int32_t userId = -1;
+    EXPECT_EQ(OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId), ERR_OK);
     std::string bundleName = "com.testDisableNotification.example";
     NotificationDisable notificationDisable;
     std::vector<std::string> bundleList = {bundleName};
     notificationDisable.SetDisabled(false);
     notificationDisable.SetBundleList(bundleList);
-    notificationDisable.SetUserId(101);
+    notificationDisable.SetUserId(userId);
     sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
     NotificationPreferences::GetInstance()->preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
     bool result = advancedNotificationService_->IsDisableNotification(bundleName);
-    ASSERT_FALSE(result);
+    EXPECT_FALSE(result);
+    NotificationPreferences::GetInstance()->preferencesInfo_.userDisableNotificationInfo_.clear();
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
 }
 
@@ -2705,16 +2712,17 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_005, Function | SmallTest 
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
     }
+    int32_t userId = -1;
+    EXPECT_EQ(OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId), ERR_OK);
     std::string bundleName = "com.testDisableNotification.example";
     NotificationDisable notificationDisable;
-    std::vector<std::string> bundleList = {bundleName};
     notificationDisable.SetDisabled(true);
-    notificationDisable.SetBundleList(bundleList);
-    notificationDisable.SetUserId(101);
+    notificationDisable.SetUserId(userId);
     sptr<NotificationDisable> notificationDisablePtr = new (std::nothrow) NotificationDisable(notificationDisable);
     NotificationPreferences::GetInstance()->preferencesInfo_.SetDisableNotificationInfo(notificationDisablePtr);
     bool result = advancedNotificationService_->IsDisableNotification(bundleName);
-    ASSERT_TRUE(result);
+    EXPECT_FALSE(result);
+    NotificationPreferences::GetInstance()->preferencesInfo_.userDisableNotificationInfo_.clear();
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
 }
 
