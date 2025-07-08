@@ -392,8 +392,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     }
     ANS_LOGI("IsNeedSilent: policy: %{public}s, repeat: %{public}s, callerType: %{public}d",
         policy.c_str(), repeat_call.c_str(), callerType);
-    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE &&
-        callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
+    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE && callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
         if (datashareHelper->isRepeatCall(phoneNumber)) {
             return 1;
         }
@@ -413,18 +412,10 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
-            if (!isAccountVerified) {
-                isNeedSilent = 0;
-            } else {
-                isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
-            }
+            isNeedSilent = isAccountVerified ? QueryContactByProfileId(phoneNumber, policy, userId) : 0;
             break;
         case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
-            if (!isAccountVerified) {
-                isNeedSilent = 1;
-            } else {
-                isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
-            }
+            isNeedSilent = isAccountVerified ? QueryContactByProfileId(phoneNumber, policy, userId) : 1;
             break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
