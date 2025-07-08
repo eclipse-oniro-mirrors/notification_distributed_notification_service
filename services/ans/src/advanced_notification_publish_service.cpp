@@ -392,7 +392,8 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     }
     ANS_LOGI("IsNeedSilent: policy: %{public}s, repeat: %{public}s, callerType: %{public}d",
         policy.c_str(), repeat_call.c_str(), callerType);
-    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE && callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
+    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE &&
+        callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
         if (datashareHelper->isRepeatCall(phoneNumber)) {
             return 1;
         }
