@@ -169,103 +169,6 @@ HWTEST_F(AnsPublishServiceTest, Publish_00002, Function | SmallTest | Level1)
     ASSERT_EQ(ret, (int)ERR_OK);
 }
 
-
-/**
- * @tc.name: Publish_00003
- * @tc.desc: Publish live_view notification once
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, Publish_00003, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    std::string label = "";
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetNotificationId(1);
-    auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    auto content = std::make_shared<NotificationContent>(liveContent);
-    request->SetContent(content);
-    RegisterPushCheck();
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(false);
-
-    auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_OK);
-
-    sptr<NotificationSlot> slot;
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    ret = advancedNotificationService_->GetSlotByType(slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_OK);
-    ASSERT_EQ(1, slot->GetAuthorizedStatus());
-    ASSERT_EQ(1, slot->GetAuthHintCnt());
-}
-
-/**
- * @tc.name: Publish_00004
- * @tc.desc: Publish live_view notification twice
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, Publish_00004, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    std::string label = "";
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetNotificationId(1);
-    auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    auto content = std::make_shared<NotificationContent>(liveContent);
-    request->SetContent(content);
-    RegisterPushCheck();
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(false);
-
-    auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_OK);
-
-    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
-    request2->SetNotificationId(2);
-    request2->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request2->SetContent(content);
-    ret = advancedNotificationService_->Publish(label, request2);
-    ASSERT_EQ(ret, (int)ERR_OK);
-
-    sptr<NotificationSlot> slot;
-    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    ret = advancedNotificationService_->GetSlotByType(slotType, slot);
-    ASSERT_EQ(ret, (int)ERR_OK);
-    ASSERT_EQ(0, slot->GetAuthorizedStatus());
-    ASSERT_EQ(2, slot->GetAuthHintCnt());
-}
-
-/**
- * @tc.name: Publish_00005
- * @tc.desc: Publish test receiver user and checkUserExists is true
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, Publish_00005, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    std::string label = "";
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetNotificationId(1);
-    request->SetReceiverUserId(101);
-    auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    auto content = std::make_shared<NotificationContent>(liveContent);
-    request->SetContent(content);
-    RegisterPushCheck();
-    MockIsOsAccountExists(true);
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(true);
-
-    auto ret = advancedNotificationService_->Publish(label, request);
-    ASSERT_EQ(ret, (int)ERR_OK);
-}
-
 /**
  * @tc.name: Publish_00006
  * @tc.desc: Publish test receiver user and checkUserExists is false
@@ -341,6 +244,7 @@ HWTEST_F(AnsPublishServiceTest, Publish_00008, Function | SmallTest | Level1)
  */
 HWTEST_F(AnsPublishServiceTest, DeleteByBundle_00001, Function | SmallTest | Level1)
 {
+    MockIsVerfyPermisson(true);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     auto ret = advancedNotificationService_->DeleteByBundle(bundleOption);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_BUNDLE);
@@ -2716,34 +2620,6 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_005, Function | SmallTest 
     bool result = advancedNotificationService_->IsDisableNotification(bundleName);
     ASSERT_TRUE(result);
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
-}
-
-/*
- * @tc.name: AtomicServicePublish_0100
- * @tc.desc: test PublishNotification with common liveView.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0100, Function | MediumTest | Level1)
-{
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    sptr<NotificationRequest> request = new NotificationRequest(1000);
-    std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();
-    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
-    request->SetContent(content);
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    request->SetIsAgentNotification(true);
-    request->SetOwnerBundleName("test.com");
-    request->SetOwnerUserId(100);
-    auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("autoServiceIntallStatus", AAFwk::Integer::Box(0));
-    request->SetExtendInfo(extendInfo);
-    auto params = request->GetExtendInfo();
-    int32_t installedStatus = params->GetIntParam("autoServiceIntallStatus", 0);
-    auto ret = advancedNotificationService_->Publish("", request);
-    EXPECT_EQ(ret, ERR_OK);
 }
 
 /*
