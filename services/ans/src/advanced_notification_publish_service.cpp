@@ -375,7 +375,6 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         ANS_LOGE("The data share helper is nullptr.");
         return -1;
     }
-
     int isNeedSilent = 0;
     std::string policy;
     Uri policyUri(datashareHelper->GetFocusModeCallPolicyUri(userId));
@@ -403,7 +402,6 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     if (account_ret != ERR_OK) {
         ANS_LOGE("IsOsAccountVerified fail.");
     }
-    ANS_LOGI("IsOsAccountVerified isAccountVerified:%{public}d", isAccountVerified);
     switch (atoi(policy.c_str())) {
         case ContactPolicy::FORBID_EVERYONE:
             break;
@@ -419,7 +417,7 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
             isNeedSilent = isAccountVerified ? QueryContactByProfileId(phoneNumber, policy, userId) : 1;
             break;
     }
-    ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
+    ANS_LOGI("CheckNeedSilent isNeedSilent:%{public}d isAccountVerified:%{public}d", isNeedSilent, isAccountVerified);
     return isNeedSilent;
 }
 
