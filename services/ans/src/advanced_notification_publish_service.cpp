@@ -398,6 +398,12 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
             return 1;
         }
     }
+    bool isAccountVerified = true;
+    ErrCode account_ret = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, isAccountVerified);
+    if (account_ret != ERR_OK) {
+        ANS_LOGE("IsOsAccountVerified fail.");
+    }
+    ANS_LOGI("IsOsAccountVerified isAccountVerified:%{public}d", isAccountVerified);
     switch (atoi(policy.c_str())) {
         case ContactPolicy::FORBID_EVERYONE:
             break;
@@ -407,10 +413,19 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
-        case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
-            isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
+            if (!isAccountVerified) {
+                isNeedSilent = 0;
+            } else {
+                isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
+            }
             break;
-            
+        case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
+            if (!isAccountVerified) {
+                isNeedSilent = 1;
+            } else {
+                isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
+            }
+            break;
     }
     ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
     return isNeedSilent;
