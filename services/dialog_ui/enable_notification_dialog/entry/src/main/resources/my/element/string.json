@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"%s အား သင့်ထံ အသိပေးချက်များ ပေးပို့ခွင့်ပြုမည်လား။",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"ခွင့်ပြုမည်",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"ငြင်းပယ်မည်",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

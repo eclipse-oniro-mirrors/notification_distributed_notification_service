@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"به %s اجازه می‌دهید برایتان اعلان ارسال کند؟",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"اجازه دادن",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"غیرمجاز کردن",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

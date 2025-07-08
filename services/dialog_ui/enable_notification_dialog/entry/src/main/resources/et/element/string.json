@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Kas lubada rakendusel %s saata teile teavitusi?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Luba",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Keela",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

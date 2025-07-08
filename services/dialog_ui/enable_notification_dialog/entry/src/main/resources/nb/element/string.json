@@ -2,23 +2,23 @@
     "string":[
         {
             "name":"group_label_notification",
-            "value":"Tillate at %s sender deg varsler?",
+            "value":"Vil du tillate at %s sender deg varsler?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Tillat",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Ikke tillat",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

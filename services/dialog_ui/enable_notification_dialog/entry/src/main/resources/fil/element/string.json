@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Payagan ang %s na magpadala sa iyo ng mga notification?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Payagan",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Tanggihan",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

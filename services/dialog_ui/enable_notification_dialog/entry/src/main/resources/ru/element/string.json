@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Разрешить приложению %s отправлять вам уведомления?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Разрешить",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Запретить",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -45,6 +45,13 @@
         {
             "name":"reason_cjy",
             "value":"Они могут включать уведомления на экране блокировки, уведомления в формате баннеров и метки на значках приложений. Уведомления могут поступать со звуком и вибрацией. Вы можете изменить эти настройки в разделе EasyAbroad > Управление приложением.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Уведомления будут отображаться в формате баннеров. Вы можете в любой момент изменить параметры уведомлений в настройках.",
             "attr":{
                 "priority":"translate"
             }

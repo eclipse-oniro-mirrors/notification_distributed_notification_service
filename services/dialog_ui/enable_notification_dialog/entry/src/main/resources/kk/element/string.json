@@ -2,23 +2,23 @@
     "string":[
         {
             "name":"group_label_notification",
-            "value":"%s хабарландырулар жіберуге рұқсат ету керек пе?",
+            "value":"%s үшін хабарландырулар жіберуіне рұқсат ету керек пе?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Рұқсат ету",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Тыйым салу",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

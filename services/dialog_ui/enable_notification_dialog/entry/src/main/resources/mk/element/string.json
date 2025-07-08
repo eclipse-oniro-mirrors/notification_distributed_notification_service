@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Да се дозволи %s да ви испраќа известувања?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Дозволи",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Одбиј",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

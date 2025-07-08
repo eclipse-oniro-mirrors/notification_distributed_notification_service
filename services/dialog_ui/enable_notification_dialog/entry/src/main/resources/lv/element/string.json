@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Vai atļaut %s sūtīt jums paziņojumus?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Atļaut",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Liegt",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

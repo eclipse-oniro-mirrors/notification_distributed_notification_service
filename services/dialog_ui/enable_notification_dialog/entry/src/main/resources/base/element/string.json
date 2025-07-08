@@ -1,57 +1,72 @@
 {
-  "string":[
-      {
-          "name":"entry_desc",
-          "value":"description"
-      },
-      {
-          "name":"NotificationServiceExtAbility_desc",
-          "value":"NotificationDialog"
-      },
-      {
-          "name":"NotificationServiceExtAbility_label",
-          "value":"NotificationDialog"
-      },
-      {
-          "name":"reason",
-          "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change this in Settings."
-      },
-      {
-          "name":"reason_simple",
-          "value":"These may include banners, badges, and sounds. You can change this in Settings."
-      },
-      {
-        "name":"reason_zyt",
-        "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change these settings in DroiTong > App management."
-      },
-      {
-        "name":"reason_cjy",
-        "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change these settings in EasyAbroad > App management."
-      },
-      {
-        "name":"reason_tv",
-        "value":"Notifications will be delivered as banners. You can change your notification preferences at any time in Settings."
-      },
-      {
-          "name":"ALLOW",
-          "value":"Allow",
-          "attr":{
-              "priority":"LT"
-          }
-      },
-      {
-          "name":"BAN",
-          "value":"Deny",
-          "attr":{
-              "priority":"LT"
-          }
-      },
-      {
-          "name":"group_label_notification",
-          "value":"Allow %s to send you notifications?",
-          "attr":{
-              "priority":"LT"
-          }
-      }
-  ]
+    "string":[
+        {
+            "name":"entry_desc",
+            "value":"description"
+        },
+        {
+            "name":"NotificationServiceExtAbility_desc",
+            "value":"NotificationDialog"
+        },
+        {
+            "name":"NotificationServiceExtAbility_label",
+            "value":"NotificationDialog"
+        },
+        {
+            "name":"reason",
+            "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change this in Settings.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_simple",
+            "value":"These may include banners, badges, and sounds. You can change this in Settings.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change these settings in DroiTong > App management.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change these settings in EasyAbroad > App management.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Notifications will be delivered as banners. You can change your notification preferences at any time in Settings.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"Allow",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"Deny",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"group_label_notification",
+            "value":"Allow %s to send you notifications?",
+            "attr":{
+                "priority":"LT"
+            }
+        }
+    ]
 }

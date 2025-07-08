@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Saako %s lähettää ilmoituksia?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Salli",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Estä",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

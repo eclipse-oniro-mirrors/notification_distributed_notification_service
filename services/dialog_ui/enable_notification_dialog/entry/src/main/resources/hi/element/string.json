@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"%s को आपके पास अधिसूचनाएँ भेजने की अनुमति दें?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"अनुमति दें",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"अस्वीकार करें",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

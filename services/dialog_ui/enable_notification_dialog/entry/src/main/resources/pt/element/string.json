@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Permitir que o %s envie notificações para você?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Permitir",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Recusar",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]
