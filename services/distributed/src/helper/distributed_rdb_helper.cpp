@@ -334,10 +334,6 @@ int32_t DistributedRdbHelper::RestoreForMasterSlaver()
 {
     ANS_LOGI("RestoreForMasterSlaver start");
     int32_t result = rdbStore_->Restore("");
-    if (result == NativeRdb::E_SQLITE_CORRUPT) {
-        Destroy();
-        Init();
-    }
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
     return result;
 }
