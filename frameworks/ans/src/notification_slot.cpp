@@ -149,7 +149,7 @@ void NotificationSlot::SetType(NotificationConstant::SlotType type)
             SetLockscreenVisibleness(NotificationConstant::VisiblenessType::PUBLIC);
             SetSound(DEFAULT_NOTIFICATION_SOUND);
             SetVibrationStyle(DEFAULT_NOTIFICATION_VIBRATION);
-            SetLevel(LEVEL_DEFAULT);
+            SetLevel(LEVEL_HIGH);
             break;
         case NotificationConstant::SlotType::CONTENT_INFORMATION:
             id_ = "CONTENT_INFORMATION";
