@@ -879,6 +879,11 @@ std::string NotificationRequest::CollaborationToJson() const
 
 NotificationRequest *NotificationRequest::CollaborationFromJson(const std::string& basicInfo)
 {
+    if (basicInfo.empty() || !nlohmann::json::accept(basicInfo)) {
+        ANS_LOGE("Invalid JSON string");
+        return nullptr;
+    }
+
     nlohmann::json jsonObject = nlohmann::json::parse(basicInfo, nullptr, false);
     if (jsonObject.is_null() or !jsonObject.is_object()) {
         ANS_LOGE("Invalid JSON object");

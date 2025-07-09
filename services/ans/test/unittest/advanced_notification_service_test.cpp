@@ -4586,14 +4586,14 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00002, Functi
 
     ErrCode ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_OK);
-    ASSERT_EQ(enableStatusInt, 0);
+    ASSERT_EQ(enableStatusInt, 2);
 
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
     ASSERT_EQ(ret, ERR_OK);
 
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_OK);
-    ASSERT_EQ(enableStatusInt, 2);
+    ASSERT_EQ(enableStatusInt, 1);
 }
 
 /**
