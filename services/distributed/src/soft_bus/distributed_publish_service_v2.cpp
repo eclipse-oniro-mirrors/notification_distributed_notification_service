@@ -39,6 +39,7 @@
 #include "distributed_subscribe_service.h"
 #include "remove_all_distributed_box.h"
 #include "bundle_resource_helper.h"
+#include "distributed_service.h"
 
 namespace OHOS {
 namespace Notification {
@@ -322,8 +323,26 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
         return;
     }
 
+    DistributedDeviceInfo device;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(peerDevice.deviceId_, device)) {
+        return;
+    }
+    // wearable switch set by litewearable
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+    if (deviceType == DistributedService::WEARABLE_DEVICE_TYPE) {
+        deviceType = DistributedService::LITEWEARABLE_DEVICE_TYPE;
+    }
+
+    bool enable = false;
+    auto result = NotificationHelper::IsDistributedEnabledBySlot(NotificationConstant::SlotType::LIVE_VIEW,
+        deviceType, enable);
+    if (result != ERR_OK || !enable) {
+        ANS_LOGW("Dans get switch %{public}s failed %{public}d.", deviceType.c_str(), result);
+        return;
+    }
+
     std::vector<sptr<Notification>> notifications;
-    auto result = NotificationHelper::GetAllNotificationsBySlotType(notifications,
+    result = NotificationHelper::GetAllNotificationsBySlotType(notifications,
         NotificationConstant::SlotType::LIVE_VIEW);
     if (result != ERR_OK) {
         ANS_LOGI("Dans get all active %{public}d.", result);
@@ -339,7 +358,7 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
         }
         notificationList.push_back(notification->GetKey());
     }
-    SyncNotifictionList(peerDevice, notificationList);
+    SyncNotifictionList(device, notificationList);
 
     for (auto& notification : notifications) {
         if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
@@ -348,9 +367,9 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
             continue;
         }
         std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
-        SendNotifictionRequest(sharedNotification, peerDevice, true);
+        SendNotifictionRequest(sharedNotification, device, true);
     }
-    DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
+    DistributedDeviceService::GetInstance().SetDeviceSyncData(device.deviceId_,
         DistributedDeviceService::SYNC_LIVE_VIEW, true);
 }
 
