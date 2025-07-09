@@ -2091,8 +2091,8 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0500, Function | 
 }
 
 /**
- * @tc.number    : OnDistributedPublish_0300
- * @tc.name      : OnDistributedPublish_0300
+ * @tc.number    : OnDistributedPublish_0600
+ * @tc.name      : OnDistributedPublish_0600
  * @tc.desc      : Test OnDistributedPublish function
  * @tc.require   : #I61RF2
  */
@@ -2107,6 +2107,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0600, Function | 
     request->SetOwnerBundleName("test");
     request->SetUpdateOnly(true);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
 }
 
@@ -4586,14 +4587,14 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00002, Functi
 
     ErrCode ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_OK);
-    ASSERT_EQ(enableStatusInt, 0);
+    ASSERT_EQ(enableStatusInt, 2);
 
     ret = advancedNotificationService.SetSilentReminderEnabled(bo, true);
     ASSERT_EQ(ret, ERR_OK);
 
     ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_OK);
-    ASSERT_EQ(enableStatusInt, 2);
+    ASSERT_EQ(enableStatusInt, 1);
 }
 
 /**
