@@ -265,7 +265,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_300, Functi
 
 /**
  * @tc.name: DistributeOperation_400
- * @tc.desc: Test DistributeOperation when record's NotificationRequestPoint is nullptr.
+ * @tc.desc: Test DistributeOperation when notification don't support distributed collaboration.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -277,7 +277,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_400, Functi
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetDistributedCollaborate(true);
+    request->SetDistributedCollaborate(false);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->AddToNotificationList(record);
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();

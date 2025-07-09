@@ -2091,8 +2091,8 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0500, Function | 
 }
 
 /**
- * @tc.number    : OnDistributedPublish_0300
- * @tc.name      : OnDistributedPublish_0300
+ * @tc.number    : OnDistributedPublish_0600
+ * @tc.name      : OnDistributedPublish_0600
  * @tc.desc      : Test OnDistributedPublish function
  * @tc.require   : #I61RF2
  */
@@ -2107,6 +2107,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0600, Function | 
     request->SetOwnerBundleName("test");
     request->SetUpdateOnly(true);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
+    SleepForFC();
     ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
 }
 
