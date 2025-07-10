@@ -70,6 +70,16 @@ DistributedDeviceInfo DistributedDeviceService::GetLocalDevice()
     return localDevice_;
 }
 
+bool DistributedDeviceService::IsLocalPadOrPC()
+{
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 &&
+        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+        return false;
+    }
+    return true;
+}
+
 bool DistributedDeviceService::IsReportDataByHa()
 {
     return localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
@@ -159,8 +169,8 @@ bool DistributedDeviceService::IsSyncInstalledBundle(const std::string& deviceId
         return false;
     }
 
-    if (!forceSync && iter->second.installedBunlesSync) {
-        ANS_LOGI("Dans bundle sync %{public}d %{public}d.", forceSync, iter->second.installedBunlesSync);
+    if (!forceSync && iter->second.installedBundlesSync) {
+        ANS_LOGI("Dans bundle sync %{public}d %{public}d.", forceSync, iter->second.installedBundlesSync);
         return false;
     }
     return true;
@@ -181,11 +191,27 @@ void DistributedDeviceService::SetDeviceSyncData(const std::string& deviceId, in
         iter->second.liveViewSync = syncData;
     }
     if (type == SYNC_INSTALLED_BUNDLE) {
-        iter->second.installedBunlesSync = syncData;
+        iter->second.installedBundlesSync = syncData;
     }
     if (type == DEVICE_USAGE) {
         iter->second.deviceUsage = syncData;
     }
+}
+
+void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId)
+{
+    std::lock_guard<std::mutex> lock(mapLock_);
+    auto deviceIter = peerDevice_.find(deviceId);
+    if (deviceIter == peerDevice_.end()) {
+        ANS_LOGI("Dans unknown device %{public}s.", StringAnonymous(deviceId).c_str());
+        return;
+    }
+    deviceIter->second.connectedTry_ = 0;
+    deviceIter->second.deviceUsage = false;
+    deviceIter->second.liveViewSync = false;
+    deviceIter->second.iconSync = false;
+    deviceIter->second.installedBundlesSync = false;
+    deviceIter->second.peerState_ = DeviceState::STATE_SYNC;
 }
 
 void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32_t state)
@@ -388,8 +414,15 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
         ANS_LOGW("Dans SyncDeviceState serialize failed.");
         return;
     }
+    bool isPad = IsLocalPadOrPC();
     std::lock_guard<std::mutex> lock(mapLock_);
     for (const auto& peer : peerDevice_) {
+        if (isPad && peer.second.peerState_ != DeviceState::STATE_ONLINE) {
+            ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}d %{public}s.",
+                status, notificationEnable, liveViewEnable, peer.second.deviceType_,
+                StringAnonymous(peer.second.deviceId_).c_str());
+            continue;
+        }
         DistributedClient::GetInstance().SendMessage(stateBox, TransDataType::DATA_TYPE_MESSAGE,
             peer.second.deviceId_, MODIFY_ERROR_EVENT_CODE);
         ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}lu %{public}d %{public}d %{public}d.",

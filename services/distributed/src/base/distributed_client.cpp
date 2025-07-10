@@ -65,7 +65,7 @@ void DistributedClient::AddDevice(DistributedDeviceInfo peerDevice)
         BRANCH6_ID, message, PUBLISH_ERROR_EVENT_CODE);
 }
 
-void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t deviceType)
+void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t deviceType, bool releaseNetwork)
 {
     std::string messageKey = deviceId + '_' + std::to_string(TransDataType::DATA_TYPE_MESSAGE);
     std::string byteKey = deviceId + '_' + std::to_string(TransDataType::DATA_TYPE_BYTES);
@@ -80,7 +80,9 @@ void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t devi
         CloseSocket(socket->second);
         socketsId_.erase(socket);
     }
-    networksId_.erase(deviceId);
+    if (releaseNetwork) {
+        networksId_.erase(deviceId);
+    }
     std::string message = "ReleasenetworkId: " + StringAnonymous(deviceId);
     AnalyticsUtil::GetInstance().SendHaReport(MODIFY_ERROR_EVENT_CODE, 0,
         BRANCH7_ID, message, PUBLISH_ERROR_EVENT_CODE);

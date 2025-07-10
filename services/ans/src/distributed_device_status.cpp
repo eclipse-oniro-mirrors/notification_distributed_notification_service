@@ -76,14 +76,14 @@ void ChangeStatus(DeviceStatus& device, const std::string &deviceType, const uin
             device.status &= ~(1 << i);
         }
     }
-    
+
     if (deviceType == NotificationConstant::PAD_DEVICE_TYPE ||
         deviceType == NotificationConstant::PC_DEVICE_TYPE) {
         DeviceStatueChangeInfo changeInfo;
         changeInfo.deviceId = device.deviceId;
         if (((1 << DistributedDeviceStatus::USING_FLAG) & controlFlag) &&
             ((1 << DistributedDeviceStatus::USING_FLAG) & device.status)) {
-            changeInfo.changeType = DeviceStatueChangeType::DEVICE_USING_CHANGE;
+            changeInfo.changeType = DeviceStatueChangeType::DEVICE_USING_ONLINE;
             DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
             ANS_LOGI("notify %{public}s %{public}s using change.", device.deviceType.c_str(),
                 StringAnonymous(device.deviceId).c_str());
@@ -104,7 +104,8 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
     bool existFlag = false;
     std::string deviceStatusId = deviceId;
     uint32_t finalStatus = 0;
-    if ((1 << NETWORKID_FLAG) & controlFlag) {
+    bool allConnect = ((1 << NETWORKID_FLAG) & controlFlag);
+    if (allConnect) {
         std::string udid;
         int32_t result = DistributedExtensionService::GetInstance().TransDeviceIdToUdid(deviceId, udid);
         if (result != ERR_OK) {
@@ -120,10 +121,21 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         if (device->deviceType != deviceType || device->deviceId != deviceStatusId) {
             continue;
         }
+
+        if (allConnect && ((1 << DistributedDeviceStatus::USING_FLAG) & device->status) == 0) {
+            ANS_LOGI("No change %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceStatusId).c_str());
+            continue;
+        }
         ChangeStatus(*device, deviceType, status, controlFlag, userId);
-        ANS_LOGI("update 222 %{public}s %{public}u", StringAnonymous(device->deviceId).c_str(), device->status);
+        ANS_LOGI("update sttuas %{public}s %{public}u", StringAnonymous(device->deviceId).c_str(), device->status);
         existFlag = true;
         break;
+    }
+
+    // for allconnect release device
+    if (allConnect) {
+        ANS_LOGI("Not need %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceStatusId).c_str());
+        return ERR_OK;
     }
 
     if (!existFlag) {

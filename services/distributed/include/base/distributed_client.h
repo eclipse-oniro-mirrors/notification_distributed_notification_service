@@ -30,7 +30,7 @@ public:
     static DistributedClient& GetInstance();
     void OnShutdown(int32_t socket, ShutdownReason reason);
     void AddDevice(DistributedDeviceInfo peerDevice);
-    void ReleaseDevice(const std::string &deviceId, uint16_t deviceType);
+    void ReleaseDevice(const std::string &deviceId, uint16_t deviceType, bool releaseNetwork = true);
     void RefreshDevice(const std::string &deviceId, uint16_t deviceType,
         const std::string &networkId);
     void initClient(const std::string &deviceId, uint16_t deviceType);

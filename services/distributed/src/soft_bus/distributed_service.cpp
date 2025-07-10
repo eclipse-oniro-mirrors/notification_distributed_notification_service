@@ -137,6 +137,13 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         DistributedDeviceService::GetInstance().AddDeviceInfo(deviceItem);
+        if (device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+            device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
+            device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC ||
+            DistributedDeviceService::GetInstance().IsLocalPadOrPC()) {
+            ANS_LOGI("Dans wait peer %{public}s.", StringAnonymous(device.deviceId_).c_str());
+            return;
+        }
         // Delay linking to avoid bind failure, There is a delay in reporting the device online
         auto sleepTime = std::chrono::milliseconds(ADD_DEVICE_SLEEP_TIMES_MS);
         std::this_thread::sleep_for(sleepTime);
@@ -184,7 +191,7 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
         ANS_LOGI("Device change %{public}d %{public}d %{public}d", changeInfo.changeType,
             changeInfo.enableChange, changeInfo.liveViewChange);
 #ifdef DISTRIBUTED_FEATURE_MASTER
-        if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CHANGE) {
+        if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_ONLINE) {
             HandleDeviceUsingChange(changeInfo);
         }
 
@@ -202,6 +209,19 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
                 return;
             }
             DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(device);
+            DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
+                device.deviceType_, false);
+            std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+            if (!deviceType.empty()) {
+                auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_,
+                    BunleListOperationType::RELEASE_BUNDLES, std::vector<std::string>());
+                ANS_LOGI("Remove bundle %{public}s %{public}s %{public}d.", deviceType.c_str(),
+                    StringAnonymous(device.deviceId_).c_str(), ret);
+            }
+
+            DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_OFFLINE);
+            DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
+            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_);
         }
 #else
         if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
@@ -328,7 +348,8 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
         DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
     }
-    DistributedPublishService::GetInstance().SyncLiveViewNotification(device, true);
+    // sync to peer device
+    ConnectPeerDevice(device);
 }
 #else
 void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request,
@@ -367,23 +388,25 @@ void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool
         std::vector<std::string> bundles = { bundleName };
         auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
         auto peerDevices = DistributedDeviceService::GetInstance().GetDeviceList();
-        if (!isAdd) {
-            for (auto& device : peerDevices) {
-                DistributedBundleService::GetInstance().SendInstalledBundles(device.second, localDevice.deviceId_,
-                    bundles, BunleListOperationType::REMOVE_BUNDLES);
+        bool isPad = DistributedDeviceService::GetInstance().IsLocalPadOrPC();
+        if (isAdd) {
+            int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
+            if (DelayedSingleton<BundleResourceHelper>::GetInstance()->CheckSystemApp(bundleName, userId)) {
+                ANS_LOGI("Bundle no sycn %{public}d %{public}s.", userId, bundleName.c_str());
+                return;
             }
-            ANS_LOGI("Sync bundle remove %{public}s %{public}zu.", bundleName.c_str(), peerDevices.size());
-            return;
         }
-
-        int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
-        if (!DelayedSingleton<BundleResourceHelper>::GetInstance()->CheckSystemApp(bundleName, userId)) {
-            for (auto device : peerDevices) {
-                DistributedBundleService::GetInstance().SendInstalledBundles(device.second, localDevice.deviceId_,
-                    bundles, BunleListOperationType::ADD_BUNDLES);
+        int32_t syncType = isAdd ? BunleListOperationType::ADD_BUNDLES : BunleListOperationType::REMOVE_BUNDLES;
+        for (auto& device : peerDevices) {
+            if (isPad && device.second.peerState_ != DeviceState::STATE_ONLINE) {
+                ANS_LOGI("DeviceState bundle %{public}d %{public}d %{public}s.", syncType, device.second.deviceType_,
+                    StringAnonymous(device.second.deviceId_).c_str());
+                continue;
             }
-            ANS_LOGI("Sync bundle add %{public}s %{public}zu.", bundleName.c_str(), peerDevices.size());
+            DistributedBundleService::GetInstance().SendInstalledBundles(device.second, localDevice.deviceId_,
+                bundles, syncType);
         }
+        ANS_LOGI("Sync bundle %{public}d %{public}s %{public}zu.", syncType, bundleName.c_str(), peerDevices.size());
     });
     serviceQueue_->submit(task);
 }
@@ -408,22 +431,40 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
         return;
     }
     ANS_LOGI("Dans handle match device type %{public}d.", matchType);
+    DistributedDeviceInfo device;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(peerDevice.deviceId_, device)) {
+        return;
+    }
 #ifdef DISTRIBUTED_FEATURE_MASTER
     if (matchType == MatchType::MATCH_SYN) {
-        DistributedDeviceService::GetInstance().SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
-        DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, true);
+        DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_ACK);
+        DistributedPublishService::GetInstance().SyncLiveViewNotification(device, true);
     } else if (matchType == MatchType::MATCH_ACK) {
-        DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
-        DistributedPublishService::GetInstance().SyncLiveViewNotification(peerDevice, false);
+        DistributedSubscribeService::GetInstance().SubscribeNotification(device);
+        DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
     }
 #else
+    if (DistributedDeviceService::GetInstance().IsLocalPadOrPC()) {
+        if (matchType == MatchType::MATCH_SYN) {
+            DistributedSubscribeService::GetInstance().SubscribeNotification(device);
+            DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
+            DistributedBundleService::GetInstance().SyncInstalledBundles(device, true);
+            DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_ACK);
+            return;
+        }
+        if (matchType == MatchType::MATCH_OFFLINE) {
+            DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
+                device.deviceType_, false);
+            DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
+            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_);
+        }
+    }
+
     if (matchType == MatchType::MATCH_SYN) {
-        DistributedDeviceService::GetInstance().SyncDeviceMatch(peerDevice, MatchType::MATCH_ACK);
-        DistributedBundleService::GetInstance().SyncInstalledBundles(peerDevice, true);
+        DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_ACK);
     } else if (matchType == MatchType::MATCH_ACK) {
         DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
-        DistributedSubscribeService::GetInstance().SubscribeNotification(peerDevice);
-        DistributedBundleService::GetInstance().SyncInstalledBundles(peerDevice, false);
+        DistributedSubscribeService::GetInstance().SubscribeNotification(device);
     }
 #endif
 }
