@@ -96,11 +96,11 @@ HWTEST_F(NotificationOperationInfoTest, Marshalling_0100, Function | SmallTest |
     notificationOperationInfo.SetJumpType(1);
     notificationOperationInfo.SetNotificationUdid("udid");
     EXPECT_TRUE(notificationOperationInfo.Marshalling(parcel));
-    NotificationOperationInfo ntfOperInfoRes;
-    EXPECT_TRUE(ntfOperInfoRes.ReadFromParcel(parcel));
-    EXPECT_EQ(ntfOperInfoRes.GetBtnIndex(), 2);
-    EXPECT_EQ(ntfOperInfoRes.GetJumpType(), 1);
-    EXPECT_EQ(ntfOperInfoRes.GetNotificationUdid(), "udid");
+    sptr<NotificationOperationInfo> ntfOperInfoRes = notificationOperationInfo.Unmarshalling(parcel);
+    EXPECT_NE(ntfOperInfoRes, nullptr);
+    EXPECT_EQ(ntfOperInfoRes->GetBtnIndex(), 2);
+    EXPECT_EQ(ntfOperInfoRes->GetJumpType(), 1);
+    EXPECT_EQ(ntfOperInfoRes->GetNotificationUdid(), "udid");
 }
 }
 }

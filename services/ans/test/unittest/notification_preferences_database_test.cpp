@@ -22,6 +22,7 @@
 #include "notification_rdb_data_mgr.h"
 #undef private
 #undef protected
+#include "mock_os_account_manager.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -1146,6 +1147,75 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedEnabledForBundle_020
     std::string deviceType = "testDeviceType1111";
     bool enable = true;
     bool result = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enable);
+    ASSERT_EQ(result, false);
+}
+
+/**
+ * @tc.name: GetDistributedAuthStatus_0100
+ * @tc.desc: test GetDistributedAuthStatus with invalid accountLocalId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedAuthStatus_0100, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
+    std::string deviceType = "deviceType";
+    std::string deviceId = "deviceId";
+    int32_t targetUserId = 100;
+    bool isAuth;
+    bool result = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+    ASSERT_EQ(result, false);
+    ASSERT_EQ(isAuth, false);
+}
+
+/**
+ * @tc.name: GetDistributedAuthStatus_0200
+ * @tc.desc: test GetDistributedAuthStatus when NativeRdb::E_EMPTY_VALUES_BUCKET
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedAuthStatus_0200, TestSize.Level1)
+{
+    std::string deviceType = "deviceType";
+    std::string deviceId = "deviceId";
+    int32_t targetUserId = 100;
+    bool isAuth;
+    bool result = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
+    ASSERT_EQ(result, true);
+    ASSERT_EQ(isAuth, false);
+}
+
+/**
+ * @tc.name: GetDistributedAuthStatus_0300
+ * @tc.desc: test GetDistributedAuthStatus when NativeRdb::E_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetDistributedAuthStatus_0300, TestSize.Level1)
+{
+    std::string deviceType = "deviceType";
+    std::string deviceId = "deviceId";
+    int32_t targetUserId = 100;
+    bool isAuth = true;
+    bool result = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
+    ASSERT_EQ(result, true);
+    result = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
+    ASSERT_EQ(result, true);
+    ASSERT_EQ(isAuth, true);
+}
+
+/**
+ * @tc.name: SetDistributedAuthStatus_0100
+ * @tc.desc: test SetDistributedAuthStatus with invalid accountLocalId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, SetDistributedAuthStatus_0100, TestSize.Level1)
+{
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1);
+    std::string deviceType = "deviceType";
+    std::string deviceId = "deviceId";
+    int32_t targetUserId = 100;
+    bool isAuth = true;
+    bool result = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
     ASSERT_EQ(result, false);
 }
 

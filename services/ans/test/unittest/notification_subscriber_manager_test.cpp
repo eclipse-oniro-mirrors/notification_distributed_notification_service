@@ -827,7 +827,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyApplicationInfoNeedChanged_001
 
 /**
  * @tc.number    : DistributeOperation_001
- * @tc.name      :
+ * @tc.name      : test DistributeOperation call back success
  */
 HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | SmallTest | Level1)
 {
@@ -849,6 +849,36 @@ HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_001, Function | 
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
+
+/**
+ * @tc.number    : DistributeOperation_002
+ * @tc.name      : test DistributeOperation with operationInfo nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_002, Function | SmallTest | Level1)
+{
+    NotificationSubscriberManager notificationSubscriberManager;
+    ASSERT_EQ((int)ERR_ANS_TASK_ERR, notificationSubscriberManager.DistributeOperation(nullptr, nullptr));
+}
+
+/**
+ * @tc.number    : DistributeOperation_003
+ * @tc.name      : test DistributeOperation ERR_ANS_DISTRIBUTED_OPERATION_FAILED
+ */
+HWTEST_F(NotificationSubscriberManagerTest, DistributeOperation_003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
+    request->SetExtendInfo(extendInfo);
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    operationInfo->SetHashCode("hashCode");
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.subscriberRecordList_.push_back(nullptr);
+    notificationSubscriberManager.subscriberRecordList_.push_back(
+        notificationSubscriberManager.CreateSubscriberRecord(nullptr));
+    ASSERT_EQ((int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED,
+        notificationSubscriberManager.DistributeOperation(operationInfo, request));
+}
+
 /**
  * @tc.number    : OnRemoteDied_001
  * @tc.name      : OnRemoteDied and params is nullptr

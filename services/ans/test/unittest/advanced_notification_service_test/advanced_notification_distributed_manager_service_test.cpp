@@ -187,6 +187,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_1
 HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperationParamCheck_200, Function | SmallTest | Level1)
 {
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    operationInfo->SetHashCode("hashCode");
     operationInfo->SetOperationType(static_cast<OperationType>(5));
     sptr<IAnsOperationCallback> callback = nullptr;
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
@@ -265,7 +266,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_300, Functi
 
 /**
  * @tc.name: DistributeOperation_400
- * @tc.desc: Test DistributeOperation when notification don't support distributed collaboration.
+ * @tc.desc: Test DistributeOperation ERR_OK.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -279,14 +280,64 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_400, Functi
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetDistributedCollaborate(false);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->DeleteAll();
     advancedNotificationService_->AddToNotificationList(record);
     sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
     operationInfo->SetHashCode(record->notification->GetKey());
     operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
     sptr<IAnsOperationCallback> callback = nullptr;
-
     auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
 
+/**
+ * @tc.name: DistributeOperation_500
+ * @tc.desc: Test DistributeOperation when record's NotificationRequestPoint is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_500, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
+    record->notification = new (std::nothrow) Notification(nullptr);
+    advancedNotificationService_->DeleteAll();
+    advancedNotificationService_->AddToNotificationList(record);
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    operationInfo->SetHashCode(record->notification->GetKey());
+    operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+    sptr<IAnsOperationCallback> callback = nullptr;
+    auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: DistributeOperation_600
+ * @tc.desc: Test DistributeOperation when record's distributedCollaborate_ is false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_600, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetDistributedCollaborate(false);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->DeleteAll();
+    advancedNotificationService_->AddToNotificationList(record);
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    operationInfo->SetHashCode(record->notification->GetKey());
+    operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_REPLY);
+    sptr<IAnsOperationCallback> callback = nullptr;
+    auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
 

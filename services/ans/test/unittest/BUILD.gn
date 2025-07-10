@@ -137,6 +137,7 @@ ohos_unittest("notification_preferences_database_test") {
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_os_account_manager.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
     "mock/mock_swing_callback_stub.cpp",
