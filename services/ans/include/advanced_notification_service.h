@@ -54,6 +54,8 @@ namespace OHOS {
 namespace Notification {
 
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
+constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
+constexpr char SOUND_CAPABILITY[] = "sound_capability";
 class AdvancedNotificationService final : public AnsManagerStub,
     public std::enable_shared_from_this<AdvancedNotificationService> {
 public:
@@ -1660,7 +1662,9 @@ private:
     ErrCode AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
         const sptr<NotificationBundleOption> &bundleOption);
     ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
-    ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request, std::string bundleName);
+        bool VerifyCloudCapability(const int32_t &uid, const std::string &capability);
+    ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request,
+        sptr<NotificationBundleOption> &bundleOption);
     void GenerateSlotReminderMode(const sptr<NotificationSlot> &slot, const sptr<NotificationBundleOption> &bundle,
         bool isSpecifiedSlot = false, uint32_t defaultSlotFlags = DEFAULT_SLOT_FLAGS);
     static void CloseAlert(const std::shared_ptr<NotificationRecord> &record);

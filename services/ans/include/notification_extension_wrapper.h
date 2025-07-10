@@ -42,6 +42,7 @@ public:
     typedef void (*UPDATE_BY_BUNDLE)(const std::string bundleName, int deleteType);
     typedef int32_t (*REMINDER_CONTROL)(const std::string &bundleName);
     typedef int32_t (*BANNER_CONTROL)(const std::string &bundleName);
+    typedef int32_t (*VERIFY_CLOUD_CAPABILITY)(const int32_t &uid, const std::string &permission);
     typedef bool (*NOTIFICATIONDIALOGCONTROL)();
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
@@ -66,6 +67,7 @@ public:
     void UpdateByBundle(const std::string bundleName, int deleteType);
     int32_t ReminderControl(const std::string &bundleName);
     int32_t BannerControl(const std::string &bundleName);
+    int32_t VerifyCloudCapability(const int32_t &uid, const std::string &capability);
     bool NotificationDialogControl();
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
@@ -90,6 +92,7 @@ private:
     UPDATE_BY_BUNDLE updateByBundle_ = nullptr;
     REMINDER_CONTROL reminderControl_ = nullptr;
     BANNER_CONTROL bannerControl_ = nullptr;
+    VERIFY_CLOUD_CAPABILITY verifyCloudCapability_ = nullptr;
     NOTIFICATIONDIALOGCONTROL notificationDialogControl_ = nullptr;
     bool isRegisterDataSettingObserver = false;
 

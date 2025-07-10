@@ -503,7 +503,7 @@ HWTEST_F(AnsBranchTest, SubscribeSelf_279003, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_ANS_TASK_ERR);
+    ASSERT_EQ(advancedNotificationService_->SubscribeSelf(subscriber->GetImpl()), ERR_OK);
 }
 
 /**

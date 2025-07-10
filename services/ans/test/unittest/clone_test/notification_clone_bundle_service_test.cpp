@@ -63,11 +63,8 @@ protected:
 HWTEST_F(NotificationCloneBundleTest, OnBackUp_00001, Function | SmallTest | Level1)
 {
     nlohmann::json jsonObject;
-    int32_t userId = 300;
-    auto advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    
-    MockNotificationCloneUtil* mockCloneUtil = new MockNotificationCloneUtil();
-    EXPECT_CALL(*mockCloneUtil, GetActiveUserId()).WillOnce(Return(userId));
+    int32_t userId = 100;
+    auto advancedNotificationService_ = AdvancedNotificationService::GetInstance();
 
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };

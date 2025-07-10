@@ -127,7 +127,7 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
     request->SetNotDistributed(false);
     SetRequestBySlotType(request, bundleOption);
 
-    result = CheckSoundPermission(request, bundleOption->GetBundleName());
+    result = CheckSoundPermission(request, bundleOption);
     if (result != ERR_OK) {
         return AnsStatus(result, "CheckSoundPermission failed");
     }
