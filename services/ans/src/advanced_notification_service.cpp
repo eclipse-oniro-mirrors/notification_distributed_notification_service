@@ -2100,6 +2100,17 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         }));
     notificationSvrQueue_->wait(handler);
     if (notificationDisable->GetDisabled()) {
+        int32_t userId = notificationDisable->GetUserId();
+        if (userId != SUBSCRIBE_USER_INIT) {
+            int32_t currentUserId = SUBSCRIBE_USER_INIT;
+            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId) != ERR_OK) {
+                ANS_LOGD("GetCurrentActiveUserId failed");
+                return ERR_OK;
+            }
+            if (currentUserId != userId) {
+                return ERR_OK;
+            }
+        }
         std::vector<std::string> bundleList = notificationDisable->GetBundleList();
         for (auto bundle : bundleList) {
             RemoveAllNotificationsByBundleName(

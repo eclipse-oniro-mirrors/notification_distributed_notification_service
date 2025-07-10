@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2588,6 +2588,23 @@ HWTEST_F(NotificationPreferencesTest, GetkioskAppTrustList_008, Function | Small
     std::vector<std::string> resultList;
     auto ret = notificationPreferences.GetkioskAppTrustList(resultList);
     ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetUserDisableNotificationInfo_001
+ * @tc.desc: test GetUserDisableNotificationInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetUserDisableNotificationInfo_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    NotificationDisable disable;
+    bool ret = NotificationPreferences::GetInstance()->GetUserDisableNotificationInfo(105, disable);
+    EXPECT_FALSE(ret);
+    notificationPreferences.preferncesDB_ = nullptr;
+    ret = notificationPreferences.GetUserDisableNotificationInfo(105, disable);
+    EXPECT_FALSE(ret);
 }
 }  // namespace Notification
 }  // namespace OHOS
