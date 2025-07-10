@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Benarkan %s menghantar pemberitahuan kepada anda?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Benarkan",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Tolak",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

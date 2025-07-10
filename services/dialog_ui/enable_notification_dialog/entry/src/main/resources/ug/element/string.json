@@ -1,57 +1,72 @@
 {
-  "string":[
-      {
-          "name":"entry_desc",
-          "value":"description"
-      },
-      {
-          "name":"NotificationServiceExtAbility_desc",
-          "value":"NotificationDialog"
-      },
-      {
-          "name":"NotificationServiceExtAbility_label",
-          "value":"NotificationDialog"
-      },
-      {
-          "name":"reason",
-          "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. تەڭشەكتىن ئۆزگەرتەلەيسىز."
-      },
-      {
-          "name":"reason_simple",
-          "value":"بالداق ئۇقتۇرۇش، تامغا ۋە سايراپ ئۇقتۇرۇش قاتارلىقلار شۇنىڭ ئىچىدە، بۇ تاللانمىنى تەڭشەكتىن ئۆزگەرتەلەيسىز."
-      },
-      {
-        "name":"reason_zyt",
-        "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. DroiTong > ئەپ باشقۇرۇش دېگەن ئورۇندىن ئۆزگەرتەلەيسىز."
-      },
-      {
-        "name":"reason_cjy",
-        "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. چۇجىڭيى (چېگرا قولايلىقى) > ئەپ باشقۇرۇش دېگەن ئورۇندىن ئۆزگەرتەلەيسىز."
-      },
-      {
-        "name":"reason_tv",
-        "value":"بالداق ئۇقتۇرۇش شۇنىڭ ئىچىدە. بۇ تاللانمىنى تەڭشەكتىن ئۆزگەرتەلەيسىز."
-      },
-      {
-          "name":"ALLOW",
-          "value":"رۇخسەت",
-          "attr":{
-              "priority":"LT"
-          }
-      },
-      {
-          "name":"BAN",
-          "value":"چەكلەش",
-          "attr":{
-              "priority":"LT"
-          }
-      },
-      {
-          "name":"group_label_notification",
-          "value":"\u200f«%s» نىڭ ئۇقتۇرۇش يوللىشىغا رۇخسەتمۇ؟",
-          "attr":{
-              "priority":"LT"
-          }
-      }
-  ]
+    "string":[
+        {
+            "name":"entry_desc",
+            "value":"description"
+        },
+        {
+            "name":"NotificationServiceExtAbility_desc",
+            "value":"NotificationDialog"
+        },
+        {
+            "name":"NotificationServiceExtAbility_label",
+            "value":"NotificationDialog"
+        },
+        {
+            "name":"reason",
+            "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. تەڭشەكتىن ئۆزگەرتەلەيسىز.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_simple",
+            "value":"بالداق ئۇقتۇرۇش، تامغا ۋە سايراپ ئۇقتۇرۇش قاتارلىقلار شۇنىڭ ئىچىدە، بۇ تاللانمىنى تەڭشەكتىن ئۆزگەرتەلەيسىز.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_zyt",
+            "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. DroiTong > ئەپ باشقۇرۇش دېگەن ئورۇندىن ئۆزگەرتەلەيسىز.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_cjy",
+            "value":"قۇلۇپ ئېكرانى، بالداق، تامغا، ئاۋاز ۋە تىترەش شۇنىڭ ئىچىدە. چۇجىڭيى (چېگرا قولايلىقى) > ئەپ باشقۇرۇش دېگەن ئورۇندىن ئۆزگەرتەلەيسىز.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"بالداق ئۇقتۇرۇش شۇنىڭ ئىچىدە. بۇ تاللانمىنى تەڭشەكتىن ئۆزگەرتەلەيسىز.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"ALLOW",
+            "value":"رۇخسەت",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"BAN",
+            "value":"چەكلەش",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"group_label_notification",
+            "value":"\u200f«%s» نىڭ ئۇقتۇرۇش يوللىشىغا رۇخسەتمۇ؟",
+            "attr":{
+                "priority":"LT"
+            }
+        }
+    ]
 }

@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"%s toestaan om u meldingen te sturen?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Toestaan",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Weigeren",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

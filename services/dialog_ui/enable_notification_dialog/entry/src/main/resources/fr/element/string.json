@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Autoriser %s à vous envoyer des notifications ?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Autoriser",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Refuser",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -45,6 +45,13 @@
         {
             "name":"reason_cjy",
             "value":"Il peut s'agir de notifications d'écran verrouillé, de bannières, de badges, de sons et de vibrations. Ces paramètres peuvent être modifiés sous EasyAbroad > Gestion des applications.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Les notifications sont diffusées sous forme de bannières. Vous pouvez modifier vos préférences de notification à tout moment dans Paramètres.",
             "attr":{
                 "priority":"translate"
             }

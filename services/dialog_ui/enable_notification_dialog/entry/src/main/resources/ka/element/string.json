@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"გსურთ დაუშვათ, რომ %s-მ შეძლოს თქვენთვის შეტყობინებების გამოგზავნა?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"დაშვება",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"უარყოფა",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

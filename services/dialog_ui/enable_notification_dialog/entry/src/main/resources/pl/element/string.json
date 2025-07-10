@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Zezwolić aplikacji %s na wysyłanie powiadomień?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Zezwól",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Odmów",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

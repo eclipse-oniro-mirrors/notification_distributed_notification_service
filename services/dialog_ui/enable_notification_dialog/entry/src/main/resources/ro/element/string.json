@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Permiteți aplicației %s să vă trimită notificări?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Permitere",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Refuzare",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

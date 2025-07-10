@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"السماح لتطبيق %s بإرسال الإشعارات إليك؟",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"سماح",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"رفض",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -45,6 +45,13 @@
         {
             "name":"reason_cjy",
             "value":"قد تشمل هذه إشعارات شاشة القفل، واللافتات، والشارات، والأصوات، والاهتزازات. يمكنك تغيير هذه الإعدادات من \"EasyAbroad > إدارة التطبيقات\".",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"ستصل الإشعارات في شكل شريط إشعارات. ويمكنك تغيير تفضيلات الإشعارات في أي وقت في الإعدادات.",
             "attr":{
                 "priority":"translate"
             }

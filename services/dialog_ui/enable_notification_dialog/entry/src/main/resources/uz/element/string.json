@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"%s ilovasining sizga bildirishnomalar yuborishiga ruxsat berasizmi?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Ruxsat",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Taqiqlash",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -11,6 +11,38 @@
         {
             "name":"BAN",
             "value":"[TS_917253]_Deny"
+        },
+        {
+            "name":"reason",
+            "value":"[TS_917250]_These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change this in Settings."
+        },
+        {
+            "name":"reason_zyt",
+            "value":"[TS_1044874]_These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change these settings in DroiTong > App management."
+        },
+        {
+            "name":"NotificationServiceExtAbility_label",
+            "value":"[TS_917249]_NotificationDialog"
+        },
+        {
+            "name":"reason_cjy",
+            "value":"[TS_1058565]_These may include lock screen notifications, banners, badges, sounds, and vibrations. You can change these settings in EasyAbroad > App management."
+        },
+        {
+            "name":"reason_simple",
+            "value":"[TS_994101]_These may include banners, badges, and sounds. You can change this in Settings."
+        },
+        {
+            "name":"entry_desc",
+            "value":"[TS_917246]_description"
+        },
+        {
+            "name":"NotificationServiceExtAbility_desc",
+            "value":"[TS_917256]_NotificationDialog"
+        },
+        {
+            "name":"reason_tv",
+            "value":"[TS_1057966]_Notifications will be delivered as banners. You can change your notification preferences at any time in Settings."
         }
     ]
 }

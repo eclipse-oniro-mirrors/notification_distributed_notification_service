@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"¿Permitir que %s te envíe notificaciones?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Permitir",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Denegar",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -45,6 +45,13 @@
         {
             "name":"reason_cjy",
             "value":"Estas pueden incluir notificaciones de pantalla de bloqueo, banners, insignias, sonidos y vibraciones. Puedes cambiar estos ajustes en EasyAbroad > Gestión de aplicaciones.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Las notificaciones se enviarán en forma de tiras. Puedes cambiar las preferencias de notificaciones en cualquier momento en Ajustes.",
             "attr":{
                 "priority":"translate"
             }

@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Дозволити додатку \"%s\" надсилати вам сповіщення?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Дозволити",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Заборонити",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

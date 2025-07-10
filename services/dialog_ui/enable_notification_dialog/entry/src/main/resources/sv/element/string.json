@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Vill du tillåta att %s skickar dig aviseringar?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Tillåt",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Avvisa",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

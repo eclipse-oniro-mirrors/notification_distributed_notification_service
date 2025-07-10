@@ -2,23 +2,23 @@
     "string":[
         {
             "name":"group_label_notification",
-            "value":"Izinkan %s mengirimi Anda notifikasi?",
+            "value":"‏%s רוצה לשלוח לך התראות, לאפשר?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
-            "value":"Izinkan",
+            "value":"אפשר",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
-            "value":"Tolak",
+            "value":"סרב",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

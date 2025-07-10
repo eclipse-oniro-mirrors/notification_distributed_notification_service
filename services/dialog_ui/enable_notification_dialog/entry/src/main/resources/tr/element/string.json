@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"%s uygulamasının size bildirim göndermesine izin verilsin mi?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"İzin Ver",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Reddet",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

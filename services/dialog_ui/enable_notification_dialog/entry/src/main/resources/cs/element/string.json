@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Povolit aplikaci %s posílat oznámení?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Povolit",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Odmítnout",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Дазволіць праграме «%s» адпраўляць вам апавяшчэнні?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Дазволіць",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Адмовіць",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

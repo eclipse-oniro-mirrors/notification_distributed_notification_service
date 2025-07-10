@@ -4,21 +4,21 @@
             "name":"group_label_notification",
             "value":"Cho phép %s gửi thông báo cho bạn?",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"ALLOW",
             "value":"Cho phép",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"BAN",
             "value":"Từ chối",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -45,6 +45,13 @@
         {
             "name":"reason_cjy",
             "value":"Những thông báo này có thể bao gồm thông báo trên màn hình khóa, biểu ngữ, huy hiệu, âm thanh và rung. Bạn có thể thay đổi những cài đặt này trong EasyAbroad > Quản lý ứng dụng.",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"reason_tv",
+            "value":"Thông báo sẽ được gửi dưới dạng biểu ngữ. Bạn có thể thay đổi các tùy chọn thông báo của mình bất kỳ lúc nào trong mục Cài đặt.",
             "attr":{
                 "priority":"translate"
             }
