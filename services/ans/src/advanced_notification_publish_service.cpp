@@ -375,7 +375,6 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         ANS_LOGE("The data share helper is nullptr.");
         return -1;
     }
-
     int isNeedSilent = 0;
     std::string policy;
     Uri policyUri(datashareHelper->GetFocusModeCallPolicyUri(userId));
@@ -392,11 +391,14 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
     }
     ANS_LOGI("IsNeedSilent: policy: %{public}s, repeat: %{public}s, callerType: %{public}d",
         policy.c_str(), repeat_call.c_str(), callerType);
-    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE &&
-        callerType == 0 && atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE) {
-        if (datashareHelper->isRepeatCall(phoneNumber)) {
-            return 1;
-        }
+    if (repeat_call == FOCUS_MODE_REPEAT_CALLERS_ENABLE && callerType == 0 &&
+        atoi(policy.c_str()) != ContactPolicy::ALLOW_EVERYONE && datashareHelper->isRepeatCall(phoneNumber)) {
+        return 1;
+    }
+    bool isAccountVerified = true;
+    ErrCode account_ret = OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, isAccountVerified);
+    if (account_ret != ERR_OK) {
+        ANS_LOGE("IsOsAccountVerified fail.");
     }
     switch (atoi(policy.c_str())) {
         case ContactPolicy::FORBID_EVERYONE:
@@ -407,11 +409,13 @@ ErrCode AdvancedNotificationService::CheckNeedSilent(
         case ContactPolicy::ALLOW_EXISTING_CONTACTS:
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
         case ContactPolicy::ALLOW_SPECIFIED_CONTACTS:
+            isNeedSilent = isAccountVerified ? QueryContactByProfileId(phoneNumber, policy, userId) : 0;
+            break;
         case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
-            isNeedSilent = QueryContactByProfileId(phoneNumber, policy, userId);
+            isNeedSilent = isAccountVerified ? QueryContactByProfileId(phoneNumber, policy, userId) : 1;
             break;
     }
-    ANS_LOGI("IsNeedSilentInDoNotDisturbMode: %{public}d", isNeedSilent);
+    ANS_LOGI("CheckNeedSilent isNeedSilent:%{public}d isAccountVerified:%{public}d", isNeedSilent, isAccountVerified);
     return isNeedSilent;
 }
 
