@@ -25,6 +25,7 @@ namespace Notification {
 enum MatchType {
     MATCH_SYN = 0,
     MATCH_ACK,
+    MATCH_OFFLINE,
 };
 
 class NotifticationMatchBox : public BoxBase {

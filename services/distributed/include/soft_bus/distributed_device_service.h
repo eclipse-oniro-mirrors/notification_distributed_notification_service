@@ -36,6 +36,7 @@ public:
     static DistributedDeviceService& GetInstance();
     static std::string DeviceTypeToTypeString(uint16_t deviceType);
 
+    bool IsLocalPadOrPC();
     bool IsReportDataByHa();
     void InitLocalDevice(const std::string &deviceId, uint16_t deviceType);
     DistributedDeviceInfo GetLocalDevice();
@@ -53,6 +54,7 @@ public:
     bool CheckDeviceNeedSync(const std::string& deviceId);
     void IncreaseDeviceSyncCount(const std::string& deviceId);
     void AddDeviceInfo(DistributedDeviceInfo deviceItem);
+    void ResetDeviceInfo(const std::string& deviceId);
     void DeleteDeviceInfo(const std::string& deviceId);
     std::map<std::string, DistributedDeviceInfo>& GetDeviceList();
     void GetDeviceList(std::map<std::string, DistributedDeviceInfo>& peerDevices);

@@ -38,7 +38,7 @@ enum BunleListOperationType {
 };
 
 enum DeviceStatueChangeType {
-    DEVICE_USING_CHANGE = 0,
+    DEVICE_USING_ONLINE = 0,
     NOTIFICATION_ENABLE_CHANGE = 1,
     ALL_CONNECT_STATUS_CHANGE = 2,
     DEVICE_USING_CLOSE = 3,

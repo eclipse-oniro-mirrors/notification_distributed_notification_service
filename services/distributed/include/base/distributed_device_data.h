@@ -49,7 +49,7 @@ struct DistributedDeviceInfo {
     bool deviceUsage = false;
     bool liveViewSync = false;
     bool iconSync = false;
-    bool installedBunlesSync = false;
+    bool installedBundlesSync = false;
     uint16_t deviceType_;
     int32_t peerState_ = DeviceState::STATE_INIT;
     int32_t socketId_ = -1;

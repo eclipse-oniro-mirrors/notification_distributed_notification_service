@@ -365,12 +365,6 @@ void DistributedBundleService::ReportBundleIconList(const DistributedDeviceInfo 
 void DistributedBundleService::SyncInstalledBundles(const DistributedDeviceInfo& peerDevice, bool isForce)
 {
     auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
-    if (localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
-        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 &&
-        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
-        return;
-    }
-
     if (!DistributedDeviceService::GetInstance().IsSyncInstalledBundle(peerDevice.deviceId_, isForce)) {
         return;
     }

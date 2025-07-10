@@ -86,9 +86,12 @@ void DistributedSubscribeService::SubscribeNotification(const DistributedDeviceI
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, userId, result);
 }
 
-void DistributedSubscribeService::UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType)
+void DistributedSubscribeService::UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType,
+    bool releaseDevice)
 {
-    DistributedDeviceService::GetInstance().DeleteDeviceInfo(deviceId);
+    if (releaseDevice) {
+        DistributedDeviceService::GetInstance().DeleteDeviceInfo(deviceId);
+    }
     std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = subscriberMap_.find(deviceId);
     if (iter == subscriberMap_.end()) {
