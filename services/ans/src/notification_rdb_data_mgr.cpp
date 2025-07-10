@@ -796,10 +796,6 @@ int32_t NotificationDataMgr::RestoreForMasterSlaver()
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGI("RestoreForMasterSlaver start");
     int32_t result =  rdbStore_->Restore("");
-    if (result == NativeRdb::E_SQLITE_CORRUPT) {
-        Destroy();
-        Init();
-    }
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
     return result;
 }
