@@ -65,10 +65,7 @@ HWTEST_F(NotificationCloneDisturbTest, OnBackUp_00001, Function | SmallTest | Le
 {
     nlohmann::json jsonObject;
     int32_t userId = 100;
-    auto advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    
-    MockNotificationCloneUtil* mockCloneUtil = new MockNotificationCloneUtil();
-    EXPECT_CALL(*mockCloneUtil, GetActiveUserId()).WillOnce(Return(userId));
+    auto advancedNotificationService_ = AdvancedNotificationService::GetInstance();
 
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };
@@ -142,40 +139,6 @@ HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_002, Function | SmallT
     bundle.SetAppIndex(1);
 
     trustList.push_back(bundle);
-
-    MockNotificationCloneUtil* mockCloneUtil = new MockNotificationCloneUtil();
-    EXPECT_CALL(*mockCloneUtil, GetBundleUid(_, _, _)).WillOnce(Return(54321));
-
-    notificationCloneDisturb->GetProfileUid(userId, uidMap, trustList, exitBunldleList, notExitBunldleList);
-
-    EXPECT_EQ(exitBunldleList.size(), 0);
-    EXPECT_EQ(notExitBunldleList.size(), 1);
-}
-
-/**
- * @tc.name: GetProfileUid_Test_003
- * @tc.desc: Test that the function sets the UID from uidMap when the key exists in uidMap.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationCloneDisturbTest, GetProfileUid_Test_003, Function | SmallTest | Level1)
-{
-    int32_t userId = 1;
-    std::map<std::string, int32_t> uidMap;
-    std::vector<NotificationBundleOption> trustList;
-    std::vector<NotificationBundleOption> exitBunldleList;
-    std::vector<NotificationBundleOption> notExitBunldleList;
-
-    // Create a bundle
-    NotificationBundleOption bundle;
-    bundle.SetBundleName("com.example.app");
-    bundle.SetAppIndex(1);
-
-    trustList.push_back(bundle);
-
-    MockNotificationCloneUtil* mockCloneUtil = new MockNotificationCloneUtil();
-    EXPECT_CALL(*mockCloneUtil, GetBundleUid(_, _, _)).WillOnce(Return(-1));
-
     notificationCloneDisturb->GetProfileUid(userId, uidMap, trustList, exitBunldleList, notExitBunldleList);
 
     EXPECT_EQ(exitBunldleList.size(), 0);

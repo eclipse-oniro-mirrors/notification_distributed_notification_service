@@ -151,7 +151,12 @@ void ExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
         return;
     }
-    ANS_LOGD("extension wrapper init success");
+    verifyCloudCapability_ = (VERIFY_CLOUD_CAPABILITY)dlsym(extensionWrapperHandle_, "VerifyCloudCapability");
+    if (verifyCloudCapability_ == nullptr) {
+        ANS_LOGE("extension wrapper symbol failed, error: %{public}s", dlerror());
+        return;
+    }
+    ANS_LOGI("extension wrapper init success");
 }
 
 void ExtensionWrapper::CheckIfSetlocalSwitch()
@@ -237,6 +242,16 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
     }
     return bannerControl_(bundleName);
 }
+
+int32_t ExtensionWrapper::VerifyCloudCapability(const int32_t &uid, const std::string &capability)
+{
+    if (verifyCloudCapability_ == nullptr) {
+        ANS_LOGE("VerifyCloudCapability wrapper symbol failed");
+        return -1;
+    }
+    return verifyCloudCapability_(uid, capability);
+}
+
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
 bool ExtensionWrapper::IsPrivilegeMessage(const sptr<NotificationRequest> &request)

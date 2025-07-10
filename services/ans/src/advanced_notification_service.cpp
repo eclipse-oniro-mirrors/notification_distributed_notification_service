@@ -363,15 +363,7 @@ AdvancedNotificationService::AdvancedNotificationService()
 
 AdvancedNotificationService::~AdvancedNotificationService()
 {
-    ANS_LOGD("called");
-    NotificationSubscriberManager::GetInstance()->UnRegisterOnSubscriberAddCallback();
-
-    StopFilters();
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
-    DistributedNotificationManager::GetInstance()->UngegisterCallback();
-#endif
-    SelfClean();
-    slotFlagsDefaultMap_.clear();
+    ANS_LOGI("deconstructor");
 }
 
 void AdvancedNotificationService::SelfClean()
@@ -1929,8 +1921,18 @@ bool AdvancedNotificationService::IsNeedNotifyConsumed(const sptr<NotificationRe
     return deleteTime != NotificationConstant::NO_DELAY_DELETE_TIME;
 }
 
+bool AdvancedNotificationService::VerifyCloudCapability(const int32_t &uid, const std::string &capability)
+{
+#ifdef ENABLE_ANS_EXT_WRAPPER
+    int32_t ctrlResult = EXTENTION_WRAPPER->VerifyCloudCapability(uid, capability);
+    return (ctrlResult == ERR_OK) ? true : false;
+#else
+    return false;
+#endif
+}
+
 ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<NotificationRequest> &request,
-    std::string bundleName)
+    sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("called");
     if (request->GetSound().empty()) {
@@ -1945,8 +1947,8 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
     }
 
     // Update sound permission info cache
-    ANS_LOGD("Check sound permission: %{public}d, %{public}s, %{public}d", length, bundleName.c_str(),
-        soundPermissionInfo_->needUpdateCache_.load());
+    ANS_LOGD("Check sound permission: %{public}d, %{public}s, %{public}d",
+        length, bundleOption->GetBundleName().c_str(), soundPermissionInfo_->needUpdateCache_.load());
     if (soundPermissionInfo_->needUpdateCache_.load()) {
         std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
         if (soundPermissionInfo_->needUpdateCache_.load()) {
@@ -1958,7 +1960,9 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
         }
     }
 
-    if (!soundPermissionInfo_->allPackage_ && soundPermissionInfo_->bundleName_.count(bundleName) == 0) {
+    if (!soundPermissionInfo_->allPackage_
+        && soundPermissionInfo_->bundleName_.count(bundleOption->GetBundleName()) == 0
+        && !VerifyCloudCapability(bundleOption->GetUid(), SOUND_CAPABILITY)) {
         request->SetSound("");
     }
     return ERR_OK;

@@ -107,7 +107,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
             break;
         }
 
-        result = CheckSoundPermission(request, bundleOption->GetBundleName());
+        result = CheckSoundPermission(request, bundleOption);
         if (result != ERR_OK) {
             message.ErrorCode(result).Message("Check sound failed.");
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);

@@ -53,7 +53,7 @@ HWTEST_F(DhNotificationCloneBundleTest, OnRestore_Test_001, Function | SmallTest
 {
     nlohmann::json jsonObject;
     int32_t userId = 100;
-    auto advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
+    auto advancedNotificationService_ = AdvancedNotificationService::GetInstance();
 
     sptr<NotificationDoNotDisturbProfile> date = nullptr;
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles = { date };

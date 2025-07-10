@@ -1692,8 +1692,10 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckSoundPermission_100, Function
     sound += "."; // sound length larger than 2048
     request->SetSound(sound);
     std::string bundle = "bundle";
+    int32_t uid = 10;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
 
-    auto ret = advancedNotificationService_->CheckSoundPermission(request, bundle);
+    auto ret = advancedNotificationService_->CheckSoundPermission(request, bundleOption);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -1709,8 +1711,10 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckSoundPermission_200, Function
     std::string sound = "1";
     request->SetSound(sound);
     std::string bundle = "bundle";
+    int32_t uid = 10;
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
 
-    auto ret = advancedNotificationService_->CheckSoundPermission(request, bundle);
+    auto ret = advancedNotificationService_->CheckSoundPermission(request, bundleOption);
 
     ASSERT_EQ(ret, (int)ERR_OK);
 }

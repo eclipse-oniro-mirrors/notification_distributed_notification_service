@@ -1807,6 +1807,12 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
 {
+    int32_t userId = DEFAULT_UID;
+    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
+    if (VerifyCloudCapability(uid, REMINDER_CAPABILITY)) {
+        return true;
+    }
     if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsReminderEnabled(bundleName)) {
         return true;
     }
