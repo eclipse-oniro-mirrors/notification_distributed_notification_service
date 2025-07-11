@@ -1817,7 +1817,6 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
             }
         }
     }
-
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
     if (result != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
@@ -1825,7 +1824,6 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
             if (!request->IsAtomicServiceNotification()) {
-                ANS_LOGI("The application with the permission fails to pushcheck.");
                 NotificationAnalyticsUtil::ReportTipsEvent(request, message);
             }
             result = ERR_OK;
