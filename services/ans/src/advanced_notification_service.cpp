@@ -619,6 +619,7 @@ ErrCode AdvancedNotificationService::FillNotificationRecord(
 
     record->request = requestdbObj.request;
     record->notification = new (std::nothrow) Notification(requestdbObj.request);
+    record->isAtomicService = record->request->IsAtomicServiceNotification();
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
         return ERR_ANS_NO_MEMORY;
@@ -993,6 +994,10 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
                 record->notification->GetKey().c_str(), result);
             return result;
         }
+    }
+
+    if (record->isAtomicService) {
+        return ERR_OK;
     }
 
     if (permissonFilter_ == nullptr || notificationSlotFilter_ == nullptr) {
@@ -1999,12 +2004,10 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
         return result;
     }
 
-    if (!record->isAtomicService) {
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return result;
-        }
+    result = Filter(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Reject by filters: %{public}d", result);
+        return result;
     }
 
     if (isSystemApp) {

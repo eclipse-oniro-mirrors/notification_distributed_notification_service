@@ -99,6 +99,9 @@ ErrCode AdvancedNotificationService::SetCreatorInfoWithAtomicService(const sptr<
 AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomicService(
     const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption)
 {
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    request->SetIsSystemApp(AccessTokenHelper::IsSystemApp() ||
+        AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID()));
     ErrCode result = CheckUserIdParams(request->GetReceiverUserId());
     if (result != ERR_OK) {
         return AnsStatus(result, "User is invalid");
@@ -124,7 +127,7 @@ AnsStatus AdvancedNotificationService::CheckAndPrepareNotificationInfoWithAtomic
         return AnsStatus(ERR_ANS_INVALID_BUNDLE, "create bundleOption failed");
     }
     SetClassificationWithVoip(request);
-    request->SetNotDistributed(false);
+    request->SetNotDistributed(true);
     SetRequestBySlotType(request, bundleOption);
 
     result = CheckSoundPermission(request, bundleOption);
