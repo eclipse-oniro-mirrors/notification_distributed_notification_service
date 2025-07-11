@@ -20,11 +20,10 @@
 #include "bundle_manager_helper.h"
 #include "notification_preferences.h"
 #include "notification_analytics_util.h"
+#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
-
-constexpr const char *PRIVACYCENTER_BUNDLE_NAME = "com.huawei.hmos.security.privacycenter";
 
 void PermissionFilter::OnStart()
 {}
@@ -74,7 +73,8 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
     }
 
     if (result == ERR_OK) {
-        if (record->bundleOption->GetBundleName().compare(PRIVACYCENTER_BUNDLE_NAME) == 0 && !enable) {
+        if (!enable && DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            IsNotificationForcedEnable(record->bundleOption->GetBundleName())) {
             AdvancedNotificationService::GetInstance()->
                 SetNotificationsEnabledForSpecialBundle("", record->bundleOption, true);
             return result;
