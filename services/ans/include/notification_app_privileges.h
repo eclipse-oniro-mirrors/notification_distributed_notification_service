@@ -30,8 +30,10 @@ public:
     bool IsBannerEnabled() const;
     bool IsReminderEnabled() const;
     bool IsDistributedReplyEnabled() const;
+    bool IsNotificationForcedEnable() const;
 
 private:
+    static constexpr int32_t NOTIFICATION_FORCED_ENABLE = 5;
     static constexpr int32_t DISTRIBUTED_REPLY_SEQ = 4;
     static constexpr int32_t REMINDER_ENABLED_SEQ = 2;
     static constexpr int32_t BANNER_ENABLED_SEQ = 1;
