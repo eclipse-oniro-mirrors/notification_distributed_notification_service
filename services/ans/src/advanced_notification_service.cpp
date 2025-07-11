@@ -1813,7 +1813,6 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         if (pushCallBackParam != nullptr) {
             if (extroInfo != nullptr && extroInfo->HasParam("event")) {
                 pushCallBackParam->event = extroInfo->GetStringParam("event");
-                ANS_LOGI("get event,%{public}s", pushCallBackParam->event.c_str());
             }
         }
     }
