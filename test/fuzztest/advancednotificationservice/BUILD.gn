@@ -46,7 +46,6 @@ group("fuzztest") {
     "serviceunsubscribe_fuzzer:ServiceUnsubscribeFuzzTest",
     "servicecancelgroup_fuzzer:ServiceCancelGroupFuzzTest",
     "servicesetsyncnotificationenabledwithoutapp_fuzzer:ServiceSetSyncNotificationEnabledWithoutAppFuzzTest",
-    "servicepublishcontinuoustasknotification_fuzzer:ServicePublishContinuousTaskNotificationFuzzTest",
     "serviceupdateslots_fuzzer:ServiceUpdateSlotsFuzzTest",
     "servicegetslots_fuzzer:ServiceGetSlotsFuzzTest",
     "servicegetenabledforbundleslotself_fuzzer:ServiceGetEnabledForBundleSlotSelfFuzzTest",
@@ -85,7 +84,6 @@ group("fuzztest") {
     "servicesetnotificationsenabledforallbundles_fuzzer:ServiceSetNotificationsEnabledForAllBundlesFuzzTest",
     "servicecanpopenablenotificationdialog_fuzzer:ServiceCanPopEnableNotificationDialogFuzzTest",
     "servicecancelcontinuoustasknotification_fuzzer:ServiceCancelContinuousTaskNotificationFuzzTest",
-    "servicepublishwithmaxcapacity_fuzzer:ServicePublishWithMaxCapacityFuzzTest",
     "servicegetdeviceremindtype_fuzzer:ServiceGetDeviceRemindTypeFuzzTest",
     "servicedelete_fuzzer:ServiceDeleteFuzzTest",
     "servicesetdistributedenabledbyslot_fuzzer:ServiceSetDistributedEnabledBySlotFuzzTest",
@@ -107,6 +105,5 @@ group("fuzztest") {
     "serviceupdatenotificationtimerbyuid_fuzzer:ServiceUpdateNotificationTimerByUidFuzzTest",
     "serviceisdistributedenabledbyslot_fuzzer:ServiceIsDistributedEnabledBySlotFuzzTest",
     "serviceremovedistributednotifications_fuzzer:ServiceRemoveDistributedNotificationsFuzzTest",
-    "servicepublishpreparednotification_fuzzer:ServicePublishPreparedNotificationFuzzTest",
   ]
 }
