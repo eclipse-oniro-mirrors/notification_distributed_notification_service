@@ -1824,8 +1824,10 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
             .ErrorCode(result).Message("Push OnCheckNotification failed.");
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            ANS_LOGI("The application with the permission fails to pushcheck.");
-            NotificationAnalyticsUtil::ReportTipsEvent(request, message);
+            if (!request->IsAtomicServiceNotification()) {
+                ANS_LOGI("The application with the permission fails to pushcheck.");
+                NotificationAnalyticsUtil::ReportTipsEvent(request, message);
+            }
             result = ERR_OK;
         } else {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
