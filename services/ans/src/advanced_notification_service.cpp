@@ -619,6 +619,7 @@ ErrCode AdvancedNotificationService::FillNotificationRecord(
 
     record->request = requestdbObj.request;
     record->notification = new (std::nothrow) Notification(requestdbObj.request);
+    record->isAtomicService = record->request->IsAtomicServiceNotification();
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
         return ERR_ANS_NO_MEMORY;
@@ -993,6 +994,10 @@ ErrCode AdvancedNotificationService::Filter(const std::shared_ptr<NotificationRe
                 record->notification->GetKey().c_str(), result);
             return result;
         }
+    }
+
+    if (record->isAtomicService) {
+        return ERR_OK;
     }
 
     if (permissonFilter_ == nullptr || notificationSlotFilter_ == nullptr) {
@@ -1808,19 +1813,18 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
         if (pushCallBackParam != nullptr) {
             if (extroInfo != nullptr && extroInfo->HasParam("event")) {
                 pushCallBackParam->event = extroInfo->GetStringParam("event");
-                ANS_LOGI("get event,%{public}s", pushCallBackParam->event.c_str());
             }
         }
     }
-
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
     if (result != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
             .ErrorCode(result).Message("Push OnCheckNotification failed.");
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            ANS_LOGI("The application with the permission fails to pushcheck.");
-            NotificationAnalyticsUtil::ReportTipsEvent(request, message);
+            if (!request->IsAtomicServiceNotification()) {
+                NotificationAnalyticsUtil::ReportTipsEvent(request, message);
+            }
             result = ERR_OK;
         } else {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
@@ -1999,12 +2003,10 @@ ErrCode AdvancedNotificationService::AddRecordToMemory(
         return result;
     }
 
-    if (!record->isAtomicService) {
-        result = Filter(record);
-        if (result != ERR_OK) {
-            ANS_LOGE("Reject by filters: %{public}d", result);
-            return result;
-        }
+    result = Filter(record);
+    if (result != ERR_OK) {
+        ANS_LOGE("Reject by filters: %{public}d", result);
+        return result;
     }
 
     if (isSystemApp) {
