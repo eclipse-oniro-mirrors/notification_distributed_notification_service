@@ -1,0 +1,146 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+interface OHOS.Notification.IAnsDialogCallback;
+interface OHOS.Notification.IAnsSubscriberLocalLiveView;
+interface OHOS.Notification.IAnsSubscriber;
+interface OHOS.Notification.IAnsOperationCallback;
+
+sequenceable OHOS.Notification.NotificationBundleOption;
+sequenceable OHOS.Notification.NotificationDisable;
+sequenceable OHOS.Notification.NotificationDoNotDisturbDate;
+sequenceable OHOS.Notification.NotificationDoNotDisturbProfile;
+sequenceable OHOS.Notification.NotificationRequest;
+sequenceable OHOS.Notification.NotificationSlot;
+sequenceable OHOS.Notification.NotificationSubscribeInfo;
+sequenceable OHOS.Notification.NotificationOperationInfo;
+sequenceable OHOS.Notification.Notification;
+sequenceable OHOS.Notification.NotificationButtonOption;
+sequenceable OHOS.Notification.NotificationCheckRequest;
+sequenceable OHOS.IRemoteObject;
+
+interface OHOS.Notification.IAnsSettingManager {
+    void AddSlotByType([in] int slotTypeInt);
+
+    void AddSlots([in] sptr<NotificationSlot>[] slots);
+
+    void RemoveSlotByType([in] int slotTypeInt);
+
+    void RemoveAllSlots();
+
+    void GetSlotByType([in] int slotTypeInt, [out] null_sptr<NotificationSlot> slot);
+
+    void GetSlots([out] sptr<NotificationSlot>[] slots);
+
+    void GetSlotNumAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned long num);
+
+    void CanPublishAsBundle([in] String representativeBundle, [out] boolean canPublish);
+
+    void GetBundleImportance([out] int importance);
+
+    void HasNotificationPolicyAccessPermission([out] boolean granted);
+
+    void GetSlotsByBundle([in] sptr<NotificationBundleOption> bundleOption, [out] sptr<NotificationSlot>[] slots);
+
+    void GetSlotByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int slotTypeInt,
+        [out] null_sptr<NotificationSlot> slot);
+
+    void UpdateSlots([in] sptr<NotificationBundleOption> bundleOption, [in] sptr<NotificationSlot>[] slots);
+
+    void RequestEnableNotification([in] String deviceId, [in] IAnsDialogCallback ansDialogCallback);
+    void RequestEnableNotification([in] String deviceId, [in] IAnsDialogCallback ansDialogCallback, [in] IRemoteObject callerToken);
+
+    void RequestEnableNotification([in] String bundleName, [in] int uid);
+
+    void SetNotificationsEnabledForBundle([in] String deviceId, [in] boolean enabled);
+
+    void SetNotificationsEnabledForAllBundles([in] String deviceId, [in] boolean enabled);
+
+    void SetNotificationsEnabledForSpecialBundle(
+        [in] String deviceId, [in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled, [in] boolean updateUnEnableTime);
+
+    void SetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+
+    void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
+
+    void GetShowBadgeEnabled([out] boolean enabled);
+
+    void IsAllowedNotify([out] boolean allowed);
+
+    void IsAllowedNotifySelf([out] boolean allowed);
+
+    void CanPopEnableNotificationDialog([in] IAnsDialogCallback ansDialogCallback, [out] boolean canPop, [out] String bundleName);
+
+    void RemoveEnableNotificationDialog();
+
+    void IsSpecialBundleAllowedNotify([in] sptr<NotificationBundleOption> bundleOption, [out] boolean allowed);
+
+    void SetDoNotDisturbDate([in] sptr<NotificationDoNotDisturbDate> date);
+
+    void GetDoNotDisturbDate([out] sptr<NotificationDoNotDisturbDate> date);
+
+    void AddDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+
+    void RemoveDoNotDisturbProfiles([in] sptr<NotificationDoNotDisturbProfile>[] profiles);
+
+    void DoesSupportDoNotDisturbMode([out] boolean doesSupport);
+
+    void IsNeedSilentInDoNotDisturbMode([in] String phoneNumber, [in] int callerType);
+
+    void IsSpecialUserAllowedNotify([in] int userId, [out] boolean allowed);
+
+    void SetNotificationsEnabledByUser([in] int userId, [in] boolean enabled);
+
+    void SetDoNotDisturbDate([in] int userId, [in] sptr<NotificationDoNotDisturbDate> date);
+
+    void GetDoNotDisturbDate([in] int userId, [out] sptr<NotificationDoNotDisturbDate> date);
+
+    void SetEnabledForBundleSlot(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int slotTypeInt,
+        [in] boolean enabled,
+        [in] boolean isForceControl);
+
+        void GetEnabledForBundleSlot(
+        [in] sptr<NotificationBundleOption> bundleOption,
+        [in] int slotTypeInt,
+        [out] boolean enabled);
+
+    void GetEnabledForBundleSlotSelf([in] int slotTypeInt, [out] boolean enabled);
+
+    void SetSyncNotificationEnabledWithoutApp([in] int userId, [in] boolean enabled);
+
+    void GetSyncNotificationEnabledWithoutApp([in] int userId, [out] boolean enabled);
+
+    void GetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned int slotFlags);
+
+    void SetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] unsigned int slotFlags);
+
+    void GetNotificationSettings([out] unsigned int slotFlags);
+
+    void GetAllNotificationEnabledBundles([out] NotificationBundleOption[] bundleOption);
+
+    void GetAllLiveViewEnabledBundles([out] NotificationBundleOption[] bundleOption);
+
+    void IsSilentReminderEnabled([in] sptr<NotificationBundleOption> bundleOption, [out] int enabled);
+
+    void SetSilentReminderEnabled([in] sptr<NotificationBundleOption> bundleOption, [in] boolean enabled);
+
+    void GetDoNotDisturbProfile([in] long id, [out] sptr<NotificationDoNotDisturbProfile> profile);
+
+    void AllowUseReminder([in] String bundleName, [out] boolean isAllowUseReminder);
+
+    void DisableNotificationFeature([in] sptr<NotificationDisable> notificationDisable);
+}
