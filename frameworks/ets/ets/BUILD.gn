@@ -1,0 +1,374 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//base/notification/distributed_notification_service/notification.gni")
+
+# start : notification/notificationUserInput.ets
+generate_static_abc("notification_user_input_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationUserInput.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_user_input.abc"
+  out_puts = [ "$target_out_dir/notification_user_input.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_user_input.abc"
+}
+
+ohos_prebuilt_etc("notification_user_input_etc") {
+  source = "$target_out_dir/notification_user_input.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_user_input_abc" ]
+}
+# end : notification/notificationUserInput.ets
+
+# start : notification/notificationTemplate.ets
+generate_static_abc("notification_template_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationTemplate.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_template.abc"
+  out_puts = [ "$target_out_dir/notification_template.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_template.abc"
+}
+
+ohos_prebuilt_etc("notification_template_etc") {
+  source = "$target_out_dir/notification_template.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_template_abc" ]
+}
+# end : notification/notificationTemplate.ets
+
+
+
+# start : notification/notificationSubscriber.ets
+generate_static_abc("notification_subscriber_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSubscriber.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_subscriber.abc"
+  out_puts = [ "$target_out_dir/notification_subscriber.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_subscriber.abc"
+}
+
+ohos_prebuilt_etc("notification_subscriber_etc") {
+  source = "$target_out_dir/notification_subscriber.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_subscriber_abc" ]
+}
+# end : notification/notificationSubscriber.ets
+
+# start : notification/notificationSubscribeInfo.ets
+generate_static_abc("notification_subscribe_info_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSubscribeInfo.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_subscribe_info.abc"
+  out_puts = [ "$target_out_dir/notification_subscribe_info.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_subscribe_info.abc"
+}
+
+ohos_prebuilt_etc("notification_subscribe_info_etc") {
+  source = "$target_out_dir/notification_subscribe_info.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_subscribe_info_abc" ]
+}
+# end : notification/notificationSubscribeInfo.ets
+
+# start : notification/notificationSortingMap.ets
+generate_static_abc("notification_sorting_map_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSortingMap.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_sorting_map.abc"
+  out_puts = [ "$target_out_dir/notification_sorting_map.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_sorting_map.abc"
+}
+
+ohos_prebuilt_etc("notification_sorting_map_etc") {
+  source = "$target_out_dir/notification_sorting_map.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_sorting_map_abc" ]
+}
+# end : notification/notificationSortingMap.ets
+
+# start : notification/notificationSorting.ets
+generate_static_abc("notification_sorting_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSorting.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_sorting.abc"
+  out_puts = [ "$target_out_dir/notification_sorting.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_sorting.abc"
+}
+
+ohos_prebuilt_etc("notification_sorting_etc") {
+  source = "$target_out_dir/notification_sorting.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_sorting_abc" ]
+}
+# end : notification/notificationSorting.ets
+
+# start : notification/notificationSlot.ets
+generate_static_abc("notification_slot_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationSlot.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_slot.abc"
+  out_puts = [ "$target_out_dir/notification_slot.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_slot.abc"
+}
+
+ohos_prebuilt_etc("notification_slot_etc") {
+  source = "$target_out_dir/notification_slot.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_slot_abc" ]
+}
+# end : notification/notificationSlot.ets
+
+# start : notification/notificationRequest.ets
+generate_static_abc("notification_request_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationRequest.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_request.abc"
+  out_puts = [ "$target_out_dir/notification_request.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_request.abc"
+}
+
+ohos_prebuilt_etc("notification_request_etc") {
+  source = "$target_out_dir/notification_request.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_request_abc" ]
+}
+# end : notification/notificationRequest.ets
+
+# start : notification/notificationFlags.ets
+generate_static_abc("notification_flags_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationFlags.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_flags.abc"
+  out_puts = [ "$target_out_dir/notification_flags.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_flags.abc"
+}
+
+ohos_prebuilt_etc("notification_flags_etc") {
+  source = "$target_out_dir/notification_flags.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_flags_abc" ]
+}
+# end : notification/notificationFlags.ets
+
+# start : notification/notificationContent.ets
+generate_static_abc("notification_content_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationContent.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_content.abc"
+  out_puts = [ "$target_out_dir/notification_content.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_content.abc"
+}
+
+ohos_prebuilt_etc("notification_content_etc") {
+  source = "$target_out_dir/notification_content.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_content_abc" ]
+}
+# end : notification/notificationContent.ets
+
+# start : notification/NotificationCommonDef.ets
+generate_static_abc("notification_common_def_abc") {
+  base_url = "./"
+  files = [
+      "./notification/NotificationCommonDef.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_common_def.abc"
+  out_puts = [ "$target_out_dir/notification_common_def.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_common_def.abc"
+}
+
+ohos_prebuilt_etc("notification_common_def_etc") {
+  source = "$target_out_dir/notification_common_def.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_common_def_abc" ]
+}
+# end : notification/NotificationCommonDef.ets
+
+
+# start : notification/notificationActionButton.ets
+generate_static_abc("notification_action_button_abc") {
+  base_url = "./"
+  files = [
+      "./notification/notificationActionButton.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_action_button.abc"
+  out_puts = [ "$target_out_dir/notification_action_button.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_action_button.abc"
+}
+
+ohos_prebuilt_etc("notification_action_button_etc") {
+  source = "$target_out_dir/notification_action_button.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_action_button_abc" ]
+}
+# end : notification/notificationActionButton.ets
+
+# start : @ohos.notificationManager.ets
+generate_static_abc("notification_manager_abc") {
+  base_url = "./"
+  files = [
+      "./@ohos.notificationManager.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_manager.abc"
+  out_puts = [ "$target_out_dir/notification_manager.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_manager.abc"
+}
+
+ohos_prebuilt_etc("notification_manager_etc") {
+  source = "$target_out_dir/notification_manager.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_manager_abc" ]
+}
+# end : @ohos.notificationManager.ets
+
+# start : @ohos.notificationSubscribe.ets
+generate_static_abc("notification_subscribe_abc") {
+  base_url = "./"
+  files = [
+      "./@ohos.notificationSubscribe.ets",
+    ]
+
+  dst_file = "$target_out_dir/notification_subscribe.abc"
+  out_puts = [ "$target_out_dir/notification_subscribe.abc" ]
+
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/notification_subscribe.abc"
+}
+
+ohos_prebuilt_etc("notification_subscribe_etc") {
+  source = "$target_out_dir/notification_subscribe.abc"
+  module_install_dir = "framework"
+  subsystem_name = "${subsystem_name}"
+  part_name = "${component_name}"
+  deps = [ ":notification_subscribe_abc" ]
+}
+# end : @ohos.notificationSubscribe.ets
+
+group("ets_files") {
+  deps = [
+    ":notification_user_input_abc",
+    ":notification_user_input_etc",
+    ":notification_template_abc",
+    ":notification_template_etc",
+    ":notification_subscriber_abc",
+    ":notification_subscriber_etc",
+    ":notification_subscribe_info_abc",
+    ":notification_subscribe_info_etc",
+    ":notification_sorting_map_abc",
+    ":notification_sorting_map_etc",
+    ":notification_sorting_abc",
+    ":notification_sorting_etc",
+    ":notification_slot_abc",
+    ":notification_slot_etc",
+    ":notification_request_abc",
+    ":notification_request_etc",
+    ":notification_flags_abc",
+    ":notification_flags_etc",
+    ":notification_content_abc",
+    ":notification_content_etc",
+    ":notification_common_def_abc",
+    ":notification_common_def_etc",
+    ":notification_action_button_abc",
+    ":notification_action_button_etc",
+    ":notification_manager_abc",
+    ":notification_manager_etc",
+    ":notification_subscribe_abc",
+    ":notification_subscribe_etc",
+  ]
+}
