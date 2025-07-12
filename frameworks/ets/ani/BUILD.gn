@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 import("//base/notification/distributed_notification_service/notification.gni")
 
 ohos_shared_library("notification_manager_ani") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
@@ -115,6 +116,7 @@ ohos_shared_library("notification_manager_ani") {
 }
 
 ohos_shared_library("notification_subscribe_ani") {
+  shlib_type = "ani"
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
