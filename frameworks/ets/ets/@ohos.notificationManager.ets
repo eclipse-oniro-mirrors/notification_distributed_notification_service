@@ -572,7 +572,7 @@ export default namespace notificationManager {
         if (request?.wantAgent !== undefined && request.wantAgent == null) {
             return errorParamInvalid;
         }
-        if(request?.extraInfo !== undefined && request?.extraInfo == null) {
+        if(request?.extendInfo !== undefined && request?.extendInfo == null) {
             return errorParamInvalid;
         }
         if (request?.actionButtons !== undefined && request?.actionButtons?.length === 0) {

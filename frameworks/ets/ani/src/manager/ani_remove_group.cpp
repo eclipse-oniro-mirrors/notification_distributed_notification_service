@@ -16,7 +16,7 @@
 #include "ani_remove_group.h"
 
 #include "ans_log_wrapper.h"
-#include "sts_error_utils.h"
+#include "ets_error_utils.h"
 #include "notification_helper.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
@@ -45,7 +45,7 @@ void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string gr
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniRemoveGroupByBundle -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniRemoveGroupByBundle end");
 }

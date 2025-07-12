@@ -22,7 +22,7 @@
 #include "notification_slot.h"
 #include "notification_button_option.h"
 #include "notification_local_live_view_subscriber.h"
-#include "sts_runtime.h"
+#include "ets_native_reference.h"
 #include "notification_check_info.h"
 
 namespace OHOS {
@@ -143,7 +143,7 @@ public:
      */
     void SetStsNotificationLocalLiveViewSubscriber(ani_env *env, ani_object &localLiveViewSubscriberObj);
 
-    std::unique_ptr<AbilityRuntime::STSNativeReference> &GetStsNotificationLocalLiveViewSubscriber()
+    std::unique_ptr<AppExecFwk::ETSNativeReference> &GetStsNotificationLocalLiveViewSubscriber()
     {
         return stsSubscriber_;
     }
@@ -151,7 +151,7 @@ private:
     ani_env* GetAniEnv();
 private:
     ani_vm* vm_ = nullptr;
-    std::unique_ptr<AbilityRuntime::STSNativeReference> stsSubscriber_ = nullptr;
+    std::unique_ptr<AppExecFwk::ETSNativeReference> stsSubscriber_ = nullptr;
 };
 
 bool SlotTypeEtsToC(ani_env *env, ani_enum_item enumItem, SlotType &slotType);

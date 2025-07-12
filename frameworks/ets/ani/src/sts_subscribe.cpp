@@ -29,13 +29,13 @@ StsDistributedOperationCallback::StsDistributedOperationCallback(ani_object prom
 {
 }
 
-void StsDistributedOperationCallback::OnOperationCallback(const int32_t operationResult)
+ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t operationResult)
 {
     std::lock_guard<std::mutex> l(lock_);
-    if (isCall_) return;
+    if (isCall_) return ANI_OK;
     if (etsVm_ == nullptr) {
         ANS_LOGD("etsVm_ is null");
-        return;
+        return ANI_OK;
     }
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
@@ -43,15 +43,16 @@ void StsDistributedOperationCallback::OnOperationCallback(const int32_t operatio
     aniResult = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
         ANS_LOGD("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
-        return;
+        return aniResult;
     }
     OnStsOperationCallback(etsEnv, operationResult);
     aniResult = etsVm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
         ANS_LOGD("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
-        return;
+        return aniResult;
     }
     isCall_ = true;
+    return ANI_OK;
 }
 
 void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const int32_t operationResult)
@@ -62,21 +63,21 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         return;
     }
     ani_status status = ANI_OK;
-    int32_t externalErrorCode = (operationResult == ERR_OK) ? operationResult : GetExternalCode(operationResult);
-    ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrorCode);
+    int32_t externalErrCode = (operationResult == ERR_OK) ? operationResult : GetExternalCode(operationResult);
+    ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrCode);
 
-    if (externalErrorCode == ERR_OK) {
+    if (externalErrCode == ERR_OK) {
         ANS_LOGD("OnStsOperationCallback Resolve");
-        ani_object ret = OHOS::AppExecFwk::createInt(env, externalErrorCode);
+        ani_object ret = OHOS::AppExecFwk::CreateInt(env, externalErrCode);
         if (ANI_OK != (status = env->PromiseResolver_Resolve(resolver_, static_cast<ani_ref>(ret)))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
             return;
         }
     } else {
         ANS_LOGD("OnStsOperationCallback reject");
-        std::string errMsg = FindAnsErrMsg(externalErrorCode);
+        std::string errMsg = FindAnsErrMsg(externalErrCode);
         ani_error rejection =
-            static_cast<ani_error>(OHOS::AbilityRuntime::CreateStsError(env, externalErrorCode, errMsg));
+            static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, externalErrCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(resolver_, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
         }
@@ -581,7 +582,7 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     bool isInfoUndefine = IsUndefine(env, info);
     if (isSubscribeUndefine) {
         ANS_LOGD("subscriber is undefine");
-        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, "subscriber is undefine");
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, "subscriber is undefine");
         return false;
     }
     sptr<OHOS::Notification::NotificationSubscribeInfo> SubscribeInfo =
@@ -589,7 +590,7 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     if (!isInfoUndefine) {
         if (!UnwarpNotificationSubscribeInfo(env, info, *SubscribeInfo)) {
             ANS_LOGD("UnwarpNotificationSubscribeInfo faild");
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, "UnwarpNotificationSubscribeInfo faild");
+            OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, "UnwarpNotificationSubscribeInfo faild");
             return false;
         }
     }
@@ -597,12 +598,12 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
         if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
             ANS_LOGD("GetNotificationSubscriber faild");
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
+            OHOS::NotificationSts::ThrowError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
             return false;
         }
         if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
             ANS_LOGD("AddSubscriberInstancesInfo faild");
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
+            OHOS::NotificationSts::ThrowError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
             return false;
         }
     }
@@ -618,7 +619,7 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
         ANS_LOGD("SubscribeNotification faild. status %{public}d ErrorToExternal %{public}d",
             status, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+        OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
         return false;
     }
     return true;
@@ -630,14 +631,14 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     if (IsUndefine(env, subscriber)) {
         ANS_LOGD("Subscriber is undefine");
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_INVALID_PARAM);
-        OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_INVALID_PARAM, msg);
+        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INVALID_PARAM, msg);
         return false;
     }
     std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
     if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
         ANS_LOGD("Subscriber not found");
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_INVALID_PARAM);
-        OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_INVALID_PARAM, msg);
+        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INVALID_PARAM, msg);
         return false;
     }
     bool ret = AddDeletingSubscriber(stsSubscriber);
@@ -649,12 +650,12 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
             ANS_LOGD("UnSubscribe faild. status %{public}d ErrorToExternal %{public}d",
                 status, externalErrorCode);
             std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
-            OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+            OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
             DelDeletingSubscriber(stsSubscriber);
         }
     } else {
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_SUBSCRIBER_IS_DELETING);
-        OHOS::AbilityRuntime::ThrowStsError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
+        OHOS::NotificationSts::ThrowError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
         return false;
     }
     return true;
@@ -666,19 +667,19 @@ bool SubscriberInstanceManager::SubscribeSelf(ani_env *env, ani_object subscribe
     bool isSubscribeUndefine = IsUndefine(env, subscriber);
     if (isSubscribeUndefine) {
         ANS_LOGD("subscriber is undefine");
-        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, "subscriber is undefine");
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, "subscriber is undefine");
         return false;
     }
     std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
     if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
         if (!GetNotificationSubscriber(env, subscriber, stsSubscriber)) {
             ANS_LOGD("GetNotificationSubscriber faild");
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
+            OHOS::NotificationSts::ThrowError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
             return false;
         }
         if (!AddSubscriberInstancesInfo(env, stsSubscriber)) {
             ANS_LOGD("AddSubscriberInstancesInfo faild");
-            OHOS::AbilityRuntime::ThrowStsError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
+            OHOS::NotificationSts::ThrowError(env, ERROR_INTERNAL_ERROR, "GetNotificationSubscriber faild");
             return false;
         }
     }
@@ -690,7 +691,7 @@ bool SubscriberInstanceManager::SubscribeSelf(ani_env *env, ani_object subscribe
         ANS_LOGD("SubscribeNotificationSelf faild. status %{public}d ErrorToExternal %{public}d",
             status, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalErrorCode, msg);
+        OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
         return false;
     }
     return true;

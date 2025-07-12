@@ -16,8 +16,8 @@ import("//build/ohos.gni")
 
 group("ani_packages") {
   deps = [
-    "./ets:ets_files",
     "./ani:notification_manager_ani",
     "./ani:notification_subscribe_ani",
+    "./ets:ets_files",
   ]
 }

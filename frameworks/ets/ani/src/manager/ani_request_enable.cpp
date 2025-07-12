@@ -16,7 +16,7 @@
 
 #include "ani_ans_dialog_callback.h"
 #include "ans_log_wrapper.h"
-#include "sts_error_utils.h"
+#include "ets_error_utils.h"
 #include "notification_helper.h"
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
@@ -38,7 +38,7 @@ bool GetEnableNotificationInfo(ani_env *env, ani_object content, std::shared_ptr
     if (ANI_OK != status || stageMode != ANI_TRUE) {
         ANS_LOGE("Only support stage mode");
         std::string msg = "Incorrect parameter types.Only support stage mode.";
-        OHOS::AbilityRuntime::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     info->stageMode = true;
@@ -93,7 +93,7 @@ void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared
         ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(info->errorCode);
     if (errorCode == ERR_OK) {
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
-        ani_object ret = OHOS::AppExecFwk::createInt(env, errorCode);
+        ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
             ANS_LOGD("createInt faild");
             return;
@@ -104,7 +104,8 @@ void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared
     } else {
         std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
         ANS_LOGD("reject. errorCode %{public}d errMsg %{public}s", errorCode, errMsg.c_str());
-        ani_error rejection = static_cast<ani_error>(OHOS::AbilityRuntime::CreateStsError(env, errorCode, errMsg));
+        ani_error rejection =
+            static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, errorCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
         }

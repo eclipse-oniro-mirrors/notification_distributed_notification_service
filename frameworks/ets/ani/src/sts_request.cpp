@@ -542,7 +542,7 @@ void GetNotificationExtraInfo(ani_env *env, ani_object obj, std::shared_ptr<Noti
 {
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref extraInfoRef = {};
-    if (ANI_OK != GetPropertyRef(env, obj, "extraInfo", isUndefined, extraInfoRef)
+    if (ANI_OK != GetPropertyRef(env, obj, "extendInfo", isUndefined, extraInfoRef)
         || isUndefined == ANI_TRUE || extraInfoRef == nullptr) {
         ANS_LOGE("GetNotificationExtraInfo: get ref failed");
         return;
@@ -972,7 +972,7 @@ bool SetRequestExtraInfo(ani_env *env, const OHOS::Notification::NotificationReq
         return true;
     }
     ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
-    if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extraInfo", extraInfo)) {
+    if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extendInfo", extraInfo)) {
         ANS_LOGD("SetNotificationRequestByCustom: set extraInfo failed");
     }
     return true;

@@ -29,7 +29,7 @@ ani_boolean AniIsNotificationEnabled(ani_env *env)
     int returncode = Notification::NotificationHelper::IsAllowedNotifySelf(allowed);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsNotificationEnabled -> error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniIsNotificationEnabled end");
@@ -43,7 +43,7 @@ ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_double userId)
     int returncode = Notification::NotificationHelper::IsAllowedNotify(userId, allowed);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniIsNotificationEnabledWithId -> error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniIsNotificationEnabledWithId end");
@@ -66,7 +66,7 @@ ani_boolean AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bu
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniIsNotificationEnabledWithBundleOption -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return ANI_FALSE;
     }
     ANS_LOGD("AniIsNotificationEnabledWithBundleOption end");
@@ -87,7 +87,7 @@ void AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_boolean
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetNotificationEnable -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniSetNotificationEnable end");
 }
@@ -100,7 +100,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniGetAllNotificationEnabledBundles -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
     ani_object arrayBundles = NotificationSts::GetAniArrayBundleOption(env, bundleOptions);
@@ -120,7 +120,7 @@ ani_boolean AniIsNotificationEnabledSync(ani_env *env)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniIsNotificationEnabledSync -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return NotificationSts::BoolToAniBoolean(false);
     }
     return NotificationSts::BoolToAniBoolean(allowed);
@@ -135,7 +135,7 @@ ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double use
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniGetSyncNotificationEnabledWithoutApp -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return NotificationSts::BoolToAniBoolean(false);
     }
     ANS_LOGD("End success, enabled: %{public}d, returncode: %{public}d", enabled, returncode);
@@ -150,7 +150,7 @@ void AniSetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId, an
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetSyncNotificationEnabledWithoutApp -> error, errorCode: %{public}d", externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
     ANS_LOGD("AniSetSyncNotificationEnabledWithoutApp end");
@@ -163,7 +163,7 @@ void AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani_objec
     if (!NotificationSts::GetStringArrayByAniObj(env, bundleList, bundleListStd)) {
         std::string msg = "Invalid bundleList: must be an array of strings.";
         ANS_LOGE("GetStringArrayByAniObj failed. msg: %{public}s", msg.c_str());
-        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
         return;
     }
     Notification::NotificationDisable param;
@@ -175,7 +175,7 @@ void AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani_objec
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniDisableNotificationFeature error, errorCode: %{public}d", externalCode);
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 }
 } // namespace NotificationManagerSts

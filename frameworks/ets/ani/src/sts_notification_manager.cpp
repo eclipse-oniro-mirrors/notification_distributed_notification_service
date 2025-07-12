@@ -344,7 +344,7 @@ void StsNotificationLocalLiveViewSubscriber::SetStsNotificationLocalLiveViewSubs
         ANS_LOGE("Set failed, env is nullptr");
         return;
     }
-    stsSubscriber_ = std::make_unique<AbilityRuntime::STSNativeReference>();
+    stsSubscriber_ = std::make_unique<AppExecFwk::ETSNativeReference>();
     if (stsSubscriber_ == nullptr) {
         ANS_LOGE("stsSubscriber_ is nullptr");
         return;

@@ -20,7 +20,7 @@
 #include <vector>
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
-#include "sts_error_utils.h"
+#include "ets_error_utils.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -121,17 +121,22 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
     return findMsg->second;
 }
 
+inline void ThrowError(ani_env *env, int32_t code, std::string msg)
+{
+    OHOS::AbilityRuntime::EtsErrorUtil::ThrowError(env, code,msg);
+}
+
 inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)
 {
     ANS_LOGE("%{public}s", logMsg.c_str());
-    OHOS::AbilityRuntime::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+    ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
         FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
 }
 
 inline void ThrowStsErrorWithCode(ani_env *env, const int32_t errCode, std::string msg = "")
 {
     if (env == nullptr) return;
-    OHOS::AbilityRuntime::ThrowStsError(env, errCode, msg.empty() ? FindAnsErrMsg(errCode) : msg);
+    ThrowError(env, errCode, msg.empty() ? FindAnsErrMsg(errCode) : msg);
 }
 
 inline void ThrowStsErrorWithInvalidParam(ani_env *env)

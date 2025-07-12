@@ -30,11 +30,11 @@ namespace NotificationSts {
 using NotificationKey = OHOS::Notification::NotificationKey;
 using StsNotificationOperationInfo = OHOS::Notification::NotificationOperationInfo;
 
-class StsDistributedOperationCallback : public OHOS::Notification::OperationCallbackStub {
+class StsDistributedOperationCallback : public OHOS::Notification::AnsOperationCallbackStub {
 public:
     explicit StsDistributedOperationCallback(ani_object promise, ani_resolver resolver);
     ~StsDistributedOperationCallback() override {};
-    void OnOperationCallback(const int32_t operationResult) override;
+    ErrCode OnOperationCallback(const int32_t operationResult) override;
     void OnStsOperationCallback(ani_env *env, const int32_t operationResult);
     void SetVm(ani_vm *vm);
 private:
