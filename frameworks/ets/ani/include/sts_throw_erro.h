@@ -123,7 +123,7 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
 
 inline void ThrowError(ani_env *env, int32_t code, std::string msg)
 {
-    OHOS::AbilityRuntime::EtsErrorUtil::ThrowError(env, code,msg);
+    OHOS::AbilityRuntime::EtsErrorUtil::ThrowError(env, code, msg);
 }
 
 inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)
