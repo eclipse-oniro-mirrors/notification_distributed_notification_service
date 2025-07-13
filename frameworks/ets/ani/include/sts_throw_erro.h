@@ -121,6 +121,11 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
     return findMsg->second;
 }
 
+inline void ThrowError(ani_env *env, int32_t code, std::string msg)
+{
+    OHOS::AbilityRuntime::ThrowStsError(env, code, msg);
+}
+
 inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)
 {
     ANS_LOGE("%{public}s", logMsg.c_str());

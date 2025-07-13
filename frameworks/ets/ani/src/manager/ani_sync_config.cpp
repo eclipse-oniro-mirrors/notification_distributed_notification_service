@@ -37,21 +37,21 @@ ani_double AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value
     if (NotificationSts::GetStringByAniString(env, key, keyStr) != ANI_OK) {
         std::string msg = "Parameter verification failed";
         ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
         return RESULT_FAILED;
     }
     std::string valueStr;
     if (NotificationSts::GetStringByAniString(env, value, valueStr) != ANI_OK) {
         std::string msg = "Parameter verification failed";
         ANS_LOGE("GetStringByAniString failed. msg: %{public}s", msg.c_str());
-        OHOS::AbilityRuntime::ThrowStsError(env, Notification::ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
         return RESULT_FAILED;
     }
     int returncode = Notification::NotificationHelper::SetAdditionConfig(keyStr, valueStr);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("setAdditionalConfig -> error, errorCode: %{public}d", externalCode);
-        AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return RESULT_FAILED;
     }
     return RESULT_OK;

@@ -361,7 +361,7 @@ export default namespace notificationSubscribe {
         )
     }
 
-	export function removeAll(bundle?: BundleOption): Promise<void>
+    export function removeAll(bundle?: BundleOption): Promise<void>
     {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {

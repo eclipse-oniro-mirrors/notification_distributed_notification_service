@@ -39,7 +39,7 @@ void AniSetDoNotDisturbDate(ani_env *env, ani_object date)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("SetDoNotDisturbDate error. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniSetDoNotDisturbDate end");
 }
@@ -60,7 +60,7 @@ void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double user
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("SetDoNotDisturbDate erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 
     ANS_LOGD("AniSetDoNotDisturbDateWithId end");
@@ -77,7 +77,7 @@ ani_object AniGetDoNotDisturbDate(ani_env *env)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetDoNotDisturbDate retern erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return data;
     }
 
@@ -104,7 +104,7 @@ ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_double userId)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetDoNotDisturbDate erro. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return data;
     }
 
@@ -126,7 +126,7 @@ ani_boolean AniIsSupportDoNotDisturbMode(ani_env *env)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("DoesSupportDoNotDisturbMode error. returncode: %{public}d, externalCode: %{public}d",
             returncode, externalCode);
-        OHOS::AbilityRuntime::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return ANI_FALSE;
     }
     ANS_LOGD("DoesSupportDoNotDisturbMode returncode: %{public}d", supportDoNotDisturbMode);
