@@ -632,7 +632,7 @@ void DistributedPublishService::PublishNotification(const std::shared_ptr<TlvBox
     MakeExtendInfo(requestBox, request);
     MakeNotificationButtons(requestBox, static_cast<NotificationConstant::SlotType>(slotType), request);
     MakeNotificationContent(requestBox, request, isCommonLiveView, contentType);
-    MakeNotificationIcon(requestBox, request, isCommonLiveView);
+    MakeNotificationIcon(requestBox, request);
     MakeNotificationReminderFlag(requestBox, request);
     int result = IN_PROCESS_CALL(NotificationHelper::PublishNotification(*request));
     ANS_LOGI("Dans publish message %{public}s %{public}d.", request->GetDistributedHashCode().c_str(), result);
@@ -804,7 +804,7 @@ void DistributedPublishService::MakeExtendInfo(const NotificationRequestBox& box
 }
 
 void DistributedPublishService::MakeNotificationIcon(const NotificationRequestBox& box,
-    sptr<NotificationRequest>& request, bool isCommonLiveView)
+    sptr<NotificationRequest>& request)
 {
     std::shared_ptr<Media::PixelMap> icon;
     auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
