@@ -278,7 +278,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_400, Functi
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetDistributedCollaborate(false);
+    request->SetDistributedCollaborate(true);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->DeleteAll();
     advancedNotificationService_->AddToNotificationList(record);

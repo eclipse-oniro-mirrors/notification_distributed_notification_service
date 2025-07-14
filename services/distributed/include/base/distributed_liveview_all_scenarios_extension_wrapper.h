@@ -43,6 +43,10 @@ public:
     typedef int32_t (*RESTORE_COLLABORATION_WINDOW)(const std::string &networkId);
     typedef ErrCode (*DISTRIBUTED_ANCO_NOTIFICATION_CLICK)(
         const sptr<NotificationRequest> &request, bool &triggerWantInner);
+    typedef ErrCode (*UPDATE_LIVE_VIEW_BIN_FILE_2_PIEXL_MAP)(
+        std::shared_ptr<Media::PixelMap> &pixelMap, const std::vector<uint8_t> &buffer);
+    typedef ErrCode (*UPDATE_LIVE_VIEW_PIEXL_MAP_2_BIN_FILE)(
+        const std::shared_ptr<Media::PixelMap> pixelMap, std::vector<uint8_t> &buffer);
     ErrCode UpdateLiveviewDecodeContent(const sptr<NotificationRequest> &request, std::vector<uint8_t> &buffer,
         const std::string& deviceType);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
@@ -53,6 +57,10 @@ public:
         sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
     ErrCode DistributedAncoNotificationClick(const sptr<NotificationRequest> &request, bool &triggerWantInner);
     int32_t RestoreCollaborationWindow(const std::string &networkId);
+    ErrCode UpdateLiveviewBinFile2PiexlMap(
+        std::shared_ptr<Media::PixelMap> &pixelMap, const std::vector<uint8_t> &buffer);
+    ErrCode UpdateLiveviewPiexlMap2BinFile(
+        const std::shared_ptr<Media::PixelMap> pixelMap, std::vector<uint8_t> &buffer);
 private:
     void InitDistributedCollaborateClick();
 
@@ -65,6 +73,8 @@ private:
     DISTRIBUTED_LIVE_VIEW_OPERATION distributedLiveViewOperation_ = nullptr;
     RESTORE_COLLABORATION_WINDOW restoreCollaborationWindow_ = nullptr;
     DISTRIBUTED_ANCO_NOTIFICATION_CLICK distributedAncoNotificationClick_ = nullptr;
+    UPDATE_LIVE_VIEW_BIN_FILE_2_PIEXL_MAP updateLiveviewBinFile2PiexlMap_ = nullptr;
+    UPDATE_LIVE_VIEW_PIEXL_MAP_2_BIN_FILE updateLiveviewPiexlMap2BinFile_ = nullptr;
 };
 
 #define DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER \

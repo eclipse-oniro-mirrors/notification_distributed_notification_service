@@ -96,6 +96,20 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitDistributedCollaborate
         ANS_LOGE("distributed anco notification click failed, error: %{public}s", dlerror());
         return;
     }
+
+    updateLiveviewBinFile2PiexlMap_ =
+        (UPDATE_LIVE_VIEW_BIN_FILE_2_PIEXL_MAP)dlsym(ExtensionHandle_, "UpdateLiveviewBinFile2PiexlMap");
+    if (updateLiveviewBinFile2PiexlMap_ == nullptr) {
+        ANS_LOGE("update liveview Bin File 2 PiexlMap failed, error: %{public}s", dlerror());
+        return;
+    }
+ 
+    updateLiveviewPiexlMap2BinFile_ =
+        (UPDATE_LIVE_VIEW_PIEXL_MAP_2_BIN_FILE)dlsym(ExtensionHandle_, "UpdateLiveviewPiexlMap2BinFile");
+    if (updateLiveviewPiexlMap2BinFile_ == nullptr) {
+        ANS_LOGE("update liveview PiexlMap 2 Bin File failed, error: %{public}s", dlerror());
+        return;
+    }
 }
 
 void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
@@ -189,5 +203,25 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::DistributedAncoNotifica
         return 0;
     }
     return distributedAncoNotificationClick_(request, triggerWantInner);
+}
+
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewBinFile2PiexlMap(
+    std::shared_ptr<Media::PixelMap> &pixelMap, const std::vector<uint8_t> &buffer)
+{
+    if (updateLiveviewBinFile2PiexlMap_ == nullptr) {
+        ANS_LOGE("update liveview Bin File 2 PiexlMap wrapper symbol failed");
+        return 0;
+    }
+    return updateLiveviewBinFile2PiexlMap_(pixelMap, buffer);
+}
+ 
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewPiexlMap2BinFile(
+    const std::shared_ptr<Media::PixelMap> pixelMap, std::vector<uint8_t> &buffer)
+{
+    if (updateLiveviewPiexlMap2BinFile_ == nullptr) {
+        ANS_LOGE("update liveview PiexlMap 2 Bin File wrapper symbol failed");
+        return 0;
+    }
+    return updateLiveviewPiexlMap2BinFile_(pixelMap, buffer);
 }
 }
