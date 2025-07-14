@@ -104,6 +104,7 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
 {
     ANS_LOGD("called");
 
+    std::vector<sptr<NotificationSlot>> slots_temp;
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_BUNDLE;
