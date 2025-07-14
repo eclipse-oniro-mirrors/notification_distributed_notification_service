@@ -121,6 +121,17 @@ ErrCode AdvancedNotificationService::GetSlots(std::vector<sptr<NotificationSlot>
             result = ERR_OK;
             slots.clear();
         }
+        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+            for (auto slot : slots) {
+                sptr<NotificationSlot> value(new NotificationSlot(*slot));
+                value->SetReminderMode(value->GetSilentReminderMode());
+                slots_temp.emplace_back(value);
+                ANS_LOGD("GetSlotsByBundle ReminderMode:%{public}d", value->GetReminderMode());
+            }
+            slots =  slots_temp;
+        }
     }));
     notificationSvrQueue_->wait(handler);
     return result;
@@ -161,11 +172,11 @@ ErrCode AdvancedNotificationService::GetSlotsByBundle(
             slots.clear();
         }
         NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-        result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        result = NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundle, enableStatus);
         if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
             for (auto slot : slots) {
                 sptr<NotificationSlot> value(new NotificationSlot(*slot));
-                value->SetReminderMode(1 << 5);
+                value->SetReminderMode(value->GetSilentReminderMode());
                 slots_temp.emplace_back(value);
                 ANS_LOGD("GetSlotsByBundle ReminderMode:%{public}d", slot->GetReminderMode());
             }
@@ -204,9 +215,18 @@ ErrCode AdvancedNotificationService::GetSlotByBundle(
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ERR_OK;
+    sptr<NotificationSlot> slotFromDb = nullptr;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
+        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slotFromDb);
+        if (slotFromDb != nullptr) {
+            slot = new (std::nothrow) NotificationSlot(*slotFromDb);
+        }
+        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundle, enableStatus);
+        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON && slot != nullptr) {
+            slot->SetReminderMode(slot->GetSilentReminderMode());
+        }
     }));
     notificationSvrQueue_->wait(handler);
     if (slot != nullptr) {
@@ -424,6 +444,11 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             slotFlags = DEFAULT_SLOT_FLAGS;
+        }
+        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundle, enableStatus);
+        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+            slotFlags = SILENT_REMINDER__SLOT_FLAGS;
         }
     }));
     notificationSvrQueue_->wait(handler);
@@ -730,9 +755,19 @@ ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<Not
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
+    sptr<NotificationSlot> slotFromDb = nullptr;
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        ANS_LOGD("ffrt enter!");
-        NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
+        ANS_LOGI("ffrt enter!");
+        NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slotFromDb);
+        if (slotFromDb != nullptr) {
+            ANS_LOGI("slotFromDb != nullptr");
+            slot = new (std::nothrow) NotificationSlot(*slotFromDb);
+        }
+        NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+        NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+        if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON && slot != nullptr) {
+            slot->SetReminderMode(slot->GetSilentReminderMode());
+        }
     }));
     notificationSvrQueue_->wait(handler);
     // if get slot failed, it still return ok.

@@ -54,6 +54,7 @@ namespace OHOS {
 namespace Notification {
 
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
+static const uint32_t SILENT_REMINDER__SLOT_FLAGS = 32; // 0b100000
 constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
 constexpr char SOUND_CAPABILITY[] = "sound_capability";
 class AdvancedNotificationService final : public AnsManagerStub,

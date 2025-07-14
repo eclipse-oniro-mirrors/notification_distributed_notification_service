@@ -540,5 +540,27 @@ uint32_t NotificationSlot::GetDefaultReminderMode() const
 
     return reminderMode;
 }
+
+uint32_t NotificationSlot::GetSilentReminderMode() const
+{
+    uint32_t reminderMode = 0;
+    switch (type_) {
+        case NotificationConstant::SlotType::SOCIAL_COMMUNICATION:
+        case NotificationConstant::SlotType::SERVICE_REMINDER:
+        case NotificationConstant::SlotType::LIVE_VIEW:
+        case NotificationConstant::SlotType::CUSTOMER_SERVICE:
+        case NotificationConstant::SlotType::EMERGENCY_INFORMATION:
+            reminderMode = STATUSBAR_ICON_OPNE;
+            break;
+        case NotificationConstant::SlotType::OTHER:
+        case NotificationConstant::SlotType::CONTENT_INFORMATION:
+            reminderMode = 0;
+            break;
+        default:
+            break;
+    }
+
+    return reminderMode;
+}
 }  // namespace Notification
 }  // namespace OHOS

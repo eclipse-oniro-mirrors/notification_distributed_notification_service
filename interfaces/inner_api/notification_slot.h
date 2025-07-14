@@ -381,6 +381,12 @@ public:
     std::string Dump() const;
 
     /**
+     * @brief Obtains the reminder mode of a NotificationSlot object
+     * @return Returns the reminder mode of the NotificationSlot object with silentReminder.
+     */
+    uint32_t GetSilentReminderMode() const;
+
+    /**
      * @brief Marshals a NotificationSlot object into a Parcel.
      *
      * @param parcel Indicates the Parcel object for marshalling.
