@@ -134,7 +134,8 @@
           "//base/notification/distributed_notification_service/frameworks/js/napi:napi_reminder",
           "//base/notification/distributed_notification_service/interfaces/ndk:ohnotification",
           "//base/notification/distributed_notification_service/frameworks/reminder:reminder_client",
-          "//base/notification/distributed_notification_service/frameworks/ets:ani_packages"
+          "//base/notification/distributed_notification_service/frameworks/ets:ani_packages",
+          "//base/notification/distributed_notification_service/frameworks/reminder_ani:reminder_agent_manager_taihe"
         ],
         "service_group": [
           "//base/notification/distributed_notification_service/sa_profile:ans_sa_profile",
