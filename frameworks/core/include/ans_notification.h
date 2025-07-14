@@ -1138,7 +1138,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode SetSilentReminderEnabled(const NotificationBundleOption &bundleOption, const bool enabled);
- 
+
     /**
      * @brief get whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
@@ -1282,6 +1282,12 @@ public:
 
     ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
             bool notificaitonEnable, bool liveViewEnable);
+
+    ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+            std::vector<std::string>& bundleList);
+
+    ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+        std::string& deviceId, int32_t& userId);
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     /**

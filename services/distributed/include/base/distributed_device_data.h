@@ -46,6 +46,15 @@ struct DistributedDeviceInfo {
         : deviceType_(deviceType), deviceId_(deviceId) {}
     DistributedDeviceInfo(uint16_t deviceType, std::string deviceId, std::string networkId)
         : deviceType_(deviceType), deviceId_(deviceId), networkId_(networkId) {}
+    bool IsPadOrPc() const
+    {
+        if (deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
+            deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 &&
+            deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+            return false;
+        }
+        return true;
+    }
     bool deviceUsage = false;
     bool liveViewSync = false;
     bool iconSync = false;

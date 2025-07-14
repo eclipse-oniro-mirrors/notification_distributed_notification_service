@@ -1074,7 +1074,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     ErrCode SetSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption, const bool enabled) override;
- 
+
     /*
      * @brief Get whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
@@ -1216,6 +1216,12 @@ public:
 
     ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
         bool notificaitonEnable, bool liveViewEnable) override;
+
+    ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        std::vector<std::string>& bundleList) override;
+
+    ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+        std::string& deviceId, int32_t& userId) override;
 
     /**
      * @brief clear notification when aggregate local switch close.

@@ -119,6 +119,20 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
     return ERR_OK;
 }
 
+int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::string& deviceType,
+    const std::string& deviceId, std::vector<std::string>& bundleList)
+{
+    std::lock_guard<std::mutex> lock(lock_);
+    for (auto& item : devicesData_) {
+        if (item.deviceType == deviceType && item.deviceId == deviceId) {
+            bundleList.assign(item.installedBundles.begin(), item.installedBundles.end());
+            return ERR_OK;
+        }
+    }
+    ANS_LOGW("Get bundle %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
+    return ERR_ANS_INVALID_PARAM;
+}
+
 bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
     const std::string bundleName)
 {

@@ -726,6 +726,18 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        std::vector<std::string>& bundleList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+        std::string& deviceId, int32_t& userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
 private:
     std::string cmd_;
     std::string bundle_;

@@ -642,7 +642,7 @@ ErrCode NotificationHelper::SetSilentReminderEnabled(const NotificationBundleOpt
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetSilentReminderEnabled(bundleOption, enabled);
 }
- 
+
 ErrCode NotificationHelper::IsSilentReminderEnabled(const NotificationBundleOption &bundleOption, int32_t &enableStatus)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
@@ -751,6 +751,19 @@ ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
 ErrCode NotificationHelper::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedDevicelist(deviceTypes);
+}
+
+ErrCode NotificationHelper::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+    std::string& deviceId, int32_t& userId)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetMutilDeviceStatus(deviceType, status, deviceId, userId);
+}
+
+ErrCode NotificationHelper::GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+    std::vector<std::string>& bundleList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetTargetDeviceBundleList(deviceType, deviceId,
+        bundleList);
 }
 }  // namespace Notification
 }  // namespace OHOS

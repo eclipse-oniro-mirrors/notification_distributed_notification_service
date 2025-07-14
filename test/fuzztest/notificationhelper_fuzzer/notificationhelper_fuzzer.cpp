@@ -291,7 +291,12 @@ public:
         
         notificationHelper.SetTargetDeviceSwitch(deviceType, deviceId,
             fdp->ConsumeBool(), fdp->ConsumeBool());
-        
+        notificationHelper.GetTargetDeviceBundleList(deviceType, deviceId, bundleList);
+
+        int32_t targetUserId;
+        std::string targetDeviceId;
+        notificationHelper.GetMutilDeviceStatus(deviceType, controlFlag, targetDeviceId, targetUserId);
+
         sptr<NotificationDoNotDisturbProfile> disturbProfile =
             ObjectBuilder<NotificationDoNotDisturbProfile>::Build(fdp);
         notificationHelper.GetDoNotDisturbProfile(uid, disturbProfile);

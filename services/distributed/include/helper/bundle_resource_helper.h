@@ -89,6 +89,9 @@ public:
 
     bool CheckSystemApp(const std::string& bundleName, int32_t userId);
 
+    ErrCode GetBundleInfoV9(const std::string& bundleName, int32_t userId,
+        AppExecFwk::BundleInfo& bundleInfo);
+
 private:
     void Connect();
     void Disconnect();

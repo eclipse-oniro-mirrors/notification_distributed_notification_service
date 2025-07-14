@@ -1492,7 +1492,7 @@ public:
 
     uint32_t GetCollaboratedReminderFlag() const;
 
-    std::string CollaborationToJson() const;
+    bool CollaborationToJson(std::string& data) const;
 
     static NotificationRequest *CollaborationFromJson(const std::string& basicInfo);
 

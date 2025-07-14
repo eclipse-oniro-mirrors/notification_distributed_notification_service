@@ -277,7 +277,6 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
 
         NotificationRequestDb requestDb = { .request = record->request, .bundleOption = record->bundleOption};
         UpdateCollaborateTimerInfo(record);
-        SetNotificationRequestToDb(requestDb);
     });
     notificationSvrQueue_->wait(handler);
     return ERR_OK;

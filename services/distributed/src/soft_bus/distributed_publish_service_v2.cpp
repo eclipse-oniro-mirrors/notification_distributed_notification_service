@@ -57,6 +57,7 @@ static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
 static const std::string EXTENDINFO_ENABLE_CHECK = "check";
 static const std::string EXTENDINFO_DEVICETYPE = "deviceType";
 static const std::string EXTENDINFO_LOCALTYPE = "localType";
+static const uint32_t UNLOCKED_USED_FLAG = 3;
 
 DistributedPublishService& DistributedPublishService::GetInstance()
 {
@@ -317,6 +318,73 @@ std::shared_ptr<BatchRemoveNotificationBox> DistributedPublishService::MakeBatch
     return batchRemoveBox;
 }
 
+void DistributedPublishService::SyncLiveViewList(const DistributedDeviceInfo device,
+    const std::vector<sptr<Notification>>& notifications)
+{
+    if (device.IsPadOrPc()) {
+        ANS_LOGI("Dans no need sync list.");
+        return;
+    }
+
+    std::vector<std::string> notificationList;
+    for (auto& notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
+            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            ANS_LOGI("Dans no need sync remove notification.");
+            continue;
+        }
+        notificationList.push_back(notification->GetKey());
+    }
+    SyncNotifictionList(device, notificationList);
+}
+
+void DistributedPublishService::SyncLiveViewContent(const DistributedDeviceInfo device,
+    const std::vector<sptr<Notification>>& notifications)
+{
+    std::vector<std::string> bundlesList;
+    bool checkBundleExist = false;
+    if (device.IsPadOrPc()) {
+        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+        if (deviceType.empty()) {
+            ANS_LOGW("Dans sync invalid %{public}s %{public}u.", StringAnonymous(device.deviceId_).c_str(),
+                device.deviceType_);
+            return;
+        }
+        if (NotificationHelper::GetTargetDeviceBundleList(deviceType, device.udid_, bundlesList) != ERR_OK) {
+            ANS_LOGW("Get bundles %{public}s %{public}u.", StringAnonymous(device.deviceId_).c_str(),
+                device.deviceType_);
+            return;
+        }
+        ANS_LOGI("Get bundles size %{public}zu.", bundlesList.size());
+        checkBundleExist = true;
+    }
+
+    std::unordered_set<std::string> bundleSet(bundlesList.begin(), bundlesList.end());
+    for (auto& notification : notifications) {
+        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
+            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
+            ANS_LOGI("Dans no need sync notification.");
+            continue;
+        }
+
+        auto requestPoint = notification->GetNotificationRequestPoint();
+        std::string bundleName = requestPoint->GetOwnerBundleName();
+        if (checkBundleExist && bundleSet.count(bundleName)) {
+            ANS_LOGI("Dans no need sync %{public}d %{public}s.", checkBundleExist, bundleName.c_str());
+            continue;
+        }
+
+        int32_t userId = requestPoint->GetOwnerUserId();
+        if (DelayedSingleton<BundleResourceHelper>::GetInstance()->CheckSystemApp(bundleName, userId)) {
+            ANS_LOGI("Bundle system no sycn %{public}d %{public}s.", userId, bundleName.c_str());
+            return;
+        }
+
+        std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+        SendNotifictionRequest(sharedNotification, device, true);
+    }
+}
+
 void DistributedPublishService::SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce)
 {
     if (!DistributedDeviceService::GetInstance().IsSyncLiveView(peerDevice.deviceId_, isForce)) {
@@ -349,26 +417,8 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
         return;
     }
 
-    std::vector<std::string> notificationList;
-    for (auto& notification : notifications) {
-        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
-            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-            ANS_LOGI("Dans no need sync remove notification.");
-            continue;
-        }
-        notificationList.push_back(notification->GetKey());
-    }
-    SyncNotifictionList(device, notificationList);
-
-    for (auto& notification : notifications) {
-        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr ||
-            !notification->GetNotificationRequestPoint()->IsCommonLiveView()) {
-            ANS_LOGI("Dans no need sync notification.");
-            continue;
-        }
-        std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
-        SendNotifictionRequest(sharedNotification, device, true);
-    }
+    SyncLiveViewList(device, notifications);
+    SyncLiveViewContent(device, notifications);
     DistributedDeviceService::GetInstance().SetDeviceSyncData(device.deviceId_,
         DistributedDeviceService::SYNC_LIVE_VIEW, true);
 }
@@ -376,7 +426,7 @@ void DistributedPublishService::SyncLiveViewNotification(const DistributedDevice
 void DistributedPublishService::SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
     const std::vector<std::string>& notificationList)
 {
-    ANS_LOGI("Dans sync notification %{public}d.", (int32_t)(notificationList.size()));
+    ANS_LOGI("Dans sync notification %{public}zu.", notificationList.size());
     std::shared_ptr<NotificationSyncBox> notificationSyncBox = std::make_shared<NotificationSyncBox>();
     notificationSyncBox->SetLocalDeviceId(peerDevice.deviceId_);
     notificationSyncBox->SetNotificationEmpty(notificationList.empty());
@@ -406,9 +456,6 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
         requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
     auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
-    if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
-        requestBox->SetNotificationBasicInfo(requestPoint->CollaborationToJson());
-    }
     requestBox->SetDeviceId(local.deviceId_);
     requestBox->SetAutoDeleteTime(requestPoint->GetAutoDeletedTime());
     requestBox->SetFinishTime(requestPoint->GetFinishDeadLine());
@@ -433,7 +480,9 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
             requestPoint, buffer, deviceType);
         requestBox->SetCommonLiveView(buffer);
     }
-    SetNotificationExtendInfo(requestPoint, peerDevice.deviceType_, requestBox);
+    if (!SetNotificationExtendInfo(requestPoint, peerDevice.deviceType_, isSyncNotification, requestBox)) {
+        return;
+    }
     SetNotificationButtons(requestPoint, peerDevice.deviceType_, requestPoint->GetSlotType(), requestBox);
     SetNotificationContent(request->GetNotificationRequestPoint()->GetContent(),
         requestPoint->GetNotificationType(), requestBox);
@@ -546,8 +595,89 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
     }
 }
 
-void DistributedPublishService::SetNotificationExtendInfo(const sptr<NotificationRequest> notificationRequest,
-    int32_t deviceType, std::shared_ptr<NotificationRequestBox>& requestBox)
+bool DistributedPublishService::FillSyncRequestExtendInfo(const sptr<NotificationRequest> notificationRequest,
+    int32_t deviceTypeId, std::shared_ptr<NotificationRequestBox>& requestBox, AAFwk::WantParams& wantParam)
+{
+    std::string appName;
+    auto params = notificationRequest->GetExtendInfo();
+    if (params != nullptr) {
+        wantParam = *params;
+        appName = params->GetStringParam("notification_collaboration_app_name");
+    }
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(deviceTypeId);
+    std::string bundleName = appName.empty() ? notificationRequest->GetOwnerBundleName() : appName;
+    AppExecFwk::BundleResourceInfo resourceInfo;
+    if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(bundleName, resourceInfo) != ERR_OK) {
+        ANS_LOGW("Dans get bundle icon failed %{public}s.", bundleName.c_str());
+        return false;
+    }
+
+    int32_t userId;
+    std::string deviceId;
+    if (NotificationHelper::GetMutilDeviceStatus(deviceType, UNLOCKED_USED_FLAG, deviceId, userId) != ERR_OK) {
+        ANS_LOGW("Dans get status failed %{public}s.", deviceType.c_str());
+        return false;
+    }
+
+    if (appName.empty()) {
+        int32_t ownerUserId = notificationRequest->GetOwnerUserId();
+        AppExecFwk::BundleInfo bundleInfo;
+        if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfoV9(bundleName, ownerUserId,
+            bundleInfo) != ERR_OK) {
+            ANS_LOGE("Dans get application, %{public}d, %{public}s", deviceTypeId, bundleName.c_str());
+            return false;
+        }
+
+        AppExecFwk::ApplicationInfo appInfo = bundleInfo.applicationInfo;
+        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME, AAFwk::String::Box(appInfo.name));
+        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL, AAFwk::String::Box(resourceInfo.label));
+        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, AAFwk::Integer::Box(appInfo.appIndex));
+        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID + "_" + deviceType,
+            AAFwk::String::Box(deviceId));
+        requestBox->SetSmallIcon(AnsImageUtil::CreatePixelMapByString(resourceInfo.icon));
+        requestBox->SetReceiverUserId(userId);
+        ANS_LOGI("Dans fill %{public}s %{public}d %{public}s %{public}d", resourceInfo.label.c_str(), appInfo.appIndex,
+            deviceId.c_str(), userId);
+        return true;
+    }
+    wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID + "_" + deviceType, AAFwk::String::Box(deviceId));
+    requestBox->SetSmallIcon(AnsImageUtil::CreatePixelMapByString(resourceInfo.icon));
+    requestBox->SetReceiverUserId(userId);
+    return true;
+}
+
+bool DistributedPublishService::FillNotSyncRequestExtendInfo(const sptr<NotificationRequest> notificationRequest,
+    int32_t deviceType, std::shared_ptr<NotificationRequestBox>& requestBox, AAFwk::WantParams& wantParam)
+{
+    auto params = notificationRequest->GetExtendInfo();
+    if (params == nullptr) {
+        ANS_LOGW("Fill box invalid data.");
+        return false;
+    }
+    std::string content = params->GetStringParam("notification_collaboration_app_name");
+    if (content.empty()) {
+        ANS_LOGI("Fill box invalid app name.");
+        return false;
+    }
+    AppExecFwk::BundleResourceInfo resourceInfo;
+    if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(content, resourceInfo) != 0) {
+        ANS_LOGW("Dans get bundle icon failed %{public}s.", content.c_str());
+        return false;
+    }
+    std::shared_ptr<Media::PixelMap> icon = AnsImageUtil::CreatePixelMapByString(resourceInfo.icon);
+    requestBox->SetSmallIcon(icon);
+    std::string key = EXTENDINFO_INFO_PRE + EXTENDINFO_USERID +
+        DistributedDeviceService::DeviceTypeToTypeString(deviceType);
+    int32_t userId = params->GetIntParam(key, -1);
+    if (userId != -1) {
+        requestBox->SetReceiverUserId(userId);
+    }
+    wantParam = *params;
+    return true;
+}
+
+bool DistributedPublishService::SetNotificationExtendInfo(const sptr<NotificationRequest> notificationRequest,
+    int32_t deviceType, bool isSyncNotification, std::shared_ptr<NotificationRequestBox>& requestBox)
 {
     if (notificationRequest->GetBigIcon() != nullptr) {
         requestBox->SetBigIcon(notificationRequest->GetBigIcon(), deviceType);
@@ -558,32 +688,35 @@ void DistributedPublishService::SetNotificationExtendInfo(const sptr<Notificatio
     if (notificationRequest->GetLittleIcon() != nullptr) {
         requestBox->SetSmallIcon(notificationRequest->GetLittleIcon());
     }
-    auto params = notificationRequest->GetExtendInfo();
-    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH || params == nullptr) {
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
         ANS_LOGI("Send request no extend info %{public}d.", deviceType);
-        return;
-    }
-    std::string content = params->GetStringParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME);
-    if (!content.empty()) {
-        AppExecFwk::BundleResourceInfo resourceInfo;
-        if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(content, resourceInfo) != 0) {
-            ANS_LOGW("Dans get bundle icon failed %{public}s.", content.c_str());
-            return;
-        }
-        std::shared_ptr<Media::PixelMap> icon = AnsImageUtil::CreatePixelMapByString(resourceInfo.icon);
-        requestBox->SetSmallIcon(icon);
+        return true;
     }
 
-    std::string key = EXTENDINFO_INFO_PRE + EXTENDINFO_USERID +
-        DistributedDeviceService::DeviceTypeToTypeString(deviceType);
-    int32_t userId = params->GetIntParam(key, -1);
-    if (userId != -1) {
-        requestBox->SetReceiverUserId(userId);
+    std::string basicInfo;
+    if (!notificationRequest->CollaborationToJson(basicInfo)) {
+        ANS_LOGW("Dans OnConsumed collaboration json failed.");
+        return false;
     }
-    params->DumpInfo(0);
-    AAFwk::WantParamWrapper wantWrapper(*params);
+    requestBox->SetNotificationBasicInfo(basicInfo);
+
+    AAFwk::WantParams wantParam;
+    if (isSyncNotification) {
+        if (!FillSyncRequestExtendInfo(notificationRequest, deviceType, requestBox, wantParam)) {
+            ANS_LOGW("Dans fill sync failed.");
+            return false;
+        }
+    } else {
+        if (!FillNotSyncRequestExtendInfo(notificationRequest, deviceType, requestBox, wantParam)) {
+            ANS_LOGW("Dans fill not sync failed.");
+            return false;
+        }
+    }
+    wantParam.DumpInfo(0);
+    AAFwk::WantParamWrapper wantWrapper(wantParam);
     requestBox->SetBoxExtendInfo(wantWrapper.ToString());
     requestBox->SetDeviceUserId(DistributedSubscribeService::GetCurrentActiveUserId());
+    return true;
 }
 
 #else
@@ -662,8 +795,7 @@ void DistributedPublishService::PublishSynchronousLiveView(const std::shared_ptr
         return;
     }
 
-    ANS_LOGI("Dans handle sync notification %{public}d %{public}d.", (int32_t)(notificationList.size()),
-        (int32_t)(notifications.size()));
+    ANS_LOGI("Dans sync notification %{public}zu %{public}zu.", notificationList.size(), notifications.size());
     for (auto item : notificationList) {
         ANS_LOGI("Dans sync %{public}s.", item.c_str());
     }

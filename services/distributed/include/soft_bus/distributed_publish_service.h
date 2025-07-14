@@ -45,10 +45,12 @@ public:
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void RemoveAllDistributedNotifications(DistributedDeviceInfo& deviceInfo);
     void SyncLiveViewNotification(const DistributedDeviceInfo peerDevice, bool isForce);
+    void SyncLiveViewList(const DistributedDeviceInfo device, const std::vector<sptr<Notification>>& notifications);
+    void SyncLiveViewContent(const DistributedDeviceInfo device, const std::vector<sptr<Notification>>& notifications);
     void SendNotifictionRequest(const std::shared_ptr<Notification> request,
         const DistributedDeviceInfo& peerDevice, bool isSyncNotification = false);
-    void SetNotificationExtendInfo(const sptr<NotificationRequest> notificationRequest,
-            int32_t deviceType, std::shared_ptr<NotificationRequestBox>& requestBox);
+    bool SetNotificationExtendInfo(const sptr<NotificationRequest> notificationRequest,
+            int32_t deviceType, bool isSyncNotification, std::shared_ptr<NotificationRequestBox>& requestBox);
 private:
     void SyncNotifictionList(const DistributedDeviceInfo& peerDevice,
         const std::vector<std::string>& notificationList);
@@ -60,6 +62,10 @@ private:
     std::shared_ptr<NotificationRemoveBox> MakeRemvoeBox(std::string &hashCode, int32_t &slotTypes);
     std::shared_ptr<BatchRemoveNotificationBox> MakeBatchRemvoeBox(std::vector<std::string>& hashCodes,
         std::string &slotTypes);
+    bool FillSyncRequestExtendInfo(const sptr<NotificationRequest> notificationRequest, int32_t deviceTypeId,
+        std::shared_ptr<NotificationRequestBox>& requestBox, AAFwk::WantParams& wantParam);
+    bool FillNotSyncRequestExtendInfo(const sptr<NotificationRequest> notificationRequest, int32_t deviceType,
+        std::shared_ptr<NotificationRequestBox>& requestBox, AAFwk::WantParams& wantParam);
 #else
     void PublishNotification(const std::shared_ptr<TlvBox>& boxMessage);
     void PublishSynchronousLiveView(const std::shared_ptr<TlvBox>& boxMessage);

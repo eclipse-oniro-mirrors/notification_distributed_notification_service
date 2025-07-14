@@ -531,6 +531,40 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_300, 
 }
 
 /**
+ * @tc.name: GetMutilDeviceStatus_100
+ * @tc.desc: Test GetMutilDeviceStatus when caller is not subsystem.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetMutilDeviceStatus_100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    const std::string deviceType = "pad";
+    uint32_t flag = 3;
+    int32_t userId;
+    std::string deviceId = "";
+
+    auto ret = advancedNotificationService_->GetMutilDeviceStatus(deviceType, flag, deviceId, userId);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
+ * @tc.name: GetTargetDeviceBundleList_100
+ * @tc.desc: Test GetTargetDeviceBundleList when caller is not subsystem.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetTargetDeviceBundleList_100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+    const std::string deviceType = "pad";
+    const std::string deviceId = "id";
+    std::vector<std::string> bundles;
+    auto ret = advancedNotificationService_->GetTargetDeviceBundleList(deviceType, deviceId, bundles);
+    ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
+}
+
+/**
  * @tc.name: SetTargetDeviceSwitch_100
  * @tc.desc: Test SetTargetDeviceSwitch when caller is not subsystem.
  * @tc.type: FUNC

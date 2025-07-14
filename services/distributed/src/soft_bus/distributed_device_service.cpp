@@ -72,12 +72,7 @@ DistributedDeviceInfo DistributedDeviceService::GetLocalDevice()
 
 bool DistributedDeviceService::IsLocalPadOrPC()
 {
-    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
-        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 &&
-        localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
-        return false;
-    }
-    return true;
+    return localDevice_.IsPadOrPc();
 }
 
 bool DistributedDeviceService::IsReportDataByHa()
@@ -99,9 +94,7 @@ bool DistributedDeviceService::CheckNeedSubscribeAllConnect()
 {
     std::lock_guard<std::mutex> lock(mapLock_);
     for (auto& device : peerDevice_) {
-        if (device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-            device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
-            device.second.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+        if (device.second.IsPadOrPc()) {
             return true;
         }
     }
