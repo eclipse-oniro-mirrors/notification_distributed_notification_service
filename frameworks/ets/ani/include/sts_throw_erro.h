@@ -100,8 +100,11 @@ static const std::vector<std::pair<uint32_t, int32_t>> ERRORS_CONVERT = {
 
 inline int32_t GetExternalCode(uint32_t errCode)
 {
-    int32_t ExternalCode = ERR_OK;
+    int32_t ExternalCode = ERROR_INTERNAL_ERROR;
     for (const auto &errorConvert : ERRORS_CONVERT) {
+        if (errCode == errorConvert.second) {
+            return errCode;
+        }
         if (errCode == errorConvert.first) {
             ExternalCode = errorConvert.second;
             break;
