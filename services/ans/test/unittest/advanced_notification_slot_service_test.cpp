@@ -154,6 +154,26 @@ HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00002, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: GetSlotsByBundle_00003
+ * @tc.desc: Test GetSlotsByBundle
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetSlotsByBundle_00003, Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 100);
+    advancedNotificationService_->SetSilentReminderEnabled(bundleOption, true);
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(slotType);
+    slots.push_back(slot);
+    std::vector<sptr<NotificationSlot>> slotRes;
+    ASSERT_EQ(advancedNotificationService_->GetSlotsByBundle(bundleOption, slotRes), (int)ERR_OK);
+}
+
+/**
  * @tc.name: UpdateSlots_00001
  * @tc.desc: Test UpdateSlots
  * @tc.type: FUNC

@@ -196,6 +196,25 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_01600,
 }
 
 /**
+ * @tc.name: GetSlots_00002
+ * @tc.desc: Test GetSlots
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetSlots_00002, Function | SmallTest | Level1)
+{
+    MockSystemApp();
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 100);
+    advancedNotificationService_->SetSilentReminderEnabled(bundleOption, true);
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::CUSTOMER_SERVICE;
+    std::vector<sptr<NotificationSlot>> slots;
+    sptr<NotificationSlot> slot = new NotificationSlot(slotType);
+    slots.push_back(slot);
+    std::vector<sptr<NotificationSlot>> slotRes;
+    ASSERT_EQ(advancedNotificationService_->GetSlots(slotRes), (int)ERR_OK);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_01800
  * @tc.name      : ANS_SetNotificationBadgeNum_0100
  * @tc.desc      : Test SetNotificationBadgeNum function
