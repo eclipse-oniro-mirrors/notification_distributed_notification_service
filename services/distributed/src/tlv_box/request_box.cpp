@@ -17,6 +17,7 @@
 
 #include "ans_image_util.h"
 #include "ans_log_wrapper.h"
+#include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_local_config.h"
 
 namespace OHOS {
@@ -193,8 +194,11 @@ bool NotificationRequestBox::SetSmallIcon(const std::shared_ptr<Media::PixelMap>
     if (box_ == nullptr) {
         return false;
     }
-    std::string icon = AnsImageUtil::PackImage(smallIcon);
-    return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_ICON, icon));
+    std::vector<uint8_t> buffer;
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(smallIcon, buffer);
+    ANS_LOGI("SetSmallIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    const unsigned char* begin = buffer.data();
+    return box_->PutValue(std::make_shared<TlvItem>(BUNDLE_ICON, begin, buffer.size()));
 }
 
 bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& bigIcon,
@@ -204,8 +208,8 @@ bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& 
         return false;
     }
 
-    std::string icon;
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::string icon;
         std::string copyIcon = AnsImageUtil::PackImage(bigIcon);
         auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
         if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
@@ -213,10 +217,13 @@ bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& 
         }
         icon = AnsImageUtil::PackImage(copyPixelMap);
         ANS_LOGI("SetBigIcon %{public}zu, %{public}zu", copyIcon.size(), icon.size());
-    } else {
-        icon = AnsImageUtil::PackImage(bigIcon);
+        return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
     }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, icon));
+    std::vector<uint8_t> buffer;
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(bigIcon, buffer);
+    ANS_LOGI("SetBigIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    const unsigned char* begin = buffer.data();
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BIG_ICON, begin, buffer.size()));
 }
 
 bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMap>& overlayIcon,
@@ -226,8 +233,8 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
         return false;
     }
 
-    std::string icon;
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::string icon;
         std::string copyIcon = AnsImageUtil::PackImage(overlayIcon);
         auto copyPixelMap = AnsImageUtil::UnPackImage(copyIcon);
         if (!AnsImageUtil::ImageScale(copyPixelMap, DEFAULT_ICON_WITHE, DEFAULT_ICON_HEIGHT)) {
@@ -235,10 +242,13 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
         }
         icon = AnsImageUtil::PackImage(copyPixelMap);
         ANS_LOGI("SetOverlayIcon %{public}zu, %{public}zu", copyIcon.size(), icon.size());
-    } else {
-        icon = AnsImageUtil::PackImage(overlayIcon);
+        return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
     }
-    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, icon));
+    std::vector<uint8_t> buffer;
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewPiexlMap2BinFile(overlayIcon, buffer);
+    ANS_LOGI("SetOverlayIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    const unsigned char* begin = buffer.data();
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_OVERLAY_ICON, begin, buffer.size()));
 }
 
 bool NotificationRequestBox::SetCommonLiveView(const std::vector<uint8_t>& byteSequence)
@@ -469,40 +479,62 @@ bool NotificationRequestBox::GetSmallIcon(std::shared_ptr<Media::PixelMap>& smal
     if (box_ == nullptr) {
         return false;
     }
-    std::string content;
-    if (!box_->GetStringValue(BUNDLE_ICON, content)) {
+    std::vector<uint8_t> buffer;
+    bool res = box_->GetBytes(BUNDLE_ICON, buffer);
+    ANS_LOGI("GetSmallIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewBinFile2PiexlMap(smallIcon, buffer);
+    if (smallIcon == nullptr) {
         return false;
     }
-    ANS_LOGI("GetBigIcon %{public}zu", content.size());
-    smallIcon = AnsImageUtil::UnPackImage(content);
     return true;
 }
 
-bool NotificationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const
+bool NotificationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon, const int32_t deviceType) const
 {
     if (box_ == nullptr) {
         return false;
     }
-    std::string bigIconContent;
-    if (!box_->GetStringValue(NOTIFICATION_BIG_ICON, bigIconContent)) {
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::string bigIconContent;
+        if (!box_->GetStringValue(NOTIFICATION_BIG_ICON, bigIconContent)) {
+            return false;
+        }
+        ANS_LOGI("GetBigIcon %{public}zu", bigIconContent.size());
+        bigIcon = AnsImageUtil::UnPackImage(bigIconContent);
+    } else {
+        std::vector<uint8_t> buffer;
+        bool res = box_->GetBytes(NOTIFICATION_BIG_ICON, buffer);
+        ANS_LOGI("GetBigIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewBinFile2PiexlMap(bigIcon, buffer);
+    }
+    if (bigIcon == nullptr) {
         return false;
     }
-    ANS_LOGI("GetBigIcon %{public}zu", bigIconContent.size());
-    bigIcon = AnsImageUtil::UnPackImage(bigIconContent);
     return true;
 }
 
-bool NotificationRequestBox::GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const
+bool NotificationRequestBox::GetOverlayIcon(
+    std::shared_ptr<Media::PixelMap>& overlayIcon, const int32_t deviceType) const
 {
     if (box_ == nullptr) {
         return false;
     }
-    std::string overlayContent;
-    if (!box_->GetStringValue(NOTIFICATION_OVERLAY_ICON, overlayContent)) {
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        std::string overlayContent;
+        if (!box_->GetStringValue(NOTIFICATION_OVERLAY_ICON, overlayContent)) {
+            return false;
+        }
+        ANS_LOGI("GetOverlayIcon %{public}zu", overlayContent.size());
+        overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
+    } else {
+        std::vector<uint8_t> buffer;
+        bool res = box_->GetBytes(NOTIFICATION_OVERLAY_ICON, buffer);
+        ANS_LOGI("GetOverlayIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewBinFile2PiexlMap(overlayIcon, buffer);
+    }
+    if (overlayIcon == nullptr) {
         return false;
     }
-    ANS_LOGI("GetOverlayIcon %{public}zu", overlayContent.size());
-    overlayIcon = AnsImageUtil::UnPackImage(overlayContent);
     return true;
 }
 

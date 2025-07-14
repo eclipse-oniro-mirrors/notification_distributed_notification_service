@@ -807,10 +807,11 @@ void DistributedPublishService::MakeNotificationIcon(const NotificationRequestBo
     sptr<NotificationRequest>& request, bool isCommonLiveView)
 {
     std::shared_ptr<Media::PixelMap> icon;
-    if (box.GetBigIcon(icon)) {
+    auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
+    if (box.GetBigIcon(icon, localDevice.deviceType_)) {
         request->SetBigIcon(icon);
     }
-    if (box.GetOverlayIcon(icon)) {
+    if (box.GetOverlayIcon(icon, localDevice.deviceType_)) {
         request->SetOverlayIcon(icon);
     }
     if (box.GetSmallIcon(icon)) {

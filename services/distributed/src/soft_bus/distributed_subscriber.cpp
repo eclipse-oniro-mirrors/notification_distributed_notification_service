@@ -154,7 +154,8 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
     ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s, OperRespDeviceId: %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str(), StringAnonymous(operRespDevice.deviceId_).c_str());
-    if (operRespDevice.deviceId_.compare(peerDevice_.deviceId_) != 0) {
+    if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH &&
+        operRespDevice.deviceId_.compare(peerDevice_.deviceId_) != 0) {
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     return DistributedService::GetInstance().OnOperationResponse(operationInfo, peerDevice_);

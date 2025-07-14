@@ -78,8 +78,8 @@ public:
     bool GetNotificationActionName(std::string& actionName) const;
     bool GetNotificationUserInput(std::string& userInput) const;
     bool GetSmallIcon(std::shared_ptr<Media::PixelMap>& smallIcon) const;
-    bool GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon) const;
-    bool GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon) const;
+    bool GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIcon, const int32_t deviceType) const;
+    bool GetOverlayIcon(std::shared_ptr<Media::PixelMap>& overlayIcon, const int32_t deviceType) const;
     bool GetCommonLiveView(std::vector<uint8_t>& byteSequence) const;
     bool GetFinishTime(int64_t& time) const;
     bool GetAutoDeleteTime(int64_t& time) const;
