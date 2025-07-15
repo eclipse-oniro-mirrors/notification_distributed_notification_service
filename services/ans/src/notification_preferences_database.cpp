@@ -244,6 +244,16 @@ const static std::string KEY_REMOVED_FLAG = "1";
 const static std::string KEY_SECOND_REMOVED_FLAG = "2";
 
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
+
+/**
+ * Force to turn on the notification switch once.
+ */
+const static std::string KEY_ONCE_FORCED_ENABLE_FLAG = "label_ans_once_forced_enable";
+
+const static std::string KEY_NOT_FORCED_ENABLE = "1";
+
+const static std::string KEY_FORCED_ENABLE_DONE = "2";
+
 /**
  * Indicates hashCode rule.
  */
@@ -3056,6 +3066,75 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
 
     ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
     if (!existFlag || result == KEY_REMOVED_FLAG) {
+        return false;
+    }
+    return true;
+}
+
+static std::string GetOnceForcedEnableFlagKey(const sptr<NotificationBundleOption> &bundleOption)
+{
+    std::string key = KEY_ONCE_FORCED_ENABLE_FLAG + KEY_UNDER_LINE + bundleOption->GetBundleName() +
+        std::to_string(bundleOption->GetUid());
+    return key;
+}
+
+bool NotificationPreferencesDatabase::SetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return false;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Current user acquisition failed");
+        return false;
+    }
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    std::string key = GetOnceForcedEnableFlagKey(bundleOption);
+    int32_t result = rdbDataManager_->InsertData(key, KEY_FORCED_ENABLE_DONE, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption)
+{
+    if (bundleOption == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return true;
+    }
+
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
+    if (userId == SUBSCRIBE_USER_INIT) {
+        ANS_LOGW("Current user acquisition failed");
+        return true;
+    }
+
+    std::string key = GetOnceForcedEnableFlagKey(bundleOption);
+    bool existFlag = true;
+    std::string result;
+    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                existFlag = false;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = value;
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    ANS_LOGI("once forced enable flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
+    if (!existFlag || result == KEY_NOT_FORCED_ENABLE) {
         return false;
     }
     return true;

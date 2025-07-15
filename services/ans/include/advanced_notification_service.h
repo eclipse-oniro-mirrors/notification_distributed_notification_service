@@ -1412,6 +1412,8 @@ public:
      */
     ErrCode SetHashCodeRule(const uint32_t type) override;
 
+    bool IsNotificationOnceForcedEnable(sptr<NotificationBundleOption> &bundleOption);
+
     ErrCode AtomicServicePublish(const sptr<NotificationRequest> &request);
 
 protected:

@@ -31,6 +31,7 @@
 #include "notification_analytics_util.h"
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
+#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
@@ -444,6 +445,19 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
     notificationSvrQueue_->wait(handler);
 
     return result;
+}
+
+bool AdvancedNotificationService::IsNotificationOnceForcedEnable(sptr<NotificationBundleOption> &bundleOption)
+{
+    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->
+        IsNotificationOnceForcedEnable(bundleOption->GetBundleName()) &&
+        !NotificationPreferences::GetInstance()->GetOnceForcedEnableFlag(bundleOption)) {
+        NotificationPreferences::GetInstance()->SetOnceForcedEnableFlag(bundleOption);
+        ANS_LOGI("bundle %{public}s_%{public}d once forced enable.",
+            bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+        return true;
+    }
+    return false;
 }
 
 ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(int32_t userId, bool enabled)
