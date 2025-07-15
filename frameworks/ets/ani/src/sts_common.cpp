@@ -34,7 +34,7 @@ bool IsUndefine(ani_env *env, const ani_object &obj)
         return true;
     }
     ani_boolean isUndefined;
-    if (ANI_OK != env->Reference_IsUndefined(obj, &isUndefined)) {
+    if (env->Reference_IsUndefined(obj, &isUndefined) != ANI_OK) {
         ANS_LOGE("Reference_IsUndefined  faild");
         return true;
     }
@@ -98,7 +98,7 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
             return false;
         }
         std::string std_string;
-        if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string))) {
+        if ((status = GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string)) != ANI_OK) {
             ANS_LOGE("GetStdString faild. status %{public}d", status);
             return false;
         }
@@ -489,17 +489,17 @@ ani_object newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ani_class arrayCls = nullptr;
-    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayCls)) {
+    if (env->FindClass("Lescompat/Array;", &arrayCls) != ANI_OK) {
         ANS_LOGE("FindClass Lescompat/Array; Failed");
         return nullptr;
     }
     ani_method arrayCtor;
-    if (ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor)) {
+    if (env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor) != ANI_OK) {
         ANS_LOGE("Class_FindMethod <ctor> Failed");
         return nullptr;
     }
     ani_object arrayObj = nullptr;
-    if (ANI_OK != env->Object_New(arrayCls, arrayCtor, &arrayObj, length)) {
+    if (env->Object_New(arrayCls, arrayCtor, &arrayObj, length) != ANI_OK) {
         ANS_LOGE("Object_New Array Faild");
         return nullptr;
     }
@@ -516,17 +516,17 @@ ani_object newRecordClass(ani_env *env)
     }
     ani_status status = ANI_ERROR;
     ani_class recordCls;
-    if (ANI_OK != (status = env->FindClass("Lescompat/Record;", &recordCls))) {
+    if ((status = env->FindClass("Lescompat/Record;", &recordCls)) != ANI_OK) {
         ANS_LOGE("newRecordClass fail, FindClass status = %{public}d", status);
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != (status = env->Class_FindMethod(recordCls, "<ctor>", nullptr, &ctor))) {
+    if ((status = env->Class_FindMethod(recordCls, "<ctor>", nullptr, &ctor)) != ANI_OK) {
         ANS_LOGE("newRecordClass fail, Class_FindMethod status = %{public}d", status);
         return nullptr;
     }
     ani_object recordObj = {};
-    if (ANI_OK != (status = env->Object_New(recordCls, ctor, &recordObj))) {
+    if ((status = env->Object_New(recordCls, ctor, &recordObj)) != ANI_OK) {
         ANS_LOGE("newRecordClass fail, Object_New status = %{public}d", status);
         return nullptr;
     }
@@ -591,17 +591,17 @@ bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &c
         ANS_LOGE("CreateClassObjByClassName fail, has nullptr");
         return false;
     }
-    if (ANI_OK != env->FindClass(className, &cls)) {
+    if (env->FindClass(className, &cls) != ANI_OK) {
         ANS_LOGE("FindClass fail");
         return false;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor) != ANI_OK) {
         ANS_LOGE("FindMethod fail");
         return false;
     }
     outAniObj = {};
-    if (ANI_OK != env->Object_New(cls, ctor, &outAniObj)) {
+    if (env->Object_New(cls, ctor, &outAniObj) != ANI_OK) {
         ANS_LOGE("Object_New fail");
         return false;
     }
@@ -616,24 +616,44 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     ani_class cls;
     ani_status status;
-    if (ANI_OK != (status = env->FindClass("Lescompat/Date;", &cls))) {
+    if ((status = env->FindClass("Lescompat/Date;", &cls)) != ANI_OK) {
         ANS_LOGD("error. not find class name 'Lescompat/Date;'. status %{public}d", status);
         return false;
     }
     ani_method ctor;
-    if (ANI_OK != (status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor))) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
         ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }
-    ani_object timeObj = CreateDouble(env, static_cast<double>(time));
-    if (timeObj == nullptr) {
-        ANS_LOGD("createDouble faild");
-        return false;
-    }
-    if (ANI_OK != (status = env->Object_New(cls, ctor, &outObj, timeObj))) {
+    if ((status = env->Object_New(cls, ctor, &outObj)) != ANI_OK) {
         ANS_LOGD("Object_New faild. status %{public}d", status);
         return false;
     }
+    ani_double msObj = 0;
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "D:D", &msObj, static_cast<double>(time)))
+        != ANI_OK) {
+        ANS_LOGD("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time)
+{
+    ANS_LOGD("GetDateByObject call");
+    if (env == nullptr || timeObj == nullptr) {
+        ANS_LOGE("GetDateByObject fail, env or timeObj is nullptr");
+        return false;
+    }
+
+    ani_status status;
+    ani_double timeMsObj = 0;
+    if ((status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":D", &timeMsObj)) != ANI_OK) {
+        ANS_LOGD("Object_CallMethodByName_Double faild. status %{public}d", status);
+        return false;
+    }
+    time = static_cast<int64_t>(timeMsObj);
+    ANS_LOGD("GetDateByObject end");
     return true;
 }
 
@@ -697,7 +717,7 @@ bool SetPropertyOptionalByString(ani_env *env, ani_object &object, const char *n
     }
     ani_string stringObj;
     ani_status status = ANI_OK;
-    if (ANI_OK != (status = GetAniStringByString(env, value, stringObj))) {
+    if ((status = GetAniStringByString(env, value, stringObj)) != ANI_OK) {
         ANS_LOGE("GetAniStringByString faild. status %{public}d", status);
         return false;
     }
@@ -731,7 +751,7 @@ bool SetPropertyByRef(ani_env *env, ani_object &object, const char *name, ani_re
         ANS_LOGE("The parameter is invalid.");
         return false;
     }
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(object, name, value))) {
+    if ((status = env->Object_SetPropertyByName_Ref(object, name, value)) != ANI_OK) {
         ANS_LOGE("set '%{public}s' faild. status %{public}d", name, status);
         return false;
     }
