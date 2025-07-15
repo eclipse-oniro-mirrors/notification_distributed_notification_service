@@ -77,8 +77,7 @@ private:
     void MakePadNotificationButtons(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         bool isCommonLiveView, int32_t contentType);
-    void MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
-        bool isCommonLiveView);
+    void MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationReminderFlag(const NotificationRequestBox& box,
         sptr<NotificationRequest>& request);
     void MakeNotificationBasicContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
