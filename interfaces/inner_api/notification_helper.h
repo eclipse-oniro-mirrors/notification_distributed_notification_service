@@ -1187,7 +1187,7 @@ public:
      * @return Returns set notifications enabled for specified bundle result.
      */
     static ErrCode IsSilentReminderEnabled(const NotificationBundleOption &bundleOption, int32_t &enableStatus);
- 
+
     /**
      * @brief Set Enable smartphone to collaborate with other devices for intelligent reminders
      *
@@ -1272,6 +1272,27 @@ public:
      */
     static ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
         int operatorType, const std::vector<std::string>& bundleList);
+
+    /**
+     * @brief Get the status of the target device.
+     *
+     * @param deviceType Type of the device whose status you want to set.
+     * @param status The status.
+     * @return Returns set result.
+     */
+    static ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+        std::string& deviceId, int32_t& userId);
+
+    /**
+     * @brief get target device of bundle list.
+     *
+     * @param deviceType device type.
+     * @param deviceId device udid.
+     * @param bundleList device of bundle list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        std::vector<std::string>& bundleList);
 
     /**
      * @brief set target device of bundle list.

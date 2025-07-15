@@ -842,7 +842,7 @@ std::string NotificationRequest::Dump()
             (unifiedGroupInfo_ ? unifiedGroupInfo_->Dump() : "null")+ " }";
 }
 
-std::string NotificationRequest::CollaborationToJson() const
+bool NotificationRequest::CollaborationToJson(std::string& data) const
 {
     nlohmann::json jsonObject;
     jsonObject["id"]              = notificationId_;
@@ -869,12 +869,12 @@ std::string NotificationRequest::CollaborationToJson() const
         nlohmann::json bundleOptionObj;
         if (!NotificationJsonConverter::ConvertToJson(agentBundle_.get(), bundleOptionObj)) {
             ANS_LOGE("Cannot convert agentBundle to JSON.");
-            return std::string();
+            return false;
         }
         jsonObject["agentBundle"] = bundleOptionObj;
     }
-
-    return jsonObject.dump();
+    data = jsonObject.dump();
+    return true;
 }
 
 NotificationRequest *NotificationRequest::CollaborationFromJson(const std::string& basicInfo)

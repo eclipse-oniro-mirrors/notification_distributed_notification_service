@@ -41,6 +41,8 @@ public:
         bool notificationEnable, bool liveViewEnable);
     int32_t SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
         int operatorType, const std::vector<std::string>& bundleList);
+    int32_t GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+        std::vector<std::string>& bundleList);
     bool CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
         const std::string bundleName);
     bool GetDeviceNotificationEnable(const std::string& deviceType, const std::string& deviceId);

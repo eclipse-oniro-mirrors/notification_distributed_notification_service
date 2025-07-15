@@ -137,10 +137,7 @@ void DistributedService::AddDevice(DistributedDeviceInfo device)
         DistributedDeviceInfo deviceItem = device;
         deviceItem.peerState_ = DeviceState::STATE_SYNC;
         DistributedDeviceService::GetInstance().AddDeviceInfo(deviceItem);
-        if (device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-            device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
-            device.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC ||
-            DistributedDeviceService::GetInstance().IsLocalPadOrPC()) {
+        if (device.IsPadOrPc() || DistributedDeviceService::GetInstance().IsLocalPadOrPC()) {
             ANS_LOGI("Dans wait peer %{public}s.", StringAnonymous(device.deviceId_).c_str());
             return;
         }

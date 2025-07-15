@@ -489,6 +489,41 @@ ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string
         operatorType, bundleList);
 }
 
+ErrCode AdvancedNotificationService::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+    std::string& deviceId, int32_t& userId)
+{
+    if (deviceType.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGD("isSubsystem is bogus.");
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    DeviceStatus deviceStatus = DelayedSingleton<DistributedDeviceStatus>::GetInstance()->GetMultiDeviceStatus(
+        deviceType, status);
+    userId = deviceStatus.userId;
+    deviceId = deviceStatus.deviceId;
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetTargetDeviceBundleList(const std::string& deviceType,
+    const std::string& deviceId, std::vector<std::string>& bundleList)
+{
+    if (deviceType.empty() || deviceId.empty()) {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    return DistributedDeviceDataService::GetInstance().GetTargetDeviceBundleList(deviceType, deviceId,
+        bundleList);
+}
+
 ErrCode AdvancedNotificationService::SetTargetDeviceSwitch(const std::string& deviceType,
     const std::string& deviceId, bool notificaitonEnable, bool liveViewEnable)
 {
@@ -610,10 +645,10 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
         ANS_LOGE("bundle is nullptr");
         return ERR_ANS_INVALID_BUNDLE;
     }
-    
+
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledByBundle(bundle,
         deviceType, enabled);
-    
+
     ANS_LOGI("%{public}s_%{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledByBundle result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), deviceType.c_str(), std::to_string(enabled).c_str(), result);

@@ -2098,7 +2098,7 @@ ErrCode AnsNotification::SetDistributedAuthStatus(
         ANS_LOGE("Invalid deviceType or deviceId.");
         return ERR_ANS_INVALID_PARAM;
     }
-    
+
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("UnregisterPushCallback fail.");
@@ -2139,13 +2139,13 @@ ErrCode AnsNotification::SetSilentReminderEnabled(const NotificationBundleOption
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
- 
+
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("SetSilentReminderEnabledCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
- 
+
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("Fail: bundleOption is empty.");
@@ -2153,7 +2153,7 @@ ErrCode AnsNotification::SetSilentReminderEnabled(const NotificationBundleOption
     }
     return proxy->SetSilentReminderEnabled(bo, enabled);
 }
- 
+
 ErrCode AnsNotification::IsSilentReminderEnabled(const NotificationBundleOption &bundleOption,
     int32_t &enableStatus)
 {
@@ -2162,13 +2162,13 @@ ErrCode AnsNotification::IsSilentReminderEnabled(const NotificationBundleOption 
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INVALID_PARAM;
     }
- 
+
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("IsSilentReminderEnabledCallback fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
- 
+
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("Fail: bundleOption is empty.");
@@ -2280,6 +2280,30 @@ ErrCode AnsNotification::SetTargetDeviceBundleList(const std::string& deviceType
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
     return proxy->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+}
+
+ErrCode AnsNotification::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
+    std::string& deviceId, int32_t& userId)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetMutilDeviceStatus fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetMutilDeviceStatus(deviceType, status, deviceId, userId);
+}
+
+ErrCode AnsNotification::GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
+    std::vector<std::string>& bundleList)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+    return proxy->GetTargetDeviceBundleList(deviceType, deviceId, bundleList);
 }
 
 ErrCode AnsNotification::SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
