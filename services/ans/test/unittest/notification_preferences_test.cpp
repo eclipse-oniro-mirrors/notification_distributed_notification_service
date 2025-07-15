@@ -2447,6 +2447,7 @@ HWTEST_F(NotificationPreferencesTest, GetkioskAppTrustList_001, Function | Small
 {
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    notificationPreferences.isKioskTrustListUpdate_ = false;
     std::vector<std::string> kioskAppTrustList;
     kioskAppTrustList.push_back("testBundleName1");
     kioskAppTrustList.push_back("testBundleName2");
@@ -2585,6 +2586,28 @@ HWTEST_F(NotificationPreferencesTest, GetkioskAppTrustList_008, Function | Small
     int32_t userId = -1;
     auto result = notificationPreferences.SetKvToDb(key, value, userId);
     ASSERT_EQ(result, ERR_OK);
+    std::vector<std::string> resultList;
+    auto ret = notificationPreferences.GetkioskAppTrustList(resultList);
+    ASSERT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetkioskAppTrustList_009
+ * @tc.desc: Test GetkioskAppTrustList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetkioskAppTrustList_009, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
+    notificationPreferences.isKioskTrustListUpdate_ = false;
+
+    std::string key = "kiosk_app_trust_list";
+    std::string value = R"(["com.example.app1", "com.example.app2", "com.example.app3"])";
+    int32_t userId = -1;
+    auto result = notificationPreferences.SetKvToDb(key, value, userId);
+    ASSERT_EQ(result, ERR_OK);
+    ASSERT_EQ(notificationPreferences.isKioskTrustListUpdate_, true);
     std::vector<std::string> resultList;
     auto ret = notificationPreferences.GetkioskAppTrustList(resultList);
     ASSERT_EQ(ret, true);

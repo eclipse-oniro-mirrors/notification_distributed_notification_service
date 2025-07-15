@@ -1338,6 +1338,9 @@ int32_t NotificationPreferences::SetKvToDb(
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
+    if (key == "kiosk_app_trust_list") {
+        isKioskTrustListUpdate_ = true;
+    }
     return preferncesDB_->SetKvToDb(key, value, userId);
 }
 
@@ -1562,7 +1565,7 @@ bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, Not
 bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    if (preferencesInfo_.GetkioskAppTrustList(kioskAppTrustList)) {
+    if (preferencesInfo_.GetkioskAppTrustList(kioskAppTrustList) && !isKioskTrustListUpdate_) {
         ANS_LOGD("info get disable notification success");
         return true;
     }
@@ -1587,6 +1590,7 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
     }
     kioskAppTrustList = jsonObject.get<std::vector<std::string>>();
     preferencesInfo_.SetkioskAppTrustList(kioskAppTrustList);
+    isKioskTrustListUpdate_ = false;
     return true;
 }
 
