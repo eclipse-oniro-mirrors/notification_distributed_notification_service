@@ -73,8 +73,9 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
     }
 
     if (result == ERR_OK) {
-        if (!enable && DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            IsNotificationForcedEnable(record->bundleOption->GetBundleName())) {
+        if (!enable && (DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            IsNotificationForcedEnable(record->bundleOption->GetBundleName()) ||
+            AdvancedNotificationService::GetInstance()->IsNotificationOnceForcedEnable(record->bundleOption))) {
             AdvancedNotificationService::GetInstance()->
                 SetNotificationsEnabledForSpecialBundle("", record->bundleOption, true);
             return result;

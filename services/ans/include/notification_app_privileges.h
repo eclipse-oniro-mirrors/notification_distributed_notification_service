@@ -31,13 +31,22 @@ public:
     bool IsReminderEnabled() const;
     bool IsDistributedReplyEnabled() const;
     bool IsNotificationForcedEnable() const;
+    bool IsNotificationOnceForcedEnable() const;
 
 private:
-    static constexpr int32_t NOTIFICATION_FORCED_ENABLE = 5;
+    static constexpr int32_t NOTIFICATION_ONCE_FORCED_ENABLE_SEQ = 6;
+    static constexpr int32_t NOTIFICATION_FORCED_ENABLE_SEQ = 5;
     static constexpr int32_t DISTRIBUTED_REPLY_SEQ = 4;
     static constexpr int32_t REMINDER_ENABLED_SEQ = 2;
     static constexpr int32_t BANNER_ENABLED_SEQ = 1;
     static constexpr int32_t LIVE_VIEW_ENABLED_SEQ = 0;
+
+    static constexpr char NOTIFICATION_ONCE_FORCED_ENABLE = '1';
+    static constexpr char NOTIFICATION_FORCED_ENABLE = '1';
+    static constexpr char DISTRIBUTED_REPLY_ENABLE = '1';
+    static constexpr char REMINDER_ENABLE = '1';
+    static constexpr char BANNER_ENABLE = '1';
+    static constexpr char LIVE_VIEW_ENABLE = '1';
 
     uint32_t privileges_ = 0;
 };

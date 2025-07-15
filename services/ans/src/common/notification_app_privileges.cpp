@@ -19,22 +19,32 @@ namespace OHOS {
 namespace Notification {
 NotificationAppPrivileges::NotificationAppPrivileges(const std::string &flagStr)
 {
-    if (flagStr.size() > LIVE_VIEW_ENABLED_SEQ && flagStr[LIVE_VIEW_ENABLED_SEQ] == '1') {
+    if (flagStr.size() > LIVE_VIEW_ENABLED_SEQ &&
+        flagStr[LIVE_VIEW_ENABLED_SEQ] == LIVE_VIEW_ENABLE) {
         privileges_ |= 1 << LIVE_VIEW_ENABLED_SEQ;
     }
-    if (flagStr.size() > BANNER_ENABLED_SEQ && flagStr[BANNER_ENABLED_SEQ] == '1') {
+    if (flagStr.size() > BANNER_ENABLED_SEQ &&
+        flagStr[BANNER_ENABLED_SEQ] == BANNER_ENABLE) {
         privileges_ |= 1 << BANNER_ENABLED_SEQ;
     }
-    if (flagStr.size() > REMINDER_ENABLED_SEQ && flagStr[REMINDER_ENABLED_SEQ] == '1') {
+    if (flagStr.size() > REMINDER_ENABLED_SEQ &&
+        flagStr[REMINDER_ENABLED_SEQ] == REMINDER_ENABLE) {
         privileges_ |= 1 << REMINDER_ENABLED_SEQ;
     }
-    if (flagStr.size() > DISTRIBUTED_REPLY_SEQ && flagStr[DISTRIBUTED_REPLY_SEQ] == '1') {
+    if (flagStr.size() > DISTRIBUTED_REPLY_SEQ &&
+        flagStr[DISTRIBUTED_REPLY_SEQ] == DISTRIBUTED_REPLY_ENABLE) {
         privileges_ |= 1 << DISTRIBUTED_REPLY_SEQ;
     }
-    if (flagStr.size() >= NOTIFICATION_FORCED_ENABLE && flagStr[NOTIFICATION_FORCED_ENABLE] == '1') {
-        privileges_ |= 1 << NOTIFICATION_FORCED_ENABLE;
+    if (flagStr.size() > NOTIFICATION_FORCED_ENABLE_SEQ &&
+        flagStr[NOTIFICATION_FORCED_ENABLE_SEQ] == NOTIFICATION_FORCED_ENABLE) {
+        privileges_ |= 1 << NOTIFICATION_FORCED_ENABLE_SEQ;
+    }
+    if (flagStr.size() > NOTIFICATION_ONCE_FORCED_ENABLE_SEQ &&
+        flagStr[NOTIFICATION_ONCE_FORCED_ENABLE_SEQ] == NOTIFICATION_ONCE_FORCED_ENABLE) {
+        privileges_ |= 1 << NOTIFICATION_ONCE_FORCED_ENABLE_SEQ;
     }
 }
+
 bool NotificationAppPrivileges::IsLiveViewEnabled() const
 {
     if ((privileges_ & (1 << LIVE_VIEW_ENABLED_SEQ)) != 0) {
@@ -66,7 +76,14 @@ bool NotificationAppPrivileges::IsDistributedReplyEnabled() const
 
 bool NotificationAppPrivileges::IsNotificationForcedEnable() const
 {
-    if ((privileges_ & (1 << NOTIFICATION_FORCED_ENABLE)) != 0) {
+    if ((privileges_ & (1 << NOTIFICATION_FORCED_ENABLE_SEQ)) != 0) {
+        return true;
+    }
+    return false;
+}
+bool NotificationAppPrivileges::IsNotificationOnceForcedEnable() const
+{
+    if ((privileges_ & (1 << NOTIFICATION_ONCE_FORCED_ENABLE_SEQ)) != 0) {
         return true;
     }
     return false;
