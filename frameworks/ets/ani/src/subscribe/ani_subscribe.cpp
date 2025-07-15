@@ -25,24 +25,24 @@
 namespace OHOS {
 namespace NotificationSubScribeSts {
 static const char *REMOVE_FOR_BUNDLE_SIGNATURE =
-    "Lnotification/NotificationCommonDef/BundleOption;"
-    "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKey;"
-    "L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
+    "C{notification.NotificationCommonDef.BundleOption}"
+    "C{@ohos.notificationSubscribe.notificationSubscribe.NotificationKey}"
+    "C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *REMOVE_FOR_HASHCODE_SIGNATURE =
-    "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
+    "C{std.core.String}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *REMOVE_FOR_HASHCODES_SIGNATURE =
-    "Lescompat/Array;L@ohos/notificationSubscribe/notificationSubscribe/RemoveReason;:V";
+    "C{escompat.Array}C{@ohos.notificationSubscribe.notificationSubscribe.RemoveReason}:";
 static const char *DISTRIBUTE_OPERATION_SIGNATURE =
-    "Lstd/core/String;L@ohos/notificationSubscribe/notificationSubscribe/OperationInfo;:Lstd/core/Promise;";
+    "C{std.core.String}C{@ohos.notificationSubscribe.notificationSubscribe.OperationInfo}:C{std.core.Promise}";
 static const char *SUBSCRIBE_SIGNATURE =
-   "Lnotification/notificationSubscriber/NotificationSubscriber;"
-   "Lnotification/notificationSubscribeInfo/NotificationSubscribeInfo;:V";
+   "C{notification.notificationSubscriber.NotificationSubscriber}"
+   "C{notification.notificationSubscribeInfo.NotificationSubscribeInfo}:";
 static const char *UNSUBSCRIBE_SIGNATURE =
-   "Lnotification/notificationSubscriber/NotificationSubscriber;:V";
+   "C{notification.notificationSubscriber.NotificationSubscriber}:";
 static const char *REMOVEALL_FOR_BUNDLEOPTION_SIGNATURE =
-   "Lnotification/NotificationCommonDef/BundleOption;:V";
-static const char *REMOVEALL_FOR_USERID_STGNATURE = "D:V";
-static const char *REMOVEALL_SIGNATURE = ":V";
+   "C{notification.NotificationCommonDef.BundleOption}:";
+static const char *REMOVEALL_FOR_USERID_STGNATURE = "d:";
+static const char *REMOVEALL_SIGNATURE = ":";
 
 ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object operationInfo)
 {
@@ -103,7 +103,7 @@ void AniSubscribeSelf(ani_env *env, ani_object obj)
 void AniSubScribeRegistryInit(ani_env *env)
 {
     ANS_LOGD("AniSubScribeRegistryInit call");
-    static const char *npName = "L@ohos/notificationSubscribe/notificationSubscribe;";
+    static const char *npName = "@ohos.notificationSubscribe.notificationSubscribe";
     ani_namespace np;
     if (ANI_OK != env->FindNamespace(npName, &np)) {
         ANS_LOGD("Not found '%{public}s'", npName);

@@ -66,7 +66,7 @@ ani_object GetAniArrayBundleOption(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
             return nullptr;
         }
@@ -95,7 +95,7 @@ bool UnwrapArrayBundleOption(ani_env *env,
     for (int32_t i = 0; i < static_cast<int>(length); i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &optionRef, i);
+            "$_get", "i:C{std.core.Object}", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayBundleOption: get bundleOptionRef failed, status = %{public}d", status);
             return false;
@@ -120,7 +120,7 @@ bool WrapBundleOption(ani_env* env,
     }
     ani_class bundleCls = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/NotificationCommonDef/BundleOptionInner;", bundleCls, bundleObject)
+        "notification.NotificationCommonDef.BundleOptionInner", bundleCls, bundleObject)
         || bundleCls == nullptr || bundleObject == nullptr) {
         ANS_LOGE("WrapBundleOption: create BundleOption failed");
         return false;

@@ -73,7 +73,7 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "I:Lstd/core/Object;", &optionRef, (ani_int)i);
+            "i:C{std.core.Object}", &optionRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, i);
             return false;
@@ -113,7 +113,7 @@ bool WrapProfileTrustList(ani_env* env, sptr<NotificationDoNotDisturbProfile> pr
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(arrayObj, "$_set",
-            "ILstd/core/Object;:V", index, bundleObj))) {
+            "iC{std.core.Object}:", index, bundleObj))) {
             ANS_LOGE("WrapProfileTrustList set object faild. index %{public}d status %{public}d",
                 index, status);
             return false;
@@ -137,7 +137,7 @@ bool WrapDoNotDisturbProfile(ani_env* env, sptr<NotificationDoNotDisturbProfile>
         ANS_LOGE("WrapDoNotDisturbProfile: Invalid input parameters");
         return false;
     }
-    const char* className = "L@ohos/notificationManager/notificationManager/DoNotDisturbProfileInner;";
+    const char* className = "@ohos.notificationManager.notificationManager.DoNotDisturbProfileInner";
     if (!CreateClassObjByClassName(env, className, cls, outObj) || outObj == nullptr) {
         ANS_LOGE("WrapDoNotDisturbProfile: Failed to create profile class object");
         return false;

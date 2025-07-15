@@ -209,7 +209,7 @@ ani_object WrapNotificationActionButton(ani_env* env,
     ani_object iconButtonObject = nullptr;
     ani_class iconButtonCls = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationActionButton/NotificationActionButtonInner;", iconButtonCls, iconButtonObject)) {
+        "notification.notificationActionButton.NotificationActionButtonInner", iconButtonCls, iconButtonObject)) {
         ANS_LOGE("WrapNotificationActionButton : CreateClassObjByClassName failed");
         return nullptr;
     }
@@ -246,7 +246,7 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref buttonRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)i))) {
+            "$_get", "i:C{std.core.Object}", &buttonRef, (ani_int)i))) {
             ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, i);
             return status;
         }
@@ -287,7 +287,7 @@ ani_object GetAniArrayNotificationActionButton(ani_env* env,
             ANS_LOGE("GetAniArrayActionButton: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
             ANS_LOGE("GetAniArrayActionButton: Object_CallMethodByName_Void failed");
             return nullptr;
         }

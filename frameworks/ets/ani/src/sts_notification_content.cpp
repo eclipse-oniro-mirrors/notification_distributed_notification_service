@@ -99,7 +99,7 @@ bool LiveViewStatusCToEts(ani_env *env, LiveViewStatus liveViewStatus, ani_enum_
     STSLiveViewStatus stsLiveViewStatus = STSLiveViewStatus::LIVE_VIEW_CREATE;
     if (!StsLiveViewStatusUtils::CToSts(liveViewStatus, stsLiveViewStatus)
         || !EnumConvertNativeToAni(env,
-        "Lnotification/notificationContent/#LiveViewStatus", stsLiveViewStatus, enumItem)) {
+        "notification.notificationContent.#LiveViewStatus", stsLiveViewStatus, enumItem)) {
         ANS_LOGE("LiveViewStatusCToEts failed");
         return false;
     }
@@ -117,7 +117,7 @@ bool LiveViewTypesCToEts(ani_env *env, LiveViewTypes liveViewTypes, ani_enum_ite
 {
     ANS_LOGD("LiveViewTypesCToEts call");
     return EnumConvertNativeToAni(env,
-        "Lnotification/notificationContent/#LiveViewTypes", liveViewTypes, enumItem);
+        "notification.notificationContent.#LiveViewTypes", liveViewTypes, enumItem);
 }
 
 void UnWarpNotificationProgress(ani_env *env, ani_object obj, NotificationProgress &notificationProgress)
@@ -161,7 +161,7 @@ bool WarpNotificationProgress(ani_env *env, const NotificationProgress &progress
     }
     ani_class progressClass = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationProgressInner;", progressClass, progressObject)
+        "notification.notificationContent.NotificationProgressInner", progressClass, progressObject)
         || progressObject == nullptr) {
         ANS_LOGE("WarpNotificationProgress: create class failed");
         return false;
@@ -232,7 +232,7 @@ bool WarpNotificationTime(ani_env *env, const NotificationTime &time, bool isIni
     }
     ani_class timeClass = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationTimeInner;", timeClass, timeObject)
+        "notification.notificationContent.NotificationTimeInner", timeClass, timeObject)
         || timeObject == nullptr) {
         ANS_LOGE("WarpNotificationTime: create class failed");
         return false;
@@ -333,7 +333,7 @@ ani_status GetIconButtonArray(ani_env *env,
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref buttonRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &buttonRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &buttonRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -400,7 +400,7 @@ bool WarpNotificationLocalLiveViewButton(
     }
     ani_class buttonClass = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationButtonInner;", buttonClass, buttonObject)
+        "notification.notificationContent.NotificationButtonInner", buttonClass, buttonObject)
         || buttonObject == nullptr) {
         ANS_LOGE("WarpNotificationLocalLiveViewButton: create class failed");
         return false;
@@ -573,7 +573,7 @@ ani_object WarpNotificationIconButton(ani_env *env, const NotificationIconButton
     ani_class iconButtonCls = nullptr;
     ani_object iconButtonObject = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationIconButtonInner;", iconButtonCls, iconButtonObject)
+        "notification.notificationContent.NotificationIconButtonInner", iconButtonCls, iconButtonObject)
         || iconButtonObject == nullptr) {
         ANS_LOGE("WarpNotificationIconButton: create class failed");
         return nullptr;
@@ -633,7 +633,7 @@ ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIco
             ANS_LOGE("GetAniIconButtonArray: item is nullptr");
             return nullptr;
         }
-        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+        if (ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
             ANS_LOGE("GetAniIconButtonArray: add item failed");
             return nullptr;
         }
@@ -652,7 +652,7 @@ bool WarpNotificationCapsule(ani_env *env, const NotificationCapsule &capsule, a
     }
     ani_class capsuleClass = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationCapsuleInner;", capsuleClass, capsuleObject)
+        "notification.notificationContent.NotificationCapsuleInner", capsuleClass, capsuleObject)
         || capsuleObject == nullptr) {
         ANS_LOGE("GetAniIconButtonArray: create class failed");
         return false;
@@ -1182,7 +1182,7 @@ bool SetNotificationNormalContent(
     ani_class contentCls;
     ani_object contentObj;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationBasicContentInner;", contentCls, contentObj)
+        "notification.notificationContent.NotificationBasicContentInner", contentCls, contentObj)
         || contentCls == nullptr || contentObj == nullptr) {
         ANS_LOGE("SetNotificationNormalContent: create class failed");
         return false;
@@ -1214,7 +1214,7 @@ bool SetNotificationLongTextContent(
     ani_class contentCls;
     ani_object contentObj;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationLongTextContentInner;", contentCls, contentObj)
+        "notification.notificationContent.NotificationLongTextContentInner", contentCls, contentObj)
         || contentObj == nullptr) {
         ANS_LOGE("SetNotificationLongTextContent: create class failed");
         return false;
@@ -1254,7 +1254,7 @@ bool SetNotificationPictureContent(
     ani_class contentCls;
     ani_object contentObj;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationPictureContentInner;", contentCls, contentObj)
+        "notification.notificationContent.NotificationPictureContentInner", contentCls, contentObj)
         || contentObj == nullptr) {
         ANS_LOGE("SetNotificationPictureContent: create class failed");
         return false;
@@ -1292,7 +1292,7 @@ bool SetNotificationMultiLineContent(
     ani_class contentCls;
     ani_object contentObj;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationMultiLineContentInner;", contentCls, contentObj)
+        "notification.notificationContent.NotificationMultiLineContentInner", contentCls, contentObj)
         || contentObj == nullptr) {
         ANS_LOGE("SetNotificationMultiLineContent: create class failed");
         return false;
@@ -1431,7 +1431,7 @@ bool SetNotificationLocalLiveViewContent(
     ani_class contentCls;
     ani_object contentObj;
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationContent/NotificationSystemLiveViewContentInner;", contentCls, contentObj)
+        "notification.notificationContent.NotificationSystemLiveViewContentInner", contentCls, contentObj)
         || contentObj == nullptr) {
         ANS_LOGE("SetNotificationMultiLineContent: create class failed");
         return false;
@@ -1509,7 +1509,7 @@ bool SetNotificationLiveViewContent(
     }
     ani_class contentCls;
     ani_object contentObj;
-    if (!CreateClassObjByClassName(env, "Lnotification/notificationContent/NotificationLiveViewContentInner;",
+    if (!CreateClassObjByClassName(env, "notification.notificationContent.NotificationLiveViewContentInner",
         contentCls, contentObj) || contentObj == nullptr) {
         ANS_LOGE("SetNotificationLiveViewContent: create class failed");
         return false;
@@ -1529,7 +1529,7 @@ bool SetNotificationContent(ani_env* env, std::shared_ptr<NotificationContent> n
         return false;
     }
     ani_class ncCls;
-    if (!CreateClassObjByClassName(env, "Lnotification/notificationContent/NotificationContentInner;",
+    if (!CreateClassObjByClassName(env, "notification.notificationContent.NotificationContentInner",
         ncCls, ncObj) || ncObj == nullptr) {
         ANS_LOGE("SetNotificationContent: create class failed");
         return false;

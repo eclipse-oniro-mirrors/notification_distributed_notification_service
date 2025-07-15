@@ -128,7 +128,7 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref pixelMapRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(param),
-            "$_get", "I:Lstd/core/Object;", &pixelMapRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &pixelMapRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("GetPixelMapArrayByRef:status : %{public}d, index: %{public}d", status, i);
             pixelMaps.clear();
@@ -193,7 +193,7 @@ ani_status GetResourceArray(ani_env *env,
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref iconRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &iconRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &iconRef, (ani_int)i);
         if (status != ANI_OK) {
             res.clear();
             ANS_LOGE("GetResourceArray: status = %{public}d, index = %{public}d", status, i);
@@ -221,7 +221,7 @@ ani_status GetKeyString(ani_env *env, ani_object obj, int index, ani_string &str
     ani_status status = ANI_ERROR;
     ani_ref stringEntryRef;
     status = env->Object_CallMethodByName_Ref(obj,
-        "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)index);
+        "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)index);
     if (status != ANI_OK) {
         ANS_LOGE("status : %{public}d, index: %{public}d", status, index);
         return status;
@@ -308,7 +308,7 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
-    if (ANI_OK != (status = env->FindClass("Lnotification/notificationContent/RecordTools;", &cls))) {
+    if (ANI_OK != (status = env->FindClass("notification.notificationContent.RecordTools", &cls))) {
         ANS_LOGE("GetMapOfPictureInfo : FindClass status = %{public}d", status);
         return status;
     }
@@ -349,7 +349,7 @@ ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::R
     ani_class resourceCls = nullptr;
     ani_object resourceObject = nullptr;
     if (!CreateClassObjByClassName(env,
-        "Lglobal/resourceInner/ResourceInner;", resourceCls, resourceObject)) {
+        "global.resourceInner.ResourceInner", resourceCls, resourceObject)) {
         ANS_LOGE("GetAniResource : CreateClassObjByClassName failed");
         return nullptr;
     }
@@ -391,7 +391,7 @@ ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<M
             ANS_LOGE("GetAniArrayPixelMap : pixelMapObject is nullptr");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V",
+        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:",
             i, pixelMapObject);
         if (status != ANI_OK) {
             ANS_LOGE("GetAniArrayPixelMap : Object_CallMethodByName_Void failed %{public}d", status);
@@ -424,7 +424,7 @@ ani_object GetAniArrayResource(ani_env *env,
             ANS_LOGE("GetAniArrayResource : resourceObject is nullPtr");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V",
+        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:",
             i, resourceObject);
         if (status != ANI_OK) {
             ANS_LOGE("GetAniArrayResource : Object_CallMethodByName_Void failed %{public}d", status);
@@ -461,7 +461,7 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
             return false;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(pictureInfoObj,
-            "$_set", "Lstd/core/Object;Lstd/core/Object;:V", aniKey, aniPictrueArray)) {
+            "$_set", "C{std.core.Object}C{std.core.Object}:", aniKey, aniPictrueArray)) {
             ANS_LOGE("GetAniPictrueInfo : Object_CallMethodByName_Void failed");
             return false;
         }
@@ -494,12 +494,12 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
     }
     ani_status status = ANI_ERROR;
     ani_class arrayCls = nullptr;
-    if (ANI_OK != (status = env->FindClass("Lescompat/Array;", &arrayCls))) {
+    if (ANI_OK != (status = env->FindClass("escompat.Array", &arrayCls))) {
         ANS_LOGE("GetAniWantAgentArray : FindClass status = %{public}d", status);
         return nullptr;
     }
     ani_method arrayCtor;
-    if (ANI_OK != (status = env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor))) {
+    if (ANI_OK != (status = env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor))) {
         ANS_LOGE("GetAniWantAgentArray : Class_FindMethod status = %{public}d", status);
         return nullptr;
     }
@@ -512,7 +512,7 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
     for (auto &wantAgent : wantAgents) {
         ani_object item = WarpWantAgent(env, wantAgent);
         if (item == nullptr
-            || ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, item)) {
+            || ANI_OK != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, item)) {
             ANS_LOGE("GetAniWantAgentArray : set WantAgent failed");
             return nullptr;
         }

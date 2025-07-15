@@ -32,7 +32,7 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &so
         ANS_LOGE("invalid parameter value");
         return false;
     }
-    if (!CreateClassObjByClassName(env, "Lnotification/notificationSorting/NotificationSortingInner;", cls, obj)) {
+    if (!CreateClassObjByClassName(env, "notification.notificationSorting.NotificationSortingInner", cls, obj)) {
         ANS_LOGE("Create obj faild. NotificationSortingInner");
         return false;
     }

@@ -19,9 +19,9 @@
 
 namespace OHOS {
 namespace NotificationSts {
-constexpr const char* CLASSNAME_BOOLEAN = "Lstd/core/Boolean;";
-constexpr const char* CLASSNAME_DOUBLE = "Lstd/core/Double;";
-constexpr const char* CLASSNAME_INT = "Lstd/core/Int;";
+constexpr const char* CLASSNAME_BOOLEAN = "std.core.Boolean";
+constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
+constexpr const char* CLASSNAME_INT = "std.core.Int";
 std::string GetResizeStr(std::string instr, int32_t length)
 {
     return instr.length() <= length ? instr : instr.substr(0, length);
@@ -92,7 +92,7 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(ani_obj,
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d", status);
             return false;
@@ -260,7 +260,7 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -296,7 +296,7 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref numEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &numEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &numEntryRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -332,7 +332,7 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
             ANS_LOGE("GetAniStringByString faild");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V",
+        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:",
             i, aniStr);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Void failed %{public}d", status);
@@ -444,7 +444,7 @@ ani_object CreateBoolean(ani_env *env, bool value)
         return nullptr;
     }
     ani_method personInfoCtor;
-    if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "Z:V", &personInfoCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "z:", &personInfoCtor)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return nullptr;
     }
@@ -469,7 +469,7 @@ ani_object CreateDouble(ani_env *env, double value)
         return nullptr;
     }
     ani_method doubleCtor;
-    if ((status = env->Class_FindMethod(doubleCls, "<ctor>", "D:V", &doubleCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return nullptr;
     }
@@ -489,12 +489,12 @@ ani_object newArrayClass(ani_env *env, int length)
         return nullptr;
     }
     ani_class arrayCls = nullptr;
-    if (env->FindClass("Lescompat/Array;", &arrayCls) != ANI_OK) {
-        ANS_LOGE("FindClass Lescompat/Array; Failed");
+    if (ANI_OK != env->FindClass("escompat.Array", &arrayCls)) {
+        ANS_LOGE("FindClass escompat.Array Failed");
         return nullptr;
     }
     ani_method arrayCtor;
-    if (env->Class_FindMethod(arrayCls, "<ctor>", "I:V", &arrayCtor) != ANI_OK) {
+    if (ANI_OK != env->Class_FindMethod(arrayCls, "<ctor>", "i:", &arrayCtor)) {
         ANS_LOGE("Class_FindMethod <ctor> Failed");
         return nullptr;
     }
@@ -516,7 +516,7 @@ ani_object newRecordClass(ani_env *env)
     }
     ani_status status = ANI_ERROR;
     ani_class recordCls;
-    if ((status = env->FindClass("Lescompat/Record;", &recordCls)) != ANI_OK) {
+    if (ANI_OK != (status = env->FindClass("escompat.Record", &recordCls))) {
         ANS_LOGE("newRecordClass fail, FindClass status = %{public}d", status);
         return nullptr;
     }
@@ -550,7 +550,7 @@ ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64
             ANS_LOGE("null intObj");
             return nullptr;
         }
-        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", i, intObj);
+        ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, intObj);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d", status);
             return nullptr;
@@ -616,8 +616,8 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     ani_class cls;
     ani_status status;
-    if ((status = env->FindClass("Lescompat/Date;", &cls)) != ANI_OK) {
-        ANS_LOGD("error. not find class name 'Lescompat/Date;'. status %{public}d", status);
+    if (ANI_OK != (status = env->FindClass("escompat.Date", &cls))) {
+        ANS_LOGD("error. not find class name 'escompat.Date'. status %{public}d", status);
         return false;
     }
     ani_method ctor;
@@ -666,7 +666,7 @@ ani_object CreateInt(ani_env *env, int32_t value)
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "i:", &ctor)) != ANI_OK) {
         ANS_LOGE("Class_FindMethod '%{public}s' faild. status %{public}d", CLASSNAME_INT, status);
         return nullptr;
     }
