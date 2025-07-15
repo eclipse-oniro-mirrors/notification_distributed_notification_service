@@ -97,7 +97,7 @@ bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     }
     ani_class groupInfoCls = nullptr;
     if ((!CreateClassObjByClassName(env,
-        "Lnotification/notificationRequest/UnifiedGroupInfoInner;", groupInfoCls, groupInfoObject))
+        "notification.notificationRequest.UnifiedGroupInfoInner", groupInfoCls, groupInfoObject))
         || groupInfoCls == nullptr || groupInfoObject == nullptr) {
         ANS_LOGE("WarpNotificationUnifiedGroupInfo: create class failed");
         return false;
@@ -1112,7 +1112,7 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
         return false;
     }
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationRequest/NotificationRequestInner;", cls, outAniObj)) {
+        "notification.notificationRequest.NotificationRequestInner", cls, outAniObj)) {
         ANS_LOGE("WarpNotificationRequest: create class failed");
         return false;
     }
@@ -1160,7 +1160,7 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(
-            arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
+            arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
             ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }
@@ -1187,7 +1187,7 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
                 return nullptr;
             }
         if (ANI_OK
-            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
+            != env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", index, requestObj)) {
             ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
             return nullptr;
         }

@@ -406,7 +406,7 @@ bool StsSubscriberInstance::HasOnBatchCancelCallback()
         ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
         return false;
     }
-    
+
     ani_ref fn_ref;
     aniResult = etsEnv->Object_GetFieldByName_Ref(static_cast<ani_object>(ref_), "onBatchCancel", &fn_ref);
     if (ANI_OK != aniResult) {
@@ -745,7 +745,7 @@ bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &
     ani_boolean isUndefined = ANI_TRUE;
     ani_double idDouble = 0.0;
     if (!GetDoubleValueByClassName(env, obj,
-        "L@ohos/notificationSubscribe/notificationSubscribe/NotificationKeyInner;", "<get>id", idDouble)) {
+        "@ohos.notificationSubscribe.notificationSubscribe.NotificationKeyInner", "<get>id", idDouble)) {
         ANS_LOGD("GetDoubleValueByClassName id fail");
         return false;
     }

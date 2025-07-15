@@ -101,7 +101,7 @@ bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &re
         }
         for (size_t i = 0; i < vibrationValues.size(); i++) {
             status = env->Object_CallMethodByName_Void(
-                vibrationValuesObj, "$_set", "ID:V", i, static_cast<ani_double>(vibrationValues[i]));
+                vibrationValuesObj, "$_set", "id:", i, static_cast<ani_double>(vibrationValues[i]));
             if (status != ANI_OK) {
                 ANS_LOGE("faild. status : %{public}d", status);
                 return false;
@@ -129,7 +129,7 @@ bool WarpSubscribeCallbackData(
         return false;
     }
     if (!CreateClassObjByClassName(
-        env, "Lnotification/notificationSubscriber/SubscribeCallbackDataInner;", cls, outObj)) {
+        env, "notification.notificationSubscriber.SubscribeCallbackDataInner", cls, outObj)) {
             ANS_LOGE("CreateClassObjByClassName faild");
             return false;
     }
@@ -190,7 +190,7 @@ bool WarpSubscribeCallbackDataArray(
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-            outObj, "$_set", "ILstd/core/Object;:V", i, obj))) {
+            outObj, "$_set", "iC{std.core.Object}:", i, obj))) {
                 ANS_LOGE("set object faild. status %{public}d", status);
                 return false;
             }
@@ -208,7 +208,7 @@ bool WarpEnabledNotificationCallbackData(
     }
     ani_class cls;
     ani_status status;
-    const char *className = "Lnotification/notificationSubscriber/EnabledNotificationCallbackDataInner;";
+    const char *className = "notification.notificationSubscriber.EnabledNotificationCallbackDataInner";
     if (!CreateClassObjByClassName(env, className, cls, outObj)) {
         ANS_LOGE("CreateClassObjByClassName faild");
         return false;
@@ -239,7 +239,7 @@ bool WarpBadgeNumberCallbackData(
     }
     ani_class cls;
     ani_object instanceKeyObj;
-    const char *className = "Lnotification/notificationSubscriber/BadgeNumberCallbackDataInner;";
+    const char *className = "notification.notificationSubscriber.BadgeNumberCallbackDataInner";
     if (!CreateClassObjByClassName(env, className, cls, outObj)) {
         ANS_LOGE("CreateClassObjByClassName faild");
         return false;

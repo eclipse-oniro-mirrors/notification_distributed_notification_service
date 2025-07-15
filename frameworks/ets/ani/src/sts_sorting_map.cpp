@@ -44,7 +44,7 @@ bool GetKeySToRecode(ani_env *env, const std::shared_ptr<NotificationSortingMap>
             return false;
         }
         if (ANI_OK != (status = env->Object_CallMethodByName_Void(
-            recordObj, "$_set", "Lstd/core/Object;Lstd/core/Object;:V", keyString, sortingObj))) {
+            recordObj, "$_set", "C{std.core.Object}C{std.core.Object}:", keyString, sortingObj))) {
             ANS_LOGE("set key value faild. key: %{public}s status %{public}d", it.c_str(), status);
             return false;
         }
@@ -65,12 +65,12 @@ bool WarpNotificationSortingMap(ani_env *env,
     }
 
     if (!CreateClassObjByClassName(env,
-        "Lnotification/notificationSortingMap/NotificationSortingMapInner;", cls, outObj)) {
+        "notification.notificationSortingMap.NotificationSortingMapInner", cls, outObj)) {
         ANS_LOGE("CreateClassObjByClassName faild.");
         return false;
     }
 
-    if (!CreateClassObjByClassName(env, "Lescompat/Record;", recordCls, recordObj) || recordObj == nullptr) {
+    if (!CreateClassObjByClassName(env, "escompat.Record", recordCls, recordObj) || recordObj == nullptr) {
         ANS_LOGE("Create recordObj faild.");
         return false;
     }

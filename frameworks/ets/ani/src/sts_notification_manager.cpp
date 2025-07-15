@@ -396,7 +396,7 @@ bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
     if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType)
         || !EnumConvertNativeToAni(
-            env, "L@ohos/notificationManager/notificationManager/SlotType;", stsSlotType, enumItem)) {
+            env, "@ohos.notificationManager.notificationManager.SlotType", stsSlotType, enumItem)) {
         ANS_LOGE("SlotTypeCToEts failed");
         return false;
     }
@@ -419,7 +419,7 @@ bool SlotLevelCToEts(ani_env *env, SlotLevel slotLevel, ani_enum_item &enumItem)
     ANS_LOGD("SlotLevelCToEts call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
     if (!StsSlotLevelUtils::CToSts(slotLevel, stsSlotLevel) || !EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/SlotLevel;", stsSlotLevel, enumItem)) {
+        "@ohos.notificationManager.notificationManager.SlotLevel", stsSlotLevel, enumItem)) {
         ANS_LOGE("SlotLevelCToEts failed");
         return false;
     }
@@ -444,7 +444,7 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
     if (!StsContentTypeUtils::CToSts(contentType, stsContentType)
         || !EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/ContentType;", stsContentType, enumItem)) {
+        "@ohos.notificationManager.notificationManager.ContentType", stsContentType, enumItem)) {
         ANS_LOGE("ContentTypeCToEts failed");
         return false;
     }
@@ -469,7 +469,7 @@ bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
     StsRemindTypeUtils::CToSts(remindType, stsRemindType);
     EnumConvertNativeToAni(env,
-        "L@ohos/notificationManager/notificationManager/RemindType;", stsRemindType, enumItem);
+        "@ohos.notificationManager.notificationManager.RemindType", stsRemindType, enumItem);
     return true;
 }
 
@@ -514,7 +514,7 @@ ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonO
     ani_object optObj = nullptr;
     ani_class optCls = nullptr;
     if (!CreateClassObjByClassName(env,
-        "L@ohos/notificationManager/notificationManager/ButtonOptionsInner;", optCls, optObj) || optObj == nullptr) {
+        "@ohos.notificationManager.notificationManager.ButtonOptionsInner", optCls, optObj) || optObj == nullptr) {
         ANS_LOGE("WarpNotificationButtonOption: create class failed");
         return nullptr;
     }
@@ -537,13 +537,13 @@ bool WarpNotificationDoNotDisturbDate(
     }
     ani_class cls;
     ani_enum_item stsEnumValue;
-    const char *className = "L@ohos/notificationManager/notificationManager/DoNotDisturbDateInner;";
+    const char *className = "@ohos.notificationManager.notificationManager.DoNotDisturbDateInner";
     if (!CreateClassObjByClassName(env, className, cls, outObj) || outObj == nullptr) {
         ANS_LOGE("WarpNotificationDoNotDisturbDate: create class faild");
         return false;
     }
     if (!EnumConvertNativeToAni(
-        env, "L@ohos/notificationManager/notificationManager/DoNotDisturbType;",
+        env, "@ohos.notificationManager.notificationManager.DoNotDisturbType",
             date->GetDoNotDisturbType(), stsEnumValue)) {
         ANS_LOGE("EnumConvert_NativeToSts faild");
         return false;
@@ -576,7 +576,7 @@ bool SetCheckInfoContentType(ani_env *env, ani_object &obj, const std::string &n
         ANS_LOGE("CToSts 'contentType' faild.");
         return false;
     }
-    if (!EnumConvertNativeToAni(env, "L@ohos/notificationManager/notificationManager/ContentType;", stsType, item)) {
+    if (!EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.ContentType", stsType, item)) {
         ANS_LOGE("EnumConvertNativeToAni 'contentType' faild.");
         return false;
     }
@@ -599,7 +599,7 @@ bool SetCheckInfoSlotType(ani_env *env, ani_object &obj, const std::string &name
         ANS_LOGE("CToSts 'slotType' faild.");
         return false;
     }
-    if (!EnumConvertNativeToAni(env, "L@ohos/notificationManager/notificationManager/SlotType;", stsType, item)) {
+    if (!EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.SlotType", stsType, item)) {
         ANS_LOGE("EnumConvertNativeToAni 'slotType' faild.");
         return false;
     }
@@ -701,7 +701,7 @@ bool WarpNotificationCheckInfo(
         return false;
     }
     if (!CreateClassObjByClassName(
-        env, "L@ohos/notificationManager/notificationManager/NotificationCheckInfoInner;", cls, obj)) {
+        env, "@ohos.notificationManager.notificationManager.NotificationCheckInfoInner", cls, obj)) {
             ANS_LOGE("WarpNotificationCheckInfo create faild");
             return false;
         }

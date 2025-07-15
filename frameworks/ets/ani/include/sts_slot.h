@@ -25,7 +25,7 @@ using SlotType = OHOS::Notification::NotificationConstant::SlotType;
 using SlotLevel = OHOS::Notification::NotificationSlot::NotificationLevel;
 using NotificationSlot = OHOS::Notification::NotificationSlot;
 
-constexpr const char* NOTIFICATION_SOLT_CLASSNAME = "Lnotification/notificationSlot/NotificationSlotInner;";
+constexpr const char* NOTIFICATION_SOLT_CLASSNAME = "notification.notificationSlot.NotificationSlotInner";
 bool SetOptionalFieldSlotType(ani_env *env, const ani_class cls, ani_object &object, const std::string fieldName,
     const SlotType value);
 bool SetOptionalFieldSlotLevel(ani_env *env, const ani_class cls, ani_object &object, const std::string fieldName,
