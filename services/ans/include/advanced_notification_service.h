@@ -35,6 +35,7 @@
 #include "live_publish_process.h"
 #include "notification.h"
 #include "notification_bundle_option.h"
+#include "distributed_bundle_option.h"
 #include "notification_dialog_manager.h"
 #include "notification_do_not_disturb_profile.h"
 #include "notification_record.h"
@@ -1048,6 +1049,17 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled) override;
+    
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundles Indicates the bundles.
+     * @param deviceType Indicates the type of the device running the application.
+     * @return Returns set distributed enabled for specified bundle result.
+     */
+    ErrCode SetDistributedBundleOption(const std::vector<sptr<DistributedBundleOption>> &bundles,
+        const std::string &deviceType) override;
 
     /**
      * @brief Get whether to allow a specified application to publish notifications cross

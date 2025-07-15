@@ -319,6 +319,18 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled);
+    
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundles Indicates the bundles.
+     * @param deviceType Indicates the type of the device running the application.
+     * @return Returns set distributed enabled for specified bundle result.
+     */
+    ErrCode SetDistributedBundleOption(
+        const std::vector<sptr<DistributedBundleOption>> &bundles,
+        const std::string &deviceType);
 
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross

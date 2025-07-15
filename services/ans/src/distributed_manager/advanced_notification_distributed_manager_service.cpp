@@ -657,6 +657,68 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledByBundle(const sptr<No
     return result;
 }
 
+ErrCode AdvancedNotificationService::SetDistributedBundleOption(
+    const std::vector<sptr<DistributedBundleOption>> &bundles,
+    const std::string &deviceType)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_10);
+    ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundles.empty()) {
+        ANS_LOGE("bundles is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("bundles null").ErrorCode(ERR_ANS_INVALID_PARAM));
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (deviceType.empty()) {
+        ANS_LOGE("deviceType is null.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.Message("device null").ErrorCode(ERR_ANS_INVALID_PARAM));
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("IsSystemApp is false.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_NON_SYSTEM_APP).BranchId(BRANCH_11));
+        return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission Denied.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_12));
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+    
+    std::vector<sptr<DistributedBundleOption>> affectBundleOption;
+    for (auto distributedBundle : bundles) {
+        std::string bundleName = distributedBundle->GetBundle()->GetBundleName();
+        int32_t uid = distributedBundle->GetBundle()->GetUid();
+        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+        sptr<NotificationBundleOption> returnOption = GenerateValidBundleOption(bundleOption);
+        if (returnOption == nullptr) {
+            ANS_LOGW("unaffet bundle. %{public}s %{public}d", bundleName.c_str(), uid);
+            continue;
+        }
+        distributedBundle->GetBundle()->SetUid(returnOption->GetUid());
+        affectBundleOption.emplace_back(distributedBundle);
+    }
+
+    if (affectBundleOption.empty()) {
+        ANS_LOGE("no bundle is afffect");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(
+            ERR_ANS_DISTRIBUTED_OPERATION_FAILED).BranchId(BRANCH_13));
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
+     
+    ErrCode result = NotificationPreferences::GetInstance()->SetDistributedBundleOption(
+        affectBundleOption, deviceType);
+
+    ANS_LOGI("SetDistributedBundleOption result: %{public}s, %{public}d",  deviceType.c_str(), result);
+    NotificationAnalyticsUtil::ReportModifyEvent(
+        message.Message("batch").ErrorCode(result).BranchId(BRANCH_13));
+
+    return result;
+}
+
 ErrCode AdvancedNotificationService::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
     const std::string &deviceType, bool &enabled)
 {
@@ -698,6 +760,11 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
     auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
         enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
         : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+        
+    if (deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
+        return result;
+    }
+
     if (result == ERR_OK) {
         bool liveViewEnabled = false;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(

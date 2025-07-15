@@ -28,10 +28,22 @@ struct DistributedEnableParams {
     bool enable = false;
 };
 
+struct DistributedBundleOptionParams {
+    std::vector<DistributedBundleOption> bundles;
+    std::string deviceType;
+};
+
 struct AsyncCallbackDistributedEnable {
     napi_env env = nullptr;
     napi_async_work asyncWork = nullptr;
     DistributedEnableParams params;
+    CallbackPromiseInfo info;
+};
+
+struct AsyncCallbackDistributedBundleOption {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    DistributedBundleOptionParams params;
     CallbackPromiseInfo info;
 };
 
@@ -60,6 +72,7 @@ struct AsyncCallbackDistributedEnableBySlot {
     CallbackPromiseInfo info;
 };
 napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info info);
+napi_value NapiSetDistributedBundleOption(napi_env env, napi_callback_info info);
 napi_value NapiSetSmartReminderEnabled(napi_env env, napi_callback_info info);
 napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info);
 napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info);

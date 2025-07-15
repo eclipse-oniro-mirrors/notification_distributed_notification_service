@@ -86,6 +86,7 @@ private:
         const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
     bool GetAppSwitch(const string &deviceType, const string &ownerBundleName, int32_t ownerUid) const;
     bool GetSmartSwitch(const string &deviceType) const;
+    bool GetDistributedSwitch(const string &deviceType) const;
     void InitValidDevices(set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         const sptr<NotificationRequest> &request) const;

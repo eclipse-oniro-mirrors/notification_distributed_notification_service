@@ -1133,6 +1133,109 @@ napi_value Common::GetButtonOption(const napi_env &env, const napi_value &value,
     return NapiGetNull(env);
 }
 
+napi_value Common::GetBundleOption(
+    const napi_env &env,
+    const napi_value &value,
+    std::shared_ptr<NotificationBundleOption> &option)
+{
+    ANS_LOGD("called");
+
+    bool hasProperty {false};
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+
+    char str[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    // bundle: string
+    NAPI_CALL(env, napi_has_named_property(env, value, "bundle", &hasProperty));
+    if (!hasProperty) {
+        ANS_LOGE("Property bundle expected.");
+        return nullptr;
+    }
+    napi_get_named_property(env, value, "bundle", &result);
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_string) {
+        ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of bundle must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+    option->SetBundleName(str);
+
+    // uid?: number
+    NAPI_CALL(env, napi_has_named_property(env, value, "uid", &hasProperty));
+    if (hasProperty) {
+        int32_t uid = 0;
+        napi_get_named_property(env, value, "uid", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int32(env, result, &uid);
+        option->SetUid(uid);
+    }
+
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetDistributedBundleOption(
+    const napi_env &env,
+    const napi_value &value,
+    DistributedBundleOption &option)
+{
+    ANS_LOGD("called");
+
+    bool hasProperty {false};
+    napi_valuetype valuetype = napi_undefined;
+    napi_value result = nullptr;
+
+    // bundle: NotificationBundleOption
+    NAPI_CALL(env, napi_has_named_property(env, value, "bundle", &hasProperty));
+    if (!hasProperty) {
+        ANS_LOGE("Property bundle expected.");
+        std::string msg = "Property bundle expected.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    napi_get_named_property(env, value, "bundle", &result);
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_object) {
+        ANS_LOGE("Wrong argument type. object expected.");
+        std::string msg = "Incorrect parameter types. The type of bundle must be object.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    std::shared_ptr<NotificationBundleOption> bundleOption = std::make_shared<NotificationBundleOption>();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is null");
+        return nullptr;
+    }
+    auto retValue = Common::GetBundleOption(env, result, bundleOption);
+    if (retValue == nullptr) {
+        ANS_LOGE("null retValue");
+        return nullptr;
+    }
+    option.SetBundle(bundleOption);
+
+    // enable?: bool
+    NAPI_CALL(env, napi_has_named_property(env, value, "enable", &hasProperty));
+    if (hasProperty) {
+        bool enable = false;
+        napi_get_named_property(env, value, "enable", &result);
+        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+        if (valuetype != napi_boolean) {
+            ANS_LOGE("Wrong argument type. boolean expected.");
+            return nullptr;
+        }
+        napi_get_value_bool(env, result, &enable);
+        option.SetEnable(enable);
+    }
+
+    return NapiGetNull(env);
+}
+
 napi_value Common::GetHashCodes(const napi_env &env, const napi_value &value, std::vector<std::string> &hashCodes)
 {
     ANS_LOGD("called");

@@ -550,6 +550,12 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetDistributedBundleOption(const std::vector<sptr<DistributedBundleOption>> &bundles,
+        const std::string &deviceType) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode SetAdditionConfig(const std::string& key, const std::string& value) override
     {
         return ERR_ANS_INVALID_PARAM;

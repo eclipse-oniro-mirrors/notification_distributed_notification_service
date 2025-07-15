@@ -1082,6 +1082,21 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 
+ErrCode NotificationPreferences::SetDistributedBundleOption(
+    const std::vector<sptr<DistributedBundleOption>> &bundles,
+    const std::string &deviceType)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    
+    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    bool storeDBResult = true;
+    storeDBResult = preferncesDB_->PutDistributedBundleOption(bundles, deviceType, userId);
+    return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
 ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
     const std::string &deviceType, bool &enabled)
 {

@@ -2136,6 +2136,63 @@ bool NotificationPreferencesDatabase::PutDistributedEnabledForBundle(const std::
     return (result == NativeRdb::E_OK);
 }
 
+bool NotificationPreferencesDatabase::PutDistributedBundleOption(
+    const std::vector<sptr<DistributedBundleOption>> &bundles,
+    const std::string &deviceType,
+    const int32_t &userId
+)
+{
+    ANS_LOGI("PutDistributedBundleOption start");
+
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return NativeRdb::E_ERROR;
+    }
+    std::unordered_map<std::string, std::string> existSwitchMap;
+    int32_t result = rdbDataManager_->QueryDataBeginWithKey(
+        KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION, existSwitchMap, userId);
+    if (result != NativeRdb::E_OK && result != NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        ANS_LOGE("get exist distributed switch error");
+        return false;
+    }
+    
+    bool retResult = true;
+    std::unordered_map<std::string, std::string> values;
+    for (auto bundleOption : bundles) {
+        std::string bundleName = bundleOption->GetBundle()->GetBundleName();
+        int32_t uid = bundleOption->GetBundle()->GetUid();
+
+        NotificationPreferencesInfo::BundleInfo bundleInfo;
+        bundleInfo.SetBundleName(bundleName);
+        bundleInfo.SetBundleUid(uid);
+        std::string key = GenerateBundleLablel(bundleInfo, deviceType);
+
+        auto ite = existSwitchMap.find(key);
+        if (ite != existSwitchMap.end()) {
+            bool iteResult = static_cast<bool>(StringToInt(ite->second));
+            if (iteResult == bundleOption->isEnable()) {
+                continue;
+            }
+            result = rdbDataManager_->InsertData(key, std::to_string(bundleOption->isEnable()), userId);
+            if (result != NativeRdb::E_OK) {
+                retResult = false;
+                ANS_LOGE("update distributed switch failed, %{public}s %{public}d", bundleName.c_str(), uid);
+            }
+        } else {
+            values.emplace(key, std::to_string(bundleOption->isEnable()));
+        }
+    }
+
+    if (!values.empty()) {
+        result = rdbDataManager_->InsertBatchData(values, userId);
+        if (result != NativeRdb::E_OK) {
+            retResult = false;
+            ANS_LOGE("batch insert distributed switch failed");
+        }
+    }
+    return retResult;
+}
+
 std::string NotificationPreferencesDatabase::GenerateBundleLablel(
     const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const
 {
