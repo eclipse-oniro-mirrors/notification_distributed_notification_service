@@ -622,19 +622,38 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
     }
     ani_method ctor;
     if (ANI_OK != (status = env->Class_FindMethod(
-        cls, "<ctor>", "X{C{escompat.Date}C{std.core.Numeric}C{std.core.String}}:V", &ctor))) {
+        cls, "<ctor>", ":V", &ctor))) {
         ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }
-    ani_object timeObj = CreateDouble(env, static_cast<double>(time));
-    if (timeObj == nullptr) {
-        ANS_LOGD("createDouble faild");
-        return false;
-    }
-    if (ANI_OK != (status = env->Object_New(cls, ctor, &outObj, timeObj))) {
+    if (ANI_OK != (status = env->Object_New(cls, ctor, &outObj))) {
         ANS_LOGD("Object_New faild. status %{public}d", status);
         return false;
     }
+    ani_double msObj = 0;
+    if (ANI_OK != (status = env->Object_CallMethodByName_Double(outObj, "setTime", "D:D", &msObj, static_cast<double>(time)))) {
+        ANS_LOGD("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
+bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time)
+{
+    ANS_LOGD("GetDateByObject call");
+    if (env == nullptr || timeObj == nullptr) {
+        ANS_LOGE("GetDateByObject fail, env or timeObj is nullptr");
+        return false;
+    }
+
+    ani_status status;
+    ani_double timeMsObj = 0;
+    if (ANI_OK != (status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":D", &timeMsObj))) {
+        ANS_LOGD("Object_CallMethodByName_Double faild. status %{public}d", status);
+        return false;
+    }
+    time = static_cast<int64_t>(timeMsObj);
+    ANS_LOGD("GetDateByObject end");
     return true;
 }
 
