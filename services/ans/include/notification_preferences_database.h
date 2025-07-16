@@ -100,6 +100,21 @@ public:
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
 
     /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundles Indicates the bundles.
+     * @param deviceType Indicates the type of the device running the application.
+     * @param userId userId
+     * @return Returns set distributed enabled for specified bundle result.
+     */
+    bool PutDistributedBundleOption(
+        const std::vector<sptr<DistributedBundleOption>> &bundles,
+        const std::string &deviceType,
+        const int32_t &userId
+        );
+
+    /**
      * @brief Get distributed enable notification in the of  bundle into disturbe DB.
      *
      * @param deviceType Indicates device type.

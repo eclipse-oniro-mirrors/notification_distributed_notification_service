@@ -592,6 +592,12 @@ ErrCode NotificationHelper::SetDistributedEnabledByBundle(const NotificationBund
         deviceType, enabled);
 }
 
+ErrCode NotificationHelper::SetDistributedBundleOption(const std::vector<DistributedBundleOption> &bundles,
+    const std::string &deviceType)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedBundleOption(bundles, deviceType);
+}
+
 ErrCode NotificationHelper::IsDistributedEnabledByBundle(const NotificationBundleOption &bundleOption,
     const std::string &deviceType, bool &enabled)
 {

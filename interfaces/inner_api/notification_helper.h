@@ -18,6 +18,7 @@
 
 #include "ans_dialog_host_client.h"
 #include "notification_bundle_option.h"
+#include "distributed_bundle_option.h"
 #include "notification_button_option.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_do_not_disturb_profile.h"
@@ -1090,6 +1091,17 @@ public:
      */
     static ErrCode SetDistributedEnabledByBundle(
         const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled);
+
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundles Indicates the bundles.
+     * @param deviceType Indicates the type of the device running the application.
+     * @return Returns set distributed enabled for specified bundle result.
+     */
+    static ErrCode SetDistributedBundleOption(
+        const std::vector<DistributedBundleOption> &bundles, const std::string &deviceType);
 
     /**
      * @brief Get whether to allow a specified application to publish notifications cross

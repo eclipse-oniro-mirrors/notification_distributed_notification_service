@@ -1667,6 +1667,32 @@ public:
      */
     static napi_value GetButtonOption(const napi_env &env, const napi_value &value, NotificationButtonOption &option);
 
+    /**
+     * @brief Gets a NotificationBundleOption object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param option Indicates a NotificationBundleOption object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetBundleOption(
+        const napi_env &env,
+        const napi_value &value,
+        std::shared_ptr<NotificationBundleOption> &option);
+
+    /**
+     * @brief Gets a DistributedBundleOption object from specified js object
+     *
+     * @param env Indicates the environment that the API is invoked under
+     * @param value Indicates a js object to be converted
+     * @param option Indicates a DistributedBundleOption object from specified js object
+     * @return Returns the null object if success, returns the null value otherwise
+     */
+    static napi_value GetDistributedBundleOption(
+        const napi_env &env,
+        const napi_value &value,
+        DistributedBundleOption &option);
+
     static napi_value GetHashCodes(const napi_env &env, const napi_value &value, std::vector<std::string> &hashCodes);
 
     static napi_value GetLiveViewWantAgent(const napi_env &env, const napi_value &value,

@@ -623,6 +623,28 @@ bool SmartReminderCenter::GetSmartSwitch(const string &deviceType) const
     return true;
 }
 
+bool SmartReminderCenter::GetDistributedSwitch(const string &deviceType) const
+{
+    std::string device = deviceType;
+
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) != 0 &&
+        deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE) != 0) {
+            return true;
+        }
+    NotificationConstant::SWITCH_STATE enableStatus;
+    ErrCode errResult = NotificationPreferences::GetInstance()->IsDistributedEnabled(
+        NotificationConstant::LITEWEARABLE_DEVICE_TYPE, enableStatus);
+    if (errResult != ERR_OK) {
+        ANS_LOGE("query distributed switch fail");
+        return false;
+    }
+    if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
+        return true;
+    }
+    return false;
+}
+
 bool SmartReminderCenter::HandleAffectedReminder(
     const string &deviceType,
     const shared_ptr<ReminderAffected> &reminderAffected,

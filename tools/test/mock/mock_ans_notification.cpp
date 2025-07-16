@@ -67,6 +67,16 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
     }
 }
 
+ErrCode AnsNotification::SetDistributedBundleOption(
+    const std::vector<DistributedBundleOption> &bundles, const std::string &deviceType)
+{
+    if (deviceType == "phone") {
+        return ERR_OK;
+    } else {
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+}
+
 ErrCode AnsNotification::SetDistributedEnabledBySlot(
     const NotificationConstant::SlotType &slotType, const std::string &deviceType, const bool enabled)
 {

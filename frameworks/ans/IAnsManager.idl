@@ -19,6 +19,7 @@ interface OHOS.Notification.IAnsSubscriber;
 interface OHOS.Notification.IAnsOperationCallback;
 
 sequenceable OHOS.Notification.NotificationBundleOption;
+sequenceable OHOS.Notification.DistributedBundleOption;
 sequenceable OHOS.Notification.NotificationDisable;
 sequenceable OHOS.Notification.NotificationDoNotDisturbDate;
 sequenceable OHOS.Notification.NotificationDoNotDisturbProfile;
@@ -267,6 +268,9 @@ interface OHOS.Notification.IAnsManager {
 
     void SetDistributedEnabledByBundle(
         [in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean enabled);
+
+    void SetDistributedBundleOption(
+        [in] sptr<DistributedBundleOption>[] bundles, [in] String deviceType);
 
     void SetDistributedEnabled([in] String deviceType, [in] boolean enabled);
 

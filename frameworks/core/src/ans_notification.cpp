@@ -2026,6 +2026,33 @@ ErrCode AnsNotification::SetDistributedEnabledByBundle(const NotificationBundleO
     return proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled);
 }
 
+ErrCode AnsNotification::SetDistributedBundleOption(
+    const std::vector<DistributedBundleOption> &bundles, const std::string &deviceType)
+{
+    ANS_LOGD("called");
+    if (bundles.empty()) {
+        ANS_LOGE("Invalid bundles.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (deviceType.empty()) {
+        ANS_LOGE("Invalid deviceType.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    std::vector<sptr<DistributedBundleOption>> bundleOptions;
+    for (auto bundle : bundles) {
+        sptr<DistributedBundleOption> distributedBundleOption(new (std::nothrow) DistributedBundleOption(bundle));
+        bundleOptions.emplace_back(distributedBundleOption);
+    }
+    return proxy->SetDistributedBundleOption(bundleOptions, deviceType);
+}
+
 ErrCode AnsNotification::SetDistributedEnabled(const std::string &deviceType, const bool &enabled)
 {
     ANS_LOGD("called");

@@ -25,6 +25,7 @@
 #include "notification_local_live_view_subscriber.h"
 #include "notification_subscriber.h"
 #include "want_params.h"
+#include "distributed_bundle_option.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "swing_callback_service.h"
 #endif
@@ -1112,6 +1113,17 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(
         const NotificationBundleOption &bundleOption, const std::string &deviceType, const bool enabled);
+    
+    /**
+     * @brief Sets whether to allow a specified application to publish notifications cross
+     * device collaboration. The caller must have system permissions to call this method.
+     *
+     * @param bundles Indicates the bundles.
+     * @param deviceType Indicates the type of the device running the application.
+     * @return Returns set distributed enabled for specified bundle result.
+     */
+    ErrCode SetDistributedBundleOption(
+        const std::vector<DistributedBundleOption> &bundles, const std::string &deviceType);
 
     /**
      * @brief get whether to allow a specified application to publish notifications cross

@@ -82,6 +82,7 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/src/manager/ans_manager_death_recipient.cpp",
     "${frameworks_module_ans_path}/src/ans_dialog_host_client.cpp",
     "${frameworks_module_ans_path}/src/badge_number_callback_data.cpp",
+    "${frameworks_module_ans_path}/src/distributed_bundle_option.cpp",
     "${frameworks_module_ans_path}/src/enabled_notification_callback_data.cpp",
     "${frameworks_module_ans_path}/src/message_user.cpp",
     "${frameworks_module_ans_path}/src/notification.cpp",

@@ -158,6 +158,8 @@ public:
     MOCK_METHOD2(SetAdditionConfig, ErrCode(const std::string&, const std::string&));
     MOCK_METHOD3(SetDistributedEnabledByBundle,
         ErrCode(const sptr<NotificationBundleOption>&, const std::string&, bool));
+    MOCK_METHOD2(SetDistributedBundleOption,
+        ErrCode(const std::vector<sptr<DistributedBundleOption>>&, const std::string &));
     MOCK_METHOD2(SetDistributedEnabled, ErrCode(const std::string&, bool));
     MOCK_METHOD2(IsDistributedEnabled, ErrCode(const std::string&, bool&));
     MOCK_METHOD1(GetDistributedAbility, ErrCode(int32_t&));
