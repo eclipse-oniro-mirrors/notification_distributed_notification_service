@@ -254,6 +254,7 @@ ohos_unittest("distributed_preferences_branch_test") {
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
