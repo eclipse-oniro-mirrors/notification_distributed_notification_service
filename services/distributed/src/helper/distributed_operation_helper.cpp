@@ -15,7 +15,9 @@
 
 #include "distributed_operation_helper.h"
 
+#ifdef SCREENLOCK_MGR_ENABLE
 #include "screenlock_common.h"
+#endif
 #include "in_process_call_wrapper.h"
 #include "distributed_service.h"
 #include "analytics_util.h"
@@ -23,6 +25,7 @@
 namespace OHOS {
 namespace Notification {
 
+#ifdef SCREENLOCK_MGR_ENABLE
 UnlockScreenCallback::UnlockScreenCallback(const std::string& eventId) : eventId_(eventId) {}
 
 UnlockScreenCallback::~UnlockScreenCallback() {}
@@ -38,6 +41,7 @@ void UnlockScreenCallback::OnCallBack(int32_t screenLockResult)
             "unlock screen failed");
     }
 }
+#endif
 
 OperationService& OperationService::GetInstance()
 {
