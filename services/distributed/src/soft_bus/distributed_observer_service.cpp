@@ -114,8 +114,13 @@ void OberverService::Init(uint16_t deviceType)
 
 int32_t OberverService::IsScreenLocked()
 {
+#ifdef SCREENLOCK_MGR_ENABLE
     bool state = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     return state ? SCREEN_OFF : SCREEN_ON;
+#else
+    ANS_LOGI("Screenlock manager is disabled.")
+    return SCREEN_ON;
+#endif
 }
 
 void OberverService::Destory()
@@ -124,10 +129,12 @@ void OberverService::Destory()
     ANS_LOGI("OberverService service destory.");
 }
 
+#ifdef SCREENLOCK_MGR_ENABLE
 int32_t OberverService::Unlock(
     const ScreenLock::Action &action, const sptr<ScreenLock::ScreenLockCallbackInterface> &listener)
 {
     return ScreenLock::ScreenLockManager::GetInstance()->Unlock(action, listener);
 }
+#endif
 }
 }

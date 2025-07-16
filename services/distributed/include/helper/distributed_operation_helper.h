@@ -23,7 +23,9 @@
 #include "ans_log_wrapper.h"
 #include "ability_manager_client.h"
 #include "power_mgr_client.h"
+#ifdef SCREENLOCK_MGR_ENABLE
 #include "screenlock_callback_interface.h"
+#endif
 #include "notification_operation_info.h"
 
 namespace OHOS {
@@ -36,6 +38,7 @@ struct OperationInfo {
     AAFwk::Want want;
 };
 
+#ifdef SCREENLOCK_MGR_ENABLE
 class UnlockScreenCallback : public IRemoteStub<ScreenLock::ScreenLockCallbackInterface> {
 public:
     explicit UnlockScreenCallback(const std::string& eventId);
@@ -45,6 +48,7 @@ public:
 private:
     std::string eventId_;
 };
+#endif
 
 class OperationService {
 public:

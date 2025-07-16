@@ -31,7 +31,9 @@
 #include "distributed_operation_helper.h"
 #include "ability_manager_helper.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
+#ifdef SCREENLOCK_MGR_ENABLE
 #include "screenlock_manager.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -72,11 +74,13 @@ void DistributedOperationService::HandleNotificationOperation(const std::shared_
     if (static_cast<OperationType>(operationType) == DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
         int32_t btnIndex;
         responseBox.GetOperationBtnIndex(btnIndex);
-        if (!ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
-            UnlockListenerOperService::GetInstance().TriggerByJumpType(hashCode, jumpType, peerDeviceType, btnIndex);
+#ifdef SCREENLOCK_MGR_ENABLE
+        if (ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
+            UnlockListenerOperService::GetInstance().AddDelayTask(hashCode, jumpType, peerDeviceType, btnIndex);
             return;
         }
-        UnlockListenerOperService::GetInstance().AddDelayTask(hashCode, jumpType, peerDeviceType, btnIndex);
+#endif
+        UnlockListenerOperService::GetInstance().TriggerByJumpType(hashCode, jumpType, peerDeviceType, btnIndex);
         return;
     }
     TriggerByOperationType(hashCode, peerDeviceType, operationType, responseBox);
@@ -279,6 +283,7 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
         }
     }
 
+#ifdef SCREENLOCK_MGR_ENABLE
     if (ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
         OperationInfo info;
         info.deviceTypeId = deviceType;
@@ -294,17 +299,18 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
         }
         info.want = *wantPtr;
         OperationService::GetInstance().AddOperation(info);
-    } else {
-        auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
-        ANS_LOGI("StartAbility result:%{public}d", ret);
-        if (ret == ERR_OK) {
-            AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP,
-                NotificationConstant::SlotType::LIVE_VIEW);
-        } else {
-             AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, 0, ret, "pull up failed");
-        }
-        AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, ret, BRANCH9_ID, "pull up success");
+        return;
     }
+#endif
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(*wantPtr);
+    ANS_LOGI("StartAbility result:%{public}d", ret);
+    if (ret == ERR_OK) {
+        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP,
+            NotificationConstant::SlotType::LIVE_VIEW);
+    } else {
+        AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, 0, ret, "pull up failed");
+    }
+    AnalyticsUtil::GetInstance().AbnormalReporting(MODIFY_ERROR_EVENT_CODE, ret, BRANCH9_ID, "pull up success");
 }
 
 void DistributedOperationService::TriggerByOperationType(const std::string& hashCode, const int32_t deviceType,
