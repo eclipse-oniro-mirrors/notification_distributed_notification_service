@@ -1107,7 +1107,7 @@ ErrCode NotificationPreferences::SetDistributedBundleOption(
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedBundleOption(bundles, deviceType, userId);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
