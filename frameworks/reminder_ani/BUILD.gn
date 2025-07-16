@@ -65,6 +65,7 @@ taihe_shared_library("reminder_agent_manager_ani") {
 
   external_deps = [
     "ability_base:zuri",
+    "ability_runtime:ani_common",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
