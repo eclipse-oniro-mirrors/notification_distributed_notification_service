@@ -118,7 +118,7 @@ int32_t OberverService::IsScreenLocked()
     bool state = ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked();
     return state ? SCREEN_OFF : SCREEN_ON;
 #else
-    ANS_LOGI("Screenlock manager is disabled.")
+    ANS_LOGI("Screenlock manager is disabled.");
     return SCREEN_ON;
 #endif
 }
