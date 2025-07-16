@@ -120,7 +120,7 @@ void SmartReminderCenter::ParseReminderFilterDevice(const nlohmann::json &root, 
         std::string slotTypes = reminderFilterDeviceJson[SLOT_TYPE].get<std::string>();
         std::vector<std::string> slotTypeVector;
         StringUtils::Split(slotTypes, SPLIT_FLAG, slotTypeVector);
-        
+
         for (std::string slotTypeStr : slotTypeVector) {
             if (!NotificationSlot::GetSlotTypeByString(slotTypeStr, slotType)) {
                 continue;
@@ -322,7 +322,9 @@ void SmartReminderCenter::InitValidDevices(
         }
 
         if (NotificationConstant::PC_DEVICE_TYPE == deviceType || NotificationConstant::PAD_DEVICE_TYPE == deviceType) {
+#ifdef ALL_SCENARIO_COLLABORATION
             InitPcPadDevices(deviceType, syncDevices, smartDevices, statusMap, request);
+#endif
             continue;
         }
 
@@ -379,6 +381,7 @@ void SmartReminderCenter::InitValidDevices(
     return;
 }
 
+#ifdef ALL_SCENARIO_COLLABORATION
 void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     set<string> &syncDevices, set<string> &smartDevices,
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
@@ -436,6 +439,7 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     smartDevices.insert(deviceType);
     return;
 }
+#endif
 
 void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,
     const sptr<NotificationRequest> &request) const
@@ -496,7 +500,7 @@ void SmartReminderCenter::HandleReminderMethods(
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices) const
 {
     std::string classfication = request->GetClassification();
-    
+
     if (syncDevices.find(deviceType) == syncDevices.end()) {
         return;
     }
@@ -536,7 +540,7 @@ void SmartReminderCenter::HandleReminderMethods(
         ANS_LOGI("not set any rule for deviceType %{public}s", deviceType.c_str());
         return;
     }
-    
+
     auto iter = statusMap.find(deviceType);
     if (iter == statusMap.end()) {
         ANS_LOGE("get device status failed. deviceType = %{public}s", deviceType.c_str());
@@ -599,7 +603,7 @@ bool SmartReminderCenter::GetAppSwitch(const string &deviceType,
     }
 
     bool isEnable = true;
-    
+
     sptr<NotificationBundleOption> bundleOption =
         new (std::nothrow) NotificationBundleOption(ownerBundleName, ownerUid);
     if (NotificationPreferences::GetInstance()->IsDistributedEnabledByBundle(
@@ -658,7 +662,7 @@ bool SmartReminderCenter::HandleAffectedReminder(
             ret = false;
             break;
         }
-        
+
         auto iter =  statusMap.find(affectedBy.first);
         if (iter == statusMap.end()) {
             ANS_LOGE("get device status failed. deviceType = %{public}s", deviceType.c_str());

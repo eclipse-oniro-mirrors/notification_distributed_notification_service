@@ -90,10 +90,12 @@ private:
     void InitValidDevices(set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         const sptr<NotificationRequest> &request) const;
+#ifdef ALL_SCENARIO_COLLABORATION
     void InitPcPadDevices(const string &deviceType,
         set<string> &syncDevices, set<string> &smartDevices,
         map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
         const sptr<NotificationRequest> &request) const;
+#endif
     void FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,
         const sptr<NotificationRequest> &request) const;
     bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;

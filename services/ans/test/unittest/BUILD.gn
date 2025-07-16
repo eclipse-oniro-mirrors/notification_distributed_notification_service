@@ -51,6 +51,10 @@ ohos_unittest("ans_unit_test") {
     "smart_reminder_center_test.cpp",
   ]
 
+  if (distributed_notification_service_feature_all_scenario_collaboration) {
+    defines += [ "ALL_SCENARIO_COLLABORATION" ]
+  }
+
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/ans:libans",
@@ -747,6 +751,10 @@ ohos_unittest("notification_preferences_test") {
     "notification_preferences_info_test.cpp",
     "notification_preferences_test.cpp",
   ]
+
+  if (distributed_notification_service_feature_all_scenario_collaboration) {
+    defines += [ "ALL_SCENARIO_COLLABORATION" ]
+  }
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",

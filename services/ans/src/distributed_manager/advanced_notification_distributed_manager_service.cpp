@@ -99,6 +99,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
 
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedEnabledBySlot(slotType,
         deviceType, enabled);
+#ifdef ALL_SCENARIO_COLLABORATION
     if (result == ERR_OK && slotType == NotificationConstant::SlotType::LIVE_VIEW) {
         NotificationConstant::SWITCH_STATE notification = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabled(deviceType,
@@ -117,6 +118,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabledBySlot(
             NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE,
             NotificationConstant::DistributedDeleteType::SLOT);
     }
+#endif
     ANS_LOGI("SetDistributedEnabledBySlot %{public}d, deviceType: %{public}s, enabled: %{public}s, "
         "SetDistributedEnabledBySlot result: %{public}d",
         slotType, deviceType.c_str(), std::to_string(enabled).c_str(), result);
@@ -359,6 +361,7 @@ ErrCode DistributeOperationParamCheck(const sptr<NotificationOperationInfo>& ope
 ErrCode AdvancedNotificationService::DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
     const sptr<IAnsOperationCallback> &callback)
 {
+#ifdef ALL_SCENARIO_COLLABORATION
     ErrCode result = DistributeOperationParamCheck(operationInfo, callback);
     if (result != ERR_OK) {
         return result;
@@ -402,10 +405,14 @@ ErrCode AdvancedNotificationService::DistributeOperation(const sptr<Notification
         DistributedOperationService::GetInstance().RemoveOperationResponse(key);
     }
     return result;
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
 }
 
 ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
 {
+#ifdef ALL_SCENARIO_COLLABORATION
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_NON_SYSTEM_APP;
@@ -423,6 +430,9 @@ ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string&
     ANS_LOGI("Reply operation key %{public}s %{public}d.", hashCode.c_str(), result);
     DistributedOperationService::GetInstance().ReplyOperationResponse(hashCode, result);
     return ERR_OK;
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &deviceType, uint32_t status,
@@ -477,6 +487,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string& deviceType,
     const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList)
 {
+#ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
@@ -487,6 +498,9 @@ ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string
     }
     return DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(deviceType, deviceId,
         operatorType, bundleList);
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
 }
 
 ErrCode AdvancedNotificationService::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
@@ -527,6 +541,7 @@ ErrCode AdvancedNotificationService::GetTargetDeviceBundleList(const std::string
 ErrCode AdvancedNotificationService::SetTargetDeviceSwitch(const std::string& deviceType,
     const std::string& deviceId, bool notificaitonEnable, bool liveViewEnable)
 {
+#ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
         return ERR_ANS_NON_SYSTEM_APP;
     }
@@ -537,6 +552,9 @@ ErrCode AdvancedNotificationService::SetTargetDeviceSwitch(const std::string& de
     }
     return DistributedDeviceDataService::GetInstance().SetDeviceSyncSwitch(deviceType, deviceId,
         notificaitonEnable, liveViewEnable);
+#else
+    return ERR_ANS_INVALID_PARAM;
+#endif
 }
 
 ErrCode AdvancedNotificationService::GetAllDistribuedEnabledBundles(
@@ -765,6 +783,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         return result;
     }
 
+#ifdef ALL_SCENARIO_COLLABORATION
     if (result == ERR_OK) {
         bool liveViewEnabled = false;
         if (NotificationPreferences::GetInstance()->IsDistributedEnabledBySlot(
@@ -783,6 +802,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
             NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE,
             NotificationConstant::DistributedDeleteType::EXCLUDE_ONE_SLOT);
     }
+#endif
     return result;
 }
 

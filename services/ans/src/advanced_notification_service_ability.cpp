@@ -18,7 +18,9 @@
 #include "system_event_observer.h"
 #include "common_event_manager.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
+#ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
+#endif
 #include "advanced_datashare_helper.h"
 #include "distributed_extension_service.h"
 
@@ -107,9 +109,13 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
         notificationService->ResetDistributedEnabled();
     } else if (systemAbilityId == DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) {
         ANS_LOGW("DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID");
+#ifdef ALL_SCENARIO_COLLABORATION
         DistributedDeviceManager::GetInstance().RegisterDms(true);
+#endif
     } else if (systemAbilityId == ALL_CONNECT_SA_ID) {
+#ifdef ALL_SCENARIO_COLLABORATION
         DistributedExtensionService::GetInstance().OnAllConnectOnline();
+#endif
     }
 }
 

@@ -16,7 +16,9 @@
 #include "distributed_device_status.h"
 
 #include "distributed_data_define.h"
+#ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_extension_service.h"
+#endif
 #include "ans_inner_errors.h"
 
 namespace OHOS {
@@ -77,6 +79,7 @@ void ChangeStatus(DeviceStatus& device, const std::string &deviceType, const uin
         }
     }
 
+#ifdef ALL_SCENARIO_COLLABORATION
     if (deviceType == NotificationConstant::PAD_DEVICE_TYPE ||
         deviceType == NotificationConstant::PC_DEVICE_TYPE) {
         DeviceStatueChangeInfo changeInfo;
@@ -92,6 +95,7 @@ void ChangeStatus(DeviceStatus& device, const std::string &deviceType, const uin
             DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
         }
     }
+#endif
 
     ANS_LOGI("update %{public}s %{public}s %{public}d status %{public}d %{public}u %{public}u",
         device.deviceType.c_str(), StringAnonymous(device.deviceId).c_str(), userId, controlFlag,
@@ -105,6 +109,7 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
     std::string deviceStatusId = deviceId;
     uint32_t finalStatus = 0;
     bool allConnect = ((1 << NETWORKID_FLAG) & controlFlag);
+#ifdef ALL_SCENARIO_COLLABORATION
     if (allConnect) {
         std::string udid;
         int32_t result = DistributedExtensionService::GetInstance().TransDeviceIdToUdid(deviceId, udid);
@@ -115,6 +120,7 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         }
         deviceStatusId = udid;
     }
+#endif
 
     std::lock_guard<std::mutex> lock(mapLock_);
     for (auto device = deviceInfo_.begin(); device != deviceInfo_.end(); device++) {
