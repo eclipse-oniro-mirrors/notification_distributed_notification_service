@@ -97,19 +97,18 @@ static const std::vector<std::pair<uint32_t, int32_t>> ERRORS_CONVERT = {
     {ERR_ANS_OPERATION_TIMEOUT, ERROR_DISTRIBUTED_OPERATION_TIMEOUT},
 };
 
-
 inline int32_t GetExternalCode(uint32_t errCode)
 {
-    int32_t ExternalCode = ERR_OK;
     for (const auto &errorConvert : ERRORS_CONVERT) {
+        if (errCode == errorConvert.second) {
+            return errCode;
+        }
         if (errCode == errorConvert.first) {
-            ExternalCode = errorConvert.second;
-            break;
+            return errorConvert.second;
         }
     }
-    ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
-    return ExternalCode;
-};
+    return ERROR_INTERNAL_ERROR;
+}
 
 inline std::string FindAnsErrMsg(const int32_t errCode)
 {
@@ -119,6 +118,11 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
         return "Inner error.";
     }
     return findMsg->second;
+}
+
+inline void ThrowError(ani_env *env, int32_t code, std::string msg)
+{
+    OHOS::AbilityRuntime::ThrowStsError(env, code, msg);
 }
 
 inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)

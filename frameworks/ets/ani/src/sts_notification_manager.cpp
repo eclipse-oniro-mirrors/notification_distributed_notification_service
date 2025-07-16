@@ -744,25 +744,34 @@ bool UnWarpNotificationDoNotDisturbDate(
     NotificationDoNotDisturbDate& doNotDisturbDate)
 {
     ani_boolean isUndefined = false;
-    ani_double mDouble = 0.0;
+    ani_ref mDate = nullptr;
     if (env == nullptr) {
         ANS_LOGE("UnWarpNotificationDoNotDisturbDate: Invalid input parameters");
         return false;
     }
     GetDoNotDisturbDateByDoNotDisturbType(env, doNotDisturbDateObj, doNotDisturbDate);
-
-    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "begin", isUndefined, mDouble)
+    int64_t beginTime = 0;
+    if (ANI_OK == GetPropertyRef(env, doNotDisturbDateObj, "begin", isUndefined, mDate)
         && isUndefined == ANI_FALSE) {
-        doNotDisturbDate.SetBeginDate(static_cast<int32_t>(mDouble));
+        if (mDate == nullptr || !GetDateByObject(env, static_cast<ani_object>(mDate), beginTime)) {
+            ANS_LOGE("get begin time failed");
+            return false;
+        }
     }
-    if (ANI_OK == GetPropertyDouble(env, doNotDisturbDateObj, "end", isUndefined, mDouble)
+    int64_t endTime = 0;
+    if (ANI_OK == GetPropertyRef(env, doNotDisturbDateObj, "end", isUndefined, mDate)
         && isUndefined == ANI_FALSE) {
-        doNotDisturbDate.SetEndDate(static_cast<int32_t>(mDouble));
+        if (mDate == nullptr || !GetDateByObject(env, static_cast<ani_object>(mDate), endTime)) {
+            ANS_LOGE("get end time failed");
+            return false;
+        }
     }
-    if (doNotDisturbDate.GetBeginDate() >= doNotDisturbDate.GetEndDate()) {
+    if (beginTime >= endTime) {
         ANS_LOGE("Invalid time range");
         return false;
     }
+    doNotDisturbDate.SetBeginDate(static_cast<int32_t>(beginTime));
+    doNotDisturbDate.SetEndDate(static_cast<int32_t>(endTime));
     ANS_LOGD("Successfully parsed DoNotDisturbDate");
     return true;
 }
