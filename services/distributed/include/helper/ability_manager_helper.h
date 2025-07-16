@@ -39,7 +39,7 @@ public:
     void DisconnectServiceAbility(const std::string &eventId, const AppExecFwk::ElementName& element);
 
 private:
-    std::mutex connectionLock_;
+    ffrt::mutex connectionLock_;
     std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
     std::map<std::string, sptr<DistributedOperationConnection>> operationConnection_;
 };

@@ -33,6 +33,7 @@
 #include "notification_constant.h"
 #include "advanced_notification_inline.h"
 #include "hitrace_util.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -70,7 +71,7 @@ constexpr const int32_t BANNER_FLAG = 1 << 12;
 constexpr const int32_t VIBRATION_FLAG = 1 << 13;
 
 const static std::string NOTIFICATION_EVENT_PUSH_AGENT = "notification.event.PUSH_AGENT";
-static std::mutex reportFlowControlMutex_;
+static ffrt::mutex reportFlowControlMutex_;
 static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowControlTimestampMap_ = {
     {MODIFY_ERROR_EVENT_CODE, {}},
     {PUBLISH_ERROR_EVENT_CODE, {}},
@@ -80,14 +81,14 @@ static std::map<int32_t, std::list<std::chrono::system_clock::time_point>> flowC
 static std::map<std::string, BadgeInfo> badgeInfos;
 static std::map<std::string, ReportLiveViewMessage> liveViewMessages;
 
-static std::mutex reportCacheMutex_;
+static ffrt::mutex reportCacheMutex_;
 static uint64_t reportTimerId = 0;
 static std::list<ReportCache> reportCacheList;
 static bool g_reportFlag = false;
 static std::shared_ptr<ReportTimerInfo> reportTimeInfo = std::make_shared<ReportTimerInfo>();
 
-static std::mutex badgeInfosMutex_;
-static std::mutex reportSuccessCacheMutex_;
+static ffrt::mutex badgeInfosMutex_;
+static ffrt::mutex reportSuccessCacheMutex_;
 static uint64_t reportAggregateTimeId = 0;
 static std::list<ReportCache> successReportCacheList;
 static bool g_successReportFlag = false;
@@ -96,20 +97,20 @@ static std::list<ReportCache> reportAggList;
 
 static int32_t SLOT_REPORT_INTERVAL = 7 * 24 * NotificationConstant::HOUR_TO_MS;
 static int64_t lastReportTime_ = 0;
-static std::mutex lastReportTimeMutex_;
+static ffrt::mutex lastReportTimeMutex_;
 static int32_t SLOT_SUB_CODE = 101;
 static int32_t SLOT_ONCE_REPORT = 10;
 static uint32_t SLOT_MAX_REPORT = 200;
 static uint64_t reportSlotEnabledTimerId_ = 0;
 static std::shared_ptr<ReportTimerInfo> slotTimeInfo = std::make_shared<ReportTimerInfo>();
 static std::list<ReportSlotMessage> slotEnabledList_;
-static std::mutex slotEnabledListMutex_;
+static ffrt::mutex slotEnabledListMutex_;
 static bool g_reportSlotFlag = false;
-static std::mutex reportSlotEnabledMutex_;
+static ffrt::mutex reportSlotEnabledMutex_;
 
 static int32_t LIVEVIEW_SUB_CODE = 202;
 static int32_t LIVEVIEW_AGGREGATE_NUM = 10;
-static std::mutex ReportLiveViewMessageMutex_;
+static ffrt::mutex ReportLiveViewMessageMutex_;
 static uint64_t reportLiveViewMessageTimerId_ = 0;
 static std::shared_ptr<ReportTimerInfo> liveViewTimeInfo = std::make_shared<ReportTimerInfo>();
 static int32_t LIVEVIEW_REPORT_INTERVAL = 2 * NotificationConstant::HOUR_TO_MS;
@@ -474,7 +475,7 @@ void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequ
         if (liveViewContent->GetExtraInfo() != nullptr) {
             std::string bundle = bundleName + MESSAGE_DELIMITER +
                 liveViewContent->GetExtraInfo()->GetStringParam("event");
-                std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
+                std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
                 if (reportType == ANS_CUSTOMIZE_CODE) {
                     AddLiveViewSuccessNum(bundle, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
                 } else if (reportType == PUBLISH_ERROR_EVENT_CODE) {
@@ -484,7 +485,7 @@ void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequ
         }
     }
     if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW) {
-        std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
+        std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
         std::string bundle = bundleName + "#-99";
         if (reportType == ANS_CUSTOMIZE_CODE) {
             AddLocalLiveViewSuccessNum(bundle);
@@ -591,7 +592,7 @@ void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
 
 void NotificationAnalyticsUtil::ExecuteLiveViewReport()
 {
-    std::lock_guard<std::mutex> lock(ReportLiveViewMessageMutex_);
+    std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
     if (liveViewMessages.empty()) {
         ANS_LOGI("report end");
         g_reportLiveViewFlag = false;
@@ -912,7 +913,7 @@ void NotificationAnalyticsUtil::ReportNotificationEvent(EventFwk::Want want,
 bool NotificationAnalyticsUtil::ReportFlowControl(const int32_t reportType)
 {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    std::lock_guard<std::mutex> lock(reportFlowControlMutex_);
+    std::lock_guard<ffrt::mutex> lock(reportFlowControlMutex_);
     auto iter = flowControlTimestampMap_.find(reportType);
     if (iter == flowControlTimestampMap_.end()) {
         return false;
@@ -1072,7 +1073,7 @@ void NotificationAnalyticsUtil::SetCommonWant(EventFwk::Want& want, const HaMeta
 
 void NotificationAnalyticsUtil::AddListCache(EventFwk::Want& want, int32_t eventCode)
 {
-    std::lock_guard<std::mutex> lock(reportCacheMutex_);
+    std::lock_guard<ffrt::mutex> lock(reportCacheMutex_);
     int32_t size = static_cast<int32_t>(reportCacheList.size());
     if (size >= REPORT_CACHE_MAX_SIZE) {
         ANS_LOGW("list size is max");
@@ -1111,7 +1112,7 @@ void NotificationAnalyticsUtil::ReportBadgeChange(const sptr<BadgeNumberCallback
     int32_t badgeNumber = badgeData->GetBadgeNumber();
     std::string badgeNumStr = (badgeNumber > MAX_BADGE_NUMBER) ? "99+" : std::to_string(badgeNumber);
     {
-        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        std::lock_guard<ffrt::mutex> lock(badgeInfosMutex_);
         auto iter = badgeInfos.find(bundle);
         if (iter != badgeInfos.end()) {
             badgeInfo.badgeNum = iter->second.badgeNum + "_" + badgeNumStr;
@@ -1149,7 +1150,7 @@ void NotificationAnalyticsUtil::ReportPublishBadge(const sptr<NotificationReques
     uint32_t badgeNumber = request->GetBadgeNumber();
     std::string badgeNumStr = (badgeNumber > MAX_BADGE_NUMBER) ? "99+" : std::to_string(badgeNumber);
     {
-        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        std::lock_guard<ffrt::mutex> lock(badgeInfosMutex_);
         auto iter = badgeInfos.find(bundle);
         if (iter != badgeInfos.end()) {
             badgeInfo.badgeNum = iter->second.badgeNum + "_+" + badgeNumStr;
@@ -1195,7 +1196,7 @@ void NotificationAnalyticsUtil::CheckBadgeReport()
     auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     {
-        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        std::lock_guard<ffrt::mutex> lock(badgeInfosMutex_);
         for (auto& pair : badgeInfos) {
             if (pair.second.changeCount == MAX_NUMBER_EVERY_BADGE_DATA ||
                 now - pair.second.startTime > MAX_BADGE_CHANGE_REPORT_TIME) {
@@ -1224,7 +1225,7 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
     want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
     ansData["subCode"] = std::to_string(BADGE_CHANGE_CODE);
     {
-        std::lock_guard<std::mutex> lock(badgeInfosMutex_);
+        std::lock_guard<ffrt::mutex> lock(badgeInfosMutex_);
         for (const auto& pair : badgeInfos) {
             const std::string bundle = pair.first;
             const BadgeInfo info = pair.second;
@@ -1267,7 +1268,7 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
 
 void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_t eventCode)
 {
-    std::lock_guard<std::mutex> lock(reportSuccessCacheMutex_);
+    std::lock_guard<ffrt::mutex> lock(reportSuccessCacheMutex_);
     int32_t size = static_cast<int32_t>(successReportCacheList.size());
     if (size >= SUCCESS_REPORT_CACHE_MAX_SIZE) {
         ANS_LOGW("Success list size is max.");
@@ -1354,7 +1355,7 @@ void NotificationAnalyticsUtil::ExecuteSuccessCacheList()
     }
     CheckBadgeReport();
     auto triggerFunc = [] {
-        std::lock_guard<std::mutex> lock(reportSuccessCacheMutex_);
+        std::lock_guard<ffrt::mutex> lock(reportSuccessCacheMutex_);
         NotificationAnalyticsUtil::ExecuteSuccessCacheList();
     };
     reportAggregateTimeInfo->SetCallbackInfo(triggerFunc);
@@ -1380,7 +1381,7 @@ void NotificationAnalyticsUtil::ExecuteCacheList()
     auto reportCache = reportCacheList.front();
     ReportCommonEvent(reportCache);
     auto triggerFunc = [] {
-        std::lock_guard<std::mutex> lock(reportCacheMutex_);
+        std::lock_guard<ffrt::mutex> lock(reportCacheMutex_);
         NotificationAnalyticsUtil::ExecuteCacheList();
     };
     reportCacheList.pop_front();
@@ -1484,7 +1485,7 @@ bool NotificationAnalyticsUtil::ReportAllBundlesSlotEnabled()
 
 bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
 {
-    std::lock_guard<std::mutex> lock(reportSlotEnabledMutex_);
+    std::lock_guard<ffrt::mutex> lock(reportSlotEnabledMutex_);
     if (g_reportSlotFlag) {
         ANS_LOGW("now has message is reporting");
         return false;
@@ -1516,7 +1517,7 @@ bool NotificationAnalyticsUtil::CreateSlotTimerExecute(const int32_t &userId)
 
 void NotificationAnalyticsUtil::ExecuteSlotReportList()
 {
-    std::lock_guard<std::mutex> lock(reportSlotEnabledMutex_);
+    std::lock_guard<ffrt::mutex> lock(reportSlotEnabledMutex_);
 
     if (!ReportSlotEnable()) {
         g_reportSlotFlag = false;
@@ -1541,7 +1542,7 @@ void NotificationAnalyticsUtil::ExecuteSlotReportList()
 
 bool NotificationAnalyticsUtil::ReportSlotEnable()
 {
-    std::lock_guard<std::mutex> lock(slotEnabledListMutex_);
+    std::lock_guard<ffrt::mutex> lock(slotEnabledListMutex_);
     if (slotEnabledList_.empty()) {
         ANS_LOGI("report end");
         return false;
@@ -1590,7 +1591,7 @@ bool NotificationAnalyticsUtil::BuildSlotReportCache(ReportCache &reportCache,
 
 bool NotificationAnalyticsUtil::CheckSlotNeedReport()
 {
-    std::lock_guard<std::mutex> lock(lastReportTimeMutex_);
+    std::lock_guard<ffrt::mutex> lock(lastReportTimeMutex_);
     auto now = GetCurrentTime();
     if (lastReportTime_ != 0 && abs(now - lastReportTime_) <= SLOT_REPORT_INTERVAL) {
         ANS_LOGD("no need report");
@@ -1616,7 +1617,7 @@ bool NotificationAnalyticsUtil::GetAllSlotMessageCache(const int32_t &userId)
         ANS_LOGW("slotEnablesMap size %{public}zu", slotEnablesMap.size());
         return false;
     }
-    std::lock_guard<std::mutex> lock(slotEnabledListMutex_);
+    std::lock_guard<ffrt::mutex> lock(slotEnabledListMutex_);
     for (const auto& budleEntry : slotEnablesMap) {
         std::string budleEntryKey = budleEntry.first;
         // enable

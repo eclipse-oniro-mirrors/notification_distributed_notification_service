@@ -62,7 +62,7 @@ DistributedNotificationManager::DistributedNotificationManager()
 DistributedNotificationManager::~DistributedNotificationManager()
 {
     ANS_LOGI("deconstructor");
-    std::lock_guard<std::mutex> lock(callbackMutex_);
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     callback_ = {};
 }
 
@@ -276,7 +276,7 @@ bool DistributedNotificationManager::PublishCallback(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
     ANS_LOGI("start");
-    std::lock_guard<std::mutex> lock(callbackMutex_);
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (callback_.OnPublish) {
         callback_.OnPublish(deviceId, bundleName, request);
     }
@@ -289,7 +289,7 @@ bool DistributedNotificationManager::UpdateCallback(
     const std::string &deviceId, const std::string &bundleName, sptr<NotificationRequest> &request)
 {
     ANS_LOGI("start");
-    std::lock_guard<std::mutex> lock(callbackMutex_);
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (callback_.OnUpdate) {
         callback_.OnUpdate(deviceId, bundleName, request);
     }
@@ -302,7 +302,7 @@ bool DistributedNotificationManager::DeleteCallback(
     const std::string &deviceId, const std::string &bundleName, const std::string &label, int32_t id)
 {
     ANS_LOGI("start");
-    std::lock_guard<std::mutex> lock(callbackMutex_);
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (callback_.OnDelete) {
         callback_.OnDelete(deviceId, bundleName, label, id);
     }
@@ -415,7 +415,7 @@ ErrCode DistributedNotificationManager::RegisterCallback(const IDistributedCallb
         ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(callbackMutex_);
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     callback_ = callback;
     return ERR_OK;
 }
@@ -423,7 +423,7 @@ ErrCode DistributedNotificationManager::RegisterCallback(const IDistributedCallb
 ErrCode DistributedNotificationManager::UngegisterCallback()
 {
     ANS_LOGD("start");
-    std::lock_guard<std::mutex> lock(callbackMutex_);
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     callback_ = {};
     return ERR_OK;
 }

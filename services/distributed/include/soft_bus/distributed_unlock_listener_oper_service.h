@@ -94,7 +94,7 @@ private:
         const int32_t btnIndex, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& wantAgentPtr);
 
 private:
-    std::mutex mapLock_;
+    ffrt::mutex mapLock_;
     std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
     std::vector<std::string> hashCodeOrder_;
     std::map<std::string, uint64_t> timerMap_;

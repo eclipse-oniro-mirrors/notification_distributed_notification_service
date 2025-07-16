@@ -30,7 +30,7 @@ DistributedDeviceDataService& DistributedDeviceDataService::GetInstance()
 
 void DistributedDeviceDataService::ResetTargetDevice(const std::string& deviceType, const std::string& deviceId)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto itemIter = devicesData_.begin(); itemIter != devicesData_.end(); itemIter++) {
         if (itemIter->deviceType == deviceType && itemIter->deviceId == deviceId) {
             devicesData_.erase(itemIter);
@@ -43,7 +43,7 @@ void DistributedDeviceDataService::ResetTargetDevice(const std::string& deviceTy
 int32_t DistributedDeviceDataService::SetDeviceSyncSwitch(const std::string& deviceType, const std::string& deviceId,
     bool notificationEnable, bool liveViewEnable)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto itemIter = devicesData_.begin(); itemIter != devicesData_.end(); itemIter++) {
         if (itemIter->deviceType == deviceType && itemIter->deviceId == deviceId) {
             itemIter->liveViewSyncEnable = liveViewEnable;
@@ -73,7 +73,7 @@ int32_t DistributedDeviceDataService::SetDeviceSyncSwitch(const std::string& dev
 int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::string& deviceType,
     const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto itemIter = devicesData_.begin(); itemIter != devicesData_.end(); itemIter++) {
         if (itemIter->deviceType != deviceType || itemIter->deviceId != deviceId) {
             continue;
@@ -122,7 +122,7 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
 int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::string& deviceType,
     const std::string& deviceId, std::vector<std::string>& bundleList)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
         if (item.deviceType == deviceType && item.deviceId == deviceId) {
             bundleList.assign(item.installedBundles.begin(), item.installedBundles.end());
@@ -136,7 +136,7 @@ int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::strin
 bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
     const std::string bundleName)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
         if (item.deviceType == deviceType && item.deviceId == deviceId) {
             return item.installedBundles.count(bundleName);
@@ -149,7 +149,7 @@ bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& dev
 bool DistributedDeviceDataService::GetDeviceNotificationEnable(const std::string& deviceType,
     const std::string& deviceId)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
         if (item.deviceType == deviceType && item.deviceId == deviceId) {
             return item.notificationSyncEnable;
@@ -161,7 +161,7 @@ bool DistributedDeviceDataService::GetDeviceNotificationEnable(const std::string
 
 bool DistributedDeviceDataService::GetDeviceLiveViewEnable(const std::string& deviceType, const std::string& deviceId)
 {
-    std::lock_guard<std::mutex> lock(lock_);
+    std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
         if (item.deviceType == deviceType && item.deviceId == deviceId) {
             return item.liveViewSyncEnable;

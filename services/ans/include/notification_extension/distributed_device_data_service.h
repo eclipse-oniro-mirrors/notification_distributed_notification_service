@@ -21,6 +21,8 @@
 #include <vector>
 #include <unordered_set>
 
+#include "ffrt.h"
+
 namespace OHOS {
 namespace Notification {
 
@@ -52,7 +54,7 @@ private:
     DistributedDeviceDataService() = default;
     ~DistributedDeviceDataService() = default;
 
-    std::mutex lock_;
+    ffrt::mutex lock_;
     std::vector<DeviceData> devicesData_;
 };
 }

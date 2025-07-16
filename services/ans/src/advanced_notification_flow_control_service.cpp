@@ -40,7 +40,7 @@ void RemoveExpiredTimestamp(std::list<TimePoint> &list, const TimePoint &now)
 
 ErrCode GlobalFlowController::FlowControl(const std::shared_ptr<NotificationRecord> record, const TimePoint &now)
 {
-    std::lock_guard<std::mutex> lock(globalFlowControllerMutex_);
+    std::lock_guard<ffrt::mutex> lock(globalFlowControllerMutex_);
     RemoveExpiredTimestamp(globalFlowControllerList_, now);
     if (globalFlowControllerList_.size() >= threshold_) {
         ANS_LOGE("%{public}s", errMsg_.msg.c_str());
@@ -54,14 +54,14 @@ ErrCode GlobalFlowController::FlowControl(const std::shared_ptr<NotificationReco
 
 void GlobalFlowController::RecordTimestamp(const TimePoint &now)
 {
-    std::lock_guard<std::mutex> lock(globalFlowControllerMutex_);
+    std::lock_guard<ffrt::mutex> lock(globalFlowControllerMutex_);
     globalFlowControllerList_.push_back(now);
 }
 
 ErrCode CallerFlowController::FlowControl(
     const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now)
 {
-    std::lock_guard<std::mutex> lock(callerFlowControllerMutex_);
+    std::lock_guard<ffrt::mutex> lock(callerFlowControllerMutex_);
     auto callerFlowControlIter = callerFlowControllerMapper_.find(callingUid);
     if (callerFlowControlIter == callerFlowControllerMapper_.end()) {
         return ERR_OK;
@@ -80,7 +80,7 @@ ErrCode CallerFlowController::FlowControl(
 void CallerFlowController::RecordTimestamp(
     const std::shared_ptr<NotificationRecord> record, const int32_t callingUid, const TimePoint &now)
 {
-    std::lock_guard<std::mutex> lock(callerFlowControllerMutex_);
+    std::lock_guard<ffrt::mutex> lock(callerFlowControllerMutex_);
     auto callerFlowControlIter = callerFlowControllerMapper_.find(callingUid);
     if (callerFlowControlIter == callerFlowControllerMapper_.end()) {
         callerFlowControllerMapper_[callingUid] = std::make_shared<std::list<TimePoint>>();
@@ -91,7 +91,7 @@ void CallerFlowController::RecordTimestamp(
 
 void CallerFlowController::RemoveExpired(const TimePoint &now)
 {
-    std::lock_guard<std::mutex> lock(callerFlowControllerMutex_);
+    std::lock_guard<ffrt::mutex> lock(callerFlowControllerMutex_);
     for (auto iter = callerFlowControllerMapper_.begin(); iter != callerFlowControllerMapper_.end();) {
         auto latest = iter->second->back();
         if (std::chrono::abs(now - latest) > CALLER_FLOW_CONTRL_EXPIRE_TIME) {

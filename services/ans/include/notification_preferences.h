@@ -592,10 +592,10 @@ private:
     void SetDistributedEnabledForBundle(const NotificationPreferencesInfo::BundleInfo& bundleInfo);
 
 private:
-    static std::mutex instanceMutex_;
+    static ffrt::mutex instanceMutex_;
     static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
-    std::mutex preferenceMutex_;
+    ffrt::mutex preferenceMutex_;
     std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};

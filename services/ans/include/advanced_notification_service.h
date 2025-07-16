@@ -1809,8 +1809,8 @@ private:
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> distributedUniqueKeyList_;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> localUniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
-    std::mutex delayNotificationMutext_;
-    static std::mutex doNotDisturbMutex_;
+    ffrt::mutex delayNotificationMutext_;
+    static ffrt::mutex doNotDisturbMutex_;
     std::map<int32_t, std::string> doNotDisturbEnableRecord_;
     bool isCachedAppAndDeviceRelationMap_ = false;
     std::map<std::string, std::string> appAndDeviceRelationMap_;

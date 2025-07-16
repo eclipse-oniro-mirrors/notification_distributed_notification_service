@@ -20,6 +20,7 @@
 #include <map>
 #include <thread>
 #include "distributed_device_data.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -38,7 +39,7 @@ private:
     DistributedServer() = default;
     ~DistributedServer() = default;
     std::atomic<bool> init = false;
-    std::mutex serverLock_;
+    ffrt::mutex serverLock_;
     DistributedDeviceInfo localDevice_;
     std::vector<std::shared_ptr<ConnectedSocketInfo>> peerSockets_;
     std::map<std::string, int32_t> serverSocket_;

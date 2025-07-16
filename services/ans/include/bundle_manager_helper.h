@@ -182,7 +182,7 @@ private:
 
 private:
     sptr<AppExecFwk::IBundleMgr> bundleMgr_ = nullptr;
-    std::mutex connectionMutex_;
+    ffrt::mutex connectionMutex_;
     sptr<RemoteDeathRecipient> deathRecipient_ = nullptr;
 
     DECLARE_DELAYED_SINGLETON(BundleManagerHelper)

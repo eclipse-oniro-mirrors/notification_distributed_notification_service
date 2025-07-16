@@ -26,6 +26,7 @@
 #include "ans_const_define.h"
 #include "notification_record.h"
 #include "notification_analytics_util.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -87,7 +88,7 @@ public:
 private:
     uint32_t threshold_;
     FlowControlErrMsg errMsg_;
-    std::mutex globalFlowControllerMutex_;
+    ffrt::mutex globalFlowControllerMutex_;
     std::list<TimePoint> globalFlowControllerList_;
 };
 
@@ -127,7 +128,7 @@ public:
 private:
     uint32_t threshold_;
     FlowControlErrMsg errMsg_;
-    std::mutex callerFlowControllerMutex_;
+    ffrt::mutex callerFlowControllerMutex_;
     std::map<int32_t, std::shared_ptr<std::list<TimePoint>>> callerFlowControllerMapper_;
 };
 

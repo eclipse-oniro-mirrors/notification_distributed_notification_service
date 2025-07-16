@@ -38,7 +38,7 @@ namespace Notification {
 namespace {
 const static std::string KEY_BUNDLE_LABEL = "label_ans_bundle_";
 }
-std::mutex NotificationPreferences::instanceMutex_;
+ffrt::mutex NotificationPreferences::instanceMutex_;
 std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 
 NotificationPreferences::NotificationPreferences()
@@ -55,7 +55,7 @@ NotificationPreferences::NotificationPreferences()
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
 {
     if (instance_ == nullptr) {
-        std::lock_guard<std::mutex> lock(instanceMutex_);
+        std::lock_guard<ffrt::mutex> lock(instanceMutex_);
         if (instance_ == nullptr) {
             auto instance = std::make_shared<NotificationPreferences>();
             instance_ = instance;
@@ -76,7 +76,7 @@ ErrCode NotificationPreferences::AddNotificationSlots(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     for (auto slot : slots) {
@@ -105,7 +105,7 @@ ErrCode NotificationPreferences::AddNotificationBundleProperty(const sptr<Notifi
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     preferencesInfo.SetBundleInfo(bundleInfo);
@@ -131,7 +131,7 @@ ErrCode NotificationPreferences::RemoveNotificationSlot(
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
         " slotType: " + std::to_string(static_cast<uint32_t>(slotType)));
     message.SlotType(static_cast<uint32_t>(slotType));
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = CheckSlotForRemoveSlot(bundleOption, slotType, preferencesInfo);
@@ -160,7 +160,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_3);
     message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()));
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
@@ -196,7 +196,7 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     ErrCode result = ERR_OK;
@@ -226,7 +226,7 @@ ErrCode NotificationPreferences::UpdateNotificationSlots(
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_2)
         .BundleName(bundleOption->GetBundleName());
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     for (auto slotIter : slots) {
@@ -263,7 +263,7 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_7);
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         if (!bundleInfo.GetSlot(type, slot)) {
             result = ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST;
@@ -290,7 +290,7 @@ ErrCode NotificationPreferences::GetNotificationAllSlots(
 
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.GetAllSlots(slots);
     } else {
@@ -310,7 +310,7 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
 
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         num = static_cast<uint64_t>(bundleInfo.GetAllSlotsSize());
     } else {
@@ -337,7 +337,7 @@ ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
     if (result == ERR_OK) {
@@ -375,7 +375,7 @@ ErrCode NotificationPreferences::SetShowBadge(const sptr<NotificationBundleOptio
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SHOW_BADGE_TYPE, enable);
     if (result == ERR_OK) {
@@ -400,7 +400,7 @@ ErrCode NotificationPreferences::SetImportance(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_IMPORTANCE_TYPE, importance);
     if (result == ERR_OK) {
@@ -424,7 +424,7 @@ ErrCode NotificationPreferences::SetTotalBadgeNums(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_BADGE_TOTAL_NUM_TYPE, num);
     if (result == ERR_OK) {
@@ -450,7 +450,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result =
         SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled);
@@ -467,7 +467,7 @@ ErrCode NotificationPreferences::GetNotificationsEnabled(const int32_t &userId, 
     }
 
     ErrCode result = ERR_OK;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferencesInfo_.GetEnabledAllNotification(userId, enabled)) {
         result = ERR_ANS_INVALID_PARAM;
     }
@@ -479,7 +479,7 @@ ErrCode NotificationPreferences::SetNotificationsEnabled(const int32_t &userId, 
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.SetEnabledAllNotification(userId, enabled);
     ErrCode result = ERR_OK;
@@ -506,7 +506,7 @@ ErrCode NotificationPreferences::SetHasPoppedDialog(const sptr<NotificationBundl
     if (bundleOption == nullptr) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     ErrCode result = ERR_OK;
     result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_POPPED_DIALOG_TYPE, hasPopped);
@@ -524,7 +524,7 @@ ErrCode NotificationPreferences::GetDoNotDisturbDate(const int32_t &userId,
     }
 
     ErrCode result = ERR_OK;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!preferencesInfo.GetDoNotDisturbDate(userId, date)) {
         result = ERR_ANS_INVALID_PARAM;
@@ -539,7 +539,7 @@ ErrCode NotificationPreferences::SetDoNotDisturbDate(const int32_t &userId,
     if (userId <= SUBSCRIBE_USER_INIT) {
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.SetDoNotDisturbDate(userId, date);
 
@@ -572,7 +572,7 @@ ErrCode NotificationPreferences::AddDoNotDisturbProfiles(
         }
         profile->SetProfileTrustList(trustList);
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.AddDoNotDisturbProfiles(userId, profiles);
     if (preferncesDB_ == nullptr) {
@@ -617,7 +617,7 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
             return ERR_ANS_INVALID_PARAM;
         }
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     preferencesInfo.RemoveDoNotDisturbProfiles(userId, profiles);
     if (preferncesDB_ == nullptr) {
@@ -662,7 +662,7 @@ ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int6
         ANS_LOGE("profile is nullptr");
         return ERR_ANS_INVALID_PARAM;
     }
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
         auto trustList = profile->GetProfileTrustList();
@@ -699,7 +699,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
     }
     bundleOption->SetBundleName(cloneBundleInfo.GetBundleName());
     bundleOption->SetUid(cloneBundleInfo.GetUid());
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     if (!GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(cloneBundleInfo.GetBundleName());
@@ -753,7 +753,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
 void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
     std::vector<NotificationCloneBundleInfo> &cloneBundles)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
     std::unordered_map<std::string, std::string> bundlesMap;
     if (GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, userId) != ERR_OK) {
@@ -768,14 +768,14 @@ void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
 void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
     std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     preferencesInfo_.GetAllDoNotDisturbProfiles(userId, profiles);
 }
 
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
@@ -789,7 +789,7 @@ ErrCode NotificationPreferences::GetAllLiveViewEnabledBundles(const int32_t user
     std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     return preferencesInfo_.GetAllLiveViewEnabledBundles(userId, bundleOption);
 }
 
@@ -797,7 +797,7 @@ ErrCode NotificationPreferences::GetAllDistribuedEnabledBundles(int32_t userId,
     const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         return ERR_ANS_SERVICE_NOT_READY;
     }
@@ -810,7 +810,7 @@ ErrCode NotificationPreferences::GetAllDistribuedEnabledBundles(int32_t userId,
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferncesDB_->RemoveAllDataFromDisturbeDB()) {
         result = ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
@@ -824,7 +824,7 @@ ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 ErrCode NotificationPreferences::GetDoNotDisturbProfile(
     int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (!preferencesInfo_.GetDoNotDisturbProfiles(profileId, userId, profile)) {
         return ERR_ANS_NO_PROFILE_TEMPLATE;
     }
@@ -842,7 +842,7 @@ void NotificationPreferences::RemoveDoNotDisturbProfileTrustList(
     int32_t appIndex = bundleOption->GetAppIndex();
     auto bundleName = bundleOption->GetBundleName();
     ANS_LOGI("Remove %{public}s %{public}d %{public}d.", bundleName.c_str(), uid, appIndex);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
@@ -1006,7 +1006,7 @@ ErrCode NotificationPreferences::GetBundleProperty(
 {
     ErrCode result = ERR_OK;
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         switch (type) {
             case BundleType::BUNDLE_IMPORTANCE_TYPE:
@@ -1088,7 +1088,7 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
@@ -1121,7 +1121,7 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
@@ -1139,7 +1139,7 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
         return ERR_ANS_INVALID_PARAM;
     }
  
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
     silentReminderInfo.bundleName = bundleOption->GetBundleName();
     silentReminderInfo.uid = bundleOption->GetUid();
@@ -1161,7 +1161,7 @@ ErrCode NotificationPreferences::IsSilentReminderEnabled(const sptr<Notification
         return ERR_ANS_INVALID_PARAM;
     }
  
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
     if (preferencesInfo_.GetSilentReminderInfo(bundleOption, silentReminderInfo)) {
         enableStatus = silentReminderInfo.enableStatus;
@@ -1182,7 +1182,7 @@ void NotificationPreferences::RemoveSilentEnabledDbByBundle(const sptr<Notificat
 {
     ANS_LOGE("%{public}s", __FUNCTION__);
     if (preferncesDB_ != nullptr && bundleOption != nullptr) {
-        std::lock_guard<std::mutex> lock(preferenceMutex_);
+        std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
         preferncesDB_->RemoveSilentEnabledDbByBundle(bundleOption->GetBundleName(), bundleOption->GetUid());
         preferencesInfo_.RemoveSilentReminderInfo(bundleOption);
     }
@@ -1192,7 +1192,7 @@ ErrCode NotificationPreferences::SetDistributedEnabled(
     const std::string &deviceType, const NotificationConstant::SWITCH_STATE &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedEnabled(deviceType, enableStatus);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1202,7 +1202,7 @@ ErrCode NotificationPreferences::IsDistributedEnabled(
     const std::string &deviceType, NotificationConstant::SWITCH_STATE &enableStatus)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     storeDBResult = preferncesDB_->GetDistributedEnabled(deviceType, enableStatus);
@@ -1213,7 +1213,7 @@ ErrCode NotificationPreferences::GetDistributedAuthStatus(
     const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool &isAuth)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->GetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1223,7 +1223,7 @@ ErrCode NotificationPreferences::SetDistributedAuthStatus(
     const std::string &deviceType, const std::string &deviceId, int32_t targetUserId, bool isAuth)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetDistributedAuthStatus(deviceType, deviceId, targetUserId, isAuth);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1236,7 +1236,7 @@ ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &devi
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetSmartReminderEnabled(deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1249,7 +1249,7 @@ ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &devic
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->IsSmartReminderEnabled(deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1263,7 +1263,7 @@ ErrCode NotificationPreferences::SetDistributedEnabledBySlot(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetDistributedEnabledBySlot(slotType, deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1277,7 +1277,7 @@ ErrCode NotificationPreferences::IsDistributedEnabledBySlot(
         return ERR_ANS_INVALID_PARAM;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->IsDistributedEnabledBySlot(slotType, deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1286,7 +1286,7 @@ ErrCode NotificationPreferences::IsDistributedEnabledBySlot(
 void NotificationPreferences::InitSettingFromDisturbDB(int32_t userId)
 {
     ANS_LOGI("%{public}s userId is %{public}d", __FUNCTION__, userId);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ != nullptr) {
         preferncesDB_->ParseFromDisturbeDB(preferencesInfo_, userId);
     }
@@ -1295,7 +1295,7 @@ void NotificationPreferences::InitSettingFromDisturbDB(int32_t userId)
 void NotificationPreferences::RemoveSettings(int32_t userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     preferencesInfo_.RemoveNotificationEnable(userId);
     preferencesInfo_.RemoveDoNotDisturbDate(userId);
     if (preferncesDB_ != nullptr) {
@@ -1327,7 +1327,7 @@ void NotificationPreferences::RemoveEnabledDbByBundle(const sptr<NotificationBun
 {
     ANS_LOGE("%{public}s", __FUNCTION__);
     if (preferncesDB_ != nullptr && bundleOption != nullptr) {
-        std::lock_guard<std::mutex> lock(preferenceMutex_);
+        std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
         preferncesDB_->RemoveEnabledDbByBundleName(bundleOption->GetBundleName(), bundleOption->GetUid());
     }
 }
@@ -1532,7 +1532,7 @@ bool NotificationPreferences::DelBatchCloneBundleInfo(const int32_t &userId,
 ErrCode NotificationPreferences::SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     preferencesInfo_.SetDisableNotificationInfo(notificationDisable);
     if (preferncesDB_ == nullptr) {
         ANS_LOGE("the prefernces db is nullptr");
@@ -1548,7 +1548,7 @@ ErrCode NotificationPreferences::SetDisableNotificationInfo(const sptr<Notificat
 
 bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetDisableNotificationInfo(notificationDisable)) {
         ANS_LOGD("info get disable notification success");
         return true;
@@ -1570,7 +1570,7 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
 
 bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetUserDisableNotificationInfo(userId, notificationDisable)) {
         ANS_LOGD("info get disable notification success");
         return true;
@@ -1624,7 +1624,7 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
 ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::string> &deviceTypes, const int32_t &userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     nlohmann::json deviceTypesJson = deviceTypes;
     std::string deviceTypesjsonString = deviceTypesJson.dump();
@@ -1635,7 +1635,7 @@ ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::strin
 ErrCode NotificationPreferences::GetDistributedDevicelist(std::vector<std::string> &deviceTypes)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     std::string value = "";
     auto storeDBResult = preferncesDB_->GetDistributedDevicelist(value);
     if (!storeDBResult) {
@@ -1674,7 +1674,7 @@ ErrCode NotificationPreferences::SetSubscriberExistFlag(const std::string& devic
         return ERR_ANS_SERVICE_NOT_READY;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->SetSubscriberExistFlag(deviceType, existFlag);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
@@ -1690,7 +1690,7 @@ ErrCode NotificationPreferences::GetSubscriberExistFlag(const std::string& devic
         return ERR_ANS_SERVICE_NOT_READY;
     }
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = preferncesDB_->GetSubscriberExistFlag(deviceType, existFlag);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
@@ -1727,7 +1727,7 @@ ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetHashCodeRule(uid, type);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1736,7 +1736,7 @@ ErrCode NotificationPreferences::SetHashCodeRule(const int32_t uid, const uint32
 uint32_t NotificationPreferences::GetHashCodeRule(const int32_t uid)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     uint32_t result = 0;
     result = preferncesDB_->GetHashCodeRule(uid);
     ANS_LOGI("uid = %{public}d result = %{public}d", uid, result);

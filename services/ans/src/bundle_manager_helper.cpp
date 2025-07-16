@@ -38,13 +38,13 @@ BundleManagerHelper::BundleManagerHelper()
 
 BundleManagerHelper::~BundleManagerHelper()
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Disconnect();
 }
 
 void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Disconnect();
 }
 
@@ -52,7 +52,7 @@ std::string BundleManagerHelper::GetBundleNameByUid(int32_t uid)
 {
     std::string bundle;
 
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
     Connect();
 
@@ -68,7 +68,7 @@ bool BundleManagerHelper::IsSystemApp(int32_t uid)
 {
     bool isSystemApp = false;
 
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
     Connect();
 
@@ -113,7 +113,7 @@ bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, c
 bool BundleManagerHelper::GetBundleInfoByBundleName(
     const std::string bundle, const int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
 
     if (bundleMgr_ == nullptr) {
@@ -161,7 +161,7 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
 {
     int32_t uid = -1;
 
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
     Connect();
 
@@ -180,7 +180,7 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &bundleName, const int32_t userId)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
     Connect();
 
@@ -201,7 +201,7 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
 bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const AppExecFwk::BundleFlag flag,
     int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
     Connect();
 
@@ -219,7 +219,7 @@ bool BundleManagerHelper::GetBundleInfo(const std::string &bundleName, const App
 bool BundleManagerHelper::GetBundleInfos(
     const AppExecFwk::BundleFlag flag, std::vector<AppExecFwk::BundleInfo> &bundleInfos, int32_t userId)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
 
     if (bundleMgr_ == nullptr) {
@@ -235,7 +235,7 @@ bool BundleManagerHelper::GetBundleInfos(
 int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
 {
     int32_t appIndex = 0;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (nullptr == bundleMgr_) {
         return appIndex;
@@ -251,7 +251,7 @@ int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle
     const int32_t appIndex)
 {
     int32_t uid = -1;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ != nullptr) {
         std::string identity = IPCSkeleton::ResetCallingIdentity();
@@ -268,7 +268,7 @@ bool BundleManagerHelper::GetBundleInfoV9(
     const std::string bundle, const int32_t flag,
     AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
 
     if (bundleMgr_ == nullptr) {
@@ -289,7 +289,7 @@ ErrCode BundleManagerHelper::GetApplicationInfo(const std::string &bundleName, i
     AppExecFwk::ApplicationInfo &appInfo)
 {
     ErrCode result = 0;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
         ANS_LOGE("GetBundleInfo bundle proxy failed.");
@@ -323,7 +323,7 @@ ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName
     AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex)
 {
     ErrCode result = 0;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
         ANS_LOGE("GetBundleInfo bundle proxy failed.");
