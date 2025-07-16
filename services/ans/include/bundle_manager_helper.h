@@ -27,6 +27,7 @@
 #include "refbase.h"
 #include "remote_death_recipient.h"
 #include "singleton.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
