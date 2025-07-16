@@ -45,12 +45,12 @@ enum {
 };
 
 template<typename T>
-static std::vector<double> ConvertInt(const std::vector<T>& values)
+static std::vector<int32_t> ConvertInt(const std::vector<T>& values)
 {
-    std::vector<double> results;
+    std::vector<int32_t> results;
     results.reserve(values.size());
     for (const auto value : values) {
-        results.push_back(static_cast<double>(value));
+        results.push_back(static_cast<int32_t>(value));
     }
     return results;
 }
@@ -209,7 +209,7 @@ bool Common::UnWarpSlotType(uintptr_t slotType, Notification::NotificationConsta
     return true;
 }
 
-bool Common::ParseIntArray(const ::taihe::array<double>& values, std::vector<uint8_t>& result, uint8_t maxLen)
+bool Common::ParseIntArray(const ::taihe::array<int32_t>& values, std::vector<uint8_t>& result, uint8_t maxLen)
 {
     size_t size = values.size();
     if (size > maxLen) {
@@ -231,7 +231,7 @@ bool Common::ParseIntParam(const reminderAgentManager::manager::ReminderRequest&
     std::shared_ptr<Notification::ReminderRequest>& reminder)
 {
     if (reminderReq.ringDuration.has_value()) {
-        int64_t ringDuration = static_cast<int64_t>(reminderReq.ringDuration.value());
+        int64_t ringDuration = reminderReq.ringDuration.value();
         if (ringDuration < 0 || ringDuration > static_cast<int64_t>(
             Notification::ReminderRequest::MAX_RING_DURATION / Notification::ReminderRequest::MILLI_SECONDS)) {
             ANSR_LOGE("Param[ringDuration] out of range.");
@@ -240,7 +240,7 @@ bool Common::ParseIntParam(const reminderAgentManager::manager::ReminderRequest&
         reminder->SetRingDuration(static_cast<uint64_t>(ringDuration));
     }
     if (reminderReq.snoozeTimes.has_value()) {
-        int32_t snoozeTimes = static_cast<int32_t>(reminderReq.snoozeTimes.value());
+        int32_t snoozeTimes = reminderReq.snoozeTimes.value();
         if (snoozeTimes < 0) {
             reminder->SetSnoozeTimes(0);
         } else {
@@ -251,22 +251,22 @@ bool Common::ParseIntParam(const reminderAgentManager::manager::ReminderRequest&
         reminder->SetTimeInterval(static_cast<uint64_t>(reminderReq.timeInterval.value()));
     }
     if (reminderReq.titleResourceId.has_value()) {
-        reminder->SetTitleResourceId(static_cast<int32_t>(reminderReq.titleResourceId.value()));
+        reminder->SetTitleResourceId(reminderReq.titleResourceId.value());
     }
     if (reminderReq.contentResourceId.has_value()) {
-        reminder->SetContentResourceId(static_cast<int32_t>(reminderReq.contentResourceId.value()));
+        reminder->SetContentResourceId(reminderReq.contentResourceId.value());
     }
     if (reminderReq.expiredContentResourceId.has_value()) {
-        reminder->SetExpiredContentResourceId(static_cast<int32_t>(reminderReq.expiredContentResourceId.value()));
+        reminder->SetExpiredContentResourceId(reminderReq.expiredContentResourceId.value());
     }
     if (reminderReq.snoozeContentResourceId.has_value()) {
-        reminder->SetSnoozeContentResourceId(static_cast<int32_t>(reminderReq.snoozeContentResourceId.value()));
+        reminder->SetSnoozeContentResourceId(reminderReq.snoozeContentResourceId.value());
     }
     if (reminderReq.notificationId.has_value()) {
-        reminder->SetNotificationId(static_cast<int32_t>(reminderReq.notificationId.value()));
+        reminder->SetNotificationId(reminderReq.notificationId.value());
     }
     if (reminderReq.autoDeletedTime.has_value()) {
-        int64_t autoDeletedTime = static_cast<int64_t>(reminderReq.autoDeletedTime.value());
+        int64_t autoDeletedTime = reminderReq.autoDeletedTime.value();
         reminder->SetAutoDeletedTime(autoDeletedTime > 0 ? autoDeletedTime : 0);
     }
     return true;
@@ -324,19 +324,17 @@ bool Common::ParseLocalDateTime(const reminderAgentManager::manager::LocalDateTi
     }
     dateTime.tm_mday = day;
 
-    int32_t hour = static_cast<int32_t>(dateTimeReq.hour);
-    if (hour < 0 || hour > MAX_HOUR) {
+    if (dateTimeReq.hour < 0 || dateTimeReq.hour > MAX_HOUR) {
         ANSR_LOGW("Param[hour] out of range[0, %{public}d]", MAX_HOUR);
         return false;
     }
-    dateTime.tm_hour = hour;
+    dateTime.tm_hour = dateTimeReq.hour;
 
-    int32_t minute = static_cast<int32_t>(dateTimeReq.minute);
-    if (minute < 0 || minute > MAX_MINUTE) {
+    if (dateTimeReq.minute < 0 || dateTimeReq.minute > MAX_MINUTE) {
         ANSR_LOGW("Param[minute] out of range[0, %{public}d]", MAX_MINUTE);
         return false;
     }
-    dateTime.tm_min = minute;
+    dateTime.tm_min = dateTimeReq.minute;
 
     if (dateTimeReq.second.has_value()) {
         dateTime.tm_sec = static_cast<int32_t>(dateTimeReq.second.value());
@@ -663,17 +661,15 @@ bool Common::CreateReminderCalendar(const reminderAgentManager::manager::Reminde
 void Common::GenAniIntResult(const sptr<Notification::ReminderRequest>& reminder,
     reminderAgentManager::manager::ReminderRequest& base)
 {
-    base.ringDuration = ::taihe::optional<double>::make(static_cast<double>(reminder->GetRingDuration()));
-    base.snoozeTimes = ::taihe::optional<double>::make(static_cast<double>(reminder->GetSnoozeTimes()));
-    base.timeInterval = ::taihe::optional<double>::make(static_cast<double>(reminder->GetTimeInterval()));
-    base.titleResourceId = ::taihe::optional<double>::make(static_cast<double>(reminder->GetTitleResourceId()));
-    base.contentResourceId = ::taihe::optional<double>::make(static_cast<double>(reminder->GetContentResourceId()));
-    base.expiredContentResourceId = ::taihe::optional<double>::make(
-        static_cast<double>(reminder->GetExpiredContentResourceId()));
-    base.snoozeContentResourceId = ::taihe::optional<double>::make(
-        static_cast<double>(reminder->GetSnoozeContentResourceId()));
-    base.notificationId = ::taihe::optional<double>::make(static_cast<double>(reminder->GetNotificationId()));
-    base.autoDeletedTime = ::taihe::optional<double>::make(static_cast<double>(reminder->GetAutoDeletedTime()));
+    base.ringDuration = ::taihe::optional<int64_t>::make(static_cast<int64_t>(reminder->GetRingDuration()));
+    base.snoozeTimes = ::taihe::optional<int32_t>::make(static_cast<int32_t>(reminder->GetSnoozeTimes()));
+    base.timeInterval = ::taihe::optional<int64_t>::make(static_cast<int64_t>(reminder->GetTimeInterval()));
+    base.titleResourceId = ::taihe::optional<int32_t>::make(reminder->GetTitleResourceId());
+    base.contentResourceId = ::taihe::optional<int32_t>::make(reminder->GetContentResourceId());
+    base.expiredContentResourceId = ::taihe::optional<int32_t>::make(reminder->GetExpiredContentResourceId());
+    base.snoozeContentResourceId = ::taihe::optional<int32_t>::make(reminder->GetSnoozeContentResourceId());
+    base.notificationId = ::taihe::optional<int32_t>::make(reminder->GetNotificationId());
+    base.autoDeletedTime = ::taihe::optional<int64_t>::make(reminder->GetAutoDeletedTime());
 }
 
 void Common::GenAniStringResult(const sptr<Notification::ReminderRequest>& reminder,
@@ -814,7 +810,7 @@ void Common::GenAniReminderTimer(const sptr<Notification::ReminderRequest>& remi
     GenAniReminderBase(reminder, timer.base);
     Notification::ReminderRequestTimer* timerReq =
         static_cast<Notification::ReminderRequestTimer*>(reminder.GetRefPtr());
-    timer.triggerTimeInSeconds = static_cast<double>(timerReq->GetInitInfo());
+    timer.triggerTimeInSeconds = static_cast<int64_t>(timerReq->GetInitInfo());
 }
 
 void Common::GenAniReminderAlarm(const sptr<Notification::ReminderRequest>& reminder,
@@ -823,14 +819,13 @@ void Common::GenAniReminderAlarm(const sptr<Notification::ReminderRequest>& remi
     GenAniReminderBase(reminder, alarm.base);
     Notification::ReminderRequestAlarm* alarmReq =
         static_cast<Notification::ReminderRequestAlarm*>(reminder.GetRefPtr());
-    alarm.hour = static_cast<double>(alarmReq->GetHour());
-    alarm.minute = static_cast<double>(alarmReq->GetMinute());
+    alarm.hour = static_cast<int32_t>(alarmReq->GetHour());
+    alarm.minute = static_cast<int32_t>(alarmReq->GetMinute());
     auto daysOfWeek = reminder->GetDaysOfWeek();
     if (daysOfWeek.empty()) {
         return;
     }
-    std::vector<double> results = ConvertInt<int32_t>(daysOfWeek);
-    alarm.daysOfWeek = ::taihe::optional<::taihe::array<double>>::make(results);
+    alarm.daysOfWeek = ::taihe::optional<::taihe::array<int32_t>>::make(daysOfWeek);
 }
 
 void Common::GenAniReminderCalendar(const sptr<Notification::ReminderRequest>& reminder,
@@ -839,26 +834,25 @@ void Common::GenAniReminderCalendar(const sptr<Notification::ReminderRequest>& r
     GenAniReminderBase(reminder, calendar.base);
     Notification::ReminderRequestCalendar* calendarReq =
         static_cast<Notification::ReminderRequestCalendar*>(reminder.GetRefPtr());
-    calendar.dateTime.year = static_cast<double>(calendarReq->GetFirstDesignateYear());
-    calendar.dateTime.month = static_cast<double>(calendarReq->GetFirstDesignageMonth());
-    calendar.dateTime.day = static_cast<double>(calendarReq->GetFirstDesignateDay());
-    calendar.dateTime.hour = static_cast<double>(calendarReq->GetHour());
-    calendar.dateTime.minute = static_cast<double>(calendarReq->GetMinute());
-    calendar.dateTime.second = ::taihe::optional<double>::make(static_cast<double>(calendarReq->GetSecond()));
+    calendar.dateTime.year = static_cast<int32_t>(calendarReq->GetFirstDesignateYear());
+    calendar.dateTime.month = static_cast<int32_t>(calendarReq->GetFirstDesignageMonth());
+    calendar.dateTime.day = static_cast<int32_t>(calendarReq->GetFirstDesignateDay());
+    calendar.dateTime.hour = static_cast<int32_t>(calendarReq->GetHour());
+    calendar.dateTime.minute = static_cast<int32_t>(calendarReq->GetMinute());
+    calendar.dateTime.second = ::taihe::optional<int32_t>::make(static_cast<int32_t>(calendarReq->GetSecond()));
     auto months = calendarReq->GetRepeatMonths();
     if (!months.empty()) {
-        std::vector<double> results = ConvertInt<uint8_t>(months);
-        calendar.repeatMonths = ::taihe::optional<::taihe::array<double>>::make(results);
+        std::vector<int32_t> results = ConvertInt<uint8_t>(months);
+        calendar.repeatMonths = ::taihe::optional<::taihe::array<int32_t>>::make(results);
     }
     auto days = calendarReq->GetRepeatDays();
     if (!days.empty()) {
-        std::vector<double> results = ConvertInt<uint8_t>(days);
-        calendar.repeatDays = ::taihe::optional<::taihe::array<double>>::make(results);
+        std::vector<int32_t> results = ConvertInt<uint8_t>(days);
+        calendar.repeatDays = ::taihe::optional<::taihe::array<int32_t>>::make(results);
     }
     auto daysOfWeek = reminder->GetDaysOfWeek();
     if (!daysOfWeek.empty()) {
-        std::vector<double> results = ConvertInt<int32_t>(daysOfWeek);
-        calendar.daysOfWeek = ::taihe::optional<::taihe::array<double>>::make(results);
+        calendar.daysOfWeek = ::taihe::optional<::taihe::array<int32_t>>::make(daysOfWeek);
     }
 }
 

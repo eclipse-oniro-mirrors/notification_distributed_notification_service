@@ -104,27 +104,6 @@ static bool UnWarpNotificationSlot(uintptr_t slot, OHOS::Notification::Notificat
     return true;
 }
 
-static ani_object WarpDouble(ani_env* env, double value)
-{
-    ani_class doubleCls;
-    ani_status status = ANI_ERROR;
-    if ((status = env->FindClass("Lstd/core/Double;", &doubleCls)) != ANI_OK) {
-        ANSR_LOGE("Failed to find classLstd/core/Double.");
-        return nullptr;
-    }
-    ani_method doubleCtor;
-    if ((status = env->Class_FindMethod(doubleCls, "<ctor>", "D:V", &doubleCtor)) != ANI_OK) {
-        ANSR_LOGE("Failed to find method <ctor>.");
-        return nullptr;
-    }
-    ani_object doubleObj;
-    if ((status = env->Object_New(doubleCls, doubleCtor, &doubleObj, static_cast<ani_double>(value))) != ANI_OK) {
-        ANSR_LOGE("Failed to create double object.");
-        return nullptr;
-    }
-    return doubleObj;
-}
-
 static bool WarpDate(int64_t time, ani_object &outObj)
 {
     ani_env* env = ::taihe::get_env();
@@ -134,27 +113,29 @@ static bool WarpDate(int64_t time, ani_object &outObj)
     }
     ani_class cls;
     ani_status status;
-    if (ANI_OK != (status = env->FindClass("Lescompat/Date;", &cls))) {
-        ANSR_LOGE("Failed to find class Lescompat/Date.");
+    if (ANI_OK != (status = env->FindClass("escompat.Date", &cls))) {
+        ANSR_LOGE("Failed to find class escompat.Date.");
         return false;
     }
     ani_method ctor;
-    if (ANI_OK != (status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor))) {
-        ANSR_LOGE("Failed to find method <ctor>. Lstd/core/Object;:V");
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+        ANSR_LOGE("Failed to find method <ctor>. :V.");
         return false;
     }
-    ani_object timeObj = WarpDouble(env, static_cast<double>(time));
-    if (timeObj == nullptr) {
+    if ((status = env->Object_New(cls, ctor, &outObj)) != ANI_OK) {
+        ANSR_LOGE("Object_New faild.");
         return false;
     }
-    if (ANI_OK != (status = env->Object_New(cls, ctor, &outObj, timeObj))) {
-        ANSR_LOGE("Failed to create date object.");
+    ani_double msObj = 0;
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "D:D", &msObj, static_cast<double>(time)))
+        != ANI_OK) {
+        ANSR_LOGE("Object_CallMethodByName_Double setDate faild.");
         return false;
     }
     return true;
 }
 
-double PublishReminderSync(::ohos::reminderAgentManager::manager::ParamReminder const& reminderReq)
+int32_t PublishReminderSync(::ohos::reminderAgentManager::manager::ParamReminder const& reminderReq)
 {
     std::shared_ptr<OHOS::Notification::ReminderRequest> reminder;
     if (!ReminderAgentManagerNapi::Common::CreateReminder(reminderReq, reminder)) {
@@ -168,16 +149,15 @@ double PublishReminderSync(::ohos::reminderAgentManager::manager::ParamReminder 
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
         return -1;
     }
-    return static_cast<double>(reminderId);
+    return reminderId;
 }
 
-void CancelReminderSync(double reminderId)
+void CancelReminderSync(int32_t reminderId)
 {
-    int32_t id = static_cast<int32_t>(reminderId);
-    if (!CheckReminderId(id)) {
+    if (!CheckReminderId(reminderId)) {
         return;
     }
-    int32_t ret = OHOS::Notification::ReminderHelper::CancelReminder(id);
+    int32_t ret = OHOS::Notification::ReminderHelper::CancelReminder(reminderId);
     if (ret != ERR_OK) {
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
     }
@@ -240,10 +220,9 @@ void RemoveNotificationSlotSync(uintptr_t slotType)
     }
 }
 
-void AddExcludeDateSync(double reminderId, uintptr_t date)
+void AddExcludeDateSync(int32_t reminderId, uintptr_t date)
 {
-    int32_t id = static_cast<int32_t>(reminderId);
-    if (!CheckReminderId(id)) {
+    if (!CheckReminderId(reminderId)) {
         return;
     }
     ani_double dateValue;
@@ -259,33 +238,31 @@ void AddExcludeDateSync(double reminderId, uintptr_t date)
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
         return;
     }
-    ret = OHOS::Notification::ReminderHelper::AddExcludeDate(id, static_cast<int64_t>(dateValue));
+    ret = OHOS::Notification::ReminderHelper::AddExcludeDate(reminderId, static_cast<int64_t>(dateValue));
     if (ret != ERR_OK) {
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
     }
 }
 
-void DeleteExcludeDatesSync(double reminderId)
+void DeleteExcludeDatesSync(int32_t reminderId)
 {
-    int32_t id = static_cast<int32_t>(reminderId);
-    if (!CheckReminderId(id)) {
+    if (!CheckReminderId(reminderId)) {
         return;
     }
-    int32_t ret = OHOS::Notification::ReminderHelper::DelExcludeDates(id);
+    int32_t ret = OHOS::Notification::ReminderHelper::DelExcludeDates(reminderId);
     if (ret != ERR_OK) {
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
     }
 }
 
-::taihe::array<uintptr_t> GetExcludeDatesSync(double reminderId)
+::taihe::array<uintptr_t> GetExcludeDatesSync(int32_t reminderId)
 {
-    int32_t id = static_cast<int32_t>(reminderId);
     std::vector<uintptr_t> results;
-    if (!CheckReminderId(id)) {
+    if (!CheckReminderId(reminderId)) {
         return ::taihe::array<uintptr_t>(results);
     }
     std::vector<int64_t> dates;
-    int32_t ret = OHOS::Notification::ReminderHelper::GetExcludeDates(id, dates);
+    int32_t ret = OHOS::Notification::ReminderHelper::GetExcludeDates(reminderId, dates);
     if (ret != ERR_OK) {
         ::taihe::set_business_error(ret, ReminderAgentManagerNapi::Common::getErrCodeMsg(ret));
         return ::taihe::array<uintptr_t>(results);
@@ -318,7 +295,7 @@ void DeleteExcludeDatesSync(double reminderId)
             continue;
         }
         ::ohos::reminderAgentManager::manager::ReminderInfo reminderInfo {
-            .reminderId = static_cast<double>(reminder.reminderRequest_->GetReminderId()),
+            .reminderId = reminder.reminderRequest_->GetReminderId(),
             .reminderReq = result.value()
         };
         aniReminders.push_back(reminderInfo);
