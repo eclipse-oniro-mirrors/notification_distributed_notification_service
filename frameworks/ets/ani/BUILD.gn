@@ -164,10 +164,37 @@ ohos_shared_library("notification_subscribe_ani") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "${frameworks_path}/cj/ffi:cj_notification_manager_ffi",
-   ]
+if (distributed_notification_service_disable_control) {
+    defines += [ "DISABLE_NOTIFICATION_FEATURE_ENABLE" ]
+  }
+
+  if (distributed_notification_service_feature_badge_manager) {
+    defines += [ "ANS_FEATURE_BADGE_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_local_liveview) {
+    defines += [ "ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW" ]
+  }
+
+  if (distributed_notification_service_feature_distributed_db) {
+    defines += [ "ANS_FEATURE_DISTRIBUTED_DB" ]
+  }
+
+  if (distributed_notification_service_feature_disturb_manager) {
+    defines += [ "ANS_FEATURE_DISTURB_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_slot_manager) {
+    defines += [ "ANS_FEATURE_SLOT_MANAGER" ]
+  }
+
+  if (distributed_notification_service_feature_additional_config) {
+    defines += [ "ANS_FEATURE_ADDITIONAL_CONFIG" ]
+  }
+
+  if (distributed_notification_service_feature_open_notification_settings) {
+    defines += [ "ANS_FEATURE_OPEN_NOTIFICATION_SETTINGS" ]
+  }
 
   external_deps = [
     "c_utils:utils",

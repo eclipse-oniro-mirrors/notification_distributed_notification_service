@@ -723,7 +723,7 @@ void GetDoNotDisturbDateByDoNotDisturbType(ani_env *env, ani_object obj, Notific
     ani_status status = ANI_ERROR;
     ani_boolean isUndefined = ANI_OK;
     ani_ref doNotDisturbTypeRef = {};
-    if (ANI_OK != (status = GetPropertyRef(env, obj, "doNotDisturbType", isUndefined, doNotDisturbTypeRef))
+    if (ANI_OK != (status = GetPropertyRef(env, obj, "type", isUndefined, doNotDisturbTypeRef))
         || isUndefined == ANI_TRUE || doNotDisturbTypeRef == nullptr) {
         ANS_LOGE("GetDoNotDisturbDateByDoNotDisturbType: get Ref failed");
         return;
