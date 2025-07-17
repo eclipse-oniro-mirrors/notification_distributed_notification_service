@@ -144,8 +144,8 @@ static std::array kitManagerFunctions = {
 #endif
 
 #ifdef ANS_FEATURE_DISTURB_MANAGER
-     ani_native_function {"nativeSetDoNotDisturbDate", nullptr, reinterpret_cast<void *>(AniSetDoNotDisturbDate)},
-     ani_native_function {"nativeSetDoNotDisturbDateWithId", nullptr,
+    ani_native_function {"nativeSetDoNotDisturbDate", nullptr, reinterpret_cast<void *>(AniSetDoNotDisturbDate)},
+    ani_native_function {"nativeSetDoNotDisturbDateWithId", nullptr,
         reinterpret_cast<void *>(AniSetDoNotDisturbDateWithId)},
     ani_native_function {"nativeGetDoNotDisturbDate", nullptr, reinterpret_cast<void *>(AniGetDoNotDisturbDate)},
     ani_native_function {"nativeGetDoNotDisturbDateWithId", nullptr,
