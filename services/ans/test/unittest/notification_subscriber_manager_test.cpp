@@ -220,7 +220,8 @@ HWTEST_F(NotificationSubscriberManagerTest, NotificationSubscriberManagerTest_00
     // Test NotifyDisturbModeChanged function.
     sptr<NotificationDoNotDisturbDate> date =
         new NotificationDoNotDisturbDate(NotificationConstant::DoNotDisturbType::NONE, 0, 0);
-    notificationSubscriberManager_->NotifyDoNotDisturbDateChanged(0, date);
+    std::string bundle = "com.example.test";
+    notificationSubscriberManager_->NotifyDoNotDisturbDateChanged(0, date, bundle);
 
     // Test AddSubscriber function.
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
@@ -566,7 +567,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumed_001, Function | Small
 
 /**
  * @tc.number    : NotifyBadgeEnabledChanged_001
- * @tc.name      :
+ * @tc.name      : test notify badge enable to trigger call back success
  */
 HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Function | SmallTest | Level1)
 {
@@ -574,9 +575,12 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChanged_001, Funct
     sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
     auto isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_FALSE(isCallback);
-    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, nullptr), (int)ERR_OK);
-     
+    std::string bundle = "com.example.test";
+    sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
+    subscribeInfo->AddAppName(bundle);
+    ASSERT_EQ(notificationSubscriberManager_->AddSubscriber(subscriber, subscribeInfo), (int)ERR_OK);
     sptr<EnabledNotificationCallbackData> callbackData(new EnabledNotificationCallbackData());
+    callbackData->SetBundle(bundle);
     notificationSubscriberManager_->NotifyBadgeEnabledChanged(callbackData);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
@@ -721,12 +725,13 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyCanceledInner_001, Functi
 
 /**
  * @tc.number    : NotifyDoNotDisturbDateChangedInner_001
- * @tc.name      :
+ * @tc.name      : test set do not disturb date to trigger call back success
  */
 HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_001, Function | SmallTest | Level1)
 {
     //build notificationMap
     sptr<NotificationDoNotDisturbDate> date(new NotificationDoNotDisturbDate());
+    std::string bundle = "com.example.test";
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -736,25 +741,28 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyDoNotDisturbDateChangedInner_0
 
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
+    
     info->AddAppUserId(101);
+    info->AddAppName(bundle);
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date);
+    notificationSubscriberManager.NotifyDoNotDisturbDateChangedInner(101, date, bundle);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
 }
 
-
 /**
  * @tc.number    : NotifyEnabledNotificationChangedInner_002
- * @tc.name      :
+ * @tc.name      : test enable notification changed to trigger call back success
  */
 HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInner_002, Function | SmallTest | Level1)
 {
     //build notificationMap
-    sptr<EnabledNotificationCallbackData> date(new EnabledNotificationCallbackData());
-    date->SetUid(101);
+    sptr<EnabledNotificationCallbackData> callback(new EnabledNotificationCallbackData());
+    std::string bundle = "com.example.test";
+    callback->SetBundle(bundle);
+    callback->SetUid(101);
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -765,9 +773,10 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
     NotificationSubscriberManager notificationSubscriberManager;
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
     info->AddAppUserId(100);
+    info->AddAppName(bundle);
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.NotifyEnabledNotificationChangedInner(date);
+    notificationSubscriberManager.NotifyEnabledNotificationChangedInner(callback);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);
@@ -775,12 +784,14 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInne
 
 /**
  * @tc.number    : SetBadgeNumber_001
- * @tc.name      :
+ * @tc.name      : test set badge number to trigger call back success
  */
 HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Function | SmallTest | Level1)
 {
     //build notificationMap
-    sptr<BadgeNumberCallbackData> date(new BadgeNumberCallbackData());
+    sptr<BadgeNumberCallbackData> badge(new BadgeNumberCallbackData());
+    std::string bundle = "com.example.test";
+    badge->SetBundle(bundle);
 
     //build subscriber
     std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
@@ -794,9 +805,10 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_001, Function | Small
 
     sptr<NotificationSubscribeInfo> info(new NotificationSubscribeInfo());
     info->AddAppUserId(100);
+    info->AddAppName(bundle);
     ASSERT_EQ(notificationSubscriberManager.AddSubscriberInner(subscriber, info), (int)ERR_OK);
 
-    notificationSubscriberManager.SetBadgeNumber(date);
+    notificationSubscriberManager.SetBadgeNumber(badge);
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     isCallback = testAnsSubscriber->GetCallBack();
     ASSERT_TRUE(isCallback);

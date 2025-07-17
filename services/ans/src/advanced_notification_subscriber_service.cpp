@@ -119,6 +119,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
 
         sptrInfo->AddAppName(bundle);
         sptrInfo->SetSubscriberUid(uid);
+        sptrInfo->SetIsSubscribeSelf(true);
 
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo);
         if (errCode != ERR_OK) {

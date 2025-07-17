@@ -108,7 +108,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
     ASSERT_NE(nullptr, notificationSubscriberManager);
     sptr<NotificationDoNotDisturbDate> date = nullptr;
     notificationSubscriberManager->notificationSubQueue_ = nullptr;
-    notificationSubscriberManager->NotifyDoNotDisturbDateChanged(0, date);
+    std::string bundle = "com.example.test";
+    notificationSubscriberManager->NotifyDoNotDisturbDateChanged(0, date, bundle);
 }
 
 /**

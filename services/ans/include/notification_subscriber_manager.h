@@ -96,8 +96,10 @@ public:
      *
      * @param userId Indicates which user need consume the update nofitication
      * @param date Indicates the NotificationDoNotDisturbDate object.
+     * @param bundle Indicates which bundle need consume the update nofitication
      */
-    void NotifyDoNotDisturbDateChanged(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
+    void NotifyDoNotDisturbDateChanged(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date,
+        const std::string &bundle);
 
     void NotifyEnabledNotificationChanged(const sptr<EnabledNotificationCallbackData> &callbackData);
 
@@ -180,7 +182,8 @@ private:
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap);
-    void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
+    void NotifyDoNotDisturbDateChangedInner(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date,
+        const std::string &bundle);
     void NotifyEnabledNotificationChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     void NotifyBadgeEnabledChangedInner(const sptr<EnabledNotificationCallbackData> &callbackData);
     bool IsSystemUser(int32_t userId);
@@ -188,6 +191,11 @@ private:
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
     bool ConsumeRecordFilter(
         const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    bool IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
+        const int32_t &userId, const std::string &bundle);
+    template <typename... Args>
+    void NotifySubscribers(int32_t userId, const std::string& bundle,
+        ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args);
 
 private:
     std::list<std::shared_ptr<SubscriberRecord>> subscriberRecordList_ {};

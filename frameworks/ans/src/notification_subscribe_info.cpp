@@ -120,6 +120,12 @@ bool NotificationSubscribeInfo::Marshalling(Parcel &parcel) const
         ANS_LOGE("Can't write needNotifyResponse");
         return false;
     }
+
+    // write isSubscribeSelf
+    if (!parcel.WriteBool(isSubscribeSelf_)) {
+        ANS_LOGE("Can't write isSubscribeSelf");
+        return false;
+    }
     return true;
 }
 
@@ -179,6 +185,8 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
     needNotifyApplicationChanged_ = parcel.ReadBool();
     // read needNotifyResponse
     needNotifyResponse_ = parcel.ReadBool();
+    // read isSubscribeSelf_
+    isSubscribeSelf_ = parcel.ReadBool();
     return true;
 }
 
@@ -202,6 +210,7 @@ std::string NotificationSubscribeInfo::Dump()
             "needNotify = " + std::to_string(needNotifyApplicationChanged_) +
             "filterType = " + std::to_string(filterType_) +
             "needResponse = " + std::to_string(needNotifyResponse_) +
+            "isSubscribeSelf = " + std::to_string(isSubscribeSelf_) +
             " }";
 }
 
@@ -253,6 +262,16 @@ bool NotificationSubscribeInfo::GetNeedNotifyResponse() const
 void NotificationSubscribeInfo::SetNeedNotifyResponse(bool isNeed)
 {
     needNotifyResponse_ = isNeed;
+}
+
+bool NotificationSubscribeInfo::GetIsSubscribeSelf() const
+{
+    return isSubscribeSelf_;
+}
+
+void NotificationSubscribeInfo::SetIsSubscribeSelf(bool isSubscribeSelf)
+{
+    isSubscribeSelf_ = isSubscribeSelf;
 }
 }  // namespace Notification
 }  // namespace OHOS
