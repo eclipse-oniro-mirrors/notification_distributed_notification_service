@@ -18,6 +18,8 @@ group("ans_service") {
 
   if (distributed_notification_supported) {
     deps += [ "distributed:libans_distributed" ]
+  }
+  if (distributed_notification_service_feature_all_scenario_collaboration) {
     deps += [ "distributed:libdans" ]
   }
 }

@@ -77,7 +77,9 @@
 #include "advanced_datashare_helper_ext.h"
 #include "notification_analytics_util.h"
 #include "advanced_notification_flow_control_service.h"
+#ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
+#endif
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "notification_operation_service.h"
 #include "string_wrapper.h"

@@ -206,7 +206,7 @@ HWTEST_F(
     EXPECT_EQ(test.isDatashaReready_, true);
 }
 
-#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+#ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.number    : AdvancedNotificationServiceAbilityTest_02000
  * @tc.name      : ANS_AdvancedNotificationServiceAbility_02000

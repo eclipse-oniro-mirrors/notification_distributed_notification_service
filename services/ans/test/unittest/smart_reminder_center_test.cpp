@@ -212,6 +212,7 @@ HWTEST_F(SmartReminderCenterTest, InitValidDevices_00002, Function | SmallTest |
     smartReminderCenter_->InitValidDevices(validDevices, smartDevices, statusMap, request);
     ASSERT_EQ(request->GetNotificationControlFlags(), 0);
 }
+#ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.name: InitPcPadDevices_100
  * @tc.desc: Test InitPcPadDevices
@@ -251,6 +252,7 @@ HWTEST_F(SmartReminderCenterTest, InitPcPadDevices_200, Function | SmallTest | L
     ASSERT_EQ(validDevices.size(), 0);
     ASSERT_EQ(smartDevices.size(), 0);
 }
+#endif
 
 /**
  * @tc.name: FillRequestExtendInfo_100
