@@ -47,6 +47,7 @@ ohos_shared_library("cj_notification_manager_ffi") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:data_ability_helper",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:cj_image_ffi",
     "ipc:ipc_core",
