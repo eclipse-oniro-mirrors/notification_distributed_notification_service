@@ -63,6 +63,7 @@ ohos_executable("anm") {
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "image_framework:image_native",
     "relational_store:native_rdb",

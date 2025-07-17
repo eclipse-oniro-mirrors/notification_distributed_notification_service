@@ -37,6 +37,7 @@ ohos_unittest("ans_notification_branch_test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "ffrt:libffrt",
     "googletest:gmock_main",
     "hilog:libhilog",
     "image_framework:image_native",
