@@ -108,8 +108,8 @@ constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
-std::mutex AdvancedNotificationService::instanceMutex_;
-std::mutex AdvancedNotificationService::pushMutex_;
+ffrt::mutex AdvancedNotificationService::instanceMutex_;
+ffrt::mutex AdvancedNotificationService::pushMutex_;
 ffrt::mutex AdvancedNotificationService::doNotDisturbMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
@@ -275,7 +275,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(instanceMutex_);
 
     if (instance_ == nullptr) {
         instance_ = new (std::nothrow) AdvancedNotificationService();
@@ -1587,7 +1587,7 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
 void AdvancedNotificationService::ResetPushCallbackProxy(NotificationConstant::SlotType slotType)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(pushMutex_);
+    std::lock_guard<ffrt::mutex> lock(pushMutex_);
     if (pushCallBacks_.empty()) {
         ANS_LOGE("invalid proxy state");
         return;
@@ -1653,7 +1653,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         }
     }
     {
-        std::lock_guard<std::mutex> lock(pushMutex_);
+        std::lock_guard<ffrt::mutex> lock(pushMutex_);
         pushRecipient_ = new (std::nothrow) PushCallbackRecipient();
         if (!pushRecipient_) {
             ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
@@ -1697,7 +1697,7 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
     }
 
     {
-        std::lock_guard<std::mutex> lock(pushMutex_);
+        std::lock_guard<ffrt::mutex> lock(pushMutex_);
         pushCallBacks_.clear();
     }
 
@@ -1862,8 +1862,8 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
 
 bool AdvancedNotificationService::CreateDialogManager()
 {
-    static std::mutex dialogManagerMutex_;
-    std::lock_guard<std::mutex> lock(dialogManagerMutex_);
+    static ffrt::mutex dialogManagerMutex_;
+    std::lock_guard<ffrt::mutex> lock(dialogManagerMutex_);
     if (dialogManager_ == nullptr) {
         dialogManager_ = std::make_unique<NotificationDialogManager>(*this);
         if (!dialogManager_->Init()) {
@@ -1954,7 +1954,7 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
     ANS_LOGD("Check sound permission: %{public}d, %{public}s, %{public}d",
         length, bundleOption->GetBundleName().c_str(), soundPermissionInfo_->needUpdateCache_.load());
     if (soundPermissionInfo_->needUpdateCache_.load()) {
-        std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
+        std::lock_guard<ffrt::mutex> lock(soundPermissionInfo_->dbMutex_);
         if (soundPermissionInfo_->needUpdateCache_.load()) {
             soundPermissionInfo_->allPackage_ = false;
             soundPermissionInfo_->bundleName_.clear();

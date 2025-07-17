@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "notification_constant.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -228,10 +229,10 @@ struct AsyncOperationCallbackInfo {
     OperationInfo operationInfo;
 };
 
-static std::mutex mutex_;
+static ffrt::mutex mutex_;
 static thread_local std::vector<SubscriberInstancesInfo> subscriberInstances_;
 
-static std::mutex delMutex_;
+static ffrt::mutex delMutex_;
 static std::vector<std::shared_ptr<SubscriberInstance>> DeletingSubscriber;
 
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value, SubscriberInstancesInfo &subscriberInfo);

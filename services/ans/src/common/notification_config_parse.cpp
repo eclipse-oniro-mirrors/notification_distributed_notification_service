@@ -148,7 +148,7 @@ uint32_t NotificationConfigParse::GetConfigSlotReminderModeByType(NotificationCo
 {
     static std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> configSlotsReminder;
     {
-        std::lock_guard<std::mutex> lock(slotReminderMutex_);
+        std::lock_guard<ffrt::mutex> lock(slotReminderMutex_);
         if (configSlotsReminder.empty()) {
             GetCurrentSlotReminder(configSlotsReminder);
         }
@@ -284,7 +284,7 @@ bool NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string
         ANS_LOGE("smartReminderEnableList is invalid");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     deviceTypes = smartReminderEnableList.get<std::vector<std::string>>();
     return true;
 }
@@ -313,7 +313,7 @@ bool NotificationConfigParse::GetMirrorNotificationEnabledStatus(std::vector<std
         ANS_LOGE("Invalid mirror Status");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     deviceTypes = mirrorNotificationEnabledStatus.get<std::vector<std::string>>();
     return true;
 }
@@ -340,7 +340,7 @@ bool NotificationConfigParse::GetAppAndDeviceRelationMap(std::map<std::string, s
         ANS_LOGE("appAndDeviceRelationMap is invalid");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     for (auto& appAndDeviceRelation : appAndDeviceRelationMap.items()) {
         relationMap[appAndDeviceRelation.key()] = appAndDeviceRelation.value();
     }

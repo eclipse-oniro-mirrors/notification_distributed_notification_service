@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace NotificationNapi {
 std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> Common::wantAgent_;
-std::mutex Common::mutex_;
+ffrt::mutex Common::mutex_;
 
 Common::Common()
 {}
@@ -1326,14 +1326,14 @@ __attribute__((no_sanitize("cfi"))) napi_value Common::CreateWantAgentByJS(const
     }
 
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<ffrt::mutex> lock(mutex_);
         wantAgent_.insert(agent);
     }
     napi_finalize finalize = [](napi_env env, void *data, void *hint) {
         AbilityRuntime::WantAgent::WantAgent *objectInfo =
                 static_cast<AbilityRuntime::WantAgent::WantAgent *>(data);
             if (objectInfo) {
-                std::lock_guard<std::mutex> lock(mutex_);
+                std::lock_guard<ffrt::mutex> lock(mutex_);
                 for (auto it = wantAgent_.begin(); it != wantAgent_.end(); ++it) {
                     if ((*it).get() == objectInfo) {
                         wantAgent_.erase(it);

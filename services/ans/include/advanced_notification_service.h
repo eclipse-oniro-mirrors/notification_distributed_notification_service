@@ -1455,7 +1455,7 @@ private:
         std::set<std::string> bundleName_;
         std::atomic<bool> needUpdateCache_ = true;
         bool allPackage_ = false;
-        std::mutex dbMutex_;
+        ffrt::mutex dbMutex_;
     };
 
     enum UploadStatus {
@@ -1782,8 +1782,8 @@ private:
 
 private:
     static sptr<AdvancedNotificationService> instance_;
-    static std::mutex instanceMutex_;
-    static std::mutex pushMutex_;
+    static ffrt::mutex instanceMutex_;
+    static ffrt::mutex pushMutex_;
     static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
     static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
     bool aggregateLocalSwitch_ = false;

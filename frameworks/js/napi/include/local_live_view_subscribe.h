@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "notification_bundle_option.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -83,10 +84,10 @@ struct AsyncCallbackInfoSubscribeLocalLiveView {
     CallbackPromiseInfo info;
 };
 
-static std::mutex mutex_;
+static ffrt::mutex mutex_;
 static thread_local std::vector<LocalLiveViewSubscriberInstancesInfo> subscriberInstances_;
 
-static std::mutex delMutex_;
+static ffrt::mutex delMutex_;
 static std::vector<LocalLiveViewSubscriberInstance*> DeletingSubscriber;
 
 bool HasNotificationSubscriber(const napi_env &env,

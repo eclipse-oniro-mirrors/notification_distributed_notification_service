@@ -798,7 +798,7 @@ ErrCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<Notificat
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    std::lock_guard<std::mutex> lock(subscriberMutex_);
+    std::lock_guard<ffrt::mutex> lock(subscriberMutex_);
     auto item = subscribers_.find(subscriber);
     if (item != subscribers_.end()) {
         sptr<SubscriberListener> listener = item->second;
@@ -2404,7 +2404,7 @@ ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, bool& i
 void AnsNotification::CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
     sptr<SubscriberListener> &listener)
 {
-    std::lock_guard<std::mutex> lock(subscriberMutex_);
+    std::lock_guard<ffrt::mutex> lock(subscriberMutex_);
     auto item = subscribers_.find(subscriber);
     if (item != subscribers_.end()) {
         listener = item->second;
@@ -2420,7 +2420,7 @@ void AnsNotification::CreateSubscribeListener(const std::shared_ptr<Notification
 
 void AnsNotification::OnServiceDied()
 {
-    std::lock_guard<std::mutex> lock(subscriberMutex_);
+    std::lock_guard<ffrt::mutex> lock(subscriberMutex_);
     for (auto item : subscribers_) {
         item.first->OnDied();
     }

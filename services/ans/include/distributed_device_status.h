@@ -24,6 +24,7 @@
 #include "errors.h"
 #include "ans_log_wrapper.h"
 #include "safe_map.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -50,7 +51,7 @@ public:
     DeviceStatus GetMultiDeviceStatus(const std::string &deviceType, const uint32_t status);
 
 private:
-    std::mutex mapLock_;
+    ffrt::mutex mapLock_;
     std::vector<DeviceStatus> deviceInfo_;
     SafeMap<std::string, uint32_t> deviceStatus_;
 

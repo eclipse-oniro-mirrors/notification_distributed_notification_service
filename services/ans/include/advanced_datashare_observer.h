@@ -22,6 +22,7 @@
 #include "ans_const_define.h"
 #include "system_ability_definition.h"
 #include "uri.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -60,7 +61,7 @@ public:
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     static sptr<AdvancedDatashareObserver> instance_;
-    static std::mutex instanceMutex_;
+    static ffrt::mutex instanceMutex_;
     bool isDataShareReady_ = false;
 };
 } // namespace Notification

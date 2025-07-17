@@ -33,7 +33,7 @@ DistributedDeviceStatus::~DistributedDeviceStatus() = default;
 ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, const uint32_t status,
     const uint32_t controlFlag)
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     uint32_t oldStatus = deviceStatus_.ReadVal(deviceType);
     for (uint32_t i = 0; i < STATUS_SIZE; i++) {
         if (((1 << i) & controlFlag) && ((1 << i) & status)) {
@@ -116,7 +116,7 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
         deviceStatusId = udid;
     }
 
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     for (auto device = deviceInfo_.begin(); device != deviceInfo_.end(); device++) {
         if (device->deviceType != deviceType || device->deviceId != deviceStatusId) {
             continue;
@@ -149,14 +149,14 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
 
 uint32_t DistributedDeviceStatus::GetDeviceStatus(const std::string &deviceType)
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     return deviceStatus_.ReadVal(deviceType);
 }
 
 DeviceStatus DistributedDeviceStatus::GetMultiDeviceStatus(
     const std::string &deviceType, const uint32_t status)
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     for (DeviceStatus device : deviceInfo_) {
         if (device.deviceType == deviceType && (device.status & status) == status) {
             return device;

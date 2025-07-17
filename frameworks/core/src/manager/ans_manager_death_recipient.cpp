@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Notification {
 void AnsManagerDeathRecipient::SubscribeSAManager()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (statusChangeListener_ != nullptr) {
         return;
     }

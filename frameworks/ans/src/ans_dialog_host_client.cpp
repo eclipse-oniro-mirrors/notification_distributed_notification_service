@@ -21,7 +21,7 @@ namespace OHOS::Notification {
 bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(AnsDialogHostClient::instanceMutex_);
     if (instance_ != nullptr) {
         result = instance_;
         return false;
@@ -33,13 +33,13 @@ bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
 
 sptr<AnsDialogHostClient> AnsDialogHostClient::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(AnsDialogHostClient::instanceMutex_);
     return AnsDialogHostClient::instance_;
 }
 
 void AnsDialogHostClient::Destroy()
 {
-    std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(AnsDialogHostClient::instanceMutex_);
     AnsDialogHostClient::instance_ = nullptr;
 }
 
@@ -47,7 +47,7 @@ bool AnsDialogHostClient::SetDialogCallbackInterface(
     std::unique_ptr<AnsDialogCallbackNativeInterface> dialogCallbackInterface)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(AnsDialogHostClient::instanceMutex_);
     if (dialogCallbackInterface == nullptr || AnsDialogHostClient::instance_ == nullptr) {
         return false;
     }

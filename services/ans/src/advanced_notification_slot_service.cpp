@@ -1061,7 +1061,7 @@ ErrCode AdvancedNotificationService::SetAdditionConfig(const std::string &key, c
     }
 
     if (key == RING_TRUST_PKG_KEY) {
-        std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
+        std::lock_guard<ffrt::mutex> lock(soundPermissionInfo_->dbMutex_);
         soundPermissionInfo_->needUpdateCache_ = true;
     }
 

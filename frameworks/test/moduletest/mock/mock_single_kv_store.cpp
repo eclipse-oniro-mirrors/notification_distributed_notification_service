@@ -19,12 +19,12 @@
 
 namespace OHOS {
 namespace DistributedKv {
-std::mutex MockSingleKvStore::mutex_;
+ffrt::mutex MockSingleKvStore::mutex_;
 std::map<std::pair<std::string, std::string>, std::shared_ptr<SingleKvStore>> MockSingleKvStore::kvStoreMap_;
 
 void MockSingleKvStore::InsertMockKvStore(AppId appId, StoreId storeId, std::shared_ptr<SingleKvStore> store)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     kvStoreMap_[std::pair<std::string, std::string>(appId.appId, storeId.storeId)] = store;
 }

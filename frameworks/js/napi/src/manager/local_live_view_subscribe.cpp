@@ -172,7 +172,7 @@ void LocalLiveViewSubscriberInstance::SetCallbackInfo(const napi_env &env, const
 bool HasNotificationSubscriber(const napi_env &env, const napi_value &value,
     LocalLiveViewSubscriberInstancesInfo &subscriberInfo)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     for (auto vec : subscriberInstances_) {
         napi_value callback = nullptr;
         napi_get_reference_value(env, vec.ref, &callback);
@@ -232,7 +232,7 @@ bool AddSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscrib
         ANS_LOGE("null subscriber");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     subscriberInstances_.emplace_back(subscriberInfo);
 
     return true;
@@ -246,7 +246,7 @@ bool DelSubscriberInstancesInfo(const napi_env &env, const LocalLiveViewSubscrib
         return false;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
         if ((*it).subscriber == subscriber) {
             if ((*it).ref != nullptr) {
@@ -325,7 +325,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
 
 bool AddDeletingSubscriber(LocalLiveViewSubscriberInstance *subscriber)
 {
-    std::lock_guard<std::mutex> lock(delMutex_);
+    std::lock_guard<ffrt::mutex> lock(delMutex_);
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
     if (iter != DeletingSubscriber.end()) {
         return false;
@@ -337,7 +337,7 @@ bool AddDeletingSubscriber(LocalLiveViewSubscriberInstance *subscriber)
 
 void DelDeletingSubscriber(LocalLiveViewSubscriberInstance *subscriber)
 {
-    std::lock_guard<std::mutex> lock(delMutex_);
+    std::lock_guard<ffrt::mutex> lock(delMutex_);
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
     if (iter != DeletingSubscriber.end()) {
         DeletingSubscriber.erase(iter);
