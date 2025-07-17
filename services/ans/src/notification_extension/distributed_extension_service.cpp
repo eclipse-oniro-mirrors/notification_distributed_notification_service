@@ -244,7 +244,8 @@ int32_t DistributedExtensionService::TransDeviceIdToUdid(const std::string& netw
             StringAnonymous(networkId).c_str(), ret);
         return ret;
     }
-    ANS_LOGI("OnDeviceOnline id change %{public}s %{public}s", networkId.c_str(), udid.c_str());
+    ANS_LOGI("OnDeviceOnline id change %{public}s %{public}s", StringAnonymous(networkId).c_str(),
+        StringAnonymous(udid).c_str());
     return ERR_OK;
 }
 
