@@ -1187,12 +1187,7 @@ bool ReminderRequest::MarshallingWantParameters(Parcel& parcel, const AAFwk::Wan
 
 bool ReminderRequest::Marshalling(Parcel &parcel) const
 {
-    auto reminderRequest = ReminderRequestFactory::CreateReminderRequest(reminderType_);
-    if (reminderRequest == nullptr) {
-        ANSR_LOGE("Failed to create reminder due to no memory.");
-        return false;
-    }
-    return reminderRequest->WriteParcel(parcel);
+    return false;
 }
 
 bool ReminderRequest::WriteParcel(Parcel &parcel) const
