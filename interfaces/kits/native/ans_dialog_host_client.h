@@ -23,7 +23,6 @@
 #include <refbase.h>
 
 #include "ans_dialog_callback_native_interface.h"
-#include "ffrt.h"
 
 namespace OHOS::Notification {
 class AnsDialogHostClient final : public AnsDialogCallbackStub {
@@ -41,7 +40,7 @@ public:
 
 private:
     inline static sptr<AnsDialogHostClient> instance_ = nullptr;
-    inline static ffrt::mutex instanceMutex_;
+    inline static std::mutex instanceMutex_;
     AnsDialogHostClient() = default;
 
     std::unique_ptr<AnsDialogCallbackNativeInterface> dialogCallbackInterface_ = nullptr;
