@@ -14,6 +14,7 @@
  */
 
 #include "mock_parameters.h"
+#include "ffrt.h"
 
 #include <mutex>
 
