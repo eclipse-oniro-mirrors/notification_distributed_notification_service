@@ -31,6 +31,7 @@ ohos_unittest("ans_notification_annex_test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
