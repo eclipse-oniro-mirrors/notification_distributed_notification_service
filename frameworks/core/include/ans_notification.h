@@ -26,7 +26,6 @@
 #include "notification_subscriber.h"
 #include "want_params.h"
 #include "distributed_bundle_option.h"
-#include "ffrt.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "swing_callback_service.h"
 #endif
@@ -1450,7 +1449,7 @@ private:
         sptr<SubscriberListener> &listener);
 
 private:
-    ffrt::mutex subscriberMutex_;
+    std::mutex subscriberMutex_;
     std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     sptr<SwingCallBackService> swingCallBackService_;
