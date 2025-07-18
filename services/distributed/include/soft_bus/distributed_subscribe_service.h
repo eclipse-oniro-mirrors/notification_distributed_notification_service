@@ -19,6 +19,7 @@
 #include "distributed_subscriber.h"
 #include <thread>
 #include "distributed_device_data.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -30,7 +31,7 @@ public:
     void SubscribeNotification(const DistributedDeviceInfo peerDevice);
     void UnSubscribeNotification(const std::string &deviceId, uint16_t deviceType, bool releaseDevice = true);
 private:
-    std::mutex mapLock_;
+    ffrt::mutex mapLock_;
     std::map<std::string, std::shared_ptr<DistribuedSubscriber>> subscriberMap_;
 };
 }

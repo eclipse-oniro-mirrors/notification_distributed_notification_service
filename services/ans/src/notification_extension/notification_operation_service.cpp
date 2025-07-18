@@ -60,7 +60,7 @@ void DistributedOperationService::AddOperation(const std::string& hashCode,
     }
     uint64_t timerId = timer->CreateTimer(timerInfo);
     timer->StartTimer(timerId, expiredTime);
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto iterCallback = callbackMap_.find(hashCode);
     if (iterCallback != callbackMap_.end()) {
         ANS_LOGW("Operation callback has same key %{public}s.", hashCode.c_str());
@@ -84,7 +84,7 @@ void DistributedOperationService::AddOperation(const std::string& hashCode,
 
 void DistributedOperationService::RemoveOperationResponse(const std::string& hashCode)
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto iterCallback = callbackMap_.find(hashCode);
     if (iterCallback != callbackMap_.end()) {
         callbackMap_.erase(iterCallback);
@@ -106,7 +106,7 @@ void DistributedOperationService::RemoveOperationResponse(const std::string& has
 
 void DistributedOperationService::ReplyOperationResponse(const std::string& hashCode, int32_t result)
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto iterCallback = callbackMap_.find(hashCode);
     if (iterCallback != callbackMap_.end()) {
         iterCallback->second->OnOperationCallback(result);

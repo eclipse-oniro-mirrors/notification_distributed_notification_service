@@ -31,7 +31,7 @@ BundleResourceHelper::BundleResourceHelper()
 
 BundleResourceHelper::~BundleResourceHelper()
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Disconnect();
 }
 
@@ -68,7 +68,7 @@ void BundleResourceHelper::Disconnect()
 
 void BundleResourceHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Disconnect();
 }
 
@@ -76,7 +76,7 @@ ErrCode BundleResourceHelper::GetBundleInfo(const std::string &bundleName,
     AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex)
 {
     ErrCode result = 0;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
         ANS_LOGE("GetBundleInfo bundle proxy failed.");
@@ -99,7 +99,7 @@ ErrCode BundleResourceHelper::GetAllBundleInfos(int32_t flags, std::vector<AppEx
     int32_t userId)
 {
     ErrCode result = 0;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
         ANS_LOGE("GetBundleInfo bundle proxy failed.");
@@ -141,7 +141,7 @@ ErrCode BundleResourceHelper::GetApplicationInfo(const std::string &appName, int
     AppExecFwk::ApplicationInfo &appInfo)
 {
     ErrCode result = 0;
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
         ANS_LOGE("GetBundleInfo bundle proxy failed.");
@@ -169,7 +169,7 @@ ErrCode BundleResourceHelper::GetBundleInfoV9(const std::string& bundleName, int
     AppExecFwk::BundleInfo& bundleInfo)
 {
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
-    std::lock_guard<std::mutex> lock(connectionMutex_);
+    std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
         return false;

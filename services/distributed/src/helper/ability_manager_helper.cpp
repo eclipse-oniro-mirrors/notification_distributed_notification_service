@@ -38,7 +38,7 @@ int AbilityManagerHelper::ConnectAbility(const std::string &eventId, const AAFwk
     const std::string& userInputKey, const std::string& userInput)
 {
     ANS_LOGI("enter, target bundle = %{public}s", want.GetBundle().c_str());
-    std::lock_guard<std::mutex> lock(connectionLock_);
+    std::lock_guard<ffrt::mutex> lock(connectionLock_);
     sptr<DistributedOperationConnection> connection =
         new (std::nothrow) DistributedOperationConnection(eventId, userInputKey, userInput);
     if (connection == nullptr) {
@@ -62,7 +62,7 @@ void AbilityManagerHelper::DisconnectServiceAbility(const std::string &eventId, 
     }
 
     std::function<void()> task = [this, eventId, element]() {
-        std::lock_guard<std::mutex> lock(connectionLock_);
+        std::lock_guard<ffrt::mutex> lock(connectionLock_);
         auto iter = operationConnection_.find(eventId);
         if (iter == operationConnection_.end()) {
             ANS_LOGI("failed to find connection!");

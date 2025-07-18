@@ -58,6 +58,7 @@ ohos_shared_library("ohnotification") {
     "ability_base:base",
     "ability_base:zuri",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
   ]
   output_extension = "so"

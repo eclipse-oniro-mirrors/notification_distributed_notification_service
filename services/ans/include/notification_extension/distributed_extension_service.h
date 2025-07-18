@@ -22,6 +22,7 @@
 #include "ffrt.h"
 #include "notification_config_parse.h"
 #include "distributed_data_define.h"
+#include "ffrt.h"
 
 #include <set>
 #include <mutex>
@@ -72,7 +73,7 @@ private:
     bool SetSupportPeerDevice(nlohmann::json &configJson);
     bool SetMaxTitleLength(nlohmann::json &configJson);
 
-    std::mutex mapLock_;
+    ffrt::mutex mapLock_;
     std::atomic<bool> dansRunning_ = false;
     std::shared_ptr<ffrt::queue> distributedQueue_ = nullptr;
     std::shared_ptr<NotificationLoadUtils> dansHandler_;

@@ -39,7 +39,7 @@ void DistributedServer::ReleaseServer()
         CloseSocket(item.second);
     }
     serverSocket_.clear();
-    std::lock_guard<std::mutex> lock(serverLock_);
+    std::lock_guard<ffrt::mutex> lock(serverLock_);
     for (auto& item : peerSockets_) {
         CloseSocket(item->socketId_);
     }
@@ -87,7 +87,7 @@ int32_t DistributedServer::InitServer(const std::string &deviceId, uint16_t devi
 
 void DistributedServer::OnBind(int32_t socket, PeerSocketInfo info)
 {
-    std::lock_guard<std::mutex> lock(serverLock_);
+    std::lock_guard<ffrt::mutex> lock(serverLock_);
     std::shared_ptr<ConnectedSocketInfo> socketInfo = std::make_shared<ConnectedSocketInfo>();
     socketInfo->pkgName_ = info.pkgName;
     socketInfo->peerName_ = info.name;
@@ -99,7 +99,7 @@ void DistributedServer::OnBind(int32_t socket, PeerSocketInfo info)
 
 void DistributedServer::OnShutdown(int32_t socket, ShutdownReason reason)
 {
-    std::lock_guard<std::mutex> lock(serverLock_);
+    std::lock_guard<ffrt::mutex> lock(serverLock_);
     for (auto socketInfo = peerSockets_.begin(); socketInfo != peerSockets_.end();
         socketInfo++) {
         if ((*socketInfo)->socketId_ == socket) {

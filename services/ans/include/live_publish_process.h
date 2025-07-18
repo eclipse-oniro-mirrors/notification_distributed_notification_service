@@ -18,6 +18,7 @@
 
 #include "base_publish_process.h"
 #include "ans_status.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -36,9 +37,9 @@ private:
     bool GetLiveViewSubscribeState(int32_t uid);
 
     std::set<int32_t> localLiveViewSubscribedList_;
-    std::mutex liveViewMutext_;
+    ffrt::mutex liveViewMutext_;
     static std::shared_ptr<LivePublishProcess> instance_;
-    static std::mutex instanceMutex_;
+    static ffrt::mutex instanceMutex_;
 };
 }  // namespace Notification
 }  // namespace OHOS

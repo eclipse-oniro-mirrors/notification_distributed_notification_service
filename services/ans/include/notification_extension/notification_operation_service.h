@@ -78,7 +78,7 @@ private:
     ~DistributedOperationService() = default;
 
 private:
-    std::mutex mapLock_;
+    ffrt::mutex mapLock_;
     std::shared_ptr<ffrt::queue> operationQueue_ = nullptr;
     std::map<std::string, uint64_t> timerMap_;
     std::map<std::string, sptr<IAnsOperationCallback>> callbackMap_;

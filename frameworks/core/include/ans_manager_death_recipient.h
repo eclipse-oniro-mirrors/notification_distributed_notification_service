@@ -18,6 +18,7 @@
 #include <singleton.h>
 
 #include "system_ability_status_change_stub.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -35,7 +36,7 @@ private:
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     };
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     sptr<ISystemAbilityStatusChange> statusChangeListener_ = nullptr;
 };
 }  // namespace Notification

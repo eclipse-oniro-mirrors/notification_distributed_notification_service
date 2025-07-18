@@ -88,7 +88,7 @@ int32_t DistributedRdbHelper::Init()
 {
     ANS_LOGD("Create rdbStore");
     {
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ != nullptr) {
             ANS_LOGD("notification rdb has existed");
             return NativeRdb::E_OK;
@@ -104,7 +104,7 @@ int32_t DistributedRdbHelper::Init()
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     config.SetHaMode(NativeRdb::HAMode::MAIN_REPLICA);
     RdbCallBack rdbDataCallBack_(notificationRdbConfig_);
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     int32_t ret = NativeRdb::E_OK;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, notificationRdbConfig_.version,
         rdbDataCallBack_, ret);
@@ -120,7 +120,7 @@ int32_t DistributedRdbHelper::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
 
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -137,7 +137,7 @@ int32_t DistributedRdbHelper::Destroy()
 
 int32_t DistributedRdbHelper::InsertData(const std::string &key, const std::string &value)
 {
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -160,7 +160,7 @@ int32_t DistributedRdbHelper::InsertData(const std::string &key, const std::stri
 
 int32_t DistributedRdbHelper::InsertBatchData(const std::unordered_map<std::string, std::string> &values)
 {
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -186,7 +186,7 @@ int32_t DistributedRdbHelper::InsertBatchData(const std::unordered_map<std::stri
 
 int32_t DistributedRdbHelper::DeleteData(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -204,7 +204,7 @@ int32_t DistributedRdbHelper::DeleteData(const std::string &key)
 int32_t DistributedRdbHelper::QueryData(const std::string &key, std::string &value)
 {
     ANS_LOGD("QueryData start");
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -221,7 +221,7 @@ int32_t DistributedRdbHelper::QueryDataBeginWithKey(
     const std::string &key, std::unordered_map<std::string, std::string> &values)
 {
     ANS_LOGD("QueryData BeginWithKey start");
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;

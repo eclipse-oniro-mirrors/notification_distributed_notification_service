@@ -20,6 +20,7 @@
 
 #include <thread>
 #include "match_box.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -67,7 +68,7 @@ public:
 #endif
 
 private:
-    std::mutex mapLock_;
+    ffrt::mutex mapLock_;
     bool subscribeAllConnect = false;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;

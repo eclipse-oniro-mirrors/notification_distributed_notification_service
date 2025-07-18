@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_COMMON_NOTIFICATION_PUBLISH_PROCESS_H
 
 #include "base_publish_process.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -27,7 +28,7 @@ public:
 
 private:
     static std::shared_ptr<CommonNotificationPublishProcess> instance_;
-    static std::mutex instanceMutex_;
+    static ffrt::mutex instanceMutex_;
 };
 }  // namespace Notification
 }  // namespace OHOS

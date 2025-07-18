@@ -39,7 +39,7 @@ DistributedPreferences& DistributedPreferences::GetInstance()
 
 int32_t DistributedPreferences::InsertBundleIcon(const std::string &bundleName, const std::string &icon)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGW("Prefernces handler is nullptr.");
         return -1;
@@ -53,7 +53,7 @@ int32_t DistributedPreferences::InsertBundleIcon(const std::string &bundleName, 
 
 int32_t DistributedPreferences::DeleteBundleIcon(const std::string &bundleName)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGW("Prefernces handler is nullptr.");
         return -1;
@@ -67,7 +67,7 @@ int32_t DistributedPreferences::DeleteBundleIcon(const std::string &bundleName)
 
 int32_t DistributedPreferences::InsertBatchBundleIcons(std::unordered_map<std::string, std::string> &values)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGW("Prefernces handler is nullptr.");
         return -1;
@@ -85,7 +85,7 @@ int32_t DistributedPreferences::InsertBatchBundleIcons(std::unordered_map<std::s
 
 int32_t DistributedPreferences::GetIconByBundleName(const std::string& bundleName, std::string &icon)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGW("Prefernces handler is nullptr.");
         return -1;
@@ -99,7 +99,7 @@ int32_t DistributedPreferences::GetIconByBundleName(const std::string& bundleNam
 
 int32_t DistributedPreferences::GetSavedBundlesIcon(std::vector<std::string>& bundleNames)
 {
-    std::lock_guard<std::mutex> lock(preferenceMutex_);
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         ANS_LOGW("Prefernces handler is nullptr.");
         return -1;

@@ -77,14 +77,14 @@ const int32_t PIXEL_MAP_TEST_HEIGHT = 32;
 const int32_t CANCELGROUP_NID = 10101;
 const int32_t BADGE_NUMBER = 100;
 
-std::mutex g_subscribe_mtx;
-std::mutex g_consumed_mtx;
-std::mutex g_unsubscribe_mtx;
-std::mutex g_send_finished_mtx;
+ffrt::mutex g_subscribe_mtx;
+ffrt::mutex g_consumed_mtx;
+ffrt::mutex g_unsubscribe_mtx;
+ffrt::mutex g_send_finished_mtx;
 AAFwk::Want g_want;
 
-std::mutex g_system_live_view_subscribe_mtx;
-std::mutex g_system_live_view_subscribe_response_mtx;
+ffrt::mutex g_system_live_view_subscribe_mtx;
+ffrt::mutex g_system_live_view_subscribe_response_mtx;
 std::string g_onResponseReceivedButtonName {"testButton"};
 int32_t g_onResponseReceivedId = -1;
 

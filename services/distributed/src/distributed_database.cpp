@@ -122,7 +122,7 @@ void DistributedDatabase::GetKvStore()
 
 bool DistributedDatabase::CheckKvStore()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (kvStore_ == nullptr) {
         GetKvStore();
     }
@@ -140,7 +140,7 @@ bool DistributedDatabase::OnDeviceConnected()
 
 bool DistributedDatabase::PutToDistributedDB(const std::string &key, const std::string &value)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
         ANS_LOGE("null kvStore");
@@ -165,7 +165,7 @@ bool DistributedDatabase::PutToDistributedDB(const std::string &key, const std::
 
 bool DistributedDatabase::GetFromDistributedDB(const std::string &key, std::string &value)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
         ANS_LOGE("null kvStore");
@@ -192,7 +192,7 @@ bool DistributedDatabase::GetFromDistributedDB(const std::string &key, std::stri
 
 bool DistributedDatabase::GetEntriesFromDistributedDB(const std::string &prefixKey, std::vector<Entry> &entries)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
         ANS_LOGE("null kvStore");
@@ -216,7 +216,7 @@ bool DistributedDatabase::GetEntriesFromDistributedDB(const std::string &prefixK
 
 bool DistributedDatabase::DeleteToDistributedDB(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
         ANS_LOGE("null kvStore");
@@ -240,7 +240,7 @@ bool DistributedDatabase::DeleteToDistributedDB(const std::string &key)
 
 bool DistributedDatabase::ClearDataByDevice(const std::string &deviceId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (kvStore_ == nullptr) {
         ANS_LOGE("null kvStore");
@@ -263,7 +263,7 @@ bool DistributedDatabase::ClearDataByDevice(const std::string &deviceId)
 
 bool DistributedDatabase::GetLocalDeviceId(std::string &deviceId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!CheckKvDataManager()) {
         return false;
     }
@@ -289,7 +289,7 @@ bool DistributedDatabase::GetLocalDeviceId(std::string &deviceId)
 
 bool DistributedDatabase::GetLocalDeviceInfo(DeviceInfo &localInfo)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!CheckKvDataManager()) {
         return false;
     }
@@ -310,7 +310,7 @@ bool DistributedDatabase::GetLocalDeviceInfo(DeviceInfo &localInfo)
 
 bool DistributedDatabase::GetDeviceInfoList(std::vector<DeviceInfo> &deviceList)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!CheckKvDataManager()) {
         return false;
     }
@@ -331,7 +331,7 @@ bool DistributedDatabase::GetDeviceInfoList(std::vector<DeviceInfo> &deviceList)
 
 bool DistributedDatabase::RecreateDistributedDB()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!CheckKvDataManager()) {
         return false;
     }

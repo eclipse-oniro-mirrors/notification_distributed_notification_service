@@ -99,7 +99,7 @@ int32_t NotificationDataMgr::Init()
 {
     ANS_LOGD("Create rdbStore");
     {
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ != nullptr) {
             ANS_LOGD("notification rdb has existed");
             return NativeRdb::E_OK;
@@ -116,9 +116,9 @@ int32_t NotificationDataMgr::Init()
     rdbStoreConfig.SetHaMode(NativeRdb::HAMode::MAIN_REPLICA);
     rdbStoreConfig.SetClearMemorySize(NOTIFICATION_RDB_MAX_MEMORY_SIZE);
     RdbStoreDataCallBackNotificationStorage rdbDataCallBack_(notificationRdbConfig_);
-    std::lock_guard<std::mutex> lock(createdTableMutex_);
+    std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
     {
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         int32_t ret = NativeRdb::E_OK;
         rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(rdbStoreConfig, notificationRdbConfig_.version,
             rdbDataCallBack_, ret);
@@ -157,10 +157,10 @@ int32_t NotificationDataMgr::InitCreatedTables()
 int32_t NotificationDataMgr::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
-    std::lock_guard<std::mutex> lock(createdTableMutex_);
+    std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
     createdTables_.clear();
     {
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
@@ -188,7 +188,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::strin
             ANS_LOGE("Get user table name failed.");
             return NativeRdb::E_ERROR;
         }
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
@@ -223,7 +223,7 @@ int32_t NotificationDataMgr::InsertData(const std::string &key, const std::vecto
         ANS_LOGE("Get user table name failed.");
         return NativeRdb::E_ERROR;
     }
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -259,7 +259,7 @@ int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::strin
             ANS_LOGE("Get user table name failed.");
             return NativeRdb::E_ERROR;
         }
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
@@ -292,7 +292,7 @@ int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &u
     ANS_LOGD("DeleteData start");
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
     std::reverse(operatedTables.begin(), operatedTables.end());
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -333,7 +333,7 @@ int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &key
     {
         std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
         std::reverse(operatedTables.begin(), operatedTables.end());
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
@@ -370,7 +370,7 @@ int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &valu
 {
     ANS_LOGD("QueryData start");
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -429,7 +429,7 @@ int32_t NotificationDataMgr::QueryData(const std::string tableName, const std::s
 int32_t NotificationDataMgr::QueryData(const std::string &key, std::vector<uint8_t> &values, const int32_t &userId)
 {
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -488,7 +488,7 @@ int32_t NotificationDataMgr::QueryDataBeginWithKey(
 {
     ANS_LOGD("QueryData BeginWithKey start");
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -567,7 +567,7 @@ int32_t NotificationDataMgr::QueryDataContainsWithKey(
 {
     ANS_LOGD("QueryDataContainsWithKey start");
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -640,7 +640,7 @@ int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::s
 {
     ANS_LOGD("QueryAllData start");
     std::vector<std::string> operatedTables = GenerateOperatedTables(userId);
-    std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("notification rdb is null");
         return NativeRdb::E_ERROR;
@@ -718,10 +718,10 @@ int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
     std::stringstream stream;
     stream << notificationRdbConfig_.tableName << keySpliter << userId;
     std::string tableName = stream.str();
-    std::lock_guard<std::mutex> lock(createdTableMutex_);
+    std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
     int32_t ret = NativeRdb::E_OK;
     {
-        std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
         if (rdbStore_ == nullptr) {
             return NativeRdb::E_ERROR;
         }
@@ -749,9 +749,9 @@ int32_t NotificationDataMgr::GetUserTableName(const int32_t &userId, std::string
     stream << notificationRdbConfig_.tableName << keySpliter << userId;
     tableName = stream.str();
     if (createdTables_.find(tableName) == createdTables_.end()) {
-        std::lock_guard<std::mutex> lock(createdTableMutex_);
+        std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
         if (createdTables_.find(tableName) == createdTables_.end()) {
-            std::lock_guard<std::mutex> lock(rdbStorePtrMutex_);
+            std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
             if (rdbStore_ == nullptr) {
                 return NativeRdb::E_ERROR;
             }
@@ -780,7 +780,7 @@ std::vector<std::string> NotificationDataMgr::GenerateOperatedTables(const int32
         std::stringstream stream;
         stream << notificationRdbConfig_.tableName << keySpliter << userId;
         std::string tableName = stream.str();
-        std::lock_guard<std::mutex> lock(createdTableMutex_);
+        std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
         if (createdTables_.find(tableName) != createdTables_.end()) {
             operatedTables.emplace_back(tableName);
         }

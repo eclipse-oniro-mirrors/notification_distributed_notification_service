@@ -166,7 +166,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
 ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32_t uid)
 {
     {
-        std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+        std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
         for (auto iter = delayNotificationList_.begin(); iter != delayNotificationList_.end();) {
             if ((*iter).first->notification->GetNotificationRequest().GetCreatorUid() == uid &&
                 (*iter).first->notification->GetNotificationRequest().IsInProgress()) {

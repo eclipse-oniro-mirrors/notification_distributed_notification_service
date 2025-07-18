@@ -30,11 +30,11 @@
 namespace OHOS {
 namespace Notification {
 std::shared_ptr<LivePublishProcess> LivePublishProcess::instance_;
-std::mutex LivePublishProcess::instanceMutex_;
+ffrt::mutex LivePublishProcess::instanceMutex_;
 
 std::shared_ptr<LivePublishProcess> LivePublishProcess::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(instanceMutex_);
 
     if (instance_ == nullptr) {
         instance_ = std::make_shared<LivePublishProcess>();
@@ -132,13 +132,13 @@ void LivePublishProcess::AddLiveViewSubscriber(int32_t uid)
 
 void LivePublishProcess::EraseLiveViewSubsciber(int32_t uid)
 {
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
+    std::lock_guard<ffrt::mutex> lock(liveViewMutext_);
     localLiveViewSubscribedList_.erase(uid);
 }
 
 bool LivePublishProcess::GetLiveViewSubscribeState(int32_t uid)
 {
-    std::lock_guard<std::mutex> lock(liveViewMutext_);
+    std::lock_guard<ffrt::mutex> lock(liveViewMutext_);
     if (localLiveViewSubscribedList_.find(uid) == localLiveViewSubscribedList_.end()) {
         return false;
     }

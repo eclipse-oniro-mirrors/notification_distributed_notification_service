@@ -127,6 +127,7 @@ ohos_shared_library("notification") {
     "ability_runtime:napi_wantagent_common",
     "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "image_framework:image",

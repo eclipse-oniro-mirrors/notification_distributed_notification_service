@@ -25,6 +25,7 @@
 #include "push_callback_stub.h"
 #include "want.h"
 #include "notification_constant.h"
+#include "ffrt.h"
 
 class NativeReference;
 
@@ -53,7 +54,7 @@ private:
     napi_env env_ = nullptr;
     napi_ref pushCallBackObject_ = nullptr;
     std::map<NotificationConstant::SlotType, napi_ref> pushCallBackObjects_;
-    std::mutex mutexlock;
+    ffrt::mutex mutexlock;
 };
 } // namespace Notification
 } // namespace OHOS

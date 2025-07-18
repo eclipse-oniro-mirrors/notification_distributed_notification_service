@@ -73,8 +73,8 @@ private:
         std::map<std::string, std::unordered_set<std::string>>& peerDeviceTypeMap) const;
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
     std::vector<nlohmann::json> notificationConfigJsons_;
-    std::mutex mutex_;
-    std::mutex slotReminderMutex_;
+    ffrt::mutex mutex_;
+    ffrt::mutex slotReminderMutex_;
     std::vector<int32_t> uidList_;
     std::vector<std::string> bundleNameList_;
     std::set<std::string> reporteTrustSet_ {};

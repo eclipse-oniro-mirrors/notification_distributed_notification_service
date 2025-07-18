@@ -21,11 +21,11 @@
 namespace OHOS {
 namespace Notification {
 std::shared_ptr<CommonNotificationPublishProcess> CommonNotificationPublishProcess::instance_;
-std::mutex CommonNotificationPublishProcess::instanceMutex_;
+ffrt::mutex CommonNotificationPublishProcess::instanceMutex_;
 
 std::shared_ptr<CommonNotificationPublishProcess> CommonNotificationPublishProcess::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(instanceMutex_);
 
     if (instance_ == nullptr) {
         instance_ = std::make_shared<CommonNotificationPublishProcess>();

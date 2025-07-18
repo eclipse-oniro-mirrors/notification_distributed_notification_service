@@ -115,6 +115,7 @@ ohos_shared_library("notificationmanager") {
     "access_token:libtokenid_sdk",
     "ace_engine:ace_uicontent",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "image_framework:image",

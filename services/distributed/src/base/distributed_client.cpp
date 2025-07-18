@@ -31,7 +31,7 @@ DistributedClient& DistributedClient::GetInstance()
 
 void DistributedClient::ReleaseClient()
 {
-    std::lock_guard<std::mutex> lock(clientLock_);
+    std::lock_guard<ffrt::mutex> lock(clientLock_);
     ANS_LOGI("Release client socket %{public}d.", (int32_t)(socketsId_.size()));
     for (auto& socketItem : socketsId_) {
         CloseSocket(socketItem.second);
@@ -41,7 +41,7 @@ void DistributedClient::ReleaseClient()
 
 void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
 {
-    std::lock_guard<std::mutex> lock(clientLock_);
+    std::lock_guard<ffrt::mutex> lock(clientLock_);
     for (auto& socketItem : socketsId_) {
         if (socketItem.second == socket) {
             socketItem.second = -1;
@@ -55,7 +55,7 @@ void DistributedClient::OnShutdown(int32_t socket, ShutdownReason reason)
 
 void DistributedClient::AddDevice(DistributedDeviceInfo peerDevice)
 {
-    std::lock_guard<std::mutex> lock(clientLock_);
+    std::lock_guard<ffrt::mutex> lock(clientLock_);
     ANS_LOGI("Distributed client AddDevice %{public}s %{public}s", StringAnonymous(peerDevice.deviceId_).c_str(),
         StringAnonymous(peerDevice.networkId_).c_str());
     networksId_[peerDevice.deviceId_] = peerDevice.networkId_;
@@ -69,7 +69,7 @@ void DistributedClient::ReleaseDevice(const std::string &deviceId, uint16_t devi
 {
     std::string messageKey = deviceId + '_' + std::to_string(TransDataType::DATA_TYPE_MESSAGE);
     std::string byteKey = deviceId + '_' + std::to_string(TransDataType::DATA_TYPE_BYTES);
-    std::lock_guard<std::mutex> lock(clientLock_);
+    std::lock_guard<ffrt::mutex> lock(clientLock_);
     auto socket = socketsId_.find(messageKey);
     if (socket != socketsId_.end()) {
         CloseSocket(socket->second);
@@ -92,7 +92,7 @@ void DistributedClient::RefreshDevice(const std::string &deviceId, uint16_t devi
     const std::string &networkId)
 {
     ReleaseDevice(deviceId, deviceType);
-    std::lock_guard<std::mutex> lock(clientLock_);
+    std::lock_guard<ffrt::mutex> lock(clientLock_);
     networksId_[deviceId] = networkId;
     ANS_LOGI("Distributed refresh device %{public}s %{public}s", StringAnonymous(deviceId).c_str(),
         StringAnonymous(networkId).c_str());
@@ -106,7 +106,7 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataTyp
 {
     std::string key = deviceId + '_' + std::to_string(dataType);
     {
-        std::lock_guard<std::mutex> lock(clientLock_);
+        std::lock_guard<ffrt::mutex> lock(clientLock_);
         auto socketItem = socketsId_.find(key);
         if (socketItem != socketsId_.end() && socketItem->second != -1) {
             socketId = socketItem->second;
@@ -131,7 +131,7 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataTyp
         return result;
     }
     {
-        std::lock_guard<std::mutex> lock(clientLock_);
+        std::lock_guard<ffrt::mutex> lock(clientLock_);
         socketsId_[key] = socketId;
         ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
     }

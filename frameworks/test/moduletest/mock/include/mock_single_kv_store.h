@@ -27,6 +27,7 @@
 #include "types.h"
 #include "data_query.h"
 #include "single_kvstore.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace DistributedKv {
@@ -389,7 +390,7 @@ public:
     void DeleteDataToDoCallback(const Key &key);
 
 private:
-    static std::mutex mutex_;
+    static ffrt::mutex mutex_;
     static std::map<std::pair<std::string, std::string>, std::shared_ptr<SingleKvStore>> kvStoreMap_;
     std::shared_ptr<KvStoreObserver> observer_;
     std::map<Key, Value, MockSingleKvStore::Compare> kvstore_;

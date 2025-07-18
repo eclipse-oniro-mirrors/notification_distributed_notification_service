@@ -161,7 +161,7 @@ bool NotificationDialogManager::AddDialogInfoIfNotExist(
     const sptr<NotificationBundleOption>& bundle,
     const sptr<IAnsDialogCallback>& callback)
 {
-    std::lock_guard<std::mutex> lock(dialogsMutex_);
+    std::lock_guard<ffrt::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
     int32_t uid = bundle->GetUid();
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
@@ -181,7 +181,7 @@ bool NotificationDialogManager::AddDialogInfoIfNotExist(
 sptr<NotificationBundleOption> NotificationDialogManager::GetBundleOptionByBundleName(
     const std::string& bundleName, const int32_t& uid)
 {
-    std::lock_guard<std::mutex> lock(dialogsMutex_);
+    std::lock_guard<ffrt::mutex> lock(dialogsMutex_);
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
         [&](const std::unique_ptr<DialogInfo>& dialogInfo) {
             return dialogInfo->bundleOption->GetBundleName() == bundleName && dialogInfo->bundleOption->GetUid() == uid;
@@ -196,7 +196,7 @@ sptr<NotificationBundleOption> NotificationDialogManager::GetBundleOptionByBundl
 void NotificationDialogManager::RemoveDialogInfoByBundleOption(const sptr<NotificationBundleOption>& bundle,
     std::unique_ptr<DialogInfo>& dialogInfoRemoved)
 {
-    std::lock_guard<std::mutex> lock(dialogsMutex_);
+    std::lock_guard<ffrt::mutex> lock(dialogsMutex_);
     std::string name = bundle->GetBundleName();
     int32_t uid = bundle->GetUid();
     auto dialogIter = std::find_if(dialogsOpening_.begin(), dialogsOpening_.end(),
@@ -213,7 +213,7 @@ void NotificationDialogManager::RemoveDialogInfoByBundleOption(const sptr<Notifi
 
 void NotificationDialogManager::RemoveAllDialogInfos(std::list<std::unique_ptr<DialogInfo>>& dialogInfosRemoved)
 {
-    std::lock_guard<std::mutex> lock(dialogsMutex_);
+    std::lock_guard<ffrt::mutex> lock(dialogsMutex_);
     for (auto& dialogInfo : dialogsOpening_) {
         dialogInfosRemoved.push_back(std::move(dialogInfo));
     }

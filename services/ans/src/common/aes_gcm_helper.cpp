@@ -28,6 +28,7 @@
 
 #include "aes_gcm_helper.h"
 #include "ans_log_wrapper.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -40,7 +41,7 @@ static const int STEP = 2;
 static const int OFFSET = 4;
 static const int HEX_OF_A = 10;
 static const int WIDTH_PER_BYTE = 2;
-static inline std::mutex g_generateKeyMutex{};
+static inline ffrt::mutex g_generateKeyMutex{};
 
 std::string AesGcmHelper::Byte2Hex(const std::string &bytes)
 {
@@ -82,7 +83,7 @@ std::string AesGcmHelper::Hex2Byte(const std::string &hex)
 
 bool AesGcmHelper::GenerateKey(std::string &key)
 {
-    std::lock_guard<std::mutex> lck(g_generateKeyMutex);
+    std::lock_guard<ffrt::mutex> lck(g_generateKeyMutex);
     const char *keyPathPtr = G_KEY_PATH.c_str();
     char *resolvedPath = (char *)malloc(PATH_MAX);
     if (resolvedPath != nullptr) {

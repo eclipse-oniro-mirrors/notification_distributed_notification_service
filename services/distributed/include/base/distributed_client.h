@@ -21,6 +21,7 @@
 #include <thread>
 #include "distributed_device_data.h"
 #include "box_base.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -43,7 +44,7 @@ private:
     ~DistributedClient() = default;
 
     std::string ShutdownReasonToString(ShutdownReason reason);
-    std::mutex clientLock_;
+    ffrt::mutex clientLock_;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, int32_t> socketsId_;
     std::map<std::string, std::string> networksId_;

@@ -1455,7 +1455,7 @@ private:
         std::set<std::string> bundleName_;
         std::atomic<bool> needUpdateCache_ = true;
         bool allPackage_ = false;
-        std::mutex dbMutex_;
+        ffrt::mutex dbMutex_;
     };
 
     enum UploadStatus {
@@ -1782,8 +1782,8 @@ private:
 
 private:
     static sptr<AdvancedNotificationService> instance_;
-    static std::mutex instanceMutex_;
-    static std::mutex pushMutex_;
+    static ffrt::mutex instanceMutex_;
+    static ffrt::mutex pushMutex_;
     static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
     static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
     bool aggregateLocalSwitch_ = false;
@@ -1809,8 +1809,8 @@ private:
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> distributedUniqueKeyList_;
     std::list<std::pair<std::chrono::system_clock::time_point, std::string>> localUniqueKeyList_;
     std::list<std::pair<std::shared_ptr<NotificationRecord>, uint64_t>> delayNotificationList_;
-    std::mutex delayNotificationMutext_;
-    static std::mutex doNotDisturbMutex_;
+    ffrt::mutex delayNotificationMutext_;
+    static ffrt::mutex doNotDisturbMutex_;
     std::map<int32_t, std::string> doNotDisturbEnableRecord_;
     bool isCachedAppAndDeviceRelationMap_ = false;
     std::map<std::string, std::string> appAndDeviceRelationMap_;

@@ -28,6 +28,7 @@
 
 #include "ians_dialog_callback.h"
 #include "ans_inner_errors.h"
+#include "ffrt.h"
 
 namespace OHOS::Notification {
 class AdvancedNotificationService;
@@ -137,7 +138,7 @@ private:
 
     std::shared_ptr<NotificationDialogEventSubscriber> dialogEventSubscriber = nullptr;
     AdvancedNotificationService& ans_;
-    std::mutex dialogsMutex_;
+    ffrt::mutex dialogsMutex_;
     std::list<std::unique_ptr<DialogInfo>> dialogsOpening_;
 };
 } // namespace OHOS::Notification

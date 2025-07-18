@@ -51,7 +51,7 @@ OperationService& OperationService::GetInstance()
 
 void OperationService::AddOperation(OperationInfo operationInfo)
 {
-    std::lock_guard<std::mutex> lock(operationMutex_);
+    std::lock_guard<ffrt::mutex> lock(operationMutex_);
     auto iter = operationInfoMaps_.find(operationInfo.eventId);
     if (iter != operationInfoMaps_.end()) {
         ANS_LOGW("OperationService operation exist %{public}s.", operationInfo.eventId.c_str());
@@ -64,7 +64,7 @@ void OperationService::AddOperation(OperationInfo operationInfo)
 
 void OperationService::HandleScreenEvent()
 {
-    std::lock_guard<std::mutex> lock(operationMutex_);
+    std::lock_guard<ffrt::mutex> lock(operationMutex_);
     for (auto iter = operationInfoMaps_.begin(); iter != operationInfoMaps_.end();) {
         ANS_LOGI("OperationService erase operation %{public}s %{public}d.",
             iter->second.eventId.c_str(), iter->second.type);
@@ -74,7 +74,7 @@ void OperationService::HandleScreenEvent()
 
 void OperationService::TriggerOperation(std::string eventId)
 {
-    std::lock_guard<std::mutex> lock(operationMutex_);
+    std::lock_guard<ffrt::mutex> lock(operationMutex_);
     auto iter = operationInfoMaps_.find(eventId);
     if (iter == operationInfoMaps_.end()) {
         ANS_LOGW("Operation not exist %{public}s.", eventId.c_str());
@@ -100,7 +100,7 @@ void OperationService::TriggerOperation(std::string eventId)
 
 void OperationService::TimeOutOperation(std::string eventId)
 {
-    std::lock_guard<std::mutex> lock(operationMutex_);
+    std::lock_guard<ffrt::mutex> lock(operationMutex_);
     auto iter = operationInfoMaps_.find(eventId);
     if (iter == operationInfoMaps_.end()) {
         ANS_LOGI("Operation not exist %{public}s.", eventId.c_str());

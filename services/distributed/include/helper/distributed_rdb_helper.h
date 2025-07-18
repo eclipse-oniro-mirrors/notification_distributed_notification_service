@@ -22,6 +22,7 @@
 #include "rdb_open_callback.h"
 #include "rdb_store_config.h"
 #include "notification_constant.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -116,7 +117,7 @@ private:
 private:
     DistributedRdbConfig notificationRdbConfig_;
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
-    mutable std::mutex rdbStorePtrMutex_;
+    mutable ffrt::mutex rdbStorePtrMutex_;
 };
 
 }

@@ -90,7 +90,7 @@ bool DistributedPreferencesDatabase::CheckKvStore()
 
 bool DistributedPreferencesDatabase::PutToDistributedDB(const std::string &key, const std::string &value)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (!CheckKvStore()) {
         return false;
@@ -114,7 +114,7 @@ bool DistributedPreferencesDatabase::PutToDistributedDB(const std::string &key, 
 
 bool DistributedPreferencesDatabase::GetFromDistributedDB(const std::string &key, std::string &value)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!CheckKvStore()) {
         return false;
     }
@@ -137,7 +137,7 @@ bool DistributedPreferencesDatabase::GetFromDistributedDB(const std::string &key
 bool DistributedPreferencesDatabase::GetEntriesFromDistributedDB(
     const std::string &prefixKey, std::vector<Entry> &entries)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
     if (!CheckKvStore()) {
         return false;
     }
@@ -156,7 +156,7 @@ bool DistributedPreferencesDatabase::GetEntriesFromDistributedDB(
 
 bool DistributedPreferencesDatabase::DeleteToDistributedDB(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (!CheckKvStore()) {
         return false;
@@ -177,7 +177,7 @@ bool DistributedPreferencesDatabase::DeleteToDistributedDB(const std::string &ke
 
 bool DistributedPreferencesDatabase::ClearDatabase()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<ffrt::mutex> lock(mutex_);
 
     if (!CheckKvDataManager()) {
         return false;

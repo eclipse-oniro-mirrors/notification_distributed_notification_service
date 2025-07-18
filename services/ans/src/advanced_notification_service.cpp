@@ -110,9 +110,9 @@ constexpr const char *KEY_UNIFIED_GROUP_ENABLE = "unified_group_enable";
 }  // namespace
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::instance_;
-std::mutex AdvancedNotificationService::instanceMutex_;
-std::mutex AdvancedNotificationService::pushMutex_;
-std::mutex AdvancedNotificationService::doNotDisturbMutex_;
+ffrt::mutex AdvancedNotificationService::instanceMutex_;
+ffrt::mutex AdvancedNotificationService::pushMutex_;
+ffrt::mutex AdvancedNotificationService::doNotDisturbMutex_;
 std::map<std::string, uint32_t> slotFlagsDefaultMap_;
 
 std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> AdvancedNotificationService::pushCallBacks_;
@@ -277,7 +277,7 @@ ErrCode AdvancedNotificationService::PrepareNotificationRequest(const sptr<Notif
 
 sptr<AdvancedNotificationService> AdvancedNotificationService::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(instanceMutex_);
+    std::lock_guard<ffrt::mutex> lock(instanceMutex_);
 
     if (instance_ == nullptr) {
         instance_ = new (std::nothrow) AdvancedNotificationService();
@@ -812,7 +812,7 @@ void AdvancedNotificationService::QueryIntelligentExperienceEnable(const int32_t
 
 void AdvancedNotificationService::ReportDoNotDisturbModeChanged(const int32_t &userId, std::string &enable)
 {
-    std::lock_guard<std::mutex> lock(doNotDisturbMutex_);
+    std::lock_guard<ffrt::mutex> lock(doNotDisturbMutex_);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_2);
     std::string info = "Do not disturb mode changed, userId: " + std::to_string(userId) + ", enable: " + enable;
     auto it = doNotDisturbEnableRecord_.find(userId);
@@ -1231,7 +1231,7 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeys(
         keys.push_back(record->notification->GetKey());
     }
 
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
         if (bundleOption != nullptr && delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
@@ -1262,7 +1262,7 @@ std::vector<std::string> AdvancedNotificationService::GetNotificationKeysByBundl
         }
     }
 
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
         if (bundleOption != nullptr && delayRequest.GetOwnerUid() == bundleOption->GetUid()) {
@@ -1360,7 +1360,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
         }
     }
 
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         if ((delayNotification.first->bundleOption->GetUid() == bundleOption->GetUid()) &&
             (delayNotification.first->notification->GetLabel() == notificationKey.label) &&
@@ -1432,7 +1432,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
 
 bool AdvancedNotificationService::RemoveFromDelayedNotificationList(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         if (delayNotification.first->notification->GetKey() == key) {
             CancelTimer(delayNotification.second);
@@ -1471,7 +1471,7 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotifica
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedNotificationList(
     const int32_t ownerUid, const int32_t notificationId)
 {
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         auto delayRequest = delayNotification.first->notification->GetNotificationRequest();
         if (delayRequest.GetOwnerUid() == ownerUid &&
@@ -1589,7 +1589,7 @@ ErrCode AdvancedNotificationService::GetHasPoppedDialog(
 void AdvancedNotificationService::ResetPushCallbackProxy(NotificationConstant::SlotType slotType)
 {
     ANS_LOGD("called");
-    std::lock_guard<std::mutex> lock(pushMutex_);
+    std::lock_guard<ffrt::mutex> lock(pushMutex_);
     if (pushCallBacks_.empty()) {
         ANS_LOGE("invalid proxy state");
         return;
@@ -1655,7 +1655,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         }
     }
     {
-        std::lock_guard<std::mutex> lock(pushMutex_);
+        std::lock_guard<ffrt::mutex> lock(pushMutex_);
         pushRecipient_ = new (std::nothrow) PushCallbackRecipient();
         if (!pushRecipient_) {
             ANS_LOGE("Failed to create death Recipient ptr PushCallbackRecipient!");
@@ -1699,7 +1699,7 @@ ErrCode AdvancedNotificationService::UnregisterPushCallback()
     }
 
     {
-        std::lock_guard<std::mutex> lock(pushMutex_);
+        std::lock_guard<ffrt::mutex> lock(pushMutex_);
         pushCallBacks_.clear();
     }
 
@@ -1864,8 +1864,8 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
 
 bool AdvancedNotificationService::CreateDialogManager()
 {
-    static std::mutex dialogManagerMutex_;
-    std::lock_guard<std::mutex> lock(dialogManagerMutex_);
+    static ffrt::mutex dialogManagerMutex_;
+    std::lock_guard<ffrt::mutex> lock(dialogManagerMutex_);
     if (dialogManager_ == nullptr) {
         dialogManager_ = std::make_unique<NotificationDialogManager>(*this);
         if (!dialogManager_->Init()) {
@@ -1956,7 +1956,7 @@ ErrCode AdvancedNotificationService::CheckSoundPermission(const sptr<Notificatio
     ANS_LOGD("Check sound permission: %{public}d, %{public}s, %{public}d",
         length, bundleOption->GetBundleName().c_str(), soundPermissionInfo_->needUpdateCache_.load());
     if (soundPermissionInfo_->needUpdateCache_.load()) {
-        std::lock_guard<std::mutex> lock(soundPermissionInfo_->dbMutex_);
+        std::lock_guard<ffrt::mutex> lock(soundPermissionInfo_->dbMutex_);
         if (soundPermissionInfo_->needUpdateCache_.load()) {
             soundPermissionInfo_->allPackage_ = false;
             soundPermissionInfo_->bundleName_.clear();

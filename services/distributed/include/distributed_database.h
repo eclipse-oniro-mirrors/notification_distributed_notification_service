@@ -27,6 +27,7 @@
 #include "distributed_database_callback.h"
 #include "distributed_device_callback.h"
 #include "distributed_flow_control.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -131,7 +132,7 @@ private:
     void GetKvStore();
     bool CheckKvStore();
 
-    std::mutex mutex_;
+    ffrt::mutex mutex_;
     std::unique_ptr<DistributedKv::DistributedKvDataManager> kvDataManager_;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStore_;
     std::shared_ptr<DistributedDatabaseCallback> databaseCb_;

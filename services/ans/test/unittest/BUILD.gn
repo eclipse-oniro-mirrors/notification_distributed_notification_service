@@ -849,6 +849,7 @@ ohos_unittest("access_token_helper_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
@@ -902,6 +903,7 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -1210,6 +1212,7 @@ ohos_unittest("push_callback_stub_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -1265,6 +1268,7 @@ ohos_unittest("notification_rdb_data_mgr_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -1318,6 +1322,7 @@ ohos_unittest("notification_config_parse_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -1367,6 +1372,7 @@ ohos_unittest("os_account_manager_helper_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
@@ -1415,6 +1421,7 @@ ohos_unittest("advanced_datashare_observer_unit_test") {
     "data_share:datashare_common",
     "data_share:datashare_consumer",
     "eventhandler:libeventhandler",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -1446,6 +1453,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
   external_deps = [
     "ability_runtime:dataobs_manager",
     "c_utils:utils",
+    "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
@@ -1572,6 +1580,7 @@ ohos_unittest("common_utils_test") {
   external_deps = [
     "ability_base:zuri",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
   ]
 

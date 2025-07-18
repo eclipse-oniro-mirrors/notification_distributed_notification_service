@@ -98,7 +98,7 @@ void CallBackReturn(const int32_t ret, const std::weak_ptr<PushCallBackParam> pu
         return;
     }
 
-    std::unique_lock<std::mutex> uniqueLock(callBackParam->callBackMutex);
+    std::unique_lock<ffrt::mutex> uniqueLock(callBackParam->callBackMutex);
     callBackParam->result = ret;
     callBackParam->ready = true;
     callBackParam->callBackCondition.notify_all();

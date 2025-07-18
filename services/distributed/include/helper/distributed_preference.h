@@ -19,6 +19,7 @@
 #include <unordered_set>
 
 #include "distributed_rdb_helper.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -38,7 +39,7 @@ public:
     int32_t GetIconByBundleName(const std::string& bundleName, std::string &icon);
     int32_t GetSavedBundlesIcon(std::vector<std::string>& bundleNames);
 private:
-    std::mutex preferenceMutex_;
+    ffrt::mutex preferenceMutex_;
     std::shared_ptr<DistributedRdbHelper> preferncesDB_ = nullptr;
 };
 }

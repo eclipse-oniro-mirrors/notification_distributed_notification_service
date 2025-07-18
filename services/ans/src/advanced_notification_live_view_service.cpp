@@ -497,7 +497,7 @@ ErrCode AdvancedNotificationService::GetLockScreenPictureFromDb(NotificationRequ
 
 void AdvancedNotificationService::UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     auto iter = delayNotificationList_.begin();
     while (iter != delayNotificationList_.end()) {
         if ((*iter).first->notification->GetKey() == record->notification->GetKey()) {
@@ -514,7 +514,7 @@ void AdvancedNotificationService::UpdateInDelayNotificationList(const std::share
 
 void AdvancedNotificationService::AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record)
 {
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     auto request = record->notification->GetNotificationRequest();
     auto timerId = StartDelayPublishTimer(
         request.GetOwnerUid(), request.GetNotificationId(), request.GetPublishDelayTime());
@@ -539,7 +539,7 @@ ErrCode AdvancedNotificationService::SaPublishSystemLiveViewAsBundle(const std::
 
 bool AdvancedNotificationService::IsNotificationExistsInDelayList(const std::string &key)
 {
-    std::lock_guard<std::mutex> lock(delayNotificationMutext_);
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
     for (auto delayNotification : delayNotificationList_) {
         if (delayNotification.first->notification->GetKey() == key) {
             return true;

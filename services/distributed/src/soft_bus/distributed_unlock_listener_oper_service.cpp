@@ -64,7 +64,7 @@ void UnlockListenerOperService::AddDelayTask(const std::string& hashCode, const 
     }
     uint64_t timerId = timer->CreateTimer(timerInfo);
     timer->StartTimer(timerId, expiredTime);
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto iterDelayTask = delayTaskMap_.find(hashCode);
     if (iterDelayTask != delayTaskMap_.end()) {
         ANS_LOGW("Operation delayTask has same key %{public}s.", hashCode.c_str());
@@ -94,7 +94,7 @@ void UnlockListenerOperService::AddDelayTask(const std::string& hashCode, const 
 
 void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashCode)
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto iterDelayTask = delayTaskMap_.find(hashCode);
     if (iterDelayTask != delayTaskMap_.end()) {
         delayTaskMap_.erase(iterDelayTask);
@@ -119,7 +119,7 @@ void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashC
 
 void UnlockListenerOperService::ReplyOperationResponse()
 {
-    std::lock_guard<std::mutex> lock(mapLock_);
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
     ANS_LOGI("UnlockListenerOperService ReplyOperationResponse hashCodeOrder size %{public}u", hashCodeOrder_.size());
     for (std::string hashCode : hashCodeOrder_) {
         auto iterDelayTask = delayTaskMap_.find(hashCode);

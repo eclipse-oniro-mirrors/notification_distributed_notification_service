@@ -24,6 +24,7 @@
 #include "notification_progress.h"
 #include "notification_time.h"
 #include "ans_convert_enum.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -1899,7 +1900,7 @@ private:
     static const int32_t ONLY_CALLBACK_MAX_PARA = 1;
     static const int32_t ONLY_CALLBACK_MIN_PARA = 0;
     static std::set<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> wantAgent_;
-    static std::mutex mutex_;
+    static ffrt::mutex mutex_;
     static const char *GetPropertyNameByContentType(ContentType type);
     static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
 };

@@ -273,7 +273,7 @@ void DistributedExtensionService::OnDeviceOnline(const DmDeviceInfo &deviceInfo)
             ANS_LOGE("Dans handler is null ptr.");
             return;
         }
-        std::lock_guard<std::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::mutex> lock(mapLock_);
         DistributedDeviceDataService::GetInstance().ResetTargetDevice(
             DeviceTypeToTypeString(deviceInfo.deviceTypeId), deviceInfo.deviceId);
         handler(deviceInfo.deviceId, udid, deviceInfo.deviceTypeId, deviceInfo.networkId);
@@ -357,7 +357,7 @@ void DistributedExtensionService::OnDeviceOffline(const DmDeviceInfo &deviceInfo
         return;
     }
     std::function<void()> offlineTask = std::bind([&, deviceInfo]() {
-        std::lock_guard<std::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::mutex> lock(mapLock_);
         if (deviceMap_.count(deviceInfo.deviceId) == 0) {
             ANS_LOGE("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
             return;
@@ -386,7 +386,7 @@ void DistributedExtensionService::OnDeviceChanged(const DmDeviceInfo &deviceInfo
         return;
     }
     std::function<void()> changeTask = std::bind([&, deviceInfo]() {
-        std::lock_guard<std::mutex> lock(mapLock_);
+        std::lock_guard<ffrt::mutex> lock(mapLock_);
         if (deviceMap_.count(deviceInfo.deviceId) == 0) {
             ANS_LOGE("Not target device %{public}s", StringAnonymous(deviceInfo.deviceId).c_str());
             return;

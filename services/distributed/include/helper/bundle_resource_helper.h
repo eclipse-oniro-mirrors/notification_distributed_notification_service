@@ -22,6 +22,7 @@
 #include "refbase.h"
 #include "singleton.h"
 #include "ans_log_wrapper.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -98,7 +99,7 @@ private:
     void OnRemoteDied(const wptr<IRemoteObject> &object);
 
     sptr<AppExecFwk::IBundleMgr> bundleMgr_ = nullptr;
-    std::mutex connectionMutex_;
+    ffrt::mutex connectionMutex_;
     sptr<BundleDeathRecipient> deathRecipient_ = nullptr;
 
     DECLARE_DELAYED_SINGLETON(BundleResourceHelper)

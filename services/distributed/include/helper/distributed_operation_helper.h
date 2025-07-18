@@ -27,6 +27,7 @@
 #include "screenlock_callback_interface.h"
 #endif
 #include "notification_operation_info.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
@@ -61,7 +62,7 @@ public:
 private:
     OperationService() = default;
     ~OperationService() = default;
-    std::mutex operationMutex_;
+    ffrt::mutex operationMutex_;
     std::map<std::string, OperationInfo> operationInfoMaps_;
 };
 }
