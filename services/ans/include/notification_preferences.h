@@ -600,6 +600,7 @@ private:
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
     bool isKioskMode_ = false;
+    bool isKioskTrustListUpdate_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS
