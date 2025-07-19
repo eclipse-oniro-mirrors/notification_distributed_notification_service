@@ -43,7 +43,7 @@ void AniPublish(ani_env *env, ani_object obj)
     ANS_LOGD("AniPublish end");
 }
 
-void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
+void AniPublishWithId(ani_env *env, ani_object obj, ani_int userId)
 {
     ANS_LOGD("AniPublishWithId start");
     //NotificationRequest request;
@@ -52,7 +52,7 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
         NotificationSts::ThrowStsErroWithMsg(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
         return;
     }
-    notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
+    notificationRequest->SetOwnerUserId(userId);
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
@@ -62,7 +62,7 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
     ANS_LOGD("AniPublishWithId end");
 }
 
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_double userId)
+void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_int userId)
 {
     ANS_LOGD("AniPublishAsBundle enter");
     std::string bundleStr;
@@ -77,7 +77,7 @@ void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representat
         NotificationSts::ThrowStsErroWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
         return;
     }
-    notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
+    notificationRequest->SetOwnerUserId(userId);
     notificationRequest->SetOwnerBundleName(bundleStr);
     int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
     if (returncode != ERR_OK) {

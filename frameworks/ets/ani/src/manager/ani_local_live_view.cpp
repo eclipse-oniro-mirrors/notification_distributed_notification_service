@@ -24,7 +24,7 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 void AniTriggerSystemLiveView(
-    ani_env *env, ani_object bundleOptionObj, ani_double notificationId, ani_object buttonOptionsObj)
+    ani_env *env, ani_object bundleOptionObj, ani_int notificationId, ani_object buttonOptionsObj)
 {
     ANS_LOGD("AniTriggerSystemLiveView call");
     BundleOption bundleOption;

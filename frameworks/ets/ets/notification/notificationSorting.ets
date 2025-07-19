@@ -18,7 +18,7 @@ import { NotificationSlot } from 'notification.notificationSlot';
 export interface NotificationSorting {
     readonly slot: NotificationSlot;
     readonly hashCode: string;
-    readonly ranking: number;
+    readonly ranking: long;
 }
 
 class NotificationSortingInner implements NotificationSorting {
@@ -39,5 +39,5 @@ class NotificationSortingInner implements NotificationSorting {
             authorizedStatus: undefined
         };
     public readonly hashCode: string = '';
-    public readonly ranking: number = -1;
+    public readonly ranking: long = -1;
 }

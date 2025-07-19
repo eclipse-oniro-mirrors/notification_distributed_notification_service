@@ -20,15 +20,15 @@ export interface NotificationSlot {
     desc?: string;
     badgeFlag?: boolean;
     bypassDnd?: boolean;
-    lockscreenVisibility?: number;
+    lockscreenVisibility?: int;
     vibrationEnabled?: boolean;
     sound?: string;
     lightEnabled?: boolean;
-    lightColor?: number;
-    vibrationValues?: Array<number>;
+    lightColor?: int;
+    vibrationValues?: Array<long>;
     readonly enabled?: boolean;
-    readonly reminderMode?: number;
-    readonly authorizedStatus?: number;
+    readonly reminderMode?: int;
+    readonly authorizedStatus?: int;
 }
 
 class NotificationSlotInner implements NotificationSlot {
@@ -37,13 +37,13 @@ class NotificationSlotInner implements NotificationSlot {
     public desc?: string;
     public badgeFlag?: boolean;
     public bypassDnd?: boolean;
-    public lockscreenVisibility?: number;
+    public lockscreenVisibility?: int;
     public vibrationEnabled?: boolean;
     public sound?: string;
     public lightEnabled?: boolean;
-    public lightColor?: number;
-    public vibrationValues?: Array<number>;
+    public lightColor?: int;
+    public vibrationValues?: Array<long>;
     public readonly enabled?: boolean;
-    public readonly reminderMode?: number;
-    public readonly authorizedStatus?: number;
+    public readonly reminderMode?: int;
+    public readonly authorizedStatus?: int;
 }

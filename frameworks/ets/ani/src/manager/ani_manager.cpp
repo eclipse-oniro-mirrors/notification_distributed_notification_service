@@ -78,7 +78,7 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeGetAllActiveNotifications", nullptr,
         reinterpret_cast<void *>(AniGetAllActiveNotifications)},
     ani_native_function {"nativeGetActiveNotifications", nullptr, reinterpret_cast<void *>(AniGetActiveNotifications)},
-    ani_native_function {"nativeGetActiveNotificationCount", ":D",
+    ani_native_function {"nativeGetActiveNotificationCount", ":J",
         reinterpret_cast<void *>(AniGetActiveNotificationCount)},
     ani_native_function {"nativeGetActiveNotificationByFilter", nullptr,
         reinterpret_cast<void *>(AniGetActiveNotificationByFilter)},
@@ -99,7 +99,7 @@ static std::array kitManagerFunctions = {
 #ifdef ANS_FEATURE_BADGE_MANAGER
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
     ani_native_function {"nativeIsBadgeDisplayed", nullptr, reinterpret_cast<void *>(AniIsBadgeDisplayed)},
-    ani_native_function {"nativeSetBadgeNumber", "D:V", reinterpret_cast<void *>(AniSetBadgeNumber)},
+    ani_native_function {"nativeSetBadgeNumber", "I:V", reinterpret_cast<void *>(AniSetBadgeNumber)},
     ani_native_function {"nativeSetBadgeNumberByBundle", nullptr, reinterpret_cast<void *>(AniSetBadgeNumberByBundle)},
 #else
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},

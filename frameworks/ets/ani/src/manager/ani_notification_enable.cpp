@@ -36,7 +36,7 @@ ani_boolean AniIsNotificationEnabled(ani_env *env)
     return NotificationSts::BoolToAniBoolean(allowed);
 }
 
-ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_double userId)
+ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_int userId)
 {
     ANS_LOGD("AniIsNotificationEnabledWithId call");
     bool allowed = false;
@@ -126,7 +126,7 @@ ani_boolean AniIsNotificationEnabledSync(ani_env *env)
     return NotificationSts::BoolToAniBoolean(allowed);
 }
 
-ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId)
+ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_int userId)
 {
     ANS_LOGD("AniGetSyncNotificationEnabledWithoutApp call");
     bool enabled = false;
@@ -142,11 +142,11 @@ ani_boolean AniGetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double use
     return NotificationSts::BoolToAniBoolean(enabled);
 }
 
-void AniSetSyncNotificationEnabledWithoutApp(ani_env* env, ani_double userId, ani_boolean enabled)
+void AniSetSyncNotificationEnabledWithoutApp(ani_env* env, ani_int userId, ani_boolean enabled)
 {
     ANS_LOGD("AniSetSyncNotificationEnabledWithoutApp call,enable : %{public}d", enabled);
     int returncode = Notification::NotificationHelper::SetSyncNotificationEnabledWithoutApp(
-        static_cast<int32_t>(userId), NotificationSts::AniBooleanToBool(enabled));
+        userId, NotificationSts::AniBooleanToBool(enabled));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetSyncNotificationEnabledWithoutApp -> error, errorCode: %{public}d", externalCode);

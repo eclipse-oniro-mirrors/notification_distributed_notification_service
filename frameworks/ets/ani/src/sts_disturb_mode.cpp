@@ -29,8 +29,8 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
         return false;
     }
     ani_boolean isUndefined = ANI_TRUE;
-    ani_double idAni = 0.0;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(param, "id", &idAni)) {
+    ani_long idAni = 0;
+    if (ANI_OK != env->Object_GetPropertyByName_Long(param, "id", &idAni)) {
         ANS_LOGE("UnwrapDoNotDisturbProfile: get id failed");
         return false;
     }
@@ -142,8 +142,8 @@ bool WrapDoNotDisturbProfile(ani_env* env, sptr<NotificationDoNotDisturbProfile>
         ANS_LOGE("WrapDoNotDisturbProfile: Failed to create profile class object");
         return false;
     }
-    ani_double id = static_cast<double>(profile->GetProfileId());
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(outObj, "id", id))) {
+    ani_long id = static_cast<ani_long>(profile->GetProfileId());
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Long(outObj, "id", id))) {
         ANS_LOGE("WrapDoNotDisturbProfile : set reason faild. status %{public}d", status);
         return false;
     }

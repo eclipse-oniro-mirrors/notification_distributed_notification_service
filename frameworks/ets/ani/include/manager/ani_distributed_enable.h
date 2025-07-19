@@ -26,7 +26,7 @@ ani_boolean AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, an
 void AniSetDistributedEnable(ani_env* env, ani_boolean enabled);
 void AniSetDistributedEnableByBundle(ani_env *env, ani_object obj, ani_boolean enable);
 void AniSetDistributedEnableByBundleAndType(ani_env *env, ani_object obj, ani_string deviceType, ani_boolean enable);
-void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_double status);
+void AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_long status);
 ani_boolean AniIsSmartReminderEnabled(ani_env *env, ani_string deviceType);
 void AniSetSmartReminderEnable(ani_env *env, ani_string deviceType, ani_boolean enable);
 void AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType, ani_boolean enable);

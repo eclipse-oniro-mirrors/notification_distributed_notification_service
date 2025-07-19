@@ -234,7 +234,7 @@ void AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_object slo
     ANS_LOGD("AniSetSlotByBundle leave");
 }
 
-ani_double AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption)
+ani_long AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption)
 {
     ANS_LOGD("AniGetSlotNumByBundle enter");
     Notification::NotificationBundleOption option;
@@ -251,7 +251,7 @@ ani_double AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption)
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return RETURN_EXCEPTION_VALUE;
     }
-    ani_double retNum = static_cast<ani_double>(num);
+    ani_long retNum = static_cast<ani_long>(num);
     ANS_LOGD("AniGetSlotNumByBundle leave");
     return retNum;
 }
@@ -322,7 +322,7 @@ ani_boolean AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, 
     return isEnable ? ANI_TRUE : ANI_FALSE;
 }
 
-ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
+ani_long AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
 {
     ANS_LOGD("sts getSlotFlagsByBundle call");
     Notification::NotificationBundleOption option;
@@ -340,7 +340,7 @@ ani_int AniGetSlotFlagsByBundle(ani_env *env, ani_object obj)
     return slotFlags;
 }
 
-void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_double slotFlags)
+void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags)
 {
     ANS_LOGD("sts setSlotFlagsByBundle call");
     Notification::NotificationBundleOption option;
@@ -349,7 +349,7 @@ void AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_double slotFlags)
         return;
     }
     int returncode =
-        Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(option, static_cast<int32_t>(slotFlags));
+        Notification::NotificationHelper::SetNotificationSlotFlagsAsBundle(option, static_cast<uint32_t>(slotFlags));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetSlotFlagsByBundle -> error, errorCode: %{public}d", externalCode);

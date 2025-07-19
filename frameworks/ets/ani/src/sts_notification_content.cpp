@@ -127,18 +127,18 @@ void UnWarpNotificationProgress(ani_env *env, ani_object obj, NotificationProgre
         ANS_LOGE("UnWarpNotificationProgress failed, has nullptr");
         return;
     }
-    ani_double maxValueAni = 0.0;
+    ani_int maxValueAni = 0;
     ani_boolean isUndefined = ANI_TRUE;
-    if (GetPropertyDouble(env, obj, "maxValue", isUndefined, maxValueAni) == ANI_OK
+    if (GetPropertyInt(env, obj, "maxValue", isUndefined, maxValueAni) == ANI_OK
         && isUndefined == ANI_FALSE) {
-        notificationProgress.SetMaxValue(static_cast<int32_t>(maxValueAni));
+        notificationProgress.SetMaxValue(maxValueAni);
     } else {
         ANS_LOGD("UnWarpNotificationProgress: get maxValue failed");
     }
-    ani_double currentValueAni = 0.0;
-    if (GetPropertyDouble(env, obj, "currentValue", isUndefined, currentValueAni) == ANI_OK
+    ani_int currentValueAni = 0;
+    if (GetPropertyInt(env, obj, "currentValue", isUndefined, currentValueAni) == ANI_OK
         && isUndefined == ANI_FALSE) {
-        notificationProgress.SetCurrentValue(static_cast<int32_t>(currentValueAni));
+        notificationProgress.SetCurrentValue(currentValueAni);
     } else {
         ANS_LOGD("UnWarpNotificationProgress: get currentValue failed");
     }
@@ -166,12 +166,12 @@ bool WarpNotificationProgress(ani_env *env, const NotificationProgress &progress
         ANS_LOGE("WarpNotificationProgress: create class failed");
         return false;
     }
-    // maxValue?: number;
-    if (!SetPropertyOptionalByDouble(env, progressObject, "maxValue", progress.GetMaxValue())) {
+    // maxValue?: int;
+    if (!SetPropertyOptionalByInt(env, progressObject, "maxValue", progress.GetMaxValue())) {
         ANS_LOGD("WarpNotificationProgress: set maxValue failed");
     }
-    // currentValue?: number;
-    if (!SetPropertyOptionalByDouble(env, progressObject, "currentValue", progress.GetCurrentValue())) {
+    // currentValue?: int;
+    if (!SetPropertyOptionalByInt(env, progressObject, "currentValue", progress.GetCurrentValue())) {
         ANS_LOGD("WarpNotificationProgress: set currentValue failed");
     }
     // isPercentage?: boolean;
@@ -191,10 +191,10 @@ void UnWarpNotificationTime(ani_env *env, ani_object obj,
         return;
     }
     ani_boolean isUndefined = ANI_TRUE;
-    ani_double initialTime = 0.0;
-    if (GetPropertyDouble(env, obj, "version", isUndefined, initialTime) == ANI_OK
+    ani_int initialTime = 0;
+    if (GetPropertyInt(env, obj, "version", isUndefined, initialTime) == ANI_OK
         && isUndefined == ANI_FALSE) {
-        notificationTime.SetInitialTime(static_cast<int32_t>(initialTime));
+        notificationTime.SetInitialTime(initialTime);
     } else {
         ANS_LOGD("UnWarpNotificationTime: get version failed");
     }
@@ -237,9 +237,9 @@ bool WarpNotificationTime(ani_env *env, const NotificationTime &time, bool isIni
         ANS_LOGE("WarpNotificationTime: create class failed");
         return false;
     }
-    // initialTime?: number;
+    // initialTime?: int;
     if (isInitialTimeExist) {
-        if (!SetPropertyOptionalByDouble(env, timeObject, "initialTime", time.GetInitialTime())) {
+        if (!SetPropertyOptionalByInt(env, timeObject, "initialTime", time.GetInitialTime())) {
             ANS_LOGD("WarpNotificationTime: set initialTime failed");
         }
     }
@@ -496,7 +496,7 @@ bool getCapsuleByString(ani_env *env, ani_object obj, const char *name, std::str
     return true;
 }
 
-bool getCapsuleByDouble(ani_env *env, ani_object obj, const char *name, double &out)
+bool getCapsuleByInt(ani_env *env, ani_object obj, const char *name, int32_t &out)
 {
     ani_boolean isUndefined = ANI_TRUE;
     out = ERR_OK;
@@ -507,7 +507,7 @@ bool getCapsuleByDouble(ani_env *env, ani_object obj, const char *name, double &
             ANS_LOGE("%{public}s of Capsule is undefined", name);
             return false;
         }
-        if ((env->Object_CallMethodByName_Double(static_cast<ani_object>(tempRef),
+        if ((env->Object_CallMethodByName_Int(static_cast<ani_object>(tempRef),
             "unboxed", ":D", &out)) != ANI_OK) {
             ANS_LOGE("get double of %{public}s failed", name);
             return false;
@@ -542,8 +542,8 @@ bool UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule
     }
     capsule.SetContent(GetResizeStr(tempStr, STR_MAX_SIZE));
 
-    ani_double time = 0.0;
-    if (!getCapsuleByDouble(env, obj, "time", time)) {
+    ani_int time = 0;
+    if (!getCapsuleByInt(env, obj, "time", time)) {
         ANS_LOGE("get content failed");
         return false;
     }
@@ -677,8 +677,8 @@ bool WarpNotificationCapsule(ani_env *env, const NotificationCapsule &capsule, a
     if (!SetPropertyOptionalByString(env, capsuleObject, "content", capsule.GetContent())) {
         ANS_LOGD("WarpNotificationCapsule: set content failed");
     }
-    // time?: number;
-    if (!SetPropertyOptionalByDouble(env, capsuleObject, "time", capsule.GetTime())) {
+    // time?: int;
+    if (!SetPropertyOptionalByInt(env, capsuleObject, "time", capsule.GetTime())) {
         ANS_LOGD("WarpNotificationCapsule: set time failed");
     }
     // capsuleButtons?: Array<NotificationIconButton>;
@@ -908,14 +908,14 @@ void GetAniLiveViewContentVersion(
         ANS_LOGD("CheckAniLiveViewContentParam faild");
         return;
     }
-    ani_double versionAni = 0.0;
+    ani_int versionAni = 0;
     ani_boolean isUndefined = ANI_TRUE;
-    if (GetPropertyDouble(env, obj, "version", isUndefined, versionAni) != ANI_OK
+    if (GetPropertyInt(env, obj, "version", isUndefined, versionAni) != ANI_OK
         || isUndefined == ANI_TRUE) {
             ANS_LOGD("UnWarpNotificationLiveViewContent: get version failed");
             return;
         }
-    liveViewContent->SetVersion(static_cast<int32_t>(versionAni));
+    liveViewContent->SetVersion(static_cast<uint32_t>(versionAni));
 }
 
 void GetAniLiveViewContentExtraInfo(
@@ -1128,14 +1128,14 @@ ani_status UnWarpNotificationLocalLiveViewContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationLocalLiveViewContent: get BasicContent failed");
         return status;
     }
-    ani_double typeCode = 0.0;
+    ani_int typeCode = 0;
     ani_boolean isUndefined = ANI_TRUE;
-    if ((status = GetPropertyDouble(env, obj, "typeCode", isUndefined, typeCode)) != ANI_OK
+    if ((status = GetPropertyInt(env, obj, "typeCode", isUndefined, typeCode)) != ANI_OK
         || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnWarpNotificationLocalLiveViewContent: get typeCode failed");
         return ANI_INVALID_ARGS;
     }
-    localLiveViewContent->SetType(static_cast<int32_t>(typeCode));
+    localLiveViewContent->SetType(typeCode);
     if (!GetLocalLiveViewContentByOne(env, obj, localLiveViewContent)) {
         return ANI_INVALID_ARGS;
     }

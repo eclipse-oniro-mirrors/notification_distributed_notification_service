@@ -18,7 +18,7 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-ani_double AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value);
+ani_int AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

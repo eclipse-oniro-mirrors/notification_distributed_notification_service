@@ -166,7 +166,7 @@ void AniRemoveAllForBundle(ani_env *env, ani_object bundle)
     }
 }
 
-void AniRemoveAllForUserId(ani_env *env, ani_double userId)
+void AniRemoveAllForUserId(ani_env *env, ani_int userId)
 {
     ANS_LOGD("AniRemoveAllForUserId enter");
     int ret = NotificationHelper::RemoveNotifications(userId);

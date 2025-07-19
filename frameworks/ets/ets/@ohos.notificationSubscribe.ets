@@ -55,12 +55,12 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
 export default namespace notificationSubscribe {
     loadLibrary("notification_subscribe_ani.z")
     export interface NotificationKey {
-        id: number;
+        id: int;
         label?: string;
     }
 
     class NotificationKeyInner implements NotificationKey {
-        id: number = -1;
+        id: int = -1;
         label?: string;
     }
 
@@ -81,7 +81,7 @@ export default namespace notificationSubscribe {
     export native function nativeUnSubscribe(subscriber: NotificationSubscriber): void
     export native function nativeSubscribeSelf(subscriber: NotificationSubscriber): void
     export native function nativeRemoveAllForBundle(bundle?: BundleOption): void;
-    export native function nativeRemoveAllForUserId(userId: number): void;
+    export native function nativeRemoveAllForUserId(userId: int): void;
     export native function nativeRemoveAll(): void;
 
     export function subscribe(subscriber: NotificationSubscriber, callback: AsyncCallback<void>): void {
@@ -397,7 +397,7 @@ export default namespace notificationSubscribe {
         )
     }
 
-    export function removeAll(userId: number, callback: AsyncCallback<void>): void {
+    export function removeAll(userId: int, callback: AsyncCallback<void>): void {
         if (callback == undefined) {
             throw errorParamInvalid;
         }
@@ -414,7 +414,7 @@ export default namespace notificationSubscribe {
         )
     }    
 
-    export function removeAll(userId: number): Promise<void> {
+    export function removeAll(userId: int): Promise<void> {
     let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
         let p = taskpool.execute((): void => { return notificationSubscribe.nativeRemoveAllForUserId(userId); });
         p.then((data: NullishType): void => {

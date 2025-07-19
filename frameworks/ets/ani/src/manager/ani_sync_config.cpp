@@ -26,10 +26,10 @@ namespace NotificationManagerSts {
 const char KEY_NAME[] = "AGGREGATE_CONFIG";
 const char RING_LIST_KEY_NAME[] = "RING_TRUSTLIST_PKG";
 const char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
-const double RESULT_OK = 0.0;
-const double RESULT_FAILED = 1.0;
+const ani_int RESULT_OK = 0;
+const ani_int RESULT_FAILED = 1;
 
-ani_double AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
+ani_int AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value)
 {
     ANS_LOGD("sts setAdditionalConfig call");
     if (env == nullptr || key == nullptr) {

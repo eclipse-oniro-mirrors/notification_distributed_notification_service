@@ -34,8 +34,8 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     }
     std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     option.SetBundleName(bundleName);
-    ani_double result = 0.0;
-    if (GetPropertyDouble(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
+    ani_int result = 0.0;
+    if (GetPropertyInt(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
         int32_t uid = static_cast<int32_t>(result);
         option.SetUid(uid);
     } else {
@@ -132,9 +132,9 @@ bool WrapBundleOption(ani_env* env,
         ANS_LOGE("WrapBundleOption: set bundle failed");
         return false;
     }
-    // uid?: number;
-    uint32_t uid = bundleOption->GetUid();
-    SetPropertyOptionalByDouble(env, bundleObject, "uid", uid);
+    // uid?: int;
+    int32_t uid = bundleOption->GetUid();
+    SetPropertyOptionalByInt(env, bundleObject, "uid", uid);
     ANS_LOGD("WrapBundleOption end");
     return true;
 }

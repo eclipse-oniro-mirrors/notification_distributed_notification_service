@@ -22,13 +22,13 @@
 
 namespace OHOS {
 namespace NotificationManagerSts {
-ani_double AniGetActiveNotificationCount(ani_env *env)
+ani_long AniGetActiveNotificationCount(ani_env *env)
 {
     ANS_LOGD("sts GetActiveNotificationCount call");
     uint64_t num = 0;
     int returncode = OHOS::Notification::NotificationHelper::GetActiveNotificationNums(num);
     ANS_LOGD("sts GetActiveNotificationCount end, num: %{public}llu", num);
-    ani_double retNum = static_cast<ani_double>(num);
+    ani_long retNum = static_cast<ani_long>(num);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

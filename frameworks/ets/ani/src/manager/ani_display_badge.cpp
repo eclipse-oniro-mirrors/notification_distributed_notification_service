@@ -77,9 +77,9 @@ ani_boolean AniIsBadgeDisplayed(ani_env *env, ani_object obj)
     return NotificationSts::BoolToAniBoolean(isDisplayed);
 }
 
-void AniSetBadgeNumber(ani_env *env, ani_double badgeNumber)
+void AniSetBadgeNumber(ani_env *env, ani_int badgeNumber)
 {
-    ANS_LOGD("sts AniSetBadgeNumber call, BadgeNumber: %{public}lf", badgeNumber);
+    ANS_LOGD("sts AniSetBadgeNumber call, BadgeNumber: %{public}d", badgeNumber);
     int returncode = Notification::NotificationHelper::SetBadgeNumber(static_cast<int32_t>(badgeNumber));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
@@ -89,14 +89,14 @@ void AniSetBadgeNumber(ani_env *env, ani_double badgeNumber)
     ANS_LOGD("sts AniSetBadgeNumber end");
 }
 
-void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_double badgeNumber)
+void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badgeNumber)
 {
-    ANS_LOGD("AniSetBadgeNumberByBundle call, badgeNumber: %{public}lf", badgeNumber);
+    ANS_LOGD("AniSetBadgeNumberByBundle call, badgeNumber: %{public}d", badgeNumber);
     int returncode = ERR_OK;
     BundleOption option;
     if (NotificationSts::UnwrapBundleOption(env, obj, option)) {
         returncode = Notification::NotificationHelper::SetBadgeNumberByBundle(option,
-            static_cast<int32_t>(badgeNumber));
+            badgeNumber);
     } else {
         ANS_LOGE("sts AniSetBadgeNumberByBundle ERROR_INTERNAL_ERROR");
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
