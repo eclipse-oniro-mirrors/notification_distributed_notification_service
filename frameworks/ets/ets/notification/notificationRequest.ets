@@ -89,7 +89,7 @@ export interface NotificationRequest {
     tapDismissed?: boolean;
     autoDeletedTime?: number;
     wantAgent?: WantAgent;
-    extraInfo?: Record<string, Object>;
+    extendInfo?: Record<string, Object>;
     color?: number;
     colorEnabled?: boolean;
     isAlertOnce?: boolean;
@@ -140,7 +140,7 @@ class NotificationRequestInner implements NotificationRequest {
     public tapDismissed?: boolean | undefined;
     public autoDeletedTime?: number | undefined;
     public wantAgent?: WantAgent | undefined;
-    public extraInfo?: Record<string, Object> | undefined;
+    public extendInfo?: Record<string, Object> | undefined;
     public color?: number | undefined;
     public colorEnabled?: boolean | undefined;
     public isAlertOnce?: boolean | undefined;
