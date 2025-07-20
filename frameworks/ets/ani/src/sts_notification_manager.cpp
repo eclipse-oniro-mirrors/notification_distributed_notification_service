@@ -319,7 +319,7 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
         ANS_LOGE("Object_GetField_Ref failed");
         return;
     }
-    ani_object notificationIdAni = CreateDouble(env, notificationId);
+    ani_object notificationIdAni = CreateInt(env, notificationId);
     ani_object buttonOptionObj = WarpNotificationButtonOption(env, buttonOption);
     if (notificationIdAni == nullptr || buttonOptionObj == nullptr) {
         ANS_LOGE("null args");
@@ -614,15 +614,15 @@ bool SetNotificationCheckInfoNumber(
     ani_env *env, const std::shared_ptr<OHOS::Notification::NotificationCheckInfo> &data, ani_object &outObj)
 {
     ani_status status = ANI_OK;
-    // notificationId: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
-        outObj, "notificationId", static_cast<ani_double>(data->GetNotifyId())))) {
+    // notificationId: int;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Int(
+        outObj, "notificationId", data->GetNotifyId()))) {
             ANS_LOGE("WarpNotificationCheckInfo. set 'notificationId' faild. status %{public}d", status);
             return false;
         }
-    // creatorUserId: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
-        outObj, "creatorUserId", static_cast<ani_double>(data->GetCreatorUserId())))) {
+    // creatorUserId: int;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Int(
+        outObj, "creatorUserId", data->GetCreatorUserId()))) {
             ANS_LOGE("WarpNotificationCheckInfo. set 'creatorUserId' faild. status %{public}d", status);
             return false;
         }

@@ -96,13 +96,13 @@ export default namespace notificationManager {
     }
 
     export interface DoNotDisturbProfile {
-        id: number;
+        id: long;
         name: string;
         trustlist?: Array<BundleOption>;
     }
 
     class DoNotDisturbProfileInner implements DoNotDisturbProfile {
-        id: number = -1;
+        id: long = -1;
         name: string = "";
         trustlist?: Array<BundleOption> = new Array<BundleOption>();
     }
@@ -116,11 +116,11 @@ export default namespace notificationManager {
     }
 
     export interface SystemLiveViewSubscriber {
-        onResponse?: (notificationId: number, buttonOptions: ButtonOptions) => void;
+        onResponse?: (notificationId: int, buttonOptions: ButtonOptions) => void;
     }
 
     class SystemLiveViewSubscriberInner implements SystemLiveViewSubscriber {
-        onResponse?: (notificationId: number, buttonOptions: ButtonOptions) => void;
+        onResponse?: (notificationId: int, buttonOptions: ButtonOptions) => void;
     }
 
     export enum DeviceRemindType {
@@ -131,17 +131,17 @@ export default namespace notificationManager {
     }
 
     export native function nativeCancelAll(): void;
-    export native function nativeCancelWithId(id: number): void;
-    export native function nativeCancelWithIdLabel(id: number, label: string): void;
-    export native function nativeCancelWithIdOptionalLabel(id: number, label?: string): void;
-    export native function nativeCancelWithBundle(bundle: BundleOption, id: number): void;
+    export native function nativeCancelWithId(id: int): void;
+    export native function nativeCancelWithIdLabel(id: int, label: string): void;
+    export native function nativeCancelWithIdOptionalLabel(id: int, label?: string): void;
+    export native function nativeCancelWithBundle(bundle: BundleOption, id: int): void;
 
     export native function nativeDisplayBadge(bundle: BundleOption, enable: boolean): void;
     export native function nativeIsBadgeDisplayed(bundle: BundleOption): boolean;
-    export native function nativeSetBadgeNumber(badgeNumber: number): void;
-    export native function nativeSetBadgeNumberByBundle(bundle: BundleOption, badgeNumber: number): void;
+    export native function nativeSetBadgeNumber(badgeNumber: int): void;
+    export native function nativeSetBadgeNumberByBundle(bundle: BundleOption, badgeNumber: int): void;
 
-    export native function nativeGetActiveNotificationCount(): number;
+    export native function nativeGetActiveNotificationCount(): long;
     export native function nativeGetActiveNotifications():Array<NotificationRequest>;
     export native function nativeGetAllActiveNotifications():Array<NotificationRequest>;
     export native function nativeGetActiveNotificationByFilter(filter: NotificationFilter): NotificationRequest;
@@ -151,13 +151,13 @@ export default namespace notificationManager {
 
     export native function nativeSubscribeSystemLiveView(subscriber: SystemLiveViewSubscriber): void;
     export native function nativeTriggerSystemLiveView(
-        bundle: BundleOption, notificationId: number, buttonOptions: ButtonOptions): void;
+        bundle: BundleOption, notificationId: int, buttonOptions: ButtonOptions): void;
 
-    export native function nativePublishWithUserId(request: NotificationRequest, userId: number):void;
+    export native function nativePublishWithUserId(request: NotificationRequest, userId: int):void;
     export native function nativePublish(request: NotificationRequest):void;
 
-    export native function nativeGetSlotFlagsByBundle(bundle: BundleOption): int;
-    export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: number): void;
+    export native function nativeGetSlotFlagsByBundle(bundle: BundleOption): long;
+    export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: long): void;
     export native function nativeGetSlotsByBundle(bundle: BundleOption): Array<NotificationSlot>;
     export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType): NotificationSlot;
 
@@ -168,7 +168,7 @@ export default namespace notificationManager {
         bundle: BundleOption, type: SlotType, enable: boolean, isForceControl: boolean): void;
 
     export native function nativeIsNotificationEnabled(): boolean;
-    export native function nativeIsNotificationEnabledWithId(userId : number): boolean;
+    export native function nativeIsNotificationEnabledWithId(userId : int): boolean;
     export native function nativeIsNotificationEnabledWithBundleOption(bundleOption: BundleOption): boolean;
     export native function nativeSetNotificationEnable(bundle: BundleOption, enable: boolean): void;
     export native function nativeRequestEnableNotification(content: UIAbilityContext): Promise<int>;
@@ -185,31 +185,31 @@ export default namespace notificationManager {
     export native function nativeRemoveSlot(slotType: SlotType): void;
     export native function nativeRemoveAllSlots(): void;
     export native function nativeSetSlotByBundle(bundle: BundleOption, slot: NotificationSlot): void;
-    export native function nativeGetSlotNumByBundle(bundle: BundleOption): number;
+    export native function nativeGetSlotNumByBundle(bundle: BundleOption): long;
     export native function nativeIsSupportTemplate(templateName: string): boolean;
     export native function nativeSetDistributedEnable(enable: boolean): void;
     export native function nativeIsDistributedEnabled(): boolean;
     export native function nativeIsDistributedEnabledByBundle(bundle: BundleOption): boolean;
     export native function nativeIsDistributedEnabledByBundleType(bundle: BundleOption, deviceType: string): boolean;
     export native function nativeGetDeviceRemindType(): DeviceRemindType;
-    export native function nativeSetSyncNotificationEnabledWithoutApp(userId: number, enable: boolean): void;
-    export native function nativeGetSyncNotificationEnabledWithoutApp(userId: number): boolean;
+    export native function nativeSetSyncNotificationEnabledWithoutApp(userId: int, enable: boolean): void;
+    export native function nativeGetSyncNotificationEnabledWithoutApp(userId: int): boolean;
 
-    export native function nativePublishAsBundle(request: NotificationRequest, representativeBundle: string, userId: number): void;
+    export native function nativePublishAsBundle(request: NotificationRequest, representativeBundle: string, userId: int): void;
     export native function nativePublishAsBundleWithBundleOption(representativeBundle: BundleOption, request: NotificationRequest): void;
-    export native function nativeCancelAsBundle(id: number, representativeBundle: string, userId: number): void;
-    export native function nativeCancelAsBundleWithBundleOption(representativeBundle: BundleOption, id: number): void;
+    export native function nativeCancelAsBundle(id: int, representativeBundle: string, userId: int): void;
+    export native function nativeCancelAsBundleWithBundleOption(representativeBundle: BundleOption, id: int): void;
     export native function nativeCancelGroup(groupName: string): void;
     export native function nativeSetDoNotDisturbDate(date: DoNotDisturbDate): void;
-    export native function nativeSetDoNotDisturbDateWithId(date: DoNotDisturbDate, userId: number): void;
+    export native function nativeSetDoNotDisturbDateWithId(date: DoNotDisturbDate, userId: int): void;
     export native function nativeGetDoNotDisturbDate(): DoNotDisturbDate;
-    export native function nativeGetDoNotDisturbDateWithId(userId: number): DoNotDisturbDate;
+    export native function nativeGetDoNotDisturbDateWithId(userId: int): DoNotDisturbDate;
     export native function nativeIsSupportDoNotDisturbMode(): boolean;
-    export native function nativeGetDoNotDisturbProfile(id: number): DoNotDisturbProfile;
+    export native function nativeGetDoNotDisturbProfile(id: long): DoNotDisturbProfile;
 
     export native function nativeOpenNotificationSettings(content: UIAbilityContext): Promise<int>;
 
-    export native function nativesetTargetDeviceStatus(deviceType: string, status: number): void;
+    export native function nativesetTargetDeviceStatus(deviceType: string, status: long): void;
     export native function nativesetDistributedEnabledByBundle(bundle: BundleOption, deviceType: string, enable: boolean): void;
     export native function nativesetSmartReminderEnabled(deviceType: string, enable: boolean): void;
     export native function nativeisSmartReminderEnabled(deviceType: string): boolean;
@@ -640,15 +640,15 @@ export default namespace notificationManager {
         return error;
     }
 
-    export function getSlotNumByBundle(bundle: BundleOption): Promise<number> {
+    export function getSlotNumByBundle(bundle: BundleOption): Promise<long> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): number => { return nativeGetSlotNumByBundle(bundle); });
+        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): long => { return nativeGetSlotNumByBundle(bundle); });
             p.then((data: NullishType): void => {
-                let ret : number = data as number;
+                let ret : long = data as long;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);
@@ -657,7 +657,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getSlotNumByBundle(bundle: BundleOption, callback: AsyncCallback<number>): void {
+    export function getSlotNumByBundle(bundle: BundleOption, callback: AsyncCallback<long>): void {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
             throw error;
@@ -665,9 +665,9 @@ export default namespace notificationManager {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): number => { return nativeGetSlotNumByBundle(bundle); });
+        let p = taskpool.execute((): long => { return nativeGetSlotNumByBundle(bundle); });
         p.then((data: NullishType): void => {
-            let ret : number = data as number;
+            let ret : long = data as long;
             callback(null, ret);
         }, (error: Error): void => {
             let err: BusinessError = error as BusinessError;
@@ -1000,7 +1000,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function isNotificationEnabled(userId: number, callback: AsyncCallback<boolean>): void
+    export function isNotificationEnabled(userId: int, callback: AsyncCallback<boolean>): void
     {
         if (callback == null) {
             throw errorParamInvalid;
@@ -1015,7 +1015,7 @@ export default namespace notificationManager {
         })
     }
 
-    export function isNotificationEnabled(userId: number): Promise<boolean>
+    export function isNotificationEnabled(userId: int): Promise<boolean>
     {
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean => { return nativeIsNotificationEnabledWithId(userId); });
@@ -1201,7 +1201,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setSlotFlagsByBundle(bundle: BundleOption, slotFlags: number): Promise<void> {
+    export function setSlotFlagsByBundle(bundle: BundleOption, slotFlags: long): Promise<void> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
             throw error;
@@ -1217,15 +1217,15 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getSlotFlagsByBundle(bundle: BundleOption): Promise<number> {
+    export function getSlotFlagsByBundle(bundle: BundleOption): Promise<long> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
             throw error;
         }
-        let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): number => { return nativeGetSlotFlagsByBundle(bundle); });
+        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): long => { return nativeGetSlotFlagsByBundle(bundle); });
             p.then((data: NullishType): void => {
-                let ret : Double = data as Double;
+                let ret : long = data as long;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);
@@ -1267,7 +1267,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function publish(request: NotificationRequest, userId: number, callback: AsyncCallback<void>): void {
+    export function publish(request: NotificationRequest, userId: int, callback: AsyncCallback<void>): void {
         let error: BusinessError = isInvalidParameter(request);
         if (error.code !== ERROR_OK) {
             throw error;
@@ -1284,7 +1284,7 @@ export default namespace notificationManager {
         })
     }
 
-    export function publish(request: NotificationRequest, userId: number): Promise<void> {
+    export function publish(request: NotificationRequest, userId: int): Promise<void> {
         let error: BusinessError = isInvalidParameter(request);
         if (error.code !== ERROR_OK) {
             throw error;
@@ -1301,7 +1301,7 @@ export default namespace notificationManager {
     }
 
     export function triggerSystemLiveView(
-        bundle: BundleOption, notificationId: number, buttonOptions: ButtonOptions): Promise<void>
+        bundle: BundleOption, notificationId: int, buttonOptions: ButtonOptions): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
@@ -1426,14 +1426,14 @@ export default namespace notificationManager {
         })
     }
 
-    export function getActiveNotificationCount(callback: AsyncCallback<number>): void
+    export function getActiveNotificationCount(callback: AsyncCallback<long>): void
     {
         if (callback == null) {
             throw errorParamInvalid;
         }
-        let p = taskpool.execute((): number => { return nativeGetActiveNotificationCount(); });
+        let p = taskpool.execute((): long => { return nativeGetActiveNotificationCount(); });
         p.then((data: NullishType): void => {
-            let ret : number = data as number;
+            let ret : long = data as long;
             callback(null, ret);
         }, (error: Object): void => {
             let err: BusinessError = error as BusinessError;
@@ -1441,11 +1441,11 @@ export default namespace notificationManager {
         })
     }
 
-    export function getActiveNotificationCount(): Promise<number> {
-        let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback):void => {
-            let p = taskpool.execute((): number => { return nativeGetActiveNotificationCount(); });
+    export function getActiveNotificationCount(): Promise<long> {
+        let pPromise = new Promise<long>((resolve: ResolveCallback<long>, reject: RejectCallback):void => {
+            let p = taskpool.execute((): long => { return nativeGetActiveNotificationCount(); });
             p.then((data :NullishType): void => {
-                let ret : number = data as number;
+                let ret : long = data as long;
                 resolve(ret);
             }, (err:Error): void => {
                 reject(err);
@@ -1519,7 +1519,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function cancel(bundle: BundleOption, id: number): Promise<void> {
+    export function cancel(bundle: BundleOption, id: int): Promise<void> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
             throw error;
@@ -1535,7 +1535,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function cancel(id: number, label?: string): Promise<void> {
+    export function cancel(id: int, label?: string): Promise<void> {
         if (label == null || label?.length === 0) {
             throw errorParamInvalid;
         }
@@ -1550,7 +1550,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function cancel(id: number, label: string, callback: AsyncCallback<void>): void {
+    export function cancel(id: int, label: string, callback: AsyncCallback<void>): void {
         if (label == null || label?.length === 0) {
             throw errorParamInvalid;
         }
@@ -1566,7 +1566,7 @@ export default namespace notificationManager {
         })
     }
 
-    export function cancel(id: number, callback: AsyncCallback<void>): void {
+    export function cancel(id: int, callback: AsyncCallback<void>): void {
         if (callback == null) {
             throw errorParamInvalid;
         }
@@ -1659,12 +1659,12 @@ export default namespace notificationManager {
     }
 
     export interface NotificationCheckResult {
-        code: number;
+        code: int;
         message: string;
     }
 
     class NotificationCheckResultInner implements NotificationCheckResult {
-        public code: number = -1;
+        public code: int = -1;
         public message: string = '';
     }
 
@@ -1694,7 +1694,7 @@ export default namespace notificationManager {
                     }, (error: Error): void => {
                         let err: BusinessError = error as BusinessError;
                         result = {
-                            code: err.code,
+                            code: err.code as int,
                             message: err.message
                         };
                     }
@@ -1727,20 +1727,20 @@ export default namespace notificationManager {
 
     export interface NotificationCheckInfo {
         bundleName: string;
-        notificationId: number;
+        notificationId: int;
         label?: string;
         contentType: ContentType;
-        creatorUserId: number;
+        creatorUserId: int;
         slotType: SlotType;
         extraInfos?: Record<string, Object>;
     }
 
     class NotificationCheckInfoInner implements NotificationCheckInfo {
         public bundleName: string = '';
-        public notificationId: number = -1;
+        public notificationId: int = -1;
         public label?: string;
         public contentType: ContentType = ContentType.NOTIFICATION_CONTENT_BASIC_TEXT;
-        public creatorUserId: number = -1;
+        public creatorUserId: int = -1;
         public slotType: SlotType = SlotType.UNKNOWN_TYPE;
         public extraInfos?: Record<string, Object>;
     }
@@ -1765,7 +1765,7 @@ export default namespace notificationManager {
         return nativeIsNotificationEnabledSync();
     }
 
-    export function setBadgeNumber(badgeNumber: number, callback: AsyncCallback<void>): void
+    export function setBadgeNumber(badgeNumber: int, callback: AsyncCallback<void>): void
     {
         if (callback == null) {
            throw errorParamInvalid;
@@ -1779,7 +1779,7 @@ export default namespace notificationManager {
         })
     }
 
-    export function setBadgeNumber(badgeNumber: number): Promise<void> {
+    export function setBadgeNumber(badgeNumber: int): Promise<void> {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeSetBadgeNumber(badgeNumber); });
             p.then((data: NullishType): void => {
@@ -1791,7 +1791,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setBadgeNumberByBundle(bundle: BundleOption, badgeNumber: number): Promise<void>
+    export function setBadgeNumberByBundle(bundle: BundleOption, badgeNumber: int): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
@@ -1900,7 +1900,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: number, callback: AsyncCallback<void>): void
+    export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: int, callback: AsyncCallback<void>): void
     {
         let error: BusinessError = isInvalidParameter(request);
         if (error.code !== ERROR_OK) {
@@ -1922,7 +1922,7 @@ export default namespace notificationManager {
         });
     }
 
-    export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: number): Promise<void>
+    export function publishAsBundle(request: NotificationRequest, representativeBundle: string, userId: int): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(request);
         if (error.code !== ERROR_OK) {
@@ -1963,7 +1963,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function cancelAsBundle(id: number, representativeBundle: string, userId: number, callback: AsyncCallback<void>): void
+    export function cancelAsBundle(id: int, representativeBundle: string, userId: int, callback: AsyncCallback<void>): void
     {
         if (callback == null) {
             throw errorParamInvalid;
@@ -1980,7 +1980,7 @@ export default namespace notificationManager {
         });
     }
 
-    export function cancelAsBundle(id: number, representativeBundle: string, userId: number): Promise<void>
+    export function cancelAsBundle(id: int, representativeBundle: string, userId: int): Promise<void>
     {
         if (representativeBundle == null || representativeBundle?.length === 0) {
             throw errorParamInvalid;
@@ -1996,7 +1996,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function cancelAsBundle(representativeBundle: BundleOption, id: number): Promise<void>
+    export function cancelAsBundle(representativeBundle: BundleOption, id: int): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(representativeBundle);
         if (error.code !== ERROR_OK) {
@@ -2082,7 +2082,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: number, callback: AsyncCallback<void>): void
+    export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: int, callback: AsyncCallback<void>): void
     {
         if (callback == null) {
             throw errorParamInvalid;
@@ -2100,7 +2100,7 @@ export default namespace notificationManager {
         });
     }
 
-    export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: number): Promise<void>
+    export function setDoNotDisturbDate(date: DoNotDisturbDate, userId: int): Promise<void>
     {
         let error: BusinessError = isInvalidParameter(date);
         if (error.code !== ERROR_OK) {
@@ -2146,7 +2146,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getDoNotDisturbDate(userId: number, callback: AsyncCallback<DoNotDisturbDate>): void
+    export function getDoNotDisturbDate(userId: int, callback: AsyncCallback<DoNotDisturbDate>): void
     {
         if (callback == null) {
             throw errorParamInvalid;
@@ -2161,7 +2161,7 @@ export default namespace notificationManager {
         });
     }
 
-    export function getDoNotDisturbDate(userId: number): Promise<DoNotDisturbDate>
+    export function getDoNotDisturbDate(userId: int): Promise<DoNotDisturbDate>
     {
         let pPromise = new Promise<DoNotDisturbDate>((resolve: ResolveCallback<DoNotDisturbDate>, reject: RejectCallback): void => {
             let p = taskpool.execute((): DoNotDisturbDate => { return nativeGetDoNotDisturbDateWithId(userId); });
@@ -2219,7 +2219,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getDoNotDisturbProfile(id: number): Promise<DoNotDisturbProfile>
+    export function getDoNotDisturbProfile(id: long): Promise<DoNotDisturbProfile>
     {
         let pPromise = new Promise<DoNotDisturbProfile>((resolve: ResolveCallback<DoNotDisturbProfile>, reject: RejectCallback): void => {
             let p = taskpool.execute((): DoNotDisturbProfile => { return nativeGetDoNotDisturbProfile(id); });
@@ -2261,7 +2261,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setTargetDeviceStatus(deviceType: string, status: number): Promise<void> {
+    export function setTargetDeviceStatus(deviceType: string, status: long): Promise<void> {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
         let p = taskpool.execute((): void => { return nativesetTargetDeviceStatus(deviceType,status); });
         p.then((data: NullishType): void => {
@@ -2364,11 +2364,11 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function setAdditionalConfig(key: string, value: string): Promise<number>{
-        let pPromise = new Promise<number>((resolve: ResolveCallback<number>, reject: RejectCallback): void => {
-            let p = taskpool.execute((): number => { return nativesetAdditionalConfig(key,value); });
+    export function setAdditionalConfig(key: string, value: string): Promise<int>{
+        let pPromise = new Promise<int>((resolve: ResolveCallback<int>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): int => { return nativesetAdditionalConfig(key,value); });
             p.then((data: NullishType): void => {
-                let ret : Double = data as Double;
+                let ret : int = data as int;
                 resolve(ret);
             }, (error: Error): void => {
                 reject(error);
@@ -2552,7 +2552,7 @@ export default namespace notificationManager {
     }
 
     export function setSyncNotificationEnabledWithoutApp
-        (userId: number, enable: boolean, callback: AsyncCallback<void>): void
+        (userId: int, enable: boolean, callback: AsyncCallback<void>): void
     {
         if (callback == null) {
             throw errorParamInvalid;
@@ -2567,7 +2567,7 @@ export default namespace notificationManager {
         })
     }
 
-    export function setSyncNotificationEnabledWithoutApp(userId: number, enable: boolean): Promise<void>
+    export function setSyncNotificationEnabledWithoutApp(userId: int, enable: boolean): Promise<void>
     {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void =>
@@ -2581,7 +2581,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getSyncNotificationEnabledWithoutApp(userId: number): Promise<boolean> {
+    export function getSyncNotificationEnabledWithoutApp(userId: int): Promise<boolean> {
         let pPromise = new Promise<boolean>((resolve: ResolveCallback<boolean>, reject: RejectCallback): void => {
             let p = taskpool.execute((): boolean =>
                 { return nativeGetSyncNotificationEnabledWithoutApp(userId); });
@@ -2595,7 +2595,7 @@ export default namespace notificationManager {
         return pPromise;
     }
 
-    export function getSyncNotificationEnabledWithoutApp(userId: number, callback: AsyncCallback<boolean>): void
+    export function getSyncNotificationEnabledWithoutApp(userId: int, callback: AsyncCallback<boolean>): void
     {
         if (callback == null) {
             throw errorParamInvalid;

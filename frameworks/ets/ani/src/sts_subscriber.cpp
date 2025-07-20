@@ -58,7 +58,7 @@ bool SetReason(ani_env *env, const int32_t deleteReason, ani_object &outObj)
 {
     ani_status status = ANI_OK;
     if (deleteReason != -1) {
-        ani_object reason = CreateDouble(env, static_cast<ani_double>(deleteReason));
+        ani_object reason = CreateInt(env, deleteReason);
         if (reason == nullptr) {
             ANS_LOGE("reason Create faild");
             return false;
@@ -101,7 +101,7 @@ bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &re
         }
         for (size_t i = 0; i < vibrationValues.size(); i++) {
             status = env->Object_CallMethodByName_Void(
-                vibrationValuesObj, "$_set", "id:", i, static_cast<ani_double>(vibrationValues[i]));
+                vibrationValuesObj, "$_set", "id:", i, static_cast<ani_long>(vibrationValues[i]));
             if (status != ANI_OK) {
                 ANS_LOGE("faild. status : %{public}d", status);
                 return false;
@@ -143,7 +143,7 @@ bool WarpSubscribeCallbackData(
         ANS_LOGE("SetNotificationSortingMap faild");
         return false;
     }
-    // reason?: number
+    // reason?: int
     if (!SetReason(env, deleteReason, outObj)) {
         ANS_LOGE("SetReason faild");
         return false;
@@ -153,7 +153,7 @@ bool WarpSubscribeCallbackData(
         ANS_LOGE("SetSound faild");
         return false;
     }
-    // vibrationValues?: Array<number>
+    // vibrationValues?: Array<long>
     if (!SetVibrationValues(env, request, outObj)) {
         ANS_LOGE("SetSound faild");
         return false;
@@ -217,7 +217,7 @@ bool WarpEnabledNotificationCallbackData(
         ANS_LOGE("SetFieldString bundle faild");
         return false;
     }
-    if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_double>(callbackData->GetUid()))) {
+    if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_int>(callbackData->GetUid()))) {
         ANS_LOGE("uid set faild.");
         return false;
     }
@@ -248,22 +248,22 @@ bool WarpBadgeNumberCallbackData(
         ANS_LOGE("SetFieldString bundle faild");
         return false;
     }
-    if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_double>(badgeData->GetUid()))) {
+    if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_int>(badgeData->GetUid()))) {
         ANS_LOGE("uid set faild.");
         return false;
     }
-    if (!CallSetter(env, cls, outObj, "badgeNumber", static_cast<ani_double>(badgeData->GetBadgeNumber()))) {
+    if (!CallSetter(env, cls, outObj, "badgeNumber", static_cast<ani_int>(badgeData->GetBadgeNumber()))) {
         ANS_LOGE("badgeNumber set faild");
         return false;
     }
-    instanceKeyObj = CreateDouble(env, static_cast<ani_double>(badgeData->GetInstanceKey()));
+    instanceKeyObj = CreateInt(env, static_cast<ani_int>(badgeData->GetInstanceKey()));
     if (instanceKeyObj != nullptr) {
         if (!CallSetter(env, cls, outObj, "instanceKey", instanceKeyObj)) {
             ANS_LOGE("instanceKey set faild.");
             return false;
         }
     } else {
-        ANS_LOGE("instanceKeyObj createDouble faild");
+        ANS_LOGE("instanceKeyObj CreateInt faild");
     }
     if (!SetFieldString(env, cls, outObj, "appInstanceKey", badgeData->GetAppInstanceKey())) {
         ANS_LOGD("SetFieldString appInstanceKey faild");

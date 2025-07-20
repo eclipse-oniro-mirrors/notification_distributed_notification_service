@@ -55,9 +55,9 @@ bool WarpNotificationSorting(ani_env *env, Notification::NotificationSorting &so
         ANS_LOGE("set hashCode faild. status %{public}d", status);
         return false;
     }
-    // readonly ranking: number;
-    if (ANI_OK != (status = env->Object_SetPropertyByName_Double(
-        obj, "ranking", static_cast<ani_double>(sorting.GetRanking())))) {
+    // readonly ranking: long;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Long(
+        obj, "ranking", static_cast<ani_long>(sorting.GetRanking())))) {
         ANS_LOGE("set ranking faild. status %{public}d", status);
         return false;
     }

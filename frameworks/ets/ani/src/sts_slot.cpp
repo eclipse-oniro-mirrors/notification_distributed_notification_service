@@ -119,23 +119,23 @@ bool WrapNotificationSlotByString(ani_env *env, sptr<Notification::NotificationS
     return true;
 }
 
-bool WrapNotificationSlotByDouble(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
+bool WrapNotificationSlotByInt(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
 {
-    if (!SetPropertyOptionalByDouble(
-        env, outAniObj, "lockscreenVisibility", static_cast<double>(slot->GetLockScreenVisibleness()))) {
+    if (!SetPropertyOptionalByInt(
+        env, outAniObj, "lockscreenVisibility", static_cast<int32_t>(slot->GetLockScreenVisibleness()))) {
         ANS_LOGE("Set lockscreenVisibility fail");
         return false;
     }
-    if (!SetPropertyOptionalByDouble(env, outAniObj, "lightColor", static_cast<double>(slot->GetLedLightColor()))) {
+    if (!SetPropertyOptionalByInt(env, outAniObj, "lightColor", static_cast<int32_t>(slot->GetLedLightColor()))) {
         ANS_LOGE("Set lightColor fail");
         return false;
     }
-    if (!SetPropertyOptionalByDouble(env, outAniObj, "reminderMode", static_cast<double>(slot->GetReminderMode()))) {
+    if (!SetPropertyOptionalByInt(env, outAniObj, "reminderMode", static_cast<int32_t>(slot->GetReminderMode()))) {
         ANS_LOGE("Set reminderMode fail");
         return false;
     }
-    if (!SetPropertyOptionalByDouble(
-        env, outAniObj, "authorizedStatus", static_cast<double>(slot->GetAuthorizedStatus()))) {
+    if (!SetPropertyOptionalByInt(
+        env, outAniObj, "authorizedStatus", static_cast<int32_t>(slot->GetAuthorizedStatus()))) {
         ANS_LOGE("Set authorizedStatus fail");
         return false;
     }
@@ -175,11 +175,11 @@ bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slo
         ANS_LOGE("set String params fail");
         return false;
     }
-    if (!WrapNotificationSlotByDouble(env, slot, outAniObj)) {
-        ANS_LOGE("set String params fail");
+    if (!WrapNotificationSlotByInt(env, slot, outAniObj)) {
+        ANS_LOGE("set int params fail");
         return false;
     }
-    if (!SetOptionalFieldArrayDouble(env, cls, outAniObj, "vibrationValues", slot->GetVibrationStyle())) {
+    if (!SetOptionalFieldArrayLong(env, cls, outAniObj, "vibrationValues", slot->GetVibrationStyle())) {
         ANS_LOGE("Set vibrationValues fail");
         return false;
     }
@@ -229,15 +229,15 @@ bool ParseNotificationSlotByBasicType(ani_env *env, ani_object notificationSlotO
         isUndefined == ANI_FALSE) {
         slot.SetSound(Uri(GetResizeStr(sound, STR_MAX_SIZE)));
     }
-    ani_double doubleValue = 0.0;
-    if (GetPropertyDouble(env, notificationSlotObj, "lockscreenVisibility", isUndefined, doubleValue) == ANI_OK
+    ani_int intValue = 0;
+    if (GetPropertyInt(env, notificationSlotObj, "lockscreenVisibility", isUndefined, intValue) == ANI_OK
         && isUndefined == ANI_FALSE) {
             slot.SetLockscreenVisibleness(
-                Notification::NotificationConstant::VisiblenessType(static_cast<int32_t>(doubleValue)));
+                Notification::NotificationConstant::VisiblenessType(intValue));
     }
-    if (GetPropertyDouble(env, notificationSlotObj, "lightColor", isUndefined, doubleValue) == ANI_OK
+    if (GetPropertyInt(env, notificationSlotObj, "lightColor", isUndefined, intValue) == ANI_OK
         && isUndefined == ANI_FALSE) {
-            slot.SetLedLightColor(static_cast<int32_t>(doubleValue));
+            slot.SetLedLightColor(intValue);
     }
     bool boolValue = true;
     if (GetPropertyBool(env, notificationSlotObj, "badgeFlag", isUndefined, boolValue) == ANI_OK
@@ -288,7 +288,7 @@ bool UnwrapNotificationSlot(ani_env *env, ani_object notificationSlotObj, Notifi
         return false;
     }
     std::vector<int64_t> vibrationValues;
-    if (GetPropertyNumberArray(env, notificationSlotObj, "vibrationValues", isUndefined, vibrationValues) == ANI_OK &&
+    if (GetPropertyLongArray(env, notificationSlotObj, "vibrationValues", isUndefined, vibrationValues) == ANI_OK &&
         isUndefined == ANI_FALSE) {
         slot.SetVibrationStyle(vibrationValues);
     }

@@ -34,9 +34,9 @@ void AniCancelAll(ani_env* env)
     ANS_LOGD("AniCancelAll notifications end");
 }
 
-void AniCancelWithId(ani_env* env, ani_double id)
+void AniCancelWithId(ani_env* env, ani_int id)
 {
-    ANS_LOGD("AniCancelWithId call,id : %{public}lf", id);
+    ANS_LOGD("AniCancelWithId call,id : %{public}d", id);
     int returncode = Notification::NotificationHelper::CancelNotification(static_cast<int32_t>(id));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
@@ -46,7 +46,7 @@ void AniCancelWithId(ani_env* env, ani_double id)
     ANS_LOGD("AniCancelWithId notifications end");
 }
 
-void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label)
+void AniCancelWithIdLabel(ani_env* env, ani_int id, ani_string label)
 {
     ANS_LOGD("AniCancelWithIdLabel call");
     std::string tempStr;
@@ -55,7 +55,7 @@ void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label)
         return;
     }
     std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
-    ANS_LOGD("Cancel by label id:%{public}lf label:%{public}s", id, labelStr.c_str());
+    ANS_LOGD("Cancel by label id:%{public}d label:%{public}s", id, labelStr.c_str());
     int returncode = Notification::NotificationHelper::CancelNotification(labelStr, static_cast<int32_t>(id));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
@@ -65,7 +65,7 @@ void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label)
     ANS_LOGD("AniCancelWithIdLabel end");
 }
 
-void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id)
+void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_int id)
 {
     ANS_LOGD("AniCancelWithBundle call");
     Notification::NotificationBundleOption option;
@@ -74,7 +74,7 @@ void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id)
         return;
     }
     
-    ANS_LOGD("Cancel by bundle:%{public}s id:%{public}lf",
+    ANS_LOGD("Cancel by bundle:%{public}s id:%{public}d",
         option.GetBundleName().c_str(), id);
     int returncode = Notification::NotificationHelper::CancelAsBundle(option, static_cast<int32_t>(id));
     if (returncode != ERR_OK) {
@@ -85,9 +85,9 @@ void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id)
     ANS_LOGD("AniCancelWithBundle end");
 }
 
-void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
+void AniCancelWithIdOptinalLabel(ani_env* env, ani_int id, ani_string label)
 {
-    ANS_LOGD("sts AniCancelWithIdOptinalLabel call, id:%{public}lf", id);
+    ANS_LOGD("sts AniCancelWithIdOptinalLabel call, id:%{public}d", id);
     ani_boolean isUndefined = ANI_FALSE;
     env->Reference_IsUndefined(label, &isUndefined);
     int32_t ret = -1;
@@ -103,7 +103,7 @@ void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
             return;
         }
         std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
-        ANS_LOGD("sts AniCancelWithIdOptinalLabel id:%{public}lf label:%{public}s", id, labelStr.c_str());
+        ANS_LOGD("sts AniCancelWithIdOptinalLabel id:%{public}d label:%{public}s", id, labelStr.c_str());
         ret = Notification::NotificationHelper::CancelNotification(labelStr, id);
     }
     if (ret != ERR_OK) {
@@ -115,7 +115,7 @@ void AniCancelWithIdOptinalLabel(ani_env* env, ani_double id, ani_string label)
     ANS_LOGD("sts AniCancelWithIdOptinalLabel end");
 }
 
-void AniCancelAsBundle(ani_env *env, ani_double id, ani_string representativeBundle, ani_double userId)
+void AniCancelAsBundle(ani_env *env, ani_int id, ani_string representativeBundle, ani_int userId)
 {
     ANS_LOGD("AniCancelAsBundle enter");
     int32_t convertedId = static_cast<int32_t>(id);
@@ -141,7 +141,7 @@ void AniCancelAsBundle(ani_env *env, ani_double id, ani_string representativeBun
     ANS_LOGD("AniCancelAsBundle end");
 }
 
-void AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_double id)
+void AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_int id)
 {
     ANS_LOGD("AniCancelAsBundleWithBundleOption enter");
     int32_t idTest = static_cast<int32_t>(id);

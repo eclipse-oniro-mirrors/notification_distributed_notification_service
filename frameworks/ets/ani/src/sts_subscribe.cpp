@@ -717,6 +717,26 @@ bool GetDoubleValueByClassName(
     return true;
 }
 
+bool GetIntValueByClassName(
+    ani_env *env, ani_object param, const char *className, const char *name, ani_int &value)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        ANS_LOGD("FindClass faild. %{public}s", className);
+        return false;
+    }
+    ani_method idGetter;
+    if (ANI_OK != env->Class_FindMethod(cls, name, nullptr, &idGetter)) {
+        ANS_LOGD("Class_FindMethod faild. %{public}s", className);
+        return false;
+    }
+    if (ANI_OK != env->Object_CallMethod_Int(param, idGetter, &value)) {
+        ANS_LOGD("Object_CallMethod_Int faild. %{public}s", className);
+        return false;
+    }
+    return true;
+}
+
 bool UnWarpReasonEnum(ani_env *env, const ani_object enumItem, int32_t &outEnum)
 {
     ani_status status = ANI_ERROR;
@@ -743,13 +763,13 @@ bool IsValidRemoveReason(int32_t reasonType)
 bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &OutObj)
 {
     ani_boolean isUndefined = ANI_TRUE;
-    ani_double idDouble = 0.0;
-    if (!GetDoubleValueByClassName(env, obj,
-        "@ohos.notificationSubscribe.notificationSubscribe.NotificationKeyInner", "<get>id", idDouble)) {
-        ANS_LOGD("GetDoubleValueByClassName id fail");
+    ani_int idInt = 0;
+    if (!GetIntValueByClassName(env, obj,
+        "@ohos.notificationSubscribe.notificationSubscribe.NotificationKeyInner", "<get>id", idInt)) {
+        ANS_LOGD("GetIntValueByClassName id fail");
         return false;
     }
-    OutObj.id = static_cast<int32_t>(idDouble);
+    OutObj.id = static_cast<int32_t>(idInt);
     std::string label;
     if (GetPropertyString(env, obj, "label", isUndefined, label) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGD("UnWarpNotificationKey GetPropertyString label fail");

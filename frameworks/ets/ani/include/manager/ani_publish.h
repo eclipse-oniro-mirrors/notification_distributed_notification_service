@@ -20,8 +20,8 @@
 namespace OHOS {
 namespace NotificationManagerSts {
 void AniPublish(ani_env *env, ani_object obj);
-void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId);
-void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_double userId);
+void AniPublishWithId(ani_env *env, ani_object obj, ani_int userId);
+void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representativeBundle, ani_int userId);
 void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeBundle, ani_object request);
 } // namespace NotificationManagerSts
 } // namespace OHOS

@@ -15,14 +15,14 @@
 
 export interface NotificationSubscribeInfo {
     bundleNames?: Array<string>;
-    userId?: number;
+    userId?: int;
     deviceType?: string;
-    filterLimit?: number;
+    filterLimit?: long;
 }
 
 class NotificationSubscribeInfoInner implements NotificationSubscribeInfo {
     public bundleNames?: Array<string>;
-    public userId?: number;
+    public userId?: int;
     public deviceType?: string;
-    public filterLimit?: number;
+    public filterLimit?: long;
 }

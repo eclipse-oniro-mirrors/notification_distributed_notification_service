@@ -79,9 +79,9 @@ export class NotificationSubscriberInner implements NotificationSubscriber {
 export interface SubscribeCallbackData {
     readonly request: NotificationRequest;
     readonly sortingMap?: NotificationSortingMap;
-    readonly reason?: number;
+    readonly reason?: int;
     readonly sound?: string;
-    readonly vibrationValues?: Array<number>;
+    readonly vibrationValues?: Array<long>;
 }
 
 class SubscribeCallbackDataInner implements SubscribeCallbackData {
@@ -137,36 +137,36 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         notDistributed: undefined
     };
     public readonly sortingMap?: NotificationSortingMap;
-    public readonly reason?: number;
+    public readonly reason?: int;
     public readonly sound?: string;
-    public readonly vibrationValues?: Array<number>;
+    public readonly vibrationValues?: Array<long>;
 }
 
 export interface EnabledNotificationCallbackData {
     readonly bundle: string;
-    readonly uid: number;
+    readonly uid: int;
     readonly enable: boolean;
 }
 
 class EnabledNotificationCallbackDataInner implements EnabledNotificationCallbackData {
     public readonly bundle: string = '';
-    public readonly uid: number = -1;
+    public readonly uid: int = -1;
     public readonly enable: boolean = false;
 }
 
 export interface BadgeNumberCallbackData {
     readonly bundle: string;
-    readonly uid: number;
-    readonly badgeNumber: number;
-    readonly instanceKey?: number;
+    readonly uid: int;
+    readonly badgeNumber: int;
+    readonly instanceKey?: int;
     readonly appInstanceKey?: string;
 }
 
 class BadgeNumberCallbackDataInner implements BadgeNumberCallbackData {
     public readonly bundle: string = '';
-    public readonly uid: number = -1;
-    public readonly badgeNumber: number = -1;
-    public readonly instanceKey?: number;
+    public readonly uid: int = -1;
+    public readonly badgeNumber: int = -1;
+    public readonly instanceKey?: int;
     public readonly appInstanceKey?: string;
 }
 

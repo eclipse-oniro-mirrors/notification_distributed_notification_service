@@ -35,6 +35,7 @@ bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);
 ani_object CreateInt(ani_env *env, int32_t value);
+ani_object CreateLong(ani_env *env, int64_t value);
 bool CreateDate(ani_env *env, int64_t time, ani_object &outObj);
 bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time);
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string &aniStr);
@@ -51,11 +52,17 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, bool &outvalue);
 ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_double &outvalue);
+ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
+    ani_boolean &isUndefined, ani_int &outvalue);
+ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
+    ani_boolean &isUndefined, ani_long &outvalue);
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_ref &outRef);
 ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<std::string> &res);
 ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<int64_t> &res);
+ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<int64_t> &res);
 
 void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef);
@@ -66,12 +73,13 @@ bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value);
 bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, double value);
-bool SetOptionalFieldArrayDouble(ani_env *env, ani_class cls, ani_object &object, const std::string &fieldName,
+bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, const std::string &fieldName,
     const std::vector<std::int64_t> &values);
 
 // property
 bool SetPropertyOptionalByBoolean(ani_env *env, ani_object &object, const char *name, bool value);
 bool SetPropertyOptionalByDouble(ani_env *env, ani_object &object, const char *name, double value);
+bool SetPropertyOptionalByLong(ani_env *env, ani_object &object, const char *name, int64_t value);
 bool SetPropertyOptionalByString(ani_env *env, ani_object &object, const char *name, const std::string value);
 bool SetPropertyOptionalByInt(ani_env *env, ani_object &object, const char *name, int32_t value);
 bool SetPropertyByRef(ani_env *env, ani_object &object, const char *name, ani_ref value);

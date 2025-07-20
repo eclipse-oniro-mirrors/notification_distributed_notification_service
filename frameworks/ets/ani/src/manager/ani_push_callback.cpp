@@ -124,10 +124,10 @@ bool StsPushCallBack::WarpFunctionResult(ani_env *env, ani_object obj, ResultPar
     ANS_LOGD("enter");
     if (env == nullptr || obj == nullptr) return false;
     ani_status status = ANI_OK;
-    ani_double code;
+    ani_int code;
     ani_ref msg;
     std::string message = "";
-    if (ANI_OK != (status = env->Object_GetPropertyByName_Double(obj, "code", &code))) {
+    if (ANI_OK != (status = env->Object_GetPropertyByName_Int(obj, "code", &code))) {
         ANS_LOGE("WarpFunctionResult. code faild. status %{public}d", status);
         return false;
     }

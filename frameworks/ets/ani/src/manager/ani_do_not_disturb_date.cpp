@@ -44,7 +44,7 @@ void AniSetDoNotDisturbDate(ani_env *env, ani_object date)
     ANS_LOGD("AniSetDoNotDisturbDate end");
 }
 
-void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double userId)
+void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_int userId)
 {
     ANS_LOGD("AniSetDoNotDisturbDateWithId enter");
     Notification::NotificationDoNotDisturbDate doNotDisturbDate;
@@ -53,8 +53,7 @@ void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double user
         NotificationSts::ThrowStsErroWithMsg(env, "UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
         return;
     }
-    const int32_t id = static_cast<int32_t>(userId);
-    int returncode = Notification::NotificationHelper::SetDoNotDisturbDate(id, doNotDisturbDate);
+    int returncode = Notification::NotificationHelper::SetDoNotDisturbDate(userId, doNotDisturbDate);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("SetDoNotDisturbDate erro. returncode: %{public}d, externalCode: %{public}d",
@@ -86,13 +85,12 @@ ani_object AniGetDoNotDisturbDate(ani_env *env)
     return data;
 }
 
-ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_double userId)
+ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_int userId)
 {
     ani_object data = nullptr;
     Notification::NotificationDoNotDisturbDate doNotDisturbDate;
     ANS_LOGD("AniGetDoNotDisturbDateWithId enter");
-    const int32_t id = static_cast<int32_t>(userId);
-    int returncode = Notification::NotificationHelper::GetDoNotDisturbDate(id, doNotDisturbDate);
+    int returncode = Notification::NotificationHelper::GetDoNotDisturbDate(userId, doNotDisturbDate);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("GetDoNotDisturbDate erro. returncode: %{public}d, externalCode: %{public}d",

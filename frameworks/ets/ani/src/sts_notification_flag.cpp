@@ -55,9 +55,9 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
         ANS_LOGE("WarpNotificationFlags set 'vibrationEnabled' faild");
         return false;
     }
-    // readonly reminderFlags?: number;
+    // readonly reminderFlags?: long;
     uint32_t reminderFlags = flags->GetReminderFlags();
-    if (!SetPropertyOptionalByDouble(env, flagsObject, "reminderFlags", reminderFlags)) {
+    if (!SetPropertyOptionalByLong(env, flagsObject, "reminderFlags", static_cast<int64_t>(reminderFlags))) {
         ANS_LOGD("WarpNotificationFlags set 'reminderFlags' faild");
     }
     return true;

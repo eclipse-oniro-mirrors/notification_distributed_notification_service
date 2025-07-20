@@ -75,12 +75,12 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
     } else {
         ANS_LOGD("UnWarpDistributedOptions: supportOperateDevices get failed");
     }
-    // readonly remindType?: number;
-    ani_double remindType = 0.0;
+    // readonly remindType?: int;
+    ani_int remindType = 0;
     isUndefined = ANI_TRUE;
-    if (ANI_OK == GetPropertyDouble(env, obj, "remindType", isUndefined, remindType)
+    if (ANI_OK == GetPropertyInt(env, obj, "remindType", isUndefined, remindType)
         && isUndefined == ANI_FALSE) {
-        distributedOptions.remindType = static_cast<int32_t>(remindType);
+        distributedOptions.remindType = remindType;
     } else {
         ANS_LOGD("UnWarpDistributedOptions: remindType get failed");
     }
@@ -264,37 +264,37 @@ void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
         ANS_LOGD("GetNotificationRequestByNumber failed, has nullptr");
         return;
     }
-    ani_double mDouble = 0.0;
+    ani_int mInt = 0;
+    ani_long mLong = 0;
     ani_boolean isUndefined = ANI_TRUE;
-    if (ANI_OK == GetPropertyDouble(env, obj, "id", isUndefined, mDouble) && isUndefined == ANI_FALSE) {
-        request->SetNotificationId(static_cast<int32_t>(mDouble));
+    if (ANI_OK == GetPropertyInt(env, obj, "id", isUndefined, mInt) && isUndefined == ANI_FALSE) {
+        request->SetNotificationId(mInt);
     } else {
         request->SetNotificationId(0);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "deliveryTime", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "deliveryTime", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetDeliveryTime(static_cast<int32_t>(mDouble));
+        request->SetDeliveryTime(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "autoDeletedTime", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "autoDeletedTime", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetAutoDeletedTime(static_cast<int32_t>(mDouble));
+        request->SetAutoDeletedTime(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "color", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "color", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetColor(static_cast<int32_t>(mDouble));
+        request->SetColor(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "badgeIconStyle", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyInt(env, obj, "badgeIconStyle", isUndefined, mInt)
         && isUndefined == ANI_FALSE) {
-        int32_t style = static_cast<int32_t>(mDouble);
-        request->SetBadgeIconStyle(static_cast<NotificationRequest::BadgeStyle>(style));
+        request->SetBadgeIconStyle(static_cast<NotificationRequest::BadgeStyle>(mInt));
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "badgeNumber", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "badgeNumber", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetBadgeNumber(static_cast<int32_t>(mDouble));
+        request->SetBadgeNumber(mLong);
     }
-    if (ANI_OK == GetPropertyDouble(env, obj, "notificationControlFlags", isUndefined, mDouble)
+    if (ANI_OK == GetPropertyLong(env, obj, "notificationControlFlags", isUndefined, mLong)
         && isUndefined == ANI_FALSE) {
-        request->SetNotificationControlFlags(static_cast<int32_t>(mDouble));
+        request->SetNotificationControlFlags(static_cast<uint32_t>(mLong));
     }
     ANS_LOGD("GetNotificationRequestByNumber end");
 }
@@ -845,30 +845,30 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
         ANS_LOGE("request is nullptr");
         return false;
     }
-    // id?: number
-    SetPropertyOptionalByDouble(env, object, "id", request->GetNotificationId());
+    // id?: int
+    SetPropertyOptionalByInt(env, object, "id", request->GetNotificationId());
     // slotType?: SlotType
     ani_enum_item slotTypeItem {};
     if (SlotTypeCToEts(env, request->GetSlotType(), slotTypeItem)) {
         CallSetter(env, cls, object, "notificationSlotType", slotTypeItem);
     }
-    // deliveryTime?: number
-    SetPropertyOptionalByDouble(env, object, "deliveryTime", request->GetDeliveryTime());
-    // autoDeletedTime?: number
-    SetPropertyOptionalByDouble(env, object, "autoDeletedTime", request->GetAutoDeletedTime());
-    // color ?: number
-    SetPropertyOptionalByDouble(env, object, "color", request->GetColor());
-    // badgeIconStyle ?: number
-    SetPropertyOptionalByDouble(env, object, "badgeIconStyle",
+    // deliveryTime?: long
+    SetPropertyOptionalByLong(env, object, "deliveryTime", request->GetDeliveryTime());
+    // autoDeletedTime?: long
+    SetPropertyOptionalByLong(env, object, "autoDeletedTime", request->GetAutoDeletedTime());
+    // color ?: long
+    SetPropertyOptionalByLong(env, object, "color", request->GetColor());
+    // badgeIconStyle ?: int
+    SetPropertyOptionalByInt(env, object, "badgeIconStyle",
         static_cast<int32_t>(request->GetBadgeIconStyle()));
-    // readonly creatorUid?: number
-    SetPropertyOptionalByDouble(env, object, "creatorUid", request->GetCreatorUid());
-    // readonly creatorPid?: number
-    SetPropertyOptionalByDouble(env, object, "creatorPid", request->GetCreatorPid());
-    // badgeNumber?: number
-    SetPropertyOptionalByDouble(env, object, "badgeNumber", request->GetBadgeNumber());
-    // readonly creatorInstanceKey?: number
-    SetPropertyOptionalByDouble(env, object, "creatorInstanceKey", request->GetCreatorInstanceKey());
+    // readonly creatorUid?: int
+    SetPropertyOptionalByInt(env, object, "creatorUid", request->GetCreatorUid());
+    // readonly creatorPid?: int
+    SetPropertyOptionalByInt(env, object, "creatorPid", request->GetCreatorPid());
+    // badgeNumber?: long
+    SetPropertyOptionalByLong(env, object, "badgeNumber", request->GetBadgeNumber());
+    // readonly creatorInstanceKey?: int
+    SetPropertyOptionalByInt(env, object, "creatorInstanceKey", request->GetCreatorInstanceKey());
     return true;
 }
 
