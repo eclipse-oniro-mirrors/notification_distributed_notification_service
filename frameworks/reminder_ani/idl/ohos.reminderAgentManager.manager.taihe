@@ -65,12 +65,12 @@ struct ActionButton {
 }
 
 struct LocalDateTime {
-    year: f64;
-    month: f64;
-    day: f64;
-    hour: f64;
-    minute: f64;
-    second: Optional<f64>;
+    year: i32;
+    month: i32;
+    day: i32;
+    hour: i32;
+    minute: i32;
+    second: Optional<i32>;
 }
 
 struct ReminderRequest {
@@ -78,22 +78,22 @@ struct ReminderRequest {
     actionButton: Optional<Array<ActionButton>>;
     wantAgent: Optional<WantAgent>;
     maxScreenWantAgent: Optional<MaxScreenWantAgent>;
-    ringDuration: Optional<f64>;
-    snoozeTimes: Optional<f64>;
-    timeInterval: Optional<f64>;
+    ringDuration: Optional<i64>;
+    snoozeTimes: Optional<i32>;
+    timeInterval: Optional<i64>;
     title: Optional<String>;
-    titleResourceId: Optional<f64>;
+    titleResourceId: Optional<i32>;
     content: Optional<String>;
-    contentResourceId: Optional<f64>;
+    contentResourceId: Optional<i32>;
     expiredContent: Optional<String>;
-    expiredContentResourceId: Optional<f64>;
+    expiredContentResourceId: Optional<i32>;
     snoozeContent: Optional<String>;
-    snoozeContentResourceId: Optional<f64>;
-    notificationId: Optional<f64>;
+    snoozeContentResourceId: Optional<i32>;
+    notificationId: Optional<i32>;
     groupId: Optional<String>;
     slotType: Optional<@sts_type("notification.SlotType") Opaque>;
     tapDismissed: Optional<bool>;
-    autoDeletedTime: Optional<f64>;
+    autoDeletedTime: Optional<i64>;
     snoozeSlotType: Optional<@sts_type("notification.SlotType") Opaque>;
     customRingUri: Optional<String>;
 }
@@ -101,23 +101,23 @@ struct ReminderRequest {
 struct ReminderRequestCalendar {
     @extends base: ReminderRequest;
     dateTime: LocalDateTime;
-    repeatMonths: Optional<Array<f64>>;
-    repeatDays: Optional<Array<f64>>;
-    daysOfWeek: Optional<Array<f64>>;
+    repeatMonths: Optional<Array<i32>>;
+    repeatDays: Optional<Array<i32>>;
+    daysOfWeek: Optional<Array<i32>>;
     endDateTime: Optional<LocalDateTime>;
     rruleWantAgent: Optional<WantAgent>;
 }
 
 struct ReminderRequestAlarm {
     @extends base: ReminderRequest;
-    hour: f64;
-    minute: f64;
-    daysOfWeek: Optional<Array<f64>>;
+    hour: i32;
+    minute: i32;
+    daysOfWeek: Optional<Array<i32>>;
 }
 
 struct ReminderRequestTimer {
     @extends base: ReminderRequest;
-    triggerTimeInSeconds: f64;
+    triggerTimeInSeconds: i64;
 }
 
 union ParamReminder {
@@ -128,17 +128,17 @@ union ParamReminder {
 }
 
 struct ReminderInfo {
-    reminderId: f64;
+    reminderId: i32;
     reminderReq: ParamReminder;
 }
 
 @gen_async("publishReminder")
 @gen_promise("publishReminder")
-function PublishReminderSync(reminderReq: ParamReminder): f64;
+function PublishReminderSync(reminderReq: ParamReminder): i32;
 
 @gen_async("cancelReminder")
 @gen_promise("cancelReminder")
-function CancelReminderSync(reminderId: f64): void;
+function CancelReminderSync(reminderId: i32): void;
 
 @gen_async("getValidReminders")
 @gen_promise("getValidReminders")
@@ -157,13 +157,13 @@ function AddNotificationSlotSync(slot: @sts_type("NotificationSlot") Opaque): vo
 function RemoveNotificationSlotSync(slotType: @sts_type("notification.SlotType") Opaque): void;
 
 @gen_promise("addExcludeDate")
-function AddExcludeDateSync(reminderId: f64, date: @sts_type("Date") Opaque): void;
+function AddExcludeDateSync(reminderId: i32, date: @sts_type("Date") Opaque): void;
 
 @gen_promise("deleteExcludeDates")
-function DeleteExcludeDatesSync(reminderId: f64): void;
+function DeleteExcludeDatesSync(reminderId: i32): void;
 
 @gen_promise("getExcludeDates")
-function GetExcludeDatesSync(reminderId: f64): Array<@sts_type("Date") Opaque>;
+function GetExcludeDatesSync(reminderId: i32): Array<@sts_type("Date") Opaque>;
 
 @gen_promise("getAllValidReminders")
 function GetAllValidRemindersSync(): Array<ReminderInfo>;

@@ -58,7 +58,7 @@ public:
     static bool UnWarpSlotType(uintptr_t slotType, Notification::NotificationConstant::SlotType& outSlot);
 
 private:
-    static bool ParseIntArray(const ::taihe::array<double>& values, std::vector<uint8_t>& result, uint8_t maxLen);
+    static bool ParseIntArray(const ::taihe::array<int32_t>& values, std::vector<uint8_t>& result, uint8_t maxLen);
 
     static bool ParseIntParam(const ::ohos::reminderAgentManager::manager::ReminderRequest& reminderReq,
         std::shared_ptr<Notification::ReminderRequest>& reminder);
