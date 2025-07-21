@@ -709,6 +709,10 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
     std::vector<sptr<DistributedBundleOption>> affectBundleOption;
     for (auto distributedBundle : bundles) {
         std::string bundleName = distributedBundle->GetBundle()->GetBundleName();
+        if (bundleName.empty()) {
+            ANS_LOGW("unaffet bundle. empty bundle");
+            continue;
+        }
         int32_t uid = distributedBundle->GetBundle()->GetUid();
         sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
         sptr<NotificationBundleOption> returnOption = GenerateValidBundleOption(bundleOption);
