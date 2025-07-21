@@ -1192,31 +1192,39 @@ napi_value Common::GetDistributedBundleOption(
     napi_value result = nullptr;
 
     // bundle: NotificationBundleOption
-    NAPI_CALL(env, napi_has_named_property(env, value, "bundle", &hasProperty));
-    if (!hasProperty) {
-        ANS_LOGE("Property bundle expected.");
-        std::string msg = "Property bundle expected.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
-    napi_get_named_property(env, value, "bundle", &result);
-    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-    if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. object expected.");
-        std::string msg = "Incorrect parameter types. The type of bundle must be object.";
-        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
     std::shared_ptr<NotificationBundleOption> bundleOption = std::make_shared<NotificationBundleOption>();
     if (bundleOption == nullptr) {
         ANS_LOGE("bundleOption is null");
         return nullptr;
     }
-    auto retValue = Common::GetBundleOption(env, result, bundleOption);
-    if (retValue == nullptr) {
-        ANS_LOGE("null retValue");
+    
+    // bundleName
+    char str[STR_MAX_SIZE] = {0};
+    size_t strLen = 0;
+    napi_get_named_property(env, value, "bundleName", &result);
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_string) {
+        ANS_LOGE("Wrong argument type. string expected.");
+        std::string msg = "Incorrect parameter bundleName. The type of bundleName must be string.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
+    NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+    bundleOption->SetBundleName(str);
+
+    // uid
+    int32_t uid = 0;
+    napi_get_named_property(env, value, "uid", &result);
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. number expected.");
+        std::string msg = "Incorrect parameter uid. The type of uid must be number.";
+        Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    napi_get_value_int32(env, result, &uid);
+    bundleOption->SetUid(uid);
+
     option.SetBundle(bundleOption);
 
     // enable?: bool
