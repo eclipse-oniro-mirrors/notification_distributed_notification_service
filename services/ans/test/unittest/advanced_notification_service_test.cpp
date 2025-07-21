@@ -61,6 +61,9 @@ extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 
 namespace OHOS {
 namespace Notification {
+namespace {
+constexpr int32_t MAX_USER_ID = 10737;
+}
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsNonBundleName(bool isNonBundleName);
@@ -4670,10 +4673,10 @@ HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00002, Func
     notificationDisable->SetUserId(userId);
     auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
     EXPECT_EQ(ret, ERR_OK);
-    userId++;
+    userId = MAX_USER_ID;
     notificationDisable->SetUserId(userId);
     ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

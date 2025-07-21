@@ -2097,6 +2097,16 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         ANS_LOGE("serial queue is invalid");
         return ERR_ANS_INVALID_PARAM;
     }
+    int32_t userId = notificationDisable->GetUserId();
+    if (userId != SUBSCRIBE_USER_INIT) {
+        std::vector<int32_t> userIds;
+        if (OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds) == ERR_OK) {
+            if (std::find(userIds.begin(), userIds.end(), userId) == userIds.end()) {
+                ANS_LOGE("userId %{public}d is not exist", notificationDisable->GetUserId());
+                return ERR_ANS_INVALID_PARAM;
+            }
+        }
+    }
     ffrt::task_handle handler =
         notificationSvrQueue_->submit_h(std::bind([copyNotificationDisable = notificationDisable]() {
             ANS_LOGD("the ffrt enter");
@@ -2104,7 +2114,6 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         }));
     notificationSvrQueue_->wait(handler);
     if (notificationDisable->GetDisabled()) {
-        int32_t userId = notificationDisable->GetUserId();
         if (userId != SUBSCRIBE_USER_INIT) {
             int32_t currentUserId = SUBSCRIBE_USER_INIT;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId) != ERR_OK) {
