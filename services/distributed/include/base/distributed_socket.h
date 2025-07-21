@@ -31,9 +31,9 @@ int32_t ClientBind(const std::string& name, const std::string& pkgName,
 
 void CloseSocket(int32_t socketId);
 
-int32_t ClientSendBytes(int32_t socketId, const void* data, int32_t length);
+int32_t ClientSendBytes(int32_t socketId, const void* data, uint32_t length);
 
-int32_t ClientSendMessage(int32_t socketId, const void* data, int32_t length);
+int32_t ClientSendMessage(int32_t socketId, const void* data, uint32_t length);
 }
 }
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SOCKET_H

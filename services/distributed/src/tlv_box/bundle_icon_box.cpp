@@ -138,6 +138,11 @@ bool BundleIconBox::GetBundleList(std::vector<std::string>& bundleList)
     if (box_->GetMessageType(messageType)) {
         index = (messageType == BUNDLE_ICON_SYNC) ? ICON_START_INDEX : BUNDLE_START_INDEX;
     }
+    if (length < 0 || length > MAX_BUNDLE_NUM) {
+        ANS_LOGW("Invalid bundles %{public}d.", length);
+        return false;
+    }
+
     for (int i = 0; i < length; i++) {
         std::string bundleName;
         if (box_->GetStringValue(index + i, bundleName))
