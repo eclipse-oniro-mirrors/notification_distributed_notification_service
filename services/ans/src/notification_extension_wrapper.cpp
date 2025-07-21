@@ -329,7 +329,7 @@ bool ExtensionWrapper::NotificationDialogControl()
         return true;
     }
     bool result = notificationDialogControl_();
-    ANS_LOGI("notificationDialogControl_ result = %{public}d", result);
+    ANS_LOGI("result = %{public}d", result);
     return result;
 }
 

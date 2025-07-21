@@ -451,7 +451,6 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 
     DelayedSingleton<DistributedDeviceStatus>::GetInstance()->SetDeviceStatus(deviceType, status_,
         DistributedDeviceStatus::DISTURB_DEFAULT_FLAG);
-    ANS_LOGI("update %{public}s status %{public}u", deviceType.c_str(), status);
     return ERR_OK;
 }
 

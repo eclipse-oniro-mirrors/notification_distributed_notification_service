@@ -183,7 +183,7 @@ ErrCode NotificationPreferences::RemoveNotificationAllSlots(const sptr<Notificat
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
         message.ErrorCode(result).Append(" Remove all slot successful.");
-        ANS_LOGI("%{public}s_%{public}d, Remove all slot successful.",
+        ANS_LOGI("%{public}s_%{public}d, Remove successful.",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     }
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -1705,7 +1705,6 @@ void NotificationPreferences::SetDistributedEnabledForBundle(const NotificationP
     if (!isCachedMirrorNotificationEnabledStatus_) {
         if (!DelayedSingleton<NotificationConfigParse>::GetInstance()->GetMirrorNotificationEnabledStatus(
             mirrorNotificationEnabledStatus_)) {
-            ANS_LOGE("Get mirror status failed");
             return;
         }
         isCachedMirrorNotificationEnabledStatus_ = true;

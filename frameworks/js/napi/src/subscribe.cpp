@@ -178,7 +178,7 @@ SubscriberInstance::~SubscriberInstance()
 
 void ThreadSafeOnCancel(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -234,7 +234,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         ANS_LOGE("null sortingMap");
         return;
     }
-    ANS_LOGI("OnCanceled NotificationKey = %{public}s. sortingMap size = %{public}zu. deleteReason = %{public}d",
+    ANS_LOGI("Key = %{public}s. sortingMap size = %{public}zu. deleteReason = %{public}d",
         request->GetKey().c_str(), sortingMap->GetKey().size(), deleteReason);
     ANS_LOGD("SubscriberInstance::OnCanceled instanceKey: %{public}s", request->GetInstanceKey().c_str());
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
@@ -256,7 +256,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
 
 void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -290,7 +290,7 @@ void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context,
     }
     uint32_t elementCount = 0;
     napi_get_array_length(env, resultArray, &elementCount);
-    ANS_LOGI("notification array length: %{public}d ", elementCount);
+    ANS_LOGI("Notifications size: %{public}d ", elementCount);
     if (elementCount > 0) {
         Common::SetCallback(env, subscriber->GetCallbackInfo(BATCH_CANCEL).ref, resultArray);
     }
@@ -316,13 +316,12 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
         ANS_LOGE("null sortingMap");
         return;
     }
-    ANS_LOGI("OnBatchCancel deleteReason = %{public}d, sortingMap size = %{public}zu",
-        deleteReason, sortingMap->GetKey().size());
     std::string notificationKeys = "";
     for (auto notification : requestList) {
         notificationKeys.append(notification->GetKey()).append("-");
     }
-    ANS_LOGI("OnBatchCancel. cancel keys = %{public}s", notificationKeys.c_str());
+    ANS_LOGI("Reason = %{public}d, sortingMap size = %{public}zu, keys = %{public}s",
+        deleteReason, sortingMap->GetKey().size(), notificationKeys.c_str());
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
@@ -352,6 +351,7 @@ bool SubscriberInstance::HasOnBatchCancelCallback()
 
 void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, void* data)
 {
+    ANS_LOGI("called");
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     auto additionalData = dataWorkerData->request->GetNotificationRequest().GetAdditionalData();
     if (additionalData && additionalData->HasParam("_oh_ans_sys_traceid")) {
@@ -424,7 +424,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
         return;
     }
     auto notificationFlags = request->GetNotificationRequest().GetFlags();
-    ANS_LOGI("OnConsumed Notification key = %{public}s, sortingMap size = %{public}zu, notificationFlag = %{public}s",
+    ANS_LOGI("key = %{public}s, sortingMap size = %{public}zu, notificationFlag = %{public}s",
         request->GetKey().c_str(), sortingMap->GetKey().size(),
         notificationFlags == nullptr ? "null" : notificationFlags->Dump().c_str());
     ANS_LOGD("OnConsumed instanceKey: %{public}s", request->GetInstanceKey().c_str());
@@ -447,7 +447,7 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
 
 void ThreadSafeOnUpdate(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -493,7 +493,7 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
         ANS_LOGE("null sortingMap");
         return;
     }
-    ANS_LOGI("OnUpdate sortingMap size = %{public}zu", sortingMap->GetKey().size());
+    ANS_LOGI("sortingMap size = %{public}zu", sortingMap->GetKey().size());
 
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
     if (dataWorker == nullptr) {
@@ -512,7 +512,7 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
 
 void ThreadSafeOnConnected(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
         ANS_LOGE("null dataWorkerData");
@@ -542,7 +542,7 @@ void SubscriberInstance::OnConnected()
     }
 
     if (tsfn_ == nullptr) {
-        ANS_LOGI("null tsfn");
+        ANS_LOGW("null tsfn");
         return;
     }
 
@@ -562,7 +562,7 @@ void SubscriberInstance::OnConnected()
 
 void ThreadSafeOnDisconnected(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -613,7 +613,7 @@ void SubscriberInstance::OnDisconnected()
 
 void ThreadSafeOnDestroy(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -659,7 +659,7 @@ void SubscriberInstance::OnDied()
 
 void ThreadSafeOnDoNotDisturbDateChange(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -727,7 +727,7 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 
 void ThreadSafeOnDoNotDisturbChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -788,7 +788,7 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
 
 void ThreadSafeOnEnabledNotificationChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -854,7 +854,7 @@ void SubscriberInstance::OnEnabledNotificationChanged(
 
 void ThreadSafeOnBadgeChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {
@@ -919,7 +919,7 @@ void SubscriberInstance::OnBadgeChanged(
 
 void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* context, void* data)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("called");
 
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
     if (dataWorkerData == nullptr) {

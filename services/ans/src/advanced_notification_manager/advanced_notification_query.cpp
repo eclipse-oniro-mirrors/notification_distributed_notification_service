@@ -210,10 +210,9 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         return ERR_ANS_INVALID_BUNDLE;
     }
     // get other bundle notification need controller permission
-    if (bundle->GetUid() == IPCSkeleton::GetCallingUid()) {
-        ANS_LOGI("Get self notification uid: %{public}d, curUid: %{public}d.",
+    if (bundle->GetUid() != IPCSkeleton::GetCallingUid()) {
+        ANS_LOGI_LIMIT("None-self call, uid: %{public}d, curUid: %{public}d.",
             bundle->GetUid(), IPCSkeleton::GetCallingUid());
-    } else {
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             ANS_LOGE("Get live view by filter failed because check permission is false.");
             return ERR_ANS_PERMISSION_DENIED;

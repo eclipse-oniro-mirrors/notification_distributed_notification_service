@@ -54,7 +54,7 @@ napi_value Common::NapiGetUndefined(napi_env env)
 
 napi_value Common::CreateErrorValue(napi_env env, int32_t errCode, bool newType)
 {
-    ANS_LOGI("called, errorCode[%{public}d]", errCode);
+    ANS_LOGD("called, errorCode[%{public}d]", errCode);
     napi_value error = Common::NapiGetNull(env);
     if (errCode == ERR_OK && newType) {
         return error;

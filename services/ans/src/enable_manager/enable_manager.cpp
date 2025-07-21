@@ -72,12 +72,12 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
 
 ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string& bundleName, int32_t uid)
 {
-    ANS_LOGI("RequestEnableNotification bundleName = %{public}s uid = %{public}d", bundleName.c_str(), uid);
+    ANS_LOGI("bundleName = %{public}s uid = %{public}d", bundleName.c_str(), uid);
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_PERMISSION_DENIED;
     }
     if (bundleName == BUNDLE_NAME_ZYT || bundleName == BUNDLE_NAME_ABROAD) {
-        ANS_LOGI("RequestEnableNotification zyt or abroad");
+        ANS_LOGE("zyt or abroad");
         return ERR_ANS_NOT_ALLOWED;
     }
 
@@ -87,7 +87,7 @@ ErrCode AdvancedNotificationService::RequestEnableNotification(const std::string
         bundleInfo, ZERO_USER_ID);
     bool easyAbroad = false;
     if (bundleInfo.applicationInfo.installSource == INSTALL_SOURCE_EASYABROAD) {
-        ANS_LOGI("RequestEnableNotification abroad app");
+        ANS_LOGW("abroad app");
         easyAbroad = true;
     }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
@@ -140,7 +140,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         return ERROR_INTERNAL_ERROR;
     }
     if (hasPopped) {
-        ANS_LOGE("Has popped is true.");
+        ANS_LOGW("Has popped is true.");
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
@@ -151,7 +151,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             return ERR_ANS_NOT_ALLOWED;
         } else {
-            ANS_LOGI("duplicated popped.");
+            ANS_LOGW("duplicated popped.");
             message.Append(" duplicated popped.");
         }
 #else
@@ -177,7 +177,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         result = ERR_ANS_DIALOG_POP_SUCCEEDED;
     }
 
-    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), result);
     message.ErrorCode(result);
     if (!innerLake || result == ERR_ANS_DIALOG_POP_SUCCEEDED) {
@@ -298,7 +298,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     }
 
     ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
-        "Set notifications enabled for special bundle result: %{public}d", bundleOption->GetBundleName().c_str(),
+        "result: %{public}d", bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), std::to_string(enabled).c_str(), result);
         message.ErrorCode(result).BranchId(BRANCH_9);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -386,7 +386,7 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
 
     canPop = true;
     bundleName = bundleOption->GetBundleName();
-    ANS_LOGI("%{public}s_%{public}d, canPop: %{public}s, CanPopEnableNotificationDialog result: %{public}d",
+    ANS_LOGI("%{public}s_%{public}d, canPop: %{public}s, result: %{public}d",
         bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), std::to_string(canPop).c_str(), result);
     message.ErrorCode(result).Append(" CanPopEnableNotificationDialog end");
     NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -407,7 +407,7 @@ ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog()
 
 ErrCode AdvancedNotificationService::RemoveEnableNotificationDialog(const sptr<NotificationBundleOption> &bundleOption)
 {
-    ANS_LOGI("RemoveEnableNotificationDialog  %{public}s, %{public}d",
+    ANS_LOGI("%{public}s, %{public}d",
         bundleOption->GetBundleName().c_str(),
         bundleOption->GetUid());
     if (!CreateDialogManager()) {

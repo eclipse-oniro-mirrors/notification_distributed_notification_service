@@ -52,7 +52,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
             ANS_LOGD("NapiDisplayBadge work excute.");
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
-                ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d enable = %{public}d",
+                ANS_LOGI("bundle=%{public}s uid=%{public}d enable=%{public}d",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.enable);
@@ -141,7 +141,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
             AsyncCallbackInfoIsDisplayBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoIsDisplayBadge *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
-                    ANS_LOGI("option.bundle = %{public}s option.uid = %{public}d",
+                    ANS_LOGI("bundle=%{public}s uid=%{public}d",
                         asynccallbackinfo->params.option.GetBundleName().c_str(),
                         asynccallbackinfo->params.option.GetUid());
                     asynccallbackinfo->info.errorCode = NotificationHelper::GetShowBadgeEnabledForBundle(
@@ -322,7 +322,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
             ANS_LOGD("Napi set badge number by bundle work execute.");
             AsyncCallbackSetBadgeNumber *asyncCallbackInfo = static_cast<AsyncCallbackSetBadgeNumber *>(data);
             if (asyncCallbackInfo) {
-                ANS_LOGI("Option.bundle = %{public}s, option.uid = %{public}d, badge number = %{public}d.",
+                ANS_LOGI("bundle=%{public}s uid=%{public}d badge=%{public}d",
                     asyncCallbackInfo->params.option.GetBundleName().c_str(),
                     asyncCallbackInfo->params.option.GetUid(),
                     asyncCallbackInfo->params.badgeNumber);

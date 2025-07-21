@@ -32,7 +32,7 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
 {
     auto const &want = data.GetWant();
     std::string action = want.GetAction();
-    ANS_LOGI("DistributedEventSubscriber receiver event %{public}s", action.c_str());
+    ANS_LOGI("receive %{public}s", action.c_str());
 #ifdef DISTRIBUTED_FEATURE_MASTER
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         OperationService::GetInstance().HandleScreenEvent();

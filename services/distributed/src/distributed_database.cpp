@@ -85,7 +85,7 @@ void DistributedDatabase::GetKvStore()
     bool enable = false;
     DistributedPreferences::GetInstance()->GetDistributedEnable(enable);
     if (!enable) {
-        ANS_LOGI("DistributedEnable is false, no need to create db.");
+        ANS_LOGI("enable false, don't create db.");
         return;
     }
 
