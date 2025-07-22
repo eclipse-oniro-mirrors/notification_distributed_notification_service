@@ -200,7 +200,11 @@ void DistributedPublishService::OnRemoveNotification(const DistributedDeviceInfo
         ANS_LOGW("dans OnCanceled serialize failed");
         return;
     }
-    DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_MESSAGE,
+    TransDataType dataType = TransDataType::DATA_TYPE_MESSAGE;
+    if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        dataType = TransDataType::DATA_TYPE_BYTES;
+    }
+    DistributedClient::GetInstance().SendMessage(removeBox, dataType,
         peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
 }
 
@@ -221,7 +225,11 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
         ANS_LOGW("dans OnCanceled serialize failed");
         return;
     }
-    DistributedClient::GetInstance().SendMessage(batchRemoveBox, TransDataType::DATA_TYPE_MESSAGE,
+    TransDataType dataType = TransDataType::DATA_TYPE_MESSAGE;
+    if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
+        dataType = TransDataType::DATA_TYPE_BYTES;
+    }
+    DistributedClient::GetInstance().SendMessage(batchRemoveBox, dataType,
         peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
 }
 
@@ -243,7 +251,7 @@ void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDev
     }
     ANS_LOGI("RemoveAllDistributedNotifications ID:%{public}s",
         StringAnonymous(deviceInfo.deviceId_).c_str());
-    DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_MESSAGE,
+    DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_BYTES,
         deviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);
 }
 
@@ -268,7 +276,7 @@ bool DistributedPublishService::ForWardRemove(const std::shared_ptr<BoxBase>& bo
             ANS_LOGD("no need ForWardRemove");
             continue;
         }
-        DistributedClient::GetInstance().SendMessage(boxMessage, TransDataType::DATA_TYPE_MESSAGE,
+        DistributedClient::GetInstance().SendMessage(boxMessage, TransDataType::DATA_TYPE_BYTES,
             peerDeviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);
         ANS_LOGI("ForWardRemove,deviceId:%{public}s", StringAnonymous(peerDeviceInfo.deviceId_).c_str());
     }
