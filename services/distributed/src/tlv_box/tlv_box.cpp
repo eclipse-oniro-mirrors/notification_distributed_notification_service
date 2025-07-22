@@ -42,7 +42,7 @@ int32_t TlvItem::GetType() const
     return type_;
 }
 
-int32_t TlvItem::GetLength() const
+uint32_t TlvItem::GetLength() const
 {
     return length_;
 }
@@ -52,7 +52,7 @@ unsigned char* TlvItem::GetValue() const
     return value_;
 }
 
-void TlvItem::Initialize(const void* data, int32_t length)
+void TlvItem::Initialize(const void* data, uint32_t length)
 {
     if (length > MAX_BUFFER_LENGTH) {
         ANS_LOGW("Initialize data invalid %{public}d %{public}d %{public}d", type_, length, length_);
@@ -101,7 +101,7 @@ TlvItem::TlvItem(int32_t type, const TlvItem& value) : type_(type)
     Initialize(value.GetValue(), value.GetLength());
 }
 
-TlvItem::TlvItem(int32_t type, const unsigned char* value, int32_t length) : type_(type)
+TlvItem::TlvItem(int32_t type, const unsigned char* value, uint32_t length) : type_(type)
 {
     Initialize(value, length);
 }
@@ -169,6 +169,10 @@ bool TlvBox::GetInt32Value(int32_t type, int32_t& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
+        if (iter->second->GetLength() < sizeof(int32_t)) {
+            ANS_LOGW("Invalid item %{public}d %{public}u.", type, iter->second->GetLength());
+            return false;
+        }
         value = ntohl((*(int32_t*)(iter->second->GetValue())));
         return true;
     }
@@ -179,6 +183,10 @@ bool TlvBox::GetInt64Value(int32_t type, int64_t& value)
 {
     auto iter = TlvMap_.find(type);
     if (iter != TlvMap_.end()) {
+        if (iter->second->GetLength() < sizeof(uint64_t)) {
+            ANS_LOGW("Invalid item %{public}d %{public}u.", type, iter->second->GetLength());
+            return false;
+        }
         value = static_cast<int64_t>(Ntohll((*(uint64_t*)(iter->second->GetValue()))));
         return true;
     }
@@ -194,7 +202,7 @@ bool TlvBox::GetObjectValue(int32_t type, TlvBox& value)
     return value.Parse(iter->second->GetValue(), iter->second->GetLength());
 }
 
-bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
+bool TlvBox::Parse(const unsigned char* buffer, uint32_t buffersize)
 {
     if (buffer == NULL) {
         return false;
@@ -211,12 +219,25 @@ bool TlvBox::Parse(const unsigned char* buffer, int32_t buffersize)
         return false;
     }
 
-    int offset = 0;
+    uint32_t offset = 0;
     while (offset < buffersize) {
+        if (offset + sizeof(int32_t) > buffersize) {
+            delete[] cached;
+            return false;
+        }
         int32_t type = ntohl((*(int32_t*)(cached + offset)));
         offset += sizeof(int32_t);
+        if (offset + sizeof(int32_t) > buffersize) {
+            delete[] cached;
+            return false;
+        }
         int32_t length = ntohl((*(int32_t*)(cached + offset)));
         offset += sizeof(int32_t);
+        if (static_cast<uint32_t>(length) > buffersize ||
+            offset + static_cast<uint32_t>(length) > buffersize) {
+            delete[] cached;
+            return false;
+        }
         PutValue(std::make_shared<TlvItem>(type, cached + offset, length));
         offset += length;
     }

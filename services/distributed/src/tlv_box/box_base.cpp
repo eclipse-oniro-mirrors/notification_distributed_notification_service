@@ -40,7 +40,7 @@ unsigned char* BoxBase::GetByteBuffer()
     return box_->byteBuffer_;
 }
 
-int32_t BoxBase::GetByteLength()
+uint32_t BoxBase::GetByteLength()
 {
     return box_->bytesLength_;
 }

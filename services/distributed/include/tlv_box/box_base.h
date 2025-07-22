@@ -29,7 +29,7 @@ public:
     bool Serialize();
 
     unsigned char* GetByteBuffer();
-    int32_t GetByteLength();
+    uint32_t GetByteLength();
     std::shared_ptr<TlvBox> box_;
 };
 }

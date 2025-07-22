@@ -95,19 +95,19 @@ public:
     TlvItem(int32_t type, int32_t value);
     TlvItem(int32_t type, int64_t value);
     TlvItem(int32_t type, std::string value);
-    TlvItem(int32_t type, const unsigned char* value, int32_t length);
+    TlvItem(int32_t type, const unsigned char* value, uint32_t length);
     TlvItem(int32_t type, const TlvItem& value);
     ~TlvItem();
 
     int32_t GetType() const;
-    int32_t GetLength() const;
+    uint32_t GetLength() const;
     unsigned char* GetValue() const;
 
 private:
-    void Initialize(const void* value, int32_t length);
+    void Initialize(const void* value, uint32_t length);
 
     int32_t type_;
-    int32_t length_ = 0;
+    uint32_t length_ = 0;
     unsigned char* value_ = nullptr;
 };
 
@@ -115,7 +115,7 @@ class TlvBox {
 public:
     ~TlvBox();
     bool Serialize(bool addCheck = true);
-    bool Parse(const unsigned char* buffer, int32_t buffersize);
+    bool Parse(const unsigned char* buffer, uint32_t buffersize);
     bool PutValue(std::shared_ptr<TlvItem> value);
     bool SetMessageType(int32_t messageType);
     void AddMessageCRC(std::string& content);
@@ -129,7 +129,7 @@ public:
     bool GetInt64Value(int32_t type, int64_t& value);
     bool GetObjectValue(int32_t type, TlvBox& value);
 
-    int32_t bytesLength_ = 0;
+    uint32_t bytesLength_ = 0;
     unsigned char* byteBuffer_ = nullptr;
     std::map<int32_t, std::shared_ptr<TlvItem>> TlvMap_;
 };

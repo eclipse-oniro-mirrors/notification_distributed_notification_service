@@ -20,6 +20,8 @@
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_local_config.h"
 
+static int32_t MAX_LINES_NUM = 7;
+
 namespace OHOS {
 namespace Notification {
 
@@ -444,6 +446,12 @@ bool NotificationRequestBox::GetNotificationAllLines(std::vector<std::string>& a
     if (!GetAllLineLength(length)) {
         return false;
     }
+
+    if (length < 0 || length > MAX_LINES_NUM) {
+        ANS_LOGD("Invalid lines %{public}d.", length);
+        return false;
+    }
+
     for (int i = 0; i < length; i++) {
         std::string line;
         if (box_->GetStringValue(NOTIFICATION_ALL_LINES_START_INDEX + i, line)) {
