@@ -180,6 +180,20 @@ public:
      **/
     void SetNeedNotifyResponse(bool isNeed);
 
+    /**
+     * @brief Set isSubscribeSelf.
+     *
+     * @return Void.
+     **/
+    void SetIsSubscribeSelf(bool isSubscribeSelf);
+
+    /**
+     * @brief Obtains the value of isSubscribeSelf.
+     *
+     * @return Returns the value of isSubscribeSelf.
+     **/
+    bool GetIsSubscribeSelf() const;
+
 private:
     bool ReadFromParcel(Parcel &parcel);
 
@@ -192,6 +206,7 @@ private:
     std::vector<NotificationConstant::SlotType> slotTypes_ {};
     bool needNotifyApplicationChanged_ = false;
     bool needNotifyResponse_ = false;
+    bool isSubscribeSelf_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

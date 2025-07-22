@@ -50,6 +50,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     bool needNotifyResponse = false;
     uint32_t filterType {0};
     std::set<NotificationConstant::SlotType> slotTypes {};
+    bool isSubscribeSelf = false;
 };
 
 const uint32_t FILTETYPE_IM = 1 << 0;
@@ -286,14 +287,14 @@ void NotificationSubscriberManager::NotifyUpdated(const sptr<NotificationSorting
 }
 
 void NotificationSubscriberManager::NotifyDoNotDisturbDateChanged(const int32_t &userId,
-    const sptr<NotificationDoNotDisturbDate> &date)
+    const sptr<NotificationDoNotDisturbDate> &date, const std::string &bundle)
 {
     if (notificationSubQueue_ == nullptr) {
         ANS_LOGE("null queue");
         return;
     }
     AppExecFwk::EventHandler::Callback func =
-        std::bind(&NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner, this, userId, date);
+        std::bind(&NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner, this, userId, date, bundle);
 
     notificationSubQueue_->submit(func);
 }
@@ -404,6 +405,7 @@ void NotificationSubscriberManager::AddRecordInfo(
         record->filterType = subscribeInfo->GetFilterType();
         record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
         record->needNotifyResponse = subscribeInfo->GetNeedNotifyResponse();
+        record->isSubscribeSelf = subscribeInfo->GetIsSubscribeSelf();
     } else {
         record->bundleList_.clear();
         record->subscribedAll = true;
@@ -772,19 +774,45 @@ void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSo
     }
 }
 
+template <typename... Args>
+void NotificationSubscriberManager::NotifySubscribers(int32_t userId, const std::string& bundle,
+    ErrCode (IAnsSubscriber::*func)(Args...), Args&& ... args)
+{
+    for (auto& record : subscriberRecordList_) {
+        if (IsNeedNotifySubscribers(record, userId, bundle)) {
+            (record->subscriber->*func)(std::forward<Args>(args)...);
+        }
+    }
+}
+
+bool NotificationSubscriberManager::IsNeedNotifySubscribers(const std::shared_ptr<SubscriberRecord> &record,
+    const int32_t &userId, const std::string &bundle)
+{
+    if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) || IsSystemUser(userId)) {
+        return true;
+    }
+
+    if (record->userId == userId) {
+        if (record->isSubscribeSelf) {
+            auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundle);
+            if (iter != record->bundleList_.end()) {
+                return true;
+            }
+        } else {
+            return true;
+        }
+    }
+    return false;
+}
+
 void NotificationSubscriberManager::NotifyDoNotDisturbDateChangedInner(const int32_t &userId,
-    const sptr<NotificationDoNotDisturbDate> &date)
+    const sptr<NotificationDoNotDisturbDate> &date, const std::string &bundle)
 {
     if (date == nullptr) {
         ANS_LOGE("null date");
         return;
     }
-    for (auto record : subscriberRecordList_) {
-        if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
-            IsSystemUser(userId) || record->userId == userId) {
-            record->subscriber->OnDoNotDisturbDateChange(date);
-        }
-    }
+    NotifySubscribers(userId, bundle, &IAnsSubscriber::OnDoNotDisturbDateChange, date);
 }
 
 void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
@@ -796,12 +824,8 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
-    for (auto record : subscriberRecordList_) {
-        if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
-            IsSystemUser(userId) || record->userId == userId) {
-            record->subscriber->OnBadgeEnabledChanged(callbackData);
-        }
-    }
+    std::string bundle = callbackData->GetBundle();
+    NotifySubscribers(userId, bundle, &IAnsSubscriber::OnBadgeEnabledChanged, callbackData);
 }
 
 bool NotificationSubscriberManager::IsSystemUser(int32_t userId)
@@ -818,12 +842,8 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
-    for (auto record : subscriberRecordList_) {
-        if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
-                IsSystemUser(userId) || record->userId == userId) {
-            record->subscriber->OnEnabledNotificationChanged(callbackData);
-        }
-    }
+    std::string bundle = callbackData->GetBundle();
+    NotifySubscribers(userId, bundle, &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
 }
 
 void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbackData> &badgeData)
@@ -835,13 +855,8 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
     std::function<void()> setBadgeNumberFunc = [this, badgeData] () {
         int32_t userId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(badgeData->GetUid(), userId);
-        for (auto record : subscriberRecordList_) {
-            if (record->userId == SUBSCRIBE_USER_ALL || IsSystemUser(record->userId) ||
-                IsSystemUser(userId) || record->userId == userId) {
-                ANS_LOGD("SetBadgeNumber instanceKey: %{public}s", badgeData->GetAppInstanceKey().c_str());
-                record->subscriber->OnBadgeChanged(badgeData);
-            }
-        }
+        std::string bundle = badgeData->GetBundle();
+        NotifySubscribers(userId, bundle, &IAnsSubscriber::OnBadgeChanged, badgeData);
         NotificationAnalyticsUtil::ReportBadgeChange(badgeData);
     };
     notificationSubQueue_->submit(setBadgeNumberFunc);
