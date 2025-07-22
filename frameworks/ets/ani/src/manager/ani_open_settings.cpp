@@ -158,7 +158,7 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
         ANS_LOGD("reject. errorCode %{public}d errMsg %{public}s", errorCode, errMsg.c_str());
         ani_error rejection =
-            static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, errorCode, errMsg));
+            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, errorCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
             NotificationSts::ThrowStsErroWithMsg(env, "");

@@ -77,7 +77,7 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         ANS_LOGD("OnStsOperationCallback reject");
         std::string errMsg = FindAnsErrMsg(externalErrCode);
         ani_error rejection =
-            static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, externalErrCode, errMsg));
+            static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, externalErrCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(resolver_, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
         }

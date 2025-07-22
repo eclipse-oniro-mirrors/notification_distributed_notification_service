@@ -101,7 +101,7 @@ static const std::vector<std::pair<uint32_t, int32_t>> ERRORS_CONVERT = {
 inline int32_t GetExternalCode(uint32_t errCode)
 {
     for (const auto &errorConvert : ERRORS_CONVERT) {
-        if (errCode == errorConvert.second) {
+        if (static_cast<int32_t>(errCode) == errorConvert.second) {
             return errCode;
         }
         if (errCode == errorConvert.first) {
@@ -121,10 +121,9 @@ inline std::string FindAnsErrMsg(const int32_t errCode)
     return findMsg->second;
 }
 
-inline void ThrowError(ani_env *env, int32_t code, std::string msg)
-{
-    OHOS::AbilityRuntime::EtsErrorUtil::ThrowError(env, code, msg);
-}
+void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg);
+
+ani_object CreateError(ani_env *env, ani_int code, const std::string &msg);
 
 inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)
 {

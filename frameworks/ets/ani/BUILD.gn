@@ -36,6 +36,7 @@ ohos_shared_library("notification_manager_ani") {
  sources = [
     "./src/sts_common.cpp",
     "./src/sts_convert_other.cpp",
+    "./src/sts_throw_erro.cpp",
     "./src/sts_bundle_option.cpp",
     "./src/sts_notification_flag.cpp",
     "./src/sts_user_input.cpp",
@@ -166,8 +167,9 @@ ohos_shared_library("notification_subscribe_ani") {
   ]
 
   sources = [
-   "./src/sts_common.cpp",
+    "./src/sts_common.cpp",
     "./src/sts_convert_other.cpp",
+    "./src/sts_throw_erro.cpp",
     "./src/sts_bundle_option.cpp",
     "./src/sts_notification_flag.cpp",
     "./src/sts_user_input.cpp",
