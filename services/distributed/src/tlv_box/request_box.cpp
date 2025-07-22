@@ -19,6 +19,7 @@
 #include "ans_log_wrapper.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "distributed_local_config.h"
+#include "notification_constant.h"
 
 static int32_t MAX_LINES_NUM = 7;
 
@@ -490,6 +491,9 @@ bool NotificationRequestBox::GetSmallIcon(std::shared_ptr<Media::PixelMap>& smal
     std::vector<uint8_t> buffer;
     bool res = box_->GetBytes(BUNDLE_ICON, buffer);
     ANS_LOGD("GetSmallIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+    if (!res || buffer.size() <= 0) {
+        return false;
+    }
     DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewBinFile2PiexlMap(smallIcon, buffer);
     if (smallIcon == nullptr) {
         return false;
@@ -513,6 +517,9 @@ bool NotificationRequestBox::GetBigIcon(std::shared_ptr<Media::PixelMap>& bigIco
         std::vector<uint8_t> buffer;
         bool res = box_->GetBytes(NOTIFICATION_BIG_ICON, buffer);
         ANS_LOGD("GetBigIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+        if (!res || buffer.size() <= 0) {
+            return false;
+        }
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewBinFile2PiexlMap(bigIcon, buffer);
     }
     if (bigIcon == nullptr) {
@@ -538,6 +545,9 @@ bool NotificationRequestBox::GetOverlayIcon(
         std::vector<uint8_t> buffer;
         bool res = box_->GetBytes(NOTIFICATION_OVERLAY_ICON, buffer);
         ANS_LOGD("GetOverlayIcon buffer size: %{public}d", static_cast<int32_t>(buffer.size()));
+        if (!res || buffer.size() <= 0) {
+            return false;
+        }
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewBinFile2PiexlMap(overlayIcon, buffer);
     }
     if (overlayIcon == nullptr) {
@@ -624,7 +634,7 @@ bool NotificationRequestBox::GetActionButtonsTitle(std::vector<std::string>& but
         return false;
     }
     int32_t length = 0;
-    if (!GetActionButtonsLength(length)) {
+    if (!GetActionButtonsLength(length) || length > NotificationConstant::MAX_BTN_NUM) {
         return false;
     }
     for (int i = 0; i < length; i++) {
