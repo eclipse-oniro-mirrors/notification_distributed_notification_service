@@ -44,6 +44,7 @@ ohos_unittest("ans_image_util_test") {
     "googletest:gmock_main",
     "hilog:libhilog",
     "image_framework:image_native",
+    "ipc:ipc_single",
     "relational_store:native_rdb",
   ]
 

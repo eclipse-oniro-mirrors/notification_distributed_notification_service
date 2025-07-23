@@ -60,6 +60,7 @@ ohos_shared_library("libans_distributed") {
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "ipc:ipc_single",
     "kv_store:distributeddata_inner",
   ]
 
