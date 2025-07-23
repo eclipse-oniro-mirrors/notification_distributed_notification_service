@@ -22,7 +22,7 @@ constexpr const char *ERROR_CLASS_NAME = "Lescompat/Error;";
 void ThrowError(ani_env *env, ani_object err)
 {
     if (env == nullptr) {
-         ANS_LOGE("null env");
+        ANS_LOGE("null env");
         return;
     }
     env->ThrowError(static_cast<ani_error>(err));
@@ -40,34 +40,34 @@ void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg)
 ani_object WrapError(ani_env *env, const std::string &msg)
 {
     if (env == nullptr) {
-         ANS_LOGE("null env");
+        ANS_LOGE("null env");
         return nullptr;
     }
     ani_status status = ANI_ERROR;
     ani_string aniMsg = nullptr;
     if ((status = env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg)) != ANI_OK) {
-         ANS_LOGE("String_NewUTF8 failed %{public}d", status);
+        ANS_LOGE("String_NewUTF8 failed %{public}d", status);
         return nullptr;
     }
     ani_ref undefRef;
     if ((status = env->GetUndefined(&undefRef)) != ANI_OK) {
-         ANS_LOGE("GetUndefined failed %{public}d", status);
+        ANS_LOGE("GetUndefined failed %{public}d", status);
         return nullptr;
     }
     ani_class cls = nullptr;
     if ((status = env->FindClass(ERROR_CLASS_NAME, &cls)) != ANI_OK) {
-         ANS_LOGE("FindClass failed %{public}d", status);
+        ANS_LOGE("FindClass failed %{public}d", status);
         return nullptr;
     }
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
         ANI_OK) {
-         ANS_LOGE("Class_FindMethod failed %{public}d", status);
+        ANS_LOGE("Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
     ani_object obj = nullptr;
     if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
-         ANS_LOGE("Object_New failed %{public}d", status);
+        ANS_LOGE("Object_New failed %{public}d", status);
         return nullptr;
     }
     return obj;
@@ -76,29 +76,29 @@ ani_object WrapError(ani_env *env, const std::string &msg)
 ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
 {
     if (env == nullptr) {
-         ANS_LOGE("null env");
+        ANS_LOGE("null env");
         return nullptr;
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
     if ((status = env->FindClass(BUSINESS_ERROR_CLASS, &cls)) != ANI_OK) {
-         ANS_LOGE("FindClass failed %{public}d", status);
+        ANS_LOGE("FindClass failed %{public}d", status);
         return nullptr;
     }
     ani_method method = nullptr;
     if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &method)) != ANI_OK) {
-         ANS_LOGE("Class_FindMethod failed %{public}d", status);
+        ANS_LOGE("Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
     ani_object error = WrapError(env, msg);
     if (error == nullptr) {
-         ANS_LOGE("error nulll");
+        ANS_LOGE("error nulll");
         return nullptr;
     }
     ani_object obj = nullptr;
     ani_int iCode(code);
     if ((status = env->Object_New(cls, method, &obj, iCode, error)) != ANI_OK) {
-         ANS_LOGE("Object_New failed %{public}d", status);
+        ANS_LOGE("Object_New failed %{public}d", status);
         return nullptr;
     }
     return obj;
