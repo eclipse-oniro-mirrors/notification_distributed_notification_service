@@ -21,6 +21,7 @@ bool g_mockQueryForgroundOsAccountRet = true;
 bool g_mockGetOsAccountLocalIdFromUidRet = true;
 int32_t g_mockIdForGetOsAccountLocalIdFromUid = 100;
 bool g_mockOsAccountExists = true;
+std::vector<OHOS::AccountSA::OsAccountInfo> g_mockOsAccountInfos;
 }
 
 void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase)
@@ -75,6 +76,14 @@ void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
     }
 }
 
+void MockQueryAllCreatedOsAccounts(int32_t userId)
+{
+    g_mockOsAccountInfos.clear();
+    OHOS::AccountSA::OsAccountInfo osAccountInfo;
+    osAccountInfo.SetLocalId(userId);
+    g_mockOsAccountInfos.push_back(osAccountInfo);
+}
+
 namespace OHOS {
 namespace AccountSA {
 ErrCode OsAccountManager::GetForegroundOsAccountLocalId(int32_t &id)
@@ -95,6 +104,12 @@ ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t 
 ErrCode OsAccountManager::IsOsAccountExists(const int id, bool &isOsAccountExists)
 {
     isOsAccountExists = g_mockOsAccountExists;
+    return ERR_OK;
+}
+
+ErrCode OsAccountManager::QueryAllCreatedOsAccounts(std::vector<OsAccountInfo> &osAccountInfos)
+{
+    osAccountInfos = g_mockOsAccountInfos;
     return ERR_OK;
 }
 }  // namespace EventFwk
