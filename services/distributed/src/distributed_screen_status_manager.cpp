@@ -19,6 +19,7 @@
 #include "ans_log_wrapper.h"
 #include "device_manager.h"
 #include "distributed_preferences.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -47,7 +48,7 @@ DistributedScreenStatusManager::~DistributedScreenStatusManager()
 
 void DistributedScreenStatusManager::OnDeviceConnected(const std::string &deviceId)
 {
-    ANS_LOGD("deviceId:%{public}s", deviceId.c_str());
+    ANS_LOGD("deviceId:%{public}s", StringAnonymous(deviceId).c_str());
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     CheckKvStore();
 }

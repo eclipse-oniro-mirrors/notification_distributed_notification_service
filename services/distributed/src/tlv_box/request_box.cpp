@@ -96,7 +96,6 @@ bool NotificationRequestBox::SetNotificationTitle(const std::string& title)
     if (title.size() > maxLength) {
         ANS_LOGI("SetNotificationTitle truncate %{public}zu %{public}u", title.size(), maxLength);
         std::string subTitle =  title.substr(0, maxLength);
-        ANS_LOGI("SetNotificationTitle truncate %{public}s %{public}s", subTitle.c_str(), title.c_str());
         return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_TITLE, subTitle));
     }
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_TITLE, title));
@@ -111,7 +110,6 @@ bool NotificationRequestBox::SetNotificationText(const std::string& text)
     if (text.size() > maxLength) {
         ANS_LOGI("SetNotificationText truncate %{public}zu %{public}u", text.size(), maxLength);
         std::string subText =  text.substr(0, maxLength);
-        ANS_LOGI("SetNotificationTitle truncate %{public}s %{public}s", subText.c_str(), text.c_str());
         return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT, subText));
     }
     return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_CONTENT, text));
