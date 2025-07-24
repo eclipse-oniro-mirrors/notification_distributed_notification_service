@@ -97,7 +97,7 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     const bool easyAbroad)
 {
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
-        ANS_LOGE("AddDialogIfNotExist failed. Dialog already exists. bundle = %{public}s",
+        ANS_LOGE("Dialog already exists. bundle = %{public}s",
             bundle->GetBundleName().c_str());
         return ERR_ANS_DIALOG_IS_POPPING;
     }
@@ -110,7 +110,7 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
         innerLake,
         easyAbroad);
     if (result != ERR_OK) {
-        ANS_LOGE("StartEnableNotificationDialogAbility failed, result = %{public}d", result);
+        ANS_LOGE("Start failed, result=%{public}d", result);
         std::unique_ptr<NotificationDialogManager::DialogInfo> dialogInfoRemoved = nullptr;
         RemoveDialogInfoByBundleOption(bundle, dialogInfoRemoved);
     }

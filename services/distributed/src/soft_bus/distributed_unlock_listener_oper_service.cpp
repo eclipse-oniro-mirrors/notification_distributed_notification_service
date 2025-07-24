@@ -120,7 +120,7 @@ void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashC
 void UnlockListenerOperService::ReplyOperationResponse()
 {
     std::lock_guard<ffrt::mutex> lock(mapLock_);
-    ANS_LOGI("UnlockListenerOperService ReplyOperationResponse hashCodeOrder size %{public}u", hashCodeOrder_.size());
+    ANS_LOGI("hashCodeOrder size %{public}u", hashCodeOrder_.size());
     for (std::string hashCode : hashCodeOrder_) {
         auto iterDelayTask = delayTaskMap_.find(hashCode);
         if (iterDelayTask != delayTaskMap_.end()) {

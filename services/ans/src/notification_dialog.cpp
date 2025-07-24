@@ -52,20 +52,19 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
 
     auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
     if (topBundleName != appBundleName) {
-        ANS_LOGW("Current application isn't in foreground, top is %{public}s.", topBundleName.c_str());
+        ANS_LOGW("App isn't in foreground, top %{public}s.", topBundleName.c_str());
         if (!innerLake) {
             return ERR_ANS_INVALID_BUNDLE;
         } else {
-            ANS_LOGW("get top ability again");
             std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
             topBundleName = IN_PROCESS_CALL(
                 AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
             if (topBundleName != appBundleName) {
-                ANS_LOGW("get top ability again failed");
                 return ERR_ANS_INVALID_BUNDLE;
             }
         }
     }
+    ANS_LOGI("called");
     
     AAFwk::Want want;
     
@@ -84,7 +83,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     
     auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
     if (connection_ == nullptr) {
-        ANS_LOGD("new connection error.");
+        ANS_LOGE("new connection error.");
         return ERR_NO_MEMORY;
     }
 
@@ -93,7 +92,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want,
     connection_, nullptr, DEFAULT_VALUE);
     if (result != ERR_OK) {
-        ANS_LOGD("connect sceneboard systemdiaolog fail, result = %{public}d", result);
+        ANS_LOGW("connect fail, result = %{public}d", result);
         bundleName = "com.ohos.systemui";
         abilityName = "com.ohos.systemui.dialog";
         want.SetElementName(bundleName, abilityName);

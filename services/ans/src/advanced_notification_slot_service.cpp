@@ -975,11 +975,11 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         sptr<NotificationSlot> slot;
         result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
         if (result != ERR_OK) {
-            ANS_LOGE("Get enable slot: GetNotificationSlot failed");
+            ANS_LOGE("Get slot failed %{public}d", result);
             return;
         }
         if (slot == nullptr) {
-            ANS_LOGW("Get enable slot: object is null, enabled default true");
+            ANS_LOGW("null slot, default true");
             enabled = true;
             result = ERR_OK;
             return;

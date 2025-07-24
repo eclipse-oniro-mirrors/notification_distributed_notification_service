@@ -140,7 +140,7 @@ bool AnsEnumUtil::SlotTypeCToJS(const NotificationConstant::SlotType &inType, Sl
             outType = SlotType::OTHER_TYPES;
             break;
         default:
-            ANS_LOGE("SlotType %{public}d", inType);
+            ANS_LOGD("SlotType %{public}d", inType);
             return false;
     }
     return true;
@@ -240,7 +240,7 @@ bool AnsEnumUtil::SlotLevelCToJS(const NotificationSlot::NotificationLevel &inLe
             outLevel = SlotLevel::LEVEL_HIGH;
             break;
         default:
-            ANS_LOGE("SlotLevel %{public}d", inLevel);
+            ANS_LOGD("SlotLevel %{public}d", inLevel);
             return false;
     }
     return true;
@@ -381,7 +381,7 @@ void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
             break;
         default:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
-            ANS_LOGW("Reason %{public}d", inType);
+            ANS_LOGD("Reason %{public}d", inType);
             break;
     }
 }
@@ -402,7 +402,7 @@ bool AnsEnumUtil::DoNotDisturbTypeJSToC(const DoNotDisturbType &inType, Notifica
             outType = NotificationConstant::DoNotDisturbType::CLEARLY;
             break;
         default:
-            ANS_LOGE("DoNotDisturbType %{public}d", inType);
+            ANS_LOGD("DoNotDisturbType %{public}d", inType);
             return false;
     }
     return true;
@@ -424,7 +424,7 @@ bool AnsEnumUtil::DoNotDisturbTypeCToJS(const NotificationConstant::DoNotDisturb
             outType = DoNotDisturbType::TYPE_CLEARLY;
             break;
         default:
-            ANS_LOGE("DoNotDisturbType %{public}d", inType);
+            ANS_LOGD("DoNotDisturbType %{public}d", inType);
             return false;
     }
     return true;
@@ -446,7 +446,7 @@ bool AnsEnumUtil::DeviceRemindTypeCToJS(const NotificationConstant::RemindType &
             outType = DeviceRemindType::ACTIVE_REMIND;
             break;
         default:
-            ANS_LOGE("DeviceRemindType %{public}d", inType);
+            ANS_LOGD("DeviceRemindType %{public}d", inType);
             return false;
     }
     return true;
@@ -465,7 +465,7 @@ bool AnsEnumUtil::SourceTypeCToJS(const NotificationConstant::SourceType &inType
             outType = SourceType::TYPE_TIMER;
             break;
         default:
-            ANS_LOGE("SourceType %{public}d", inType);
+            ANS_LOGD("SourceType %{public}d", inType);
             return false;
     }
     return true;
@@ -488,7 +488,7 @@ bool AnsEnumUtil::LiveViewStatusCToJS(const NotificationLiveViewContent::LiveVie
             outType = LiveViewStatus::LIVE_VIEW_FULL_UPDATE;
             break;
         default:
-            ANS_LOGE("LiveViewStatus %{public}d", inType);
+            ANS_LOGD("LiveViewStatus %{public}d", inType);
             return false;
     }
 
@@ -511,7 +511,7 @@ bool AnsEnumUtil::LiveViewTypesCToJS(const NotificationLocalLiveViewContent::Liv
             outType = LiveViewTypes::LIVE_VIEW_INSTANT_BANNER;
             break;
         default:
-            ANS_LOGE("LiveViewTypes %{public}d", inType);
+            ANS_LOGD("LiveViewTypes %{public}d", inType);
             return false;
     }
 

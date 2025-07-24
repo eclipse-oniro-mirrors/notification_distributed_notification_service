@@ -111,7 +111,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "show", NAPI_AUTO_LENGTH, &resourceName);
 
-    ANS_LOGI("before napi_create_async_work");
+    ANS_LOGD("before napi_create_async_work");
     napi_create_async_work(env,
         nullptr,
         resourceName,
@@ -128,7 +128,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ANS_LOGI("NapiShowNotification word complete.");
+            ANS_LOGD("NapiShowNotification word complete.");
             AsyncCallbackInfoPublish *asynccallbackinfo = static_cast<AsyncCallbackInfoPublish *>(data);
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->info.callback != nullptr) {
@@ -138,7 +138,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
                 delete asynccallbackinfo;
                 asynccallbackinfo = nullptr;
             }
-            ANS_LOGI("napi_create_async_work complete end");
+            ANS_LOGD("napi_create_async_work complete end");
         },
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);

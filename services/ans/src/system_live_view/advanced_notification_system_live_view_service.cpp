@@ -153,7 +153,7 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
         GetCommonTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,
             NotificationContent::Type::LIVE_VIEW, recordList);
         if (recordList.size() == 0) {
-            ANS_LOGE("Get Target record list fail.");
+            ANS_LOGE("Empty list");
             result = ERR_ANS_NOTIFICATION_NOT_EXISTS;
             return;
         }

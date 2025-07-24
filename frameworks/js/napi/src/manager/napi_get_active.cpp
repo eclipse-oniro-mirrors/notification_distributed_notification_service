@@ -55,7 +55,7 @@ void AsyncCompleteCallbackNapiGetAllActiveNotifications(napi_env env, napi_statu
                 napi_set_element(env, arr, count, notificationResult);
                 count++;
             }
-            ANS_LOGI("Get all active notifications by napi. count = %{public}d", count);
+            ANS_LOGI("count=%{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->notifications.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -124,7 +124,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("callback");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Ineffective async callback data.");
         return;
@@ -153,7 +153,7 @@ void AsyncCompleteCallbackNapiGetActiveNotifications(napi_env env, napi_status s
                 napi_set_element(env, arr, count, requestResult);
                 count++;
             }
-            ANS_LOGI("GetActiveNotifications count = %{public}d", count);
+            ANS_LOGI("count=%{public}d", count);
             result = arr;
             if ((count == 0) && (asynccallbackinfo->requests.size() > 0)) {
                 asynccallbackinfo->info.errorCode = ERROR;
@@ -224,7 +224,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
 
 void AsyncCompleteCallbackNapiGetActiveNotificationCount(napi_env env, napi_status status, void *data)
 {
-    ANS_LOGI("callback");
+    ANS_LOGD("called");
     if (!data) {
         ANS_LOGE("Async callback ineffective data.");
         return;
@@ -278,7 +278,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
                     NotificationHelper::GetActiveNotificationNums(asynccallbackinfo->num);
-                ANS_LOGI("count = %{public}" PRIu64 "", asynccallbackinfo->num);
+                ANS_LOGI("count=%{public}" PRIu64 "", asynccallbackinfo->num);
             }
         },
         AsyncCompleteCallbackNapiGetActiveNotificationCount,

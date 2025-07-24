@@ -105,7 +105,7 @@ int32_t ErrorToExternal(uint32_t errCode)
         }
     }
 
-    ANS_LOGI("internal errorCode[%{public}u] to external errorCode[%{public}d]", errCode, ExternalCode);
+    ANS_LOGI("internal error[%{public}u] to [%{public}d]", errCode, ExternalCode);
     return ExternalCode;
 }
 
