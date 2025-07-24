@@ -37,20 +37,20 @@ bool FileUtils::GetJsonByFilePath(const char *filePath, std::vector<nlohmann::js
 #ifdef CONFIG_POLICY_ENABLE
     CfgFiles *cfgFiles = GetCfgFiles(filePath);
     if (cfgFiles == nullptr) {
-        ANS_LOGE("Not found filePath:%{public}s.", filePath);
+        ANS_LOGE("Not found filePath.");
         return false;
     }
 
     for (int32_t i = 0; i <= MAX_CFG_POLICY_DIRS_CNT - 1; i++) {
         if (cfgFiles->paths[i] && *(cfgFiles->paths[i]) != '\0' && GetJsonFromFile(cfgFiles->paths[i], localRoot)) {
-            ANS_LOGD("Notification config file path:%{public}s.", cfgFiles->paths[i]);
+            ANS_LOGD("Notification config file path.");
             roots.push_back(localRoot);
             ret = true;
         }
     }
     FreeCfgFiles(cfgFiles);
 #else
-    ANS_LOGD("Use default notification config file path:%{public}s.", filePath);
+    ANS_LOGD("Use default notification config file path.");
     ret = GetJsonFromFile(filePath, localRoot);
     if (ret) {
         roots.push_back(localRoot);
@@ -63,13 +63,13 @@ bool FileUtils::GetJsonFromFile(const char *path, nlohmann::json &root)
 {
     std::ifstream file(path);
     if (!file.good()) {
-        ANS_LOGE("Failed to open file %{public}s.", path);
+        ANS_LOGE("Failed to open file.");
         return false;
     }
     root = nlohmann::json::parse(file, nullptr, false);
     file.close();
     if (root.is_discarded() || !root.is_structured()) {
-        ANS_LOGE("Failed to parse json from file %{public}s.", path);
+        ANS_LOGE("Failed to parse json from file.");
         return false;
     }
     if (root.is_null() || root.empty() || !root.is_object()) {

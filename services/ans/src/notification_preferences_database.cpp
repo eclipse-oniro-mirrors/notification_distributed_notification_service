@@ -30,6 +30,7 @@
 #include "notification_analytics_util.h"
 #include "notification_config_parse.h"
 #include "uri.h"
+#include "distributed_data_define.h"
 namespace OHOS {
 namespace Notification {
 /**
@@ -2295,7 +2296,7 @@ bool NotificationPreferencesDatabase::GetDistributedAuthStatus(
         return false;
     }
     ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, targetUserId: %{public}d",
-        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), targetUserId);
+        __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId);
     std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     bool result = false;
     isAuth = false;
@@ -2384,7 +2385,7 @@ bool NotificationPreferencesDatabase::SetDistributedAuthStatus(
         return false;
     }
     ANS_LOGD("%{public}s, deviceType: %{public}s, deviceId: %{public}s, targetUserId: %{public}d",
-        __FUNCTION__, deviceType.c_str(), deviceId.c_str(), targetUserId);
+        __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId);
     std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     int32_t result = PutDataToDB(key, static_cast<int32_t>(isAuth), userId);
     ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);

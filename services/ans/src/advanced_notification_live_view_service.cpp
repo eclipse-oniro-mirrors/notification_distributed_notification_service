@@ -58,7 +58,6 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         ANS_LOGI("The number of live views to recover: %{public}zu.", requestsdb.size());
         std::vector<std::string> keys;
         for (const auto &requestObj : requestsdb) {
-            ANS_LOGD("Recover request: %{public}s.", requestObj.request->Dump().c_str());
             if (!IsLiveViewCanRecover(requestObj.request)) {
                 int32_t userId = requestObj.request->GetReceiverUserId();
                 keys.emplace_back(requestObj.request->GetBaseKey(""));

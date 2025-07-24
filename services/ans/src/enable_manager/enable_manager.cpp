@@ -32,6 +32,7 @@
 #include "os_account_manager_helper.h"
 #include "notification_extension_wrapper.h"
 #include "notification_config_parse.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -177,7 +178,7 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
     }
 
     ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, Request enable notification dailog result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), deviceId.c_str(), result);
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), result);
     message.ErrorCode(result);
     if (!innerLake || result == ERR_ANS_DIALOG_POP_SUCCEEDED) {
         NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -298,7 +299,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
 
     ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
         "Set notifications enabled for special bundle result: %{public}d", bundleOption->GetBundleName().c_str(),
-        bundleOption->GetUid(), deviceId.c_str(), std::to_string(enabled).c_str(), result);
+        bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), std::to_string(enabled).c_str(), result);
         message.ErrorCode(result).BranchId(BRANCH_9);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
