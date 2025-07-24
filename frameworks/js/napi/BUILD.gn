@@ -131,6 +131,7 @@ ohos_shared_library("notification") {
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "image_framework:image",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "libuv:uv",
     "napi:ace_napi",
