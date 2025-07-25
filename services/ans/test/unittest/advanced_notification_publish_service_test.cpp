@@ -52,6 +52,7 @@ namespace Notification {
 extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
+extern void MockIsAtomicServiceByFullTokenID(bool isAtomicService);
 class AnsPublishServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -235,6 +236,29 @@ HWTEST_F(AnsPublishServiceTest, Publish_00008, Function | SmallTest | Level1)
     MockIsSystemApp(false);
     auto ret = advancedNotificationService_->Publish(label, request);
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: Publish_00009
+ * @tc.desc: Test Publish
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_00009, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string label = "";
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    MockIsAtomicServiceByFullTokenID(true);
+
+    auto ret = advancedNotificationService_->Publish(label, request);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+
+    MockIsAtomicServiceByFullTokenID(false);
 }
 
 /**

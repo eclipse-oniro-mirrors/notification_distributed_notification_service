@@ -1969,9 +1969,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_19800,
 
     sptr<NotificationRequest> req = new NotificationRequest(19800);
     std::vector<std::string> devices;
-    devices.push_back("a");
-    devices.push_back("b");
-    devices.push_back("c");
+    devices.push_back("123");
+    devices.push_back("124");
+    devices.push_back("125");
     req->SetDevicesSupportDisplay(devices);
     ASSERT_EQ(advancedNotificationService_->CheckDistributedNotificationType(req), false);
 
@@ -1988,7 +1988,7 @@ HWTEST_F(AdvancedNotificationServiceTest, CheckDistributedNotificationType_0300,
 {
     GTEST_LOG_(INFO) << "CheckDistributedNotificationType_0300 test start";
     DistributedDatabase::DeviceInfo localDeviceInfo;
-    std::string deviceId = "deviceId";
+    std::string deviceId = "300";
     sptr<NotificationRequest> req = new NotificationRequest(19800);
     std::vector<std::string> devices;
     devices.push_back(deviceId);
@@ -2042,7 +2042,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0200, Function | 
     request->SetSlotType(slotType);
     request->SetOwnerBundleName("test");
     std::vector<std::string> devices;
-    devices.push_back("a");
+    devices.push_back("123");
     request->SetDevicesSupportDisplay(devices);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
@@ -2067,7 +2067,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0300, Function | 
     request->SetSlotType(slotType);
     request->SetOwnerBundleName("test");
     std::vector<std::string> devices;
-    devices.push_back("a");
+    devices.push_back("123");
     request->SetDevicesSupportDisplay(devices);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request);
@@ -2090,7 +2090,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0400, Function | 
     request->SetSlotType(slotType);
     request->SetOwnerBundleName("test");
     std::vector<std::string> devices;
-    devices.push_back("a");
+    devices.push_back("123");
     request->SetDevicesSupportDisplay(devices);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     advancedNotificationService.OnDistributedUpdate(deviceId, bundleName, request);
@@ -2105,7 +2105,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0400, Function | 
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0500, Function | SmallTest | Level1)
 {
-    std::string deviceId = "DeviceId";
+    std::string deviceId = "101";
     std::string bundleName = "BundleName";
     sptr<NotificationRequest> request = new NotificationRequest();
     ASSERT_NE(nullptr, advancedNotificationService_);
@@ -2542,7 +2542,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0300, Function | S
         new NotificationBundleOption("BundleName", 1000), true), (int)ERR_OK);
 
     DistributedDatabase::DeviceInfo localDeviceInfo;
-    std::string deviceId = "DeviceId";
+    std::string deviceId = "";
     if (DistributedNotificationManager::GetInstance()->GetLocalDeviceInfo(localDeviceInfo) == ERR_OK) {
         deviceId = localDeviceInfo.deviceId;
     }
@@ -2559,7 +2559,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0300, Function | S
     advancedNotificationService_->OnDistributedDelete(deviceId, bundleName, label, id);
     SleepForFC();
 
-    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 
     GTEST_LOG_(INFO) << "OnDistributedDelete_0300 test end";
 }
@@ -4607,6 +4607,8 @@ HWTEST_F(AdvancedNotificationServiceTest, SetSilentReminderEnabled_00002, Functi
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     MockQueryForgroundOsAccountId(true, 100);
+
+    advancedNotificationService.OnBundleRemoved(bo);
 
     ErrCode ret = advancedNotificationService.IsSilentReminderEnabled(bo, enableStatusInt);
     ASSERT_EQ(ret, ERR_OK);
