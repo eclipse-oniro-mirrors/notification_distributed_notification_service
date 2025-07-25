@@ -42,7 +42,7 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
         code: ERROR_PARAM_INVALID,
         message: "Invalid parameter"
     }
-    
+
     if (bundle == null) {
         return errorCode;
     }
@@ -215,7 +215,7 @@ export default namespace notificationSubscribe {
             throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => {
-            return notificationSubscribe.nativeRemove(hashCode, reason);
+            notificationSubscribe.nativeRemove(hashCode, reason);
         });
         p.then(
             (e: NullishType): void => {
@@ -233,7 +233,7 @@ export default namespace notificationSubscribe {
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
             let p = taskpool.execute((): void => {
-                return notificationSubscribe.nativeRemove(hashCode, reason);
+                notificationSubscribe.nativeRemove(hashCode, reason);
             });
             p.then(
                 (e: NullishType): void => {
@@ -349,7 +349,7 @@ export default namespace notificationSubscribe {
             throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => {
-            return notificationSubscribe.nativeRemoveAllForBundle(bundle);
+            notificationSubscribe.nativeRemoveAllForBundle(bundle);
         });
         p.then(
             (e: NullishType): void => {
@@ -366,9 +366,9 @@ export default namespace notificationSubscribe {
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {
                 if (bundle == undefined) {
-                    return notificationSubscribe.nativeRemoveAll();
+                    notificationSubscribe.nativeRemoveAll();
                 } else {
-                    return notificationSubscribe.nativeRemoveAllForBundle(bundle);
+                    notificationSubscribe.nativeRemoveAllForBundle(bundle);
                 }
             });
             p.then((data: NullishType): void => {
@@ -385,7 +385,7 @@ export default namespace notificationSubscribe {
             throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => {
-            return notificationSubscribe.nativeRemoveAll();
+            notificationSubscribe.nativeRemoveAll();
         });
         p.then(
             (e: NullishType): void => {
@@ -402,7 +402,7 @@ export default namespace notificationSubscribe {
             throw errorParamInvalid;
         }
         let p = taskpool.execute((): void => {
-            return notificationSubscribe.nativeRemoveAllForUserId(userId);
+            notificationSubscribe.nativeRemoveAllForUserId(userId);
         });
         p.then(
             (e: NullishType): void => {
@@ -412,11 +412,11 @@ export default namespace notificationSubscribe {
                 callback(err, undefined);
             }
         )
-    }    
+    }
 
     export function removeAll(userId: int): Promise<void> {
     let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
-        let p = taskpool.execute((): void => { return notificationSubscribe.nativeRemoveAllForUserId(userId); });
+        let p = taskpool.execute((): void => { notificationSubscribe.nativeRemoveAllForUserId(userId); });
         p.then((data: NullishType): void => {
             resolve(undefined);
         }, (error: Error): void => {
