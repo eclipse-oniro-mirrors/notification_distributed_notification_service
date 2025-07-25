@@ -20,6 +20,7 @@
 
 #include "reminder_agent_service_proxy.h"
 #include "reminder_request.h"
+#include "reminder_request_timer.h"
 
 #include "ans_inner_errors.h"
 #include "mock_i_remote_object.h"
@@ -82,8 +83,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, PublishReminder_0200, Function | MediumT
     std::shared_ptr<ReminderAgentServiceProxy> proxy = std::make_shared<ReminderAgentServiceProxy>(iremoteObject);
     ASSERT_NE(nullptr, proxy);
 
-    ReminderRequest reminderRequest;
-    reminderRequest.SetReminderType(ReminderRequest::ReminderType::TIMER);
+    ReminderRequestTimer reminderRequest;
     int32_t reminderId = 0;
     ErrCode res = proxy->PublishReminder(reminderRequest, reminderId);
     EXPECT_EQ(ERR_OK, res);
@@ -245,8 +245,7 @@ HWTEST_F(ReminderAgentServiceProxyTest, UpdateReminder_0200, Function | MediumTe
     ASSERT_NE(nullptr, proxy);
 
     int32_t reminderId = 0;
-    ReminderRequest reminderRequest;
-    reminderRequest.SetReminderType(ReminderRequest::ReminderType::TIMER);
+    ReminderRequestTimer reminderRequest;
     ErrCode res = proxy->UpdateReminder(reminderId, reminderRequest);
     EXPECT_EQ(ERR_OK, res);
 }
