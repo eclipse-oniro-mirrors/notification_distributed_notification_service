@@ -58,6 +58,7 @@ using namespace testing::ext;
 using namespace OHOS::Media;
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+extern void MockQueryAllCreatedOsAccounts(int32_t userId);
 
 namespace OHOS {
 namespace Notification {
@@ -4667,8 +4668,8 @@ HWTEST_F(AdvancedNotificationServiceTest, IsSilentReminderEnabled_00001, Functio
 HWTEST_F(AdvancedNotificationServiceTest, DisableNotificationFeature_00002, Function | SmallTest | Level1)
 {
     sptr<NotificationDisable> notificationDisable = new (std::nothrow) NotificationDisable();
-    int32_t userId = -1;
-    EXPECT_EQ(OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId), ERR_OK);
+    int32_t userId = 100;
+    MockQueryAllCreatedOsAccounts(userId);
     notificationDisable->SetDisabled(true);
     notificationDisable->SetUserId(userId);
     auto ret = advancedNotificationService_->DisableNotificationFeature(notificationDisable);
