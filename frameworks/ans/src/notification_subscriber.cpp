@@ -154,6 +154,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationMap == nullptr) {
+        ANS_LOGE("null notificationMap");
+        return ERR_INVALID_DATA;
+    }
     std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
     auto deviceType = subscriber_.GetDeviceType();
     if (subscriber_.SyncLiveViewVoip(deviceType, sharedNotification)) {
