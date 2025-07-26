@@ -18,12 +18,13 @@
 
 #include <mutex>
 #include <condition_variable>
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
 
 struct PushCallBackParam {
-    std::mutex callBackMutex;
+    ffrt::mutex callBackMutex;
     std::condition_variable callBackCondition;
     bool ready = false;
     int32_t result;

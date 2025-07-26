@@ -89,7 +89,7 @@ void StsPushCallBack::HandleCheckCallback(
         ANS_LOGE("WarpFunctionResult faild");
         return;
     }
-    std::unique_lock<std::mutex> uniqueLock(pushCallBackParam->callBackMutex);
+    std::unique_lock<ffrt::mutex> uniqueLock(pushCallBackParam->callBackMutex);
     pushCallBackParam->result = result.code;
     pushCallBackParam->ready = true;
     pushCallBackParam->callBackCondition.notify_all();
