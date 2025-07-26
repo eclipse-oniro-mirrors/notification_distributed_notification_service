@@ -17,7 +17,6 @@ import { NotificationSortingMap } from 'notification.notificationSortingMap';
 import notificationManager from '@ohos.notificationManager';
 import { NotificationContent } from 'notification.notificationContent';
 import image from '@ohos.multimedia.image';
-import type notificationSubscribe from '@ohos.notificationSubscribe';
 import { NotificationActionButton } from 'notification.notificationActionButton';
 import { NotificationTemplate } from 'notification.notificationTemplate';
 import { NotificationFlags } from 'notification.notificationFlags';
@@ -113,7 +112,6 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         creatorUid: undefined,
         creatorPid: undefined,
         creatorUserId: undefined,
-        // creatorInstanceKey: undefined,
         sound: undefined,
         classification: undefined,
         hashCode: undefined,
