@@ -22,7 +22,7 @@ namespace OHOS {
 namespace Notification {
 static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP = {
     {ERROR_PERMISSION_DENIED, "Permission denied"},
-    {ERROR_NOT_SYSTEM_APP, "The application isn't system application"},
+    {ERROR_NOT_SYSTEM_APP, "Not system application to call the interface"},
     {ERROR_PARAM_INVALID, "Invalid parameter"},
     {ERROR_SYSTEM_CAP_ERROR, "SystemCapability not found"},
     {ERROR_INTERNAL_ERROR, "Internal error. Possible cause: 1.IPC communication failed. 2.Memory operation error"},
