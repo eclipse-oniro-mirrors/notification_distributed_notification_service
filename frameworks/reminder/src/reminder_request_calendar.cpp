@@ -805,7 +805,9 @@ void ReminderRequestCalendar::Copy(const sptr<ReminderRequest>& other)
         return;
     }
     SetNotificationId(other->GetNotificationId());
-    SetTriggerTimeInMilli(other->GetTriggerTimeInMilli());
+    if (GetTriggerTimeInMilli() < other->GetTriggerTimeInMilli()) {
+        SetTriggerTimeInMilli(other->GetTriggerTimeInMilli());
+    }
     SetSlotType(other->GetSlotType());
     SetCustomButtonUri(other->GetCustomButtonUri());
     SetTitle(other->GetTitle());

@@ -1724,6 +1724,13 @@ HWTEST_F(ReminderRequestCalendarTest, Copy_001, Function | SmallTest | Level1)
     reminder2->SetShare(true);
     calendar->Copy(reminder2);
     EXPECT_EQ(reminder1->GetTitle(), "test_reminder2");
+    reminder2->SetTriggerTimeInMilli(100);
+    reminder1->SetTriggerTimeInMilli(200);
+    calendar->Copy(reminder2);
+    EXPECT_EQ(reminder1->GetTriggerTimeInMilli(), 200);
+    reminder1->SetTriggerTimeInMilli(50);
+    calendar->Copy(reminder2);
+    EXPECT_EQ(reminder1->GetTriggerTimeInMilli(), 100);
 }
 
 /**
