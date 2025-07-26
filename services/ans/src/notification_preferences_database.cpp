@@ -1862,8 +1862,6 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
         return false;
     }
  
-    // return std::string(KEY_SILENT_REMINDER_ENABLE_NOTIFICATION).append(
-    //     bundleInfo.GetBundleName()).append(std::to_string(bundleInfo.GetBundleUid()));
     std::string key = GenerateSilentReminderKey(
         {bundleName, uid, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF});
     int32_t userId = -1;
@@ -1874,7 +1872,7 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
         return false;
     }
  
-    ANS_LOGE("Remove Silent db info, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
+    ANS_LOGI("Remove Silent db info, bundle[%{public}s:%{public}d]", bundleName.c_str(), uid);
     return true;
 }
 

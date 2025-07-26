@@ -26,6 +26,7 @@ DlpType g_mockDlpType = DlpType::DLP_COMMON;
 ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
 bool g_mockVerfyPermisson = true;
 bool g_isSystemApp = false;
+bool g_isAtomicService = false;
 }
 
 void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
@@ -49,6 +50,11 @@ void MockIsVerfyPermisson(bool isVerify)
 void MockIsSystemAppByFullTokenID(bool isSystemApp)
 {
     g_isSystemApp = isSystemApp;
+}
+
+void MockIsAtomicServiceByFullTokenID(bool isAtomicService)
+{
+    g_isAtomicService = isAtomicService;
 }
 }
 }
@@ -81,6 +87,11 @@ int AccessTokenKit::GetHapTokenInfo(AccessTokenID tokenID, HapTokenInfo& info)
 bool AccessTokenKit::IsSystemAppByFullTokenID(uint64_t tokenId)
 {
     return Notification::g_isSystemApp;
+}
+
+bool AccessTokenKit::IsAtomicServiceByFullTokenID(uint64_t tokenId)
+{
+    return Notification::g_isAtomicService;
 }
 } // namespace AccessToken
 } // namespace Security

@@ -20,19 +20,19 @@
 
 namespace OHOS {
 namespace system {
-ffrt::mutex g_parameterMutex;
+std::mutex g_parameterMutex;
 std::map<std::string, bool> systemParameter = {{"persist.edm.notification_disable", false}};
 
 bool GetBoolParameter(const std::string& key, bool def)
 {
-    std::lock_guard<ffrt::mutex> lock(g_parameterMutex);
+    std::lock_guard<std::mutex> lock(g_parameterMutex);
     auto iter = systemParameter.find(key);
     return (iter != systemParameter.end()) ? iter->second : def;
 }
 
 void SetBoolParameter(const std::string& key, bool status)
 {
-    std::lock_guard<ffrt::mutex> lock(g_parameterMutex);
+    std::lock_guard<std::mutex> lock(g_parameterMutex);
     systemParameter[key] = status;
 }
 }

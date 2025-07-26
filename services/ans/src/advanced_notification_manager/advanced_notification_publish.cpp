@@ -52,6 +52,12 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("called");
 
+    auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
+    if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
+        ANS_LOGE("AtomicService is not allowed to publish notification");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
     const auto checkResult = CheckNotificationRequest(request);
     if (checkResult != ERR_OK) {
         return checkResult;
@@ -161,6 +167,12 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     TraceChainUtil traceChain = TraceChainUtil();
     OHOS::HiviewDFX::HiTraceId traceId = OHOS::HiviewDFX::HiTraceChain::GetId();
     ANS_LOGD("called");
+
+    auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
+    if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
+        ANS_LOGE("AtomicService is not allowed to publish notification");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_0);
     if (!request) {
