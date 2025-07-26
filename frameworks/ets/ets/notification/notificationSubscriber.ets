@@ -16,11 +16,8 @@ import { NotificationRequest, DistributedOptions, UnifiedGroupInfo } from 'notif
 import { NotificationSortingMap } from 'notification.notificationSortingMap';
 import notificationManager from '@ohos.notificationManager';
 import { NotificationContent } from 'notification.notificationContent';
-
 import image from '@ohos.multimedia.image';
-// import type notificationManager from '@ohos.notificationManager';
-// import type notificationSubscribe from '@ohos.notificationSubscribe';
-// import { NotificationContent } from 'notification.notificationContent';
+import type notificationSubscribe from '@ohos.notificationSubscribe';
 import { NotificationActionButton } from 'notification.notificationActionButton';
 import { NotificationTemplate } from 'notification.notificationTemplate';
 import { NotificationFlags } from 'notification.notificationFlags';
@@ -97,7 +94,7 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         tapDismissed: undefined,
         autoDeletedTime: undefined,
         wantAgent: undefined,
-        extraInfo: undefined,
+        extendInfo: undefined,
         color: undefined,
         colorEnabled: undefined,
         isAlertOnce: undefined,
