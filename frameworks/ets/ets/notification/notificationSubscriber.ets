@@ -23,7 +23,6 @@ import { NotificationFlags } from 'notification.notificationFlags';
 import { WantAgent } from '@ohos.app.ability.wantAgent';
 import { BundleOption } from 'notification.NotificationCommonDef';
 
-
 export interface NotificationSubscriber {
     onConsume?: (data: SubscribeCallbackData) => void;
 

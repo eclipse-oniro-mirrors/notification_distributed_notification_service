@@ -24,7 +24,7 @@ export interface NotificationSorting {
 class NotificationSortingInner implements NotificationSorting {
     public readonly slot: NotificationSlot = {
             notificationType: undefined,
-            notificationLevel: undefined;
+            notificationLevel: undefined,
             desc: undefined,
             badgeFlag: undefined,
             bypassDnd: undefined,
