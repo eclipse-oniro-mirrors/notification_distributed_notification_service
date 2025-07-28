@@ -19,7 +19,7 @@
 #include <set>
 #include <mutex>
 #include <vector>
-#include <unordered_set>
+#include <unordered_map>
 
 #include "ffrt.h"
 
@@ -31,7 +31,7 @@ struct DeviceData {
     std::string deviceType;
     bool notificationSyncEnable = true;
     bool liveViewSyncEnable = true;
-    std::unordered_set<std::string> installedBundles;
+    std::unordered_map<std::string, std::string> installedBundles;
 };
 
 class DistributedDeviceDataService {
@@ -42,9 +42,9 @@ public:
     int32_t SetDeviceSyncSwitch(const std::string& deviceType, const std::string& deviceId,
         bool notificationEnable, bool liveViewEnable);
     int32_t SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        int operatorType, const std::vector<std::string>& bundleList);
+        int operatorType, const std::vector<std::string>& bundleList, const std::vector<std::string>& labelList);
     int32_t GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        std::vector<std::string>& bundleList);
+        std::vector<std::string>& bundleList, std::vector<std::string>& labelList);
     bool CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
         const std::string bundleName);
     bool GetDeviceNotificationEnable(const std::string& deviceType, const std::string& deviceId);

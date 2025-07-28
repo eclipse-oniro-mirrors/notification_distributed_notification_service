@@ -33,7 +33,7 @@ enum IconSyncType {
 class BundleIconBox : public BoxBase {
 public:
     const static int32_t MAX_ICON_NUM = 10;
-    const static int32_t MAX_BUNDLE_NUM = 30;
+    const static int32_t MAX_BUNDLE_NUM = 20;
 
     BundleIconBox();
     BundleIconBox(std::shared_ptr<TlvBox> box);
@@ -43,12 +43,14 @@ public:
     bool SetBundleList(const std::vector<std::string>& bundleList);
     bool SetBundlesIcon(const std::unordered_map<std::string, std::string>& bundles);
     bool SetLocalDeviceId(const std::string& deviceId);
+    bool SetBundlesInfo(const std::vector<std::pair<std::string, std::string>>& bundles);
 
     bool GetIconSyncType(int32_t& type);
     bool GetDataLength(int32_t& length);
     bool GetBundleList(std::vector<std::string>& bundleList);
     bool GetBundlesIcon(std::unordered_map<std::string, std::string>& bundles);
     bool GetLocalDeviceId(std::string& deviceId) const;
+    bool GetBundlesInfo(std::vector<std::string>& bundles, std::vector<std::string>& labels);
 };
 }  // namespace Notification
 }  // namespace OHOS

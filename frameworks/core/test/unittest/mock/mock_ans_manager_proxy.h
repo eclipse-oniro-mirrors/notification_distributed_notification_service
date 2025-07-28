@@ -181,8 +181,8 @@ public:
         ErrCode(const sptr<NotificationOperationInfo>&, const sptr<IAnsOperationCallback>&));
     MOCK_METHOD2(ReplyDistributeOperation, ErrCode(const std::string&, int32_t));
     MOCK_METHOD2(GetNotificationRequestByHashCode, ErrCode(const std::string&, sptr<NotificationRequest>&));
-    MOCK_METHOD4(SetTargetDeviceBundleList,
-        ErrCode(const std::string&, const std::string&, int32_t, const std::vector<std::string>&));
+    MOCK_METHOD5(SetTargetDeviceBundleList, ErrCode(const std::string&, const std::string&, int32_t,
+        const std::vector<std::string>&, const std::vector<std::string>&));
     MOCK_METHOD4(SetTargetDeviceSwitch, ErrCode(const std::string&, const std::string&, bool, bool));
     MOCK_METHOD1(SetHashCodeRule, ErrCode(uint32_t));
     MOCK_METHOD5(RemoveDistributedNotifications, ErrCode(const std::vector<std::string>& hashcodes,
@@ -193,7 +193,8 @@ public:
         int32_t &enableStatusInt));
     MOCK_METHOD1(GetDistributedDevicelist, ErrCode(std::vector<std::string>& deviceList));
     MOCK_METHOD4(GetMutilDeviceStatus, ErrCode(const std::string&, const uint32_t, std::string&, int32_t&));
-    MOCK_METHOD3(GetTargetDeviceBundleList, ErrCode(const std::string&, const std::string&, std::vector<std::string>&));
+    MOCK_METHOD4(GetTargetDeviceBundleList, ErrCode(const std::string&, const std::string&,
+        std::vector<std::string>&, std::vector<std::string>&));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

@@ -83,7 +83,7 @@ public:
      * @param userId Indicates the userId.
      * @return Returns the invock result.
      */
-    ErrCode GetAllInstalledBundles(std::vector<std::string> &bundlesName, int32_t userId);
+    ErrCode GetAllInstalledBundles(std::vector<std::pair<std::string, std::string>>& bundlesName, int32_t userId);
 
     ErrCode GetApplicationInfo(const std::string &appName, int32_t flags, int32_t userId,
         AppExecFwk::ApplicationInfo &appInfo);

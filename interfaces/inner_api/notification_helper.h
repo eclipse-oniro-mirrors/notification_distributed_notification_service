@@ -1283,7 +1283,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        int operatorType, const std::vector<std::string>& bundleList);
+        int operatorType, const std::vector<std::string>& bundleList, const std::vector<std::string>& labelList);
 
     /**
      * @brief Get the status of the target device.
@@ -1304,7 +1304,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        std::vector<std::string>& bundleList);
+        std::vector<std::string>& bundleList, std::vector<std::string>& labelList);
 
     /**
      * @brief set target device of bundle list.

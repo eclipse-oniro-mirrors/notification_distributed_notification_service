@@ -690,10 +690,10 @@ ErrCode NotificationHelper::SetTargetDeviceStatus(const std::string &deviceType,
 }
 
 ErrCode NotificationHelper::SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-    int operatorType, const std::vector<std::string>& bundleList)
+    int operatorType, const std::vector<std::string>& bundleList, const std::vector<std::string>& labelList)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceBundleList(deviceType, deviceId,
-        operatorType, bundleList);
+        operatorType, bundleList, labelList);
 }
 
 ErrCode NotificationHelper::SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
@@ -766,10 +766,10 @@ ErrCode NotificationHelper::GetMutilDeviceStatus(const std::string &deviceType, 
 }
 
 ErrCode NotificationHelper::GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-    std::vector<std::string>& bundleList)
+    std::vector<std::string>& bundleList, std::vector<std::string>& labelList)
 {
     return DelayedSingleton<AnsNotification>::GetInstance()->GetTargetDeviceBundleList(deviceType, deviceId,
-        bundleList);
+        bundleList, labelList);
 }
 }  // namespace Notification
 }  // namespace OHOS

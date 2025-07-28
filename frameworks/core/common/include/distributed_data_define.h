@@ -31,7 +31,7 @@ constexpr char const AnonymousString[] = "******";
 constexpr int32_t DEFAULT_REPLY_TIMEOUT = 3;
 }
 
-enum BunleListOperationType {
+enum BundleListOperationType {
     ADD_BUNDLES = 0,      // add bundles
     REMOVE_BUNDLES,   // remove bundle
     RELEASE_BUNDLES   // release bundles

@@ -89,7 +89,7 @@ ErrCode BundleResourceHelper::GetBundleInfo(const std::string &bundleName,
     }
 
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_WITH_ICON);
+    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_ALL);
     result = bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
     return result;
@@ -112,7 +112,8 @@ ErrCode BundleResourceHelper::GetAllBundleInfos(int32_t flags, std::vector<AppEx
     return result;
 }
 
-ErrCode BundleResourceHelper::GetAllInstalledBundles(std::vector<std::string> &bundlesName, int32_t userId)
+ErrCode BundleResourceHelper::GetAllInstalledBundles(std::vector<std::pair<std::string, std::string>>&bundlesName,
+    int32_t userId)
 {
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -127,10 +128,19 @@ ErrCode BundleResourceHelper::GetAllInstalledBundles(std::vector<std::string> &b
             ANS_LOGD("Get not app %{public}s", bundle.applicationInfo.bundleName.c_str());
             continue;
         }
-        if (!bundle.applicationInfo.isSystemApp) {
-            ANS_LOGI("Get bundle app %{public}s", bundle.applicationInfo.bundleName.c_str());
-            bundlesName.emplace_back(bundle.applicationInfo.bundleName);
+        if (bundle.applicationInfo.isSystemApp) {
+            continue;
         }
+        AppExecFwk::BundleResourceInfo resourceInfo;
+        result = GetBundleInfo(bundle.applicationInfo.bundleName, resourceInfo);
+        if (result != ERR_OK) {
+            ANS_LOGW("Get failed %{public}s %{public}d", bundle.applicationInfo.bundleName.c_str(), result);
+            continue;
+        }
+        ANS_LOGI("Get bundle app %{public}s %{public}s", bundle.applicationInfo.bundleName.c_str(),
+            resourceInfo.label.c_str());
+        bundlesName.emplace_back(std::make_pair(bundle.applicationInfo.bundleName,
+            resourceInfo.label));
     }
 
     ANS_LOGI("Get installed bundle size %{public}zu.", bundlesName.size());

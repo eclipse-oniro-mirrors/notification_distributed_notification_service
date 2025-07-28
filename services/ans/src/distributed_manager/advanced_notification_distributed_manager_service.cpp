@@ -484,7 +484,8 @@ ErrCode AdvancedNotificationService::SetTargetDeviceStatus(const std::string &de
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string& deviceType,
-    const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList)
+    const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList,
+    const std::vector<std::string>& labelList)
 {
 #ifdef ALL_SCENARIO_COLLABORATION
     if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
@@ -496,7 +497,7 @@ ErrCode AdvancedNotificationService::SetTargetDeviceBundleList(const std::string
         return ERR_ANS_PERMISSION_DENIED;
     }
     return DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(deviceType, deviceId,
-        operatorType, bundleList);
+        operatorType, bundleList, labelList);
 #else
     return ERR_ANS_INVALID_PARAM;
 #endif
@@ -523,7 +524,7 @@ ErrCode AdvancedNotificationService::GetMutilDeviceStatus(const std::string &dev
 }
 
 ErrCode AdvancedNotificationService::GetTargetDeviceBundleList(const std::string& deviceType,
-    const std::string& deviceId, std::vector<std::string>& bundleList)
+    const std::string& deviceId, std::vector<std::string>& bundleList, std::vector<std::string>& labelList)
 {
     if (deviceType.empty() || deviceId.empty()) {
         return ERR_ANS_INVALID_PARAM;
@@ -534,7 +535,7 @@ ErrCode AdvancedNotificationService::GetTargetDeviceBundleList(const std::string
     }
 
     return DistributedDeviceDataService::GetInstance().GetTargetDeviceBundleList(deviceType, deviceId,
-        bundleList);
+        bundleList, labelList);
 }
 
 ErrCode AdvancedNotificationService::SetTargetDeviceSwitch(const std::string& deviceType,
@@ -704,7 +705,7 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_PERMISSION_DENIED).BranchId(BRANCH_12));
         return ERR_ANS_PERMISSION_DENIED;
     }
-    
+
     std::vector<sptr<DistributedBundleOption>> affectBundleOption;
     for (auto distributedBundle : bundles) {
         std::string bundleName = distributedBundle->GetBundle()->GetBundleName();
@@ -729,7 +730,7 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
             ERR_ANS_DISTRIBUTED_OPERATION_FAILED).BranchId(BRANCH_13));
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
-     
+
     ErrCode result = NotificationPreferences::GetInstance()->SetDistributedBundleOption(
         affectBundleOption, deviceType);
 
@@ -781,7 +782,7 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
     auto result = NotificationPreferences::GetInstance()->SetDistributedEnabled(deviceType,
         enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
         : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
-        
+
     if (deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
         return result;
     }
