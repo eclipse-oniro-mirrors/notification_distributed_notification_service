@@ -29,7 +29,6 @@ namespace Notification {
         service->CreateDialogManager();
         std::string stringData = fuzzData->ConsumeRandomLengthString();
         sptr<NotificationRequest> request = ObjectBuilder<NotificationRequest>::Build(fuzzData);
-        service->Publish(stringData, request);
         return true;
     }
 }
