@@ -1795,14 +1795,12 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     record->notification->SetEnableLight(false);
     record->notification->SetEnableSound(false);
     record->notification->SetEnableVibration(false);
-    auto flag = record->request->GetFlags();
-    flag->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flag->SetLightScreenEnabled(false);
-    flag->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-    flag->SetBannerEnabled(false);
-    record->request->SetFlags(flag);
+    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
     ANS_LOGI("SetFlags-CloseAlert, notificationKey = %{public}s flags = %{public}d",
-        record->request->GetKey().c_str(), flag->GetReminderFlags());
+        record->request->GetKey().c_str(), record->request->GetFlags()->GetReminderFlags());
 }
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)

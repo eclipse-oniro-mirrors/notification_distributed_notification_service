@@ -76,22 +76,9 @@ bool NotificationSubscriber::ProcessSyncDecision(
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter \
-            flags = %{public}d, deviceType:%{public}s",
-            request->GetKey().c_str(), flagIter->second->GetReminderFlags(), deviceType.c_str());
-        std::shared_ptr<NotificationFlags> tempFlags = request->GetFlags();
-        tempFlags->SetSoundEnabled(DowngradeReminder(tempFlags->IsSoundEnabled(), flagIter->second->IsSoundEnabled()));
-        tempFlags->SetVibrationEnabled(
-            DowngradeReminder(tempFlags->IsVibrationEnabled(), flagIter->second->IsVibrationEnabled()));
-        tempFlags->SetLockScreenVisblenessEnabled(
-            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
-        tempFlags->SetBannerEnabled(
-            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
-        tempFlags->SetLightScreenEnabled(
-            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
-        request->SetFlags(tempFlags);
-        ANS_LOGI("SetFlags-after filte, notificationKey = %{public}s flags = %{public}d",
-            request->GetKey().c_str(), tempFlags->GetReminderFlags());
+        request->SetFlags(flagIter->second);
+        ANS_LOGI("SetFlags-final, notificationKey = %{public}s flags = %{public}d",
+            request->GetKey().c_str(), request->GetFlags()->GetReminderFlags());
         return true;
     }
     if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
