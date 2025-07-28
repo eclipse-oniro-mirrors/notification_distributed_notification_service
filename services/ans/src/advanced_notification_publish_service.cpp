@@ -725,9 +725,12 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
         std::make_shared<NotificationBundleOption>("", uid);
         request->SetAgentBundle(agentBundle);
     }
+    bool directAgency = false;
 
-    if (request->IsAgentNotification()) {
+    if (request->IsAgentNotification() || request->GetOwnerUid() != DEFAULT_UID) {
         uid = request->GetOwnerUid();
+        request->SetIsAgentNotification(false);
+        directAgency = true;
     }
     if (uid <= 0) {
         message.ErrorCode(ERR_ANS_INVALID_UID).Message("createUid failed" + std::to_string(uid), true);
@@ -755,7 +758,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->request = request;
     record->isThirdparty = isThirdparty;
-    if (request->IsAgentNotification()) {
+    if (directAgency) {
         record->bundleOption = new (std::nothrow) NotificationBundleOption("", request->GetCreatorUid());
     } else {
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
@@ -799,18 +802,18 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
-        if (IsDisableNotificationForSaByKiosk(bundle, request)) {
+        if (IsDisableNotificationForSaByKiosk(bundle, directAgency)) {
             ANS_LOGE("bundle not in kiosk trust list, bundleName=%{public}s", bundle.c_str());
             result = ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
         }
         if (!bundleOption->GetBundleName().empty() &&
-            !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && request->IsAgentNotification())) {
+            !(request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW && directAgency)) {
             ErrCode ret = AssignValidNotificationSlot(record, bundleOption);
             if (ret != ERR_OK) {
                 ANS_LOGE("PublishNotificationBySA Can not assign valid slot!");
             }
-            if (!request->IsAgentNotification()) {
+            if (!directAgency) {
                 result = Filter(record);
                 if (result != ERR_OK) {
                     ANS_LOGE("PublishNotificationBySA Reject by filters: %{public}d", result);
@@ -1117,14 +1120,10 @@ bool AdvancedNotificationService::IsDisableNotificationByKiosk(const std::string
 }
 
 bool AdvancedNotificationService::IsDisableNotificationForSaByKiosk(
-    const std::string &bundleName, const sptr<NotificationRequest> &request)
+    const std::string &bundleName, bool directAgency)
 {
-    if (request == nullptr) {
-        ANS_LOGE("request is nullptr");
-        return false;
-    }
     bool isAppAgent = false;
-    if (!request->IsAgentNotification() && !bundleName.empty()) {
+    if (!directAgency && !bundleName.empty()) {
         isAppAgent = true;
     }
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();

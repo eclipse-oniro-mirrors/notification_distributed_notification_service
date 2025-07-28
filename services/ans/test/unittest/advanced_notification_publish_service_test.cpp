@@ -2515,20 +2515,10 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByKiosk_001, Function | Sma
 HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_001, Function | SmallTest | Level1)
 {
     std::string bundleName = "com.test.example";
-    sptr<NotificationRequest> request = nullptr;
-    bool result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, true));
 
-    request = new (std::nothrow) NotificationRequest();
-    ASSERT_NE(request, nullptr);
-    request->isAgent_ = true;
-    result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
-    EXPECT_FALSE(result);
-
-    request->isAgent_ = false;
     bundleName = "";
-    result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, false));
 }
 
 /**
@@ -2539,13 +2529,10 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_001, Function 
 HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByKiosk_002, Function | SmallTest | Level1)
 {
     std::string bundleName = "com.test.example";
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    ASSERT_NE(request, nullptr);
-    request->isAgent_ = false;
     NotificationPreferences::GetInstance()->isKioskMode_ = true;
     NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
-    bool result = advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, request);
-    EXPECT_TRUE(result);
+
+    EXPECT_TRUE(advancedNotificationService_->IsDisableNotificationForSaByKiosk(bundleName, false));
 }
 
 /**
