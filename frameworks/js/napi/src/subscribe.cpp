@@ -139,41 +139,76 @@ napi_value SetSubscribeCallbackData(const napi_env &env,
     return Common::NapiGetBoolean(env, true);
 }
 
+static void ClearEnvCallback(void *data)
+{
+    ANS_LOGD("Env expired, need to clear env");
+    SubscriberInstance *subscriber = reinterpret_cast<SubscriberInstance *>(data);
+    subscriber->ClearEnv();
+}
+
 SubscriberInstance::SubscriberInstance()
 {}
 
 SubscriberInstance::~SubscriberInstance()
 {
+    DeleteRef();
     if (tsfn_ != nullptr) {
         napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+        tsfn_ = nullptr;
     }
+    if (env_ != nullptr) {
+        napi_remove_env_cleanup_hook(env_, ClearEnvCallback, this);
+    }
+}
+
+void SubscriberInstance::DeleteRef()
+{
     if (canceCallbackInfo_.ref != nullptr) {
         napi_delete_reference(canceCallbackInfo_.env, canceCallbackInfo_.ref);
+        canceCallbackInfo_.ref = nullptr;
     }
     if (consumeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(consumeCallbackInfo_.env, consumeCallbackInfo_.ref);
+        consumeCallbackInfo_.ref = nullptr;
     }
     if (updateCallbackInfo_.ref != nullptr) {
         napi_delete_reference(updateCallbackInfo_.env, updateCallbackInfo_.ref);
+        updateCallbackInfo_.ref = nullptr;
     }
     if (subscribeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(subscribeCallbackInfo_.env, subscribeCallbackInfo_.ref);
+        subscribeCallbackInfo_.ref = nullptr;
     }
     if (unsubscribeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(unsubscribeCallbackInfo_.env, unsubscribeCallbackInfo_.ref);
+        unsubscribeCallbackInfo_.ref = nullptr;
     }
     if (dieCallbackInfo_.ref != nullptr) {
         napi_delete_reference(dieCallbackInfo_.env, dieCallbackInfo_.ref);
+        dieCallbackInfo_.ref = nullptr;
     }
     if (disturbModeCallbackInfo_.ref != nullptr) {
         napi_delete_reference(disturbModeCallbackInfo_.env, disturbModeCallbackInfo_.ref);
+        disturbModeCallbackInfo_.ref = nullptr;
     }
     if (enabledNotificationCallbackInfo_.ref != nullptr) {
         napi_delete_reference(enabledNotificationCallbackInfo_.env, enabledNotificationCallbackInfo_.ref);
+        enabledNotificationCallbackInfo_.ref = nullptr;
     }
     if (batchCancelCallbackInfo_.ref != nullptr) {
         napi_delete_reference(batchCancelCallbackInfo_.env, batchCancelCallbackInfo_.ref);
+        batchCancelCallbackInfo_.ref = nullptr;
     }
+}
+
+void SubscriberInstance::ClearEnv()
+{
+    if (tsfn_ != nullptr) {
+        napi_release_threadsafe_function(tsfn_, napi_tsfn_release);
+        tsfn_ = nullptr;
+    }
+    DeleteRef();
+    env_ = nullptr;
 }
 
 void ThreadSafeOnCancel(napi_env env, napi_value jsCallback, void* context, void* data)
@@ -984,6 +1019,11 @@ void SubscriberInstance::SetThreadSafeFunction(const napi_threadsafe_function &t
     tsfn_ = tsfn;
 }
 
+void SubscriberInstance::SetEnv(const napi_env &env)
+{
+    env_ = env;
+}
+
 void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
     canceCallbackInfo_.env = env;
@@ -1285,6 +1325,7 @@ napi_value GetNotificationSubscriber(
     napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, subscriberInfo.ref,
         ThreadFinished, nullptr, ThreadSafeCommon, &tsfn);
     subscriberInfo.subscriber->SetThreadSafeFunction(tsfn);
+    subscriberInfo.subscriber->SetEnv(env);
 
     // onConsume?:(data: SubscribeCallbackData) => void
     NAPI_CALL(env, napi_has_named_property(env, value, "onConsume", &hasProperty));
@@ -1675,6 +1716,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
 
+    napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (asynccallbackinfo->info.isCallback) {

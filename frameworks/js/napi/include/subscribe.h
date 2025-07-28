@@ -153,6 +153,24 @@ public:
      */
     void SetThreadSafeFunction(const napi_threadsafe_function &tsfn);
 
+    /**
+     * @brief Set the env.
+     *
+     */
+    void SetEnv(const napi_env &env);
+
+    /**
+     * @brief Set the env and tsfn.
+     *
+     */
+    void ClearEnv();
+
+    /**
+     * @brief delete the ref.
+     *
+     */
+    void DeleteRef();
+
 private:
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
@@ -184,6 +202,7 @@ private:
 
 private:
     napi_threadsafe_function tsfn_ = nullptr;
+    napi_env env_ = nullptr;
     CallbackInfo canceCallbackInfo_;
     CallbackInfo consumeCallbackInfo_;
     CallbackInfo updateCallbackInfo_;
