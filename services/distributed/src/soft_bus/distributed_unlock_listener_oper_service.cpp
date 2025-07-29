@@ -70,7 +70,7 @@ void UnlockListenerOperService::AddDelayTask(const std::string& hashCode, const 
         ANS_LOGW("Operation delayTask has same key %{public}s.", hashCode.c_str());
         delayTaskMap_.erase(iterDelayTask);
     }
-    NotifictionJumpInfo jumpInfo = NotifictionJumpInfo(jumpType, btnIndex, deviceType);
+    NotifictionJumpInfo jumpInfo = NotifictionJumpInfo(jumpType, btnIndex, deviceType, GetCurrentTime());
     delayTaskMap_.insert_or_assign(hashCode, jumpInfo);
 
     auto iterTimer = timerMap_.find(hashCode);
@@ -124,8 +124,10 @@ void UnlockListenerOperService::ReplyOperationResponse()
     for (std::string hashCode : hashCodeOrder_) {
         auto iterDelayTask = delayTaskMap_.find(hashCode);
         if (iterDelayTask != delayTaskMap_.end()) {
-            TriggerByJumpType(hashCode, iterDelayTask->second.jumpType, iterDelayTask->second.deviceTypeId,
-                iterDelayTask->second.btnIndex);
+            if (iterDelayTask->second.timeStamp + OPERATION_TIMEOUT > GetCurrentTime()) {
+                TriggerByJumpType(hashCode, iterDelayTask->second.jumpType,
+                    iterDelayTask->second.deviceTypeId, iterDelayTask->second.btnIndex);
+            }
             delayTaskMap_.erase(iterDelayTask);
         }
 

@@ -124,6 +124,9 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
         updateLiveviewDecodeContent_ = nullptr;
         distributedLiveViewOperation_ = nullptr;
         restoreCollaborationWindow_ = nullptr;
+        distributedAncoNotificationClick_ = nullptr;
+        updateLiveviewBinFile2PiexlMap_ = nullptr;
+        updateLiveviewPiexlMap2BinFile_ = nullptr;
     }
     ANS_LOGI("distributed liveview all scenarios extension wrapper close success");
 }
