@@ -65,11 +65,12 @@ private:
 struct NotifictionJumpInfo {
 public:
     NotifictionJumpInfo() {}
-    NotifictionJumpInfo(int32_t jump, int32_t index, int32_t typeId)
-        : jumpType(jump), btnIndex(index), deviceTypeId(typeId) {}
+    NotifictionJumpInfo(int32_t jump, int32_t index, int32_t typeId, int64_t time)
+        : jumpType(jump), btnIndex(index), deviceTypeId(typeId), timeStamp(time) {}
     int32_t jumpType;
     int32_t btnIndex;
     int32_t deviceTypeId;
+    int64_t timeStamp;
 };
 
 class UnlockListenerOperService {
