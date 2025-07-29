@@ -46,7 +46,7 @@ std::string DeviceCheck::GetDeviceNetworkId(std::string deviceId)
 }
 
 int32_t InitLocalDevice(const std::string &deviceId, uint16_t deviceType,
-    DistributedDeviceConfig config)
+    DistributedDeviceConfig config, DistributedHaCallbacks callbacks)
 {
     return 0;
 }
