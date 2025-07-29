@@ -53,8 +53,8 @@ public:
     void SetIsShowBadge(const bool &isShowBadge);
     bool GetIsShowBadge() const;
 
-    void SetEnableNotification(const bool &enable);
-    bool GetEnableNotification() const;
+    void SetEnableNotification(const int32_t &state);
+    int32_t GetEnableNotification() const;
 
     void SetSilentReminderEnabled(const NotificationConstant::SWITCH_STATE &silentReminderEnabled);
     NotificationConstant::SWITCH_STATE GetSilentReminderEnabled() const;
@@ -73,7 +73,7 @@ private:
     int32_t uid_ = -1;
     uint32_t slotFlags_ = 0;
     bool isShowBadge_ = false;
-    bool isEnabledNotification_ = false;
+    int32_t isEnabledNotification_ = 3;
     std::vector<SlotInfo> slotsInfo_;
     NotificationConstant::SWITCH_STATE silentReminderEnabled_;
 };

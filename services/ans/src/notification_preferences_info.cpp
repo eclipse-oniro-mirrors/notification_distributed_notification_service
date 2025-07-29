@@ -72,16 +72,15 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBadgeTotalNum() const
     return badgeTotalNum_;
 }
 
-void NotificationPreferencesInfo::BundleInfo::SetEnableNotification(const bool &enable)
+void NotificationPreferencesInfo::BundleInfo::SetEnableNotification(const int32_t &state)
 {
-    isEnabledNotification_ = enable;
+    isEnabledNotification_ = state;
 }
 
-bool NotificationPreferencesInfo::BundleInfo::GetEnableNotification() const
+int32_t NotificationPreferencesInfo::BundleInfo::GetEnableNotification() const
 {
     return isEnabledNotification_;
 }
-
 
 void NotificationPreferencesInfo::BundleInfo::SetHasPoppedDialog(const bool &hasPopped)
 {

@@ -88,7 +88,8 @@ HWTEST_F(PermissionFilterTest, PermissionFilterTest_00200, Function | SmallTest 
     NotificationPreferences::GetInstance()->AddNotificationSlots(
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), slots);
     NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), false);
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID),
+        static_cast<NotificationConstant::SWITCH_STATE>(0));
     std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
     record->bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     record->request = new NotificationRequest();

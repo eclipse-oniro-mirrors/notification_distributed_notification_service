@@ -83,12 +83,12 @@ bool NotificationCloneBundleInfo::GetIsShowBadge() const
     return isShowBadge_;
 }
 
-void NotificationCloneBundleInfo::SetEnableNotification(const bool &enable)
+void NotificationCloneBundleInfo::SetEnableNotification(const int32_t &state)
 {
-    isEnabledNotification_ = enable;
+    isEnabledNotification_ = state;
 }
 
-bool NotificationCloneBundleInfo::GetEnableNotification() const
+int32_t NotificationCloneBundleInfo::GetEnableNotification() const
 {
     return isEnabledNotification_;
 }

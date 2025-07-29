@@ -850,7 +850,12 @@ ErrCode AdvancedNotificationService::AddSlotThenPublishEvent(
     bool enabled, bool isForceControl)
 {
     bool allowed = false;
-    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, allowed);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    if (result == ERR_OK) {
+        allowed = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    }
     if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         result = ERR_OK;
         allowed = CheckApiCompatibility(bundle);

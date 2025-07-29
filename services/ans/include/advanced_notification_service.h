@@ -516,6 +516,31 @@ public:
         bool enabled, bool updateUnEnableTime = true) override;
 
     /**
+     * @brief Set whether to allow the specified bundle to send notifications.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param enabled Indicates the flag that allows notification to be pulished.
+     * @param updateUnEnableTime Indicates whether update the unenable time.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetNotificationsSystemEnabledForSpecialBundle(
+        const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+        bool updateUnEnableTime = true);
+    
+    /**
+     * @brief Set whether to allow the specified bundle to send notifications.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption object.
+     * @param enabled Indicates the flag that allows notification to be pulished.
+     * @param updateUnEnableTime Indicates whether update the unenable time.
+     * @param isSystemCall Indicates whether set by system.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetNotificationsEnabledForSpecialBundleImpl(
+        const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+        bool updateUnEnableTime = true, bool isSystemCall = false);
+
+    /**
      * @brief Sets whether the bundle allows the banner to display notification.
      *
      * @param bundleOption Indicates the NotificationBundleOption object.
@@ -1780,6 +1805,8 @@ private:
     AnsStatus ExecutePublishProcess(
         const sptr<NotificationRequest> &request, bool isUpdateByOwnerAllowed);
 
+    ErrCode UpdateNotificationSwitchState(
+        const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

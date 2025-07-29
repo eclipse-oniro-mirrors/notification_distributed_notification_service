@@ -434,16 +434,26 @@ ErrCode NotificationPreferences::SetTotalBadgeNums(
 }
 
 ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
-    const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
+    const sptr<NotificationBundleOption> &bundleOption, NotificationConstant::SWITCH_STATE &state)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    return GetBundleProperty(bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled);
+    int32_t val = 0;
+    ErrCode ret = GetBundleProperty(bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, val);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (val < 0 || val > 3) {
+        ANS_LOGE("The switch state is %{public}d, invalid.", val);
+        return ERR_ANS_INVALID_PARAM;
+    }
+    state = static_cast<NotificationConstant::SWITCH_STATE>(val);
+    return ERR_OK;
 }
 
 ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
-    const sptr<NotificationBundleOption> &bundleOption, const bool enabled)
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE state)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
@@ -452,8 +462,8 @@ ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    ErrCode result =
-        SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled);
+    ErrCode result = SetBundleProperty(preferencesInfo, bundleOption,
+        BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, static_cast<int32_t>(state));
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
     }
@@ -884,7 +894,10 @@ ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationB
     if (!GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
         bundleInfo.SetBundleUid(bundleOption->GetUid());
-        bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+        int32_t defaultState = CheckApiCompatibility(bundleOption) ?
+            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
+            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        bundleInfo.SetEnableNotification(defaultState);
     }
     bundleInfo.SetSlot(slot);
     preferencesInfo.SetBundleInfo(bundleInfo);
@@ -949,7 +962,10 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
         bundleInfo.SetBundleUid(bundleOption->GetUid());
-        bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+        int32_t defaultState = CheckApiCompatibility(bundleOption) ?
+            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
+            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        bundleInfo.SetEnableNotification(defaultState);
     }
     result = SaveBundleProperty(bundleInfo, bundleOption, type, value);
     if (result == ERR_OK) {
@@ -964,6 +980,7 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
     const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value)
 {
     bool storeDBResult = true;
+    int32_t state = 0;
     switch (type) {
         case BundleType::BUNDLE_IMPORTANCE_TYPE:
             bundleInfo.SetImportance(value);
@@ -978,10 +995,14 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             storeDBResult = preferncesDB_->PutShowBadge(bundleInfo, value);
             break;
         case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
-            bundleInfo.SetEnableNotification(value);
-            storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, value);
-            if (value && storeDBResult) {
-                SetDistributedEnabledForBundle(bundleInfo);
+            state = static_cast<int32_t>(value);
+            bundleInfo.SetEnableNotification(state);
+            storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, state);
+            if (storeDBResult) {
+                if (state == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ||
+                    state == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON)) {
+                    SetDistributedEnabledForBundle(bundleInfo);
+                }
             }
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
@@ -1092,7 +1113,10 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
-    bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+    int32_t defaultState = CheckApiCompatibility(bundleOption) ?
+        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
+        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1125,7 +1149,10 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
-    bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleOption));
+    int32_t defaultState = CheckApiCompatibility(bundleOption) ?
+        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
+        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;

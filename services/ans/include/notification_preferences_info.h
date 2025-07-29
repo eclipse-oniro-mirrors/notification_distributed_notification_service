@@ -102,16 +102,16 @@ public:
         /**
          * @brief Set bundle enable notification.
          *
-         * @param enable Indicates the set enable notification.
+         * @param state Indicates the set enable notification.
          */
-        void SetEnableNotification(const bool &enable);
+        void SetEnableNotification(const int32_t &state);
 
         /**
          * @brief Set bundle enable notification.
          *
-         * @return Return true on success, false on failure.
+         * @return Return switch state.
          */
-        bool GetEnableNotification() const;
+        int32_t GetEnableNotification() const;
 
         void SetHasPoppedDialog(const bool &hasPopped);
         bool GetHasPoppedDialog() const;
@@ -234,7 +234,7 @@ public:
         int32_t importance_ = BUNDLE_IMPORTANCE;
         bool isShowBadge_ = BUNDLE_SHOW_BADGE;
         int32_t badgeTotalNum_ = BUNDLE_BADGE_TOTAL_NUM;
-        bool isEnabledNotification_ = BUNDLE_ENABLE_NOTIFICATION;
+        int32_t isEnabledNotification_ = BUNDLE_SYSTEM_DEFAULT_ON_NOTIFICATION;
         bool hasPoppedDialog_ = BUNDLE_POPPED_DIALOG;
         std::map<NotificationConstant::SlotType, sptr<NotificationSlot>> slots_;
         std::map<std::string, uint32_t> slotFlagsMap_;

@@ -184,8 +184,8 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutNotificationsEnabledForBundle_0
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, true));
-    EXPECT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, false));
+    EXPECT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, 1));
+    EXPECT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, 0));
 }
 
 /**
@@ -198,7 +198,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutNotificationsEnabledForBundle_0
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(std::string());
     bundleInfo.SetBundleUid(bundleUid_);
-    EXPECT_FALSE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, false));
+    EXPECT_FALSE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, 0));
 }
 
 /**
@@ -211,7 +211,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutNotificationsEnabledForBundle_0
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    ASSERT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, true));
+    ASSERT_TRUE(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, 1));
     ASSERT_TRUE(preferncesDB_->RemoveEnabledDbByBundleName(bundleName_, bundleUid_));
 }
 

@@ -461,7 +461,7 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
 }
 
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
-    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &state)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_5);
     if (bundleInfo.GetBundleName().empty()) {
@@ -470,14 +470,14 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
         return false;
     }
 
-    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, enabled[%{public}d]",
-        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), enabled);
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, state[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), state);
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled,
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, state,
         bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
@@ -697,7 +697,10 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
                 bundleInfo.SetBundleName(bundleName);
                 bundleInfo.SetBundleUid(bundleUid);
-                bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleName, bundleUid));
+                int32_t defaultState = CheckApiCompatibility(bundleName, bundleUid) ?
+                    static_cast<int>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
+                    static_cast<int>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+                bundleInfo.SetEnableNotification(defaultState);
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
             }
@@ -788,13 +791,14 @@ bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundl
         return false;
     }
     ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());
+    std::string bundleKeyType = GenerateBundleKey(bundleKey);
     std::unordered_map<std::string, std::string> bundleEntries;
-    rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
-    ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
+    rdbDataManager_->QueryDataBeginWithKey(bundleKeyType, bundleEntries, userId);
+    ANS_LOGD("Bundle key is %{public}s.",bundleKeyType.c_str());
     std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
     bool badgeEnableExist = false;
     for (auto bundleEntry : bundleEntries) {
-        if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
+        if (IsSlotKey(bundleKeyType, bundleEntry.first)) {
             ParseSlotFromDisturbeDB(bundleInfo, bundleKey, bundleEntry, userId);
         } else {
             ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, bundleEntry);
@@ -1503,7 +1507,7 @@ void NotificationPreferencesDatabase::ParseBundleEnableNotification(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleEnableNotification bundle enable is %{public}s.", value.c_str());
-    bundleInfo.SetEnableNotification(static_cast<bool>(StringToInt(value)));
+    bundleInfo.SetEnableNotification(static_cast<int32_t>(StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundlePoppedDialog(

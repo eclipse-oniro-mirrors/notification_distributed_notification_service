@@ -82,11 +82,11 @@ public:
      * @brief Put enable notification in the of  bundle into disturbe DB.
      *
      * @param bundleInfo Indicates bundle info.
-     * @param enabled Indicates to whether to enabled
+     * @param state Indicates to whether to enabled
      * @return Return true on success, false on failure.
      */
     bool PutNotificationsEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &state);
 
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.

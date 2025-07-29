@@ -115,7 +115,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, SetIsShowBadge_00001, Function | Small
  */
 HWTEST_F(NotificationCloneBundleInfoTest, SetEnableNotification_00001, Function | SmallTest | Level1)
 {
-    bool enabledNotification = true;
+    int32_t enabledNotification = 1;
     auto rrc = std::make_shared<NotificationCloneBundleInfo>();
     rrc->SetEnableNotification(enabledNotification);
     EXPECT_EQ(rrc->GetEnableNotification(), enabledNotification);
@@ -151,7 +151,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     int32_t uid = 1;
     int32_t slotFlags = 1;
     bool isShowBadge = true;
-    bool enableNotification = true;
+    int32_t enableNotification = 1;
     NotificationCloneBundleInfo::SlotInfo slotInfo;
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     slotInfo.enable_ = true;
@@ -188,7 +188,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
     int32_t uid = 1;
     int32_t slotFlags = 1;
     bool isShowBadge = true;
-    bool enabledNotification = true;
+    int32_t enabledNotification = 1;
     NotificationCloneBundleInfo::SlotInfo slotInfo;
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     slotInfo.enable_ = true;
