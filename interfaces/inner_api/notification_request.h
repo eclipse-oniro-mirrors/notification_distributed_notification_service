@@ -1498,6 +1498,11 @@ public:
 
     bool IsAtomicServiceNotification();
 
+    void SetDistributedFlagBit(
+        const NotificationConstant::ReminderFlag &bit,
+        const bool status,
+        const std::set<std::string> &unaffectDevice = {});
+
 private:
     /**
      * Indicates the color mask, used for calculation with the ARGB value set by setColor(int32_t).
@@ -1560,6 +1565,10 @@ private:
     static bool ConvertJsonToNotificationBundleOption(NotificationRequest *target, const nlohmann::json &jsonObject);
     static bool ConvertJsonToAgentBundle(NotificationRequest *target, const nlohmann::json &jsonObject);
     static ErrCode CheckLockScreenPictureSizeForLiveView(std::shared_ptr<NotificationBasicContent> &content);
+    void SetFlagBit(
+        const NotificationConstant::ReminderFlag &bit,
+        const bool status,
+        std::shared_ptr<NotificationFlags> &flag);
 
 private:
     int32_t notificationId_ {0};

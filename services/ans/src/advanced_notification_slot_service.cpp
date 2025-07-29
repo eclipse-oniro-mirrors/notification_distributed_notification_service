@@ -46,6 +46,10 @@ namespace {
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
     constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
+    const std::set<std::string> unAffectDevices = {
+        NotificationConstant::LITEWEARABLE_DEVICE_TYPE,
+        NotificationConstant::WEARABLE_DEVICE_TYPE
+    };
 }
 
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
@@ -666,8 +670,12 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     const sptr<NotificationBundleOption> &bundleOption)
 {
     ANS_LOGD("Called.");
-    NotificationConstant::SlotType type = request->GetSlotType();
     auto flags = std::make_shared<NotificationFlags>();
+    request->SetFlags(flags);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
+#endif
+    NotificationConstant::SlotType type = request->GetSlotType();
 
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = request->GetSlotType();
@@ -684,37 +692,50 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 
     auto slotReminderMode = slot->GetReminderMode();
     if ((slotReminderMode & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-        flags->SetSoundEnabled(NotificationConstant::FlagStatus::OPEN);
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, true);
+    } else {
+        request->SetDistributedFlagBit(
+            NotificationConstant::ReminderFlag::SOUND_FLAG, false, unAffectDevices);
     }
 
     if ((slotReminderMode & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-        flags->SetLockScreenVisblenessEnabled(true);
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, true);
+    } else {
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
     }
 
     if ((slotReminderMode & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
-        flags->SetBannerEnabled(true);
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, true);
+    } else {
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
     }
 
     if ((slotReminderMode & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-        flags->SetLightScreenEnabled(true);
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, true);
+    } else {
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
     }
 
     if ((slotReminderMode & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-        flags->SetVibrationEnabled(NotificationConstant::FlagStatus::OPEN);
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, true);
+    } else {
+        request->SetDistributedFlagBit(
+            NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
     }
 
     if ((slotReminderMode & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
-        flags->SetStatusIconEnabled(true);
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, true);
+    } else {
+        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
     }
-
-    request->SetFlags(flags);
+    ANS_LOGI("SetFlags-init,Key = %{public}s flags = %{public}d",
+        request->GetKey().c_str(), request->GetFlags()->GetReminderFlags());
     HandleFlagsWithRequest(request, bundleOption);
 }
 
 void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<NotificationRequest> &request,
     const sptr<NotificationBundleOption> &bundleOption)
 {
-    auto flags = request->GetFlags();
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     if (request->IsCommonLiveView()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveviewReminderFlags(request);
@@ -722,24 +743,20 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
     } else if (!request->IsSystemLiveView()) {
         NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
         if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
-            flags->SetSoundEnabled(NotificationConstant::FlagStatus::CLOSE);
-            flags->SetLockScreenVisblenessEnabled(false);
-            flags->SetBannerEnabled(false);
-            flags->SetLightScreenEnabled(false);
-            flags->SetVibrationEnabled(NotificationConstant::FlagStatus::CLOSE);
-            request->SetFlags(flags);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false, unAffectDevices);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
         }
     }
-    ANS_LOGI("Key = %{public}s flags = %{public}d class = %{public}s silent = %{public}d",
-        request->GetKey().c_str(), flags->GetReminderFlags(),
+    ANS_LOGI("SetFlags- HandleFlag Key = %{public}s flags = %{public}d class = %{public}s silent = %{public}d",
+        request->GetKey().c_str(), request->GetFlags()->GetReminderFlags(),
         request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW) {
         return;
     }
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    DelayedSingleton<SmartReminderCenter>::GetInstance()->ReminderDecisionProcess(request);
-#endif
 }
 
 ErrCode AdvancedNotificationService::GetSlotByType(int32_t slotTypeInt, sptr<NotificationSlot> &slot)

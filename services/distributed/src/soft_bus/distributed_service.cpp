@@ -537,7 +537,7 @@ void DistributedService::OnReceiveMsg(const void *data, uint32_t dataLen)
 bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
 {
-    std::string deviceType =  DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
+    std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
     sptr<NotificationRequest> requestPoint = request->GetNotificationRequestPoint();
     auto flagsMap = requestPoint->GetDeviceFlags();
     if (flagsMap == nullptr || flagsMap->size() <= 0) {
@@ -545,25 +545,9 @@ bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> 
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-        ANS_LOGI("SetFlags-before filte, notificationKey = %{public}s flagIter \
-            flags = %{public}d, deviceType:%{public}s",
-            requestPoint->GetKey().c_str(), flagIter->second->GetReminderFlags(), deviceType.c_str());
-        std::shared_ptr<NotificationFlags> tempFlags = requestPoint->GetFlags();
-        tempFlags->SetSoundEnabled(tempFlags->IsSoundEnabled() ==  NotificationConstant::FlagStatus::OPEN &&
-            flagIter->second->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN ?
-            NotificationConstant::FlagStatus::OPEN : NotificationConstant::FlagStatus::CLOSE);
-        tempFlags->SetVibrationEnabled(tempFlags->IsVibrationEnabled() ==  NotificationConstant::FlagStatus::OPEN  &&
-            flagIter->second->IsVibrationEnabled() ==  NotificationConstant::FlagStatus::OPEN ?
-            NotificationConstant::FlagStatus::OPEN : NotificationConstant::FlagStatus::CLOSE);
-        tempFlags->SetLockScreenVisblenessEnabled(
-            tempFlags->IsLockScreenVisblenessEnabled() && flagIter->second->IsLockScreenVisblenessEnabled());
-        tempFlags->SetBannerEnabled(
-            tempFlags->IsBannerEnabled() && flagIter->second->IsBannerEnabled());
-        tempFlags->SetLightScreenEnabled(
-            tempFlags->IsLightScreenEnabled() && flagIter->second->IsLightScreenEnabled());
-        requestPoint->SetFlags(tempFlags);
-        ANS_LOGI("SetFlags-after filte, notificationKey = %{public}s flags = %{public}d",
-            requestPoint->GetKey().c_str(), tempFlags->GetReminderFlags());
+        requestPoint->SetFlags(flagIter->second);
+        ANS_LOGI("SetFlags-final, notificationKey = %{public}s flags = %{public}d",
+            requestPoint->GetKey().c_str(), requestPoint->GetFlags()->GetReminderFlags());
     } else {
         return false;
     }

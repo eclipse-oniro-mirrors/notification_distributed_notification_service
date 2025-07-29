@@ -3156,5 +3156,67 @@ bool NotificationRequest::IsAtomicServiceNotification()
     }
     return false;
 }
+
+void NotificationRequest::SetDistributedFlagBit(
+    const NotificationConstant::ReminderFlag &bit,
+    const bool status,
+    const std::set<std::string> &unaffectDevice)
+{
+    if (!notificationFlags_) {
+        ANS_LOGE("notificationFlags not init");
+        return;
+    }
+    SetFlagBit(bit, status, notificationFlags_);
+
+    if (!notificationFlagsOfDevices_ || notificationFlagsOfDevices_->size() <= 0  || status) {
+        return;
+    }
+    for (auto it = notificationFlagsOfDevices_->begin(); it != notificationFlagsOfDevices_->end(); ++it) {
+        std::string deviceType = it->first;
+        std::shared_ptr<NotificationFlags> flag = it->second;
+        if (deviceType == NotificationConstant::HEADSET_DEVICE_TYPE) {
+            continue;
+        }
+        
+        if (unaffectDevice.find(deviceType) == unaffectDevice.end()) {
+            SetFlagBit(bit, status, flag);
+        }
+    }
+}
+
+void NotificationRequest::SetFlagBit(
+    const NotificationConstant::ReminderFlag &bit,
+    const bool status,
+    std::shared_ptr<NotificationFlags> &flag)
+{
+    if (!flag) {
+        return;
+    }
+    NotificationConstant::FlagStatus enumStatus = status? NotificationConstant::FlagStatus::OPEN :
+        NotificationConstant::FlagStatus::CLOSE;
+    switch (bit) {
+        case NotificationConstant::ReminderFlag::SOUND_FLAG :
+            flag->SetSoundEnabled(enumStatus);
+            break;
+        case NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG :
+            flag->SetLockScreenVisblenessEnabled(status);
+            break;
+        case NotificationConstant::ReminderFlag::BANNER_FLAG :
+            flag->SetBannerEnabled(status);
+            break;
+        case NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG :
+            flag->SetLightScreenEnabled(status);
+            break;
+        case NotificationConstant::ReminderFlag::VIBRATION_FLAG :
+            flag->SetVibrationEnabled(enumStatus);
+            break;
+        case NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG :
+            flag->SetStatusIconEnabled(status);
+            break;
+        default :
+            ANS_LOGE("unknow bit");
+            break;
+    }
+}
 }  // namespace Notification
 }  // namespace OHOS
