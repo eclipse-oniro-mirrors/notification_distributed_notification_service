@@ -115,7 +115,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, SetIsShowBadge_00001, Function | Small
  */
 HWTEST_F(NotificationCloneBundleInfoTest, SetEnableNotification_00001, Function | SmallTest | Level1)
 {
-    int32_t enabledNotification = 1;
+    NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     auto rrc = std::make_shared<NotificationCloneBundleInfo>();
     rrc->SetEnableNotification(enabledNotification);
     EXPECT_EQ(rrc->GetEnableNotification(), enabledNotification);
@@ -151,7 +151,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     int32_t uid = 1;
     int32_t slotFlags = 1;
     bool isShowBadge = true;
-    int32_t enableNotification = 1;
+    NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationCloneBundleInfo::SlotInfo slotInfo;
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     slotInfo.enable_ = true;
@@ -162,7 +162,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00001, Function | SmallTest | L
     rrc->SetUid(uid);
     rrc->SetSlotFlags(slotFlags);
     rrc->SetIsShowBadge(isShowBadge);
-    rrc->SetEnableNotification(enableNotification);
+    rrc->SetEnableNotification(enabledNotification);
     rrc->AddSlotInfo(slotInfo);
     nlohmann::json jsonObject;
     EXPECT_EQ(jsonObject.is_null(), true);
@@ -188,7 +188,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
     int32_t uid = 1;
     int32_t slotFlags = 1;
     bool isShowBadge = true;
-    int32_t enabledNotification = 1;
+    NotificationConstant::SWITCH_STATE enabledNotification = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     NotificationCloneBundleInfo::SlotInfo slotInfo;
     slotInfo.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
     slotInfo.enable_ = true;
@@ -214,7 +214,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
             ", uid = " + std::to_string(uid) +
             ", slotFlags = " + std::to_string(slotFlags) +
             ", ShowBadge = " + std::to_string(isShowBadge) +
-            ", isEnabled = " + std::to_string(enabledNotification) +
+            ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
             ", slotsInfo = " + slotDump +
             " }";
     EXPECT_EQ(rrc->Dump(), dumpInfo);

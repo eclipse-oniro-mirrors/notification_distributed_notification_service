@@ -461,7 +461,7 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
 }
 
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
-    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &state)
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &state)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_5);
     if (bundleInfo.GetBundleName().empty()) {
@@ -471,14 +471,14 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
     }
 
     ANS_LOGI("bundelName:%{public}s, uid:%{public}d, state[%{public}d]",
-        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), state);
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), static_cast<int32_t>(state));
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, state,
-        bundleInfo.GetBundleUid());
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE,
+        static_cast<int32_t>(state), bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -697,9 +697,9 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
                 bundleInfo.SetBundleName(bundleName);
                 bundleInfo.SetBundleUid(bundleUid);
-                int32_t defaultState = CheckApiCompatibility(bundleName, bundleUid) ?
-                    static_cast<int>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
-                    static_cast<int>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+                NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleName, bundleUid) ?
+                    NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+                    NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
                 bundleInfo.SetEnableNotification(defaultState);
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
@@ -730,7 +730,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     GenerateEntry(
         GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE), std::to_string(bundleInfo.GetIsShowBadge()), values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_ENABLE_NOTIFICATION),
-        std::to_string(bundleInfo.GetEnableNotification()),
+        std::to_string(static_cast<int32_t>(bundleInfo.GetEnableNotification())),
         values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_POPPED_DIALOG),
         std::to_string(bundleInfo.GetHasPoppedDialog()),
@@ -794,7 +794,7 @@ bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundl
     std::string bundleKeyType = GenerateBundleKey(bundleKey);
     std::unordered_map<std::string, std::string> bundleEntries;
     rdbDataManager_->QueryDataBeginWithKey(bundleKeyType, bundleEntries, userId);
-    ANS_LOGD("Bundle key is %{public}s.",bundleKeyType.c_str());
+    ANS_LOGD("Bundle key is %{public}s.", bundleKeyType.c_str());
     std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
     bool badgeEnableExist = false;
     for (auto bundleEntry : bundleEntries) {
@@ -1507,7 +1507,7 @@ void NotificationPreferencesDatabase::ParseBundleEnableNotification(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleEnableNotification bundle enable is %{public}s.", value.c_str());
-    bundleInfo.SetEnableNotification(static_cast<int32_t>(StringToInt(value)));
+    bundleInfo.SetEnableNotification(static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundlePoppedDialog(

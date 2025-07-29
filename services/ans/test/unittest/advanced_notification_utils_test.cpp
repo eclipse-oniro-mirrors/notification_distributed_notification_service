@@ -709,7 +709,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     cloneBundleInfo.SetBundleName("test");
     cloneBundleInfo.SetUid(1);
     cloneBundleInfo.SetIsShowBadge(true);
-    cloneBundleInfo.SetEnableNotification(1);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     cloneBundleInfo.SetSlotFlags(63);
     NotificationCloneBundleInfo::SlotInfo info;
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -736,7 +736,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00002");
     cloneBundleInfo.SetUid(1);
     cloneBundleInfo.SetIsShowBadge(true);
-    cloneBundleInfo.SetEnableNotification(1);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     cloneBundleInfo.SetSlotFlags(63);
     NotificationCloneBundleInfo::SlotInfo info;
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;

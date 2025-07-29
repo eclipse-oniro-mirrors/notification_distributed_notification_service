@@ -193,8 +193,8 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0090
     // set status is NativeRdb::E_ERROR
     MockQueryData(true);
     // test PutNotificationsEnabledForBundle function
-    int32_t enabled = 1;
-    ASSERT_EQ(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, enabled), false);
+    ASSERT_EQ(preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON), false);
 }
 
 /**

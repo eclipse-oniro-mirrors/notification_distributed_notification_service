@@ -45,11 +45,6 @@ const static int BUNDLE_ENABLE_NOTIFICATION = true;
 const static int BUNDLE_POPPED_DIALOG = false;
 
 /**
- * Default params that bundle switch state is SYSTEM_DEFAULT_ON.
- */
-const static int BUNDLE_SYSTEM_DEFAULT_ON_NOTIFICATION = 3;
-
-/**
  * Default params that bundle show badge is false.
  */
 const static bool BUNDLE_SHOW_BADGE = true;

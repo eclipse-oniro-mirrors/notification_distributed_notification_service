@@ -1672,6 +1672,7 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
     const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo)
 {
     ANS_LOGD("called");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_9);
     NotificationConstant::SWITCH_STATE targetState = bundleInfo.applicationInfo.allowEnableNotification ?
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
@@ -1679,12 +1680,14 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
     NotificationConstant::SWITCH_STATE currentState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
         bundleOption, currentState);
-
     if (result != ERR_OK) {
-        ANS_LOGI("Initialize %{public}s to %{public}s", 
+        ANS_LOGI("Initialize %{public}s to %{public}s",
             bundleOption->GetBundleName().c_str(),
             (targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ?
                 "SYSTEM_DEFAULT_ON" : "SYSTEM_DEFAULT_OFF");
+        message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid())
+            + "_st" + std::to_string(static_cast<int32_t>(targetState)));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
             bundleOption, targetState);
     }
@@ -1693,9 +1696,12 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
                             currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
     if (isSystemDefaultState && (currentState != targetState)) {
         ANS_LOGI("Updating system default state for %{public}s : %{public}d -> %{public}d",
-                    bundleOption->GetBundleName().c_str(),
-                    static_cast<int32_t>(currentState),
-                    static_cast<int32_t>(targetState));
+            bundleOption->GetBundleName().c_str(),
+            static_cast<int32_t>(currentState),
+            static_cast<int32_t>(targetState));
+        message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid())
+            + "_st" + std::to_string(static_cast<int32_t>(targetState))).BranchId(BRANCH_10);
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
         return NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
             bundleOption, targetState);
     }
@@ -1988,13 +1994,12 @@ void AdvancedNotificationService::UpdateCloneBundleInfo(const NotificationCloneB
 void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {
-    NotificationConstant::SWITCH_STATE state = 
-        static_cast<NotificationConstant::SWITCH_STATE>(cloneBundleInfo.GetEnableNotification());
+    NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnableNotification();
     ErrCode result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, state);
     if (result == ERR_OK) {
         SetSlotFlagsTrustlistsAsBundle(bundle);
-         bool enabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
-                        state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+        bool enabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+            state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
         sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow) EnabledNotificationCallbackData(
             bundle->GetBundleName(), bundle->GetUid(), enabled);
         if (bundleData == nullptr) {

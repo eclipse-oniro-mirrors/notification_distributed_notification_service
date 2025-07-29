@@ -439,14 +439,10 @@ ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
-    int32_t val = 0;
-    ErrCode ret = GetBundleProperty(bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, val);
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    if (val < 0 || val > 3) {
-        ANS_LOGE("The switch state is %{public}d, invalid.", val);
-        return ERR_ANS_INVALID_PARAM;
+    int32_t val = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    ErrCode result = GetBundleProperty(bundleOption, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, val);
+    if (result != ERR_OK) {
+        return result;
     }
     state = static_cast<NotificationConstant::SWITCH_STATE>(val);
     return ERR_OK;
@@ -894,9 +890,9 @@ ErrCode NotificationPreferences::CheckSlotForCreateSlot(const sptr<NotificationB
     if (!GetBundleInfo(preferencesInfo, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
         bundleInfo.SetBundleUid(bundleOption->GetUid());
-        int32_t defaultState = CheckApiCompatibility(bundleOption) ?
-            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
-            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         bundleInfo.SetEnableNotification(defaultState);
     }
     bundleInfo.SetSlot(slot);
@@ -962,9 +958,9 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
     if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
         bundleInfo.SetBundleName(bundleOption->GetBundleName());
         bundleInfo.SetBundleUid(bundleOption->GetUid());
-        int32_t defaultState = CheckApiCompatibility(bundleOption) ?
-            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
-            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+        NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
         bundleInfo.SetEnableNotification(defaultState);
     }
     result = SaveBundleProperty(bundleInfo, bundleOption, type, value);
@@ -980,7 +976,7 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
     const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value)
 {
     bool storeDBResult = true;
-    int32_t state = 0;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     switch (type) {
         case BundleType::BUNDLE_IMPORTANCE_TYPE:
             bundleInfo.SetImportance(value);
@@ -995,12 +991,12 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             storeDBResult = preferncesDB_->PutShowBadge(bundleInfo, value);
             break;
         case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
-            state = static_cast<int32_t>(value);
+            state = static_cast<NotificationConstant::SWITCH_STATE>(value);
             bundleInfo.SetEnableNotification(state);
             storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, state);
             if (storeDBResult) {
-                if (state == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ||
-                    state == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON)) {
+                if (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+                    state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
                     SetDistributedEnabledForBundle(bundleInfo);
                 }
             }
@@ -1040,7 +1036,7 @@ ErrCode NotificationPreferences::GetBundleProperty(
                 value = bundleInfo.GetIsShowBadge();
                 break;
             case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
-                value = bundleInfo.GetEnableNotification();
+                value = static_cast<int32_t>(bundleInfo.GetEnableNotification());
                 break;
             case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
                 ANS_LOGD("Into BUNDLE_POPPED_DIALOG_TYPE:GetHasPoppedDialog.");
@@ -1113,9 +1109,9 @@ ErrCode NotificationPreferences::SetDistributedEnabledByBundle(const sptr<Notifi
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
-    int32_t defaultState = CheckApiCompatibility(bundleOption) ?
-        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
-        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedEnabledForBundle(deviceType, bundleInfo, enabled);
@@ -1149,9 +1145,9 @@ ErrCode NotificationPreferences::IsDistributedEnabledByBundle(const sptr<Notific
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleOption->GetBundleName());
     bundleInfo.SetBundleUid(bundleOption->GetUid());
-    int32_t defaultState = CheckApiCompatibility(bundleOption) ?
-        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) :
-        static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleOption) ?
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     bundleInfo.SetEnableNotification(defaultState);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->GetDistributedEnabledForBundle(deviceType, bundleInfo, enabled);

@@ -155,24 +155,24 @@ public:
 
     enum class SWITCH_STATE {
         /**
-         * Represents an off state that was explicitly set bt the user.
-         */
-        SYSTEM_DEFAULT_OFF,
-
-        /**
-         * Represents an on state that was explicitly set bt the user.
-         */
-        SYSTEM_DEFAULT_ON,
-
-        /**
-         * Represents an initial off state before any user modification.
+         * Represents an off state that was explicitly set by the user.
          */
         USER_MODIFIED_OFF,
 
         /**
-         * Represents an initial on state before any user modification.
+         * Represents an on state that was explicitly set by the user.
          */
-        USER_MODIFIED_ON
+        USER_MODIFIED_ON,
+
+        /**
+         * Represents the initial off state before any user modification.
+         */
+        SYSTEM_DEFAULT_OFF,
+
+        /**
+         * Represents the initial on state before any user modification.
+         */
+        SYSTEM_DEFAULT_ON
     };
 
     enum class DANS_SUPPORT_STATUS {

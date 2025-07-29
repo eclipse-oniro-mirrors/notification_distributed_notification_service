@@ -72,12 +72,12 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBadgeTotalNum() const
     return badgeTotalNum_;
 }
 
-void NotificationPreferencesInfo::BundleInfo::SetEnableNotification(const int32_t &state)
+void NotificationPreferencesInfo::BundleInfo::SetEnableNotification(const NotificationConstant::SWITCH_STATE &state)
 {
     isEnabledNotification_ = state;
 }
 
-int32_t NotificationPreferencesInfo::BundleInfo::GetEnableNotification() const
+NotificationConstant::SWITCH_STATE NotificationPreferencesInfo::BundleInfo::GetEnableNotification() const
 {
     return isEnabledNotification_;
 }

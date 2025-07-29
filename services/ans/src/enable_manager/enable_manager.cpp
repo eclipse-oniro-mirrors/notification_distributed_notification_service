@@ -265,7 +265,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
             NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
-            " st:" + std::to_string(static_cast<in32_t>(state)) +
+            " st:" + std::to_string(static_cast<int32_t>(state)) +
             " dId:" + deviceId);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {

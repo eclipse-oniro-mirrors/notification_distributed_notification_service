@@ -86,7 +86,7 @@ public:
      * @return Return true on success, false on failure.
      */
     bool PutNotificationsEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &state);
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &state);
 
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
