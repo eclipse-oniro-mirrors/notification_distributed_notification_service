@@ -722,8 +722,9 @@ ani_status UnWarpNotificationBasicContent(ani_env *env, ani_object obj,
         ANS_LOGD("UnWarpNotificationBasicContent: get additionalText failed");
     }
     ani_ref lockscreenPictureRef = {};
-    if (env->Object_GetPropertyByName_Ref(obj, "lockscreenPicture", &lockscreenPictureRef) != ANI_OK
-        || lockscreenPictureRef == nullptr) {
+    isUndefined = ANI_TRUE;
+    if (GetPropertyRef(env, obj, "lockscreenPicture", isUndefined, lockscreenPictureRef) != ANI_OK
+        || isUndefined == ANI_TRUE || lockscreenPictureRef == nullptr) {
         ANS_LOGD("UnWarpNotificationBasicContent: get lockscreenPicture failed");
     } else {
         std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(lockscreenPictureRef));
