@@ -1409,7 +1409,7 @@ public:
 
     bool IsDisableNotificationByKiosk(const std::string &bundleName);
 
-    bool IsDisableNotificationForSaByKiosk(const std::string &bundleName, const sptr<NotificationRequest> &request);
+    bool IsDisableNotificationForSaByKiosk(const std::string &bundleName, bool directAgency);
 
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
