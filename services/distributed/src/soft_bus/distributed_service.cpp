@@ -37,6 +37,7 @@ namespace OHOS {
 namespace Notification {
 
 static const std::string DISTRIBUTED_LABEL = "ans_distributed";
+static const std::string LABEL_PLACEHOLDER = "label";
 
 namespace {
 static const int32_t ADD_DEVICE_SLEEP_TIMES_MS = 1000;  // 1s
@@ -211,7 +212,7 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
             std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
             if (!deviceType.empty()) {
                 auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_,
-                    BunleListOperationType::RELEASE_BUNDLES, std::vector<std::string>());
+                    BundleListOperationType::RELEASE_BUNDLES, std::vector<std::string>(), std::vector<std::string>());
                 ANS_LOGI("Remove bundle %{public}s %{public}s %{public}d.", deviceType.c_str(),
                     StringAnonymous(device.deviceId_).c_str(), ret);
             }
@@ -381,7 +382,7 @@ void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool
         return;
     }
     std::function<void()> task = std::bind([&, bundleName, isAdd]() {
-        std::vector<std::string> bundles = { bundleName };
+        std::vector<std::pair<std::string, std::string>> bundles;
         auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
         auto peerDevices = DistributedDeviceService::GetInstance().GetDeviceList();
         bool isPad = DistributedDeviceService::GetInstance().IsLocalPadOrPC();
@@ -391,8 +392,16 @@ void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool
                 ANS_LOGI("Bundle no sycn %{public}d %{public}s.", userId, bundleName.c_str());
                 return;
             }
+            AppExecFwk::BundleResourceInfo resourceInfo;
+            if (DelayedSingleton<BundleResourceHelper>::GetInstance()->GetBundleInfo(bundleName, resourceInfo)
+                != ERR_OK) {
+                ANS_LOGW("Dans get bundle failed %{public}s.", bundleName.c_str());
+                return;
+            }
+            bundles.push_back({bundleName, resourceInfo.label});
         }
-        int32_t syncType = isAdd ? BunleListOperationType::ADD_BUNDLES : BunleListOperationType::REMOVE_BUNDLES;
+        bundles.push_back({bundleName, LABEL_PLACEHOLDER});
+        int32_t syncType = isAdd ? BundleListOperationType::ADD_BUNDLES : BundleListOperationType::REMOVE_BUNDLES;
         for (auto& device : peerDevices) {
             if (isPad && device.second.peerState_ != DeviceState::STATE_ONLINE) {
                 ANS_LOGI("DeviceState bundle %{public}d %{public}d %{public}s.", syncType, device.second.deviceType_,

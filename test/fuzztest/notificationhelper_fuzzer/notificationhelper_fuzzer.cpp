@@ -287,11 +287,13 @@ public:
         int32_t operateType = fdp->ConsumeIntegralInRange<int32_t>(0, 2);
         std::vector<std::string> bundleList;
         bundleList.emplace_back(fdp->ConsumeRandomLengthString());
-        notificationHelper.SetTargetDeviceBundleList(deviceType, deviceId, operateType, bundleList);
-        
+        std::vector<std::string> labelList;
+        labelList.emplace_back(fdp->ConsumeRandomLengthString());
+        notificationHelper.SetTargetDeviceBundleList(deviceType, deviceId, operateType, bundleList, labelList);
+
         notificationHelper.SetTargetDeviceSwitch(deviceType, deviceId,
             fdp->ConsumeBool(), fdp->ConsumeBool());
-        notificationHelper.GetTargetDeviceBundleList(deviceType, deviceId, bundleList);
+        notificationHelper.GetTargetDeviceBundleList(deviceType, deviceId, bundleList, labelList);
 
         int32_t targetUserId;
         std::string targetDeviceId;

@@ -315,7 +315,7 @@ interface OHOS.Notification.IAnsManager {
     void GetNotificationRequestByHashCode(
         [in] String hashCode, [out] null_sptr<NotificationRequest> notificationRequest);
 
-    void SetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [in] int operatorType, [in] String[] bundleList);
+    void SetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [in] int operatorType, [in] String[] bundleList, [in] String[] labelList);
 
     void SetTargetDeviceSwitch([in] String deviceType, [in] String deviceId, [in] boolean notificaitonEnable, [in] boolean liveViewEnable);
 
@@ -323,7 +323,7 @@ interface OHOS.Notification.IAnsManager {
 
     void GetMutilDeviceStatus([in] String deviceType, [in] unsigned int status, [out] String deviceId, [out] int userId);
 
-    void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList);
+    void GetTargetDeviceBundleList([in] String deviceType, [in] String deviceId, [out] String[] bundleList, [out] String[] labelList);
 
     [macrodef NOTIFICATION_SMART_REMINDER_SUPPORTED] void RegisterSwingCallback([in] IRemoteObject swingCallback);
 }

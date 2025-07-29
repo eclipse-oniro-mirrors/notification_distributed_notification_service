@@ -2299,14 +2299,14 @@ ErrCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceType, co
 }
 
 ErrCode AnsNotification::SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-    int operatorType, const std::vector<std::string>& bundleList)
+    int operatorType, const std::vector<std::string>& bundleList, const std::vector<std::string>& labelList)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+    return proxy->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList, labelList);
 }
 
 ErrCode AnsNotification::GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
@@ -2323,14 +2323,14 @@ ErrCode AnsNotification::GetMutilDeviceStatus(const std::string &deviceType, con
 }
 
 ErrCode AnsNotification::GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-    std::vector<std::string>& bundleList)
+    std::vector<std::string>& bundleList, std::vector<std::string>& labelList)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_SERVICE_NOT_CONNECTED;
     }
-    return proxy->GetTargetDeviceBundleList(deviceType, deviceId, bundleList);
+    return proxy->GetTargetDeviceBundleList(deviceType, deviceId, bundleList, labelList);
 }
 
 ErrCode AnsNotification::SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,

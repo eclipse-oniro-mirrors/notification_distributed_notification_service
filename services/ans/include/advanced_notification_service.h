@@ -1049,7 +1049,7 @@ public:
      */
     ErrCode SetDistributedEnabledByBundle(const sptr<NotificationBundleOption> &bundleOption,
         const std::string &deviceType, const bool enabled) override;
-    
+
     /**
      * @brief Sets whether to allow a specified application to publish notifications cross
      * device collaboration. The caller must have system permissions to call this method.
@@ -1224,13 +1224,14 @@ public:
         uint32_t controlFlag, const std::string &deviceId, int32_t userId) override;
 
     ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        int operatorType, const std::vector<std::string>& bundleList) override;
+        int operatorType, const std::vector<std::string>& bundleList,
+        const std::vector<std::string>& labelList) override;
 
     ErrCode SetTargetDeviceSwitch(const std::string& deviceType, const std::string& deviceId,
         bool notificaitonEnable, bool liveViewEnable) override;
 
     ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        std::vector<std::string>& bundleList) override;
+        std::vector<std::string>& bundleList, std::vector<std::string>& labelList) override;
 
     ErrCode GetMutilDeviceStatus(const std::string &deviceType, const uint32_t status,
         std::string& deviceId, int32_t& userId) override;

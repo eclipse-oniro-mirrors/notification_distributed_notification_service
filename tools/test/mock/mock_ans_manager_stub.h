@@ -637,7 +637,8 @@ public:
     }
 
     ErrCode SetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        int operatorType, const std::vector<std::string>& bundleList) override
+        int operatorType, const std::vector<std::string>& bundleList,
+        const std::vector<std::string>& labelList) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
@@ -733,7 +734,7 @@ public:
     }
 
     ErrCode GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
-        std::vector<std::string>& bundleList) override
+        std::vector<std::string>& bundleList, std::vector<std::string>& labelList) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

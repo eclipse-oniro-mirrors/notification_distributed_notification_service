@@ -71,7 +71,8 @@ int32_t DistributedDeviceDataService::SetDeviceSyncSwitch(const std::string& dev
 }
 
 int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::string& deviceType,
-    const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList)
+    const std::string& deviceId, int operatorType, const std::vector<std::string>& bundleList,
+    const std::vector<std::string>& labelList)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto itemIter = devicesData_.begin(); itemIter != devicesData_.end(); itemIter++) {
@@ -81,19 +82,19 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
         ANS_LOGI("Set bundles %{public}s %{public}s %{public}d %{public}zu %{public}zu.",
             StringAnonymous(deviceId).c_str(), deviceType.c_str(), operatorType,
             itemIter->installedBundles.size(), bundleList.size());
-        if (operatorType == BunleListOperationType::ADD_BUNDLES) {
-            for (auto& bundle : bundleList) {
-                itemIter->installedBundles.insert(bundle);
+        if (operatorType == BundleListOperationType::ADD_BUNDLES) {
+            for (uint32_t i = 0; i < bundleList.size() && i < labelList.size(); i++) {
+                itemIter->installedBundles[bundleList[i]] = labelList[i];
             }
         }
 
-        if (operatorType == BunleListOperationType::REMOVE_BUNDLES) {
-            for (auto& bundle : bundleList) {
-                itemIter->installedBundles.erase(bundle);
+        if (operatorType == BundleListOperationType::REMOVE_BUNDLES) {
+            for (uint32_t i = 0; i < bundleList.size() && i < labelList.size(); i++) {
+                itemIter->installedBundles.erase(bundleList[i]);
             }
         }
 
-        if (operatorType == BunleListOperationType::RELEASE_BUNDLES) {
+        if (operatorType == BundleListOperationType::RELEASE_BUNDLES) {
             itemIter->installedBundles.clear();
         }
         ANS_LOGI("After Set bundles %{public}s %{public}d %{public}zu.",
@@ -101,7 +102,7 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
         return ERR_OK;
     }
 
-    if (deviceType.empty() || deviceId.empty() || operatorType != BunleListOperationType::ADD_BUNDLES) {
+    if (deviceType.empty() || deviceId.empty() || operatorType != BundleListOperationType::ADD_BUNDLES) {
         ANS_LOGW("Set device failed %{public}s %{public}d", StringAnonymous(deviceId).c_str(),
             operatorType);
         return ERR_ANS_INVALID_PARAM;
@@ -110,8 +111,8 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
     DeviceData deviceData;
     deviceData.deviceType = deviceType;
     deviceData.deviceId = deviceId;
-    for (auto& bundle : bundleList) {
-        deviceData.installedBundles.insert(bundle);
+    for (uint32_t i = 0; i < bundleList.size() && i < labelList.size(); i++) {
+        deviceData.installedBundles[bundleList[i]] = labelList[i];
     }
     devicesData_.emplace_back(deviceData);
     ANS_LOGI("Set device add %{public}s %{public}s %{public}zu", StringAnonymous(deviceId).c_str(),
@@ -120,13 +121,16 @@ int32_t DistributedDeviceDataService::SetTargetDeviceBundleList(const std::strin
 }
 
 int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::string& deviceType,
-    const std::string& deviceId, std::vector<std::string>& bundleList)
+    const std::string& deviceId, std::vector<std::string>& bundleList, std::vector<std::string>& labelList)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
         if (item.deviceType == deviceType && item.deviceId == deviceId) {
-            bundleList.assign(item.installedBundles.begin(), item.installedBundles.end());
-            return ERR_OK;
+            for (auto bundleInfo : item.installedBundles) {
+                bundleList.push_back(bundleInfo.first);
+                labelList.push_back(bundleInfo.second);
+                return ERR_OK;
+            }
         }
     }
     ANS_LOGW("Get bundle %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
@@ -139,7 +143,7 @@ bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& dev
     std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
         if (item.deviceType == deviceType && item.deviceId == deviceId) {
-            return item.installedBundles.count(bundleName);
+            return item.installedBundles.find(bundleName) != item.installedBundles.end();
         }
     }
     ANS_LOGW("Get bundle failed %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());

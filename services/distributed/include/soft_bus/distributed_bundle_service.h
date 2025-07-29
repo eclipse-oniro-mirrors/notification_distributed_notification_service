@@ -45,7 +45,7 @@ private:
     void ReportBundleIconList(const DistributedDeviceInfo peerDevice);
     void SyncInstalledBundles(const DistributedDeviceInfo& peerDevice, bool isForce);
     void SendInstalledBundles(const DistributedDeviceInfo& peerDevice, const std::string& localDeviceId,
-        const std::vector<std::string>& bundles, int32_t type);
+        const std::vector<std::pair<std::string, std::string>>& bundles, int32_t type);
 #endif
 
 private:

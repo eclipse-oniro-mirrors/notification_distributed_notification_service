@@ -283,8 +283,9 @@ void DistributedBundleService::SetDeviceBundleList(const std::shared_ptr<TlvBox>
         return;
     }
 
+    std::vector<std::string> labelList;
     std::vector<std::string> bundleList;
-    if (!iconBox.GetBundleList(bundleList)) {
+    if (!iconBox.GetBundlesInfo(bundleList, labelList)) {
         ANS_LOGI("Dans handle bundle list failed.");
         return;
     }
@@ -295,7 +296,8 @@ void DistributedBundleService::SetDeviceBundleList(const std::shared_ptr<TlvBox>
             device.deviceType_);
         return;
     }
-    auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_, operatorType, bundleList);
+    auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_, operatorType,
+        bundleList, labelList);
     ANS_LOGI("SetDeviceBundleList %{public}s %{public}s %{public}d %{public}zu %{public}d", deviceType.c_str(),
         StringAnonymous(deviceId).c_str(), operatorType, bundleList.size(), ret);
 }
@@ -369,7 +371,7 @@ void DistributedBundleService::SyncInstalledBundles(const DistributedDeviceInfo&
         return;
     }
 
-    std::vector<std::string> bundlesName;
+    std::vector<std::pair<std::string, std::string>> bundlesName;
     int32_t userId = DistributedSubscribeService::GetCurrentActiveUserId();
     int32_t result = DelayedSingleton<BundleResourceHelper>::GetInstance()->GetAllInstalledBundles(
         bundlesName, userId);
@@ -378,31 +380,31 @@ void DistributedBundleService::SyncInstalledBundles(const DistributedDeviceInfo&
         return;
     }
 
-    std::vector<std::string> bundles;
+    std::vector<std::pair<std::string, std::string>> bundles;
     for (auto& bundle : bundlesName) {
         bundles.push_back(bundle);
         if (bundles.size() >= BundleIconBox::MAX_BUNDLE_NUM) {
             SendInstalledBundles(peerDevice, localDevice.deviceId_, bundles,
-                BunleListOperationType::ADD_BUNDLES);
+                BundleListOperationType::ADD_BUNDLES);
             bundles.clear();
         }
     }
 
     if (!bundles.empty()) {
-        SendInstalledBundles(peerDevice, localDevice.deviceId_, bundles, BunleListOperationType::ADD_BUNDLES);
+        SendInstalledBundles(peerDevice, localDevice.deviceId_, bundles, BundleListOperationType::ADD_BUNDLES);
     }
     DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
         DistributedDeviceService::SYNC_INSTALLED_BUNDLE, true);
 }
 
 void DistributedBundleService::SendInstalledBundles(const DistributedDeviceInfo& peerDevice,
-    const std::string& localDeviceId, const std::vector<std::string>& bundles, int32_t type)
+    const std::string& localDeviceId, const std::vector<std::pair<std::string, std::string>> & bundles, int32_t type)
 {
     std::shared_ptr<BundleIconBox> iconBox = std::make_shared<BundleIconBox>();
     iconBox->SetMessageType(INSTALLED_BUNDLE_SYNC);
     iconBox->SetLocalDeviceId(localDeviceId);
     iconBox->SetIconSyncType(type);
-    iconBox->SetBundleList(bundles);
+    iconBox->SetBundlesInfo(bundles);
     if (!iconBox->Serialize()) {
         ANS_LOGW("Dans SendInstalledBundles serialize failed.");
         return;

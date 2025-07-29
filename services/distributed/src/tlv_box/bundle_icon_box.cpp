@@ -24,6 +24,7 @@ namespace {
 const int32_t BUNDLE_NAME_TYPE = 1;
 const int32_t ICON_TYPE = 2;
 const int32_t LENGTH_TYPE = 3;
+const int32_t BUNDLE_LABEL_TYPE = 4;
 const int32_t ICON_START_INDEX = 10;
 const int32_t BUNDLE_START_INDEX = 2000;
 }
@@ -92,7 +93,7 @@ bool BundleIconBox::SetBundlesIcon(const std::unordered_map<std::string, std::st
         TlvBox box;
         box.PutValue(std::make_shared<TlvItem>(BUNDLE_NAME_TYPE, bundle.first));
         box.PutValue(std::make_shared<TlvItem>(ICON_TYPE, bundle.second));
-        ANS_LOGW("SetBundlesIcon %{public}s %{public}d.", bundle.first.c_str(), (int32_t)(bundle.second.size()));
+        ANS_LOGW("SetBundlesIcon %{public}s %{public}zu.", bundle.first.c_str(), bundle.second.size());
         if (!box.Serialize(false)) {
             ANS_LOGW("Set bundles icon failed %{public}s.", bundle.first.c_str());
             continue;
@@ -109,6 +110,27 @@ bool BundleIconBox::SetLocalDeviceId(const std::string& deviceId)
         return false;
     }
     return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
+}
+
+bool BundleIconBox::SetBundlesInfo(const std::vector<std::pair<std::string, std::string>>& bundles)
+{
+    if (box_ == nullptr || bundles.size() > MAX_BUNDLE_NUM) {
+        return false;
+    }
+    int32_t index = 0;
+    for (auto& bundle : bundles) {
+        TlvBox box;
+        box.PutValue(std::make_shared<TlvItem>(BUNDLE_NAME_TYPE, bundle.first));
+        box.PutValue(std::make_shared<TlvItem>(BUNDLE_LABEL_TYPE, bundle.second));
+        ANS_LOGW("SetBundlesIcon %{public}s %{public}zu.", bundle.first.c_str(), bundle.second.size());
+        if (!box.Serialize(false)) {
+            ANS_LOGW("Set bundles icon failed %{public}s.", bundle.first.c_str());
+            continue;
+        }
+        box_->PutValue(std::make_shared<TlvItem>(BUNDLE_START_INDEX + index, box.byteBuffer_, box.bytesLength_));
+        index++;
+    }
+    return SetDataLength(index);
 }
 
 bool BundleIconBox::GetIconSyncType(int32_t& type)
@@ -168,7 +190,7 @@ bool BundleIconBox::GetBundlesIcon(std::unordered_map<std::string, std::string>&
         }
         if (box.GetStringValue(ICON_TYPE, icon) &&
             box.GetStringValue(BUNDLE_NAME_TYPE, bundleName)) {
-            ANS_LOGI("GetBundlesIcon %{public}s %{public}d.", bundleName.c_str(), (int32_t)(icon.size()));
+            ANS_LOGI("GetBundlesIcon %{public}s %{public}zu.", bundleName.c_str(), icon.size());
             bundles.insert(std::make_pair(bundleName, icon));
         }
     }
@@ -181,6 +203,37 @@ bool BundleIconBox::GetLocalDeviceId(std::string& deviceId) const
         return false;
     }
     return box_->GetStringValue(LOCAL_DEVICE_ID, deviceId);
+}
+
+bool BundleIconBox::GetBundlesInfo(std::vector<std::string>& bundles, std::vector<std::string>& labels)
+{
+    int32_t length = 0;
+    if (!GetDataLength(length)) {
+        ANS_LOGW("Get GetBundles Info failed.");
+        return false;
+    }
+
+    if (length < 0 || length > MAX_BUNDLE_NUM) {
+        ANS_LOGW("Invalid bundles %{public}d.", length);
+        return false;
+    }
+
+    for (int i = 0; i < length; i++) {
+        TlvBox box;
+        std::string bundleLabel;
+        std::string bundleName;
+        if (!box_->GetObjectValue(BUNDLE_START_INDEX + i, box)) {
+            ANS_LOGW("Get bundles icon failed %{public}d.", i);
+            continue;
+        }
+        if (box.GetStringValue(BUNDLE_NAME_TYPE, bundleName) &&
+            box.GetStringValue(BUNDLE_LABEL_TYPE, bundleLabel)) {
+            ANS_LOGI("Get bundle Info %{public}s %{public}s.", bundleName.c_str(), bundleLabel.c_str());
+            bundles.emplace_back(bundleName);
+            labels.emplace_back(bundleLabel);
+        }
+    }
+    return true;
 }
 }
 }

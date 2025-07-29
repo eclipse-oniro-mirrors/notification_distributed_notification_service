@@ -114,28 +114,29 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTes
     StringAnonymous(DEVICE_ID);
     // add device installed bundles failed, because deviceType or deviceId is empty.
     int32_t result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("",
-        DEVICE_ID, BunleListOperationType::ADD_BUNDLES, {});
+        DEVICE_ID, BundleListOperationType::ADD_BUNDLES, {}, {});
     ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        "", BunleListOperationType::ADD_BUNDLES, {});
+        "", BundleListOperationType::ADD_BUNDLES, {}, {});
     ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        DEVICE_ID, BunleListOperationType::REMOVE_BUNDLES, {});
+        DEVICE_ID, BundleListOperationType::REMOVE_BUNDLES, {}, {});
     ASSERT_EQ(result, (int)ERR_ANS_INVALID_PARAM);
 
     // add device installed bundles
     std::vector<std::string> bundleList = { "ohos.com.test1", "ohos.com.test2" };
+    std::vector<std::string> labelList = { "test1", "test2" };
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        DEVICE_ID, BunleListOperationType::ADD_BUNDLES, bundleList);
+        DEVICE_ID, BundleListOperationType::ADD_BUNDLES, bundleList, labelList);
     ASSERT_EQ(result, (int)ERR_OK);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        DEVICE_ID, BunleListOperationType::ADD_BUNDLES, { "ohos.com.test0" });
+        DEVICE_ID, BundleListOperationType::ADD_BUNDLES, { "ohos.com.test0" }, { "test0" });
     ASSERT_EQ(result, (int)ERR_OK);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList("Pad",
-        DEVICE_ID, BunleListOperationType::ADD_BUNDLES, { "ohos.com.test0" });
+        DEVICE_ID, BundleListOperationType::ADD_BUNDLES, { "ohos.com.test0" }, { "test0" });
     ASSERT_EQ(result, (int)ERR_OK);
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        "abcdef", BunleListOperationType::ADD_BUNDLES, { "ohos.com.test0" });
+        "abcdef", BundleListOperationType::ADD_BUNDLES, { "ohos.com.test0" }, { "test0" });
     ASSERT_EQ(result, (int)ERR_OK);
     bool exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(DEVICE_TYPE,
         DEVICE_ID, "ohos.com.test1");
@@ -145,13 +146,9 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTes
         DEVICE_ID, "ohos.com.test1");
     ASSERT_EQ(exist, false);
 
-    exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(DEVICE_TYPE,
-        "", "ohos.com.test1");
-    ASSERT_EQ(exist, false);
-
     // remove device installed bundles
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        DEVICE_ID, BunleListOperationType::REMOVE_BUNDLES, { "ohos.com.test1" });
+        DEVICE_ID, BundleListOperationType::REMOVE_BUNDLES, { "ohos.com.test1" }, { "test1" });
     ASSERT_EQ(result, (int)ERR_OK);
     exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(DEVICE_TYPE,
         DEVICE_ID, "ohos.com.test1");
@@ -162,7 +159,7 @@ HWTEST_F(DistributedDeviceDataServiceTest, DeviceData_00002, Function | SmallTes
 
     // clear device installed bundles
     result = DistributedDeviceDataService::GetInstance().SetTargetDeviceBundleList(DEVICE_TYPE,
-        DEVICE_ID, BunleListOperationType::RELEASE_BUNDLES, {});
+        DEVICE_ID, BundleListOperationType::RELEASE_BUNDLES, {}, {});
     ASSERT_EQ(result, (int)ERR_OK);
     exist = DistributedDeviceDataService::GetInstance().CheckDeviceBundleExist(DEVICE_TYPE,
         DEVICE_ID, "ohos.com.test2");

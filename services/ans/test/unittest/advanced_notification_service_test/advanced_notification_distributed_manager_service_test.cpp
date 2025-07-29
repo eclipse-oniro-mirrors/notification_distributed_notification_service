@@ -482,9 +482,11 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_100, 
     const std::string deviceType = "";
     const std::string deviceId = "";
     int operatorType = 0;
+    const std::vector<std::string> labelList;
     const std::vector<std::string> bundleList;
 
-    auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+    auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType,
+        bundleList, labelList);
 
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
@@ -502,9 +504,11 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_200, 
     const std::string deviceType = "";
     const std::string deviceId = "";
     int operatorType = 0;
+    const std::vector<std::string> labelList;
     const std::vector<std::string> bundleList;
 
-    auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+    auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType,
+        bundleList, labelList);
 
     ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
@@ -523,9 +527,11 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetTargetDeviceBundleList_300, 
     const std::string deviceType = "";
     const std::string deviceId = "";
     int operatorType = 0;
+    const std::vector<std::string> labelList;
     const std::vector<std::string> bundleList;
 
-    auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType, bundleList);
+    auto ret = advancedNotificationService_->SetTargetDeviceBundleList(deviceType, deviceId, operatorType,
+        bundleList, labelList);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -560,7 +566,8 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetTargetDeviceBundleList_100, 
     const std::string deviceType = "pad";
     const std::string deviceId = "id";
     std::vector<std::string> bundles;
-    auto ret = advancedNotificationService_->GetTargetDeviceBundleList(deviceType, deviceId, bundles);
+    std::vector<std::string> labels;
+    auto ret = advancedNotificationService_->GetTargetDeviceBundleList(deviceType, deviceId, bundles, labels);
     ASSERT_EQ(ret, (int)ERR_ANS_NON_SYSTEM_APP);
 }
 
