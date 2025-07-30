@@ -98,56 +98,29 @@ static const std::vector<std::pair<uint32_t, int32_t>> ERRORS_CONVERT = {
 };
 
 
-inline int32_t GetExternalCode(uint32_t errCode)
-{
-    for (const auto &errorConvert : ERRORS_CONVERT) {
-        if (static_cast<int32_t>(errCode) == errorConvert.second) {
-            return errCode;
-        }
-        if (errCode == errorConvert.first) {
-            return errorConvert.second;
-        }
-    }
-    return ERROR_INTERNAL_ERROR;
-};
+int32_t GetExternalCode(uint32_t errCode);
 
-inline std::string FindAnsErrMsg(const int32_t errCode)
-{
-    auto findMsg = ERROR_CODE_TO_MESSAGE.find(errCode);
-    if (findMsg == ERROR_CODE_TO_MESSAGE.end()) {
-        ANS_LOGE("FindAnsErrMsg Inner error.");
-        return "Inner error.";
-    }
-    return findMsg->second;
-}
+std::string FindAnsErrMsg(const int32_t errCode);
 
-inline void ThrowStsError(ani_env *env, int32_t errCode, std::string logMsg)
-{
-    ANS_LOGE("%{public}s", logMsg.c_str());
-    OHOS::AbilityRuntime::EtsErrorUtil::ThrowError(env, errCode, logMsg);
-}
+void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg);
 
-inline void ThrowStsError(ani_env *env, int32_t errCode)
-{
-    ThrowStsError(env, errCode, FindAnsErrMsg(errCode));
-}
+ani_object CreateError(ani_env *env, ani_int code, const std::string &msg);
 
-inline void ThrowStsErroWithMsg(ani_env *env, std::string logMsg)
+inline void ThrowErroWithMsg(ani_env *env, std::string logMsg)
 {
-    ANS_LOGE("%{public}s", logMsg.c_str());
-    ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+    ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
         FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
 }
 
-inline void ThrowStsErrorWithCode(ani_env *env, const int32_t errCode, std::string msg = "")
+inline void ThrowErrorWithCode(ani_env *env, const int32_t errCode, std::string msg = "")
 {
     if (env == nullptr) return;
-    ThrowStsError(env, errCode, msg.empty() ? FindAnsErrMsg(errCode) : msg);
+    ThrowError(env, errCode, msg.empty() ? FindAnsErrMsg(errCode) : msg);
 }
 
-inline void ThrowStsErrorWithInvalidParam(ani_env *env)
+inline void ThrowErrorWithInvalidParam(ani_env *env)
 {
-    ThrowStsErrorWithCode(env, ERROR_PARAM_INVALID);
+    ThrowErrorWithCode(env, ERROR_PARAM_INVALID);
 }
 
 } // namespace NotificationSts

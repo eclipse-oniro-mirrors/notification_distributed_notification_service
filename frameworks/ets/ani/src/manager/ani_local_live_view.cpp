@@ -29,14 +29,14 @@ void AniTriggerSystemLiveView(
     ANS_LOGD("AniTriggerSystemLiveView call");
     BundleOption bundleOption;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOptionObj, bundleOption)) {
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         ANS_LOGE("AniTriggerSystemLiveView bundleOption ERROR_INTERNAL_ERROR");
         return;
     }
     NotificationSts::ButtonOption buttonOption;
     if (NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption) != ANI_OK) {
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
         return;
@@ -45,7 +45,7 @@ void AniTriggerSystemLiveView(
         static_cast<int32_t>(notificationId), buttonOption);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniTriggerSystemLiveView error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniTriggerSystemLiveView end");
@@ -61,7 +61,7 @@ void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
         = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(*localLiveViewSubscriber, false);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSubscribeSystemLiveView error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniSubscribeSystemLiveView end");

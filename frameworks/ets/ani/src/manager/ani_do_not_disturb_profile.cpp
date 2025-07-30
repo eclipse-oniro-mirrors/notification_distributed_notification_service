@@ -31,14 +31,14 @@ void AniAddDoNotDisturbProfile(ani_env *env, ani_object obj)
     if (NotificationSts::UnwrapArrayDoNotDisturbProfile(env, obj, profiles)) {
         returncode = Notification::NotificationHelper::AddDoNotDisturbProfiles(profiles);
     } else {
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         ANS_LOGE("AniAddDoNotDisturbProfile failed : ERROR_INTERNAL_ERROR");
         return;
     }
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniAddDoNotDisturbProfile error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniAddDoNotDisturbProfile end");
@@ -52,14 +52,14 @@ void AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj)
     if (NotificationSts::UnwrapArrayDoNotDisturbProfile(env, obj, profiles)) {
         returncode = Notification::NotificationHelper::RemoveDoNotDisturbProfiles(profiles);
     } else {
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         ANS_LOGE("AniRemoveDoNotDisturbProfile failed : ERROR_INTERNAL_ERROR");
         return;
     }
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniRemoveDoNotDisturbProfile error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniRemoveDoNotDisturbProfile end");
@@ -73,7 +73,7 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_double id)
     sptr<NotificationDoNotDisturbProfile> doNotDisturbProfile = new (std::nothrow) NotificationDoNotDisturbProfile();
     if (doNotDisturbProfile == nullptr) {
         ANS_LOGE("Failed to create NotificationDoNotDisturbProfile.");
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         return nullptr;
     }
@@ -85,12 +85,12 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_double id)
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniSetDoNotDisturbDateWithId error, errorCode: %{public}d, returncode: %{public}d",
             externalCode, returncode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 
     if (!NotificationSts::WrapDoNotDisturbProfile(env, doNotDisturbProfile, profile)) {
         ANS_LOGE("AniGetDoNotDisturbProfile WrapDoNotDisturbProfile failed");
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
         return nullptr;
     }

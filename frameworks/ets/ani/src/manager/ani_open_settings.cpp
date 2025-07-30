@@ -39,7 +39,7 @@ bool GetOpenSettingsInfo(ani_env *env, ani_object content, std::shared_ptr<OpenS
         ANS_LOGE("Only support stage mode");
         std::string msg = "Incorrect parameter types.Only support stage mode.";
         ANS_LOGE("sts GetOpenSettingsInfo ERROR_PARAM_INVALID");
-        OHOS::NotificationSts::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     info->context = OHOS::AbilityRuntime::GetStageModeContext(env, content);
@@ -147,12 +147,12 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
             ANS_LOGD("createInt faild");
-            NotificationSts::ThrowStsErroWithMsg(env, "");
+            NotificationSts::ThrowErroWithMsg(env, "");
             return;
         }
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
-            NotificationSts::ThrowStsErroWithMsg(env, "");
+            NotificationSts::ThrowErroWithMsg(env, "");
         }
     } else {
         std::string errMsg = OHOS::NotificationSts::FindAnsErrMsg(errorCode);
@@ -161,7 +161,7 @@ void StsAsyncCompleteCallbackOpenSettings(ani_env *env, std::shared_ptr<OpenSett
             static_cast<ani_error>(OHOS::AbilityRuntime::EtsErrorUtil::CreateError(env, errorCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(info->resolver, rejection))) {
             ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
-            NotificationSts::ThrowStsErroWithMsg(env, "");
+            NotificationSts::ThrowErroWithMsg(env, "");
         }
     }
 }
@@ -176,13 +176,13 @@ ani_object AniOpenNotificationSettings(ani_env *env, ani_object content)
     }
     if (info->context == nullptr) {
         ANS_LOGE("sts AniOpenNotificationSettings context is null");
-        NotificationSts::ThrowStsErroWithMsg(env, "");
+        NotificationSts::ThrowErroWithMsg(env, "");
         return nullptr;
     }
     std::string bundleName {""};
     if (isExist.exchange(true)) {
         ANS_LOGE("sts AniOpenNotificationSettings ERROR_SETTING_WINDOW_EXIST");
-        OHOS::NotificationSts::ThrowStsError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_SETTING_WINDOW_EXIST,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_SETTING_WINDOW_EXIST));
         return nullptr;
     }
