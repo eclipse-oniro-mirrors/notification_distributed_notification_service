@@ -104,7 +104,7 @@ std::string FindAnsErrMsg(const int32_t errCode);
 
 void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg);
 
-ani_object CreateError(ani_env *env, ani_int code, const std::string &msg);
+ani_object CreateError(ani_env *env, int32_t code, const std::string &msg);
 
 inline void ThrowErroWithMsg(ani_env *env, std::string logMsg)
 {

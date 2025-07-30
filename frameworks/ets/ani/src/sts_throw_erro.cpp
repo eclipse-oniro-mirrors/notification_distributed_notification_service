@@ -96,7 +96,7 @@ ani_object WrapError(ani_env *env, const std::string &msg)
     return obj;
 }
 
-ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
+ani_object CreateError(ani_env *env, int32_t code, const std::string &msg)
 {
     if (env == nullptr) {
         ANS_LOGE("null env");
@@ -109,7 +109,7 @@ ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
         return nullptr;
     }
     ani_method method = nullptr;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "ILescompat/Error;:V", &method)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &method)) != ANI_OK) {
         ANS_LOGE("Class_FindMethod failed %{public}d", status);
         return nullptr;
     }
@@ -119,7 +119,7 @@ ani_object CreateError(ani_env *env, ani_int code, const std::string &msg)
         return nullptr;
     }
     ani_object obj = nullptr;
-    ani_int iCode(code);
+    ani_double iCode = static_cast<ani_double>(code);
     if ((status = env->Object_New(cls, method, &obj, iCode, error)) != ANI_OK) {
         ANS_LOGE("Object_New failed %{public}d", status);
         return nullptr;
