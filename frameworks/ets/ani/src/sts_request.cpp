@@ -47,7 +47,7 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
         && isUndefined == ANI_FALSE) {
         distributedOptions.isDistributed = isDistributed;
     } else {
-        ANS_LOGD("UnWarpDistributedOptions: isDistributed get failed");
+        ANS_LOGD("UnWarpDistributedOptions: isDistributed get1159 failed");
     }
     // supportDisplayDevices?: Array<string>;
     std::vector<std::string> tempStrings = {};
@@ -1191,12 +1191,12 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
         ani_class requestCls;
         ani_object requestObj;
         if (!WarpNotificationRequest(env, request.GetRefPtr(), requestCls, requestObj) || requestObj == nullptr) {
-            ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
+            ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(
             arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
+            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}zu", index);
             return nullptr;
         }
         index ++;
@@ -1218,12 +1218,12 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
         if (!WarpNotificationRequest(
             env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
             || requestObj == nullptr) {
-                ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
+                ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
                 return nullptr;
             }
         if (ANI_OK
             != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
+            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}zu", index);
             return nullptr;
         }
         index ++;

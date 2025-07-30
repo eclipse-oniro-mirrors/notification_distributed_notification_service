@@ -106,7 +106,7 @@ void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashC
         if (iterTimer->second == NotificationConstant::INVALID_TIMER_ID) {
             return;
         }
-        ANS_LOGI("Operation timer erase %{public}s %{public}llu", hashCode.c_str(), iterTimer->second);
+        ANS_LOGI("Operation timer erase %{public}s %{public}" PRIu64, hashCode.c_str(), iterTimer->second);
         MiscServices::TimeServiceClient::GetInstance()->StopTimer(iterTimer->second);
         MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(iterTimer->second);
         timerMap_.erase(iterTimer);
@@ -120,7 +120,7 @@ void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashC
 void UnlockListenerOperService::ReplyOperationResponse()
 {
     std::lock_guard<ffrt::mutex> lock(mapLock_);
-    ANS_LOGI("hashCodeOrder size %{public}u", hashCodeOrder_.size());
+    ANS_LOGI("hashCodeOrder size %{public}zu", hashCodeOrder_.size());
     for (std::string hashCode : hashCodeOrder_) {
         auto iterDelayTask = delayTaskMap_.find(hashCode);
         if (iterDelayTask != delayTaskMap_.end()) {
