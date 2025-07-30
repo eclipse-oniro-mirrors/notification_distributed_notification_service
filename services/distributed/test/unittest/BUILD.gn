@@ -651,11 +651,15 @@ ohos_unittest("distributed_library_test") {
     "power_manager:powermgr_client",
     "relational_store:native_rdb",
     "samgr:samgr_proxy",
-    "screenlock_mgr:screenlock_client",
     "time_service:time_client",
     "zlib:libz",
   ]
- 
+
+  defines = []
+  if (screenlock_mgr_enable) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+    defines += [ "SCREENLOCK_MGR_ENABLE" ]
+  }
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
