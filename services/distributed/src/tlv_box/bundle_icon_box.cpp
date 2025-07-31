@@ -71,12 +71,13 @@ bool BundleIconBox::SetBundleList(const std::vector<std::string>& bundleList)
         return false;
     }
     int32_t messageType;
-    int32_t index = ICON_START_INDEX;
+    int32_t index = 0;
+    int32_t startIndex = ICON_START_INDEX;
     if (box_->GetMessageType(messageType)) {
-        index = (messageType == BUNDLE_ICON_SYNC) ? ICON_START_INDEX : BUNDLE_START_INDEX;
+        startIndex = (messageType == BUNDLE_ICON_SYNC) ? ICON_START_INDEX : BUNDLE_START_INDEX;
     }
     for (auto& bundleName : bundleList) {
-        if (box_->PutValue(std::make_shared<TlvItem>(index, bundleName))) {
+        if (box_->PutValue(std::make_shared<TlvItem>(startIndex + index, bundleName))) {
             index++;
         }
     }
