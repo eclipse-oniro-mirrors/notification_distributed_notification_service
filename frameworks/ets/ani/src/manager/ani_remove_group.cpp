@@ -30,13 +30,13 @@ void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string gr
     ANS_LOGD("AniRemoveGroupByBundle call");
     OHOS::Notification::NotificationBundleOption option;
     if (!OHOS::NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowStsErroWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErroWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
         return ;
     }
     std::string tempStr = "";
     ani_status status = NotificationSts::GetStringByAniString(env, groupName, tempStr);
     if (status !=  ANI_OK) {
-        NotificationSts::ThrowStsErroWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErroWithMsg(env, "sts AniRemoveGroupByBundle ERROR_INTERNAL_ERROR");
         return ;
     }
     std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
@@ -44,7 +44,7 @@ void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string gr
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniRemoveGroupByBundle -> error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniRemoveGroupByBundle end");
 }

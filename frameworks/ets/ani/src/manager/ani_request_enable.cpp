@@ -38,7 +38,7 @@ bool GetEnableNotificationInfo(ani_env *env, ani_object content, std::shared_ptr
     if (ANI_OK != status || stageMode != ANI_TRUE) {
         ANS_LOGE("Only support stage mode");
         std::string msg = "Incorrect parameter types.Only support stage mode.";
-        OHOS::NotificationSts::ThrowStsError(env, ERROR_PARAM_INVALID, msg);
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     info->stageMode = true;

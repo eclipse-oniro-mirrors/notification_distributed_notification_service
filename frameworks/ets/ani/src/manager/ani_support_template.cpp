@@ -28,7 +28,7 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
     ANS_LOGD("AniIsSupportTemplate call");
     std::string tempStr;
     if (NotificationSts::GetStringByAniString(env, templateName, tempStr) != ANI_OK) {
-        NotificationSts::ThrowStsErroWithMsg(env, "templateName parse failed!");
+        NotificationSts::ThrowErroWithMsg(env, "templateName parse failed!");
         return NotificationSts::BoolToAniBoolean(false);
     }
     std::string templateNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
@@ -38,7 +38,7 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniIsSupportTemplate -> error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return NotificationSts::BoolToAniBoolean(false);
     }
     ANS_LOGD("AniIsSupportTemplate end, support: %{public}d, returncode: %{public}d", support, returncode);
@@ -54,12 +54,12 @@ ani_object AniGetDeviceRemindType(ani_env *env)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         ANS_LOGE("AniGetDeviceRemindType error, errorCode: %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowStsError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
     ani_enum_item remindTypeItem {};
     if (!NotificationSts::DeviceRemindTypeCToEts(env, remindType, remindTypeItem)) {
-        NotificationSts::ThrowStsErroWithMsg(env, "AniGetDeviceRemindType:failed to WrapNotificationSlotArray");
+        NotificationSts::ThrowErroWithMsg(env, "AniGetDeviceRemindType:failed to WrapNotificationSlotArray");
         return nullptr;
     }
     ANS_LOGD("AniGetDeviceRemindType end, ret: %{public}d", returncode);
