@@ -232,6 +232,22 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
     bool updateUnEnableTime)
 {
+    return SetNotificationsEnabledForSpecialBundleImpl(
+        deviceId, bundleOption, enabled, updateUnEnableTime, false);
+}
+
+ErrCode AdvancedNotificationService::SetNotificationsSystemEnabledForSpecialBundle(
+    const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+    bool updateUnEnableTime)
+{
+    return SetNotificationsEnabledForSpecialBundleImpl(
+        deviceId, bundleOption, enabled, updateUnEnableTime, true);
+}
+
+ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl(
+    const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
+    bool updateUnEnableTime, bool isSystemCall)
+{
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_5);
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
@@ -242,8 +258,14 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         return ERR_ANS_INVALID_BUNDLE;
     }
 
+    NotificationConstant::SWITCH_STATE state = isSystemCall ?
+        (enabled ? NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) :
+        (enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+            NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
-            " en:" + std::to_string(enabled) +
+            " st:" + std::to_string(static_cast<int32_t>(state)) +
             " dId:" + deviceId);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
@@ -279,7 +301,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
     ErrCode result = ERR_OK;
     if (deviceId.empty()) {
         // Local device
-        result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, enabled);
+        result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, state);
         if (result == ERR_OK) {
             if (!enabled) {
                 result = RemoveAllNotificationsForDisable(bundle);
@@ -297,9 +319,10 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundle(
         // Remote device
     }
 
-    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, enable: %{public}s, "
+    ANS_LOGI("%{public}s_%{public}d, deviceId: %{public}s, state: %{public}s, "
         "result: %{public}d", bundleOption->GetBundleName().c_str(),
-        bundleOption->GetUid(), StringAnonymous(deviceId).c_str(), std::to_string(enabled).c_str(), result);
+        bundleOption->GetUid(), StringAnonymous(deviceId).c_str(),
+        std::to_string(static_cast<int32_t>(state)).c_str(), result);
         message.ErrorCode(result).BranchId(BRANCH_9);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     SendEnableNotificationHiSysEvent(bundleOption, enabled, result);
@@ -547,9 +570,14 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
 
     ErrCode result = ERR_OK;
     allowed = false;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     if (result == ERR_OK && allowed) {
-        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, allowed);
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, state);
+        if (result == ERR_OK) {
+            allowed = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+                state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+        }
         if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
             // FA model app can publish notification without user confirm
@@ -626,16 +654,21 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
     }
 
     ErrCode result = ERR_OK;
-        allowed = false;
-        result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
-        if (result == ERR_OK && allowed) {
-            result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, allowed);
-            if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-                result = ERR_OK;
-                allowed = CheckApiCompatibility(targetBundle);
-                SetNotificationsEnabledForSpecialBundle("", bundleOption, allowed);
-            }
+    allowed = false;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && allowed) {
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, state);
+        if (result == ERR_OK) {
+            allowed = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+                state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
         }
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_OK;
+            allowed = CheckApiCompatibility(targetBundle);
+            SetNotificationsSystemEnabledForSpecialBundle("", bundleOption, allowed);
+        }
+    }
     return result;
 }
 

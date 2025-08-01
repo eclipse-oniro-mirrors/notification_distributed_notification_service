@@ -83,12 +83,12 @@ bool NotificationCloneBundleInfo::GetIsShowBadge() const
     return isShowBadge_;
 }
 
-void NotificationCloneBundleInfo::SetEnableNotification(const bool &enable)
+void NotificationCloneBundleInfo::SetEnableNotification(const NotificationConstant::SWITCH_STATE &state)
 {
-    isEnabledNotification_ = enable;
+    isEnabledNotification_ = state;
 }
 
-bool NotificationCloneBundleInfo::GetEnableNotification() const
+NotificationConstant::SWITCH_STATE NotificationCloneBundleInfo::GetEnableNotification() const
 {
     return isEnabledNotification_;
 }
@@ -139,7 +139,7 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
     jsonObject[BUNDLE_INFO_APP_INDEX] =  appIndex_;
     jsonObject[BUNDLE_INFO_SLOT_FLAGS] =  slotFlags_;
     jsonObject[BUNDLE_INFO_SHOW_BADGE] =  isShowBadge_ ? 1 : 0;
-    jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] =  isEnabledNotification_ ? 1 : 0;
+    jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION] =  static_cast<int32_t>(isEnabledNotification_);
     jsonObject[BUNDLE_INFO_SILENT_REMINDER] =  static_cast<int32_t>(silentReminderEnabled_);
 }
 
@@ -194,11 +194,14 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
     if (jsonObject.contains(BUNDLE_INFO_ENABLE_NOTIFICATION) &&
         jsonObject[BUNDLE_INFO_ENABLE_NOTIFICATION].is_number()) {
         int32_t enabledNotification = jsonObject.at(BUNDLE_INFO_ENABLE_NOTIFICATION).get<int32_t>();
-        isEnabledNotification_ = (enabledNotification == CONST_ENABLE_INT);
+        if (enabledNotification >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
+            enabledNotification <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+            isEnabledNotification_ = static_cast<NotificationConstant::SWITCH_STATE>(enabledNotification);
+        }
     }
     if (jsonObject.contains(BUNDLE_INFO_SILENT_REMINDER) && jsonObject[BUNDLE_INFO_SILENT_REMINDER].is_number()) {
         int32_t silentReminderEnabled = jsonObject.at(BUNDLE_INFO_SILENT_REMINDER).get<int32_t>();
-        if (silentReminderEnabled >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) &&
+        if (silentReminderEnabled >= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) &&
             silentReminderEnabled <= static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
             silentReminderEnabled_ = static_cast<NotificationConstant::SWITCH_STATE>(silentReminderEnabled);
         }
@@ -224,7 +227,7 @@ std::string NotificationCloneBundleInfo::Dump() const
             ", uid = " + std::to_string(uid_) +
             ", slotFlags = " + std::to_string(slotFlags_) +
             ", ShowBadge = " + std::to_string(isShowBadge_) +
-            ", isEnabled = " + std::to_string(isEnabledNotification_) +
+            ", isEnabled = " + std::to_string(static_cast<int32_t>(isEnabledNotification_)) +
             ", slotsInfo = " + slotDump +
             ", silentReminderEnabled = " + std::to_string(static_cast<int32_t>(silentReminderEnabled_)) +
             " }";

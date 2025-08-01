@@ -4459,9 +4459,9 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00006, Function | SmallTest | L
     data.SetCode(0);
     advancedNotificationService_->dialogManager_->dialogEventSubscriber->OnReceiveEvent(data);
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, enable);
-    ASSERT_EQ(enable, false);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
 /**

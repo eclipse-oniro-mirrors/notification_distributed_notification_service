@@ -35,9 +35,14 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
 {
     bool isForceControl = false;
     bool enable = false;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
     ErrCode result =
-        NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(record->bundleOption, enable);
+        NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(record->bundleOption, state);
+    if (result == ERR_OK) {
+        enable = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    }
     if (result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
         result = ERR_OK;
         std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
@@ -77,7 +82,7 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
             IsNotificationForcedEnable(record->bundleOption->GetBundleName()) ||
             AdvancedNotificationService::GetInstance()->IsNotificationOnceForcedEnable(record->bundleOption))) {
             AdvancedNotificationService::GetInstance()->
-                SetNotificationsEnabledForSpecialBundle("", record->bundleOption, true);
+                SetNotificationsSystemEnabledForSpecialBundle("", record->bundleOption, true);
             return result;
         }
 
