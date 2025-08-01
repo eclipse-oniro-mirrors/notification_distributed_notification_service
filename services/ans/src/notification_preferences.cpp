@@ -346,22 +346,6 @@ ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
     return result;
 }
 
-bool NotificationPreferences::GetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (preferncesDB_ == nullptr) {
-        return true;
-    }
-    return preferncesDB_->GetOnceForcedEnableFlag(bundleOption);
-}
-
-bool NotificationPreferences::SetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (preferncesDB_ == nullptr) {
-        return false;
-    }
-    return preferncesDB_->SetOnceForcedEnableFlag(bundleOption);
-}
-
 ErrCode NotificationPreferences::IsShowBadge(const sptr<NotificationBundleOption> &bundleOption, bool &enable)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {

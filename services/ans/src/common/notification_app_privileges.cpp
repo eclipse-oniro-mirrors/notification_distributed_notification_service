@@ -35,14 +35,6 @@ NotificationAppPrivileges::NotificationAppPrivileges(const std::string &flagStr)
         flagStr[DISTRIBUTED_REPLY_SEQ] == DISTRIBUTED_REPLY_ENABLE) {
         privileges_ |= 1 << DISTRIBUTED_REPLY_SEQ;
     }
-    if (flagStr.size() > NOTIFICATION_FORCED_ENABLE_SEQ &&
-        flagStr[NOTIFICATION_FORCED_ENABLE_SEQ] == NOTIFICATION_FORCED_ENABLE) {
-        privileges_ |= 1 << NOTIFICATION_FORCED_ENABLE_SEQ;
-    }
-    if (flagStr.size() > NOTIFICATION_ONCE_FORCED_ENABLE_SEQ &&
-        flagStr[NOTIFICATION_ONCE_FORCED_ENABLE_SEQ] == NOTIFICATION_ONCE_FORCED_ENABLE) {
-        privileges_ |= 1 << NOTIFICATION_ONCE_FORCED_ENABLE_SEQ;
-    }
 }
 
 bool NotificationAppPrivileges::IsLiveViewEnabled() const
@@ -69,21 +61,6 @@ bool NotificationAppPrivileges::IsReminderEnabled() const
 bool NotificationAppPrivileges::IsDistributedReplyEnabled() const
 {
     if ((privileges_ & (1 << DISTRIBUTED_REPLY_SEQ)) != 0) {
-        return true;
-    }
-    return false;
-}
-
-bool NotificationAppPrivileges::IsNotificationForcedEnable() const
-{
-    if ((privileges_ & (1 << NOTIFICATION_FORCED_ENABLE_SEQ)) != 0) {
-        return true;
-    }
-    return false;
-}
-bool NotificationAppPrivileges::IsNotificationOnceForcedEnable() const
-{
-    if ((privileges_ & (1 << NOTIFICATION_ONCE_FORCED_ENABLE_SEQ)) != 0) {
         return true;
     }
     return false;
