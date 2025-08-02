@@ -78,14 +78,6 @@ ErrCode PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &r
     }
 
     if (result == ERR_OK) {
-        if (!enable && (DelayedSingleton<NotificationConfigParse>::GetInstance()->
-            IsNotificationForcedEnable(record->bundleOption->GetBundleName()) ||
-            AdvancedNotificationService::GetInstance()->IsNotificationOnceForcedEnable(record->bundleOption))) {
-            AdvancedNotificationService::GetInstance()->
-                SetNotificationsSystemEnabledForSpecialBundle("", record->bundleOption, true);
-            return result;
-        }
-
         if (!enable && !isForceControl) {
             message.ErrorCode(ERR_ANS_NOT_ALLOWED).Message("Notifications is off.");
             NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message);

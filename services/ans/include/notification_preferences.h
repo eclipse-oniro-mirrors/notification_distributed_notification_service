@@ -545,10 +545,6 @@ public:
     bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);
 
-    bool GetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption);
-
-    bool SetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption);
-
     void SetKioskModeStatus(bool isKioskMode);
 
     bool IsKioskMode();

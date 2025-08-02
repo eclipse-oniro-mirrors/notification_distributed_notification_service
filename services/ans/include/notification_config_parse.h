@@ -52,8 +52,6 @@ public:
     bool IsBannerEnabled(const std::string bundleName) const;
     bool IsReminderEnabled(const std::string& bundleName) const;
     bool IsDistributedReplyEnabled(const std::string& bundleName) const;
-    bool IsNotificationForcedEnable(const std::string& bundleName) const;
-    bool IsNotificationOnceForcedEnable(const std::string& bundleName) const;
     void GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold);
     bool GetSmartReminderEnableList(std::vector<std::string>& deviceTypes);
     bool GetMirrorNotificationEnabledStatus(std::vector<std::string>& deviceTypes);

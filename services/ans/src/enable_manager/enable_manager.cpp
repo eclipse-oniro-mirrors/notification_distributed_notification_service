@@ -471,19 +471,6 @@ ErrCode AdvancedNotificationService::GetAllNotificationEnabledBundles(
     return result;
 }
 
-bool AdvancedNotificationService::IsNotificationOnceForcedEnable(sptr<NotificationBundleOption> &bundleOption)
-{
-    if (DelayedSingleton<NotificationConfigParse>::GetInstance()->
-        IsNotificationOnceForcedEnable(bundleOption->GetBundleName()) &&
-        !NotificationPreferences::GetInstance()->GetOnceForcedEnableFlag(bundleOption)) {
-        NotificationPreferences::GetInstance()->SetOnceForcedEnableFlag(bundleOption);
-        ANS_LOGI("bundle %{public}s_%{public}d once forced enable.",
-            bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
-        return true;
-    }
-    return false;
-}
-
 ErrCode AdvancedNotificationService::SetNotificationsEnabledByUser(int32_t userId, bool enabled)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);

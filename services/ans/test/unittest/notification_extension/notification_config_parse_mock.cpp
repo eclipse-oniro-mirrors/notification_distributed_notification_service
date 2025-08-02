@@ -129,16 +129,6 @@ bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) cons
     return false;
 }
 
-bool NotificationConfigParse::IsNotificationForcedEnable(const std::string& bundleName) const
-{
-    return false;
-}
-
-bool NotificationConfigParse::IsNotificationOnceForcedEnable(const std::string& bundleName) const
-{
-    return false;
-}
-
 void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold)
 {
 }
