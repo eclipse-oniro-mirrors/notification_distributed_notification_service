@@ -632,15 +632,15 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     ANS_LOGD("enter");
     if (IsUndefine(env, subscriber)) {
         ANS_LOGD("Subscriber is undefine");
-        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_INVALID_PARAM);
-        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INVALID_PARAM, msg);
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERROR_PARAM_INVALID);
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     std::shared_ptr<StsSubscriberInstance> stsSubscriber = nullptr;
     if (!HasNotificationSubscriber(env, subscriber, stsSubscriber)) {
         ANS_LOGD("Subscriber not found");
-        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_INVALID_PARAM);
-        OHOS::NotificationSts::ThrowError(env, ERR_ANS_INVALID_PARAM, msg);
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERROR_PARAM_INVALID);
+        OHOS::NotificationSts::ThrowError(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
     bool ret = AddDeletingSubscriber(stsSubscriber);
@@ -656,8 +656,8 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
             DelDeletingSubscriber(stsSubscriber);
         }
     } else {
-        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERR_ANS_SUBSCRIBER_IS_DELETING);
-        OHOS::NotificationSts::ThrowError(env, ERR_ANS_SUBSCRIBER_IS_DELETING, msg);
+        std::string msg = OHOS::NotificationSts::FindAnsErrMsg(ERROR_INTERNAL_ERROR);
+        OHOS::NotificationSts::ThrowError(env, ERROR_INTERNAL_ERROR, "Subscriber is deleting");
         return false;
     }
     return true;
