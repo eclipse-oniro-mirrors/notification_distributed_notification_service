@@ -90,7 +90,8 @@ void ChangeStatus(DeviceStatus& device, const std::string &deviceType, const uin
             DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
             ANS_LOGI("notify %{public}s %{public}s using change.", device.deviceType.c_str(),
                 StringAnonymous(device.deviceId).c_str());
-        } else if (((1 << DistributedDeviceStatus::USING_FLAG) & device.status) == 0) {
+        } else if (((1 << DistributedDeviceStatus::USING_FLAG) & controlFlag) &&
+            ((1 << DistributedDeviceStatus::USING_FLAG) & device.status) == 0) {
             changeInfo.changeType = DeviceStatueChangeType::DEVICE_USING_CLOSE;
             DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
         }

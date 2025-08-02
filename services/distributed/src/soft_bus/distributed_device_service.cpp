@@ -191,7 +191,7 @@ void DistributedDeviceService::SetDeviceSyncData(const std::string& deviceId, in
     }
 }
 
-void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId)
+void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId, int32_t peerState)
 {
     std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto deviceIter = peerDevice_.find(deviceId);
@@ -204,7 +204,7 @@ void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId)
     deviceIter->second.liveViewSync = false;
     deviceIter->second.iconSync = false;
     deviceIter->second.installedBundlesSync = false;
-    deviceIter->second.peerState_ = DeviceState::STATE_SYNC;
+    deviceIter->second.peerState_ = peerState;
 }
 
 void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32_t state)

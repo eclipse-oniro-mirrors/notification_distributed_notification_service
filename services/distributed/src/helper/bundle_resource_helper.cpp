@@ -137,7 +137,7 @@ ErrCode BundleResourceHelper::GetAllInstalledBundles(std::vector<std::pair<std::
             ANS_LOGW("Get failed %{public}s %{public}d", bundle.applicationInfo.bundleName.c_str(), result);
             continue;
         }
-        ANS_LOGI("Get bundle app %{public}s %{public}s", bundle.applicationInfo.bundleName.c_str(),
+        ANS_LOGD("Get bundle app %{public}s %{public}s", bundle.applicationInfo.bundleName.c_str(),
             resourceInfo.label.c_str());
         bundlesName.emplace_back(std::make_pair(bundle.applicationInfo.bundleName,
             resourceInfo.label));
