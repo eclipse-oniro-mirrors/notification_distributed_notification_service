@@ -189,6 +189,10 @@ export class EnableNotificationDialog {
           while(!hasDisalogRectInfo && waiteTimes < 10){
             waiteTimes ++;
             await this.sleep(200);
+            let windowRect = extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+            if (windowRect.width > 0 && windowRect.height > 0) {
+              hasDisalogRectInfo = true;
+            }  
           }
           if(hasDisalogRectInfo) {
             // get display

@@ -18,7 +18,7 @@
 #include "ans_log_wrapper.h"
 
 namespace OHOS::Notification {
-bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
+bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result, bool newInterface)
 {
     ANS_LOGD("called");
     std::lock_guard<std::mutex> lock(AnsDialogHostClient::instanceMutex_);
@@ -27,6 +27,7 @@ bool AnsDialogHostClient::CreateIfNullptr(sptr<AnsDialogHostClient>& result)
         return false;
     }
     AnsDialogHostClient::instance_ = new (std::nothrow) AnsDialogHostClient();
+    AnsDialogHostClient::newInterface_ = newInterface;
     result = AnsDialogHostClient::instance_;
     return result != nullptr;
 }
@@ -62,7 +63,7 @@ ErrCode AnsDialogHostClient::OnDialogStatusChanged(const DialogStatusData& statu
         ANS_LOGE("AnsDialogCallbackNativeInterface is null.");
         return ERR_OK;
     }
-    if (hasBeenCalled.exchange(true)) {
+    if (hasBeenCalled.exchange(true) && !AnsDialogHostClient::newInterface_) {
         ANS_LOGE("Has been called.");
         return ERR_INVALID_DATA;
     }

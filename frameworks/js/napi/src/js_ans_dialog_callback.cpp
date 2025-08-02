@@ -60,7 +60,6 @@ void JsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData& dat
     std::unique_ptr<AsyncCallbackInfoIsEnable> callbackInfo(callbackInfo_);
     if (env_ == nullptr || callbackInfo == nullptr || complete_ == nullptr) {
         ANS_LOGE("invalid data");
-        AnsDialogHostClient::Destroy();
         return;
     }
 
@@ -71,7 +70,6 @@ void JsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData& dat
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
         ANS_LOGE("loop is nullptr");
-        AnsDialogHostClient::Destroy();
         return;
     }
 

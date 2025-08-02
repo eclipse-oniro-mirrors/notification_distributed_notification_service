@@ -252,6 +252,25 @@ HWTEST_F(SmartReminderCenterTest, InitPcPadDevices_200, Function | SmallTest | L
     ASSERT_EQ(validDevices.size(), 0);
     ASSERT_EQ(smartDevices.size(), 0);
 }
+
+/**
+ * @tc.name: InitPcPadDevices_300
+ * @tc.desc: Test InitPcPadDevices when ANS_VOIP
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, InitPcPadDevices_300, Function | SmallTest | Level1)
+{
+    std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
+    set<string> validDevices;
+    set<string> smartDevices;
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetClassification(NotificationConstant::ANS_VOIP);
+    map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> statusMap;
+    smartReminderCenter_->InitPcPadDevices(deviceType, validDevices, smartDevices, statusMap, request);
+
+    ASSERT_EQ(validDevices.size(), 0);
+    ASSERT_EQ(smartDevices.size(), 0);
+}
 #endif
 
 /**
