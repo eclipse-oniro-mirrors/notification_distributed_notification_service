@@ -721,7 +721,7 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
         }
         if (record->request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW &&
             !LivePublishProcess::GetInstance()->CheckLocalLiveViewSubscribed(record->request, isUpdateByOwner, uid)) {
-            result = ERR_ANS_INVALID_PARAM;
+            result = ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED;
             ANS_LOGE("CheckLocalLiveViewSubscribed Failed!");
             return;
         }

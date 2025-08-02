@@ -109,6 +109,7 @@ enum ErrorCode : uint32_t {
     ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID,
     ERR_ANS_NO_PROFILE_TEMPLATE,
     ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION,
+    ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED,
 };
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
