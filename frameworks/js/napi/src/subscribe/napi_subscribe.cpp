@@ -85,6 +85,13 @@ void NapiDistributeOperationCompleteCallback(napi_env env, napi_status status, v
     }
 }
 
+static void ClearEnvCallback(void *data)
+{
+    ANS_LOGD("Env expired, need to clear env");
+    SubscriberInstance *subscriber = reinterpret_cast<SubscriberInstance *>(data);
+    subscriber->ClearEnv();
+}
+
 napi_value NapiSubscribe(napi_env env, napi_callback_info info)
 {
     ANS_LOGD("called");
@@ -165,6 +172,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
         &asynccallbackinfo->asyncWork);
 
     bool isCallback = asynccallbackinfo->info.isCallback;
+    napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
     napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
 
     if (isCallback) {

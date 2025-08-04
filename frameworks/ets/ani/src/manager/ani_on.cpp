@@ -47,7 +47,7 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowStsErrorWithInvalidParam(env);
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
         return errCode;
     }
     if (OHOS::NotificationSts::IsUndefine(env, checkRequestObj)) {
@@ -58,18 +58,18 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     if (!OHOS::NotificationSts::UnWarpNotificationCheckRequest(env, checkRequestObj, checkRequest)) {
         ANS_LOGE("InvalidParam 'checkRequest'");
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowStsErrorWithInvalidParam(env);
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
         return errCode;
     }
     if (!CheckCallerIsSystemApp()) {
-        OHOS::NotificationSts::ThrowStsErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
         return ERROR_NOT_SYSTEM_APP;
     }
 
     sptr<StsPushCallBack> stsPushCallBack_ = new (std::nothrow) StsPushCallBack(env);
     if (stsPushCallBack_ == nullptr) {
         ANS_LOGE("new stsPushCallBack_ failed");
-        OHOS::NotificationSts::ThrowStsErrorWithCode(env, ERROR_INTERNAL_ERROR);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_INTERNAL_ERROR);
         return ERROR_INTERNAL_ERROR;
     }
     NotificationConstant::SlotType outSlotType = checkRequest->GetSlotType();
@@ -78,14 +78,14 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     if (result != ERR_OK) {
         int32_t externalCode = ERR_OK ? ERR_OK : NotificationSts::GetExternalCode(result);
         ANS_LOGE("Register failed, result is %{public}d", externalCode);
-        OHOS::NotificationSts::ThrowStsErrorWithCode(env, externalCode);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, externalCode);
         return externalCode;
     }
     ANS_LOGD("done");
     return result;
 #else
     int32_t errCode = OHOS::Notification::ERROR_SYSTEM_CAP_ERROR;
-    OHOS::NotificationSts::ThrowStsErrorWithCode(env, errCode);
+    OHOS::NotificationSts::ThrowErrorWithCode(env, errCode);
     return errCode;
 #endif
 }
@@ -99,16 +99,16 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowStsErrorWithInvalidParam(env);
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
         return errCode;
     }
     if (!CheckCallerIsSystemApp()) {
-        OHOS::NotificationSts::ThrowStsErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
+        OHOS::NotificationSts::ThrowErrorWithCode(env, ERROR_NOT_SYSTEM_APP);
         return ERROR_NOT_SYSTEM_APP;
     }
     if (!OHOS::NotificationSts::IsUndefine(env, fn)) {
         int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowStsErrorWithInvalidParam(env);
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
         return errCode;
     }
     int32_t ret = NotificationHelper::UnregisterPushCallback();
@@ -116,7 +116,7 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
     return ERR_OK;
 #else
     int32_t errCode = OHOS::Notification::ERROR_SYSTEM_CAP_ERROR;
-    OHOS::NotificationSts::ThrowStsErrorWithCode(env, errCode);
+    OHOS::NotificationSts::ThrowErrorWithCode(env, errCode);
     return errCode;
 #endif
 }

@@ -207,24 +207,6 @@ bool NotificationConfigParse::IsBannerEnabled(const std::string bundleName) cons
 #endif
 }
 
-bool NotificationConfigParse::IsNotificationForcedEnable(const std::string& bundleName) const
-{
-    std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
-    if (appPrivileges == nullptr) {
-        return false;
-    }
-    return appPrivileges->IsNotificationForcedEnable();
-}
-
-bool NotificationConfigParse::IsNotificationOnceForcedEnable(const std::string& bundleName) const
-{
-    std::shared_ptr<NotificationAppPrivileges> appPrivileges = GetAppPrivileges(bundleName);
-    if (appPrivileges == nullptr) {
-        return false;
-    }
-    return appPrivileges->IsNotificationOnceForcedEnable();
-}
-
 void NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold)
 {
     nlohmann::json root;

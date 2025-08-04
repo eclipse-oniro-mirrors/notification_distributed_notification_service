@@ -387,6 +387,10 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
     const sptr<NotificationRequest> &request) const
 {
+    if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
+        ANS_LOGI("PC/PAD init, pc/pad not support voip");
+        return;
+    }
     if (NotificationConstant::SlotType::LIVE_VIEW == request->GetSlotType() &&
         NotificationConstant::PC_DEVICE_TYPE == deviceType) {
         ANS_LOGI("PC/PAD init, pc not support liveView");
@@ -508,13 +512,6 @@ void SmartReminderCenter::HandleReminderMethods(
     if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
         ANS_LOGI("VOIP CALL");
         if (deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
-            return;
-        }
-        if (deviceType.compare(NotificationConstant::PAD_DEVICE_TYPE) == 0 ||
-            deviceType.compare(NotificationConstant::PC_DEVICE_TYPE) == 0) {
-            std::shared_ptr<NotificationFlags> reminderFlags;
-            NotificationFlags::GetReminderFlagsByString(NotificationConstant::PC_PAD_VOIP_FLAG, reminderFlags);
-            (*notificationFlagsOfDevices)[deviceType] = reminderFlags;
             return;
         }
     }

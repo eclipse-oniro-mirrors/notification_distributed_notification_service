@@ -279,7 +279,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
         }
         auto* asynccallbackinfo = static_cast<AsyncCallbackInfoIsEnable*>(data);
         sptr<AnsDialogHostClient> client = nullptr;
-        AnsDialogHostClient::CreateIfNullptr(client);
+        AnsDialogHostClient::CreateIfNullptr(client, true);
         if (client == nullptr) {
             ANS_LOGE("create client fail");
             asynccallbackinfo->info.errorCode = ERROR_INTERNAL_ERROR;

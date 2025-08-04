@@ -748,8 +748,8 @@ HWTEST_F(NotificationPreferencesTest, GetTotalBadgeNums_00300, Function | SmallT
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption_, false),
-        (int)ERR_OK);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption_,
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_OK);
 }
 
 /**
@@ -760,8 +760,8 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00100, Fu
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00200, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleEmptyOption_, false),
-        (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleEmptyOption_,
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -772,8 +772,8 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00200, Fu
  */
 HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(nullptr, false),
-        (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(nullptr,
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -783,12 +783,13 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationsEnabledForBundle_00300, Fu
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00100, Function | SmallTest | Level1)
 {
-    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption_, false),
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption_,
+        static_cast<NotificationConstant::SWITCH_STATE>(0)), (int)ERR_OK);
+
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption_, state),
         (int)ERR_OK);
-    bool enabled = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption_, enabled),
-        (int)ERR_OK);
-    EXPECT_FALSE(enabled);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
 /**
@@ -799,9 +800,9 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00100, Fu
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00200, Function | SmallTest | Level1)
 {
-    bool enabled = false;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleEmptyOption_,
-        enabled), (int)ERR_ANS_INVALID_PARAM);
+        state), (int)ERR_ANS_INVALID_PARAM);
 }
 
 /**
@@ -812,8 +813,8 @@ HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00200, Fu
  */
 HWTEST_F(NotificationPreferencesTest, GetNotificationsEnabledForBundle_00300, Function | SmallTest | Level1)
 {
-    bool enabled = false;
-    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(nullptr, enabled),
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    ASSERT_EQ((int)NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(nullptr, state),
         (int)ERR_ANS_INVALID_PARAM);
 }
 

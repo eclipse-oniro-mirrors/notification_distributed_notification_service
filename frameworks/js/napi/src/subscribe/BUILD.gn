@@ -88,7 +88,6 @@ ohos_shared_library("notificationsubscribe") {
     "ipc:ipc_single",
     "libuv:uv",
     "napi:ace_napi",
-    "node:node_header_notice",
     "relational_store:native_rdb",
   ]
 

@@ -474,9 +474,9 @@ HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00001, Function | SmallTest | 
     advancedNotificationService_->InitNotificationEnableList();
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, true);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 3);
 }
 
 /**
@@ -545,9 +545,9 @@ HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00001, Function | SmallTest | Level1)
     MockSetBundleInfoEnabled(false);
     advancedNotificationService_->OnBundleDataAdd(bundle);
     SleepForFC();
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, false);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 2);
 }
 
 /**
@@ -564,9 +564,9 @@ HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00002, Function | SmallTest | Level1)
     MockSetBundleInfoEnabled(true);
     advancedNotificationService_->OnBundleDataAdd(bundle);
     SleepForFC();
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, true);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 3);
 }
 
 /**
@@ -583,10 +583,10 @@ HWTEST_F(AnsUtilsTest, OnBundleDataAdd_00003, Function | SmallTest | Level1)
     MockSetBundleInfoFailed(true);
     advancedNotificationService_->OnBundleDataAdd(bundle);
     SleepForFC();
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
     MockSetBundleInfoFailed(false);
-    ASSERT_EQ(enable, false);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
 /**
@@ -620,9 +620,9 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00002, Function | SmallTest | Level1)
     MockSetBundleInfoEnabled(true);
     advancedNotificationService_->OnBundleDataUpdate(bundle);
     SleepForFC();
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, true);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 3);
 }
 
 /**
@@ -641,9 +641,9 @@ HWTEST_F(AnsUtilsTest, OnBundleDataUpdate_00003, Function | SmallTest | Level1)
     advancedNotificationService_->OnBundleDataUpdate(bundle);
     SleepForFC();
     MockSetBundleInfoFailed(false);
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, false);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
 /**
@@ -709,7 +709,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     cloneBundleInfo.SetBundleName("test");
     cloneBundleInfo.SetUid(1);
     cloneBundleInfo.SetIsShowBadge(true);
-    cloneBundleInfo.SetEnableNotification(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     cloneBundleInfo.SetSlotFlags(63);
     NotificationCloneBundleInfo::SlotInfo info;
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -718,9 +718,9 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00001, Function | SmallTest | Level
     advancedNotificationService_->UpdateCloneBundleInfo(cloneBundleInfo);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, true);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 1);
 }
 
 /**
@@ -736,7 +736,7 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     cloneBundleInfo.SetBundleName("UpdateCloneBundleInfo_00002");
     cloneBundleInfo.SetUid(1);
     cloneBundleInfo.SetIsShowBadge(true);
-    cloneBundleInfo.SetEnableNotification(true);
+    cloneBundleInfo.SetEnableNotification(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     cloneBundleInfo.SetSlotFlags(63);
     NotificationCloneBundleInfo::SlotInfo info;
     info.slotType_ = NotificationConstant::SlotType::SOCIAL_COMMUNICATION;
@@ -746,9 +746,9 @@ HWTEST_F(AnsUtilsTest, UpdateCloneBundleInfo_00002, Function | SmallTest | Level
     ans.UpdateCloneBundleInfo(cloneBundleInfo);
     SleepForFC();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("UpdateCloneBundleInfo_00002", 1);
-    bool enable = false;
-    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, enable);
-    ASSERT_EQ(enable, false);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+    NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
 /**

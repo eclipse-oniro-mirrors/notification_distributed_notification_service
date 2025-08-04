@@ -24,6 +24,7 @@
 #include <memory>
 #include <mutex>
 #include "notification_clone_bundle_info.h"
+#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {
@@ -198,19 +199,21 @@ public:
      * @brief Get private notification enable in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.
-     * @param enabled Indicates to whether to enable.
+     * @param state Indicates to whether to enable.
      * @return Return ERR_OK on success, others on failure.
      */
-    ErrCode GetNotificationsEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, bool &enabled);
+    ErrCode GetNotificationsEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        NotificationConstant::SWITCH_STATE &state);
 
     /**
      * @brief Set private notification enable in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.
-     * @param enabled Indicates to set enable.
+     * @param state Indicates to set switch state.
      * @return Return ERR_OK on success, others on failure.
      */
-    ErrCode SetNotificationsEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption, const bool enabled);
+    ErrCode SetNotificationsEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationConstant::SWITCH_STATE state);
 
     /**
      * @brief Get notification enable from DB.
@@ -541,10 +544,6 @@ public:
 
     bool SetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);
-
-    bool GetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption);
-
-    bool SetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption);
 
     void SetKioskModeStatus(bool isKioskMode);
 

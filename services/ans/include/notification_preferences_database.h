@@ -82,11 +82,11 @@ public:
      * @brief Put enable notification in the of  bundle into disturbe DB.
      *
      * @param bundleInfo Indicates bundle info.
-     * @param enabled Indicates to whether to enabled
+     * @param state Indicates to whether to enabled
      * @return Return true on success, false on failure.
      */
     bool PutNotificationsEnabledForBundle(
-        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled);
+        const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &state);
 
     /**
      * @brief Put distributed enable notification in the of  bundle into disturbe DB.
@@ -398,10 +398,6 @@ public:
 
     bool GetBundleRemoveFlag(const sptr<NotificationBundleOption> &bundleOption,
         const NotificationConstant::SlotType &slotType, int32_t sourceType);
-
-    bool GetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption);
-
-    bool SetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption);
 
     /**
      * @brief ParseBundleFromDistureDB

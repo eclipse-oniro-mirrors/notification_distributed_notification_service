@@ -28,7 +28,7 @@ namespace OHOS::Notification {
 class AnsDialogHostClient final : public AnsDialogCallbackStub {
 public:
     static bool IsNullptr();
-    static bool CreateIfNullptr(sptr<AnsDialogHostClient>& result);
+    static bool CreateIfNullptr(sptr<AnsDialogHostClient>& result, bool newInterface = false);
     static sptr<AnsDialogHostClient> GetInstance();
     static void Destroy();
     static bool SetDialogCallbackInterface(std::unique_ptr<AnsDialogCallbackNativeInterface> dialogCallbackInterface);
@@ -45,6 +45,7 @@ private:
 
     std::unique_ptr<AnsDialogCallbackNativeInterface> dialogCallbackInterface_ = nullptr;
     std::atomic<bool> hasBeenCalled { false };
+    inline static bool newInterface_;
 };
 } // namespace OHOS::Notification
 

@@ -247,15 +247,6 @@ const static std::string KEY_SECOND_REMOVED_FLAG = "2";
 constexpr int32_t CLEAR_SLOT_FROM_AVSEESAION = 1;
 
 /**
- * Force to turn on the notification switch once.
- */
-const static std::string KEY_ONCE_FORCED_ENABLE_FLAG = "label_ans_once_forced_enable";
-
-const static std::string KEY_NOT_FORCED_ENABLE = "1";
-
-const static std::string KEY_FORCED_ENABLE_DONE = "2";
-
-/**
  * Indicates hashCode rule.
  */
 const static std::string KEY_HASH_CODE_RULE = "hashCodeRule";
@@ -461,7 +452,7 @@ bool NotificationPreferencesDatabase::PutTotalBadgeNums(
 }
 
 bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
-    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &enabled)
+    const NotificationPreferencesInfo::BundleInfo &bundleInfo, const NotificationConstant::SWITCH_STATE &state)
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_17, EventBranchId::BRANCH_5);
     if (bundleInfo.GetBundleName().empty()) {
@@ -470,15 +461,15 @@ bool NotificationPreferencesDatabase::PutNotificationsEnabledForBundle(
         return false;
     }
 
-    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, enabled[%{public}d]",
-        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), enabled);
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, state[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), static_cast<int32_t>(state));
     if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
         return false;
     }
 
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE, enabled,
-        bundleInfo.GetBundleUid());
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE,
+        static_cast<int32_t>(state), bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
 
@@ -697,7 +688,10 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
                 NotificationPreferencesInfo::BundleInfo bundleInfo;
                 bundleInfo.SetBundleName(bundleName);
                 bundleInfo.SetBundleUid(bundleUid);
-                bundleInfo.SetEnableNotification(CheckApiCompatibility(bundleName, bundleUid));
+                NotificationConstant::SWITCH_STATE defaultState = CheckApiCompatibility(bundleName, bundleUid) ?
+                    NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+                    NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+                bundleInfo.SetEnableNotification(defaultState);
                 result = PutBundleToDisturbeDB(bundleKeyStr, bundleInfo);
                 break;
             }
@@ -727,7 +721,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     GenerateEntry(
         GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE), std::to_string(bundleInfo.GetIsShowBadge()), values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_ENABLE_NOTIFICATION),
-        std::to_string(bundleInfo.GetEnableNotification()),
+        std::to_string(static_cast<int32_t>(bundleInfo.GetEnableNotification())),
         values);
     GenerateEntry(GenerateBundleKey(bundleKey, KEY_BUNDLE_POPPED_DIALOG),
         std::to_string(bundleInfo.GetHasPoppedDialog()),
@@ -788,13 +782,14 @@ bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundl
         return false;
     }
     ANS_LOGD("Bundle name is %{public}s.", bundleKey.c_str());
+    std::string bundleKeyType = GenerateBundleKey(bundleKey);
     std::unordered_map<std::string, std::string> bundleEntries;
-    rdbDataManager_->QueryDataBeginWithKey((GenerateBundleKey(bundleKey)), bundleEntries, userId);
-    ANS_LOGD("Bundle key is %{public}s.", GenerateBundleKey(bundleKey).c_str());
+    rdbDataManager_->QueryDataBeginWithKey(bundleKeyType, bundleEntries, userId);
+    ANS_LOGD("Bundle key is %{public}s.", bundleKeyType.c_str());
     std::string keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE);
     bool badgeEnableExist = false;
     for (auto bundleEntry : bundleEntries) {
-        if (IsSlotKey(GenerateBundleKey(bundleKey), bundleEntry.first)) {
+        if (IsSlotKey(bundleKeyType, bundleEntry.first)) {
             ParseSlotFromDisturbeDB(bundleInfo, bundleKey, bundleEntry, userId);
         } else {
             ParseBundlePropertyFromDisturbeDB(bundleInfo, bundleKey, bundleEntry);
@@ -1503,7 +1498,7 @@ void NotificationPreferencesDatabase::ParseBundleEnableNotification(
     NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
 {
     ANS_LOGD("SetBundleEnableNotification bundle enable is %{public}s.", value.c_str());
-    bundleInfo.SetEnableNotification(static_cast<bool>(StringToInt(value)));
+    bundleInfo.SetEnableNotification(static_cast<NotificationConstant::SWITCH_STATE>(StringToInt(value)));
 }
 
 void NotificationPreferencesDatabase::ParseBundlePoppedDialog(
@@ -3122,75 +3117,6 @@ bool NotificationPreferencesDatabase::GetBundleRemoveFlag(const sptr<Notificatio
 
     ANS_LOGI("Get current remove flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
     if (!existFlag || result == KEY_REMOVED_FLAG) {
-        return false;
-    }
-    return true;
-}
-
-static std::string GetOnceForcedEnableFlagKey(const sptr<NotificationBundleOption> &bundleOption)
-{
-    std::string key = KEY_ONCE_FORCED_ENABLE_FLAG + KEY_UNDER_LINE + bundleOption->GetBundleName() +
-        std::to_string(bundleOption->GetUid());
-    return key;
-}
-
-bool NotificationPreferencesDatabase::SetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (bundleOption == nullptr) {
-        ANS_LOGE("null bundleOption");
-        return false;
-    }
-
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    if (userId == SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Current user acquisition failed");
-        return false;
-    }
-
-    if (!CheckRdbStore()) {
-        ANS_LOGE("null RdbStore");
-        return false;
-    }
-    std::string key = GetOnceForcedEnableFlagKey(bundleOption);
-    int32_t result = rdbDataManager_->InsertData(key, KEY_FORCED_ENABLE_DONE, userId);
-    return (result == NativeRdb::E_OK);
-}
-
-bool NotificationPreferencesDatabase::GetOnceForcedEnableFlag(const sptr<NotificationBundleOption> &bundleOption)
-{
-    if (bundleOption == nullptr) {
-        ANS_LOGE("null bundleOption");
-        return true;
-    }
-
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
-    if (userId == SUBSCRIBE_USER_INIT) {
-        ANS_LOGW("Current user acquisition failed");
-        return true;
-    }
-
-    std::string key = GetOnceForcedEnableFlagKey(bundleOption);
-    bool existFlag = true;
-    std::string result;
-    GetValueFromDisturbeDB(key, userId, [&](const int32_t& status, std::string& value) {
-        switch (status) {
-            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
-                existFlag = false;
-                break;
-            }
-            case NativeRdb::E_OK: {
-                result = value;
-                break;
-            }
-            default:
-                break;
-        }
-    });
-
-    ANS_LOGI("once forced enable flag %{public}s,%{public}s,%{public}d", key.c_str(), result.c_str(), existFlag);
-    if (!existFlag || result == KEY_NOT_FORCED_ENABLE) {
         return false;
     }
     return true;
