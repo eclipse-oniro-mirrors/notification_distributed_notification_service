@@ -97,7 +97,9 @@ private:
         const sptr<NotificationRequest> &request) const;
 #endif
     void FillRequestExtendInfo(const string &deviceType, DeviceStatus &deviceStatus,
-        const sptr<NotificationRequest> &request) const;
+        const sptr<NotificationRequest> &request,
+        const AppExecFwk::ApplicationInfo &appInfo,
+        const AppExecFwk::BundleResourceInfo &bundleResourceInfo) const;
     bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;

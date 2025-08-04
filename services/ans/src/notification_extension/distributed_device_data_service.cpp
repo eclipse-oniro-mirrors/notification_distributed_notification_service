@@ -138,12 +138,17 @@ int32_t DistributedDeviceDataService::GetTargetDeviceBundleList(const std::strin
 }
 
 bool DistributedDeviceDataService::CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
-    const std::string bundleName)
+    const std::string& bundleName, const std::string& label)
 {
     std::lock_guard<ffrt::mutex> lock(lock_);
     for (auto& item : devicesData_) {
-        if (item.deviceType == deviceType && item.deviceId == deviceId) {
-            return item.installedBundles.find(bundleName) != item.installedBundles.end();
+        if (item.deviceType != deviceType || item.deviceId != deviceId) {
+            continue;
+        }
+        for (auto installedBundle : item.installedBundles) {
+            if (installedBundle.first == bundleName || installedBundle.second == label) {
+                return true;
+            }
         }
     }
     ANS_LOGW("Get bundle failed %{public}s %{public}s", deviceType.c_str(), StringAnonymous(deviceId).c_str());
