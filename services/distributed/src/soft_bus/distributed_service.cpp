@@ -219,7 +219,7 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
 
             DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_OFFLINE);
             DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
-            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_);
+            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
         }
 #else
         if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
@@ -346,6 +346,7 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
         DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
     }
     // sync to peer device
+    DistributedDeviceService::GetInstance().SetDeviceState(device.deviceId_, DeviceState::STATE_SYNC);
     ConnectPeerDevice(device);
 }
 #else
@@ -461,7 +462,7 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
             DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
                 device.deviceType_, false);
             DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
-            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_);
+            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
         }
     }
 
