@@ -24,6 +24,22 @@
 
 namespace OHOS {
 namespace Notification {
+
+NotificationFlags::NotificationFlags(uint32_t reminderFlags): reminderFlags_(reminderFlags)
+{
+    if ((NotificationConstant::ReminderFlag::SOUND_FLAG & reminderFlags) > 0) {
+        soundEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        soundEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+ 
+    if ((NotificationConstant::ReminderFlag::VIBRATION_FLAG & reminderFlags) > 0) {
+        vibrationEnabled_ = NotificationConstant::FlagStatus::OPEN;
+    } else {
+        vibrationEnabled_ = NotificationConstant::FlagStatus::CLOSE;
+    }
+}
+
 void NotificationFlags::SetSoundEnabled(NotificationConstant::FlagStatus soundEnabled)
 {
     soundEnabled_ = soundEnabled;

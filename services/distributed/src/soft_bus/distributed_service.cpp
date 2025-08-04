@@ -400,8 +400,9 @@ void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool
                 return;
             }
             bundles.push_back({bundleName, resourceInfo.label});
+        } else {
+            bundles.push_back({bundleName, LABEL_PLACEHOLDER});
         }
-        bundles.push_back({bundleName, LABEL_PLACEHOLDER});
         int32_t syncType = isAdd ? BundleListOperationType::ADD_BUNDLES : BundleListOperationType::REMOVE_BUNDLES;
         for (auto& device : peerDevices) {
             if (isPad && device.second.peerState_ != DeviceState::STATE_ONLINE) {
