@@ -867,8 +867,6 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
     SetPropertyOptionalByInt(env, object, "creatorPid", request->GetCreatorPid());
     // badgeNumber?: long
     SetPropertyOptionalByLong(env, object, "badgeNumber", request->GetBadgeNumber());
-    // readonly creatorInstanceKey?: int
-    SetPropertyOptionalByInt(env, object, "creatorInstanceKey", request->GetCreatorInstanceKey());
     return true;
 }
 
