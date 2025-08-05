@@ -349,11 +349,6 @@ void SmartReminderCenter::InitValidDevices(
             smartDevices.insert(deviceType);
             request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
         } else {
-            bool distributedSwitch = GetDistributedSwitch(deviceType);
-            if (!distributedSwitch) {
-                ANS_LOGI("distributed switch is closed, deveiceType = %{public}s", deviceType.c_str());
-                continue;
-            }
             bool appSwitch = GetAppSwitch(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid());
             // app-close
             if (!appSwitch) {
