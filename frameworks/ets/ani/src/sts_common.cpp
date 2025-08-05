@@ -403,8 +403,8 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
 
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs)
 {
-    if (env == nullptr || strs.empty()) {
-        ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr or strs is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr");
         return nullptr;
     }
     int length = strs.size();
