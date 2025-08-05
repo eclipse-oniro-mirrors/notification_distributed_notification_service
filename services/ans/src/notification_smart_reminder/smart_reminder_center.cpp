@@ -393,6 +393,10 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
     map<string, bitset<DistributedDeviceStatus::STATUS_SIZE>> &statusMap,
     const sptr<NotificationRequest> &request) const
 {
+    if (request->GetOwnerBundleName().empty()) {
+        ANS_LOGI("PC/PAD init, bundleName null");
+        return;
+    }
     if (request->GetClassification() == NotificationConstant::ANS_VOIP) {
         ANS_LOGI("PC/PAD init, pc/pad not support voip");
         return;
