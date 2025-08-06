@@ -403,8 +403,8 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
 
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs)
 {
-    if (env == nullptr || strs.empty()) {
-        ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr or strs is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr");
         return nullptr;
     }
     int length = strs.size();
@@ -557,7 +557,7 @@ ani_object CreateLong(ani_env *env, int64_t value)
         return nullptr;
     }
     ani_method longCtor;
-    if ((status = env->Class_FindMethod(longCls, "<ctor>", "J:", &longCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(longCls, "<ctor>", "J:V", &longCtor)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return nullptr;
     }

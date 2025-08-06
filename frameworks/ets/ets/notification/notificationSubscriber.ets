@@ -116,7 +116,6 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         creatorUid: undefined,
         creatorPid: undefined,
         creatorUserId: undefined,
-        // creatorInstanceKey: undefined,
         sound: undefined,
         classification: undefined,
         hashCode: undefined,

@@ -23,21 +23,21 @@ export interface NotificationSorting {
 
 class NotificationSortingInner implements NotificationSorting {
     public readonly slot: NotificationSlot = {
-            notificationType: undefined,
-            //level?: notification.SlotLevel;
-            desc: undefined,
-            badgeFlag: undefined,
-            bypassDnd: undefined,
-            lockscreenVisibility: undefined,
-            vibrationEnabled: undefined,
-            sound: undefined,
-            lightEnabled: undefined,
-            lightColor: undefined,
-            vibrationValues: undefined,
-            enabled: undefined,
-            reminderMode: undefined,
-            authorizedStatus: undefined
-        };
+        notificationType: undefined,
+        notificationLevel: undefined,
+        desc: undefined,
+        badgeFlag: undefined,
+        bypassDnd: undefined,
+        lockscreenVisibility: undefined,
+        vibrationEnabled: undefined,
+        sound: undefined,
+        lightEnabled: undefined,
+        lightColor: undefined,
+        vibrationValues: undefined,
+        enabled: undefined,
+        reminderMode: undefined,
+        authorizedStatus: undefined
+    };
     public readonly hashCode: string = '';
     public readonly ranking: long = -1;
 }
