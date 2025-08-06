@@ -1726,7 +1726,6 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
             return false;
         }
 
-        NotificationSubscriberManager::GetInstance()->NotifyApplicationInfoNeedChanged(request->GetCreatorBundleName());
         ANS_LOGI("Common live view requires push check.");
         return true;
     }

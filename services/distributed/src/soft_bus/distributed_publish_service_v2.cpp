@@ -40,6 +40,7 @@
 #include "remove_all_distributed_box.h"
 #include "bundle_resource_helper.h"
 #include "distributed_service.h"
+#include "distributed_send_adapter.h"
 
 namespace OHOS {
 namespace Notification {
@@ -204,8 +205,9 @@ void DistributedPublishService::OnRemoveNotification(const DistributedDeviceInfo
     if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         dataType = TransDataType::DATA_TYPE_BYTES;
     }
-    DistributedClient::GetInstance().SendMessage(removeBox, dataType,
-        peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(removeBox, peerDevice,
+            dataType, DELETE_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
 }
 
 void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInfo& peerDevice,
@@ -229,8 +231,9 @@ void DistributedPublishService::OnRemoveNotifications(const DistributedDeviceInf
     if (peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         dataType = TransDataType::DATA_TYPE_BYTES;
     }
-    DistributedClient::GetInstance().SendMessage(batchRemoveBox, dataType,
-        peerDevice.deviceId_, DELETE_ERROR_EVENT_CODE);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(batchRemoveBox, peerDevice,
+        dataType, DELETE_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
@@ -249,10 +252,10 @@ void DistributedPublishService::RemoveAllDistributedNotifications(DistributedDev
         ANS_LOGW("dans OnCanceled serialize failed");
         return;
     }
-    ANS_LOGI("RemoveAllDistributedNotifications ID:%{public}s",
-        StringAnonymous(deviceInfo.deviceId_).c_str());
-    DistributedClient::GetInstance().SendMessage(removeBox, TransDataType::DATA_TYPE_BYTES,
-        deviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);
+    ANS_LOGI("Remove all:%{public}s", StringAnonymous(deviceInfo.deviceId_).c_str());
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(removeBox, deviceInfo,
+        TransDataType::DATA_TYPE_BYTES, DELETE_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
 }
 
 bool DistributedPublishService::ForWardRemove(const std::shared_ptr<BoxBase>& boxMessage,
@@ -276,8 +279,9 @@ bool DistributedPublishService::ForWardRemove(const std::shared_ptr<BoxBase>& bo
             ANS_LOGD("no need ForWardRemove");
             continue;
         }
-        DistributedClient::GetInstance().SendMessage(boxMessage, TransDataType::DATA_TYPE_BYTES,
-            peerDeviceInfo.deviceId_, DELETE_ERROR_EVENT_CODE);
+        std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(boxMessage, peerDeviceInfo,
+            TransDataType::DATA_TYPE_BYTES, DELETE_ERROR_EVENT_CODE);
+        DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
         ANS_LOGI("ForWardRemove,deviceId:%{public}s", StringAnonymous(peerDeviceInfo.deviceId_).c_str());
     }
     return true;
@@ -457,10 +461,11 @@ void DistributedPublishService::SyncNotifictionList(const DistributedDeviceInfo&
         ANS_LOGW("Dans SyncNotifictionList serialize failed.");
         return;
     }
-    int32_t result = DistributedClient::GetInstance().SendMessage(notificationSyncBox,
-        TransDataType::DATA_TYPE_BYTES, peerDevice.deviceId_, PUBLISH_ERROR_EVENT_CODE);
-    ANS_LOGI("Dans SyncNotifictionList %{public}s %{public}d %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, result);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(notificationSyncBox, peerDevice,
+            TransDataType::DATA_TYPE_BYTES, PUBLISH_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+    ANS_LOGI("Dans SyncNotifictionList %{public}s %{public}d.",
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
 }
 
 void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Notification> request,
@@ -511,8 +516,9 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
             "serialization failed");
         return;
     }
-    DistributedClient::GetInstance().SendMessage(requestBox, TransDataType::DATA_TYPE_BYTES,
-        peerDevice.deviceId_, PUBLISH_ERROR_EVENT_CODE);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(requestBox, peerDevice,
+            TransDataType::DATA_TYPE_BYTES, PUBLISH_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
 }
 
 void DistributedPublishService::SetNotificationContent(const std::shared_ptr<NotificationContent> &content,

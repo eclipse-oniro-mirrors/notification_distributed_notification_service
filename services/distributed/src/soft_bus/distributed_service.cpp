@@ -115,8 +115,7 @@ void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
         return;
     }
 
-    int32_t result = DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
-    ANS_LOGI("ConnectPeerDevice try %{public}d.", result);
+    DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
     DistributedDeviceService::GetInstance().IncreaseDeviceSyncCount(device.deviceId_);
     if (serviceQueue_ == nullptr) {
         ANS_LOGE("Check handler is null.");

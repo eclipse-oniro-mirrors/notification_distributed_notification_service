@@ -38,17 +38,6 @@ void DistributedEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData 
         OperationService::GetInstance().HandleScreenEvent();
         return;
     }
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
-        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
-        OHOS::AppExecFwk::ElementName ele = want.GetElement();
-        std::string bundleName = ele.GetBundleName();
-        if (bundleName.empty()) {
-            ANS_LOGE("Illegal bundle name.");
-            return;
-        }
-        DistributedService::GetInstance().HandleBundlesEvent(bundleName, action);
-        return;
-    }
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED) {
         UnlockListenerOperService::GetInstance().ReplyOperationResponse();
         return;
