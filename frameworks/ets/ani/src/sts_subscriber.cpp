@@ -21,6 +21,8 @@
 
 namespace OHOS {
 namespace NotificationSts {
+const int32_t NO_DELETE_REASON = -1;
+
 bool SetNotificationRequest(ani_env *env, const std::shared_ptr<NotificationSts> &request, ani_object &outObj)
 {
     ani_status status = ANI_OK;
@@ -100,8 +102,13 @@ bool SetVibrationValues(ani_env *env, const std::shared_ptr<NotificationSts> &re
             return false;
         }
         for (size_t i = 0; i < vibrationValues.size(); i++) {
+            ani_object longObj = CreateLong(env, vibrationValues[i]);
+            if (longObj == nullptr) {
+                ANS_LOGE("CreateLong faild null intObj");
+                return false;
+            }
             status = env->Object_CallMethodByName_Void(
-                vibrationValuesObj, "$_set", "id:", i, static_cast<ani_long>(vibrationValues[i]));
+                vibrationValuesObj, "$_set", "iC{std.core.Object}:", i, longObj);
             if (status != ANI_OK) {
                 ANS_LOGE("faild. status : %{public}d", status);
                 return false;
@@ -144,19 +151,17 @@ bool WarpSubscribeCallbackData(
         return false;
     }
     // reason?: int
-    if (!SetReason(env, deleteReason, outObj)) {
+    if (deleteReason != NO_DELETE_REASON && !SetReason(env, deleteReason, outObj)) {
         ANS_LOGE("SetReason faild");
         return false;
     }
     // sound?: string
     if (!SetSound(env, request, outObj)) {
         ANS_LOGE("SetSound faild");
-        return false;
     }
     // vibrationValues?: Array<long>
     if (!SetVibrationValues(env, request, outObj)) {
         ANS_LOGE("SetSound faild");
-        return false;
     }
     return true;
 }
