@@ -113,11 +113,14 @@ private:
         std::unordered_map<std::string, std::string> &values);
     int32_t QueryAllData(const std::string tableName, std::unordered_map<std::string, std::string> &datas);
     int32_t RestoreForMasterSlaver();
+    void RecoverDatabase();
 
 private:
     DistributedRdbConfig notificationRdbConfig_;
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_;
     mutable ffrt::mutex rdbStorePtrMutex_;
+    mutable ffrt::mutex recoveryMutex_;
+    std::atomic<bool> isRecovering_{false};
 };
 
 }
