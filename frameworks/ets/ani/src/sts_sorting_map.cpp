@@ -81,7 +81,7 @@ bool WarpNotificationSortingMap(ani_env *env,
         ANS_LOGE("Find recordObj setMethod faild.");
         return false;
     }
-    if (!GetKeySToRecode(env, sortingMap, recordObj, recordSetMethod, recordSetMethod)) {
+    if (!GetKeySToRecode(env, sortingMap, recordObj, recordSetMethod)) {
         ANS_LOGE("GetKeySToRecode failed.");
         return false;
     }
