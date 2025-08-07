@@ -33,6 +33,7 @@ import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
 
 const TAG = 'NotificationDialog_Service ';
+const mainWindowId = 'mainWindow';
 const permission: Record<string, Resource> = {
   'label': $r('app.string.group_label_notification'),
   'icon': $r('app.media.ic_public_ring'),
@@ -260,6 +261,7 @@ struct PermissionDialog {
         .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
         .width(Constants.FULL_WIDTH)
         .clip(true)
+        .id(mainWindowId)
         .onAreaChange((oldArea: Area, newArea: Area) => {
           this.updateButtomVisibility(newArea.width as number);
         })
@@ -348,9 +350,9 @@ struct PermissionDialog {
 
   updateButtomVisibility(dialogWidth: number): void {
     try {
-      let buttonWidth = (dialogWidth - Constants.BUTTON_LEFT - Constants.BUTTON_RIGHT
-         - Constants.BUTTON_MARGIN_LEFT - Constants.BUTTON_MARGIN_RIGHT 
-         - Constants.BUTTON_HEIGHT) * 0.5;
+      let buttonWidth = (vp2px(dialogWidth - Constants.BUTTON_LEFT - Constants.BUTTON_RIGHT -
+        Constants.BUTTON_MARGIN_LEFT - Constants.BUTTON_MARGIN_RIGHT -
+        Constants.BUTTON_HEIGHT * 2) - Constants.DIVIDER_WIDTH_NUM) * 0.5;
 
       let measureUtils = this.getUIContext().getMeasureUtils();
       let denyOptions: MeasureOptions = {
@@ -371,8 +373,8 @@ struct PermissionDialog {
         };
       let allowTextWidth = measureUtils.measureText(allowOptions);
 
-      console.info(TAG, `updateButtomVisibility ${denyTextWidth} ${allowTextWidth}  ${vp2px(buttonWidth)}`);
-      if (denyTextWidth > vp2px(buttonWidth) || allowTextWidth > vp2px(buttonWidth)) {
+      console.info(TAG, `updateButtomVisibility ${denyTextWidth} ${allowTextWidth}  ${buttonWidth}`);
+      if (denyTextWidth > buttonWidth || allowTextWidth > buttonWidth) {
         this.buttonVisibility = Visibility.None;
         this.singleRowButtonVisibility = Visibility.Visible;
       } else {
@@ -428,6 +430,15 @@ struct PermissionDialog {
     let bundleName = bundleNameObj ? bundleNameObj.toString() : '';
     await this.updateApplicationName(bundleName);
     await this.updateIsBottomPopover();
+    try {
+      let componentInfo = this.getUIContext().getComponentUtils().getRectangleById(mainWindowId);
+      if (componentInfo?.size?.width > 0 ) {
+        console.log(TAG, 'updateStatus-updateButtomVisibility');
+        this.updateButtomVisibility(px2vp(componentInfo?.size?.width));
+      }
+    } catch (err) {
+      console.error(TAG, `getRectangleById error : ${err?.code}`);
+    } 
   }
 
   async updateOnPageShow(): Promise<void> {
