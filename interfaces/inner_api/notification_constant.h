@@ -434,9 +434,9 @@ public:
     constexpr static const char* HEADSET_DEVICE_TYPE = "headset";
     constexpr static const char* LITEWEARABLE_DEVICE_TYPE = "liteWearable";
     constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
-    constexpr static const char* PAD_DEVICE_TYPE = "pad";
-    constexpr static const char* PC_DEVICE_TYPE = "pc";
-    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "pc", "pad"};
+    constexpr static const char* PAD_DEVICE_TYPE = "tablet";
+    constexpr static const char* PC_DEVICE_TYPE = "2in1";
+    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "2in1", "tablet"};
     constexpr static const char* ANS_VOIP = "ANS_VOIP";
     constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
 };
