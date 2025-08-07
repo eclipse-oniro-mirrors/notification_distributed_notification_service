@@ -60,6 +60,18 @@ std::string DistributedDeviceService::DeviceTypeToTypeString(uint16_t deviceType
     }
 }
 
+static std::string DeviceTypeConversion(const std::string& deviceType)
+{
+    if (deviceType == DistributedService::PAD_DEVICE_TYPE) {
+        return "pad";
+    }
+
+    if (deviceType == DistributedService::PC_DEVICE_TYPE) {
+        return "pc";
+    }
+    return deviceType;
+}
+
 void DistributedDeviceService::InitLocalDevice(const std::string &deviceId, uint16_t deviceType)
 {
     localDevice_.deviceId_ = deviceId;
@@ -341,20 +353,19 @@ void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerD
 void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage)
 {
     std::string deviceId;
-    std::string deviceName;
     NotifticationStateBox stateBox = NotifticationStateBox(boxMessage);
-    if (!stateBox.GetDeviceId(deviceId) || !stateBox.GetDeviceType(deviceName)) {
+    if (!stateBox.GetDeviceId(deviceId)) {
         ANS_LOGW("Dans unbox deviceId and name failed.");
         return;
     }
 
     DistributedDeviceInfo device;
     if (!GetDeviceInfo(deviceId, device)) {
-        ANS_LOGW("Dans get device failed %{public}s %{public}s.", deviceName.c_str(),
-            StringAnonymous(deviceId).c_str());
+        ANS_LOGW("Dans get device failed %{public}s.", StringAnonymous(deviceId).c_str());
         return;
     }
     int32_t status;
+    std::string deviceName = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
     if (stateBox.GetState(status)) {
         int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status,
             DEFAULT_LOCK_SCREEN_FLAG, device.udid_);
@@ -394,7 +405,9 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
     bool notificationEnable, bool liveViewEnable)
 {
     std::shared_ptr<NotifticationStateBox> stateBox = std::make_shared<NotifticationStateBox>();
-    stateBox->SetDeviceType(DeviceTypeToTypeString(localDevice_.deviceType_));
+    std::string deviceType = DeviceTypeToTypeString(localDevice_.deviceType_);
+    deviceType = DeviceTypeConversion(deviceType);
+    stateBox->SetDeviceType(deviceType);
     stateBox->SetDeviceId(localDevice_.deviceId_);
     if (type == STATE_TYPE_LOCKSCREEN || type == STATE_TYPE_BOTH) {
         stateBox->SetState(status);

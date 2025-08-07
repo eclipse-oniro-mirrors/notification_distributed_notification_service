@@ -88,13 +88,13 @@ std::string DistributedExtensionService::DeviceTypeToTypeString(uint16_t deviceT
 {
     switch (deviceType) {
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
-            return "pad";
+            return "tablet";
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_PC: {
-            return "pc";
+            return "2in1";
         }
         case DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1: {
-            return "pc";
+            return "2in1";
         }
         default:
             return "";

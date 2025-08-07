@@ -60,8 +60,8 @@ public:
     std::string GetNotificationKey(const std::shared_ptr<Notification>& notification);
     constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
     constexpr static const char* LITEWEARABLE_DEVICE_TYPE = "liteWearable";
-    constexpr static const char* PAD_DEVICE_TYPE = "pad";
-    constexpr static const char* PC_DEVICE_TYPE = "pc";
+    constexpr static const char* PAD_DEVICE_TYPE = "tablet";
+    constexpr static const char* PC_DEVICE_TYPE = "2in1";
     constexpr static const char* PHONE_DEVICE_TYPE = "phone";
 private:
     void OnHandleMsg(std::shared_ptr<TlvBox>& box);
