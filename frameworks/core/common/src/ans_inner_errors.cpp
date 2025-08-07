@@ -47,7 +47,7 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
     {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
     {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION,
-        "The application is not allowed to publish notifications due to permission control settings"},
+        "The application is not allowed to send notifications due to permission settings"},
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
 };
 
