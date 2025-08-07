@@ -59,7 +59,7 @@ public:
     void DeleteDeviceInfo(const std::string& deviceId);
     std::map<std::string, DistributedDeviceInfo>& GetDeviceList();
     void GetDeviceList(std::map<std::string, DistributedDeviceInfo>& peerDevices);
-    int32_t SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type);
+    void SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage);
 #else

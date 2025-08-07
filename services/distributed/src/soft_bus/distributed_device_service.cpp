@@ -23,6 +23,7 @@
 #include "notification_helper.h"
 #include "distributed_observer_service.h"
 #include "distributed_service.h"
+#include "distributed_send_adapter.h"
 
 namespace OHOS {
 namespace Notification {
@@ -313,7 +314,7 @@ void DistributedDeviceService::GetDeviceList(std::map<std::string, DistributedDe
     }
 }
 
-int32_t DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
+void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
 {
     std::shared_ptr<NotifticationMatchBox> matchBox = std::make_shared<NotifticationMatchBox>();
     matchBox->SetVersion(CURRENT_VERSION);
@@ -326,14 +327,14 @@ int32_t DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo pe
     }
     if (!matchBox->Serialize()) {
         ANS_LOGW("Dans SyncDeviceMatch serialize failed.");
-        return -1;
+        return;
     }
-    int32_t result = DistributedClient::GetInstance().SendMessage(matchBox, TransDataType::DATA_TYPE_MESSAGE,
-        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
-    ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d %{public}s %{public}d %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
-        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_, type);
-    return result;
+
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(matchBox, peerDevice,
+        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+    ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d.",
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
@@ -416,11 +417,11 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
                 StringAnonymous(peer.second.deviceId_).c_str());
             continue;
         }
-        DistributedClient::GetInstance().SendMessage(stateBox, TransDataType::DATA_TYPE_MESSAGE,
-            peer.second.deviceId_, MODIFY_ERROR_EVENT_CODE);
-        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}lu %{public}d %{public}d %{public}d.",
-            peer.second.deviceType_, localDevice_.deviceType_, status, peerDevice_.size(),
-            type, liveViewEnable, notificationEnable);
+        std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(stateBox, peer.second,
+            TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+        DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}d %{public}lu.",
+            type, status, liveViewEnable, notificationEnable, peerDevice_.size());
     }
 }
 #endif

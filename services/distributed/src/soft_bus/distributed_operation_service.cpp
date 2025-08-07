@@ -34,6 +34,7 @@
 #ifdef SCREENLOCK_MGR_ENABLE
 #include "screenlock_manager.h"
 #endif
+#include "distributed_send_adapter.h"
 
 namespace OHOS {
 namespace Notification {
@@ -199,7 +200,8 @@ void DistributedOperationService::ReplyOperationResponse(const std::string& hash
     responseBox.GetOperationEventId(eventId);
     responseBox.GetLocalDeviceId(deviceId);
 
-    if (!DistributedDeviceService::GetInstance().CheckDeviceExist(deviceId)) {
+    DistributedDeviceInfo device;
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfo(deviceId, device)) {
         ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(deviceId).c_str());
         return;
     }
@@ -215,14 +217,11 @@ void DistributedOperationService::ReplyOperationResponse(const std::string& hash
         ANS_LOGW("dans OnResponse reply serialize failed");
         return;
     }
-    auto ret = DistributedClient::GetInstance().SendMessage(replyBox, TransDataType::DATA_TYPE_MESSAGE,
-        deviceId, MODIFY_ERROR_EVENT_CODE);
-    if (ret != ERR_OK) {
-        ANS_LOGE("dans OnResponse send message failed result: %{public}d", ret);
-        return;
-    }
-    ANS_LOGI("Dans reply operation %{public}s %{public}d.", StringAnonymous(deviceId).c_str(), result);
-    return;
+
+    auto packageInfo = std::make_shared<PackageInfo>(replyBox, device,
+        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+    ANS_LOGI("Dans reply operation %{public}s.", StringAnonymous(deviceId).c_str());
 }
 
 int32_t DistributedOperationService::TriggerReplyApplication(const std::string& hashCode,
