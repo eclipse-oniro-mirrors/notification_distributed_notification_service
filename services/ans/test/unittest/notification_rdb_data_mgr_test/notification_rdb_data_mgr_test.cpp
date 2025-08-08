@@ -368,6 +368,78 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, RdbStoreDataCallBack_00200
 }
 
 /**
+ * @tc.name      : OnUpgrade_00001
+ * @tc.number    :
+ * @tc.desc      : test OnUpgrade function when oldVersion is 1
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, OnUpgrade_00001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    auto rdbStore = std::make_shared<RdbStoreTest>();
+    int32_t oldVersion = 1;
+    int32_t newVersion = 2;
+    // Test OnUpgrade when oldVersion is 1
+    ASSERT_EQ(rdbStoreData_->OnUpgrade(*rdbStore, oldVersion, newVersion), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : GetTableNames_00001
+ * @tc.number    :
+ * @tc.desc      : test GetTableNames
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, GetTableNames_00001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    auto rdbStore = std::make_shared<RdbStoreTest>();
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet =
+        std::make_shared<NativeRdb::AbsSharedResultSet>();
+    auto result = rdbStoreData_->GetTableNames(*rdbStore);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name      : ProcessTable_00001
+ * @tc.number    :
+ * @tc.desc      : test OnUpgrade function when oldVersion is 1
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, ProcessTable_00001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    auto rdbStore = std::make_shared<RdbStoreTest>();
+    std::string tableName = "testTable";
+
+    bool result = rdbStoreData_->ProcessTable(*rdbStore, tableName);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name      : ProcessTable_00002
+ * @tc.number    :
+ * @tc.desc      : test OnUpgrade function when oldVersion is 1
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, ProcessTable_00002, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<RdbStoreDataCallBackNotificationStorage> rdbStoreData_ =
+        std::make_unique<RdbStoreDataCallBackNotificationStorage>(notificationRdbConfig);
+    auto rdbStore = std::make_shared<RdbStoreTest>();
+    std::string tableName = "testTable";
+
+    auto mockAbsSharedResultSet = std::make_shared<NativeRdb::AbsSharedResultSet>();
+
+    bool result = rdbStoreData_->ProcessTable(*rdbStore, tableName);
+
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name      : RdbStoreDataCallBack_00300
  * @tc.number    :
  * @tc.desc      : test Init function and rdbStore_ == nullptr

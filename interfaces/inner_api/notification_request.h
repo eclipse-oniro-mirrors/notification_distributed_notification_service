@@ -1303,6 +1303,13 @@ public:
     void FillMissingParameters(const sptr<NotificationRequest> &oldRequest);
 
     /**
+     * @brief incremental update liveview
+     *
+     * @param oldRequest Indicates the old request.
+     */
+    void IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest);
+
+    /**
      * @brief Get notification request key.
      *
      * @return Return the unique key of notification request.

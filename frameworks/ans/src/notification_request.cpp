@@ -2788,6 +2788,13 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
         NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE) {
         return;
     }
+    IncrementalUpdateLiveview(oldRequest);
+}
+
+void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)
+{
+    auto content = notificationContent_->GetNotificationContent();
+    auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto newExtraInfo = newLiveViewContent->GetExtraInfo();
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
     auto oldLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
@@ -2820,6 +2827,11 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
     if (isSet) {
         newLiveViewContent->SetPicture(newPicture);
+    }
+
+    auto oldExtensionWantAgent = oldLiveViewContent->GetExtensionWantAgent();
+    if (newLiveViewContent->GetExtensionWantAgent() == nullptr) {
+        newLiveViewContent->SetExtensionWantAgent(oldExtensionWantAgent);
     }
 }
 

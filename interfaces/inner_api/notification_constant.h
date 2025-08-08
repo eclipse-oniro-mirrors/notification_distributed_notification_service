@@ -427,7 +427,7 @@ public:
     constexpr static const char* NOTIFICATION_RDB_PATH = "/data/service/el1/public/database/notification_service";
     constexpr static const char* NOTIFICATION_JOURNAL_MODE = "WAL";
     constexpr static const char* NOTIFICATION_SYNC_MODE = "FULL";
-    constexpr static int32_t NOTIFICATION_RDB_VERSION = 1;
+    constexpr static int32_t NOTIFICATION_RDB_VERSION = 2;
     constexpr static const char* SLOTTYPECCMNAMES[] = {"Social_communication", "Service_reminder",
         "Content_information", "Other", "Custom", "Live_view", "Custom_service", "Emergency_information"};
     constexpr static const char* CURRENT_DEVICE_TYPE = "current";

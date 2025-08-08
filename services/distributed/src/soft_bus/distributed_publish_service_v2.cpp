@@ -583,9 +583,8 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
         ANS_LOGE("Check actionButtons is null.");
         return;
     }
-    if ((deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) &&
-        !notificationRequest->IsCommonLiveView()) {
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
         std::vector<std::string> buttonsTitle;
         size_t length = actionButtons.size();
         if (length > NotificationConstant::MAX_BTN_NUM) {
@@ -883,7 +882,7 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
 void DistributedPublishService::MakePadNotificationButtons(
     const NotificationRequestBox& box, sptr<NotificationRequest>& request)
 {
-    if (request == nullptr || request->IsCommonLiveView()) {
+    if (request == nullptr) {
         return;
     }
     std::vector<std::string> buttonsTitle;
