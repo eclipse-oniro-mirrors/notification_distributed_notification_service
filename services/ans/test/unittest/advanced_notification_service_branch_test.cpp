@@ -466,7 +466,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_241000, Function | SmallTest | Level1)
 
     auto subscriber = new TestAnsSubscriber();
     sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
-    ASSERT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_PERMISSION_DENIED);
+    ASSERT_EQ(advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), ERR_ANS_INVALID_PARAM);
 }
 
 /**
