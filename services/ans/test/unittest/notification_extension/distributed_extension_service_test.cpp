@@ -86,11 +86,11 @@ HWTEST_F(DistributedExtensionServiceTest, extension_00002, Function | SmallTest 
     deviceType = DistributedExtensionService::TransDeviceTypeToName(DmDeviceType::DEVICE_TYPE_WIFI_CAMERA);
     ASSERT_EQ(deviceType, "");
     deviceType = DistributedExtensionService::DeviceTypeToTypeString(DmDeviceType::DEVICE_TYPE_PAD);
-    ASSERT_EQ(deviceType, "pad");
+    ASSERT_EQ(deviceType, "tablet");
     deviceType = DistributedExtensionService::DeviceTypeToTypeString(DmDeviceType::DEVICE_TYPE_PC);
-    ASSERT_EQ(deviceType, "pc");
+    ASSERT_EQ(deviceType, "2in1");
     deviceType = DistributedExtensionService::DeviceTypeToTypeString(DmDeviceType::DEVICE_TYPE_2IN1);
-    ASSERT_EQ(deviceType, "pc");
+    ASSERT_EQ(deviceType, "2in1");
     deviceType = DistributedExtensionService::DeviceTypeToTypeString(DmDeviceType::DEVICE_TYPE_WATCH);
     ASSERT_EQ(deviceType, "");
 }
