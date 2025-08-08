@@ -577,7 +577,6 @@ void SubscriberInstanceManager::DelDeletingSubscriber(std::shared_ptr<StsSubscri
 
 bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, ani_object info)
 {
-    ANS_LOGD("enter");
     bool isSubscribeUndefine = IsUndefine(env, subscriber);
     bool isInfoUndefine = IsUndefine(env, info);
     if (isSubscribeUndefine) {
@@ -587,6 +586,9 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     }
     sptr<OHOS::Notification::NotificationSubscribeInfo> SubscribeInfo =
         new (std::nothrow) OHOS::Notification::NotificationSubscribeInfo();
+    if (SubscribeInfo == nullptr) {
+        return false;
+    }
     if (!isInfoUndefine) {
         if (!UnwarpNotificationSubscribeInfo(env, info, *SubscribeInfo)) {
             ANS_LOGD("UnwarpNotificationSubscribeInfo faild");
