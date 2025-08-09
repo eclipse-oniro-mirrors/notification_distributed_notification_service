@@ -39,6 +39,95 @@ public:
 };
 
 /**
+ * @tc.name   : Tlv box for batch remove.
+ * @tc.number : TlvBoxTest_0100
+ * @tc.desc   : test tlv serialization and deserialization.
+ */
+HWTEST_F(TlvBoxTest, TlvBoxTest_0100, Function | SmallTest | Level1)
+{
+    auto data = std::make_shared<BatchRemoveNotificationBox>();
+    data->SetNotificationHashCodes("123");
+    data->SetNotificationSlotTypes("321");
+    data->Serialize();
+    int len = data->GetByteLength();
+    unsigned char* cached = new unsigned char[len];
+    errno_t err = memcpy_s(cached, len, data->GetByteBuffer(), len);
+    if (err != EOK) {
+        delete[] cached;
+        EXPECT_EQ((int)err, (int)EOK);
+    }
+    bool result = TlvBox::CheckMessageCRC((const unsigned char*)cached, len);
+    EXPECT_EQ(result, true);
+    std::shared_ptr<TlvBox> box = std::make_shared<TlvBox>();
+    result = box->Parse((const unsigned char*)cached, len - sizeof(uint32_t));
+    EXPECT_EQ(result, true);
+    delete[] cached;
+
+    BatchRemoveNotificationBox bacthBox = BatchRemoveNotificationBox(box);
+    bacthBox.box_ = nullptr;
+    EXPECT_EQ(bacthBox.SetNotificationHashCodes("123"), false);
+    EXPECT_EQ(bacthBox.SetNotificationSlotTypes("321"), false);
+    EXPECT_EQ(bacthBox.Serialize(), false);
+}
+
+/**
+ * @tc.name   : Tlv box for remove.
+ * @tc.number : TlvBoxTest_0101
+ * @tc.desc   : test tlv serialization and deserialization.
+ */
+HWTEST_F(TlvBoxTest, TlvBoxTest_0101, Function | SmallTest | Level1)
+{
+    auto data = std::make_shared<NotificationRemoveBox>();
+    data->SetNotificationHashCode("123");
+    data->SetNotificationSlotType(1);
+    data->Serialize();
+    int len = data->GetByteLength();
+    unsigned char* cached = new unsigned char[len];
+    errno_t err = memcpy_s(cached, len, data->GetByteBuffer(), len);
+    if (err != EOK) {
+        delete[] cached;
+        EXPECT_EQ((int)err, (int)EOK);
+    }
+    bool result = TlvBox::CheckMessageCRC((const unsigned char*)cached, len);
+    EXPECT_EQ(result, true);
+    std::shared_ptr<TlvBox> box = std::make_shared<TlvBox>();
+    result = box->Parse((const unsigned char*)cached, len - sizeof(uint32_t));
+    EXPECT_EQ(result, true);
+    delete[] cached;
+
+    NotificationRemoveBox removeBox = NotificationRemoveBox(box);
+    removeBox.box_ = nullptr;
+    EXPECT_EQ(removeBox.SetNotificationHashCode("123"), false);
+    EXPECT_EQ(removeBox.SetNotificationSlotType(1), false);
+}
+
+/**
+ * @tc.name   : Tlv box for remove.
+ * @tc.number : TlvBoxTest_0111
+ * @tc.desc   : test tlv serialization and deserialization.
+ */
+HWTEST_F(TlvBoxTest, TlvBoxTest_0111, Function | SmallTest | Level1)
+{
+    auto data = std::make_shared<NotificationRemoveBox>();
+    data->SetNotificationHashCode("123");
+    data->SetNotificationSlotType(1);
+    data->Serialize();
+    int len = data->GetByteLength();
+    unsigned char* cached = new unsigned char[len];
+    errno_t err = memcpy_s(cached, len, data->GetByteBuffer(), len);
+    if (err != EOK) {
+        delete[] cached;
+        EXPECT_EQ((int)err, (int)EOK);
+    }
+    bool result = TlvBox::CheckMessageCRC((const unsigned char*)cached, len);
+    EXPECT_EQ(result, true);
+    std::shared_ptr<TlvBox> box = std::make_shared<TlvBox>();
+    result = box->Parse((const unsigned char*)cached, len - sizeof(uint32_t));
+    EXPECT_EQ(result, true);
+    delete[] cached;
+}
+
+/**
  * @tc.name   : Tlv box for bundle icon.
  * @tc.number : TlvBoxTest_0102
  * @tc.desc   : test tlv serialization and deserialization.
