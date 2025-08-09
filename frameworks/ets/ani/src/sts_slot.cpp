@@ -304,16 +304,16 @@ bool UnwrapNotificationSlotArrayByAniObj(ani_env *env, ani_object notificationSl
         ANS_LOGE("notificationSlotArrayObj is null");
         return false;
     }
-    ani_double length;
-    ani_status status = env->Object_GetPropertyByName_Double(notificationSlotArrayObj, "length", &length);
+    ani_int length;
+    ani_status status = env->Object_GetPropertyByName_Int(notificationSlotArrayObj, "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Double faild. status : %{public}d", status);
         return false;
     }
-    for (int i = 0; i < int(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref notificationSlotEntryRef;
         status = env->Object_CallMethodByName_Ref(notificationSlotArrayObj,
-            "$_get", "i:C{std.core.Object}", &notificationSlotEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &notificationSlotEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("Object_CallMethodByName_Ref faild. status : %{public}d", status);
         }

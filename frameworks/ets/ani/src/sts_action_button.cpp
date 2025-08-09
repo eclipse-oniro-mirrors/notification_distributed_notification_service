@@ -233,20 +233,20 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
     ani_ref arrayObj = nullptr;
     ani_boolean isUndefined = true;
     ani_status status;
-    ani_double length;
+    ani_int length;
     StsActionButton actionButton;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetActionButtonArray: GetPropertyRef name = %{public}s, status = %{public}d", name, status);
         return ANI_INVALID_ARGS;
     }
-    if (ANI_OK!= (status = GetPropertyDouble(env, static_cast<ani_object>(arrayObj), "length", isUndefined, length))) {
+    if (ANI_OK!= (status = GetPropertyInt(env, static_cast<ani_object>(arrayObj), "length", isUndefined, length))) {
         ANS_LOGE("GetActionButtonArray: GetPropertyDouble name = %{public}s, status = %{public}d", name, status);
         return status;
     }
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref buttonRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &buttonRef, (ani_int)i))) {
+            "$_get", "i:C{std.core.Object}", &buttonRef, i))) {
             ANS_LOGE("GetActionButtonArray: get ref failed, status = %{public}d, index = %{public}d", status, i);
             return status;
         }

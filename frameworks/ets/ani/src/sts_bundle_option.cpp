@@ -85,14 +85,14 @@ bool UnwrapArrayBundleOption(ani_env *env,
         return false;
     }
     ani_status status;
-    ani_double length;
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    ani_int length;
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("UnwrapArrayBundleOption: get length failed, status = %{public}d", status);
         return false;
     }
     Notification::NotificationBundleOption option;
-    for (int32_t i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "i:C{std.core.Object}", &optionRef, i);

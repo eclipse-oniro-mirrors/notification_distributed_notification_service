@@ -320,20 +320,20 @@ ani_status GetIconButtonArray(ani_env *env,
     ani_ref arrayObj = nullptr;
     ani_boolean isUndefined = true;
     ani_status status = ANI_ERROR;
-    ani_double length;
+    ani_int length;
     if (((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK) || isUndefined == ANI_TRUE) {
         ANS_LOGI("get param failed, may be %{public}s : undefined", name);
         return ANI_INVALID_ARGS;
     }
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGI("status : %{public}d", status);
         return status;
     }
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref buttonRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &buttonRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &buttonRef, i);
         if (status != ANI_OK) {
             ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
             return status;

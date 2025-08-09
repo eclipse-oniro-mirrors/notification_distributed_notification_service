@@ -84,16 +84,16 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
         ANS_LOGE("GetStringArrayByAniObj fail, has nullptr");
         return false;
     }
-    ani_double length;
-    ani_status status = env->Object_GetPropertyByName_Double(ani_obj, "length", &length);
+    ani_int length;
+    ani_status status = env->Object_GetPropertyByName_Int(ani_obj, "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Double faild. status %{public}d", status);
         return false;
     }
-    for (int i = 0; i < int(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(ani_obj,
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d", status);
             return false;
@@ -295,21 +295,21 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     ANS_LOGD("GetPropertyStringArray: %{public}s", name);
     ani_ref arrayObj = nullptr;
     ani_status status;
-    ani_double length;
+    ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
     }
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return status;
     }
     std::string str = "";
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -331,21 +331,21 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
     ANS_LOGD("GetPropertyNumberArray enter");
     ani_ref arrayObj = nullptr;
     ani_status status;
-    ani_double length;
+    ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         return ANI_INVALID_ARGS;
     }
 
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGI("status : %{public}d", status);
         return status;
     }
 
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref numEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &numEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &numEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
             return status;
@@ -369,21 +369,21 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
     ANS_LOGD("GetPropertyLongArray enter");
     ani_ref arrayObj = nullptr;
     ani_status status;
-    ani_double length;
+    ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         return ANI_INVALID_ARGS;
     }
 
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGI("status : %{public}d", status);
         return status;
     }
 
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref numEntryRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &numEntryRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &numEntryRef, i);
         if (status != ANI_OK) {
             ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
             return status;
