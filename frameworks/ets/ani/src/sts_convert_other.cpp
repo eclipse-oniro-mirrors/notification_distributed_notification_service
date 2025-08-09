@@ -118,17 +118,17 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
-    ani_double length;
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(param), "length", &length);
+    ani_int length;
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(param), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("GetPixelMapArrayByRef: status : %{public}d", status);
         return status;
     }
 
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref pixelMapRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(param),
-            "$_get", "i:C{std.core.Object}", &pixelMapRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &pixelMapRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("GetPixelMapArrayByRef:status : %{public}d, index: %{public}d", status, i);
             pixelMaps.clear();
@@ -180,20 +180,20 @@ ani_status GetResourceArray(ani_env *env,
     ani_ref arrayObj = nullptr;
     ani_boolean isUndefined = true;
     ani_status status;
-    ani_double length;
+    ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetResourceArray failed, status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
-    status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(arrayObj), "length", &length);
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
         ANS_LOGE("GetResourceArray : status : %{public}d", status);
         return status;
     }
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         ani_ref iconRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "i:C{std.core.Object}", &iconRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &iconRef, i);
         if (status != ANI_OK) {
             res.clear();
             ANS_LOGE("GetResourceArray: status = %{public}d, index = %{public}d", status, i);
@@ -211,7 +211,7 @@ ani_status GetResourceArray(ani_env *env,
     return status;
 }
 
-ani_status GetKeyString(ani_env *env, ani_object obj, int index, ani_string &str)
+ani_status GetKeyString(ani_env *env, ani_object obj, int32_t index, ani_string &str)
 {
     ANS_LOGD("GetKeyString call");
     if (env == nullptr || obj == nullptr) {
@@ -221,7 +221,7 @@ ani_status GetKeyString(ani_env *env, ani_object obj, int index, ani_string &str
     ani_status status = ANI_ERROR;
     ani_ref stringEntryRef;
     status = env->Object_CallMethodByName_Ref(obj,
-        "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)index);
+        "$_get", "i:C{std.core.Object}", &stringEntryRef, index);
     if (status != ANI_OK) {
         ANS_LOGE("status : %{public}d, index: %{public}d", status, index);
         return status;
@@ -277,15 +277,15 @@ ani_status GetPixelMapByRef(
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
-    ani_double length;
+    ani_int length;
     if (ANI_OK !=
-        (status = env->Object_GetPropertyByName_Double(static_cast<ani_object>(keysStrArrayRef), "length", &length))) {
+        (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(keysStrArrayRef), "length", &length))) {
         ANS_LOGE("GetPixelMapByRef : Object_GetPropertyByName_Double status = %{public}d", status);
         return status;
     }
     ani_string strAni = {};
     std::vector<ani_string> keys = {};
-    for (int i = 0; i < static_cast<int>(length); i++) {
+    for (int32_t i = 0; i < length; i++) {
         if ((status = GetKeyString(env, static_cast<ani_object>(keysStrArrayRef), i, strAni)) != ANI_OK) {
             ANS_LOGE("GetPixelMapByRef : GetKeyString status = %{public}d", status);
             keys.clear();
