@@ -55,11 +55,11 @@ public:
     bool CheckDeviceNeedSync(const std::string& deviceId);
     void IncreaseDeviceSyncCount(const std::string& deviceId);
     void AddDeviceInfo(DistributedDeviceInfo deviceItem);
-    void ResetDeviceInfo(const std::string& deviceId);
+    void ResetDeviceInfo(const std::string& deviceId, int32_t peerState);
     void DeleteDeviceInfo(const std::string& deviceId);
     std::map<std::string, DistributedDeviceInfo>& GetDeviceList();
     void GetDeviceList(std::map<std::string, DistributedDeviceInfo>& peerDevices);
-    int32_t SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type);
+    void SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage);
 #else

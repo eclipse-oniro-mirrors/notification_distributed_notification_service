@@ -427,16 +427,16 @@ public:
     constexpr static const char* NOTIFICATION_RDB_PATH = "/data/service/el1/public/database/notification_service";
     constexpr static const char* NOTIFICATION_JOURNAL_MODE = "WAL";
     constexpr static const char* NOTIFICATION_SYNC_MODE = "FULL";
-    constexpr static int32_t NOTIFICATION_RDB_VERSION = 1;
+    constexpr static int32_t NOTIFICATION_RDB_VERSION = 2;
     constexpr static const char* SLOTTYPECCMNAMES[] = {"Social_communication", "Service_reminder",
         "Content_information", "Other", "Custom", "Live_view", "Custom_service", "Emergency_information"};
     constexpr static const char* CURRENT_DEVICE_TYPE = "current";
     constexpr static const char* HEADSET_DEVICE_TYPE = "headset";
     constexpr static const char* LITEWEARABLE_DEVICE_TYPE = "liteWearable";
     constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
-    constexpr static const char* PAD_DEVICE_TYPE = "pad";
-    constexpr static const char* PC_DEVICE_TYPE = "pc";
-    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "pc", "pad"};
+    constexpr static const char* PAD_DEVICE_TYPE = "tablet";
+    constexpr static const char* PC_DEVICE_TYPE = "2in1";
+    constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "2in1", "tablet"};
     constexpr static const char* ANS_VOIP = "ANS_VOIP";
     constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
 };

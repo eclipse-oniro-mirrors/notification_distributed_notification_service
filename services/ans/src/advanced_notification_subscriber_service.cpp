@@ -159,12 +159,6 @@ ErrCode AdvancedNotificationService::Unsubscribe(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_PERMISSION_DENIED));
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-        return ERR_ANS_PERMISSION_DENIED;
-    }
-
     if (subscriber == nullptr) {
         message.Message("Unsubscribe notification: " + std::to_string(ERR_ANS_INVALID_PARAM));
         NotificationAnalyticsUtil::ReportModifyEvent(message);

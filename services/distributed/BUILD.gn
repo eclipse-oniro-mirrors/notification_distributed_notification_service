@@ -100,6 +100,7 @@ ohos_shared_library("libdans") {
     "src/base/distributed_client.cpp",
     "src/base/distributed_liveview_all_scenarios_extension_wrapper.cpp",
     "src/base/distributed_local_config.cpp",
+    "src/base/distributed_send_adapter.cpp",
     "src/base/distributed_server.cpp",
     "src/base/distributed_socket.cpp",
     "src/helper/ability_manager_helper.cpp",

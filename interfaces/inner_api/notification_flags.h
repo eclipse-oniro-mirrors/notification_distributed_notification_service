@@ -32,6 +32,11 @@ public:
     NotificationFlags() = default;
 
     /**
+     * constructor by reminderFlags
+     */
+    NotificationFlags(uint32_t reminderFlags);
+
+    /**
      * Default deconstructor used to deconstruct.
      */
     ~NotificationFlags() = default;
