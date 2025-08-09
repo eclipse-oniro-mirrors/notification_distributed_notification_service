@@ -25,6 +25,8 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fdp)
     {
         Notification::NotificationNormalContent notificationNormalContent;
+        std::string stringData = fdp->ConsumeRandomLengthString();
+        notificationNormalContent.SetTitle(stringData);
         // test Dump function
         notificationNormalContent.Dump();
         // test ToJson function
