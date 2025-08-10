@@ -82,7 +82,6 @@ export interface NotificationRequest {
     id?: int;
     appMessageId?: string;
     notificationSlotType?: notificationManager.SlotType;
-    notificationSlotLevel?: notificationManager.SlotLevel;
     isOngoing?: boolean;
     isUnremovable?: boolean;
     updateOnly?: boolean;
@@ -134,7 +133,6 @@ class NotificationRequestInner implements NotificationRequest {
     public id?: int | undefined;
     public appMessageId?: string | undefined;
     public notificationSlotType?: notificationManager.SlotType | undefined;
-    public notificationSlotLevel?: notificationManager.SlotLevel | undefined;
     public isOngoing?: boolean | undefined;
     public isUnremovable?: boolean | undefined;
     public updateOnly?: boolean | undefined;
