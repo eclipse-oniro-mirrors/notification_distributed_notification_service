@@ -41,7 +41,7 @@ bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time);
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string &aniStr);
 ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
 bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString);
-ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs);
+ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> strs);
 ani_object newArrayClass(ani_env *env, int length);
 ani_object newRecordClass(ani_env *env);
 ani_object ConvertArrayDoubleToAniObj(ani_env *env, const std::vector<std::int64_t> values);
@@ -73,8 +73,8 @@ bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value);
 bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, double value);
-bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, const std::string &fieldName,
-    const std::vector<std::int64_t> &values);
+bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, const std::string fieldName,
+    const std::vector<std::int64_t> values);
 
 // property
 bool SetPropertyOptionalByBoolean(ani_env *env, ani_object &object, const char *name, bool value);
