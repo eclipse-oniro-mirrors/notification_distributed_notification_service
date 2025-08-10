@@ -59,7 +59,7 @@ ani_boolean AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bu
     if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
         returncode = Notification::NotificationHelper::IsAllowedNotify(option, allowed);
     } else {
-        NotificationSts::ThrowErroWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
         return ANI_FALSE;
     }
 
@@ -78,7 +78,7 @@ void AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_boolean
     ANS_LOGD("AniSetNotificationEnable call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
-        NotificationSts::ThrowErroWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
         return ;
     }
     std::string deviceId {""};
@@ -106,7 +106,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env)
     ani_object arrayBundles = NotificationSts::GetAniArrayBundleOption(env, bundleOptions);
     if (arrayBundles == nullptr) {
         ANS_LOGE("GetAniArrayBundleOption filed,arrayBundles is nullptr");
-        NotificationSts::ThrowErroWithMsg(env, "GetAniArrayBundleOption ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "GetAniArrayBundleOption ERROR_INTERNAL_ERROR");
         return nullptr;
     }
     return arrayBundles;

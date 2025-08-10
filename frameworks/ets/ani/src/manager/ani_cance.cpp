@@ -51,7 +51,7 @@ void AniCancelWithIdLabel(ani_env* env, ani_double id, ani_string label)
     ANS_LOGD("AniCancelWithIdLabel call");
     std::string tempStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr)) {
-        NotificationSts::ThrowErroWithMsg(env, "Label parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "Label parse failed!");
         return;
     }
     std::string labelStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
@@ -70,7 +70,7 @@ void AniCancelWithBundle(ani_env* env, ani_object bundleObj, ani_double id)
     ANS_LOGD("AniCancelWithBundle call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, bundleObj, option)) {
-        NotificationSts::ThrowErroWithMsg(env, "BundleOption parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "BundleOption parse failed!");
         return;
     }
     
@@ -124,7 +124,7 @@ void AniCancelAsBundle(ani_env *env, ani_double id, ani_string representativeBun
 
     if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
         ANS_LOGE("AniCancelAsBundle:: representativeBundle parse failed!");
-        NotificationSts::ThrowErroWithMsg(env, "representativeBundle parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "representativeBundle parse failed!");
         return;
     }
     ANS_LOGD("AniCancelAsBundle, convertedId: %{public}d, UserId: %{public}d, bundleStr: %{public}s",
@@ -148,7 +148,7 @@ void AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representativeBu
     BundleOption option;
     if (NotificationSts::UnwrapBundleOption(env, representativeBundle, option) != true) {
         ANS_LOGE("AniPublishAsBundleWithBundleOption BundleOption parse failed!");
-        NotificationSts::ThrowErroWithMsg(env, "AniPublishAsBundleWithBundleOption BundleOption parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundleWithBundleOption BundleOption parse failed!");
         return;
     }
 
@@ -172,7 +172,7 @@ void AniCancelGroup(ani_env *env, ani_string groupName)
 
     std::string tempStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, tempStr)) {
-        NotificationSts::ThrowErroWithMsg(env, "AniCancelGroup: groupName parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "AniCancelGroup: groupName parse failed!");
         return;
     }
     std::string groupNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);

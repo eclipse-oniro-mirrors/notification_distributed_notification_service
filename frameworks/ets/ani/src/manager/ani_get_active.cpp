@@ -95,7 +95,7 @@ ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj)
     ANS_LOGD("AniGetActiveNotificationByFilter call");
     Notification::LiveViewFilter filter;
     if (!OHOS::NotificationSts::UnWarpNotificationFilter(env, obj, filter)) {
-        NotificationSts::ThrowErroWithMsg(env, "sts UnWarpNotificationFilter ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "sts UnWarpNotificationFilter ERROR_INTERNAL_ERROR");
         return nullptr;
     }
     sptr<OHOS::Notification::NotificationRequest> notificationRequest = nullptr;
@@ -111,7 +111,7 @@ ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj)
     ani_class requestCls;
     if (!NotificationSts::WarpNotificationRequest(env, notificationRequest.GetRefPtr(), requestCls, requestObj)
         || requestObj == nullptr) {
-        NotificationSts::ThrowErroWithMsg(env, "sts UnWarpNotificationFilter ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "sts UnWarpNotificationFilter ERROR_INTERNAL_ERROR");
         ANS_LOGE("AniGetActiveNotificationByFilter WarpNotificationRequest faild");
         return nullptr;
     }

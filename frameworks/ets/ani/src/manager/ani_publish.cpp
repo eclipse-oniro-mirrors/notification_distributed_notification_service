@@ -32,7 +32,7 @@ void AniPublish(ani_env *env, ani_object obj)
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationRequest failed");
-        NotificationSts::ThrowErroWithMsg(env, "AniPublish ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "AniPublish ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = NotificationHelper::PublishNotification(*notificationRequest);
@@ -49,7 +49,7 @@ void AniPublishWithId(ani_env *env, ani_object obj, ani_double userId)
     //NotificationRequest request;
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
-        NotificationSts::ThrowErroWithMsg(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "AniPublishWithId ERROR_INTERNAL_ERROR");
         return;
     }
     notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
@@ -67,14 +67,14 @@ void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representat
     ANS_LOGD("AniPublishAsBundle enter");
     std::string bundleStr;
     if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
-        NotificationSts::ThrowErroWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
         return;
     }
 
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest) != ANI_OK) {
         ANS_LOGE("AniPublishAsBundle failed");
-        NotificationSts::ThrowErroWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundle ERROR_INTERNAL_ERROR");
         return;
     }
     notificationRequest->SetOwnerUserId(static_cast<int32_t>(userId));
@@ -94,13 +94,13 @@ void AniPublishAsBundleWithBundleOption(ani_env *env, ani_object representativeB
     ANS_LOGE("AniPublishAsBundleWithBundleOption enter");
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, request, notificationRequest) != ANI_OK) {
-        NotificationSts::ThrowErroWithMsg(env, "AniPublishAsBundleWithBundleOption ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "AniPublishAsBundleWithBundleOption ERROR_INTERNAL_ERROR");
         return;
     }
 
     BundleOption option;
     if (NotificationSts::UnwrapBundleOption(env, representativeBundle, option) != true) {
-        NotificationSts::ThrowErroWithMsg(env, "UnwrapBundleOption ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "UnwrapBundleOption ERROR_INTERNAL_ERROR");
         return;
     }
 

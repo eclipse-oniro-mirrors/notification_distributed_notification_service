@@ -107,7 +107,7 @@ void ThrowError(ani_env *env, int32_t errCode, const std::string &errorMsg);
 
 ani_object CreateError(ani_env *env, int32_t code, const std::string &msg);
 
-inline void ThrowErroWithMsg(ani_env *env, std::string logMsg)
+inline void ThrowErrorWithMsg(ani_env *env, std::string logMsg)
 {
     ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
         FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));

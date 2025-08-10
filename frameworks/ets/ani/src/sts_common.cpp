@@ -188,10 +188,10 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
         "unboxed", ":D", &outvalue)) != ANI_OK) {
-        ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Double failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Double sucess, status: %{public}f", outvalue);
+    ANS_LOGD("GetPropertyDouble end.");
     return status;
 }
 
@@ -316,8 +316,8 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
 
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs)
 {
-    if (env == nullptr || strs.empty()) {
-        ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr or strs is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr");
         return nullptr;
     }
     int length = strs.size();
