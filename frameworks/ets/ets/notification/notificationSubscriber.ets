@@ -87,7 +87,6 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         id: undefined,
         appMessageId: undefined,
         notificationSlotType: undefined,
-        notificationSlotLevel: undefined,
         isOngoing: undefined,
         isUnremovable: undefined,
         updateOnly: undefined,
