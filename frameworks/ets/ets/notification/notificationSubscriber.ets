@@ -97,6 +97,7 @@ class SubscribeCallbackDataInner implements SubscribeCallbackData {
         tapDismissed: undefined,
         autoDeletedTime: undefined,
         wantAgent: undefined,
+        extraInfo: undefined,
         extendInfo: undefined,
         color: undefined,
         colorEnabled: undefined,

@@ -542,7 +542,7 @@ void GetNotificationExtraInfo(ani_env *env, ani_object obj, std::shared_ptr<Noti
 {
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref extraInfoRef = {};
-    if (ANI_OK != GetPropertyRef(env, obj, "extendInfo", isUndefined, extraInfoRef)
+    if (ANI_OK != GetPropertyRef(env, obj, "extraInfo", isUndefined, extraInfoRef)
         || isUndefined == ANI_TRUE || extraInfoRef == nullptr) {
         ANS_LOGE("GetNotificationExtraInfo: get ref failed");
         return;
@@ -551,6 +551,21 @@ void GetNotificationExtraInfo(ani_env *env, ani_object obj, std::shared_ptr<Noti
     UnwrapWantParams(env, extraInfoRef, wantParams);
     std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
     request->SetAdditionalData(extras);
+}
+
+void GetNotificationExtendInfo(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+{
+    ani_boolean isUndefined = ANI_TRUE;
+    ani_ref extendInfoRef = {};
+    if (ANI_OK != GetPropertyRef(env, obj, "extendInfo", isUndefined, extendInfoRef)
+        || isUndefined == ANI_TRUE || extendInfoRef == nullptr) {
+        ANS_LOGE("GetNotificationExtendInfo: get ref failed");
+        return;
+    }
+    WantParams wantParams = {};
+    UnwrapWantParams(env, extendInfoRef, wantParams);
+    std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
+    request->SetExtendInfo(extras);
 }
 
 void GetNotificationRemovalWantAgent(ani_env *env, ani_object obj,
@@ -724,6 +739,7 @@ ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     GetNotificationSlotType(env, obj, notificationRequest);
     GetNotificationWantAgent(env, obj, notificationRequest);
     GetNotificationExtraInfo(env, obj, notificationRequest);
+    GetNotificationExtendInfo(env, obj, notificationRequest);
     GetNotificationRemovalWantAgent(env, obj, notificationRequest);
     GetNotificationActionButtons(env, obj, notificationRequest);
     GetNotificationSmallIcon(env, obj, notificationRequest);

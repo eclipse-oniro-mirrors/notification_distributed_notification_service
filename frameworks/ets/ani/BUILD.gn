@@ -129,7 +129,7 @@ if (distributed_notification_service_disable_control) {
     "ability_runtime:runtime",
     "napi:ace_napi",
     "image_framework:image_native",
-    "image_framework:image_ani",
+    "image_framework:image_taihe",
     "resource_management:global_resmgr",
     "ability_runtime:ani_base_context",
     "ability_runtime:ability_context_native",
@@ -214,7 +214,7 @@ ohos_shared_library("notification_subscribe_ani") {
     "ability_runtime:ani_common",
     "ability_runtime:ani_wantagent_common",
     "image_framework:image_native",
-    "image_framework:image_ani",
+    "image_framework:image_taihe",
     "resource_management:global_resmgr",
   ]
 
