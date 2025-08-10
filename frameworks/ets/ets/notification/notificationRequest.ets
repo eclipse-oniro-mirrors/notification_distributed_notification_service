@@ -82,6 +82,7 @@ export interface NotificationRequest {
     id?: int;
     appMessageId?: string;
     notificationSlotType?: notificationManager.SlotType;
+    notificationSlotLevel?: notificationManager.SlotLevel;
     isOngoing?: boolean;
     isUnremovable?: boolean;
     updateOnly?: boolean;
@@ -89,7 +90,6 @@ export interface NotificationRequest {
     tapDismissed?: boolean;
     autoDeletedTime?: long;
     wantAgent?: WantAgent;
-    extraInfo?: Record<string, Object>;
     extendInfo?: Record<string, Object>;
     color?: long;
     colorEnabled?: boolean;
@@ -134,6 +134,7 @@ class NotificationRequestInner implements NotificationRequest {
     public id?: int | undefined;
     public appMessageId?: string | undefined;
     public notificationSlotType?: notificationManager.SlotType | undefined;
+    public notificationSlotLevel?: notificationManager.SlotLevel | undefined;
     public isOngoing?: boolean | undefined;
     public isUnremovable?: boolean | undefined;
     public updateOnly?: boolean | undefined;
@@ -141,7 +142,6 @@ class NotificationRequestInner implements NotificationRequest {
     public tapDismissed?: boolean | undefined;
     public autoDeletedTime?: long | undefined;
     public wantAgent?: WantAgent | undefined;
-    public extraInfo?: Record<string, Object> | undefined;
     public extendInfo?: Record<string, Object> | undefined;
     public color?: long | undefined;
     public colorEnabled?: boolean | undefined;
