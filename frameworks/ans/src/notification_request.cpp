@@ -3161,7 +3161,7 @@ bool NotificationRequest::IsAtomicServiceNotification()
         ANS_LOGD("extend info is null.");
         return false;
     }
-    int32_t installedStatus = extendInfo_->GetIntParam("autoServiceIntallStatus", PKG_INSTALL_STATUS_UNKMOWN);
+    int32_t installedStatus = extendInfo_->GetIntParam("autoServiceInstallStatus", PKG_INSTALL_STATUS_UNKMOWN);
     if (installedStatus == PKG_INSTALL_STATUS_UNINSTALL) {
         ANS_LOGD("AtomicServiceNotification.");
         return true;
