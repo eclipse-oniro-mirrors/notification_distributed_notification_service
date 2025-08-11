@@ -28,7 +28,7 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
     ANS_LOGD("AniIsSupportTemplate call");
     std::string tempStr;
     if (NotificationSts::GetStringByAniString(env, templateName, tempStr) != ANI_OK) {
-        NotificationSts::ThrowErroWithMsg(env, "templateName parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "templateName parse failed!");
         return NotificationSts::BoolToAniBoolean(false);
     }
     std::string templateNameStr = NotificationSts::GetResizeStr(tempStr, NotificationSts::STR_MAX_SIZE);
@@ -59,7 +59,7 @@ ani_object AniGetDeviceRemindType(ani_env *env)
     }
     ani_enum_item remindTypeItem {};
     if (!NotificationSts::DeviceRemindTypeCToEts(env, remindType, remindTypeItem)) {
-        NotificationSts::ThrowErroWithMsg(env, "AniGetDeviceRemindType:failed to WrapNotificationSlotArray");
+        NotificationSts::ThrowErrorWithMsg(env, "AniGetDeviceRemindType:failed to WrapNotificationSlotArray");
         return nullptr;
     }
     ANS_LOGD("AniGetDeviceRemindType end, ret: %{public}d", returncode);

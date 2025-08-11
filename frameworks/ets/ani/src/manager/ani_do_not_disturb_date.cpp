@@ -30,7 +30,7 @@ void AniSetDoNotDisturbDate(ani_env *env, ani_object date)
     Notification::NotificationDoNotDisturbDate doNotDisturbDate;
     if (!NotificationSts::UnWarpNotificationDoNotDisturbDate(env, date, doNotDisturbDate)) {
         ANS_LOGE("AniSetDoNotDisturbDate UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
-        NotificationSts::ThrowErroWithMsg(env, "UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
         return;
     }
 
@@ -50,7 +50,7 @@ void AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_double user
     Notification::NotificationDoNotDisturbDate doNotDisturbDate;
     if (!NotificationSts::UnWarpNotificationDoNotDisturbDate(env, date, doNotDisturbDate)) {
         ANS_LOGE("AniSetDoNotDisturbDateWithId UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
-        NotificationSts::ThrowErroWithMsg(env, "UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "UnWarpNotificationDoNotDisturbDate ERROR_INTERNAL_ERROR");
         return;
     }
 
@@ -84,7 +84,7 @@ ani_object AniGetDoNotDisturbDate(ani_env *env)
     auto datePtr = std::make_shared<Notification::NotificationDoNotDisturbDate>(doNotDisturbDate);
     if (!NotificationSts::WarpNotificationDoNotDisturbDate(env, datePtr, data)) {
         ANS_LOGE("WarpNotificationDoNotDisturbDate faild");
-        NotificationSts::ThrowErroWithMsg(env, "AniGetDoNotDisturbDate ERROR_INTERNAL_ERROR");
+        NotificationSts::ThrowErrorWithMsg(env, "AniGetDoNotDisturbDate ERROR_INTERNAL_ERROR");
     }
 
     ANS_LOGD("AniGetDoNotDisturbDate end");
