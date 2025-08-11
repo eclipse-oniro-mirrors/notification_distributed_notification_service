@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "sts_common.h"
+#include <cinttypes>
 
 #include "ans_log_wrapper.h"
 #include "ani_common_util.h"
@@ -610,7 +611,7 @@ bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &c
 
 bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
 {
-    ANS_LOGD("Create time %{public}lld", time);
+    ANS_LOGD("Create time %{public}" PRId64, time);
     if (env == nullptr || time < 0) {
         ANS_LOGE("CreateDate fail, env is nullptr or time is invalid value");
         return false;

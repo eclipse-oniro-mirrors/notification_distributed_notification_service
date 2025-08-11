@@ -27,7 +27,7 @@ ani_double AniGetActiveNotificationCount(ani_env *env)
     ANS_LOGD("sts GetActiveNotificationCount call");
     uint64_t num = 0;
     int returncode = OHOS::Notification::NotificationHelper::GetActiveNotificationNums(num);
-    ANS_LOGD("sts GetActiveNotificationCount end, num: %{public}llu", num);
+    ANS_LOGD("sts GetActiveNotificationCount end, num: %{public}" PRIu64, num);
     ani_double retNum = static_cast<ani_double>(num);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
