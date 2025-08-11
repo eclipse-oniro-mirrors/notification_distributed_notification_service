@@ -47,7 +47,7 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
         && isUndefined == ANI_FALSE) {
         distributedOptions.isDistributed = isDistributed;
     } else {
-        ANS_LOGD("UnWarpDistributedOptions: isDistributed get1159 failed");
+        ANS_LOGD("UnWarpDistributedOptions: isDistributed get failed");
     }
     // supportDisplayDevices?: Array<string>;
     std::vector<std::string> tempStrings = {};
