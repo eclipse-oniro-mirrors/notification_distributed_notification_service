@@ -18,9 +18,6 @@ import notificationManager from '@ohos.notificationManager';
 import { NotificationContent } from 'notification.notificationContent';
 
 import image from '@ohos.multimedia.image';
-// import type notificationManager from '@ohos.notificationManager';
-// import type notificationSubscribe from '@ohos.notificationSubscribe';
-// import { NotificationContent } from 'notification.notificationContent';
 import { NotificationActionButton } from 'notification.notificationActionButton';
 import { NotificationTemplate } from 'notification.notificationTemplate';
 import { NotificationFlags } from 'notification.notificationFlags';

@@ -43,11 +43,11 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
     ani_object &pictureInfoObj);
 // AniRecord to map
 ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
-    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap);
+    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap);
 // vector to AniArray
 ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<Media::PixelMap>> &pixelMaps);
 
-ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource resource);
+ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource &resource);
 ani_status GetResourceArray(ani_env *env,
     ani_object param, const char *name, std::vector<ResourceManager::Resource> &res);
 ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::Resource> &resource);

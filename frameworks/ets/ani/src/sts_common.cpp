@@ -192,7 +192,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Double sucess, status: %{public}f", outvalue);
+    ANS_LOGD("Object_CallMethodByName_Double sucess");
     return status;
 }
 
@@ -216,7 +216,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Int sucess, status: %{public}d", outvalue);
+    ANS_LOGD("Object_CallMethodByName_Int sucess");
     return status;
 }
 
@@ -240,7 +240,7 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Long sucess, status: %{public}lld", outvalue);
+    ANS_LOGD("Object_CallMethodByName_Long sucess");
     return status;
 }
 
@@ -320,7 +320,6 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
             return status;
         }
         res.push_back(str);
-        ANS_LOGD("GetStdString index: %{public}d %{public}s", i, str.c_str());
     }
     return status;
 }
@@ -401,7 +400,7 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
     return status;
 }
 
-ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> &strs)
+ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> strs)
 {
     if (env == nullptr) {
         ANS_LOGE("GetAniStringArrayByVectorString fail, env is nullptr");
@@ -672,8 +671,8 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
     return arrayObj;
 }
 
-bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, const std::string &fieldName,
-    const std::vector<std::int64_t> &values)
+bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, const std::string fieldName,
+    const std::vector<std::int64_t> values)
 {
     if (env == nullptr || cls == nullptr || object == nullptr || fieldName.empty()) {
         ANS_LOGE("SetOptionalFieldArrayLong fail, has nullptr or fieldName is empty");
