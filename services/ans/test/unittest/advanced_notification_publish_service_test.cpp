@@ -2661,7 +2661,7 @@ HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0200, Function | MediumTest
     request->SetOwnerBundleName("test.com");
     request->SetOwnerUserId(-1);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("autoServiceIntallStatus", AAFwk::Integer::Box(0));
+    extendInfo->SetParam("autoServiceInstallStatus", AAFwk::Integer::Box(0));
     request->SetExtendInfo(extendInfo);
     auto ret = advancedNotificationService_->Publish("", request);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);

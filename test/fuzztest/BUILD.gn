@@ -47,6 +47,7 @@ group("fuzztest") {
     "notificationconversationalmessageannex_fuzzer:NotificationConversationalMessageAnnexFuzzTest",
     "notificationdistributedoptions_fuzzer:NotificationDistributedOptionsFuzzTest",
     "notificationdonotdisturbdate_fuzzer:NotificationDoNotDisturbDateFuzzTest",
+    "notificationextension_fuzzer:NotificationExtensionFuzzTest",
     "notificationflags_fuzzer:NotificationFlagsFuzzTest",
     "notificationhelper_fuzzer:NotificationHelperFuzzTest",
     "notificationlongtextcontent_fuzzer:NotificationLongTextContentFuzzTest",
