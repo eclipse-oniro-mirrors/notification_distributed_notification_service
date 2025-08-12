@@ -43,7 +43,9 @@
 #include "notification_analytics_util.h"
 #include "notification_operation_service.h"
 #include "distributed_device_data_service.h"
+#ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_extension_service.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
