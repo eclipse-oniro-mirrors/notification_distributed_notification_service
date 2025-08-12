@@ -661,7 +661,7 @@ bool DistributedPublishService::FillSyncRequestExtendInfo(const sptr<Notificatio
         requestBox->SetSmallIcon(AnsImageUtil::CreatePixelMapByString(resourceInfo.icon));
         requestBox->SetReceiverUserId(userId);
         ANS_LOGI("Dans fill %{public}s %{public}d %{public}s %{public}d", resourceInfo.label.c_str(), appInfo.appIndex,
-            deviceId.c_str(), userId);
+            StringAnonymous(deviceId).c_str(), userId);
         return true;
     }
     wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID + "_" + deviceType, AAFwk::String::Box(deviceId));
