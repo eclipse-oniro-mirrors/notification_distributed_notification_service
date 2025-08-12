@@ -1041,12 +1041,24 @@ HWTEST_F(NotificationPreferencesDatabaseTest, IsSmartReminderEnabled_0100, TestS
 /**
  * @tc.name      : GetAllNotificationEnabledBundles_00100
  * @tc.number    : GetAllNotificationEnabledBundles
- * @tc.desc      : Check func GetAllNotificationEnabledBundles,no data in db return false
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles, return true
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00100, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
     ASSERT_EQ(true, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
+}
+
+/**
+ * @tc.name      : GetAllNotificationEnabledBundles_00200
+ * @tc.number    : GetAllNotificationEnabledBundles
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles,no data in db return false
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00200, Function | SmallTest | Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::vector<NotificationBundleOption> bundleOption;
+    ASSERT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
 }
 
 /**

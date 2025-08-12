@@ -982,7 +982,11 @@ bool NotificationPreferencesDatabase::HandleDataBaseMap(
         if (enableNotificationItem == datas.end()) {
             continue;
         }
-        if (static_cast<bool>(StringToInt(enableNotificationItem->second))) {
+        NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(
+            StringToInt(enableNotificationItem->second));
+        bool enabled = (state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON ||
+            state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+        if (enabled) {
             auto uidItem = datas.find(matchUid);
             if (uidItem == datas.end()) {
                 continue;
