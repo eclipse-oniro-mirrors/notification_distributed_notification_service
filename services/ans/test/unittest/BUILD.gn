@@ -1610,6 +1610,7 @@ ohos_unittest("notification_extension_test") {
 
   sources = [
     "notification_extension/device_manager_impl_mock.cpp",
+    "notification_extension/distributed_collaboration_service_test.cpp",
     "notification_extension/distributed_device_data_service_test.cpp",
     "notification_extension/distributed_device_status_test.cpp",
     "notification_extension/distributed_extension_service_test.cpp",
@@ -1663,6 +1664,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/liveview_all_scenarios_extension_wrapper.cpp",
     "${services_path}/ans/src/notification_dialog.cpp",
     "${services_path}/ans/src/notification_dialog_manager.cpp",
+    "${services_path}/ans/src/notification_extension/distributed_collaboration_service.cpp",
     "${services_path}/ans/src/notification_extension/distributed_device_data_service.cpp",
     "${services_path}/ans/src/notification_extension/distributed_device_manager.cpp",
     "${services_path}/ans/src/notification_extension/distributed_extension_service.cpp",
