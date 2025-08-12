@@ -189,7 +189,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
     bool isSystemApp = AccessTokenHelper::IsSystemApp();
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
-	if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
+    if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
         request->SetExtendInfo(nullptr);
     }
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
