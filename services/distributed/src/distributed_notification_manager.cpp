@@ -406,7 +406,7 @@ ErrCode DistributedNotificationManager::DeleteRemoteNotification(
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->DeleteToDistributedDB(key)) {
-        ANS_LOGE("delete to distributed DB failed. key:%{public}s", key.c_str());
+        ANS_LOGE("delete to distributed DB failed. key:%{public}s", StringAnonymous(key).c_str());
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;

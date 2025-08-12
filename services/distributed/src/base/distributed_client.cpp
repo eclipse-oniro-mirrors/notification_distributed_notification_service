@@ -133,7 +133,7 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataTyp
     {
         std::lock_guard<ffrt::mutex> lock(clientLock_);
         socketsId_[key] = socketId;
-        ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
+        ANS_LOGI("Get socketid insert %{public}s %{public}d", StringAnonymous(key).c_str(), socketId);
     }
     return ERR_OK;
 }
