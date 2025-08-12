@@ -42,11 +42,12 @@ NotificationFlags::NotificationFlags(uint32_t reminderFlags): reminderFlags_(rem
 
 void NotificationFlags::SetSoundEnabled(NotificationConstant::FlagStatus soundEnabled)
 {
-    soundEnabled_ = soundEnabled;
     if (soundEnabled == NotificationConstant::FlagStatus::OPEN) {
         reminderFlags_ |= NotificationConstant::ReminderFlag::SOUND_FLAG;
+        soundEnabled_ = NotificationConstant::FlagStatus::OPEN;
     } else {
         reminderFlags_ &= ~(NotificationConstant::ReminderFlag::SOUND_FLAG);
+        soundEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
 }
 
@@ -57,11 +58,12 @@ NotificationConstant::FlagStatus NotificationFlags::IsSoundEnabled() const
 
 void NotificationFlags::SetVibrationEnabled(NotificationConstant::FlagStatus vibrationEnabled)
 {
-    vibrationEnabled_ = vibrationEnabled;
     if (vibrationEnabled == NotificationConstant::FlagStatus::OPEN) {
         reminderFlags_ |= NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+        vibrationEnabled_ = NotificationConstant::FlagStatus::OPEN;
     } else {
         reminderFlags_ &= ~(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
+        vibrationEnabled_ = NotificationConstant::FlagStatus::CLOSE;
     }
 }
 

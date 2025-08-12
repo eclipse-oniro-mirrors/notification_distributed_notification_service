@@ -187,6 +187,11 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return result;
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();
+    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(tokenCaller);
+    if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
+        request->SetExtendInfo(nullptr);
+    }
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
     // SA not support sound
@@ -424,6 +429,9 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     if (isLocalWantAgent && !isAgentController) {
         ANS_LOGE("Local wantAgent does not support permission denied");
         return ERR_ANS_PERMISSION_DENIED;
+    }
+    if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
+        request->SetExtendInfo(nullptr);
     }
     return ERR_OK;
 }

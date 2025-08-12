@@ -349,6 +349,12 @@ void SmartReminderCenter::InitValidDevices(
             smartDevices.insert(deviceType);
             request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
         } else {
+            if (NotificationConstant::SlotType::SOCIAL_COMMUNICATION != request->GetSlotType() &&
+                NotificationConstant::SlotType::SERVICE_REMINDER != request->GetSlotType() &&
+                NotificationConstant::SlotType::CUSTOMER_SERVICE != request->GetSlotType()) {
+                ANS_LOGI("unaffect slot");
+                continue;
+            }
             bool distributedSwitch = GetDistributedSwitch(deviceType);
             if (!distributedSwitch) {
                 ANS_LOGI("distributed switch is closed, deveiceType = %{public}s", deviceType.c_str());
