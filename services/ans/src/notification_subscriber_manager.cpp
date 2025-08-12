@@ -36,6 +36,9 @@
 #include "bool_wrapper.h"
 #include "advanced_notification_inline.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
+#ifdef ALL_SCENARIO_COLLABORATION
+#include "distributed_collaboration_service.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -230,6 +233,11 @@ void NotificationSubscriberManager::BatchNotifyConsumed(const std::vector<sptr<N
         return;
     }
 
+#ifdef ALL_SCENARIO_COLLABORATION
+    for (auto item : notifications) {
+        DistributedCollaborationService::GetInstance().AddCollaborativeDeleteItem(item);
+    }
+#endif
     AppExecFwk::EventHandler::Callback batchNotifyConsumedFunc = std::bind(
         &NotificationSubscriberManager::BatchNotifyConsumedInner, this, notifications, notificationMap, record);
 
@@ -250,6 +258,9 @@ void NotificationSubscriberManager::NotifyCanceled(
         ANS_LOGE("null queue");
         return;
     }
+#ifdef ALL_SCENARIO_COLLABORATION
+    DistributedCollaborationService::GetInstance().AddCollaborativeDeleteItem(notification);
+#endif
     AppExecFwk::EventHandler::Callback NotifyCanceledFunc = std::bind(
         &NotificationSubscriberManager::NotifyCanceledInner, this, notification, notificationMap, deleteReason);
 
