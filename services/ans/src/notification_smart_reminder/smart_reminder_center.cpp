@@ -33,6 +33,7 @@
 #include "notification_extension_wrapper.h"
 #endif
 #include "os_account_manager_helper.h"
+#include "distributed_data_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -505,7 +506,7 @@ void SmartReminderCenter::FillRequestExtendInfo(const string &deviceType, Device
     request->SetExtendInfo(extendInfo);
     ANS_LOGI("FillRequestExtendInfo result: %{public}s %{public}s %{public}d %{public}s %{public}d",
         appInfo.name.c_str(), bundleResourceInfo.label.c_str(), appInfo.appIndex,
-        deviceStatus.deviceId.c_str(), deviceStatus.userId);
+        StringAnonymous(deviceStatus.deviceId).c_str(), deviceStatus.userId);
 }
 
 void SmartReminderCenter::HandleReminderMethods(
