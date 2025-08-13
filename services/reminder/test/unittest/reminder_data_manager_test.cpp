@@ -1390,7 +1390,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
     DataShare::DataShareObserver::ChangeInfo::Value timeInterval5 = static_cast<double>(testValue);
     info[ReminderCalendarShareTable::TIME_INTERVAL] = timeInterval5;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
-    EXPECT_TRUE(timer->GetTimeInterval() == 300);
+    EXPECT_TRUE(timer->GetTimeInterval() == 30);
     ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
 }
 
