@@ -279,7 +279,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_007, Level1)
     manager->activeReminderId_ = 10;
     manager->activeReminder_ = reminder;
     manager->ShowActiveReminder(want);
-    manager->CloseReminder(want, true);
+    manager->CloseReminder(want, false);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
