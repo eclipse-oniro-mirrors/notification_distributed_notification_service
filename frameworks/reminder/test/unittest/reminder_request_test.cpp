@@ -339,7 +339,7 @@ HWTEST_F(ReminderRequestTest, setSnoozeTimes_00100, Function | SmallTest | Level
  */
 HWTEST_F(ReminderRequestTest, setTimeInterval_00100, Function | SmallTest | Level1)
 {
-    uint32_t minTimeIntervalInSecond = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetTimeInterval(-1);
     EXPECT_EQ(rrc->GetTimeInterval(), 0) << "timeInterval should be 0 when set with value less than 0";
@@ -1504,7 +1504,7 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00300, Function | SmallT
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-    uint32_t minTimeIntervalInSecond = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
 

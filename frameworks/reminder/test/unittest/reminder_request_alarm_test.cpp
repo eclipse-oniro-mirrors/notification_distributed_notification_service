@@ -179,7 +179,7 @@ HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00300, Function | SmallTest 
     ret->SetSnoozeTimes(1);
     EXPECT_EQ(ret->GetSnoozeTimes(), 1);
 
-    uint32_t minTimeIntervalInSecond = 300;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     ret->SetTimeInterval(1);
     EXPECT_EQ(ret->GetTimeInterval(), minTimeIntervalInSecond);
     EXPECT_EQ(rrc->IsRepeatReminder(), true);
@@ -201,7 +201,7 @@ HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00400, Function | SmallTest 
     ret->SetSnoozeTimes(0);
     EXPECT_EQ(ret->GetSnoozeTimes(), 0);
 
-    uint32_t minTimeIntervalInSecond = 300;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     ret->SetTimeInterval(1);
     EXPECT_EQ(ret->GetTimeInterval(), minTimeIntervalInSecond);
     EXPECT_EQ(rrc->IsRepeatReminder(), true);
@@ -245,7 +245,7 @@ HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00600, Function | SmallTest 
     ret->SetSnoozeTimes(1);
     EXPECT_EQ(ret->GetSnoozeTimes(), 1);
 
-    uint32_t minTimeIntervalInSecond = 300;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
     EXPECT_EQ(rrc->IsRepeatReminder(), true);
@@ -488,7 +488,7 @@ HWTEST_F(ReminderRequestAlarmTest, UpdateNextReminder_00100, Function | SmallTes
     auto ret = std::make_shared<ReminderRequest>();
     ret->SetSnoozeTimesDynamic(1);
     EXPECT_EQ(ret->GetSnoozeTimesDynamic(), 1);
-    uint32_t minTimeIntervalInSecond = 300;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     ret->SetTimeInterval(1);
     EXPECT_EQ(ret->GetTimeInterval(), minTimeIntervalInSecond);
     EXPECT_EQ(rrc->UpdateNextReminder(), true);
@@ -510,7 +510,7 @@ HWTEST_F(ReminderRequestAlarmTest, UpdateNextReminder_00200, Function | SmallTes
     ret->SetSnoozeTimes(1);
     EXPECT_EQ(ret->GetSnoozeTimes(), 1);
 
-    uint32_t minTimeIntervalInSecond = 300;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     reminderRequestAlarm->SetTimeInterval(1);
     EXPECT_EQ(reminderRequestAlarm->GetTimeInterval(), minTimeIntervalInSecond);
 
