@@ -15,7 +15,7 @@
 #include "sts_convert_other.h"
 
 #include "sts_common.h"
-#include "pixel_map_ani.h"
+#include "pixel_map_taihe_ani.h"
 
 namespace OHOS {
 namespace NotificationSts {
@@ -43,7 +43,7 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
     return wantAgentSp;
 }
 
-ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource resource)
+ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource &resource)
 {
     ANS_LOGD("UnwrapResource called");
     if (env == nullptr || obj == nullptr) {
@@ -84,30 +84,17 @@ ani_object CreateAniPixelMap(ani_env* env, std::shared_ptr<PixelMap> pixelMap)
         ANS_LOGE("CreateAniPixelMap failed, has nullPtr");
         return nullptr;
     }
-    return PixelMapAni::CreatePixelMap(env, pixelMap);
+    return PixelMapTaiheAni::CreateEtsPixelMap(env, pixelMap);
 }
 
-std::shared_ptr<PixelMap> GetPixelMapFromEnvSp(ani_env* env, ani_object obj)
+std::shared_ptr<PixelMap> GetPixelMapFromAni(ani_env* env, ani_object obj)
 {
-    ANS_LOGD("GetPixelMapFromEnvSp call");
+    ANS_LOGD("GetPixelMapFromAni call");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("GetPixelMapFromEnvSp failed, has nullPtr");
+        ANS_LOGE("GetPixelMapFromAni failed, has nullPtr");
         return nullptr;
     }
-    ani_status ret;
-    ani_long nativeObj {};
-    if ((ret = env->Object_GetFieldByName_Long(obj, "nativeObj", &nativeObj)) != ANI_OK) {
-        ANS_LOGI("GetPixelMapFromEnvSp Object_GetField_Long fetch failed");
-        return nullptr;
-    }
-    PixelMap* pixelmap = reinterpret_cast<PixelMap*>(nativeObj);
-    if (pixelmap == nullptr) {
-        ANS_LOGI("GetPixelMapFromEnvSp pixelmap nullptr");
-        return nullptr;
-    }
-    std::shared_ptr<PixelMap> pixelmapSp = std::make_shared<PixelMap>(*pixelmap);
-    deletePoint(pixelmap);
-    return pixelmapSp;
+    return PixelMapTaiheAni::GetNativePixelMap(env, obj);
 }
 
 ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::shared_ptr<PixelMap>> &pixelMaps)
@@ -134,9 +121,9 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
             pixelMaps.clear();
             return status;
         }
-        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(pixelMapRef));
+        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(pixelMapRef));
         if (pixelMap == nullptr) {
-            ANS_LOGE("GetPixelMapArrayByRef: GetPixelMapFromEnvSp failed.");
+            ANS_LOGE("GetPixelMapArrayByRef: GetPixelMapFromAni failed.");
             pixelMaps.clear();
             return ANI_INVALID_ARGS;
         }
@@ -299,7 +286,7 @@ ani_status GetPixelMapByRef(
 }
 
 ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
-    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap)
+    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> &pictureMap)
 {
     ANS_LOGD("GetMapOfPictureInfo call");
     if (env == nullptr || obj == nullptr) {
@@ -338,7 +325,7 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
     return status;
 }
 
-ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::Resource> &resource)
+ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::Resource> resource)
 {
     ANS_LOGD("GetAniResource call");
     if (env == nullptr || resource == nullptr) {
@@ -371,11 +358,11 @@ ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::R
     return resourceObject;
 }
 
-ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<Media::PixelMap>> &pixelMaps)
+ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps)
 {
     ANS_LOGD("GetAniArrayPixelMap call");
-    if (env == nullptr || pixelMaps.empty()) {
-        ANS_LOGE("GetAniArrayPixelMap failed, env is nullPtr or pixelMaps is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniArrayPixelMap failed, env is nullPtr");
         return nullptr;
     }
     ani_size length = pixelMaps.size();
@@ -385,8 +372,8 @@ ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<M
         return nullptr;
     }
     ani_size i = 0;
-    for (auto &pixelMap : pixelMaps) {
-        ani_object pixelMapObject = Media::PixelMapAni::CreatePixelMap(env, pixelMap);
+    for (auto pixelMap : pixelMaps) {
+        ani_object pixelMapObject = CreateAniPixelMap(env, pixelMap);
         if (pixelMapObject == nullptr) {
             ANS_LOGE("GetAniArrayPixelMap : pixelMapObject is nullptr");
             return nullptr;
@@ -404,11 +391,11 @@ ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<M
 }
 
 ani_object GetAniArrayResource(ani_env *env,
-    const std::vector<std::shared_ptr<ResourceManager::Resource>> &resources)
+    const std::vector<std::shared_ptr<ResourceManager::Resource>> resources)
 {
     ANS_LOGD("GetAniArrayResource call");
-    if (env == nullptr || resources.empty()) {
-        ANS_LOGE("GetAniArrayResource failed, env is nullPtr or resources is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniArrayResource failed, env is nullPtr");
         return nullptr;
     }
     ani_size length = resources.size();
@@ -418,7 +405,7 @@ ani_object GetAniArrayResource(ani_env *env,
         return nullptr;
     }
     ani_size i = 0;
-    for (auto &resource : resources) {
+    for (auto resource : resources) {
         ani_object resourceObject = GetAniResource(env, resource);
         if (resourceObject == nullptr) {
             ANS_LOGE("GetAniArrayResource : resourceObject is nullPtr");
@@ -440,8 +427,8 @@ bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shar
     ani_object &pictureInfoObj)
 {
     ANS_LOGD("GetAniPictrueInfo call");
-    if (env == nullptr || pictureMap.empty()) {
-        ANS_LOGE("GetAniPictrueInfo failed, env is nullPtr or pictureMap is empty");
+    if (env == nullptr) {
+        ANS_LOGE("GetAniPictrueInfo failed, env is nullPtr");
         return false;
     }
     pictureInfoObj = newRecordClass(env);

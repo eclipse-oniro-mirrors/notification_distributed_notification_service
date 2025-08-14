@@ -25,6 +25,7 @@
 #include "distributed_device_service.h"
 #include "distributed_preference.h"
 #include "distributed_subscribe_service.h"
+#include "distributed_send_adapter.h"
 
 namespace OHOS {
 namespace Notification {
@@ -84,10 +85,9 @@ void DistributedBundleService::RequestBundlesIcon(const DistributedDeviceInfo pe
         return;
     }
 
-    DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
-        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
-    ANS_LOGI("Dans RequestBundlesIcon %{public}s %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
+        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
     DistributedDeviceService::GetInstance().SetDeviceSyncData(peerDevice.deviceId_,
         DistributedDeviceService::SYNC_BUNDLE_ICONS, true);
 }
@@ -171,8 +171,9 @@ void DistributedBundleService::HandleBundleRemoved(const std::string& bundleName
             continue;
         }
 
-        DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
-            device.second.deviceId_, MODIFY_ERROR_EVENT_CODE);
+        auto packageInfo = std::make_shared<PackageInfo>(iconBox, device.second,
+            TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+        DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
         ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d.",
             StringAnonymous(device.second.deviceId_).c_str(), device.second.deviceType_);
     }
@@ -208,11 +209,12 @@ int32_t DistributedBundleService::UpdateBundlesIcon(const std::unordered_map<std
         return -1;
     }
 
-    int32_t result = DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_BYTES,
-        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
-    ANS_LOGI("Dans UpdateBundlesIcon %{public}s %{public}d %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_, result);
-    return result;
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
+        TransDataType::DATA_TYPE_BYTES, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+    ANS_LOGI("Dans UpdateBundlesIcon %{public}s %{public}d.",
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
+    return ERR_OK;
 }
 
 bool DistributedBundleService::GetBundleResourceInfo(const std::string bundleName, std::string& icon)
@@ -358,8 +360,9 @@ void DistributedBundleService::ReportBundleIconList(const DistributedDeviceInfo 
         return;
     }
 
-    DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
-        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
+        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
     ANS_LOGI("Dans ReportBundleIconList %{public}s %{public}d.",
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
 }
@@ -410,8 +413,9 @@ void DistributedBundleService::SendInstalledBundles(const DistributedDeviceInfo&
         return;
     }
 
-    DistributedClient::GetInstance().SendMessage(iconBox, TransDataType::DATA_TYPE_MESSAGE,
-        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(iconBox, peerDevice,
+        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
     ANS_LOGI("Dans send bundle %{public}s %{public}d.",
         StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
 }

@@ -285,7 +285,7 @@ ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj, Notificati
     if (ANI_OK == UnwrapResource(env, static_cast<ani_object>(iconRef), resource)) {
         iconButton.SetIconResource(std::make_shared<ResourceManager::Resource>(resource));
     } else {
-        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(iconRef));
+        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(iconRef));
         if (pixelMap == nullptr) {
             ANS_LOGE("UnWarpNotificationIconButton: get iconResource failed");
             return ANI_INVALID_ARGS;
@@ -453,7 +453,7 @@ bool getCapsuleByIcon(ani_env *env, ani_object obj, std::shared_ptr<PixelMap> &p
             ANS_LOGE("icon of Capsule is undefined");
             return false;
         }
-        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(tempRef));
+        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(tempRef));
     }
     return true;
 }
@@ -726,7 +726,7 @@ ani_status UnWarpNotificationBasicContent(ani_env *env, ani_object obj,
         || lockscreenPictureRef == nullptr) {
         ANS_LOGD("UnWarpNotificationBasicContent: get lockscreenPicture failed");
     } else {
-        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(lockscreenPictureRef));
+        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(lockscreenPictureRef));
         if (pixelMap != nullptr) {
             basicContent->SetLockScreenPicture(pixelMap);
         } else {
@@ -873,7 +873,7 @@ ani_status UnWarpNotificationPictureContent(ani_env *env, ani_object obj,
         ANS_LOGE("UnWarpNotificationPictureContent: get briefText failed");
         return ANI_INVALID_ARGS;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(pictureRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(pictureRef));
     if (pixelMap == nullptr) {
         ANS_LOGE("UnWarpNotificationPictureContent: get briefText by pixelMap failed");
         return ANI_INVALID_ARGS;

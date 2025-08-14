@@ -43,7 +43,9 @@
 #include "notification_analytics_util.h"
 #include "notification_operation_service.h"
 #include "distributed_device_data_service.h"
+#ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_extension_service.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -878,15 +880,6 @@ void AdvancedNotificationService::UpdateDistributedDeviceList(const std::string 
         result = NotificationPreferences::GetInstance()->SetDistributedDevicelist(deviceTypes, userId);
         if (result != ERR_OK) {
             ANS_LOGE("Set distributed device list failed");
-            return;
-        }
-        EventFwk::Want want;
-        want.SetAction(NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE);
-        EventFwk::CommonEventData commonData{ want };
-        EventFwk::CommonEventPublishInfo publishInfo;
-        publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
-        if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
-            ANS_LOGE("Publish common event failed");
         }
     }
 }
@@ -904,8 +897,18 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
 
     auto result =
         NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
-    if (result == ERR_OK && isAuth) {
-        UpdateDistributedDeviceList(deviceType, userId);
+    if (result == ERR_OK) {
+        if (isAuth) {
+            UpdateDistributedDeviceList(deviceType, userId);
+        }
+        EventFwk::Want want;
+        want.SetAction(NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE);
+        EventFwk::CommonEventData commonData{ want };
+        EventFwk::CommonEventPublishInfo publishInfo;
+        publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
+        if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
+            ANS_LOGE("Publish common event failed");
+        }
     }
     return result;
 }

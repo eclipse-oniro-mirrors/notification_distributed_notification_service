@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 #include "notification_analytics_util.h"
+#include "notification_preferences.h"
+#include "aes_gcm_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -33,6 +35,7 @@ const int32_t NOTIFICATION_KEY_INDEX = 0;
 const int32_t NOTIFICATION_VALUE_INDEX = 1;
 const std::ptrdiff_t MAX_SIZE_PER_BATCH = 100;
 const int32_t NOTIFICATION_RDB_MAX_MEMORY_SIZE = 1;
+const std::string LIVE_VIEW_KEY = "secure_live_view";
 } // namespace
 RdbStoreDataCallBackNotificationStorage::RdbStoreDataCallBackNotificationStorage(
     const NotificationRdbConfig &notificationRdbConfig): notificationRdbConfig_(notificationRdbConfig)
@@ -67,7 +70,193 @@ int32_t RdbStoreDataCallBackNotificationStorage::OnUpgrade(
 {
     ANS_LOGD("OnUpgrade currentVersion: %{public}d, targetVersion: %{public}d",
         oldVersion, newVersion);
+ 
+    if (oldVersion == 1) {
+        std::set<std::string> tables = GetTableNames(rdbStore);
+        if (tables.empty()) {
+            ANS_LOGE("Query tableName failed");
+            return NativeRdb::E_OK;
+        }
+ 
+        for (const std::string &tableName : tables) {
+            if (!ProcessTable(rdbStore, tableName)) {
+                return NativeRdb::E_OK;
+            }
+        }
+    }
+ 
     return NativeRdb::E_OK;
+}
+ 
+std::set<std::string> RdbStoreDataCallBackNotificationStorage::GetTableNames(NativeRdb::RdbStore &rdbStore)
+{
+    std::set<std::string> tables;
+    std::string queryTableSql = "SELECT name FROM sqlite_master WHERE type='table'";
+    auto absSharedResultSet = rdbStore.QuerySql(queryTableSql);
+    if (absSharedResultSet == nullptr) {
+        return tables;
+    }
+    int32_t ret = absSharedResultSet->GoToFirstRow();
+    if (ret != NativeRdb::E_OK) {
+        return tables;
+    }
+ 
+    do {
+        std::string tableName;
+        ret = absSharedResultSet->GetString(0, tableName);
+        if (ret == NativeRdb::E_OK) {
+            tables.insert(tableName);
+        }
+    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+ 
+    return tables;
+}
+ 
+bool RdbStoreDataCallBackNotificationStorage::ProcessTable(
+    NativeRdb::RdbStore &rdbStore, const std::string &tableName)
+{
+    auto absSharedResultSet = QueryTable(rdbStore, tableName);
+    if (!absSharedResultSet) {
+        return false;
+    }
+ 
+    bool result = ProcessResultSet(absSharedResultSet, rdbStore, tableName);
+    absSharedResultSet->Close();
+    return result;
+}
+ 
+std::shared_ptr<NativeRdb::AbsSharedResultSet> RdbStoreDataCallBackNotificationStorage::QueryTable(
+    NativeRdb::RdbStore &rdbStore, const std::string &tableName)
+{
+    NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);
+    absRdbPredicates.BeginsWith(NOTIFICATION_KEY, LIVE_VIEW_KEY);
+    auto absSharedResultSet = rdbStore.Query(absRdbPredicates, std::vector<std::string>());
+    if (!absSharedResultSet) {
+        ANS_LOGE("absSharedResultSet failed from %{public}s table.", tableName.c_str());
+    }
+    return absSharedResultSet;
+}
+ 
+bool RdbStoreDataCallBackNotificationStorage::ProcessResultSet(
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
+    NativeRdb::RdbStore &rdbStore, const std::string &tableName)
+{
+    absSharedResultSet->GoToFirstRow();
+    do {
+        if (!ProcessRow(absSharedResultSet, rdbStore, tableName)) {
+            return false;
+        }
+    } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
+ 
+    return true;
+}
+ 
+bool RdbStoreDataCallBackNotificationStorage::ProcessRow(
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
+    NativeRdb::RdbStore &rdbStore, const std::string &tableName)
+{
+    std::string resultKey;
+    if (!GetStringFromResultSet(absSharedResultSet, NOTIFICATION_KEY_INDEX, resultKey)) {
+        return false;
+    }
+ 
+    std::string resultValue;
+    if (!GetStringFromResultSet(absSharedResultSet, NOTIFICATION_VALUE_INDEX, resultValue)) {
+        return false;
+    }
+ 
+    std::string input;
+    AesGcmHelper::Decrypt(input, resultValue);
+    auto jsonObject = nlohmann::json::parse(input);
+ 
+    auto *request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
+    if (!request) {
+        ANS_LOGE("Parse json string to request failed.");
+        return true;
+    }
+ 
+    auto *bundleOption = NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
+    if (!bundleOption) {
+        ANS_LOGE("Parse json string to bundleOption failed.");
+        return true;
+    }
+ 
+    ANS_LOGW("before change request: %{public}s.", request->Dump().c_str());
+    if (!UpdateRequest(request)) {
+        return true;
+    }
+ 
+    if (!WriteBackToDatabase(request, bundleOption, rdbStore, tableName)) {
+        return false;
+    }
+ 
+    return true;
+}
+ 
+bool RdbStoreDataCallBackNotificationStorage::GetStringFromResultSet(
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet, int columnIndex, std::string &result)
+{
+    int32_t ret = absSharedResultSet->GetString(columnIndex, result);
+    if (ret != NativeRdb::E_OK) {
+        return false;
+    }
+    return true;
+}
+ 
+bool RdbStoreDataCallBackNotificationStorage::WriteBackToDatabase(
+    NotificationRequest *request, NotificationBundleOption *bundleOption,
+    NativeRdb::RdbStore &rdbStore, const std::string &tableName)
+{
+    nlohmann::json jsonOutObject;
+    if (!NotificationJsonConverter::ConvertToJson(request, jsonOutObject) ||
+        !NotificationJsonConverter::ConvertToJson(bundleOption, jsonOutObject)) {
+        ANS_LOGE("Convert to json object failed");
+        return false;
+    }
+ 
+    std::string encryptValue;
+    AesGcmHelper::Encrypt(jsonOutObject.dump(), encryptValue);
+    int64_t rowId = -1;
+    NativeRdb::ValuesBucket valuesBucket;
+    valuesBucket.PutString(NOTIFICATION_KEY, request->GetSecureKey());
+    valuesBucket.PutString(NOTIFICATION_VALUE, encryptValue);
+    
+    int32_t ret = rdbStore.InsertWithConflictResolution(rowId, tableName, valuesBucket,
+        NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("Insert failed with ret: %{public}d", ret);
+        return false;
+    }
+    ANS_LOGI("Insert success ret is %{public}d", ret);
+    return true;
+}
+ 
+bool RdbStoreDataCallBackNotificationStorage::UpdateRequest(NotificationRequest *request)
+{
+    auto actionButtons = request->GetActionButtons();
+    if (actionButtons.empty()) {
+        ANS_LOGE("ActionButtons is empty");
+        return false;
+    }
+ 
+    auto firstButton = actionButtons.front();
+    auto firstButtonWantAgent = firstButton->GetWantAgent();
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+        request->GetContent()->GetNotificationContent());
+    if (firstButtonWantAgent) {
+        liveViewContent->SetExtensionWantAgent(firstButtonWantAgent);
+    }
+    auto requestContent = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(requestContent);
+ 
+    actionButtons.erase(actionButtons.begin());
+    request->ClearActionButtons();
+    for (auto actionButton : actionButtons) {
+        request->AddActionButton(actionButton);
+    }
+ 
+    ANS_LOGW("End request: %{public}s.", request->Dump().c_str());
+    return true;
 }
 
 int32_t RdbStoreDataCallBackNotificationStorage::OnDowngrade(

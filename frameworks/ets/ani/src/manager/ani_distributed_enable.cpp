@@ -56,7 +56,7 @@ ani_boolean AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj)
     ANS_LOGD("AniIsDistributedEnabledByBundle call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErroWithMsg(env, "AniIsDistributedEnabledByBundle : erro arguments.");
+        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundle : erro arguments.");
         return NotificationSts::BoolToAniBoolean(false);
     }
     bool enabled = false;
@@ -75,12 +75,12 @@ ani_boolean AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, an
     ANS_LOGD("AniIsDistributedEnabledByBundleType call");
     Notification::NotificationBundleOption option;
     if (!NotificationSts::UnwrapBundleOption(env, obj, option)) {
-        NotificationSts::ThrowErroWithMsg(env, "AniIsDistributedEnabledByBundleType : erro arguments.");
+        NotificationSts::ThrowErrorWithMsg(env, "AniIsDistributedEnabledByBundleType : erro arguments.");
         return NotificationSts::BoolToAniBoolean(false);
     }
     std::string deviceTypeStr;
     if (NotificationSts::GetStringByAniString(env, deviceType, deviceTypeStr) != ANI_OK) {
-        NotificationSts::ThrowErroWithMsg(env, "deviceType parse failed!");
+        NotificationSts::ThrowErrorWithMsg(env, "deviceType parse failed!");
         return NotificationSts::BoolToAniBoolean(false);
     }
     ANS_LOGD("Cancel by deviceType:%{public}s", deviceTypeStr.c_str());

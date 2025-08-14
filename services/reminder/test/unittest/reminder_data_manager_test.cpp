@@ -279,7 +279,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_007, Level1)
     manager->activeReminderId_ = 10;
     manager->activeReminder_ = reminder;
     manager->ShowActiveReminder(want);
-    manager->CloseReminder(want, true);
+    manager->CloseReminder(want, false);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -1390,7 +1390,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_030, Level1)
     DataShare::DataShareObserver::ChangeInfo::Value timeInterval5 = static_cast<double>(testValue);
     info[ReminderCalendarShareTable::TIME_INTERVAL] = timeInterval5;
     ReminderDataShareHelper::GetInstance().BuildReminderV1(info, timer);
-    EXPECT_TRUE(timer->GetTimeInterval() == 300);
+    EXPECT_TRUE(timer->GetTimeInterval() == 30);
     ReminderDataShareHelper::GetInstance().isNewRdbVer_ = false;
 }
 

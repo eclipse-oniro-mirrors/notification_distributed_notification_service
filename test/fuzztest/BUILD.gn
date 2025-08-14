@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/notification/distributed_notification_service/notification.gni")
 
 group("fuzztest") {
   testonly = true
@@ -95,4 +96,8 @@ group("fuzztest") {
     "setprogressbar_fuzzer:SetProgressBarFuzzTest",
     "settemplate_fuzzer:SetTemplateFuzzTest",
   ]
+
+  if (distributed_notification_service_feature_all_scenario_collaboration) {
+    deps += [ "notificationextension_fuzzer:NotificationExtensionFuzzTest" ]
+  }
 }

@@ -16,7 +16,7 @@
 #ifndef NOTIFICATION_DYNAMIC_LOOAD_UTILS_H
 #define NOTIFICATION_DYNAMIC_LOOAD_UTILS_H
 
-#include "device_manager_callback.h"
+#include <string>
 
 namespace OHOS {
 namespace Notification {

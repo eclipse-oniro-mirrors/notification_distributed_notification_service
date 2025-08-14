@@ -20,9 +20,9 @@
 #include "liveview_all_scenarios_extension_wrapper.h"
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
+#include "distributed_extension_service.h"
 #endif
 #include "advanced_datashare_helper.h"
-#include "distributed_extension_service.h"
 
 namespace OHOS {
 namespace Notification {

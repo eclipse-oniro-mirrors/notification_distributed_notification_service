@@ -606,7 +606,7 @@ void GetNotificationSmallIcon(ani_env *env, ani_object obj, std::shared_ptr<Noti
         ANS_LOGE("GetNotificationSmallIcon: get ref failed");
         return;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(smallIconRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(smallIconRef));
     if (pixelMap != nullptr) {
         request->SetLittleIcon(pixelMap);
     }
@@ -621,7 +621,7 @@ void GetNotificationLargeIcon(ani_env *env, ani_object obj, std::shared_ptr<Noti
         ANS_LOGE("GetNotificationLargeIcon: get ref failed");
         return;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(largeIconRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(largeIconRef));
     if (pixelMap != nullptr) {
         request->SetBigIcon(pixelMap);
     }
@@ -636,7 +636,7 @@ void GetNotificationOverlayIcon(ani_env *env, ani_object obj, std::shared_ptr<No
         ANS_LOGE("GetNotificationOverlayIcon: get ref failed");
         return;
     }
-    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(overlayIconRef));
+    std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromAni(env, static_cast<ani_object>(overlayIconRef));
     if (pixelMap != nullptr) {
         request->SetOverlayIcon(pixelMap);
     }
@@ -1191,12 +1191,12 @@ ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<Notific
         ani_class requestCls;
         ani_object requestObj;
         if (!WarpNotificationRequest(env, request.GetRefPtr(), requestCls, requestObj) || requestObj == nullptr) {
-            ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
+            ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
             return nullptr;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(
             arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
+            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}zu", index);
             return nullptr;
         }
         index ++;
@@ -1218,12 +1218,12 @@ ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vect
         if (!WarpNotificationRequest(
             env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
             || requestObj == nullptr) {
-                ANS_LOGE("WarpNotificationRequest faild. index %{public}d", index);
+                ANS_LOGE("WarpNotificationRequest faild. index %{public}zu", index);
                 return nullptr;
             }
         if (ANI_OK
             != env->Object_CallMethodByName_Void(arrayObj, "$_set", "ILstd/core/Object;:V", index, requestObj)) {
-            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}d", index);
+            ANS_LOGE("Object_CallMethodByName_Void faild. index  %{public}zu", index);
             return nullptr;
         }
         index ++;

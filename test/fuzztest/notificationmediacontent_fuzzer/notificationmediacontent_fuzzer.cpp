@@ -30,6 +30,8 @@ namespace OHOS {
         notificationMediaContent.SetAVToken(avToken);
         // test SetShownActions function
         std::vector<uint32_t> actions;
+        uint32_t action = fdp->ConsumeIntegral<uint32_t>();
+        actions.push_back(action);
         notificationMediaContent.SetShownActions(actions);
         // test GetAVToken function
         notificationMediaContent.GetAVToken();

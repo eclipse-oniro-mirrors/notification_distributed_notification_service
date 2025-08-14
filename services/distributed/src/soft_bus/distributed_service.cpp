@@ -115,8 +115,7 @@ void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
         return;
     }
 
-    int32_t result = DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
-    ANS_LOGI("ConnectPeerDevice try %{public}d.", result);
+    DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
     DistributedDeviceService::GetInstance().IncreaseDeviceSyncCount(device.deviceId_);
     if (serviceQueue_ == nullptr) {
         ANS_LOGE("Check handler is null.");
@@ -219,7 +218,7 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
 
             DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_OFFLINE);
             DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
-            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_);
+            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
         }
 #else
         if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
@@ -346,6 +345,7 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
         DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
     }
     // sync to peer device
+    DistributedDeviceService::GetInstance().SetDeviceState(device.deviceId_, DeviceState::STATE_SYNC);
     ConnectPeerDevice(device);
 }
 #else
@@ -399,8 +399,9 @@ void DistributedService::SyncInstalledBundle(const std::string& bundleName, bool
                 return;
             }
             bundles.push_back({bundleName, resourceInfo.label});
+        } else {
+            bundles.push_back({bundleName, LABEL_PLACEHOLDER});
         }
-        bundles.push_back({bundleName, LABEL_PLACEHOLDER});
         int32_t syncType = isAdd ? BundleListOperationType::ADD_BUNDLES : BundleListOperationType::REMOVE_BUNDLES;
         for (auto& device : peerDevices) {
             if (isPad && device.second.peerState_ != DeviceState::STATE_ONLINE) {
@@ -461,7 +462,7 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
             DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
                 device.deviceType_, false);
             DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
-            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_);
+            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
         }
     }
 
@@ -555,8 +556,8 @@ bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> 
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
         requestPoint->SetFlags(flagIter->second);
-        ANS_LOGI("SetFlags-final, notificationKey = %{public}s flags = %{public}d",
-            requestPoint->GetKey().c_str(), requestPoint->GetFlags()->GetReminderFlags());
+        ANS_LOGI("SetFlags-final, notificationKey = %{public}s flags = %{public}d deviceType: %{public}s.",
+            requestPoint->GetKey().c_str(), requestPoint->GetFlags()->GetReminderFlags(), deviceType.c_str());
     } else {
         return false;
     }

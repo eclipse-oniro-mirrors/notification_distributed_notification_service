@@ -427,15 +427,14 @@ napi_value Common::SetNotificationLiveViewContent(
     // pictureInfo?: {[key, string]: Array<image.pixelMap>}
     if (liveViewContent->GetPicture().empty()) {
         ANS_LOGD("No pictures in live view.");
-        return NapiGetBoolean(env, true);
+    } else {
+        napi_value pictureMapObj = SetLiveViewPictureInfo(env, liveViewContent->GetPicture());
+        if (pictureMapObj == nullptr) {
+            ANS_LOGE("null pictureMapObj");
+            return NapiGetBoolean(env, false);
+        }
+        napi_set_named_property(env, result, "pictureInfo", pictureMapObj);
     }
-
-    napi_value pictureMapObj = SetLiveViewPictureInfo(env, liveViewContent->GetPicture());
-    if (pictureMapObj == nullptr) {
-        ANS_LOGE("null pictureMapObj");
-        return NapiGetBoolean(env, false);
-    }
-    napi_set_named_property(env, result, "pictureInfo", pictureMapObj);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> agent = liveViewContent->GetExtensionWantAgent();
     if (agent) {
@@ -1269,16 +1268,14 @@ napi_value Common::GetNotificationLiveViewContentDetailed(
     jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, contentResult, "pictureInfo", napi_object);
     if (jsValue == nullptr) {
         ANS_LOGE("null jsValue");
-        return NapiGetNull(env);
+        } else {
+        std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
+        if (GetLiveViewPictureInfo(env, jsValue, pictureMap) == nullptr) {
+            ANS_LOGE("null LiveViewPictureInfo");
+            return nullptr;
+        }
+        liveViewContent->SetPicture(pictureMap);
     }
-
-    std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
-    if (GetLiveViewPictureInfo(env, jsValue, pictureMap) == nullptr) {
-        ANS_LOGE("null LiveViewPictureInfo");
-        return nullptr;
-    }
-    liveViewContent->SetPicture(pictureMap);
-
     if (GetLiveViewWantAgent(env, contentResult, liveViewContent) == nullptr) {
         ANS_LOGD("no live view wantAgent");
         return nullptr;

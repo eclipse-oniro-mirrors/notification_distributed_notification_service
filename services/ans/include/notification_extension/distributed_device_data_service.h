@@ -46,7 +46,7 @@ public:
     int32_t GetTargetDeviceBundleList(const std::string& deviceType, const std::string& deviceId,
         std::vector<std::string>& bundleList, std::vector<std::string>& labelList);
     bool CheckDeviceBundleExist(const std::string& deviceType, const std::string& deviceId,
-        const std::string bundleName);
+        const std::string& bundleName, const std::string& label);
     bool GetDeviceNotificationEnable(const std::string& deviceType, const std::string& deviceId);
     bool GetDeviceLiveViewEnable(const std::string& deviceType, const std::string& deviceId);
 

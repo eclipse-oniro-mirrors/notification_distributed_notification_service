@@ -48,8 +48,10 @@
 #include "want_agent_helper.h"
 #include "want_params.h"
 #include "bundle_manager_helper.h"
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 #include "distributed_preferences.h"
 #include "distributed_notification_manager.h"
+#endif
 #include "ans_dialog_host_client.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
@@ -4489,6 +4491,7 @@ HWTEST_F(AdvancedNotificationServiceTest, Dialog_00008, Function | SmallTest | L
         bundleOption, EnabledDialogStatus::ALLOW_CLICKED), false);
 }
 
+#ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
 /**
  * @tc.name      : SetNotificationRemindType_00001
  * @tc.number    :
@@ -4556,6 +4559,7 @@ HWTEST_F(AdvancedNotificationServiceTest, SetNotificationRemindType_00005, Funct
     auto reminderType = advancedNotificationService_->GetRemindType();
     ASSERT_EQ(reminderType, NotificationConstant::RemindType::DEVICE_ACTIVE_DONOT_REMIND);
 }
+#endif
 
 /**
  * @tc.name      : SetSilentReminderEnabled_00001

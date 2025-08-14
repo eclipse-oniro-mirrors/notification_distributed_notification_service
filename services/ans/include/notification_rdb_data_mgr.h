@@ -23,6 +23,7 @@
 #include <map>
 #include <unordered_map>
 #include "notification_constant.h"
+#include "notification_request.h"
 #include "rdb_errno.h"
 #include "rdb_helper.h"
 #include "rdb_open_callback.h"
@@ -55,6 +56,27 @@ public:
     int32_t OnOpen(NativeRdb::RdbStore &rdbStore) override;
 
     int32_t onCorruption(std::string databaseFile) override;
+
+    std::set<std::string> GetTableNames(NativeRdb::RdbStore &rdbStore);
+ 
+    bool ProcessTable(NativeRdb::RdbStore &rdbStore, const std::string &tableName);
+ 
+    bool UpdateRequest(NotificationRequest *request);
+ 
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> QueryTable(NativeRdb::RdbStore &rdbStore,
+        const std::string &tableName);
+ 
+    bool ProcessResultSet(std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
+        NativeRdb::RdbStore &rdbStore, const std::string &tableName);
+ 
+    bool ProcessRow(std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
+        NativeRdb::RdbStore &rdbStore, const std::string &tableName);
+ 
+    bool GetStringFromResultSet(std::shared_ptr<NativeRdb::AbsSharedResultSet> absSharedResultSet,
+        int columnIndex, std::string &result);
+ 
+    bool WriteBackToDatabase(NotificationRequest *request, NotificationBundleOption *bundleOption,
+        NativeRdb::RdbStore &rdbStore, const std::string &tableName);
 private:
     NotificationRdbConfig notificationRdbConfig_;
     bool hasTableInit_ = false;

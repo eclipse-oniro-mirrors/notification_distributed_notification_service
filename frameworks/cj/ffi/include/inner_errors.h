@@ -109,6 +109,7 @@ enum ErrorCode : uint32_t {
     ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID,
     ERR_ANS_NO_PROFILE_TEMPLATE,
     ERR_ANS_REJECTED_WITH_DISABLE_NOTIFICATION,
+    ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED,
 };
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
@@ -137,7 +138,7 @@ const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update ver
 const int32_t ERROR_SETTING_WINDOW_EXIST         = 1600018;    // The notification settings window is already displayed.
 const int32_t ERROR_NO_PROFILE_TEMPLATE          = 1600019;    // Not exit noNotDisturb profile template.
 const int32_t ERROR_REJECTED_WITH_DISABLE_NOTIFICATION =
-    1600020; // The application is not allowed to publish notifications due to permission control settings.
+    1600020; // The application is not allowed to send notifications due to permission settings.
 const int32_t ERROR_NETWORK_UNREACHABLE          = 2300007;    // Network unreachable.
 const int32_t ERROR_BUNDLE_NOT_FOUND             = 17700001;   // The specified bundle name was not found.
 

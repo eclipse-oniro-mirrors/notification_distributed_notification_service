@@ -141,6 +141,7 @@ ohos_source_set("ans_service_sources") {
 
   if (distributed_notification_service_feature_all_scenario_collaboration) {
     defines += [ "ALL_SCENARIO_COLLABORATION" ]
+    sources += [ "src/notification_extension/distributed_collaboration_service.cpp" ]
     sources += [ "src/notification_extension/distributed_device_data_service.cpp" ]
     sources += [ "src/notification_extension/distributed_device_manager.cpp" ]
     sources += [ "src/notification_extension/distributed_extension_service.cpp" ]

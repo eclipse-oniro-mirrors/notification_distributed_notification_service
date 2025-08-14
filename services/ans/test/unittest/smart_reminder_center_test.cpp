@@ -284,29 +284,15 @@ HWTEST_F(SmartReminderCenterTest, FillRequestExtendInfo_100, Function | SmallTes
     std::string deviceId = "testId";
     DeviceStatus deviceStatus(deviceType, deviceId);
     sptr<NotificationRequest> request(new NotificationRequest(1));
+    AppExecFwk::ApplicationInfo appInfo;
+    appInfo.name = "testName";
+    appInfo.appIndex = 0;
+    AppExecFwk::BundleResourceInfo bundleResourceInfo;
+    bundleResourceInfo.label = "label";
 
-    smartReminderCenter_->FillRequestExtendInfo(deviceType, deviceStatus, request);
+    smartReminderCenter_->FillRequestExtendInfo(deviceType, deviceStatus, request, appInfo, bundleResourceInfo);
 
-    ASSERT_EQ(request->GetExtendInfo(), nullptr);
-}
-
-/**
- * @tc.name: FillRequestExtendInfo_200
- * @tc.desc: Test FillRequestExtendInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SmartReminderCenterTest, FillRequestExtendInfo_200, Function | SmallTest | Level1)
-{
-    std::string deviceType = "testType";
-    std::string deviceId = "testId";
-    DeviceStatus deviceStatus(deviceType, deviceId);
-    sptr<NotificationRequest> request(new NotificationRequest(1));
-    request->SetOwnerBundleName("com.ohos.sceneboard");
-    request->SetOwnerUserId(100);
-
-    smartReminderCenter_->FillRequestExtendInfo(deviceType, deviceStatus, request);
-
-    ASSERT_EQ(request->GetExtendInfo(), nullptr);
+    ASSERT_NE(request->GetExtendInfo(), nullptr);
 }
 
 /**

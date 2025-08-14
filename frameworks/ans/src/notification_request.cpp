@@ -2788,6 +2788,13 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
         NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE) {
         return;
     }
+    IncrementalUpdateLiveview(oldRequest);
+}
+
+void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)
+{
+    auto content = notificationContent_->GetNotificationContent();
+    auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto newExtraInfo = newLiveViewContent->GetExtraInfo();
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
     auto oldLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
@@ -2820,6 +2827,11 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
     }
     if (isSet) {
         newLiveViewContent->SetPicture(newPicture);
+    }
+
+    auto oldExtensionWantAgent = oldLiveViewContent->GetExtensionWantAgent();
+    if (newLiveViewContent->GetExtensionWantAgent() == nullptr) {
+        newLiveViewContent->SetExtensionWantAgent(oldExtensionWantAgent);
     }
 }
 
@@ -3149,7 +3161,7 @@ bool NotificationRequest::IsAtomicServiceNotification()
         ANS_LOGD("extend info is null.");
         return false;
     }
-    int32_t installedStatus = extendInfo_->GetIntParam("autoServiceIntallStatus", PKG_INSTALL_STATUS_UNKMOWN);
+    int32_t installedStatus = extendInfo_->GetIntParam("autoServiceInstallStatus", PKG_INSTALL_STATUS_UNKMOWN);
     if (installedStatus == PKG_INSTALL_STATUS_UNINSTALL) {
         ANS_LOGD("AtomicServiceNotification.");
         return true;

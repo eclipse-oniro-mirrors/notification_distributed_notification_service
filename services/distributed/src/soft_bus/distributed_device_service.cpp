@@ -23,6 +23,7 @@
 #include "notification_helper.h"
 #include "distributed_observer_service.h"
 #include "distributed_service.h"
+#include "distributed_send_adapter.h"
 
 namespace OHOS {
 namespace Notification {
@@ -57,6 +58,18 @@ std::string DistributedDeviceService::DeviceTypeToTypeString(uint16_t deviceType
         default:
             return "";
     }
+}
+
+static std::string DeviceTypeConversion(const std::string& deviceType)
+{
+    if (deviceType == DistributedService::PAD_DEVICE_TYPE) {
+        return "pad";
+    }
+
+    if (deviceType == DistributedService::PC_DEVICE_TYPE) {
+        return "pc";
+    }
+    return deviceType;
 }
 
 void DistributedDeviceService::InitLocalDevice(const std::string &deviceId, uint16_t deviceType)
@@ -191,7 +204,7 @@ void DistributedDeviceService::SetDeviceSyncData(const std::string& deviceId, in
     }
 }
 
-void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId)
+void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId, int32_t peerState)
 {
     std::lock_guard<ffrt::mutex> lock(mapLock_);
     auto deviceIter = peerDevice_.find(deviceId);
@@ -204,7 +217,7 @@ void DistributedDeviceService::ResetDeviceInfo(const std::string& deviceId)
     deviceIter->second.liveViewSync = false;
     deviceIter->second.iconSync = false;
     deviceIter->second.installedBundlesSync = false;
-    deviceIter->second.peerState_ = DeviceState::STATE_SYNC;
+    deviceIter->second.peerState_ = peerState;
 }
 
 void DistributedDeviceService::SetDeviceState(const std::string& deviceId, int32_t state)
@@ -313,7 +326,7 @@ void DistributedDeviceService::GetDeviceList(std::map<std::string, DistributedDe
     }
 }
 
-int32_t DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
+void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
 {
     std::shared_ptr<NotifticationMatchBox> matchBox = std::make_shared<NotifticationMatchBox>();
     matchBox->SetVersion(CURRENT_VERSION);
@@ -326,34 +339,33 @@ int32_t DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo pe
     }
     if (!matchBox->Serialize()) {
         ANS_LOGW("Dans SyncDeviceMatch serialize failed.");
-        return -1;
+        return;
     }
-    int32_t result = DistributedClient::GetInstance().SendMessage(matchBox, TransDataType::DATA_TYPE_MESSAGE,
-        peerDevice.deviceId_, MODIFY_ERROR_EVENT_CODE);
-    ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d %{public}s %{public}d %{public}d.",
-        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_,
-        StringAnonymous(localDevice_.deviceId_).c_str(), localDevice_.deviceType_, type);
-    return result;
+
+    std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(matchBox, peerDevice,
+        TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+    DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+    ANS_LOGI("Dans SyncDeviceMatch %{public}s %{public}d.",
+        StringAnonymous(peerDevice.deviceId_).c_str(), peerDevice.deviceType_);
 }
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
 void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage)
 {
     std::string deviceId;
-    std::string deviceName;
     NotifticationStateBox stateBox = NotifticationStateBox(boxMessage);
-    if (!stateBox.GetDeviceId(deviceId) || !stateBox.GetDeviceType(deviceName)) {
+    if (!stateBox.GetDeviceId(deviceId)) {
         ANS_LOGW("Dans unbox deviceId and name failed.");
         return;
     }
 
     DistributedDeviceInfo device;
     if (!GetDeviceInfo(deviceId, device)) {
-        ANS_LOGW("Dans get device failed %{public}s %{public}s.", deviceName.c_str(),
-            StringAnonymous(deviceId).c_str());
+        ANS_LOGW("Dans get device failed %{public}s.", StringAnonymous(deviceId).c_str());
         return;
     }
     int32_t status;
+    std::string deviceName = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
     if (stateBox.GetState(status)) {
         int32_t result = NotificationHelper::SetTargetDeviceStatus(deviceName, status,
             DEFAULT_LOCK_SCREEN_FLAG, device.udid_);
@@ -393,7 +405,9 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
     bool notificationEnable, bool liveViewEnable)
 {
     std::shared_ptr<NotifticationStateBox> stateBox = std::make_shared<NotifticationStateBox>();
-    stateBox->SetDeviceType(DeviceTypeToTypeString(localDevice_.deviceType_));
+    std::string deviceType = DeviceTypeToTypeString(localDevice_.deviceType_);
+    deviceType = DeviceTypeConversion(deviceType);
+    stateBox->SetDeviceType(deviceType);
     stateBox->SetDeviceId(localDevice_.deviceId_);
     if (type == STATE_TYPE_LOCKSCREEN || type == STATE_TYPE_BOTH) {
         stateBox->SetState(status);
@@ -416,11 +430,11 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
                 StringAnonymous(peer.second.deviceId_).c_str());
             continue;
         }
-        DistributedClient::GetInstance().SendMessage(stateBox, TransDataType::DATA_TYPE_MESSAGE,
-            peer.second.deviceId_, MODIFY_ERROR_EVENT_CODE);
-        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}lu %{public}d %{public}d %{public}d.",
-            peer.second.deviceType_, localDevice_.deviceType_, status, peerDevice_.size(),
-            type, liveViewEnable, notificationEnable);
+        std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(stateBox, peer.second,
+            TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
+        DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
+        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}d %{public}lu.",
+            type, status, liveViewEnable, notificationEnable, peerDevice_.size());
     }
 }
 #endif

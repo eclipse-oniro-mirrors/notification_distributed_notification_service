@@ -1940,7 +1940,7 @@ void ReminderDataManager::ClickReminder(const OHOS::EventFwk::Want &want)
         ANSR_LOGW("null reminder: %{public}d", reminderId);
         return;
     }
-    CloseReminder(reminder, false);
+    CloseReminder(reminder, true);
     StartRecentReminder();
 
     auto wantInfo = reminder->GetWantAgentInfo();

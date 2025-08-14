@@ -133,7 +133,7 @@ int32_t DistributedClient::GetSocketId(const std::string &deviceId, TransDataTyp
     {
         std::lock_guard<ffrt::mutex> lock(clientLock_);
         socketsId_[key] = socketId;
-        ANS_LOGI("Get socketid insert %{public}s %{public}d", key.c_str(), socketId);
+        ANS_LOGI("Get socketid insert %{public}s %{public}d", StringAnonymous(key).c_str(), socketId);
     }
     return ERR_OK;
 }
@@ -171,15 +171,12 @@ int32_t DistributedClient::SendMessage(const std::shared_ptr<BoxBase>& boxPtr, T
 
     // async to send byte message
     std::string errorReason = "Send failed type: " + std::to_string(type) + " , id: " + StringAnonymous(deviceId);
-    std::function<void()> sendByteTask = std::bind([boxPtr, socketId, eventType, errorReason]() {
-        int32_t res = ClientSendBytes(socketId, boxPtr->GetByteBuffer(), boxPtr->GetByteLength());
-        if (res != ERR_OK) {
-            AnalyticsUtil::GetInstance().SendEventReport(0, res, errorReason);
-            AnalyticsUtil::GetInstance().SendHaReport(eventType, res, BRANCH2_ID, errorReason);
-        }
-    });
-    ffrt::submit(sendByteTask);
-    return ERR_OK;
+    result = ClientSendBytes(socketId, boxPtr->GetByteBuffer(), boxPtr->GetByteLength());
+    if (result != ERR_OK) {
+        AnalyticsUtil::GetInstance().SendEventReport(0, result, errorReason);
+        AnalyticsUtil::GetInstance().SendHaReport(eventType, result, BRANCH2_ID, errorReason);
+    }
+    return result;
 }
 
 std::string DistributedClient::ShutdownReasonToString(ShutdownReason reason)

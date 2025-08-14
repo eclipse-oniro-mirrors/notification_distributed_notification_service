@@ -47,7 +47,7 @@ static const std::unordered_map<int32_t, std::string> ANS_ERROR_CODE_MESSAGE_MAP
     {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
     {ERROR_NETWORK_UNREACHABLE, "Network unreachable"},
     {ERROR_REJECTED_WITH_DISABLE_NOTIFICATION,
-        "The application is not allowed to publish notifications due to permission control settings"},
+        "The application is not allowed to send notifications due to permission settings"},
     {ERROR_DISTRIBUTED_OPERATION_TIMEOUT, "Distributed operation timeout"},
 };
 
@@ -87,6 +87,7 @@ static std::vector<std::pair<uint32_t, int32_t>> errorsConvert = {
     {ERR_ANS_EXPIRED_NOTIFICATION, ERROR_EXPIRED_NOTIFICATION},
     {ERR_ANS_PUSH_CHECK_FAILED, ERROR_NO_RIGHT},
     {ERR_ANS_PUSH_CHECK_UNREGISTERED, ERROR_NO_RIGHT},
+    {ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED, ERROR_NO_RIGHT},
     {ERR_ANS_PUSH_CHECK_NETWORK_UNREACHABLE, ERROR_NETWORK_UNREACHABLE},
     {ERR_ANS_NO_AGENT_SETTING, ERROR_NO_AGENT_SETTING},
     {ERR_ANS_DIALOG_IS_POPPING, ERROR_DIALOG_IS_POPPING},

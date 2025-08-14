@@ -60,6 +60,9 @@
 #include "notification_operation_info.h"
 #include "notification_operation_service.h"
 #include "bool_wrapper.h"
+#ifdef ALL_SCENARIO_COLLABORATION
+#include "distributed_collaboration_service.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -260,7 +263,6 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
         return ERR_ANS_NOT_ALLOWED;
     }
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("Serial queue is invalid.");
         return ERR_ANS_INVALID_PARAM;
     }
     ffrt::task_handle handler = notificationSvrQueue_->submit_h([&]() {
@@ -268,16 +270,16 @@ ErrCode AdvancedNotificationService::CollaboratePublish(const sptr<NotificationR
             (void)PublishRemoveDuplicateEvent(record);
             return;
         }
-        if (AssignToNotificationList(record) != ERR_OK) {
-            ANS_LOGE("Failed to assign notification list");
+#ifdef ALL_SCENARIO_COLLABORATION
+        if (!DistributedCollaborationService::GetInstance().CheckCollaborativePublish(record->notification)) {
             return;
         }
-
-        UpdateRecentNotification(record->notification, false, 0);
+#endif
+        if (AssignToNotificationList(record) != ERR_OK) {
+            return;
+        }
         sptr<NotificationSortingMap> sortingMap = GenerateSortingMap();
         NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, sortingMap);
-
-        NotificationRequestDb requestDb = { .request = record->request, .bundleOption = record->bundleOption};
         UpdateCollaborateTimerInfo(record);
     });
     notificationSvrQueue_->wait(handler);

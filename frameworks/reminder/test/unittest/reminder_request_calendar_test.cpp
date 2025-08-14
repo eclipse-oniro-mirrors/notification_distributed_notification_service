@@ -722,7 +722,7 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00002, Function | Small
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
     EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1) << "Get snoozeTimesDynamic not 1";
 
-    uint32_t minTimeIntervalInSecond = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
 
@@ -760,7 +760,7 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00003, Function | Small
 
     rrc->SetSnoozeTimes(1);
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
-    uint32_t minTimeIntervalInSecond = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
 
@@ -810,9 +810,9 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00004, Function | Small
     reminderRequest->SetSnoozeTimesDynamic(0);
     EXPECT_EQ(reminderRequest->GetSnoozeTimesDynamic(), 0) << "Get snoozeTimesDynamic not 1";
 
-    uint32_t minTimeIntervalInSeconds = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     reminderRequest->SetTimeInterval(1);
-    EXPECT_EQ(reminderRequest->GetTimeInterval(), minTimeIntervalInSeconds);
+    EXPECT_EQ(reminderRequest->GetTimeInterval(), minTimeIntervalInSecond);
 
     bool result6 = calendar->UpdateNextReminder();
     EXPECT_EQ(result6, false);
@@ -853,7 +853,7 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00005, Function | Small
     rrc->SetSnoozeTimesDynamic(0);
     EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0) << "Get snoozeTimesDynamic not 1";
 
-    uint32_t minTimeIntervalInSecond = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
 
@@ -904,7 +904,7 @@ HWTEST_F(ReminderRequestCalendarTest, UpdateNextReminder_00006, Function | Small
     EXPECT_EQ(rrc->GetSnoozeTimes(), 1) << "Get snoozeTimes not 1";
     EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1) << "Get snoozeTimesDynamic not 1";
 
-    uint32_t minTimeIntervalInSecond = 5 * 60;
+    uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
 

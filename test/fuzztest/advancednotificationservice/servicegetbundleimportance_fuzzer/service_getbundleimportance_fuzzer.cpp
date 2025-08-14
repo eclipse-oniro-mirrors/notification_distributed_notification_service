@@ -24,8 +24,7 @@ namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
-
-        int32_t importance = 0;
+        int32_t importance = fuzzData->ConsumeIntegral<int32_t>();
         service->GetBundleImportance(importance);
         return true;
     }

@@ -177,8 +177,8 @@ HWTEST_F(NotificationAnalyticsUtilTest, Operation_100, Function | SmallTest | Le
     HaOperationMessage operationMessage = HaOperationMessage(false);
     std::vector<std::string> deviceTypes;
     deviceTypes.push_back("abc");
-    deviceTypes.push_back("pc");
-    deviceTypes.push_back("pad");
+    deviceTypes.push_back("2in1");
+    deviceTypes.push_back("tablet");
     operationMessage.KeyNode(true).SyncPublish(deviceTypes);
     operationMessage.ToJson();
     ASSERT_EQ(operationMessage.notificationData.countTime, 2);
@@ -203,7 +203,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, Operation_100, Function | SmallTest | Le
 HWTEST_F(NotificationAnalyticsUtilTest, Operation_200, Function | SmallTest | Level1)
 {
     HaOperationMessage operationMessage = HaOperationMessage(false);
-    operationMessage.SyncDelete("pc", std::string()).SyncClick("pc").SyncReply("pc");
+    operationMessage.SyncDelete("2in1", std::string()).SyncClick("2in1").SyncReply("2in1");
     operationMessage.SyncDelete("pcb", std::string()).SyncClick("pcb").SyncReply("pcb");
     operationMessage.ToJson();
 
@@ -212,7 +212,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, Operation_200, Function | SmallTest | Le
 
     operationMessage = HaOperationMessage(true);
     operationMessage.ResetData();
-    operationMessage.SyncDelete("pc", std::string()).SyncClick("pc").SyncReply("pc");
+    operationMessage.SyncDelete("2in1", std::string()).SyncClick("2in1").SyncReply("2in1");
     operationMessage.SyncDelete("pcb", std::string()).SyncClick("pcb").SyncReply("pcb");
     operationMessage.ToJson();
     ASSERT_EQ(operationMessage.liveViewData.countTime, 3);

@@ -123,7 +123,6 @@ bool BundleIconBox::SetBundlesInfo(const std::vector<std::pair<std::string, std:
         TlvBox box;
         box.PutValue(std::make_shared<TlvItem>(BUNDLE_NAME_TYPE, bundle.first));
         box.PutValue(std::make_shared<TlvItem>(BUNDLE_LABEL_TYPE, bundle.second));
-        ANS_LOGW("SetBundlesIcon %{public}s %{public}zu.", bundle.first.c_str(), bundle.second.size());
         if (!box.Serialize(false)) {
             ANS_LOGW("Set bundles icon failed %{public}s.", bundle.first.c_str());
             continue;
@@ -191,7 +190,7 @@ bool BundleIconBox::GetBundlesIcon(std::unordered_map<std::string, std::string>&
         }
         if (box.GetStringValue(ICON_TYPE, icon) &&
             box.GetStringValue(BUNDLE_NAME_TYPE, bundleName)) {
-            ANS_LOGI("GetBundlesIcon %{public}s %{public}zu.", bundleName.c_str(), icon.size());
+            ANS_LOGD("GetBundlesIcon %{public}s %{public}zu.", bundleName.c_str(), icon.size());
             bundles.insert(std::make_pair(bundleName, icon));
         }
     }
@@ -229,7 +228,7 @@ bool BundleIconBox::GetBundlesInfo(std::vector<std::string>& bundles, std::vecto
         }
         if (box.GetStringValue(BUNDLE_NAME_TYPE, bundleName) &&
             box.GetStringValue(BUNDLE_LABEL_TYPE, bundleLabel)) {
-            ANS_LOGI("Get bundle Info %{public}s %{public}s.", bundleName.c_str(), bundleLabel.c_str());
+            ANS_LOGD("Get bundle Info %{public}s %{public}s.", bundleName.c_str(), bundleLabel.c_str());
             bundles.emplace_back(bundleName);
             labels.emplace_back(bundleLabel);
         }
