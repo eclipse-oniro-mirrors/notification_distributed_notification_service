@@ -799,5 +799,6 @@ int32_t NotificationDataMgr::RestoreForMasterSlaver()
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);
     return result;
 }
+
 }
 }
