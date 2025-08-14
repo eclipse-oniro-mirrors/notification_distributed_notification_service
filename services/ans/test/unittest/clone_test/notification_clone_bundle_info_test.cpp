@@ -216,6 +216,7 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
             ", ShowBadge = " + std::to_string(isShowBadge) +
             ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
             ", slotsInfo = " + slotDump +
+            ", silentReminderEnabled = 0" +
             " }";
     EXPECT_EQ(rrc->Dump(), dumpInfo);
 }

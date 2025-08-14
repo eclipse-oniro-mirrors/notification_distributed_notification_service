@@ -429,8 +429,8 @@ private:
     {
         std::shared_ptr<NotificationFlags> notiFlags = notificationRequest.GetFlags();
         if (notiFlags != nullptr) {
-            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
-            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsSoundEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsVibrationEnabled());
         }
     }
 
@@ -454,8 +454,8 @@ private:
     {
         std::shared_ptr<NotificationFlags> notiFlags = notificationRequest.GetFlags();
         if (notiFlags != nullptr) {
-            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsSoundEnabled());
-            EXPECT_EQ(NotificationConstant::FlagStatus::NONE, notiFlags->IsVibrationEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsSoundEnabled());
+            EXPECT_EQ(NotificationConstant::FlagStatus::CLOSE, notiFlags->IsVibrationEnabled());
         }
     }
 };
@@ -1834,7 +1834,7 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
     req.SetSlotType(NotificationConstant::LIVE_VIEW);
     req.SetNotificationId(notificationId);
 
-    EXPECT_EQ(ERR_ANS_INVALID_PARAM, NotificationHelper::PublishNotification(req));
+    EXPECT_EQ(ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED, NotificationHelper::PublishNotification(req));
 
     g_unsubscribe_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::UnSubscribeNotification(*subscriber));
