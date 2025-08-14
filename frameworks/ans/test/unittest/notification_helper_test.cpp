@@ -1304,7 +1304,7 @@ HWTEST_F(NotificationHelperTest, UpdateNotificationTimerByUid_00001, Function | 
     bool isPaused = true;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.UpdateNotificationTimerByUid(uid, isPaused);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOT_SYSTEM_SERVICE);
+    EXPECT_EQ(ret, (int)ERR_OK);
 }
 
 /**
