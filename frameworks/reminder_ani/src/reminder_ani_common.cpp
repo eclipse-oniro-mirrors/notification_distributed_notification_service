@@ -213,7 +213,7 @@ bool Common::ParseIntArray(const ::taihe::array<int32_t>& values, std::vector<ui
 {
     size_t size = values.size();
     if (size > maxLen) {
-        ANSR_LOGE("The max length of array is %{pulbic}hhu", maxLen);
+        ANSR_LOGE("The max length of array is %{public}d", static_cast<int32_t>(maxLen));
         return false;
     }
     for (size_t i = 0; i < size; ++i) {
@@ -389,7 +389,7 @@ void Common::ParseWantAgent(const reminderAgentManager::manager::WantAgent& want
 void Common::ParseMaxScreenWantAgent(const reminderAgentManager::manager::MaxScreenWantAgent& wantAgentReq,
     std::shared_ptr<Notification::ReminderRequest>& reminder)
 {
-    auto wantAgent = std::shared_ptr<Notification::ReminderRequest::MaxScreenAgentInfo>();
+    auto wantAgent = std::make_shared<Notification::ReminderRequest::MaxScreenAgentInfo>();
     reminder->SetMaxScreenWantAgentInfo(wantAgent);
     wantAgent->pkgName = std::string(wantAgentReq.pkgName.c_str());
     wantAgent->abilityName = std::string(wantAgentReq.abilityName.c_str());
