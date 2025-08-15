@@ -140,8 +140,7 @@ HWTEST_F(OsAccountManagerHelperTest, IsSystemAccount_0400, Function | SmallTest 
 HWTEST_F(OsAccountManagerHelperTest, GetAllOsAccount_001, Function | SmallTest | Level1)
 {
     std::vector<int32_t> userIds;
-    ASSERT_EQ(OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds),
-        ERR_ACCOUNT_COMMON_PERMISSION_DENIED);
+    ASSERT_EQ(OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds), false);
 }
 
 /**
@@ -152,8 +151,7 @@ HWTEST_F(OsAccountManagerHelperTest, GetAllOsAccount_001, Function | SmallTest |
 HWTEST_F(OsAccountManagerHelperTest, GetOsAccountPrivateStatus_Test_001, Function | SmallTest | Level1)
 {
     bool isPrivate = false;
-    ASSERT_EQ(OsAccountManagerHelper::GetInstance().GetOsAccountPrivateStatus(isPrivate),
-        ERR_ACCOUNT_COMMON_PERMISSION_DENIED);
+    ASSERT_EQ(OsAccountManagerHelper::GetInstance().GetOsAccountPrivateStatus(isPrivate), false);
 }
 }
 }

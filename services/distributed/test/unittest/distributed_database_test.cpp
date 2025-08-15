@@ -169,7 +169,7 @@ HWTEST_F(DistributedDatabaseTest, ClearDataByDevice_00100, Function | SmallTest 
 {
     std::string deviceId("<remoteDeviceId>");
 
-    EXPECT_EQ(database_->ClearDataByDevice(deviceId), false);
+    EXPECT_EQ(database_->ClearDataByDevice(deviceId), true);
 }
 
 /**

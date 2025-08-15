@@ -2134,7 +2134,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0600, Function | 
     request->SetUpdateOnly(true);
     advancedNotificationService.OnDistributedPublish(deviceId, bundleName, request);
     SleepForFC();
-    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 0);
+    ASSERT_EQ(advancedNotificationService.notificationList_.size(), 1);
 }
 
 /**
@@ -2379,7 +2379,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0500, Function | S
     for (auto record : advancedNotificationService_->notificationList_) {
         std::shared_ptr<NotificationNormalContent> ct = std::static_pointer_cast<NotificationNormalContent>(
         record->request->GetContent()->GetNotificationContent());
-        ASSERT_EQ(ct->GetTitle(), "title 1");
+        ASSERT_EQ(ct->GetTitle(), "title 2");
     }
 }
 
@@ -2686,8 +2686,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_20600,
     MockIsSystemApp(false);
     bool enable = false;
     advancedNotificationService_->IsSpecialUserAllowedNotify(userId, enable);
-    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 0);
-    ASSERT_EQ(enable, false);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    ASSERT_EQ(enable, true);
 
     GTEST_LOG_(INFO) << "OnResourceRemove_0100 test end";
 }

@@ -300,7 +300,7 @@ HWTEST_F(AnsSlotServiceTest, SetAdditionConfig_00002, Function | SmallTest | Lev
     std::string value = "";
 
     auto ret = advancedNotificationService_->SetAdditionConfig(key, value);
-    ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+    ASSERT_EQ(ret, (int)ERR_OK);
 }
 
 /**

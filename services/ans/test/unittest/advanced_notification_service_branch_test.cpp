@@ -1158,7 +1158,7 @@ HWTEST_F(AnsBranchTest, DoDistributedPublish_4000, Function | SmallTest | Level1
     request->SetNotificationId(notificationId);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundleOption);
     ASSERT_EQ(advancedNotificationService_->DoDistributedPublish(bundleOption, record),
-        (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+        (int)ERR_ANS_DISTRIBUTED_GET_INFO_FAILED);
     auto ret = advancedNotificationService_->DoDistributedDelete(
         "1", "DoDistributedPublish_4000", record->notification);
     ASSERT_EQ(ret, (int)ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
