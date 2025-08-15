@@ -22,7 +22,7 @@ constexpr const char *ERROR_CLASS_NAME = "Lescompat/Error;";
 int32_t GetExternalCode(const uint32_t errCode)
 {
     int32_t externalCode = ERROR_INTERNAL_ERROR;
-    switch(errCode) {
+    switch (errCode) {
         case ERROR_PERMISSION_DENIED:
         case ERROR_NOT_SYSTEM_APP:
         case ERROR_PARAM_INVALID:
