@@ -103,9 +103,6 @@ private:
     static void GenAniStringResult(const sptr<Notification::ReminderRequest>& reminder,
         ::ohos::reminderAgentManager::manager::ReminderRequest& base);
 
-    static void GenAniWantParams(const std::shared_ptr<Notification::ReminderRequest::WantAgentInfo>& wantInfo,
-        ::ohos::reminderAgentManager::manager::WantAgent& aniWantAgent);
-
     static void GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder,
         ::taihe::optional<::ohos::reminderAgentManager::manager::WantAgent>& aniWantAgent);
     static void GenAniMaxScreenWantAgent(const sptr<Notification::ReminderRequest>& reminder,

@@ -27,6 +27,7 @@
 #include "double_wrapper.h"
 #include "string_wrapper.h"
 #include "taihe/runtime.hpp"
+#include "ani_common_want.h"
 
 using namespace ohos;
 
@@ -358,32 +359,9 @@ void Common::ParseWantAgent(const reminderAgentManager::manager::WantAgent& want
         return;
     }
 
-    for (const auto& [key, value] : wantAgentReq.parameters.value()) {
-        switch (value.get_tag()) {
-            case reminderAgentManager::manager::ParamType::tag_t::string_t: {
-                wantAgent->parameters.SetParam(std::string(key.c_str()),
-                    AAFwk::String::Box(std::string(value.get_string_t_ref().c_str())));
-                break;
-            }
-            case reminderAgentManager::manager::ParamType::tag_t::double_t: {
-                wantAgent->parameters.SetParam(std::string(key.c_str()),
-                    AAFwk::Double::Box(value.get_double_t_ref()));
-                break;
-            }
-            case reminderAgentManager::manager::ParamType::tag_t::int_t: {
-                wantAgent->parameters.SetParam(std::string(key.c_str()),
-                    AAFwk::Integer::Box(value.get_int_t_ref()));
-                break;
-            }
-            case reminderAgentManager::manager::ParamType::tag_t::bool_t: {
-                wantAgent->parameters.SetParam(std::string(key.c_str()),
-                    AAFwk::Boolean::Box(value.get_bool_t_ref()));
-                break;
-            }
-            default:
-                break;
-        }
-    }
+    ani_env *env = ::taihe::get_env();
+    ani_ref param = reinterpret_cast<ani_ref>(wantAgentReq.parameters.value());
+    ::OHOS::AppExecFwk::UnwrapWantParams(env, param, wantAgent->parameters);
 }
 
 void Common::ParseMaxScreenWantAgent(const reminderAgentManager::manager::MaxScreenWantAgent& wantAgentReq,
@@ -683,58 +661,6 @@ void Common::GenAniStringResult(const sptr<Notification::ReminderRequest>& remin
     base.customRingUri = ::taihe::optional<::taihe::string>::make(::taihe::string(reminder->GetCustomRingUri()));
 }
 
-void Common::GenAniWantParams(const std::shared_ptr<Notification::ReminderRequest::WantAgentInfo>& wantInfo,
-    reminderAgentManager::manager::WantAgent& aniWantAgent)
-{
-    auto params = wantInfo->parameters.GetParams();
-    if (params.size() == 0) {
-        return;
-    }
-    ::taihe::map<::taihe::string, reminderAgentManager::manager::ParamType> aniParams;
-    for (const auto& iter : params) {
-        int32_t typeId = AAFwk::WantParams::GetDataType(iter.second);
-        switch (typeId) {
-            case VALUE_TYPE_INT: {
-                AAFwk::IInteger* intPtr = AAFwk::IInteger::Query(iter.second);
-                if (intPtr != nullptr) {
-                    int32_t intVal = AAFwk::Integer::Unbox(intPtr);
-                    aniParams.emplace(iter.first, reminderAgentManager::manager::ParamType::make_int_t(intVal));
-                }
-                break;
-            }
-            case VALUE_TYPE_DOUBLE: {
-                AAFwk::IDouble* doublePtr = AAFwk::IDouble::Query(iter.second);
-                if (doublePtr != nullptr) {
-                    double doubleVal = AAFwk::Double::Unbox(doublePtr);
-                    aniParams.emplace(iter.first, reminderAgentManager::manager::ParamType::make_double_t(doubleVal));
-                }
-                break;
-            }
-            case VALUE_TYPE_BOOLEAN: {
-                AAFwk::IBoolean *boolPtr = AAFwk::IBoolean::Query(iter.second);
-                if (boolPtr != nullptr) {
-                    bool boolVal = AAFwk::Boolean::Unbox(boolPtr);
-                    aniParams.emplace(iter.first, reminderAgentManager::manager::ParamType::make_bool_t(boolVal));
-                }
-                break;
-            }
-            case VALUE_TYPE_STRING: {
-                AAFwk::IString *strPtr = AAFwk::IString::Query(iter.second);
-                if (strPtr != nullptr) {
-                    std::string strVal = AAFwk::String::Unbox(strPtr);
-                    aniParams.emplace(iter.first, reminderAgentManager::manager::ParamType::make_string_t(strVal));
-                }
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-    aniWantAgent.parameters =
-        ::taihe::optional<::taihe::map<::taihe::string, reminderAgentManager::manager::ParamType>>::make(aniParams);
-}
-
 void Common::GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder,
     ::taihe::optional<reminderAgentManager::manager::WantAgent>& aniWantAgent)
 {
@@ -747,7 +673,9 @@ void Common::GenAniWantAgent(const sptr<Notification::ReminderRequest>& reminder
         .abilityName = ::taihe::string(wantAgent->abilityName),
         .uri = ::taihe::optional<::taihe::string>::make(::taihe::string(wantAgent->uri)),
     };
-    GenAniWantParams(wantAgent, aniWant);
+    ani_env *env = ::taihe::get_env();
+    ani_ref aniParams = ::OHOS::AppExecFwk::WrapWantParams(env, wantAgent->parameters);
+    aniWant.parameters = ::taihe::optional<uintptr_t>::make(reinterpret_cast<uintptr_t>(aniParams));
     aniWantAgent = ::taihe::optional<reminderAgentManager::manager::WantAgent>::make(aniWant);
 }
 

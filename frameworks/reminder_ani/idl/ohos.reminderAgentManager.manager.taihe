@@ -48,7 +48,7 @@ struct WantAgent {
     pkgName: String;
     abilityName: String;
     uri: Optional<String>;
-    parameters: Optional<@record Map<String, ParamType>>;
+    parameters: Optional<Opaque>;
 }
 
 struct MaxScreenWantAgent {
