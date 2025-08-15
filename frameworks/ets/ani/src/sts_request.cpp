@@ -724,7 +724,7 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
         return;
     }
     OHOS::Notification::NotificationBundleOption option;
-    if (ANI_OK == UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
+    if (UnwrapBundleOption(env, static_cast<ani_object>(optionRef), option)) {
         request->SetBundleOption(std::make_shared<OHOS::Notification::NotificationBundleOption>(option));
     }
 }
