@@ -19,6 +19,26 @@ namespace NotificationSts {
 constexpr const char *BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
 constexpr const char *ERROR_CLASS_NAME = "Lescompat/Error;";
 
+int32_t GetExternalCode(const uint32_t errCode)
+{
+    int32_t externalCode = ERROR_INTERNAL_ERROR;
+    switch (errCode) {
+        case ERROR_PERMISSION_DENIED:
+        case ERROR_NOT_SYSTEM_APP:
+        case ERROR_PARAM_INVALID:
+        case ERROR_SYSTEM_CAP_ERROR:
+        case ERROR_INTERNAL_ERROR:
+        case ERROR_DIALOG_IS_POPPING:
+        case ERROR_NO_MEMORY:
+            externalCode = static_cast<int32_t>(errCode);
+            break;
+        default:
+            externalCode = ErrorToExternal(errCode);
+            break;
+    }
+    return externalCode;
+}
+
 void ThrowError(ani_env *env, ani_object err)
 {
     if (env == nullptr) {

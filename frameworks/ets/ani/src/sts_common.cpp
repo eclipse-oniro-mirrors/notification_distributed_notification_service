@@ -722,8 +722,8 @@ bool CreateClassObjByClassName(ani_env *env, const char *className, ani_class &c
 
 bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
 {
-    if (env == nullptr || time < 0) {
-        ANS_LOGE("CreateDate fail, env is nullptr or time is invalid value");
+    if (env == nullptr) {
+        ANS_LOGE("CreateDate fail, env is nullptr");
         return false;
     }
     ani_class cls;
