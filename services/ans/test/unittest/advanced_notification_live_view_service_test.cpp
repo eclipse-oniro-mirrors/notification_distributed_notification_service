@@ -355,7 +355,8 @@ HWTEST_F(AnsLiveViewServiceTest, AddToDelayNotificationList_001, Function | Smal
  */
 HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_100, Function | SmallTest | Level1)
 {
-    auto ret = advancedNotificationService_->OnSubscriberAdd(nullptr);
+    advancedNotificationService_->currentUserId.clear();
+    auto ret = advancedNotificationService_->OnSubscriberAdd(nullptr, 100);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
 }
@@ -369,7 +370,8 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_200, Function | SmallTest | Lev
 {
     auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
 
-    auto ret = advancedNotificationService_->OnSubscriberAdd(record);
+    advancedNotificationService_->currentUserId.clear();
+    auto ret = advancedNotificationService_->OnSubscriberAdd(record, 100);
 
     ASSERT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
@@ -381,6 +383,7 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_200, Function | SmallTest | Lev
  */
 HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_300, Function | SmallTest | Level1)
 {
+    advancedNotificationService_->currentUserId.clear();
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
@@ -394,7 +397,7 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_300, Function | SmallTest | Lev
 
     auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
 
-    auto ret = advancedNotificationService_->OnSubscriberAdd(record);
+    auto ret = advancedNotificationService_->OnSubscriberAdd(record, 100);
 
     ASSERT_EQ(ret, (int)ERR_OK);
 }
