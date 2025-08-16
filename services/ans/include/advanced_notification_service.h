@@ -1625,7 +1625,8 @@ private:
     ErrCode GetCommonTargetRecordList(const int32_t uid, NotificationConstant::SlotType slotType,
         NotificationContent::Type contentType, std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
-    ErrCode OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
+    ErrCode OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record,
+        const int32_t userId);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     ErrCode FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
@@ -1813,6 +1814,7 @@ private:
     static std::map<NotificationConstant::SlotType, sptr<IPushCallBack>> pushCallBacks_;
     static std::map<NotificationConstant::SlotType, sptr<NotificationCheckRequest>> checkRequests_;
     bool aggregateLocalSwitch_ = false;
+    std::set<int32_t> currentUserId;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;

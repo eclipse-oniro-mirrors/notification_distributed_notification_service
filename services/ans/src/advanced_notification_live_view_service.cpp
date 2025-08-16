@@ -102,7 +102,7 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         }
         // publish notifications
         for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
-            OnSubscriberAdd(subscriber);
+            OnSubscriberAdd(subscriber, userId);
         }
         ANS_LOGI("End recover live view from db.");
     }));
@@ -168,7 +168,7 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
 }
 
 ErrCode AdvancedNotificationService::OnSubscriberAdd(
-    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record)
+    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record, const int32_t userId)
 {
     if (record == nullptr) {
         ANS_LOGE("No subscriber to notify.");
@@ -185,12 +185,14 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
         }
     }
 
-    if (notifications.empty()) {
-        ANS_LOGI("No notification to consume.");
+    if (notifications.empty() || currentUserId.count(userId)) {
+        ANS_LOGI("No notification to consume %{public}d %{public}zu.", userId, currentUserId.count(userId));
         return ERR_ANS_NOTIFICATION_NOT_EXISTS;
     }
-
-    ANS_LOGI("Consume notification count is %{public}zu.", notifications.size());
+    if (userId != INVALID_USER_ID) {
+        currentUserId.insert(userId);
+    }
+    ANS_LOGI("Consume notification count is %{public}zu %{public}d.", notifications.size(), userId);
     NotificationSubscriberManager::GetInstance()->BatchNotifyConsumed(notifications, sortingMap, record);
     return ERR_OK;
 }
