@@ -184,7 +184,8 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32
         std::vector<std::shared_ptr<NotificationRecord>> recordList;
         for (auto item : notificationList_) {
             if (item->notification->GetNotificationRequest().GetCreatorUid() == uid &&
-                item->notification->GetNotificationRequest().IsInProgress()) {
+                item->notification->GetNotificationRequest().IsInProgress() &&
+                !item->notification->GetNotificationRequest().IsCommonLiveView()) {
                 recordList.emplace_back(item);
             }
         }

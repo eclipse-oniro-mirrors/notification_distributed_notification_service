@@ -184,19 +184,31 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RemoveSystemLiveViewNotific
     request->SetCreatorUid(uid);
     request->SetInProgress(true);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
-    sptr<NotificationBundleOption> bundle1 = new NotificationBundleOption(TEST_DEFUALT_BUNDLE + "1", uid + 1);
     sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
     request1->SetCreatorUid(uid + 1);
     request1->SetInProgress(false);
     auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle);
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
+    request2->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request2->SetContent(content);
+    request2->SetCreatorUid(uid);
+    request2->SetInProgress(true);
+    auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle);
+
     advancedNotificationService_->AddToDelayNotificationList(record);
     advancedNotificationService_->AddToDelayNotificationList(record1);
     advancedNotificationService_->AddToNotificationList(record);
+    advancedNotificationService_->AddToNotificationList(record2);
 
     auto ret = advancedNotificationService_->RemoveSystemLiveViewNotificationsOfSa(uid);
 
     auto key = record->notification->GetKey();
     ASSERT_EQ(false, advancedNotificationService_->IsNotificationExistsInDelayList(key));
+    auto key2 = record2->notification->GetKey();
+    ASSERT_TRUE(advancedNotificationService_->IsNotificationExists(key2));
 }
 }  // namespace Notification
 }  // namespace OHOS
