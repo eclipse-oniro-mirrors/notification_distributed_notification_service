@@ -21,9 +21,12 @@
 #include <string>
 #include <vector>
 #include "ans_log_wrapper.h"
+#include <ani_signature_builder.h>
 
 namespace OHOS {
 namespace NotificationSts {
+using namespace arkts::ani_signature;
+
 constexpr int32_t STR_MAX_SIZE = 204;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
@@ -102,10 +105,9 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object &object, const ch
     if (env == nullptr || cls == nullptr || object == nullptr) {
         return false;
     }
-    std::string setterName("<set>");
-    setterName.append(propertyName);
+    std::string propName(propertyName);
     ani_method setter;
-    ani_status status = env->Class_FindMethod(cls, setterName.c_str(), nullptr, &setter);
+    ani_status status = env->Class_FindMethod(cls, Builder::BuildSetterName(propName).c_str(), nullptr, &setter);
     if (status != ANI_OK) {
         ANS_LOGE("Class_FindMethod %{public}s failed %{public}d", propertyName, status);
         return false;
