@@ -62,18 +62,6 @@ public:
     {}
 };
 
-class FuzzTestLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
-public:
-    void OnConnected() override
-    {}
-    void OnDisconnected() override
-    {}
-    void OnDied() override
-    {}
-    void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption) override
-    {}
-};
-
     bool TestPublishAndRemove(FuzzedDataProvider* fdp, NotificationHelper& notificationHelper)
     {
         std::string stringData = fdp->ConsumeRandomLengthString();
@@ -152,9 +140,6 @@ public:
         notificationHelper.SubscribeNotification(fuzzNotificationSubSptr);
         notificationHelper.SubscribeNotificationSelf(fuzzNotificationSub);
         notificationHelper.SubscribeNotificationSelf(fuzzNotificationSubSptr);
-        
-        FuzzTestLocalLiveViewSubscriber fuzzLocalLiveViewSubscriber;
-        notificationHelper.SubscribeLocalLiveViewNotification(fuzzLocalLiveViewSubscriber, fdp->ConsumeBool());
         
         sptr<NotificationSubscribeInfo> fuzzNotificationSubInfoSptr =
             ObjectBuilder<NotificationSubscribeInfo>::Build(fdp);
