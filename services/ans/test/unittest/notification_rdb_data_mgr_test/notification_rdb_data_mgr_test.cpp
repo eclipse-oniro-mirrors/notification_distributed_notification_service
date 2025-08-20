@@ -29,6 +29,7 @@
 namespace {
     bool g_mockQueryRet = true;
     bool g_mockExecuteSql = true;
+    bool g_mockCorrupt = false;
 }
 
 extern void MockHasBlock(bool mockRet);
@@ -67,6 +68,9 @@ class RdbStoreTest : public RdbStore {
             const ValuesBucket &initialValues,
             ConflictResolution conflictResolution = ConflictResolution::ON_CONFLICT_NONE)
         {
+            if (g_mockCorrupt) {
+                return NativeRdb::E_SQLITE_CORRUPT;
+            }
             return NativeRdb::E_ERROR;
         };
         virtual int Update(int &changedRows, const std::string &table, const ValuesBucket &values,
@@ -255,6 +259,9 @@ class RdbStoreTest : public RdbStore {
         };
         virtual int Restore(const std::string &backupPath, const std::vector<uint8_t> &newKey)
         {
+            if (g_mockCorrupt) {
+                return NativeRdb::E_SQLITE_CORRUPT;
+            }
             return NativeRdb::E_ERROR;
         };
         virtual int ChangeDbFileForRestore(const std::string newPath, const std::string backupPath,
@@ -902,6 +909,23 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, InsertData_Test_001, Funct
 }
 
 /**
+ * @tc.name      : InsertData_Test_002
+ * @tc.number    : InsertData_Test_002
+ * @tc.desc      : Test InsertData corrupt
+ */
+HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, InsertData_Test_002, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig notificationRdbConfig;
+    std::unique_ptr<NotificationDataMgr> notificationDataMgr =
+        std::make_unique<NotificationDataMgr>(notificationRdbConfig);
+    notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
+    std::string key = "<key>";
+    std::string value = "<value>";
+    g_mockCorrupt = true;
+    ASSERT_NE(notificationDataMgr->InsertData(key, value, -1), NativeRdb::E_OK);
+}
+
+/**
  * @tc.name      : QueryDataContainsWithKey_Test_001
  * @tc.number    :
  * @tc.desc      : Test case to verify that the function returns E_ERROR when rdbStore_ is null.
@@ -1017,7 +1041,7 @@ HWTEST_F(RdbStoreDataCallBackNotificationStorageTest, QueryDataContainsWithKey_T
     std::unique_ptr<NotificationDataMgr> notificationDataMgr =
         std::make_unique<NotificationDataMgr>(notificationRdbConfig);
     notificationDataMgr->rdbStore_ = std::make_shared<RdbStoreTest>();
-
+    g_mockCorrupt = false;
     int32_t result = notificationDataMgr->RestoreForMasterSlaver();
     EXPECT_EQ(result, NativeRdb::E_ERROR);
 }

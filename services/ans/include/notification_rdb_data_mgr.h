@@ -195,6 +195,7 @@ private:
     void SendUserDataSizeHisysevent();
     std::uint64_t GetRemainPartitionSize(const std::string &partitionName);
     std::vector<std::uint64_t> GetFileOrFolderSize(const std::vector<std::string> &paths);
+    void RecoverDatabase();
 
 private:
     NotificationRdbConfig notificationRdbConfig_;
@@ -202,6 +203,8 @@ private:
     mutable ffrt::mutex rdbStorePtrMutex_;
     std::set<std::string> createdTables_;
     mutable ffrt::mutex createdTableMutex_;
+    mutable ffrt::mutex recoveryMutex_;
+    std::atomic<bool> isRecovering_{false};
 };
 } // namespace Notification
 } // namespace OHOS
