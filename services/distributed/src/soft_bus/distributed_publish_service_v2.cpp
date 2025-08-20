@@ -275,7 +275,8 @@ bool DistributedPublishService::ForWardRemove(const std::shared_ptr<BoxBase>& bo
 
     for (auto peerDevice : peerDevices) {
         auto peerDeviceInfo = peerDevice.second;
-        if (peerDeviceInfo.deviceId_ == deviceId) {
+        if (peerDeviceInfo.deviceId_ == deviceId ||
+            (peerDeviceInfo.IsPadOrPc() && peerDeviceInfo.peerState_ != DeviceState::STATE_ONLINE)) {
             ANS_LOGD("no need ForWardRemove");
             continue;
         }

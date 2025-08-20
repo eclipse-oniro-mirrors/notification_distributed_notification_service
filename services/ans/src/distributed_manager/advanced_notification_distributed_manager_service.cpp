@@ -863,6 +863,11 @@ ErrCode AdvancedNotificationService::GetDistributedAuthStatus(
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
     return NotificationPreferences::GetInstance()->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 }
 
@@ -893,6 +898,11 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGD("IsSystemApp is bogus.");
         return ERR_ANS_NON_SYSTEM_APP;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("no permission");
+        return ERR_ANS_PERMISSION_DENIED;
     }
 
     auto result =

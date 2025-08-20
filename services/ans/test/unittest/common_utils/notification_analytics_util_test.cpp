@@ -179,20 +179,22 @@ HWTEST_F(NotificationAnalyticsUtilTest, Operation_100, Function | SmallTest | Le
     deviceTypes.push_back("abc");
     deviceTypes.push_back("2in1");
     deviceTypes.push_back("tablet");
-    operationMessage.KeyNode(true).SyncPublish(deviceTypes);
+    operationMessage.KeyNode(true).SyncPublish("notification_1", deviceTypes);
     operationMessage.ToJson();
-    ASSERT_EQ(operationMessage.notificationData.countTime, 2);
+    ASSERT_EQ(operationMessage.notificationData.countTime, 4);
     operationMessage.ResetData();
+    operationMessage.KeyNode(true).SyncDelete("notification_1");
 
     operationMessage = HaOperationMessage(true);
     deviceTypes.clear();
     deviceTypes.push_back("abc");
     deviceTypes.push_back("wearable");
     deviceTypes.push_back("headset");
-    operationMessage.KeyNode(false).SyncPublish(deviceTypes);
+    operationMessage.KeyNode(false).SyncPublish("notification_1", deviceTypes);
     operationMessage.ToJson();
-    ASSERT_EQ(operationMessage.liveViewData.countTime, 2);
+    ASSERT_EQ(operationMessage.liveViewData.countTime, 4);
     ASSERT_EQ(operationMessage.liveViewData.syncWatchHead, 1);
+    operationMessage.KeyNode(false).SyncDelete("notification_1");
 }
 
 /**
@@ -203,6 +205,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, Operation_100, Function | SmallTest | Le
 HWTEST_F(NotificationAnalyticsUtilTest, Operation_200, Function | SmallTest | Level1)
 {
     HaOperationMessage operationMessage = HaOperationMessage(false);
+    operationMessage.notificationData.countTime = 0;
     operationMessage.SyncDelete("2in1", std::string()).SyncClick("2in1").SyncReply("2in1");
     operationMessage.SyncDelete("pcb", std::string()).SyncClick("pcb").SyncReply("pcb");
     operationMessage.ToJson();
@@ -210,6 +213,7 @@ HWTEST_F(NotificationAnalyticsUtilTest, Operation_200, Function | SmallTest | Le
     ASSERT_EQ(operationMessage.notificationData.countTime, 3);
     operationMessage.ResetData();
 
+    operationMessage.liveViewData.countTime = 0;
     operationMessage = HaOperationMessage(true);
     operationMessage.ResetData();
     operationMessage.SyncDelete("2in1", std::string()).SyncClick("2in1").SyncReply("2in1");

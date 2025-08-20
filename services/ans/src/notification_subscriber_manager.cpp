@@ -638,6 +638,11 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     ANS_LOGD("%{public}s notification->GetUserId <%{public}d>", __FUNCTION__, notification->GetUserId());
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = nullptr;
 
+    if (notification->GetNotificationRequestPoint() != nullptr) {
+        bool liveView = notification->GetNotificationRequest().IsCommonLiveView();
+        HaOperationMessage(liveView).SyncDelete(notification->GetKey());
+    }
+
     ANS_LOGI("CancelNotification key = %{public}s", notification->GetKey().c_str());
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
@@ -726,6 +731,10 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
     std::string notificationKeys = "";
     for (auto notification : notifications) {
         notificationKeys.append(notification->GetKey()).append("-");
+        if (notification->GetNotificationRequestPoint() != nullptr) {
+            bool liveView = notification->GetNotificationRequestPoint()->IsCommonLiveView();
+            HaOperationMessage(liveView).SyncDelete(notification->GetKey());
+        }
     }
     ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());
 
@@ -923,12 +932,13 @@ void NotificationSubscriberManager::TrackCodeLog(const sptr<Notification> &notif
         }
     }
 
+    std::string hashCode = notification->GetKey();
     std::vector<std::string> deviceTypes;
     for (auto& flag : *flagsMap) {
         deviceTypes.push_back(flag.first);
     }
     HaOperationMessage operation = HaOperationMessage(commonLiveView).KeyNode(keyNode)
-        .SyncPublish(deviceTypes);
+        .SyncPublish(hashCode, deviceTypes);
     NotificationAnalyticsUtil::ReportOperationsDotEvent(operation);
 }
 
