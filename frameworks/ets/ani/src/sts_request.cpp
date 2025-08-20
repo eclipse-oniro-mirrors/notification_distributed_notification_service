@@ -542,7 +542,7 @@ void GetNotificationExtraInfo(ani_env *env, ani_object obj, std::shared_ptr<Noti
 {
     ani_boolean isUndefined = ANI_TRUE;
     ani_ref extraInfoRef = {};
-    if (ANI_OK != GetPropertyRef(env, obj, "extendInfo", isUndefined, extraInfoRef)
+    if (ANI_OK != GetPropertyRef(env, obj, "extraInfo", isUndefined, extraInfoRef)
         || isUndefined == ANI_TRUE || extraInfoRef == nullptr) {
         ANS_LOGE("GetNotificationExtraInfo: get ref failed");
         return;
@@ -551,6 +551,21 @@ void GetNotificationExtraInfo(ani_env *env, ani_object obj, std::shared_ptr<Noti
     UnwrapWantParams(env, extraInfoRef, wantParams);
     std::shared_ptr<WantParams> extras = std::make_shared<WantParams>(wantParams);
     request->SetAdditionalData(extras);
+}
+
+void GetNotificationExtendInfo(ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &request)
+{
+    ani_boolean isUndefined = ANI_TRUE;
+    ani_ref extendInfoRef = {};
+    if (ANI_OK != GetPropertyRef(env, obj, "extendInfo", isUndefined, extendInfoRef)
+        || isUndefined == ANI_TRUE || extendInfoRef == nullptr) {
+        ANS_LOGE("GetNotificationExtendInfo: get ref failed");
+        return;
+    }
+    WantParams wantParams = {};
+    UnwrapWantParams(env, extendInfoRef, wantParams);
+    std::shared_ptr<WantParams> extends = std::make_shared<WantParams>(wantParams);
+    request->SetExtendInfo(extends);
 }
 
 void GetNotificationRemovalWantAgent(ani_env *env, ani_object obj,
@@ -724,6 +739,7 @@ ani_status GetNotificationRequestByCustom(ani_env *env, ani_object obj,
     GetNotificationSlotType(env, obj, notificationRequest);
     GetNotificationWantAgent(env, obj, notificationRequest);
     GetNotificationExtraInfo(env, obj, notificationRequest);
+    GetNotificationExtendInfo(env, obj, notificationRequest);
     GetNotificationRemovalWantAgent(env, obj, notificationRequest);
     GetNotificationActionButtons(env, obj, notificationRequest);
     GetNotificationSmallIcon(env, obj, notificationRequest);
@@ -970,8 +986,22 @@ bool SetRequestExtraInfo(ani_env *env, const OHOS::Notification::NotificationReq
         return true;
     }
     ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
-    if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extendInfo", extraInfo)) {
+    if (extraInfo == nullptr || !SetPropertyByRef(env, object, "extraInfo", extraInfo)) {
         ANS_LOGD("SetNotificationRequestByCustom: set extraInfo failed");
+    }
+    return true;
+}
+
+bool SetRequestExtendInfo(ani_env *env, const OHOS::Notification::NotificationRequest *request, ani_object &object)
+{
+    std::shared_ptr<AAFwk::WantParams> extendInfoData = request->GetExtendInfo();
+    if (extendInfoData == nullptr) {
+        ANS_LOGD("extendInfo is Undefine");
+        return true;
+    }
+    ani_ref extendInfo = OHOS::AppExecFwk::WrapWantParams(env, *extendInfoData);
+    if (extendInfo == nullptr || !SetPropertyByRef(env, object, "extendInfo", extendInfo)) {
+        ANS_LOGD("SetNotificationRequestByCustom: set extendInfo failed");
     }
     return true;
 }
@@ -1074,9 +1104,13 @@ bool SetNotificationRequestByCustom(ani_env* env, ani_class cls,
         ANS_LOGE("SetNotificationRequestByCustom: set content failed");
         return false;
     }
-    // extraInfo?: {[key:string] : any}
+    // extraInfo?: Record<string, Object>
     if (!SetRequestExtraInfo(env, request, object)) {
         ANS_LOGE("set extraInfo faild");
+    }
+    // extendInfo?: Record<string, Object>
+    if (!SetRequestExtendInfo(env, request, object)) {
+        ANS_LOGE("set extendInfo faild");
     }
     // actionButtons?: Array<NotificationActionButton>
     if (!SetRequestActionButtons(env, request, object)) {

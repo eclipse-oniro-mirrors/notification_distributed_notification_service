@@ -38,6 +38,7 @@ bool ParseNotificationSlotByBasicType(ani_env *env, ani_object notificationSlotO
 bool UnwrapNotificationSlot(ani_env *env, ani_object notificationSlotObj, NotificationSlot &slot);
 bool UnwrapNotificationSlotArrayByAniObj(ani_env *env, ani_object notificationSlotArrayObj,
     std::vector<NotificationSlot> &slots);
+bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &outAniObj);
 } // namespace NotificationSts
 } // OHOS
 #endif

@@ -95,6 +95,16 @@ export default namespace notificationManager {
         end: Date;
     }
 
+    export interface NotificationSetting {
+        vibrationEnabled: boolean;
+        soundEnabled: boolean;
+    }
+
+    class NotificationSettingInner implements NotificationSetting {
+        vibrationEnabled: boolean = false;
+        soundEnabled: boolean = false;
+    }
+
     export interface DoNotDisturbProfile {
         id: long;
         name: string;
@@ -222,6 +232,7 @@ export default namespace notificationManager {
         type: 'checkNotification', callback: CallbackForCheckInfo, checkRequest?: NotificationCheckRequest): int;
     export native function nativeOff(
         type: 'checkNotification', callback?: CallbackForCheckInfo): int;
+    export native function nativeGetNotificationSetting(): NotificationSetting;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -2608,5 +2619,20 @@ export default namespace notificationManager {
             let err: BusinessError = error as BusinessError;
             callback(err, undefined);
         })
+    }
+
+    export function getNotificationSetting(): Promise<NotificationSetting> {
+        let pPromise = new Promise<NotificationSetting>(
+            (resolve: ResolveCallback<NotificationSetting>, reject: RejectCallback): void => {
+            let p = taskpool.execute((): NotificationSetting =>
+                { return nativeGetNotificationSetting(); });
+            p.then((data: NullishType): void => {
+                let ret : NotificationSetting = data as NotificationSetting;
+                resolve(ret);
+            }, (error: Error): void => {
+                reject(error);
+            });
+        });
+        return pPromise;
     }
 }

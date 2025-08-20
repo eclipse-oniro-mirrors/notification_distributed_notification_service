@@ -95,6 +95,7 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeRequestEnableNotification",
         "Lapplication/UIAbilityContext/UIAbilityContext;:Lstd/core/Promise;",
         reinterpret_cast<void *>(AniRequestEnableNotification)},
+    ani_native_function {"nativeGetNotificationSetting", nullptr, reinterpret_cast<void *>(AniGetNotificationSetting)},
 
 #ifdef ANS_FEATURE_BADGE_MANAGER
     ani_native_function {"nativeDisplayBadge", nullptr, reinterpret_cast<void *>(AniDisplayBadge)},
