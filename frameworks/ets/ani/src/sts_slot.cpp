@@ -142,6 +142,35 @@ bool WrapNotificationSlotByInt(ani_env *env, sptr<Notification::NotificationSlot
     return true;
 }
 
+bool WrapGetNotificationSetting(ani_env *env, uint32_t slotFlags, ani_object &outAniObj)
+{
+    ani_class cls = nullptr;
+    const char* className = "@ohos.notificationManager.notificationManager.NotificationSettingInner";
+    if (!CreateClassObjByClassName(env, className, cls, outAniObj)) {
+        ANS_LOGE("WrapGetNotificationSetting: Failed to create profile class object");
+        return false;
+    }
+    if (cls == nullptr || outAniObj == nullptr) {
+        ANS_LOGE("Create class failed");
+        return false;
+    }
+    
+    bool soundEnabled = slotFlags & Notification::NotificationConstant::ReminderFlag::SOUND_FLAG;
+    bool vibrationEnabled = slotFlags & Notification::NotificationConstant::ReminderFlag::VIBRATION_FLAG;
+    ani_status status = ANI_OK;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outAniObj, "vibrationEnabled", BoolToAniBoolean(vibrationEnabled)))) {
+        ANS_LOGE("Set vibrationEnabled fail, status %{public}d", status);
+        return false;
+    }
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Boolean(
+        outAniObj, "soundEnabled", BoolToAniBoolean(soundEnabled)))) {
+        ANS_LOGE("Set soundEnabled fail, status %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool WrapNotificationSlot(ani_env *env, sptr<Notification::NotificationSlot> slot, ani_object &outAniObj)
 {
     ANS_LOGD("WrapNotificationSlot call");
