@@ -99,6 +99,7 @@ static int32_t SLOT_REPORT_INTERVAL = 7 * 24 * NotificationConstant::HOUR_TO_MS;
 static int64_t lastReportTime_ = 0;
 static ffrt::mutex lastReportTimeMutex_;
 static int32_t SLOT_SUB_CODE = 101;
+static int32_t DISTRIBUTED_SUB_CODE = 102;
 static int32_t SLOT_ONCE_REPORT = 10;
 static uint32_t SLOT_MAX_REPORT = 200;
 static uint64_t reportSlotEnabledTimerId_ = 0;
@@ -226,10 +227,11 @@ std::string HaMetaMessage::Build() const
 
 void OperationalMeta::ToJson(nlohmann::json& jsonObject)
 {
-    jsonObject["s"] = syncTime;
-    jsonObject["d"] = delTime;
-    jsonObject["c"] = clickTime;
-    jsonObject["r"] = replyTime;
+    jsonObject["cr"] = createTime;
+    jsonObject["sy"] = syncTime;
+    jsonObject["de"] = delTime;
+    jsonObject["cl"] = clickTime;
+    jsonObject["re"] = replyTime;
 }
 
 OperationalData::OperationalData()
@@ -274,11 +276,17 @@ std::string HaOperationMessage::ToJson()
     return jsonObject.dump();
 }
 
-void SetPublishTime(const std::vector<std::string>& deviceTypes, OperationalData& data)
+void SetPublishTime(const std::string& hashCode, const std::vector<std::string>& deviceTypes,
+    OperationalData& data)
 {
     int32_t isWatchHeadSet = 0;
     for (auto& device : deviceTypes) {
         if (data.dataMap.find(device) != data.dataMap.end()) {
+            if (!data.dataMap[device].hashCodes.count(hashCode)) {
+                data.dataMap[device].createTime++;
+                data.dataMap[device].hashCodes.insert(hashCode);
+                data.countTime++;
+            }
             data.dataMap[device].syncTime++;
             if (device == NotificationConstant::HEADSET_DEVICE_TYPE ||
                 device == NotificationConstant::WEARABLE_DEVICE_TYPE ||
@@ -293,12 +301,30 @@ void SetPublishTime(const std::vector<std::string>& deviceTypes, OperationalData
     }
 }
 
-HaOperationMessage& HaOperationMessage::SyncPublish(std::vector<std::string>& deviceTypes)
+void SetDeleteTime(const std::string& hashCode, OperationalData& data)
+{
+    for (auto& device : data.dataMap) {
+        device.second.hashCodes.erase(hashCode);
+    }
+}
+
+HaOperationMessage& HaOperationMessage::SyncPublish(const std::string& hashCode,
+    std::vector<std::string>& deviceTypes)
 {
     if (isLiveView_) {
-        SetPublishTime(deviceTypes, liveViewData);
+        SetPublishTime(hashCode, deviceTypes, liveViewData);
     } else {
-        SetPublishTime(deviceTypes, notificationData);
+        SetPublishTime(hashCode, deviceTypes, notificationData);
+    }
+    return *this;
+}
+
+HaOperationMessage& HaOperationMessage::SyncDelete(const std::string& hashCode)
+{
+    if (isLiveView_) {
+        SetDeleteTime(hashCode, liveViewData);
+    } else {
+        SetDeleteTime(hashCode, notificationData);
     }
     return *this;
 }
@@ -1428,8 +1454,10 @@ void NotificationAnalyticsUtil::ReportOperationsDotEvent(HaOperationMessage& ope
     HaMetaMessage message;
     std::string extraInfo = NotificationAnalyticsUtil::BuildExtraInfo(message);
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
-    std::string ansData = operationMessage.ToJson();
-    want.SetParam("ansData", ansData);
+    nlohmann::json ansData;
+    ansData["data"] = operationMessage.ToJson();
+    ansData["subCode"] = std::to_string(DISTRIBUTED_SUB_CODE);
+    want.SetParam("ansData", ansData.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace));
     ANS_LOGI("Publish operation event :%{public}s", operationMessage.ToJson().c_str());
     operationMessage.ResetData();
     IN_PROCESS_CALL_WITHOUT_RET(AddListCache(want, ANS_CUSTOMIZE_CODE));

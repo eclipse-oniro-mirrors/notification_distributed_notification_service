@@ -825,6 +825,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAuthStatus_100, F
 HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAuthStatus_200, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
     MockIsSystemApp(true);
     const std::string deviceType = "";
     const std::string deviceId = "";
@@ -834,6 +835,27 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAuthStatus_200, F
     auto ret = advancedNotificationService_->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: GetDistributedAuthStatus_300
+ * @tc.desc: Test GetDistributedAuthStatus when succeed to call.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, GetDistributedAuthStatus_300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    const std::string deviceType = "";
+    const std::string deviceId = "";
+    int32_t userId = 100;
+    bool isAuth = false;
+
+    auto ret = advancedNotificationService_->GetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**
@@ -865,6 +887,7 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_100, F
 HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_200, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
     MockIsSystemApp(true);
     const std::string deviceType = "";
     const std::string deviceId = "";
@@ -874,6 +897,27 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_200, F
     auto ret = advancedNotificationService_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
 
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: SetDistributedAuthStatus_300
+ * @tc.desc: Test SetDistributedAuthStatus when succeed to call.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, SetDistributedAuthStatus_300, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    const std::string deviceType = "";
+    const std::string deviceId = "";
+    int32_t userId = 100;
+    bool isAuth = false;
+
+    auto ret = advancedNotificationService_->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

@@ -88,10 +88,12 @@ class OperationalMeta {
 public:
     void ToJson(nlohmann::json& jsonObject);
 public:
+    int32_t createTime;
     int32_t syncTime;
     int32_t delTime;
     int32_t clickTime;
     int32_t replyTime;
+    std::set<std::string> hashCodes;
 };
 
 class OperationalData {
@@ -114,7 +116,9 @@ public:
     std::string ToJson();
     bool DetermineWhetherToSend();
     HaOperationMessage& KeyNode(bool keyNodeFlag);
-    HaOperationMessage& SyncPublish(std::vector<std::string>& deviceTypes);
+    HaOperationMessage& SyncPublish(const std::string& hashCode,
+        std::vector<std::string>& deviceTypes);
+    HaOperationMessage& SyncDelete(const std::string& hashCode);
     HaOperationMessage& SyncDelete(std::string deviceType, const std::string& reason);
     HaOperationMessage& SyncClick(std::string deviceType);
     HaOperationMessage& SyncReply(std::string deviceType);
