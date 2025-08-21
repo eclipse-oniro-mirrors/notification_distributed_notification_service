@@ -469,7 +469,7 @@ bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
     StsRemindTypeUtils::CToSts(remindType, stsRemindType);
     EnumConvertNativeToAni(env,
-        "@ohos.notificationManager.notificationManager.RemindType", stsRemindType, enumItem);
+        "@ohos.notificationManager.notificationManager.DeviceRemindType", stsRemindType, enumItem);
     return true;
 }
 
