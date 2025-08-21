@@ -194,6 +194,7 @@ ohos_shared_library("libreminder") {
     "-Oz",
     "-flto",
     "-ffunction-sections",
+    "-fstack-protector-strong",
     "-fdata-sections",
   ]
   sources = []

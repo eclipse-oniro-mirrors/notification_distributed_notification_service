@@ -53,7 +53,7 @@ ohos_shared_library("reminderagent") {
     "publish.cpp",
     "reminder_common.cpp",
   ]
-
+  cflags_cc = [ "-fstack-protector-strong" ]
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_reminder_path}:reminder_innerkits",
@@ -110,7 +110,7 @@ ohos_shared_library("reminderagentmanager") {
     "publish.cpp",
     "reminder_common.cpp",
   ]
-
+  cflags_cc = [ "-fstack-protector-strong" ]
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${frameworks_module_reminder_path}:reminder_innerkits",
