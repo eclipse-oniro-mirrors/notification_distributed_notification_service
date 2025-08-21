@@ -665,7 +665,10 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
             GetJsonValue<std::string>(root, "uri", wai->uri);
             std::string parameters;
             GetJsonValue<std::string>(root, "parameters", parameters);
-            wai->parameters = AAFwk::WantParamWrapper::ParseWantParams(parameters);
+            auto result = AAFwk::WantParamWrapper::Parse(parameters);
+            if (result != nullptr) {
+                result->GetValue(wai->parameters);
+            }
             SetWantAgentInfo(wai);
             break;
         }

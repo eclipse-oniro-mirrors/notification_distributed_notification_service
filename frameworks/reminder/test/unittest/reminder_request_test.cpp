@@ -1901,6 +1901,24 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
 }
 
 /**
+ * @tc.name: RecoverWantAgentByJson_00002
+ * @tc.desc: Test invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#I94VJT
+ */
+HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00002, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    std::string jsonVal;
+    jsonVal = R"({"abilityName":"MainAbility","parameters":"{}","pkgName":"com.example.myapplication","uri":""})";
+    rrc->RecoverWantAgentByJson(jsonVal, 0);
+    std::string wantStr;
+    std::string maxWantStr;
+    rrc->SerializeWantAgent(wantStr, maxWantStr);
+    EXPECT_EQ(wantStr, jsonVal);
+}
+
+/**
  * @tc.name: RecoverWantAgent_00007
  * @tc.desc: Test RecoverWantAgent parameters.
  * @tc.type: FUNC
