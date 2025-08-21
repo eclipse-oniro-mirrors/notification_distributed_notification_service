@@ -382,5 +382,26 @@ ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_it
     }
     return infoObj;
 }
+
+ani_object AniGetNotificationSetting(ani_env *env)
+{
+    ANS_LOGD("AniGetNotificationSetting enter");
+    uint32_t slotFlags = 0;
+    int returncode = Notification::NotificationHelper::GetNotificationSettings(slotFlags);
+    ANS_LOGD("AniGetNotificationSetting slotFlags: %{public}d", slotFlags);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("GetNotificationSetting -> error, errorCode: %{public}d", externalCode);
+        NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return nullptr;
+    }
+    ani_object infoObj;
+    if (!NotificationSts::WrapGetNotificationSetting(env, slotFlags, infoObj) || infoObj == nullptr) {
+        NotificationSts::ThrowStsErroWithMsg(env, "WrapGetNotificationSetting Failed");
+        return nullptr;
+    }
+
+    return infoObj;
+}
 }
 }
