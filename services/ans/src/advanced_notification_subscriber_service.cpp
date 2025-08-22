@@ -90,6 +90,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
+    int32_t callingUid = IPCSkeleton().GetCallingUid();
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
     if (sptrInfo == nullptr) {
         ANS_LOGE("Failed to create sptrInfo");
@@ -108,17 +109,9 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
             errCode = ERR_ANS_NON_SYSTEM_APP;
             break;
         }
-
-        int32_t uid = IPCSkeleton().GetCallingUid();
         // subscribeSelf doesn't need OHOS_PERMISSION_NOTIFICATION_CONTROLLER permission
-        std::string bundle;
-        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-        if (bundleManager != nullptr) {
-            bundle = bundleManager->GetBundleNameByUid(uid);
-        }
-
+        std::string bundle = GetClientBundleName();
         sptrInfo->AddAppName(bundle);
-        sptrInfo->SetSubscriberUid(uid);
         sptrInfo->SetIsSubscribeSelf(true);
 
         errCode = NotificationSubscriberManager::GetInstance()->AddSubscriber(subscriber, sptrInfo);
@@ -128,7 +121,6 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
     } while (0);
 
     if (errCode == ERR_OK) {
-        int32_t callingUid = IPCSkeleton::GetCallingUid();
         ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
             LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid);
         }));

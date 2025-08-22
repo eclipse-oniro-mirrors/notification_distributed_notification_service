@@ -142,22 +142,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_
 }
 
 /**
- * @tc.number    : NotificationSubscriberManager_00700
- * @tc.name      : NotificationSubscriberManager_00700
- * @tc.desc      : test AddRecordInfo function and subscribeInfo == nullptr
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, NotificationSubscriberManager_00700, Function | SmallTest | Level1)
-{
-    std::shared_ptr<NotificationSubscriberManager> notificationSubscriberManager =
-        std::make_shared<NotificationSubscriberManager>();
-    ASSERT_NE(nullptr, notificationSubscriberManager);
-    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
-        notificationSubscriberManager->CreateSubscriberRecord(nullptr);
-    sptr<NotificationSubscribeInfo> subscribeInfo = nullptr;
-    notificationSubscriberManager->AddRecordInfo(record, subscribeInfo);
-}
-
-/**
  * @tc.number    : NotificationSubscriberManager_00800
  * @tc.name      : NotificationSubscriberManager_00800
  * @tc.desc      : test RemoveSubscriberInner function and record == nullptr

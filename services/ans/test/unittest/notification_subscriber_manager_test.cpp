@@ -23,7 +23,7 @@
 #include "mock_ans_subscriber.h"
 #include "ans_const_define.h"
 #include "notification_preferences.h"
-
+#include "notification_extension_wrapper.h"
 #include "ans_inner_errors.h"
 #include "ans_subscriber_listener.h"
 #include "mock_i_remote_object.h"
@@ -1113,5 +1113,60 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeAffordConsume_001, Funct
     ASSERT_TRUE(result);
 }
 #endif
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_004, Function | SmallTest | Level1)
+{
+    EXTENTION_WRAPPER->subscribeControl_ = nullptr;
+
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+
+    sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
+    subscribeInfo->SetSubscriberUid(101);
+    subscribeInfo->AddAppUserId(101);
+    notificationSubscriberManager.AddRecordInfo(record, subscribeInfo);
+    auto res = notificationSubscriberManager.IsSubscribedBysubscriber(record, notification);
+    ASSERT_TRUE(res);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_005, Function | SmallTest | Level1)
+{
+    EXTENTION_WRAPPER->subscribeControl_ = [](const std::string &bundleName, NotificationConstant::SlotType slotType) {
+        if (bundleName == "subscriberManagerTestBundleName") {
+            return true;
+        }
+        return false;
+    };
+
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+
+    sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
+    subscribeInfo->SetSubscriberUid(101);
+    subscribeInfo->AddAppUserId(101);
+    notificationSubscriberManager.AddRecordInfo(record, subscribeInfo);
+    auto res = notificationSubscriberManager.IsSubscribedBysubscriber(record, notification);
+    ASSERT_FALSE(res);
+}
+#endif // DEBUG
 }  // namespace Notification
 }  // namespace OHOS
