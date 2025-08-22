@@ -80,7 +80,7 @@ int32_t RdbStoreDataCallBackNotificationStorage::OnUpgrade(
  
         for (const std::string &tableName : tables) {
             if (!ProcessTable(rdbStore, tableName)) {
-                return NativeRdb::E_OK;
+                ANS_LOGW("No liveview in %{public}s", tableName.c_str());
             }
         }
     }
