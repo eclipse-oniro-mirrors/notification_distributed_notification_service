@@ -214,7 +214,7 @@ void StsSubscriberInstance::OnDisconnected()
     }
     std::vector<ani_ref> vec;
     CallFunction(etsEnv, "onDisconnect", vec);
-    if (!SubscriberInstanceManager::GetInstance()->DelSubscriberInstancesInfo(etsEnv, obj_)) {
+    if (!SubscriberInstanceManager::GetInstance()->DelSubscriberInstancesInfo(etsEnv, ref_)) {
         ANS_LOGD("DelSubscriberInstancesInfo faild");
     } else {
         ANS_LOGD("DelSubscriberInstancesInfo suc..");
@@ -433,7 +433,9 @@ bool StsSubscriberInstance::SetObject(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> l(lock_);
-    if (env == nullptr || obj == nullptr) return false;
+    if (env == nullptr || obj == nullptr) {
+        return false;
+    }
     if (ANI_OK != env->GetVM(&vm_)) {
         ANS_LOGD("GetVM faild");
         return false;
@@ -448,25 +450,45 @@ bool StsSubscriberInstance::SetObject(ani_env *env, ani_object obj)
 bool StsSubscriberInstance::IsInit()
 {
     ANS_LOGD("enter");
-    std::lock_guard<std::mutex> l(lock_);
     return (ref_ != nullptr && vm_ != nullptr);
 }
 bool StsSubscriberInstance::Compare(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
-    if (!IsInit()) return false;
-    if (obj == nullptr || env == nullptr) return false;
+    if (!IsInit()) {
+        return false;
+    }
+    if (obj == nullptr || env == nullptr) {
+        return false;
+    }
     ani_ref ref;
-    if (env->GlobalReference_Create(obj, &ref) != ANI_OK) return false;
+    if (env->GlobalReference_Create(obj, &ref) != ANI_OK) {
+        return false;
+    }
     ani_boolean result = ANI_FALSE;
     env->Reference_StrictEquals(ref, ref_, &result);
     env->GlobalReference_Delete(ref);
     return (result == ANI_TRUE) ? true : false;
 }
+bool StsSubscriberInstance::Compare(ani_env *env, ani_ref ref)
+{
+    ANS_LOGD("enter");
+    if (!IsInit()) {
+        return false;
+    }
+    if (ref == nullptr || env == nullptr) {
+        return false;
+    }
+    ani_boolean result = ANI_FALSE;
+    env->Reference_StrictEquals(ref, ref_, &result);
+    return (result == ANI_TRUE) ? true : false;
+}
 bool StsSubscriberInstance::Compare(std::shared_ptr<StsSubscriberInstance> instance)
 {
     ANS_LOGD("enter");
-    if (instance == nullptr) return false;
+    if (instance == nullptr) {
+        return false;
+    }
     if (instance->obj_ == obj_) {
         ANS_LOGD("Compare is ture");
         return true;
@@ -477,7 +499,9 @@ bool StsSubscriberInstance::Compare(std::shared_ptr<StsSubscriberInstance> insta
 bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::vector<ani_ref> &parm)
 {
     ANS_LOGD("enter");
-    if (env == nullptr) return false;
+    if (env == nullptr) {
+        return false;
+    }
     ani_ref fn_ref;
     ani_status aniResult = env->Object_GetPropertyByName_Ref(static_cast<ani_object>(ref_), func, &fn_ref);
     if (ANI_OK != aniResult) {
@@ -524,17 +548,16 @@ bool SubscriberInstanceManager::AddSubscriberInstancesInfo(
     subscriberInstances_.emplace_back(subscriberInfo);
     return true;
 }
-bool SubscriberInstanceManager::DelSubscriberInstancesInfo(
-    ani_env *env, ani_object obj)
+bool SubscriberInstanceManager::DelSubscriberInstancesInfo(ani_env *env, ani_ref ref)
 {
     ANS_LOGD("enter");
-    if (obj == nullptr) {
-        ANS_LOGE("obj is null");
+    if (ref == nullptr) {
+        ANS_LOGE("ref is null");
         return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
-        if ((*it)->Compare(env, obj)) {
+        if ((*it)->Compare(env, ref)) {
             DelDeletingSubscriber((*it));
             subscriberInstances_.erase(it);
             return true;
@@ -557,7 +580,9 @@ bool SubscriberInstanceManager::AddDeletingSubscriber(std::shared_ptr<StsSubscri
 {
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> lock(delMutex_);
-    if (subscriber == nullptr) return false;
+    if (subscriber == nullptr) {
+        return false;
+    }
     auto iter = std::find(DeletingSubscriber.begin(), DeletingSubscriber.end(), subscriber);
     if (iter != DeletingSubscriber.end()) {
         return false;

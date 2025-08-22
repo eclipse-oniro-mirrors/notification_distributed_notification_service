@@ -82,6 +82,7 @@ public:
     bool SetObject(ani_env *env, ani_object obj);
     bool IsInit();
     bool Compare(ani_env *env, ani_object obj);
+    bool Compare(ani_env *env, ani_ref ref);
     bool Compare(std::shared_ptr<StsSubscriberInstance> instance);
 
 private:
@@ -106,7 +107,7 @@ public:
     bool HasNotificationSubscriber(
         ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo);
     bool AddSubscriberInstancesInfo(ani_env *env, std::shared_ptr<StsSubscriberInstance> &subscriberInfo);
-    bool DelSubscriberInstancesInfo(ani_env *env, ani_object obj);
+    bool DelSubscriberInstancesInfo(ani_env *env, ani_ref ref);
 
     bool AddDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber);
     void DelDeletingSubscriber(std::shared_ptr<StsSubscriberInstance> subscriber);
