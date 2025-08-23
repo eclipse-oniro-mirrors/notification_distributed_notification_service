@@ -3539,6 +3539,7 @@ HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecordTest_0002, Funct
 HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0002, Function | SmallTest | Level1)
 {
     GTEST_LOG_(INFO) << "RecoverLiveViewFromDb_0002 test start";
+
     advancedNotificationService_->notificationList_.clear();
     sptr<NotificationRequest> request = new NotificationRequest(1);
     std::shared_ptr<NotificationLiveViewContent> liveViewContent = std::make_shared<NotificationLiveViewContent>();

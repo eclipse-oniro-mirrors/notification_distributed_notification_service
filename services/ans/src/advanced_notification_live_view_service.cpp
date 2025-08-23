@@ -80,6 +80,7 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
                 continue;
             }
 
+            record->slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
             // Turn off ringtone and vibration during recovery process
             record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
             record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
