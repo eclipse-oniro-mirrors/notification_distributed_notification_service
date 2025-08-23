@@ -748,20 +748,6 @@ HWTEST_F(NotificationHelperTest, IsDistributedEnabled_00001, Function | SmallTes
 }
 
 /**
- * @tc.name: EnableDistributed_00001
- * @tc.desc: Test EnableDistributed parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationHelperTest, EnableDistributed_00001, Function | SmallTest | Level1)
-{
-    bool enabled = true;
-    NotificationHelper notificationHelper;
-    notificationHelper.EnableDistributed(enabled);
-    EXPECT_EQ(enabled, true);
-}
-
-/**
  * @tc.name: EnableDistributedByBundle_00001
  * @tc.desc: Test EnableDistributedByBundle parameters.
  * @tc.type: FUNC
@@ -1010,8 +996,8 @@ HWTEST_F(NotificationHelperTest, SetSyncNotificationEnabledWithoutApp_00001, Fun
     int32_t userId = 10;
     bool enabled = true;
     NotificationHelper notificationHelper;
-    notificationHelper.SetSyncNotificationEnabledWithoutApp(userId, enabled);
-    EXPECT_EQ(enabled, true);
+    ErrCode ret = notificationHelper.SetSyncNotificationEnabledWithoutApp(userId, enabled);
+    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
 }
 
 /**

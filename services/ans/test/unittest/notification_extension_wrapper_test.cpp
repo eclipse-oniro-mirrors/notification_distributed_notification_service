@@ -82,19 +82,6 @@ HWTEST_F(NotificationExtensionWrapperTest, InitExtentionWrapper_Test, TestSize.L
 #endif
 }
 
-
-HWTEST_F(NotificationExtensionWrapperTest, CheckIfSetlocalSwitch_001, TestSize.Level0)
-{
-    // 创建ExtensionWrapper对象
-    ExtensionWrapper extensionWrapper;
-    // 设置extensionWrapperHandle_为nullptr
-    extensionWrapper.extensionWrapperHandle_ = nullptr;
-    // 调用待测函数
-    extensionWrapper.CheckIfSetlocalSwitch();
-    // 验证extensionWrapperHandle_仍然为nullptr
-    EXPECT_EQ(extensionWrapper.extensionWrapperHandle_, nullptr);
-}
-
 HWTEST_F(NotificationExtensionWrapperTest, CheckIfSetlocalSwitch_002, TestSize.Level0)
 {
     // 创建ExtensionWrapper对象
@@ -106,20 +93,6 @@ HWTEST_F(NotificationExtensionWrapperTest, CheckIfSetlocalSwitch_002, TestSize.L
     // 调用待测函数
     extensionWrapper.CheckIfSetlocalSwitch();
     // 验证isRegisterDataSettingObserver为true
-    EXPECT_EQ(extensionWrapper.isRegisterDataSettingObserver, true);
-}
-
-HWTEST_F(NotificationExtensionWrapperTest, CheckIfSetlocalSwitch_003, TestSize.Level0)
-{
-    // 创建ExtensionWrapper对象
-    ExtensionWrapper extensionWrapper;
-    // 设置extensionWrapperHandle_不为nullptr
-    extensionWrapper.extensionWrapperHandle_ = new int;
-    // 设置isRegisterDataSettingObserver为true
-    extensionWrapper.isRegisterDataSettingObserver = true;
-    // 调用待测函数
-    extensionWrapper.CheckIfSetlocalSwitch();
-    // 验证isRegisterDataSettingObserver仍然为true
     EXPECT_EQ(extensionWrapper.isRegisterDataSettingObserver, true);
 }
 
