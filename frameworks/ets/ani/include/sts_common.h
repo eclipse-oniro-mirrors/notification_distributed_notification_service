@@ -64,7 +64,8 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
     ani_boolean &isUndefined, std::vector<int64_t> &res);
 ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<int64_t> &res);
-
+ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<ani_enum_item> &res);
 void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef);
 
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,

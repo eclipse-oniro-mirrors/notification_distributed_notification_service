@@ -16,9 +16,33 @@
 
 #include "sts_common.h"
 #include "ans_log_wrapper.h"
+#include "sts_notification_manager.h"
 
 namespace OHOS {
 namespace NotificationSts {
+bool GetSlotTypes(ani_env *env, ani_object value, NotificationSubscribeInfo &info)
+{
+    ani_boolean isUndefined = ANI_TRUE;
+    std::vector<ani_enum_item> slotTypesEnum = {};
+    if (ANI_OK != GetPropertyEnumItemArray(env, value, "slotTypes", isUndefined, slotTypesEnum)
+        || isUndefined == ANI_TRUE || slotTypesEnum.empty()) {
+        ANS_LOGE("GetPropertyEnumItemArray fail or undefined");
+        return false;
+    }
+    std::vector<SlotType> slotTypes = {};
+    for (auto slotTypeEnum : slotTypesEnum) {
+        SlotType slotType = SlotType::OTHER;
+        if (!SlotTypeEtsToC(env, slotTypeEnum, slotType)) {
+            ANS_LOGE("Enum conversion failed");
+            return false;
+        }
+        slotTypes.push_back(slotType);
+    }
+
+    info.SetSlotTypes(slotTypes);
+
+    return true;
+}
 bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info)
 {
     ANS_LOGD("enter");
@@ -48,6 +72,9 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     }
     if (ANI_OK != GetPropertyLong(env, value, "filterLimit", isUndefined, filterLimit) || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetPropertyLong faild");
+    }
+    if (!GetSlotTypes(env, value, info)) {
+        ANS_LOGE("GetSlotTypes faild");
     }
     info.AddAppNames(bundleNames);
     info.AddAppUserId(userId);

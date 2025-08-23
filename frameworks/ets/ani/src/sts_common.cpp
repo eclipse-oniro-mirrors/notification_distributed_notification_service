@@ -324,6 +324,40 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     return status;
 }
 
+ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<ani_enum_item> &res)
+{
+    if (env == nullptr || param == nullptr || name == nullptr) {
+        ANS_LOGE("GetPropertyEnumItemArray fail, has nullptr");
+        return ANI_INVALID_ARGS;
+    }
+    ANS_LOGD("GetPropertyEnumItemArray: %{public}s", name);
+    ani_ref arrayObj = nullptr;
+    ani_status status;
+    ani_int length;
+    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK ||
+        isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
+        return ANI_INVALID_ARGS;
+    }
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
+    if (status != ANI_OK) {
+        ANS_LOGE("status: %{public}d", status);
+        return status;
+    }
+    for (int i = 0; i < static_cast<int>(length); i++) {
+        ani_ref enumItemRef;
+        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
+            "$_get", "I:Lstd/core/Object;", &enumItemRef, (ani_int)i);
+        if (status != ANI_OK) {
+            ANS_LOGE("status: %{public}d, index: %{public}d", status, i);
+            return status;
+        }
+        res.push_back(static_cast<ani_enum_item>(enumItemRef));
+    }
+    return ANI_OK;
+}
+
 ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<int64_t> &res)
 {
