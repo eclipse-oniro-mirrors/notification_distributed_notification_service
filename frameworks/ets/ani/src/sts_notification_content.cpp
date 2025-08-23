@@ -508,7 +508,7 @@ bool getCapsuleByInt(ani_env *env, ani_object obj, const char *name, int32_t &ou
             return false;
         }
         if ((env->Object_CallMethodByName_Int(static_cast<ani_object>(tempRef),
-            "unboxed", ":D", &out)) != ANI_OK) {
+            "unboxed", ":d", &out)) != ANI_OK) {
             ANS_LOGE("get double of %{public}s failed", name);
             return false;
         }

@@ -164,7 +164,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
     }
     ani_boolean result = ANI_FALSE;
     if ((status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refObj),
-        "unboxed", ":Z", &result)) != ANI_OK) {
+        "unboxed", ":z", &result)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
@@ -188,7 +188,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
-        "unboxed", ":D", &outvalue)) != ANI_OK) {
+        "unboxed", ":d", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
@@ -212,7 +212,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(refObj),
-        "unboxed", ":I", &outvalue)) != ANI_OK) {
+        "unboxed", ":i", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
@@ -236,7 +236,7 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
         return ANI_INVALID_ARGS;
     }
     if ((status = env->Object_CallMethodByName_Long(static_cast<ani_object>(refObj),
-        "unboxed", ":J", &outvalue)) != ANI_OK) {
+        "unboxed", ":l", &outvalue)) != ANI_OK) {
         ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
         return status;
     }
@@ -385,7 +385,7 @@ ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *na
         }
         ani_double doubleValue = 0.0;
         status = env->Object_CallMethodByName_Double(static_cast<ani_object>(numEntryRef), "unboxed",
-            ":D", &doubleValue);
+            ":d", &doubleValue);
         if (status != ANI_OK) {
             ANS_LOGI("Object_CallMethodByName_Double uid fail, status: %{public}d", status);
             return status;
@@ -423,7 +423,7 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
         }
         ani_long longValue = 0.0;
         status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "unboxed",
-            ":J", &longValue);
+            ":l", &longValue);
         if (status != ANI_OK) {
             ANS_LOGI("Object_CallMethodByName_Long uid fail, status: %{public}d", status);
             return status;
@@ -590,7 +590,7 @@ ani_object CreateLong(ani_env *env, int64_t value)
         return nullptr;
     }
     ani_method longCtor;
-    if ((status = env->Class_FindMethod(longCls, "<ctor>", "J:V", &longCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(longCls, "<ctor>", "l:", &longCtor)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return nullptr;
     }
@@ -767,7 +767,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
         ANS_LOGD("error. not find method name '<ctor>'. status %{public}d", status);
         return false;
     }
@@ -776,7 +776,7 @@ bool CreateDate(ani_env *env, int64_t time, ani_object &outObj)
         return false;
     }
     ani_double msObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "D:D", &msObj, static_cast<double>(time)))
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, static_cast<double>(time)))
         != ANI_OK) {
         ANS_LOGD("Object_CallMethodByName_Double setDate faild. status %{public}d", status);
         return false;
@@ -794,7 +794,7 @@ bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time)
 
     ani_status status;
     ani_double timeMsObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":D", &timeMsObj)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Double(timeObj, "getTime", ":d", &timeMsObj)) != ANI_OK) {
         ANS_LOGD("Object_CallMethodByName_Double faild. status %{public}d", status);
         return false;
     }
