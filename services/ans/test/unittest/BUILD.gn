@@ -258,6 +258,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     "ability_base:zuri",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
+    "ability_runtime:dataobs_manager",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",

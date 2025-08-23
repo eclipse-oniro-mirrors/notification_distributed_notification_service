@@ -74,6 +74,7 @@ HWTEST_F(NotificationExtensionWrapperTest, InitExtentionWrapper_Test, TestSize.L
     EXPECT_NE(extensionWrapper.localControl_, nullptr);
     EXPECT_NE(extensionWrapper.reminderControl_, nullptr);
     EXPECT_NE(extensionWrapper.bannerControl_, nullptr);
+    EXPECT_NE(extensionWrapper.subscribeControl_, nullptr);
 #endif
 
     // 验证initSummary_是否被正确初始化
@@ -360,6 +361,37 @@ HWTEST_F(NotificationExtensionWrapperTest, NotificationDialogControl_Test, TestS
     wrapper.notificationDialogControl_ = mockNotificationDialogControl;
     result = wrapper.NotificationDialogControl();
     EXPECT_EQ(true, result);
+}
+
+HWTEST_F(NotificationExtensionWrapperTest, SubscribeControl_NullSubscribeControl, TestSize.Level0)
+{
+    // Arrange
+    ExtensionWrapper wrapper;
+    std::string bundleName = "testBundle";
+    wrapper.subscribeControl_ = nullptr;
+
+    // Act
+    bool result = wrapper.IsSubscribeControl(bundleName, NotificationConstant::SlotType::LIVE_VIEW);
+
+    // Assert
+    EXPECT_FALSE(result);
+}
+
+HWTEST_F(NotificationExtensionWrapperTest, SubscribeControl_ValidSubscribeControl, TestSize.Level0)
+{
+    // Arrange
+    ExtensionWrapper wrapper;
+    std::string bundleName = "testBundle";
+    auto mockSubscribeControl = [](const std::string &bundleName, NotificationConstant::SlotType slotType) {
+        return true;
+    };
+    wrapper.subscribeControl_ = mockSubscribeControl;
+
+    // Act
+    bool result = wrapper.IsSubscribeControl(bundleName, NotificationConstant::SlotType::LIVE_VIEW);
+
+    // Assert
+    EXPECT_TRUE(result);
 }
 }   //namespace Notification
 }   //namespace OHOS

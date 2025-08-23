@@ -106,6 +106,7 @@ void ExtensionWrapper::InitExtentionWrapper()
     if (!ctrlConfig.empty()) {
         syncAdditionConfig_("NOTIFICATION_CTL_LIST_PKG", ctrlConfig);
     }
+    subscribeControl_ = (SUBSCRIBE_CONTROL)dlsym(extensionWrapperHandle_, "SubscribeControl");
 #endif
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     isPrivilegeMessage_ = (IS_PRIVILEGE_MESSAGE)dlsym(extensionWrapperHandle_, "IsPrivilegeMessage");
@@ -241,6 +242,15 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
         return -1;
     }
     return bannerControl_(bundleName);
+}
+
+bool ExtensionWrapper::IsSubscribeControl(const std::string &bundleName, NotificationConstant::SlotType slotType)
+{
+    if (subscribeControl_ == nullptr) {
+        ANS_LOGE("SubscribeControl wrapper symbol failed");
+        return false;
+    }
+    return subscribeControl_(bundleName, slotType);
 }
 
 int32_t ExtensionWrapper::VerifyCloudCapability(const int32_t &uid, const std::string &capability)

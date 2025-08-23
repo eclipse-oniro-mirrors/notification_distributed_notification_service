@@ -44,6 +44,7 @@ public:
     typedef int32_t (*BANNER_CONTROL)(const std::string &bundleName);
     typedef int32_t (*VERIFY_CLOUD_CAPABILITY)(const int32_t &uid, const std::string &permission);
     typedef bool (*NOTIFICATIONDIALOGCONTROL)();
+    typedef bool (*SUBSCRIBE_CONTROL)(const std::string &bundleName, NotificationConstant::SlotType slotType);
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     typedef bool (*IS_PRIVILEGE_MESSAGE)(const sptr<NotificationRequest> &request);
@@ -69,6 +70,7 @@ public:
     int32_t BannerControl(const std::string &bundleName);
     int32_t VerifyCloudCapability(const int32_t &uid, const std::string &capability);
     bool NotificationDialogControl();
+    bool IsSubscribeControl(const std::string &bundleName, NotificationConstant::SlotType slotType);
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     bool IsPrivilegeMessage(const sptr<NotificationRequest> &request);
@@ -94,6 +96,7 @@ private:
     BANNER_CONTROL bannerControl_ = nullptr;
     VERIFY_CLOUD_CAPABILITY verifyCloudCapability_ = nullptr;
     NOTIFICATIONDIALOGCONTROL notificationDialogControl_ = nullptr;
+    SUBSCRIBE_CONTROL subscribeControl_ = nullptr;
     bool isRegisterDataSettingObserver = false;
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER

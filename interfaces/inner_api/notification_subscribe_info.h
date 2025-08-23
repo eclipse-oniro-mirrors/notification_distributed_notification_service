@@ -111,20 +111,6 @@ public:
     std::string Dump();
 
     /**
-     * @brief Adds subscriber uid.
-     *
-     * @param appNames Indicates the uid of subscriber.
-     **/
-    void SetSubscriberUid(const int32_t uid);
-
-    /**
-     * @brief Obtains the uid of subscriber.
-     *
-     * @return Returns the uid of subscriber.
-     **/
-    int32_t GetSubscriberUid() const;
-
-    /**
      * @brief Adds subscriber slotTypes.
      *
      * @param slotTypes Indicates the slotTypes of subscriber.
@@ -196,17 +182,34 @@ public:
 
 private:
     bool ReadFromParcel(Parcel &parcel);
+    void SetSubscriberBundleName(const std::string &bundleName);
+    std::string GetSubscriberBundleName() const;
+    /**
+     * @brief Adds subscriber uid.
+     *
+     * @param appNames Indicates the uid of subscriber.
+     **/
+    void SetSubscriberUid(const int32_t uid);
+
+    /**
+     * @brief Obtains the uid of subscriber.
+     *
+     * @return Returns the uid of subscriber.
+     **/
+    int32_t GetSubscriberUid() const;
 
 private:
     std::vector<std::string> appNames_ {};
     int32_t userId_ {-1};
     std::string deviceType_;
     int32_t subscriberUid_ {-1};
+    std::string subscriberBundleName_;
     uint32_t filterType_ {0};
     std::vector<NotificationConstant::SlotType> slotTypes_ {};
     bool needNotifyApplicationChanged_ = false;
     bool needNotifyResponse_ = false;
     bool isSubscribeSelf_ = false;
+    friend class NotificationSubscriberManager;
 };
 }  // namespace Notification
 }  // namespace OHOS

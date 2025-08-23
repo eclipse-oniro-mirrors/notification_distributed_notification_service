@@ -224,6 +224,16 @@ int32_t NotificationSubscribeInfo::GetSubscriberUid() const
     return subscriberUid_;
 }
 
+void NotificationSubscribeInfo::SetSubscriberBundleName(const std::string &bundleName)
+{
+    subscriberBundleName_ = bundleName;
+}
+
+std::string NotificationSubscribeInfo::GetSubscriberBundleName() const
+{
+    return subscriberBundleName_;
+}
+
 void NotificationSubscribeInfo::SetSlotTypes(const std::vector<NotificationConstant::SlotType> slotTypes)
 {
     slotTypes_ = slotTypes;

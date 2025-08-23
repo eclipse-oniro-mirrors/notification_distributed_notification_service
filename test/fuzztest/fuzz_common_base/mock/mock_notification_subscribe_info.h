@@ -31,7 +31,6 @@ NotificationSubscribeInfo* ObjectBuilder<NotificationSubscribeInfo>::Build(Fuzze
     subscribeInfo->AddAppName(fdp->ConsumeRandomLengthString());
     subscribeInfo->AddAppUserId(fdp->ConsumeIntegral<int32_t>());
     subscribeInfo->AddDeviceType(fdp->ConsumeRandomLengthString());
-    subscribeInfo->SetSubscriberUid(fdp->ConsumeIntegral<int32_t>());
     subscribeInfo->SetFilterType(fdp->ConsumeIntegral<uint32_t>());
     subscribeInfo->SetNeedNotifyResponse(fdp->ConsumeBool());
 

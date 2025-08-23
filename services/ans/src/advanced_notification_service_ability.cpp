@@ -22,6 +22,9 @@
 #include "distributed_device_manager.h"
 #include "distributed_extension_service.h"
 #endif
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+#include "telephony_extension_wrapper.h"
+#endif
 #include "advanced_datashare_helper.h"
 
 namespace OHOS {

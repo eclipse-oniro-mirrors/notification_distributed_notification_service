@@ -49,6 +49,7 @@ struct NotificationSubscriberManager::SubscriberRecord {
     int32_t userId {SUBSCRIBE_USER_INIT};
     std::string deviceType {CURRENT_DEVICE_TYPE};
     int32_t subscriberUid {DEFAULT_UID};
+    std::string subscriberBundleName_;
     bool needNotifyApplicationChanged = false;
     bool needNotifyResponse = false;
     uint32_t filterType {0};
@@ -102,9 +103,13 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
             return ERR_ANS_NO_MEMORY;
         }
     }
+    int32_t callingUid = IPCSkeleton().GetCallingUid();
+    std::string callingBuneldName = GetClientBundleName();
+    subInfo->SetSubscriberBundleName(callingBuneldName);
+    subInfo->SetSubscriberUid(callingUid);
 
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_9, EventBranchId::BRANCH_2);
-    message.Message(GetClientBundleName() + "_" +
+    message.Message(callingBuneldName + "_" +
         " user:" + std::to_string(subInfo->GetAppUserId()));
     if (subInfo->GetAppUserId() == SUBSCRIBE_USER_INIT) {
         int32_t userId = SUBSCRIBE_USER_INIT;
@@ -140,7 +145,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(
         slotTypes += " ";
     }
     ANS_LOGI("%{public}s_, user: %{public}s, bundleNames: %{public}s, deviceType: %{public}s, slotTypes: %{public}s, "
-        "Add subscriber result: %{public}d", GetClientBundleName().c_str(),
+        "Add subscriber result: %{public}d", callingBuneldName.c_str(),
         std::to_string(subInfo->GetAppUserId()).c_str(), bundleNames.c_str(), subInfo->GetDeviceType().c_str(),
         slotTypes.c_str(), result);
     message.ErrorCode(result).Append(bundleNames + "," + subInfo->GetDeviceType() + "," + slotTypes);
@@ -396,32 +401,27 @@ std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> NotificationSub
 void NotificationSubscriberManager::AddRecordInfo(
     std::shared_ptr<SubscriberRecord> &record, const sptr<NotificationSubscribeInfo> &subscribeInfo)
 {
-    if (subscribeInfo != nullptr) {
-        record->bundleList_.clear();
-        record->subscribedAll = true;
-        for (auto bundle : subscribeInfo->GetAppNames()) {
-            record->bundleList_.insert(bundle);
-            record->subscribedAll = false;
-        }
-        record->slotTypes.clear();
-        for (auto slotType : subscribeInfo->GetSlotTypes()) {
-            record->slotTypes.insert(slotType);
-        }
-        record->userId = subscribeInfo->GetAppUserId();
-        // deviceType is empty, use default
-        if (!subscribeInfo->GetDeviceType().empty()) {
-            record->deviceType = subscribeInfo->GetDeviceType();
-        }
-        record->subscriberUid = subscribeInfo->GetSubscriberUid();
-        record->filterType = subscribeInfo->GetFilterType();
-        record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
-        record->needNotifyResponse = subscribeInfo->GetNeedNotifyResponse();
-        record->isSubscribeSelf = subscribeInfo->GetIsSubscribeSelf();
-    } else {
-        record->bundleList_.clear();
-        record->subscribedAll = true;
-        record->slotTypes.clear();
+    record->bundleList_.clear();
+    record->subscribedAll = true;
+    for (auto bundle : subscribeInfo->GetAppNames()) {
+        record->bundleList_.insert(bundle);
+        record->subscribedAll = false;
     }
+    record->slotTypes.clear();
+    for (auto slotType : subscribeInfo->GetSlotTypes()) {
+        record->slotTypes.insert(slotType);
+    }
+    record->userId = subscribeInfo->GetAppUserId();
+    // deviceType is empty, use default
+    if (!subscribeInfo->GetDeviceType().empty()) {
+        record->deviceType = subscribeInfo->GetDeviceType();
+    }
+    record->subscriberUid = subscribeInfo->GetSubscriberUid();
+    record->subscriberBundleName_ = subscribeInfo->GetSubscriberBundleName();
+    record->filterType = subscribeInfo->GetFilterType();
+    record->needNotifyApplicationChanged = subscribeInfo->GetNeedNotifyApplication();
+    record->needNotifyResponse = subscribeInfo->GetNeedNotifyResponse();
+    record->isSubscribeSelf = subscribeInfo->GetIsSubscribeSelf();
 }
 
 void NotificationSubscriberManager::RemoveRecordInfo(
@@ -663,14 +663,20 @@ void NotificationSubscriberManager::NotifyCanceledInner(
 bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
-    auto BundleNames = notification->GetBundleName();
-    auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), BundleNames);
+    auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
+    auto bundleNames = notification->GetBundleName();
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
+    if (EXTENTION_WRAPPER->IsSubscribeControl(record->subscriberBundleName_, soltType)) {
+        ANS_LOGD("%{public}s cannot receive %{public}d notification", record->subscriberBundleName_.c_str(), soltType);
+        return false;
+    }
+#endif
+    auto iter = std::find(record->bundleList_.begin(), record->bundleList_.end(), bundleNames);
     bool isSubscribedTheNotification = record->subscribedAll || (iter != record->bundleList_.end()) ||
         (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
         return false;
     }
-    auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
     auto slotIter = std::find(record->slotTypes.begin(), record->slotTypes.end(), soltType);
     bool isSubscribedSlotType = (record->slotTypes.size() == 0) || (slotIter != record->slotTypes.end());
     if (!isSubscribedSlotType) {

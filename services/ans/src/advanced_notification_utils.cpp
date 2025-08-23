@@ -1851,9 +1851,8 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
     if (ctrlResult != ERR_OK) {
         return ctrlResult;
     }
-#else
-    return true;
 #endif
+    return true;
 }
 
 ErrCode AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, bool& isAllowUseReminder)
