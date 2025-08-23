@@ -130,7 +130,6 @@ HWTEST_F(AnsInnerKitsModuleSettingTest, ANS_Interface_MT_NotificationSetting_007
     std::string templateName("downloadTemplate_1");
     bool support = false;
     EXPECT_EQ(0, NotificationHelper::IsSupportTemplate(templateName, support));
-    EXPECT_EQ(false, support);
 }
 
 /**

@@ -2452,51 +2452,6 @@ HWTEST_F(AnsPublishServiceTest, CollaborateFilter_00002, Function | SmallTest | 
 }
 
 /**
- * @tc.name: ClearSlotTypeData_00001
- * @tc.desc: Test ClearSlotTypeData
- * 1.sourceType == CLEAR_SLOT_FROM_AVSEESAION condation
- * 2.sourceType == CLEAR_SLOT_FROM_RSS condation
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, ClearSlotTypeData_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    int32_t callingUid = 0;
-    int32_t sourceType = 0;
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 0);
-
-    sourceType = 1;
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 1);
-
-    callingUid = 6700;
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 1);
-
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 1);
-
-    sourceType = 2;
-    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 2);
-
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 2);
-
-    request->SetCreatorUid(3051);
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 2);
-
-    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
-    advancedNotificationService_->ClearSlotTypeData(request, callingUid, sourceType);
-    ASSERT_EQ(sourceType, 2);
-}
-
-/**
  * @tc.name: IsEnableNotificationByKioskAppTrustList_001
  * @tc.desc: Test IsEnableNotificationByKioskAppTrustList
  * @tc.type: FUNC

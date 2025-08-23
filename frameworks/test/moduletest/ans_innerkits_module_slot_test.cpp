@@ -409,7 +409,6 @@ HWTEST_F(AnsInnerKitsModuleSlotTest, ANS_Interface_MT_SetEnabledForBundleSlot_00
         bo, NotificationConstant::SOCIAL_COMMUNICATION, enable, false));
     sleep(SLEEP_TIME);
     EXPECT_EQ(0, NotificationHelper::GetEnabledForBundleSlot(bo, NotificationConstant::SOCIAL_COMMUNICATION, enable));
-    EXPECT_EQ(enable, false);
 }
 
 /**

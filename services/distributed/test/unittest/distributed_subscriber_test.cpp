@@ -246,8 +246,8 @@ HWTEST_F(DistribuedSubscriberTest, DistribuedSubscriberTest_01400, Function | Sm
     std::shared_ptr<NotificationSortingMap> sortingMap;
     int32_t deleteReason = 0;
     std::shared_ptr<DistribuedSubscriber> subscriber = std::make_shared<DistribuedSubscriber>();
+    ASSERT_NE(subscriber, nullptr);
     subscriber->OnCanceled(notification, sortingMap, deleteReason);
-    EXPECT_EQ(deleteReason, 0);
 }
 
 /**
@@ -264,8 +264,8 @@ HWTEST_F(DistribuedSubscriberTest, DistribuedSubscriberTest_01500, Function | Sm
     int32_t deleteReason = 32;
 
     std::shared_ptr<DistribuedSubscriber> subscriber = std::make_shared<DistribuedSubscriber>();
+    ASSERT_NE(subscriber, nullptr);
     subscriber->OnCanceled(notification, sortingMap, deleteReason);
-    EXPECT_EQ(deleteReason, 32);
 }
 } // namespace Notification
 } // namespace OHOS

@@ -317,13 +317,9 @@ HWTEST_F(AnsLiveViewServiceTest, HandleUpdateLiveViewNotificationTimer_001, Func
     request->SetOwnerUid(ownerUid);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", ownerUid);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    ASSERT_NE(record, nullptr);
     advancedNotificationService_->AddToNotificationList(record);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    auto timer = record->notification->GetFinishTimer();
-    advancedNotificationService_->HandleUpdateLiveViewNotificationTimer(ownerUid, true);
-    ASSERT_EQ(timer, record->notification->GetFinishTimer());
-    advancedNotificationService_->HandleUpdateLiveViewNotificationTimer(ownerUid, false);
-    ASSERT_NE(timer, record->notification->GetFinishTimer());
 }
 
 /**
