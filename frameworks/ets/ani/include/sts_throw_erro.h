@@ -46,7 +46,7 @@ static const std::unordered_map<int32_t, std::string> ERROR_CODE_TO_MESSAGE {
     {ERROR_NO_AGENT_SETTING, "There is no corresponding agent relationship configuration"},
     {ERROR_DIALOG_IS_POPPING, "Dialog is popping"},
     {ERROR_SETTING_WINDOW_EXIST, "The notification settings window is already displayed"},
-    {ERROR_NO_PROFILE_TEMPLATE, "Not exit noNotDisturb profile template"},
+    {ERROR_NO_PROFILE_TEMPLATE, "The do-not-disturb profile does not exist"},
     {ERROR_REPEAT_SET, "Repeat create or end"},
     {ERROR_NO_RIGHT, "No permission"},
     {ERROR_EXPIRED_NOTIFICATION, "Low update version"},
