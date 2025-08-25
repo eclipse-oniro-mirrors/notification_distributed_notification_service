@@ -1638,7 +1638,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_038, Level1)
     Uri enableUri(uriStr);
     std::string enable;
     auto ret = ReminderDataShareHelper::GetInstance().Query(enableUri, "focus_mode_enable", enable);
-    EXPECT_TRUE(ret == false);
+    EXPECT_EQ(ret, false);
 }
 }  // namespace Notification
 }  // namespace OHOS

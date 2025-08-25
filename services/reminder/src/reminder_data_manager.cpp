@@ -130,6 +130,7 @@ ErrCode ReminderDataManager::CancelReminder(
         ANSR_LOGW("Not find the reminder due to not match");
         return ERR_REMINDER_NOT_EXIST;
     }
+    std::lock_guard<std::mutex> locker(cancelMutex_);
     if (activeReminderId_ == reminderId) {
         {
             std::lock_guard<std::mutex> locker(ReminderDataManager::ACTIVE_MUTEX);

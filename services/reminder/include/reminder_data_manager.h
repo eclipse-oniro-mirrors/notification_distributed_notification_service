@@ -712,6 +712,7 @@ private:
     static std::mutex ALERT_MUTEX;
     static std::mutex TIMER_MUTEX;
     static std::mutex ACTIVE_MUTEX;
+    std::mutex cancelMutex_; // for cancelReminder function
 
     /**
      * Max number of reminders limit for the whole system.
