@@ -1494,6 +1494,11 @@ HWTEST_F(NotificationPreferencesTest, GetDoNotDisturbProfile_0200, TestSize.Leve
     sptr<NotificationDoNotDisturbProfile> profile;
     auto res = NotificationPreferences::GetInstance()->GetDoNotDisturbProfile(profileId, userId, profile);
     ASSERT_EQ(res, ERR_ANS_NO_PROFILE_TEMPLATE);
+    int32_t externalRes = ErrorToExternal(res);
+    ASSERT_EQ(externalRes, ERROR_NO_PROFILE_TEMPLATE);
+    std::string defaultMsg = "Default error message";
+    string errMsg = GetAnsErrMessage(externalRes, defaultMsg);
+    ASSERT_EQ(errMsg, "The do-not-disturb profile does not exist");
 }
 
 /**

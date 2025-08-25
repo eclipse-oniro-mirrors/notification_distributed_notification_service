@@ -154,7 +154,7 @@ const int32_t ERROR_REPEAT_SET                   = 1600015;    // Repeat create 
 const int32_t ERROR_EXPIRED_NOTIFICATION         = 1600016;    // Low update version.
 const int32_t ERROR_NO_AGENT_SETTING             = 1600017;    // No corresponding agent relationship configuration.
 const int32_t ERROR_SETTING_WINDOW_EXIST         = 1600018;    // The notification settings window is already displayed.
-const int32_t ERROR_NO_PROFILE_TEMPLATE          = 1600019;    // Not exit noNotDisturb profile template.
+const int32_t ERROR_NO_PROFILE_TEMPLATE          = 1600019;    // The do-not-disturb profile does not exist.
 const int32_t ERROR_REJECTED_WITH_DISABLE_NOTIFICATION =
     1600020; // The application is not allowed to send notifications due to permission settings.
 const int32_t ERROR_DISTRIBUTED_OPERATION_TIMEOUT          = 1600021;    // Distributed operation timeout.
