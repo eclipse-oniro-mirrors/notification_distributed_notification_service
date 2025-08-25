@@ -1130,10 +1130,8 @@ ani_status UnWarpNotificationLocalLiveViewContent(ani_env *env, ani_object obj,
         return status;
     }
     ani_int typeCode = 0;
-    ani_boolean isUndefined = ANI_TRUE;
-    if ((status = GetPropertyInt(env, obj, "typeCode", isUndefined, typeCode)) != ANI_OK
-        || isUndefined == ANI_TRUE) {
-        ANS_LOGE("UnWarpNotificationLocalLiveViewContent: get typeCode failed");
+    if ((status = env->Object_GetPropertyByName_Int(obj, "typeCode", &typeCode)) != ANI_OK) {
+        ANS_LOGE("UnWarpNotificationLocalLiveViewContent: get typeCode failed, status = %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     localLiveViewContent->SetType(typeCode);
