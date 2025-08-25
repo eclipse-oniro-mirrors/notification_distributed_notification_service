@@ -70,7 +70,8 @@ public:
     int32_t BannerControl(const std::string &bundleName);
     int32_t VerifyCloudCapability(const int32_t &uid, const std::string &capability);
     bool NotificationDialogControl();
-    bool IsSubscribeControl(const std::string &bundleName, NotificationConstant::SlotType slotType);
+    bool IsSubscribeControl(const std::string &bundleName, const int32_t &uid,
+        NotificationConstant::SlotType slotType);
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     bool IsPrivilegeMessage(const sptr<NotificationRequest> &request);

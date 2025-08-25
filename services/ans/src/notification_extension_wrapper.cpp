@@ -244,7 +244,8 @@ int32_t ExtensionWrapper::BannerControl(const std::string &bundleName)
     return bannerControl_(bundleName);
 }
 
-bool ExtensionWrapper::IsSubscribeControl(const std::string &bundleName, NotificationConstant::SlotType slotType)
+bool ExtensionWrapper::IsSubscribeControl(const std::string &bundleName, const int32_t &uid,
+    NotificationConstant::SlotType slotType)
 {
     if (subscribeControl_ == nullptr) {
         ANS_LOGE("SubscribeControl wrapper symbol failed");

@@ -666,7 +666,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
     auto bundleNames = notification->GetBundleName();
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
-    if (EXTENTION_WRAPPER->IsSubscribeControl(record->subscriberBundleName_, soltType)) {
+    if (EXTENTION_WRAPPER->IsSubscribeControl(record->subscriberBundleName_, record->subscriberUid, soltType)) {
         ANS_LOGD("%{public}s cannot receive %{public}d notification", record->subscriberBundleName_.c_str(), soltType);
         return false;
     }
