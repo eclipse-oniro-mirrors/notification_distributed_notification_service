@@ -46,7 +46,7 @@ const successCallbackError: BusinessError = {code: ERROR_OK, data: undefined};
 const errorParamInvalid: BusinessError = {code: ERROR_PARAM_INVALID, message: "Invalid parameter"};
 
 export default namespace notificationManager {
-    loadLibrary("notification_manager_ani.z")
+    loadLibraryWithPermissionCheck("notification_manager_ani.z", "@ohos.notificationManager")
     export enum SlotType {
         UNKNOWN_TYPE = 0,
         SOCIAL_COMMUNICATION = 1,
