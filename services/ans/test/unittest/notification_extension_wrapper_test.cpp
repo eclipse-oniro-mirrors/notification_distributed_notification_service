@@ -344,7 +344,7 @@ HWTEST_F(NotificationExtensionWrapperTest, SubscribeControl_NullSubscribeControl
     wrapper.subscribeControl_ = nullptr;
 
     // Act
-    bool result = wrapper.IsSubscribeControl(bundleName, NotificationConstant::SlotType::LIVE_VIEW);
+    bool result = wrapper.IsSubscribeControl(bundleName, 1, NotificationConstant::SlotType::LIVE_VIEW);
 
     // Assert
     EXPECT_FALSE(result);
@@ -361,7 +361,7 @@ HWTEST_F(NotificationExtensionWrapperTest, SubscribeControl_ValidSubscribeContro
     wrapper.subscribeControl_ = mockSubscribeControl;
 
     // Act
-    bool result = wrapper.IsSubscribeControl(bundleName, NotificationConstant::SlotType::LIVE_VIEW);
+    bool result = wrapper.IsSubscribeControl(bundleName, 2, NotificationConstant::SlotType::LIVE_VIEW);
 
     // Assert
     EXPECT_TRUE(result);
