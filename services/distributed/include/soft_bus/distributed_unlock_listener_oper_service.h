@@ -21,6 +21,8 @@
 
 #include "ffrt.h"
 #include "itimer_info.h"
+#include "notification_constant.h"
+#include "notification_request.h"
 
 namespace OHOS {
 namespace Notification {
@@ -93,6 +95,14 @@ private:
     ErrCode LaunchWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr);
     ErrCode GetNtfBtnWantAgentPtr(const std::string& hashCode,
         const int32_t btnIndex, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& wantAgentPtr);
+    void TriggerLiveViewNotification(
+        sptr<NotificationRequest>& notificationRequest,
+        const NotificationConstant::SlotType& slotType,
+        const int32_t jumpType, const int32_t deviceType, const int32_t btnIndex);
+    bool TriggerAncoNotification(const sptr<NotificationRequest>& notificationRequest,
+        const std::string& hashCode, const int32_t deviceType, const NotificationConstant::SlotType& slotType);
+    void TriggerNotification(const std::string& hashCode, const int32_t jumpType,
+        const int32_t deviceType, const int32_t btnIndex, const NotificationConstant::SlotType& slotType);
 
 private:
     ffrt::mutex mapLock_;
