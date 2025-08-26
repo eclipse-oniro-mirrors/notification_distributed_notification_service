@@ -34,7 +34,6 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
         return nullptr;
     }
     std::shared_ptr<WantAgent> wantAgentSp = std::make_shared<WantAgent>(*pWantAgent);
-    deletePoint(pWantAgent);
     ANS_LOGD("UnwrapWantAgent end");
     return wantAgentSp;
 }
