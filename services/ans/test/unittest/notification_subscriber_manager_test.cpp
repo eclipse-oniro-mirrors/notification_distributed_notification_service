@@ -1114,7 +1114,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeAffordConsume_001, Funct
 }
 #endif
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
-HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_004, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_subscribeControlIsTrue, Level1)
 {
     EXTENTION_WRAPPER->subscribeControl_ = nullptr;
 
@@ -1129,6 +1129,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_004, Functi
     NotificationSubscriberManager notificationSubscriberManager;
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->isSubscribeSelf = false;
 
     sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
     subscribeInfo->SetSubscriberUid(101);
@@ -1138,7 +1139,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_004, Functi
     ASSERT_TRUE(res);
 }
 
-HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_005, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_subscribeControlIsFalse, Level1)
 {
     EXTENTION_WRAPPER->subscribeControl_ = [](const std::string &bundleName, NotificationConstant::SlotType slotType) {
         if (bundleName == "subscriberManagerTestBundleName") {
@@ -1159,6 +1160,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_005, Functi
     std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
         notificationSubscriberManager.CreateSubscriberRecord(subscriber);
     record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = false;
 
     sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
     subscribeInfo->SetSubscriberUid(101);
@@ -1166,6 +1168,37 @@ HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_005, Functi
     notificationSubscriberManager.AddRecordInfo(record, subscribeInfo);
     auto res = notificationSubscriberManager.IsSubscribedBysubscriber(record, notification);
     ASSERT_FALSE(res);
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, IsSubscribedBysubscriber_subscribeSalfAndSubscriberControlIsTrue, Level1)
+{
+    EXTENTION_WRAPPER->subscribeControl_ = [](const std::string &bundleName, NotificationConstant::SlotType slotType) {
+        if (bundleName == "subscriberManagerTestBundleName") {
+            return true;
+        }
+        return false;
+    };
+
+    sptr<NotificationRequest> request(new NotificationRequest());
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetCreatorUserId(101);
+    request->SetCreatorUid(101);
+    sptr<Notification> notification(new Notification(request));
+
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberBundleName_ = "subscriberManagerTestBundleName";
+    record->isSubscribeSelf = true;
+
+    sptr<NotificationSubscribeInfo> subscribeInfo(new NotificationSubscribeInfo());
+    subscribeInfo->SetSubscriberUid(101);
+    subscribeInfo->AddAppUserId(101);
+    notificationSubscriberManager.AddRecordInfo(record, subscribeInfo);
+    auto res = notificationSubscriberManager.IsSubscribedBysubscriber(record, notification);
+    ASSERT_TRUE(res);
 }
 #endif // DEBUG
 }  // namespace Notification
