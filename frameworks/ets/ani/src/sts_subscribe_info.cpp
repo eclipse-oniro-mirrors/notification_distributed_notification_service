@@ -76,6 +76,7 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     }
     if (!GetSlotTypes(env, value, info)) {
         ANS_LOGE("GetSlotTypes faild");
+        return false;
     }
     info.AddAppNames(bundleNames);
     info.AddAppUserId(userId);
