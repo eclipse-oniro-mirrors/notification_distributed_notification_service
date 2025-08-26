@@ -26,19 +26,15 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
         ANS_LOGE("UnwrapWantAgent failed, has nullPtr");
         return nullptr;
     }
-    ani_status status = ANI_ERROR;
-    ani_long nativeObj {};
-    if ((status = env->Object_GetFieldByName_Long(agent, "nativeObj", &nativeObj)) != ANI_OK) {
-        ANS_LOGI("UnwrapWantAgent Object_GetField_Long fetch failed, status = %{public}d", status);
-        return nullptr;
-    }
-    WantAgent* wantAgent = reinterpret_cast<WantAgent*>(nativeObj);
-    if (wantAgent == nullptr) {
+    WantAgent* pWantAgent = nullptr;
+    AppExecFwk::UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
+
+    if (pWantAgent == nullptr) {
         ANS_LOGI("UnwrapWantAgent wantAgent nullptr");
         return nullptr;
     }
-    std::shared_ptr<WantAgent> wantAgentSp = std::make_shared<WantAgent>(*wantAgent);
-    deletePoint(wantAgent);
+    std::shared_ptr<WantAgent> wantAgentSp = std::make_shared<WantAgent>(*pWantAgent);
+    deletePoint(pWantAgent);
     ANS_LOGD("UnwrapWantAgent end");
     return wantAgentSp;
 }
