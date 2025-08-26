@@ -248,6 +248,10 @@ void SettingsModalExtensionCallback::ProcessStatusChanged(int32_t code, bool isA
     ani_options aniArgs { 0, nullptr };
     if (isAsync) {
         aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
+        if (aniResult != ANI_OK) {
+            ANS_LOGD("AttachCurrentThread fail. result: %{public}d.", aniResult);
+            aniResult = vm_->GetEnv(ANI_VERSION_1, &env);
+        }
     } else {
         aniResult = vm_->GetEnv(ANI_VERSION_1, &env);
     }
