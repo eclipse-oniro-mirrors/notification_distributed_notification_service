@@ -390,9 +390,11 @@ void DistributedOperationService::LaunchProjectionApp(
     const DistributedDeviceInfo& peerDevice, const DistributedDeviceInfo& localDevice)
 {
     if ((localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD &&
-        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) ||
+        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PC &&
+        localDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1) ||
         peerDevice.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
-        ANS_LOGI("Can not launch projectionApp");
+        ANS_LOGI("Can not launch projectionApp, local deviceType: %{public}d",
+            static_cast<int32_t>(localDevice.deviceType_));
         return;
     }
     int32_t result =

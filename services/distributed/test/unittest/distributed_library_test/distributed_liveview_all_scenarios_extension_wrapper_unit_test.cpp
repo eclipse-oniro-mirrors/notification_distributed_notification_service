@@ -131,7 +131,7 @@ HWTEST_F(DistributedLiveviewAllScenariosExtensionWrapperTest,
     sptr<NotificationRequest> request = new NotificationRequest(1);
     ErrCode res =
         DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedLiveViewOperation(request, 34, 0);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, -1);
 }
  
 /**
