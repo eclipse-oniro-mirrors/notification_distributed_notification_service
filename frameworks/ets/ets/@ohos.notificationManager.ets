@@ -140,6 +140,12 @@ export default namespace notificationManager {
         ACTIVE_REMIND = 3,
     }
 
+    export enum SourceType {
+        TYPE_NORMAL = 0,
+        TYPE_CONTINUOUS = 1,
+        TYPE_TIMER = 2
+    }
+
     export native function nativeCancelAll(): void;
     export native function nativeCancelWithId(id: int): void;
     export native function nativeCancelWithIdLabel(id: int, label: string): void;

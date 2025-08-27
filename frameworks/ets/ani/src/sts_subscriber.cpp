@@ -28,9 +28,13 @@ bool SetNotificationRequest(ani_env *env, const std::shared_ptr<NotificationSts>
     ani_status status = ANI_OK;
     ani_object requestObj;
     ani_class requestCls;
-    if (!WarpNotificationRequest(env, request->GetNotificationRequestPoint().GetRefPtr(), requestCls, requestObj)
-        || requestObj == nullptr) {
-        ANS_LOGE("WarpNotificationRequest faild");
+    sptr<NotificationSts> notification = new (std::nothrow)NotificationSts(request->GetNotificationRequestPoint());
+    if (!notification) {
+        ANS_LOGE("new notification faild");
+        return false;
+    }
+    if (!WarpNotification(env, notification, requestCls, requestObj) || requestObj == nullptr) {
+        ANS_LOGE("WarpNotification faild");
         return false;
     }
     if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "request", requestObj))) {

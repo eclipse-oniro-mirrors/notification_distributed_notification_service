@@ -33,7 +33,7 @@ namespace NotificationSts {
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
-void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions distributedOptions)
+void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions &distributedOptions)
 {
     ANS_LOGD("UnWarpDistributedOptions start");
     if (env == nullptr || obj == nullptr) {
@@ -883,8 +883,6 @@ bool SetNotificationRequestByNumber(ani_env* env, ani_class cls, const OHOS::Not
     SetPropertyOptionalByInt(env, object, "creatorPid", request->GetCreatorPid());
     // badgeNumber?: long
     SetPropertyOptionalByLong(env, object, "badgeNumber", request->GetBadgeNumber());
-    //notificationControlFlags?: long
-    SetPropertyOptionalByLong(env, object, "notificationControlFlags", request->GetNotificationControlFlags());
     return true;
 }
 
@@ -1175,6 +1173,116 @@ bool WarpNotificationRequest(ani_env *env, const OHOS::Notification::Notificatio
         return false;
     }
     ANS_LOGD("WarpNotificationRequest end");
+    return true;
+}
+
+bool SetNotificationRequestDistributedOptions(ani_env *env,
+    const sptr<NotificationSts> notification, ani_object &object)
+{
+    ANS_LOGD("SetNotificationRequestDistributedOptions call");
+    ani_object optionsObj;
+    ani_class ncCls;
+    if (!CreateClassObjByClassName(env, "notification.notificationRequest.DistributedOptionsInner",
+        ncCls, optionsObj) || optionsObj == nullptr) {
+        ANS_LOGE("create distributedOption class failed");
+        return false;
+    }
+    NotificationDistributedOptions options = notification->GetNotificationRequest().GetNotificationDistributedOptions();
+    // isDistributed?: boolean
+    if (!SetPropertyOptionalByBoolean(env, optionsObj, "isDistributed", options.IsDistributed())) {
+        ANS_LOGE("set isDistributed failed");
+    }
+    // supportDisplayDevices?: Array<string>
+    ani_object displayDevices = GetAniStringArrayByVectorString(env, options.GetDevicesSupportDisplay());
+    if (displayDevices == nullptr || !SetPropertyByRef(env, optionsObj, "supportDisplayDevices", displayDevices)) {
+        ANS_LOGE("set supportDisplayDevices failed");
+    }
+    // supportOperateDevices?: Array<string>
+    ani_object supportOperateDevices = GetAniStringArrayByVectorString(env, options.GetDevicesSupportOperate());
+    if (supportOperateDevices == nullptr ||
+        !SetPropertyByRef(env, optionsObj, "supportOperateDevices", supportOperateDevices)) {
+        ANS_LOGE("set supportOperateDevices failed");
+    }
+    // readonly remindType?: number
+    ani_enum_item remindTypeItem {};
+    if (DeviceRemindTypeCToEts(env, notification->GetRemindType(), remindTypeItem)) {
+        CallSetter(env, ncCls, optionsObj, "remindType", remindTypeItem);
+    }
+    if (!SetPropertyByRef(env, object, "distributedOption", optionsObj)) {
+        ANS_LOGE("set distributedOption faild");
+    }
+    ANS_LOGD("SetNotificationRequestDistributedOptions end");
+    return true;
+}
+
+bool WarpNotificationOther(ani_env *env, ani_class &cls,
+    const sptr<NotificationSts> notification, ani_object &outAniObj)
+{
+    // hashCode?: string
+    if (!SetPropertyOptionalByString(env, outAniObj, "hashCode", notification->GetKey().c_str())) {
+        ANS_LOGD("set hashCode faild");
+    }
+    // isFloatingIcon ?: boolean
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "isFloatingIcon", notification->IsFloatingIcon())) {
+        ANS_LOGD("set isFloatingIcon faild");
+    }
+    // readonly creatorBundleName?: string
+    if (!SetPropertyOptionalByString(env, outAniObj, "creatorBundleName", notification->GetBundleName().c_str())) {
+        ANS_LOGD("set creatorBundleName faild");
+    }
+    // readonly creatorUid?: number
+    if (!SetPropertyOptionalByInt(env, outAniObj, "creatorUid", notification->GetNotificationRequest().GetOwnerUid())) {
+        ANS_LOGD("set creatorUid faild");
+    }
+    // readonly creatorUserId?: number
+    if (!SetPropertyOptionalByInt(env, outAniObj, "creatorUserId", notification->GetRecvUserId())) {
+        ANS_LOGD("set creatorUserId faild");
+    }
+    // readonly creatorPid?: number
+    if (!SetPropertyOptionalByInt(env, outAniObj, "creatorPid", notification->GetPid())) {
+        ANS_LOGD("set creatorPid faild");
+    }
+    // distributedOption?:DistributedOptions
+    if (!SetNotificationRequestDistributedOptions(env, notification, outAniObj)) {
+        ANS_LOGD("set distributedOption faild");
+        return false;
+    }
+    // readonly isRemoveAllowed?: boolean
+    if (!SetPropertyOptionalByBoolean(env, outAniObj, "isRemoveAllowed", notification->IsRemoveAllowed())) {
+        ANS_LOGD("set isRemoveAllowed faild");
+    }
+    // readonly source?: number
+    ani_enum_item sourceTypeItem {};
+    if (SourceTypeCToEts(env, notification->GetSourceType(), sourceTypeItem)) {
+        CallSetter(env, cls, outAniObj, "source", sourceTypeItem);
+    }
+    // readonly deviceId?: string
+    if (!SetPropertyOptionalByString(env, outAniObj, "deviceId", notification->GetDeviceId().c_str())) {
+        ANS_LOGD("set deviceId faild");
+    }
+    // notificationControlFlags?: number
+    if (!SetPropertyOptionalByLong(env, outAniObj, "notificationControlFlags",
+        static_cast<long>(notification->GetNotificationRequest().GetNotificationControlFlags()))) {
+        ANS_LOGD("set notificationControlFlags faild");
+    }
+    return true;
+}
+
+bool WarpNotification(ani_env *env, const sptr<NotificationSts> notification, ani_class &cls, ani_object &outAniObj)
+{
+    ANS_LOGD("WarpNotification called");
+    if (notification == nullptr) {
+        ANS_LOGE("null notification");
+        return false;
+    }
+    NotificationRequest request = notification->GetNotificationRequest();
+    if (!WarpNotificationRequest(env, &request, cls, outAniObj)) {
+        return false;
+    }
+    if (!WarpNotificationOther(env, cls, notification, outAniObj)) {
+        return false;
+    }
+    ANS_LOGD("WarpNotification end");
     return true;
 }
 
