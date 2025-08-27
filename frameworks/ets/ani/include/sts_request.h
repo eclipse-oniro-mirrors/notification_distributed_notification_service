@@ -31,7 +31,7 @@ struct StsDistributedOptions {
     int32_t remindType = -1;
 };
 
-void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions distributedOptions);
+void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOptions &distributedOptions);
 bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     const std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo, ani_object &groupInfoObject);
 
@@ -39,6 +39,7 @@ ani_status UnWarpNotificationRequest(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &notificationRequest);
 bool WarpNotificationRequest(
     ani_env *env, const NotificationRequest *notificationRequest, ani_class &cls, ani_object &outAniObj);
+bool WarpNotification(ani_env *env, const sptr<NotificationSts> notification, ani_class &cls, ani_object &outAniObj);
 ani_object GetAniNotificationRequestArray(ani_env *env, std::vector<sptr<NotificationRequest>> requests);
 ani_object GetAniNotificationRequestArrayByNotifocations(ani_env *env, std::vector<sptr<NotificationSts>> requests);
 

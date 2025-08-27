@@ -239,7 +239,7 @@ ani_status GetNotificationActionButtonArray(ani_env *env, ani_object param,
         ANS_LOGE("GetActionButtonArray: GetPropertyRef name = %{public}s, status = %{public}d", name, status);
         return ANI_INVALID_ARGS;
     }
-    if (ANI_OK!= (status = GetPropertyInt(env, static_cast<ani_object>(arrayObj), "length", isUndefined, length))) {
+    if (ANI_OK!= (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length))) {
         ANS_LOGE("GetActionButtonArray: GetPropertyDouble name = %{public}s, status = %{public}d", name, status);
         return status;
     }
