@@ -159,7 +159,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
         return status;
     }
     if (isUndefined) {
-        ANS_LOGD("%{public}s is undefined", name);
+        ANS_LOGE("%{public}s is undefined", name);
         return ANI_INVALID_ARGS;
     }
     ani_boolean result = ANI_FALSE;
