@@ -78,7 +78,7 @@ ani_object AniGetDoNotDisturbDate(ani_env *env)
     }
     auto datePtr = std::make_shared<Notification::NotificationDoNotDisturbDate>(doNotDisturbDate);
     if (!NotificationSts::WarpNotificationDoNotDisturbDate(env, datePtr, data)) {
-        ANS_LOGE("WarpNotificationDoNotDisturbDate faild");
+        ANS_LOGE("AniGetDoNotDisturbDate WarpNotificationDoNotDisturbDate faild");
         NotificationSts::ThrowStsErroWithMsg(env, "AniGetDoNotDisturbDate ERROR_INTERNAL_ERROR");
     }
     ANS_LOGD("AniGetDoNotDisturbDate end");
