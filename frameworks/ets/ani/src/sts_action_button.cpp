@@ -93,10 +93,10 @@ ani_status GetStsActionButtonByUserInput(ani_env *env, ani_object param,
     if (ANI_OK == GetPropertyRef(env, param, "userInput", isUndefind, userInputRef) && isUndefind == ANI_FALSE) {
         UnwrapNotificationUserInput(env, static_cast<ani_object>(userInputRef), userInput);
     } else {
-        ANS_LOGD("GetStsActionButtonByUserInput : GetPropertyRef userInput failed");
+        ANS_LOGD("GetPropertyRef userInput failed");
     }
     if (userInput == nullptr) {
-        ANS_LOGD("GetStsActionButtonByUserInput : userInput is nullptr");
+        ANS_LOGD("userInput is nullptr");
         userInput = {};
     }
     actionButton.userInput = userInput;
@@ -188,12 +188,12 @@ void SetNotificationActionButtonByOptionalParameter(
     // extras?: Record<string, Object>
     ani_ref extras = WrapWantParams(env, *(actionButton->GetAdditionalData().get()));
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "extras", extras)) {
-        ANS_LOGD("SetActionButtonByOptionalParameter : Set extras failed");
+        ANS_LOGD("Set extras failed");
     }
     // userInput?: NotificationUserInput
     ani_object userInputObject = WarpUserInput(env, actionButton->GetUserInput());
     if (!CallSetter(env, iconButtonCls, iconButtonObject, "userInput", userInputObject)) {
-        ANS_LOGD("SetActionButtonByOptionalParameter : Set userInput failed");
+        ANS_LOGD("Set userInput failed");
     }
     ANS_LOGD("SetActionButtonByOptionalParameter end");
 }
@@ -218,7 +218,7 @@ ani_object WrapNotificationActionButton(ani_env* env,
         return nullptr;
     }
     SetNotificationActionButtonByOptionalParameter(env, iconButtonCls, iconButtonObject, actionButton);
-    ANS_LOGE("WrapNotificationActionButton end");
+    ANS_LOGD("WrapNotificationActionButton end");
     return iconButtonObject;
 }
 
