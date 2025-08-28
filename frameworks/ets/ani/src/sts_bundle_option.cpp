@@ -28,13 +28,13 @@ bool UnwrapBundleOption(ani_env *env, ani_object obj, Notification::Notification
     }
     std::string tempStr;
     ani_boolean isUndefined = ANI_TRUE;
-    if (GetPropertyString(env, obj, "bundle", isUndefined, tempStr) !=ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "bundle", isUndefined, tempStr) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapBundleOption Get bundle failed");
         return false;
     }
     std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     option.SetBundleName(bundleName);
-    ani_int result = 0.0;
+    ani_int result = 0;
     if (GetPropertyInt(env, obj, "uid", isUndefined, result) == ANI_OK && isUndefined == ANI_FALSE) {
         int32_t uid = static_cast<int32_t>(result);
         option.SetUid(uid);
