@@ -19,6 +19,7 @@ namespace OHOS {
 namespace Notification {
 namespace {
 int32_t g_retOnCheckNotification = 0;
+int32_t g_retOnCheckLiveView = 0;
 }
 
 void MockOnCheckNotification(const int32_t retOnCheckNotification)
@@ -26,6 +27,10 @@ void MockOnCheckNotification(const int32_t retOnCheckNotification)
     g_retOnCheckNotification = retOnCheckNotification;
 }
 
+void MockOnCheckLiveView(const int32_t retOnCheckLiveView)
+{
+    g_retOnCheckLiveView = retOnCheckLiveView;
+}
 } // namespace Notification
 MockPushCallBackStub::MockPushCallBackStub() {}
 MockPushCallBackStub::~MockPushCallBackStub() {}
@@ -33,5 +38,11 @@ int32_t MockPushCallBackStub::OnCheckNotification(const std::string &notificatio
     const std::shared_ptr<Notification::PushCallBackParam> &pushCallBackParam)
 {
     return Notification::g_retOnCheckNotification;
+}
+
+int32_t MockPushCallBackStub::OnCheckLiveView(const std::string& requestId,
+    const std::vector<std::string>& bundles)
+{
+    return Notification::g_retOnCheckLiveView;
 }
 } // namespace OHOS

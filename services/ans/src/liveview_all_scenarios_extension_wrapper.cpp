@@ -53,6 +53,30 @@ void LiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         return;
     }
 
+    updateLiveViewConfig_ = (UPDATE_LIVEVIEW_CONFIG)dlsym(ExtensionHandle_, "UpdateLiveViewConfig");
+    if (updateLiveViewConfig_  == nullptr) {
+        ANS_LOGE("liveview update config %{public}s.", dlerror());
+        return;
+    }
+
+    checkLiveViewConfig_ = (CHECK_LIVEVIEW_CONFIG)dlsym(ExtensionHandle_, "CheckLiveViewConfig");
+    if (checkLiveViewConfig_   == nullptr) {
+        ANS_LOGE("liveview check config %{public}s.", dlerror());
+        return;
+    }
+
+    getLiveViewConfigVersion_ = (GET_LIVEVIEW_CONFIG_VERSION)dlsym(ExtensionHandle_,
+        "GetLiveViewConfigVersion");
+    if (getLiveViewConfigVersion_ == nullptr) {
+        ANS_LOGE("liveview get version %{public}s.", dlerror());
+        return;
+    }
+
+    notifyLiveViewEvent_  = (NOTIFY_LIVEVIEW_EVENT)dlsym(ExtensionHandle_, "NotifyLiveViewEvent");
+    if (notifyLiveViewEvent_ == nullptr) {
+        ANS_LOGE("liveview notify config %{public}s.", dlerror());
+        return;
+    }
     ANS_LOGI("liveview all scenarios extension wrapper init success");
 }
 
@@ -63,6 +87,10 @@ void LiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
         ExtensionHandle_ = nullptr;
         updateLiveviewReminderFlags_ = nullptr;
         updateLiveviewVoiceContent_ = nullptr;
+        updateLiveViewConfig_ = nullptr;
+        checkLiveViewConfig_ = nullptr;
+        getLiveViewConfigVersion_ = nullptr;
+        notifyLiveViewEvent_ = nullptr;
     }
     ANS_LOGI("liveview all scenarios extension wrapper close success");
 }
@@ -83,5 +111,47 @@ ErrCode LiveviewAllScenariosExtensionWrapper::UpdateLiveviewVoiceContent(const s
         return 0;
     }
     return updateLiveviewVoiceContent_(request);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::UpdateLiveViewConfig(const std::string& config)
+{
+    if (updateLiveViewConfig_ == nullptr) {
+        ANS_LOGE("Liveview update config failed");
+        return -1;
+    }
+
+    return updateLiveViewConfig_(config);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::CheckLiveViewConfig(const std::string& bundleName,
+    const std::string& event, int32_t userId, bool& enable)
+{
+    if (checkLiveViewConfig_ == nullptr) {
+        ANS_LOGE("Liveview check config failed");
+        return -1;
+    }
+
+    return checkLiveViewConfig_(bundleName, event, userId, enable);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::GetLiveViewConfigVersion(int32_t& version)
+{
+    if (getLiveViewConfigVersion_ == nullptr) {
+        ANS_LOGE("Liveview get version");
+        return -1;
+    }
+
+    return getLiveViewConfigVersion_(version);
+}
+
+ErrCode LiveviewAllScenariosExtensionWrapper::NotifyLiveViewEvent(const std::string& event,
+    const sptr<NotificationBundleOption>& bundleInfo)
+{
+    if (notifyLiveViewEvent_ == nullptr) {
+        ANS_LOGE("Liveview notify config failed");
+        return -1;
+    }
+
+    return notifyLiveViewEvent_(event, bundleInfo);
 }
 }

@@ -426,6 +426,10 @@ public:
      */
     bool GetDistributedDevicelist(std::string &deviceTypes);
 
+    bool GetLiveViewConfigVersion(int32_t& version);
+    bool SetLiveViewConfigVersion(const int32_t& version);
+    bool GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
+    bool SetLiveViewRebuildFlag(int32_t userId);
 private:
     bool CheckRdbStore();
 

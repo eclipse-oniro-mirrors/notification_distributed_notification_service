@@ -1323,5 +1323,73 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
         phoneNumber, callerType), ERR_ANS_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.number    : AnsBranchTest_286001
+ * @tc.name      : SetCheckConfig
+ * @tc.desc      : Test SetCheckConfig function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286001, Function | SmallTest | Level1)
+{
+    int32_t response = 0;
+    std::string requestId = "id";
+    std::string key = "key";
+    std::string value = "value";
+    MockIsVerfyPermisson(false);
+    int32_t result = advancedNotificationService_->SetCheckConfig(response, requestId, key, value);
+    ASSERT_EQ(result, ERR_ANS_INVALID_PARAM);
+
+    key = "APP_LIVEVIEW_CONFIG";
+    result = advancedNotificationService_->SetCheckConfig(response, requestId, key, value);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    result = advancedNotificationService_->SetCheckConfig(response, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->SetCheckConfig(6, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->SetCheckConfig(10, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->SetCheckConfig(11, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->SetCheckConfig(7, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_286002
+ * @tc.name      : SetCheckConfig
+ * @tc.desc      : Test SetCheckConfig function return ERR_ANS_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption();
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL);
+    int32_t result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_ANS_NON_SYSTEM_APP);
+
+    MockIsVerfyPermisson(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_ANS_PERMISSION_DENIED);
+
+    MockIsVerfyPermisson(true);
+    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_ANS_INVALID_BUNDLE);
+
+    bundle->SetBundleName(TEST_DEFUALT_BUNDLE);
+    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_ANS_INVALID_BUNDLE);
+
+    bundle->SetUid(NON_SYSTEM_APP_UID);
+    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_OK);
+    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
+    ASSERT_EQ(result, ERR_ANS_BUNDLE_SLOT_EXIST);
+}
 }  // namespace Notification
 }  // namespace OHOS

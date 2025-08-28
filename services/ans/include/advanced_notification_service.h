@@ -1439,6 +1439,13 @@ public:
 
     ErrCode AtomicServicePublish(const sptr<NotificationRequest> &request);
 
+    ErrCode SetDefaultSlotForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        int32_t slotTypeInt, bool enabled, bool isForceControl) override;
+
+    ErrCode SetCheckConfig(int32_t response, const std::string& requestId, const std::string& key,
+        const std::string& value) override;
+
+    ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList) override;
 protected:
     /**
      * @brief Query whether there is a agent relationship between the two apps.
@@ -1450,6 +1457,7 @@ protected:
     bool IsAgentRelationship(const std::string &agentBundleName, const std::string &sourceBundleName);
 
 public:
+    void TriggerLiveViewSwitchCheck(int32_t userId);
     bool CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption);
     ErrCode SetDefaultNotificationEnabled(
         const sptr<NotificationBundleOption> &bundleOption, bool enabled);
@@ -1741,7 +1749,7 @@ private:
     ErrCode AddSlotThenPublishEvent(
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
-        bool enabled, bool isForceControl);
+        bool enabled, bool isForceControl, int32_t authStatus = NotificationSlot::AuthorizedStatus::AUTHORIZED);
     ErrCode OnRecoverLiveView(const std::vector<std::string> &keys);
     ErrCode CollaborateFilter(const sptr<NotificationRequest> &request);
     void HandleUpdateLiveViewNotificationTimer(const int32_t uid, const bool isPaused);
@@ -1774,6 +1782,10 @@ private:
         std::vector<sptr<Notification>>& notifications, const int32_t removeReason);
     bool IsDistributedNotification(sptr<NotificationRequest> request);
     bool IsEnableNotificationByKioskAppTrustList(const std::string &bundleName);
+    void InvockLiveViewSwitchCheck(const std::vector<sptr<NotificationBundleOption>>& bundles,
+        int32_t userId, uint32_t index);
+    void InvokeCheckConfig(const std::string& requestId);
+    ErrCode HandlePushCheckFailed(const sptr<NotificationRequest> &request, int32_t result);
 
     template<typename T>
     bool WriteParcelableVector(const std::vector<sptr<T>> &parcelableVector, MessageParcel &data)

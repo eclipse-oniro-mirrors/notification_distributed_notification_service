@@ -44,6 +44,7 @@ constexpr const int32_t DELETE_ERROR_EVENT_CODE = 5;
 constexpr const int32_t MODIFY_ERROR_EVENT_CODE = 6;
 constexpr const int32_t ANS_CUSTOMIZE_CODE = 7;
 constexpr const int32_t BADGE_CHANGE_CODE = 201;
+static int32_t LIVEVIEW_TRIGGER_SUB_CODE = 103;
 
 constexpr const int32_t DEFAULT_ERROR_EVENT_COUNT = 5;
 constexpr const int32_t DEFAULT_ERROR_EVENT_TIME = 60;
@@ -1421,6 +1422,27 @@ void NotificationAnalyticsUtil::ExecuteCacheList()
     timer->StartTimer(reportTimerId, NotificationAnalyticsUtil::GetCurrentTime() +
         REPORT_CACHE_INTERVAL_TIME * NotificationConstant::SECOND_TO_MS);
     g_reportFlag = true;
+}
+
+void NotificationAnalyticsUtil::ReportTriggerLiveView(const std::vector<std::string>& bundles)
+{
+    nlohmann::json ansData;
+    ansData["subCode"] = std::to_string(LIVEVIEW_TRIGGER_SUB_CODE);
+    nlohmann::json dataArray = nlohmann::json::array();
+    for (auto bundle : bundles) {
+        dataArray.push_back(bundle);
+    }
+    ansData["data"] = dataArray;
+    std::string message = ansData.dump(-1, ' ', false,
+        nlohmann::json::error_handler_t::replace);
+
+    EventFwk::Want want;
+    want.SetAction(NOTIFICATION_EVENT_PUSH_AGENT);
+    want.SetParam("ansData", message);
+    ReportCache reportCache;
+    reportCache.want = want;
+    reportCache.eventCode = ANS_CUSTOMIZE_CODE;
+    ReportCommonEvent(reportCache);
 }
 
 void NotificationAnalyticsUtil::ReportCommonEvent(const ReportCache& reportCache)

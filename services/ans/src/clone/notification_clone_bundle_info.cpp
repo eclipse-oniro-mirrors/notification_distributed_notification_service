@@ -16,6 +16,7 @@
 #include "notification_clone_bundle_info.h"
 
 #include "ans_log_wrapper.h"
+#include "notification_slot.h"
 
 namespace OHOS {
 namespace Notification {
@@ -31,6 +32,7 @@ constexpr const char *BUNDLE_INFO_SLOT_TYPE = "slotType";
 constexpr const char *BUNDLE_INFO_SLOT_ENABLE = "slotEnable";
 constexpr const char *BUNDLE_INFO_SLOT_CONTROL = "slotControl";
 constexpr const char *BUNDLE_INFO_SILENT_REMINDER = "enabledSilentReminder";
+constexpr const char *BUNDLE_INFO_SLOT_AUTHSTATUS = "slotAuthorized";
 constexpr int32_t CONST_ENABLE_INT = 1;
 }
 void NotificationCloneBundleInfo::SetBundleName(const std::string &name)
@@ -110,6 +112,7 @@ void NotificationCloneBundleInfo::AddSlotInfo(const SlotInfo &slotInfo)
         if (item.slotType_ == slotInfo.slotType_) {
             item.enable_ = slotInfo.enable_;
             item.isForceControl_ = slotInfo.isForceControl_;
+            item.authorizedStatus_ = slotInfo.authorizedStatus_;
             return;
         }
     }
@@ -130,6 +133,7 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
             jsonNode[BUNDLE_INFO_SLOT_TYPE] = static_cast<int32_t>(slotsInfo_[index].slotType_);
             jsonNode[BUNDLE_INFO_SLOT_ENABLE] = slotsInfo_[index].enable_ ? 1 : 0;
             jsonNode[BUNDLE_INFO_SLOT_CONTROL] = slotsInfo_[index].isForceControl_ ? 1 : 0;
+            jsonNode[BUNDLE_INFO_SLOT_AUTHSTATUS] = slotsInfo_[index].authorizedStatus_ ? 1 : 0;
             jsonNodes.emplace_back(jsonNode);
         }
         jsonObject[BUNDLE_INFO_SLOT_LIST] = jsonNodes;
@@ -162,6 +166,10 @@ void NotificationCloneBundleInfo::SlotsFromJson(const nlohmann::json &jsonObject
         if (slotJson.contains(BUNDLE_INFO_SLOT_CONTROL) && slotJson[BUNDLE_INFO_SLOT_CONTROL].is_number()) {
             int32_t forceControl = slotJson.at(BUNDLE_INFO_SLOT_CONTROL).get<int32_t>();
             slotInfo.isForceControl_ = (forceControl == CONST_ENABLE_INT);
+        }
+        if (slotJson.contains(BUNDLE_INFO_SLOT_AUTHSTATUS) && slotJson[BUNDLE_INFO_SLOT_AUTHSTATUS].is_number()) {
+            int32_t auth = slotJson.at(BUNDLE_INFO_SLOT_AUTHSTATUS).get<int32_t>();
+            slotInfo.authorizedStatus_ = (auth == CONST_ENABLE_INT);
         }
         slotsInfo_.emplace_back(slotInfo);
     }
@@ -212,6 +220,12 @@ std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {
     return "type: " + std::to_string(slotType_) + " " + std::to_string(enable_) + " "
         + std::to_string(isForceControl_);
+}
+
+int32_t NotificationCloneBundleInfo::SlotInfo::GetAuthStaus() const
+{
+    return authorizedStatus_ ? NotificationSlot::AuthorizedStatus::AUTHORIZED :
+        NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED;
 }
 
 std::string NotificationCloneBundleInfo::Dump() const

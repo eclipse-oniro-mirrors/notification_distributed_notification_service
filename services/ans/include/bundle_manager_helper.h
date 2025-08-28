@@ -175,6 +175,8 @@ public:
     ErrCode GetBundleResourceInfo(const std::string &bundleName,
         AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex);
 
+    ErrCode GetAllBundleInfo(std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions,
+        int32_t userId);
 private:
     void Connect();
     void Disconnect();

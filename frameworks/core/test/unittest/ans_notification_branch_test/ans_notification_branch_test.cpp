@@ -763,6 +763,23 @@ public:
     {
         return ERR_ANS_INVALID_PARAM;
     }
+
+    ErrCode SetCheckConfig(int32_t response, const std::string& requestId, const std::string& key,
+        const std::string& value) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode SetDefaultSlotForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        int32_t slotTypeInt, bool enabled, bool isForceControl) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
 };
 
 class AnsNotificationBranchTest : public testing::Test {

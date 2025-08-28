@@ -389,6 +389,8 @@ void NotificationPreferencesInfo::GetAllCLoneBundlesInfo(const int32_t &userId,
             slotInfo.slotType_ = slot->GetType();
             slotInfo.enable_ = slot->GetEnable();
             slotInfo.isForceControl_ = slot->GetForceControl();
+            slotInfo.authorizedStatus_ =
+                (slot->GetAuthorizedStatus() ==NotificationSlot::AuthorizedStatus::AUTHORIZED);
             cloneBundleInfo.AddSlotInfo(slotInfo);
         }
         auto silentReminderIter = silentReminderInfos_.find(bundleItem.second);

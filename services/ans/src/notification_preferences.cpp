@@ -725,7 +725,7 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
         slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
         slotInfo->SetEnable(cloneSlot.enable_);
         slotInfo->SetForceControl(cloneSlot.isForceControl_);
-        slotInfo->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        slotInfo->SetAuthorizedStatus(cloneSlot.GetAuthStaus());
         slots.push_back(slotInfo);
         bundleInfo.SetSlot(slotInfo);
     }
@@ -753,6 +753,59 @@ void NotificationPreferences::GetAllCLoneBundlesInfo(int32_t userId,
     preferncesDB_->ParseBundleFromDistureDB(preferencesInfo, bundlesMap, userId);
     preferencesInfo.GetAllCLoneBundlesInfo(userId, bundlesMap, cloneBundles);
     preferencesInfo_ = preferencesInfo;
+}
+
+ErrCode NotificationPreferences::InitBundlesInfo(int32_t userId,
+    std::unordered_map<std::string, std::string>& bundlesMap)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    return GetBatchKvsFromDb(KEY_BUNDLE_LABEL, bundlesMap, userId);
+}
+
+ErrCode NotificationPreferences::GetLiveViewConfigVersion(int32_t& version)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    if (preferncesDB_->GetLiveViewConfigVersion(version)) {
+        return ERR_OK;
+    }
+    return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+bool NotificationPreferences::SetLiveViewConfigVersion(const int32_t& version)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+        if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    return preferncesDB_->SetLiveViewConfigVersion(version);
+}
+
+ErrCode NotificationPreferences::GetLiveViewRebuildFlag(std::string& flag, int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    if (preferncesDB_->GetLiveViewRebuildFlag(flag, userId)) {
+        return ERR_OK;
+    }
+    return ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+}
+
+bool NotificationPreferences::SetLiveViewRebuildFlag(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    return preferncesDB_->SetLiveViewRebuildFlag(userId);
 }
 
 void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
@@ -1110,7 +1163,7 @@ ErrCode NotificationPreferences::SetDistributedBundleOption(
 
     int32_t userId = -1;
     OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
-    
+
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->PutDistributedBundleOption(bundles, deviceType, userId);
@@ -1145,7 +1198,7 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
- 
+
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
     silentReminderInfo.bundleName = bundleOption->GetBundleName();
@@ -1160,14 +1213,14 @@ ErrCode NotificationPreferences::SetSilentReminderEnabled(const sptr<Notificatio
     }
     return storeDBResult ? ERR_OK : ERR_ANS_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
- 
+
 ErrCode NotificationPreferences::IsSilentReminderEnabled(const sptr<NotificationBundleOption> &bundleOption,
     NotificationConstant::SWITCH_STATE &enableStatus)
 {
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INVALID_PARAM;
     }
- 
+
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo::SilentReminderInfo silentReminderInfo;
     if (preferencesInfo_.GetSilentReminderInfo(bundleOption, silentReminderInfo)) {

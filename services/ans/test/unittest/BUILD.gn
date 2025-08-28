@@ -1614,6 +1614,7 @@ ohos_unittest("notification_extension_test") {
     "notification_extension/distributed_device_status_test.cpp",
     "notification_extension/distributed_extension_service_test.cpp",
     "notification_extension/mock_distributed_operation_callback.cpp",
+    "notification_extension/notification_liveview_utils_test.cpp",
     "notification_extension/notification_config_parse_mock.cpp",
     "notification_extension/notification_load_utils_mock.cpp",
     "notification_extension/notification_operation_service_test.cpp",
@@ -1688,6 +1689,7 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/system_event_observer.cpp",
     "${services_path}/ans/src/system_live_view/advanced_notification_system_live_view_service.cpp",
     "${services_path}/ans/src/telephony_extension_wrapper.cpp",
+    "${services_path}/ans/src/utils/notification_liveview_utils.cpp",
   ]
 
   defines = []

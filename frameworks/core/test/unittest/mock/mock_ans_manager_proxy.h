@@ -195,6 +195,9 @@ public:
     MOCK_METHOD4(GetMutilDeviceStatus, ErrCode(const std::string&, const uint32_t, std::string&, int32_t&));
     MOCK_METHOD4(GetTargetDeviceBundleList, ErrCode(const std::string&, const std::string&,
         std::vector<std::string>&, std::vector<std::string>&));
+    MOCK_METHOD4(SetCheckConfig, ErrCode(int32_t, const std::string&, const std::string&, const std::string&));
+    MOCK_METHOD1(GetLiveViewConfig, ErrCode(const std::vector<std::string>&));
+    MOCK_METHOD4(SetDefaultSlotForBundle, ErrCode(const sptr<NotificationBundleOption> &, int32_t, bool, bool));
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     MOCK_METHOD1(RegisterSwingCallback, ErrCode(const sptr<IRemoteObject>&));
 #endif

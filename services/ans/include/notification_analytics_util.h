@@ -234,6 +234,8 @@ public:
     static bool ReportAllBundlesSlotEnabled();
 
     static void ReportLiveViewNumber(const sptr<NotificationRequest>& request, const int32_t reportType);
+
+    static void ReportTriggerLiveView(const std::vector<std::string>& bundles);
 private:
     static void ReportNotificationEvent(const sptr<NotificationRequest>& request,
         EventFwk::Want want, int32_t eventCode, const std::string& reason);

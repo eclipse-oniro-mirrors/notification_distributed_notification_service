@@ -30,6 +30,8 @@
 #include "dh_notification_clone_bundle_service.h"
 #include "common_event_manager.h"
 #include "notification_analytics_util.h"
+#include "notification_liveview_utils.h"
+#include "common_event_support.h"
 
 namespace OHOS {
 namespace Notification {
@@ -301,6 +303,12 @@ void NotificationCloneManager::OnRestoreStart(EventFwk::Want want)
         if (iter->second != nullptr && !iter->second->isDhSource()) {
             iter->second->OnRestoreStart(bundleName, appIndex, userId, uid);
         }
+    }
+
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(bundleName, uid);
+    if (bundleOption != nullptr) {
+        NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(
+            EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START, bundleOption);
     }
 }
 
