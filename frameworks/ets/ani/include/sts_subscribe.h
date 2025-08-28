@@ -46,8 +46,8 @@ private:
 
 class StsSubscriberInstance : public OHOS::Notification::NotificationSubscriber {
 public:
-    StsSubscriberInstance();
-    virtual ~StsSubscriberInstance();
+    StsSubscriberInstance(){};
+    virtual ~StsSubscriberInstance(){};
 
     virtual void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
