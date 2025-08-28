@@ -286,6 +286,44 @@ bool StsRemindTypeUtils::CToSts(const RemindType inType, STSRemindType &outType)
     return true;
 }
 
+bool StsSourceTypeUtils::StsToC(const STSSourceType inType, SourceType &outType)
+{
+    switch (inType) {
+        case STSSourceType::TYPE_NORMAL:
+            outType = SourceType::TYPE_NORMAL;
+            break;
+        case STSSourceType::TYPE_CONTINUOUS:
+            outType = SourceType::TYPE_CONTINUOUS;
+            break;
+        case STSSourceType::TYPE_TIMER:
+            outType = SourceType::TYPE_TIMER;
+            break;
+        default:
+            ANS_LOGE("SourceType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool StsSourceTypeUtils::CToSts(const SourceType inType, STSSourceType &outType)
+{
+    switch (inType) {
+        case SourceType::TYPE_NORMAL:
+            outType = STSSourceType::TYPE_NORMAL;
+            break;
+        case SourceType::TYPE_CONTINUOUS:
+            outType = STSSourceType::TYPE_CONTINUOUS;
+            break;
+        case SourceType::TYPE_TIMER:
+            outType = STSSourceType::TYPE_TIMER;
+            break;
+        default:
+            ANS_LOGE("SourceType %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
 StsNotificationLocalLiveViewSubscriber::StsNotificationLocalLiveViewSubscriber()
 {}
 
@@ -488,6 +526,25 @@ bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &re
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
     if (EnumConvertAniToNative(env, enumItem, stsRemindType)) {
         StsRemindTypeUtils::StsToC(stsRemindType, remindType);
+        return true;
+    }
+    return false;
+}
+
+bool SourceTypeCToEts(ani_env *env, SourceType sourceType, ani_enum_item &enumItem)
+{
+    STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
+    StsSourceTypeUtils::CToSts(sourceType, stsSourceType);
+    EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.SourceType", stsSourceType, enumItem);
+    return true;
+}
+
+bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceType)
+{
+    STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
+    if (EnumConvertAniToNative(env, enumItem, stsSourceType)) {
+        StsSourceTypeUtils::StsToC(stsSourceType, sourceType);
         return true;
     }
     return false;
