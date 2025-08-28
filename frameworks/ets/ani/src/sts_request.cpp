@@ -1190,18 +1190,18 @@ bool SetNotificationRequestDistributedOptions(ani_env *env,
     NotificationDistributedOptions options = notification->GetNotificationRequest().GetNotificationDistributedOptions();
     // isDistributed?: boolean
     if (!SetPropertyOptionalByBoolean(env, optionsObj, "isDistributed", options.IsDistributed())) {
-        ANS_LOGE("set isDistributed failed");
+        ANS_LOGD("set isDistributed failed");
     }
     // supportDisplayDevices?: Array<string>
     ani_object displayDevices = GetAniStringArrayByVectorString(env, options.GetDevicesSupportDisplay());
     if (displayDevices == nullptr || !SetPropertyByRef(env, optionsObj, "supportDisplayDevices", displayDevices)) {
-        ANS_LOGE("set supportDisplayDevices failed");
+        ANS_LOGD("set supportDisplayDevices failed");
     }
     // supportOperateDevices?: Array<string>
     ani_object supportOperateDevices = GetAniStringArrayByVectorString(env, options.GetDevicesSupportOperate());
     if (supportOperateDevices == nullptr ||
         !SetPropertyByRef(env, optionsObj, "supportOperateDevices", supportOperateDevices)) {
-        ANS_LOGE("set supportOperateDevices failed");
+        ANS_LOGD("set supportOperateDevices failed");
     }
     // readonly remindType?: number
     ani_enum_item remindTypeItem {};
@@ -1209,7 +1209,7 @@ bool SetNotificationRequestDistributedOptions(ani_env *env,
         CallSetter(env, ncCls, optionsObj, "remindType", remindTypeItem);
     }
     if (!SetPropertyByRef(env, object, "distributedOption", optionsObj)) {
-        ANS_LOGE("set distributedOption faild");
+        ANS_LOGD("set distributedOption faild");
     }
     ANS_LOGD("SetNotificationRequestDistributedOptions end");
     return true;
