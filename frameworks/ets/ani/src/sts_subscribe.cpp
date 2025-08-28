@@ -89,23 +89,19 @@ void StsDistributedOperationCallback::SetVm(ani_vm *vm)
     etsVm_ = vm;
 }
 
-StsSubscriberInstance::StsSubscriberInstance()
-{}
-StsSubscriberInstance::~StsSubscriberInstance()
-{}
 void StsSubscriberInstance::OnCanceled(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap,
     int32_t deleteReason)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("OnCanceled enter");
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -114,27 +110,27 @@ void StsSubscriberInstance::OnCanceled(
         vec.push_back(obj);
         CallFunction(etsEnv, "onCancel", vec);
     } else {
-        ANS_LOGD("WarpSubscribeCallbackData faild");
+        ANS_LOGE("WarpSubscribeCallbackData faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-    ANS_LOGD("done");
+    ANS_LOGD("OnCanceled done");
 }
 void StsSubscriberInstance::OnConsumed(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("OnConsumed enter");
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -143,25 +139,25 @@ void StsSubscriberInstance::OnConsumed(
         vec.push_back(obj);
         CallFunction(etsEnv, "onConsume", vec);
     } else {
-        ANS_LOGD("WarpSubscribeCallbackData faild");
+        ANS_LOGE("WarpSubscribeCallbackData faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-    ANS_LOGD("done");
+    ANS_LOGD("OnConsumed done");
 }
 void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("OnUpdate enter");
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -170,14 +166,14 @@ void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMa
         vec.push_back(obj);
         CallFunction(etsEnv, "onUpdate", vec);
     } else {
-        ANS_LOGD("WarpNotificationSortingMap faild");
+        ANS_LOGE("WarpNotificationSortingMap faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-    ANS_LOGD("done");
+    ANS_LOGD("OnUpdate done");
 }
 void StsSubscriberInstance::OnConnected()
 {
