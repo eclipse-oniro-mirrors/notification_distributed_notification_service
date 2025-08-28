@@ -87,20 +87,19 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
     ani_int length;
     ani_status status = env->Object_GetPropertyByName_Int(ani_obj, "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("Object_GetPropertyByName_Double faild. status %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int faild. status %{public}d", status);
         return false;
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
-        status = env->Object_CallMethodByName_Ref(ani_obj,
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
+        status = env->Object_CallMethodByName_Ref(ani_obj, "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
         if (status != ANI_OK) {
-            ANS_LOGE("status : %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Ref faild. status : %{public}d", status);
             return false;
         }
         std::string std_string;
         if ((status = GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string)) != ANI_OK) {
-            ANS_LOGE("GetStdString faild. status %{public}d", status);
+            ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
             return false;
         }
         stdVString.emplace_back(std_string);
