@@ -32,9 +32,12 @@ StsDistributedOperationCallback::StsDistributedOperationCallback(ani_object prom
 ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t operationResult)
 {
     std::lock_guard<std::mutex> l(lock_);
-    if (isCall_) return ANI_OK;
+    if (isCall_) {
+        ANS_LOGD("OnOperationCallback isCall_ is true");
+        return ANI_OK;
+    }
     if (etsVm_ == nullptr) {
-        ANS_LOGD("etsVm_ is null");
+        ANS_LOGE("etsVm_ is null");
         return ANI_OK;
     }
     ani_env* etsEnv;
@@ -42,13 +45,13 @@ ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t opera
     ani_options aniArgs { 0, nullptr };
     aniResult = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
         return aniResult;
     }
     OnStsOperationCallback(etsEnv, operationResult);
     aniResult = etsVm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
         return aniResult;
     }
     isCall_ = true;
@@ -57,7 +60,7 @@ ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t opera
 
 void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const int32_t operationResult)
 {
-    ANS_LOGD("ENTER");
+    ANS_LOGD("OnStsOperationCallback enter");
     if (env == nullptr) {
         ANS_LOGD("env is nullptr");
         return;
@@ -67,10 +70,10 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
     ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrCode);
 
     if (externalErrCode == ERR_OK) {
-        ANS_LOGD("OnStsOperationCallback Resolve");
+        ANS_LOGD("OnStsOperationCallback resolve");
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, externalErrCode);
         if (ANI_OK != (status = env->PromiseResolver_Resolve(resolver_, static_cast<ani_ref>(ret)))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
             return;
         }
     } else {
@@ -79,7 +82,7 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         ani_error rejection =
             static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, externalErrCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(resolver_, rejection))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
         }
     }
 }
