@@ -342,14 +342,14 @@ void StsNotificationLocalLiveViewSubscriber::OnDied()
 void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, sptr<ButtonOption> buttonOption)
 {
     ANS_LOGD("OnResponse call");
-    std::string functionName = "OnResponse";
+    std::string functionName = "onResponse";
     ani_env *env = GetAniEnv();
     if (env == nullptr || stsSubscriber_ == nullptr) {
         ANS_LOGE("null env or stsSubscriber_");
         return;
     }
     ani_status status = ANI_OK;
-    ani_object stsSubscriberObj = reinterpret_cast<ani_object>(stsSubscriber_->aniRef);
+    ani_object stsSubscriberObj = static_cast<ani_object>(stsSubscriber_->aniRef);
     ani_ref funRef;
     ani_boolean isUndefined = ANI_TRUE;
     status = GetPropertyRef(env, stsSubscriberObj, functionName.c_str(), isUndefined, funRef);
@@ -371,6 +371,10 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     if ((status = env->FunctionalObject_Call(onFn, argv.size(), argv.data(), &resutlt)) != ANI_OK) {
         ANS_LOGE("FunctionalObject_Call failed, status: %{public}d", status);
         return;
+    }
+    ani_status aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("OnResponse DetachCurrentThread error. result: %{public}d.", aniResult);
     }
 }
 
@@ -409,12 +413,18 @@ ani_env* StsNotificationLocalLiveViewSubscriber::GetAniEnv()
         ANS_LOGE("vm_ is nullptr");
         return nullptr;
     }
-    ani_env* aniEnv = nullptr;
-    if (vm_->GetEnv(ANI_VERSION_1, &aniEnv) != ANI_OK) {
-        ANS_LOGE("get env failed");
-        return nullptr;
+    ani_env* env;
+    ani_status aniResult = ANI_ERROR;
+    ani_options aniArgs { 0, nullptr };
+    aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        if (vm_->GetEnv(ANI_VERSION_1, &env) != ANI_OK) {
+            ANS_LOGE("get env failed");
+            return nullptr;
+        }
     }
-    return aniEnv;
+    return env;
 }
 
 bool SlotTypeEtsToC(ani_env *env, ani_enum_item enumItem, SlotType &slotType)
