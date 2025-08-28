@@ -82,7 +82,7 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id)
     int returncode = Notification::NotificationHelper::GetDoNotDisturbProfile(id, doNotDisturbProfile);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniSetDoNotDisturbDateWithId error, errorCode: %{public}d, returncode: %{public}d",
+        ANS_LOGE("AniGetDoNotDisturbProfile error, errorCode: %{public}d, returncode: %{public}d",
             externalCode, returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
