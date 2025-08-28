@@ -22,9 +22,10 @@ namespace NotificationSts {
 bool GetKeySToRecode(ani_env *env,
     const std::shared_ptr<NotificationSortingMap> &sortingMap, ani_object &recordObj, ani_method &recordSetMethod)
 {
+    ANS_LOGD("GetKeySToRecode call");
     ani_status status = ANI_ERROR;
     std::vector<std::string> keys = sortingMap->GetKey();
-    ANS_LOGD("GetKeySToRecode sortingMap size:%{public}d", keys.size());
+    ANS_LOGD("GetKeySToRecode sortingMap sortedKey size:%{public}d", keys.size());
     for (auto &it : keys) {
         Notification::NotificationSorting sorting;
         if (!sortingMap->GetNotificationSorting(it, sorting)) {
@@ -93,7 +94,7 @@ bool WarpNotificationSortingMap(ani_env *env,
     if (!keys.empty()) {
         ani_object arrayObj = GetAniStringArrayByVectorString(env, keys);
         if (arrayObj == nullptr) {
-            ANS_LOGE("WarpVectorStringToSts sortedHashCode faild");
+            ANS_LOGE("GetAniStringArrayByVectorString sortedKey faild");
             return false;
         }
         if (ANI_OK != (status = env->Object_SetPropertyByName_Ref(outObj, "sortedHashCode", arrayObj))) {
