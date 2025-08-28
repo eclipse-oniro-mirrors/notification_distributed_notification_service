@@ -192,11 +192,11 @@ void UnWarpNotificationTime(ani_env *env, ani_object obj,
     }
     ani_boolean isUndefined = ANI_TRUE;
     ani_int initialTime = 0;
-    if (GetPropertyInt(env, obj, "version", isUndefined, initialTime) == ANI_OK
+    if (GetPropertyInt(env, obj, "initialTime", isUndefined, initialTime) == ANI_OK
         && isUndefined == ANI_FALSE) {
         notificationTime.SetInitialTime(initialTime);
     } else {
-        ANS_LOGD("UnWarpNotificationTime: get version failed");
+        ANS_LOGD("UnWarpNotificationTime: get initialTime failed");
     }
     bool isCountDown = true;
     if (ANI_OK == GetPropertyBool(env, obj, "isCountDown", isUndefined, isCountDown)
@@ -321,9 +321,12 @@ ani_status GetIconButtonArray(ani_env *env,
     ani_boolean isUndefined = true;
     ani_status status = ANI_ERROR;
     ani_int length;
-    if (((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK) || isUndefined == ANI_TRUE) {
+    if (((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK)) {
         ANS_LOGI("get param failed, may be %{public}s : undefined", name);
         return ANI_INVALID_ARGS;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_OK;
     }
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
@@ -447,33 +450,27 @@ bool getCapsuleByIcon(ani_env *env, ani_object obj, std::shared_ptr<PixelMap> &p
     ani_boolean isUndefined = ANI_TRUE;
     pixelMap = nullptr;
     ani_ref tempRef = nullptr;
-    GetPropertyRefValue(env, obj, "icon", isUndefined, tempRef);
-    if (tempRef != nullptr) {
-        if (isUndefined == ANI_TRUE) {
-            ANS_LOGE("icon of Capsule is undefined");
-            return false;
-        }
-        std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(tempRef));
+    ani_status status = GetPropertyRef(env, obj, "icon", isUndefined, tempRef);
+    if (status != ANI_OK) {
+        ANS_LOGE("icon GetPropertyRef failed");
+        return false;
     }
+    if (tempRef == nullptr) {
+        ANS_LOGE("PixelMap is null");
+        return false;
+    }
+    pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(tempRef));
+
     return true;
 }
 
 bool getCapsuleByButtons(ani_env *env, ani_object obj, std::vector<NotificationIconButton> &iconButtons)
 {
-    ani_boolean isUndefined = ANI_TRUE;
-    iconButtons = {};
-    ani_ref tempRef = nullptr;
-    GetPropertyRefValue(env, obj, "capsuleButtons", isUndefined, tempRef);
-    if (tempRef != nullptr) {
-        if (isUndefined == ANI_TRUE) {
-            ANS_LOGE("capsuleButtons of Capsule is undefined");
-            return false;
-        }
-        if (GetIconButtonArray(env, obj, "capsuleButtons", iconButtons) != ANI_OK || iconButtons.empty()) {
-            ANS_LOGE("get capsuleButtons failed");
-            return false;
-        }
+    if (GetIconButtonArray(env, obj, "capsuleButtons", iconButtons) != ANI_OK) {
+        ANS_LOGE("get capsuleButtons failed");
+        return false;
     }
+
     return true;
 }
 
@@ -481,17 +478,11 @@ bool getCapsuleByString(ani_env *env, ani_object obj, const char *name, std::str
 {
     ani_boolean isUndefined = ANI_TRUE;
     out = "";
-    ani_ref tempRef = nullptr;
-    GetPropertyRefValue(env, obj, name, isUndefined, tempRef);
-    if (tempRef != nullptr) {
-        if (isUndefined == ANI_TRUE) {
-            ANS_LOGE("%{public}s of Capsule is undefined", name);
-            return false;
-        }
-        if (GetStringByAniString(env, reinterpret_cast<ani_string>(tempRef), out) != ANI_OK) {
-            ANS_LOGE("get string of %{public}s failed", name);
-            return false;
-        }
+    ani_status status = ANI_ERROR;
+    status = GetPropertyString(env, obj, name, isUndefined, out);
+    if (status != ANI_OK) {
+        ANS_LOGE("%{public}s GetPropertyString failed", name);
+        return false;
     }
     return true;
 }
@@ -499,19 +490,19 @@ bool getCapsuleByString(ani_env *env, ani_object obj, const char *name, std::str
 bool getCapsuleByInt(ani_env *env, ani_object obj, const char *name, int32_t &out)
 {
     ani_boolean isUndefined = ANI_TRUE;
-    out = ERR_OK;
-    ani_ref tempRef = nullptr;
-    GetPropertyRefValue(env, obj, name, isUndefined, tempRef);
-    if (tempRef != nullptr) {
-        if (isUndefined == ANI_TRUE) {
-            ANS_LOGE("%{public}s of Capsule is undefined", name);
-            return false;
-        }
-        if ((env->Object_CallMethodByName_Int(static_cast<ani_object>(tempRef),
-            "unboxed", ":d", &out)) != ANI_OK) {
-            ANS_LOGE("get double of %{public}s failed", name);
-            return false;
-        }
+    ani_ref refObj;
+    ani_status status = GetPropertyRef(env, obj, name, isUndefined, refObj);
+    if (status != ANI_OK) {
+        ANS_LOGE("%{public}s is undefined", name);
+        return false;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return true;
+    }
+    if ((status = env->Object_CallMethodByName_Int(static_cast<ani_object>(refObj),
+        "unboxed", ":i", &out)) != ANI_OK) {
+        ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
+        return false;
     }
     return true;
 }
@@ -556,7 +547,7 @@ bool UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule
     capsule.SetIcon(pixelMap);
     std::vector<NotificationIconButton> iconButtons = {};
     if (!getCapsuleByButtons(env, obj, iconButtons)) {
-        ANS_LOGE("get icon failed");
+        ANS_LOGE("get capsuleButtons   failed");
         return false;
     }
     capsule.SetCapsuleButton(iconButtons);
