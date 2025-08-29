@@ -30,7 +30,7 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
     AppExecFwk::UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
 
     if (pWantAgent == nullptr) {
-        ANS_LOGI("UnwrapWantAgent wantAgent nullptr");
+        ANS_LOGE("UnwrapWantAgent wantAgent nullptr");
         return nullptr;
     }
     std::shared_ptr<WantAgent> wantAgentSp = std::make_shared<WantAgent>(*pWantAgent);
