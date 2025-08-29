@@ -30,7 +30,7 @@ ani_boolean AniIsNotificationEnabled(ani_env *env)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniIsNotificationEnabled -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniIsNotificationEnabled error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniIsNotificationEnabled end");
     return NotificationSts::BoolToAniBoolean(allowed);
@@ -44,7 +44,7 @@ ani_boolean AniIsNotificationEnabledWithId(ani_env *env, ani_int userId)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniIsNotificationEnabledWithId -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniIsNotificationEnabledWithId error, errorCode: %{public}d", externalCode);
     }
     ANS_LOGD("AniIsNotificationEnabledWithId end");
     return NotificationSts::BoolToAniBoolean(allowed);
