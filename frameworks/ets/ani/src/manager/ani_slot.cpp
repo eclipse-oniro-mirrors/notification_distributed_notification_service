@@ -371,7 +371,7 @@ ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_it
     int returncode = Notification::NotificationHelper::GetNotificationSlotForBundle(option, slotType, slot);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetSlotByBundle -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("GetSlotByBundle error, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
@@ -391,7 +391,7 @@ ani_object AniGetNotificationSetting(ani_env *env)
     ANS_LOGD("AniGetNotificationSetting slotFlags: %{public}d", slotFlags);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("GetNotificationSetting -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("GetNotificationSetting error, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return nullptr;
     }
