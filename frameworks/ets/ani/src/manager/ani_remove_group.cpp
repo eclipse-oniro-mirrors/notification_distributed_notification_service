@@ -44,7 +44,7 @@ void AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string gr
     int returncode = OHOS::Notification::NotificationHelper::RemoveGroupByBundle(option, groupNameStr);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniRemoveGroupByBundle -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniRemoveGroupByBundle error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniRemoveGroupByBundle end");
