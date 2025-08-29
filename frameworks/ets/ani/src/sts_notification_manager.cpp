@@ -65,7 +65,7 @@ bool StsSlotTypeUtils::StsToC(const STSSlotType inType, SlotType &outType)
             outType = SlotType::OTHER;
             break;
         default:
-            ANS_LOGE("SlotType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSSlotType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -130,7 +130,7 @@ bool StsContentTypeUtils::StsToC(const STSContentType inType, ContentType &outTy
             outType = ContentType::LIVE_VIEW;
             break;
         default:
-            ANS_LOGE("ContentType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSContentType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -212,7 +212,7 @@ bool StsSlotLevelUtils::StsToC(const STSSlotLevel inLevel, SlotLevel &outLevel)
             outLevel = SlotLevel::LEVEL_HIGH;
             break;
         default:
-            ANS_LOGE("SlotLevel %{public}d is an invalid value", inLevel);
+            ANS_LOGE("STSSlotLevel %{public}d is an invalid value", inLevel);
             return false;
     }
     return true;
@@ -299,7 +299,7 @@ bool StsSourceTypeUtils::StsToC(const STSSourceType inType, SourceType &outType)
             outType = SourceType::TYPE_TIMER;
             break;
         default:
-            ANS_LOGE("SourceType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSSourceType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
