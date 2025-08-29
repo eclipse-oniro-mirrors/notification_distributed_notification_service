@@ -2401,6 +2401,52 @@ ErrCode AnsNotification::AllowUseReminder(const std::string& bundleName, bool& i
     return proxy->AllowUseReminder(bundleName, isAllowUseReminder);
 }
 
+ErrCode AnsNotification::SetDefaultSlotForBundle(const NotificationBundleOption& bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("SetDefaultSlotForBundle fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INVALID_PARAM;
+    }
+    return proxy->SetDefaultSlotForBundle(bo, slotType, enabled, isForceControl);
+}
+
+ErrCode AnsNotification::SetCheckConfig(int32_t response, const std::string& requestId,
+    const std::string& key, const std::string& value)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->SetCheckConfig(response, requestId, key, value);
+}
+
+ErrCode AnsNotification::GetLiveViewConfig(const std::vector<std::string>& bundleList)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail.");
+        return ERR_ANS_SERVICE_NOT_CONNECTED;
+    }
+
+    return proxy->GetLiveViewConfig(bundleList);
+}
+
 void AnsNotification::CreateSubscribeListener(const std::shared_ptr<NotificationSubscriber> &subscriber,
     sptr<SubscriberListener> &listener)
 {

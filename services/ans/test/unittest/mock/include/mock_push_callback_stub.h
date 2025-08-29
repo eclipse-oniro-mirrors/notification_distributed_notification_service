@@ -28,8 +28,11 @@ public:
     virtual ~MockPushCallBackStub();
     virtual int32_t OnCheckNotification(const std::string &notificationData,
         const std::shared_ptr<Notification::PushCallBackParam> &pushCallBackParam) override;
+    virtual int32_t OnCheckLiveView(const std::string& requestId,
+        const std::vector<std::string>& bundles) override;
 };
 namespace Notification {
+void MockOnCheckLiveView(const int32_t retOnCheckLiveView);
 void MockOnCheckNotification(const int32_t retOnCheckNotification);
 } // namespace Notification
 }  // namespace OHOS

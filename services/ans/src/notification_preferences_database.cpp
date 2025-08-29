@@ -259,6 +259,8 @@ const static std::string KEY_SUBSCRIBER_EXISTED_FLAG = "existFlag";
 const static int32_t DISTRIBUTED_KEY_NUM = 4;
 const static int32_t DISTRIBUTED_KEY_BUNDLE_INDEX = 1;
 const static int32_t DISTRIBUTED_KEY_UID_INDEX = 2;
+static const char* const LIVE_VIEW_CCM_VERSION = "liveview_ccm_version";
+static const char* const LIVE_VIEW_REBUILD_FLAG = "liveview_rebuild_flag";
 
 /**
  * Indicates that distributed notification switch.
@@ -2336,7 +2338,71 @@ bool NotificationPreferencesDatabase::SetSilentReminderEnabled(
         result, key.c_str(), silentReminderInfo.enableStatus);
     return (result == NativeRdb::E_OK);
 }
- 
+
+bool NotificationPreferencesDatabase::GetLiveViewConfigVersion(int32_t& version)
+{
+    bool result = false;
+    GetValueFromDisturbeDB(LIVE_VIEW_CCM_VERSION, ZERO_USERID, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                result = true;
+                version = StringToInt(value);
+                break;
+            }
+            default:
+                ANS_LOGE("Get data from db failed %{public}d", status);
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::GetLiveViewRebuildFlag(std::string& flag, int32_t userId)
+{
+    bool result = false;
+    GetValueFromDisturbeDB(LIVE_VIEW_REBUILD_FLAG, userId, [&](const int32_t &status, std::string &value) {
+        switch (status) {
+            case NativeRdb::E_EMPTY_VALUES_BUCKET: {
+                result = true;
+                break;
+            }
+            case NativeRdb::E_OK: {
+                flag = value;
+                result = true;
+                break;
+            }
+            default:
+                ANS_LOGE("Get data from db failed %{public}d", status);
+                result = false;
+                break;
+        }
+    });
+    return result;
+}
+
+bool NotificationPreferencesDatabase::SetLiveViewConfigVersion(const int32_t& version)
+{
+    int32_t result = PutDataToDB(LIVE_VIEW_CCM_VERSION, version, ZERO_USERID);
+    ANS_LOGE("Set version failed %{public}d %{public}d", version, result);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::SetLiveViewRebuildFlag(int32_t userId)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    int32_t result = rdbDataManager_->InsertData(LIVE_VIEW_REBUILD_FLAG, KEY_REMOVED_FLAG, userId);
+    ANS_LOGI("Set flag failed %{public}d", result);
+    return (result == NativeRdb::E_OK);
+}
+
 bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
     NotificationPreferencesInfo::SilentReminderInfo &silentReminderInfo)
 {

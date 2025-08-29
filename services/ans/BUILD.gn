@@ -127,6 +127,7 @@ ohos_source_set("ans_service_sources") {
     "src/system_event_observer.cpp",
     "src/system_live_view/advanced_notification_system_live_view_service.cpp",
     "src/telephony_extension_wrapper.cpp",
+    "src/utils/notification_liveview_utils.cpp",
     "src/utils/notifictaion_load_utils.cpp",
   ]
 

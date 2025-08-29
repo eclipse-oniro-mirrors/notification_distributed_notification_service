@@ -36,6 +36,15 @@ public:
      */
     virtual int32_t OnCheckNotification(
         const std::string &notificationData, const std::shared_ptr<PushCallBackParam> &pushCallBackParam) = 0;
+
+    /**
+     * OnCheckLiveView
+     *
+     * @param requestId,  Identifies a unique request.
+     * @param bundles， Identifies the bundle name.
+     * @return Returns push check result.
+     */
+    virtual int32_t OnCheckLiveView(const std::string& requestId, const std::vector<std::string>& bundles) = 0;
 };
 }  // namespace Notification
 }  // namespace OHOS

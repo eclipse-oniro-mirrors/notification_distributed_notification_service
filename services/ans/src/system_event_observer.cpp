@@ -25,6 +25,7 @@
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
 #endif
+#include "notification_liveview_utils.h"
 
 namespace OHOS {
 namespace Notification {
@@ -50,6 +51,8 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_RESTORE_START);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BUNDLE_SCAN_FINISHED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_STARTED);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -101,11 +104,12 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
     std::string action = want.GetAction();
     ANS_LOGD("OnReceiveEvent action is %{public}s.", action.c_str());
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
-        if (callbacks_.onBundleRemoved != nullptr) {
-            sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
-            if (bundleOption != nullptr) {
-                callbacks_.onBundleRemoved(bundleOption);
-            }
+        sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
+        if (bundleOption != nullptr && callbacks_.onBundleRemoved != nullptr) {
+            callbacks_.onBundleRemoved(bundleOption);
+        }
+        if (bundleOption != nullptr) {
+            NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action, bundleOption);
         }
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
@@ -127,6 +131,7 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);
+        AdvancedNotificationService::GetInstance()->TriggerLiveViewSwitchCheck(userId);
 #ifdef ALL_SCENARIO_COLLABORATION
         DistributedDeviceManager::GetInstance().InitTrustList();
 #endif
@@ -162,6 +167,9 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF) {
         NotificationPreferences::GetInstance()->SetKioskModeStatus(false);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_BUNDLE_SCAN_FINISHED ||
+        action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_STARTED) {
+        NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action);
     } else {
         OnReceiveEventInner(data);
     }
@@ -183,21 +191,27 @@ void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &d
 
 void SystemEventObserver::OnBundleAddEventInner(const EventFwk::CommonEventData &data)
 {
-    if (callbacks_.onBundleAdd != nullptr) {
-        sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
-        if (bundleOption != nullptr) {
-            callbacks_.onBundleAdd(bundleOption);
-        }
+    sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
+    if (bundleOption != nullptr && callbacks_.onBundleAdd != nullptr) {
+        callbacks_.onBundleAdd(bundleOption);
+    }
+    if (bundleOption != nullptr) {
+        NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(
+            EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED, bundleOption);
     }
 }
 
 void SystemEventObserver::OnBundleUpdateEventInner(const EventFwk::CommonEventData &data)
 {
-    if (callbacks_.onBundleUpdate != nullptr) {
-        sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
-        if (bundleOption != nullptr) {
-            callbacks_.onBundleUpdate(bundleOption);
-        }
+    sptr<NotificationBundleOption> bundleOption = GetBundleOption(data.GetWant());
+    if (bundleOption != nullptr && callbacks_.onBundleUpdate != nullptr) {
+        callbacks_.onBundleUpdate(bundleOption);
+    }
+
+    AAFwk::Want want = data.GetWant();
+    if (bundleOption != nullptr && want.GetBoolParam("isAppUpdate", false)) {
+        NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(
+            EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED, bundleOption);
     }
 }
 

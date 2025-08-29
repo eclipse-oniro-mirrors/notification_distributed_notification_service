@@ -163,6 +163,7 @@ namespace Notification {
         REQUEST_ENABLE_NOTIFICATION_BY_BUNDLE,
         REPLY_DISTRIBUTE_OPERATION,
         GET_NOTIFICATION_SETTING,
+        ON_CHECK_LIVEVIEW,
     };
 }
 }

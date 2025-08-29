@@ -319,6 +319,12 @@ interface OHOS.Notification.IAnsManager {
 
     void SetTargetDeviceSwitch([in] String deviceType, [in] String deviceId, [in] boolean notificaitonEnable, [in] boolean liveViewEnable);
 
+    void SetCheckConfig([in] int response, [in] String requestId, [in] String key, [in] String value);
+
+    void GetLiveViewConfig([in] String[] bundleList);
+
+    void SetDefaultSlotForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int slotTypeInt, [in] boolean enabled, [in] boolean isForceControl);
+
     void SetHashCodeRule([in] unsigned int type);
 
     void GetMutilDeviceStatus([in] String deviceType, [in] unsigned int status, [out] String deviceId, [out] int userId);

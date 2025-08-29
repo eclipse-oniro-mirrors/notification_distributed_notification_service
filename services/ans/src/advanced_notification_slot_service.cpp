@@ -33,6 +33,8 @@
 #include "smart_reminder_center.h"
 #endif
 
+#include "notification_liveview_utils.h"
+#include "os_account_manager_helper.h"
 #include "advanced_notification_inline.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
@@ -45,7 +47,17 @@ namespace {
     constexpr char KEY_NAME[] = "AGGREGATE_CONFIG";
     constexpr char CTRL_LIST_KEY_NAME[] = "NOTIFICATION_CTL_LIST_PKG";
     constexpr char CALL_UI_BUNDLE[] = "com.ohos.callui";
+    constexpr char LIVEVIEW_CONFIG_KEY[] = "APP_LIVEVIEW_CONFIG";
     constexpr uint32_t NOTIFICATION_SETTING_FLAG_BASE = 0x11;
+    constexpr int32_t MAX_LIVEVIEW_CONFIG_SIZE = 60;
+    constexpr int32_t MAX_CHECK_RETRY_TIME = 3;
+    constexpr int32_t PUSH_CHECK_ERR_DEVICE = 6;
+    constexpr int32_t PUSH_CHECK_ERR_EXPIRED = 10;
+    constexpr int32_t PUSH_CHECK_ERR_AUTH = 11;
+    constexpr int32_t MAX_CHECK_NUM = 20;
+    constexpr uint64_t DELAY_TIME_CHECK_LIVEVIEW = 10 * 1000 * 1000;
+    constexpr uint64_t DELAY_TIME_TRIGGER_LIVEVIEW = 10 * 60 * 1000 * 1000;
+    constexpr uint64_t INTERVAL_CHECK_LIVEVIEW = 1000 * 1000;
     const std::set<std::string> unAffectDevices = {
         NotificationConstant::LITEWEARABLE_DEVICE_TYPE,
         NotificationConstant::WEARABLE_DEVICE_TYPE
@@ -870,7 +882,7 @@ ErrCode AdvancedNotificationService::GetSlotNumAsBundle(
 ErrCode AdvancedNotificationService::AddSlotThenPublishEvent(
     const sptr<NotificationSlot> &slot,
     const sptr<NotificationBundleOption> &bundle,
-    bool enabled, bool isForceControl)
+    bool enabled, bool isForceControl, int32_t authStatus)
 {
     bool allowed = false;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
@@ -887,7 +899,7 @@ ErrCode AdvancedNotificationService::AddSlotThenPublishEvent(
 
     slot->SetEnable(enabled);
     slot->SetForceControl(isForceControl);
-    slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+    slot->SetAuthorizedStatus(authStatus);
     std::vector<sptr<NotificationSlot>> slots;
     slots.push_back(slot);
     result = NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
@@ -1016,6 +1028,289 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
     }));
     notificationSvrQueue_->wait(handler);
 
+    return result;
+}
+
+ErrCode AdvancedNotificationService::SetDefaultSlotForBundle(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t slotTypeInt, bool enabled, bool isForceControl)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    NotificationConstant::SlotType slotType = static_cast<NotificationConstant::SlotType>(slotTypeInt);
+    ANS_LOGD("slotType: %{public}d, enabled: %{public}d, isForceControl: %{public}d",
+        slotType, enabled, isForceControl);
+    ErrCode result = CheckCommonParams();
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if (bundleOption == nullptr || bundleOption->GetBundleName().empty() || bundleOption->GetUid() <= 0) {
+        return ERR_ANS_INVALID_BUNDLE;
+    }
+
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_5);
+    message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid()) +
+        " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
+        " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        sptr<NotificationSlot> slot;
+        result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
+        if (result == ERR_ANS_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST ||
+            result == ERR_ANS_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            slot = new (std::nothrow) NotificationSlot(slotType);
+            if (slot == nullptr) {
+                ANS_LOGE("Failed to create NotificationSlot ptr.");
+                result = ERR_ANS_NO_MEMORY;
+                return;
+            }
+            GenerateSlotReminderMode(slot, bundleOption);
+            result = AddSlotThenPublishEvent(slot, bundleOption, enabled, isForceControl,
+                NotificationSlot::AuthorizedStatus::NOT_AUTHORIZED);
+            return;
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
+
+    SendEnableNotificationSlotHiSysEvent(bundleOption, slotType, enabled, result);
+    message.ErrorCode(result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    ANS_LOGI("%{public}s_%{public}d, SetDefaultSlotForBundle successful.",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+    return result;
+}
+
+
+void AdvancedNotificationService::InvokeCheckConfig(const std::string& requestId)
+{
+    std::shared_ptr<LiveViewCheckParam> checkParam = nullptr;
+    if (!NotificationLiveViewUtils::GetInstance().GetLiveViewCheckData(requestId, checkParam)) {
+        ANS_LOGW("Unknow request %{public}s.", requestId.c_str());
+        return;
+    }
+    if (checkParam == nullptr) {
+        ANS_LOGW("Invalid data request %{public}s.", requestId.c_str());
+        return;
+    }
+
+    sptr<IPushCallBack> pushCallBack = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> lock(pushMutex_);
+        if (pushCallBacks_.find(NotificationConstant::SlotType::LIVE_VIEW) == pushCallBacks_.end()) {
+            ANS_LOGW("No push check function.");
+            NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
+            return;
+        }
+        pushCallBack = pushCallBacks_[NotificationConstant::SlotType::LIVE_VIEW];
+    }
+    if (pushCallBack == nullptr) {
+        ANS_LOGW("Invalid push check function.");
+        NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
+        return;
+    }
+
+    int32_t res = pushCallBack->OnCheckLiveView(requestId, checkParam->bundlesName);
+    if (res != ERR_OK) {
+        ANS_LOGW("Push check failed %{public}d %{public}zu.", res, checkParam->bundlesName.size());
+        NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
+    }
+}
+
+void AdvancedNotificationService::InvockLiveViewSwitchCheck(
+    const std::vector<sptr<NotificationBundleOption>>& bundles, int32_t userId, uint32_t index)
+{
+    ANS_LOGI("Invock switch start %{public}zu %{public}u %{public}d.", bundles.size(), index, userId);
+    int count = 0;
+    std::vector<std::string> handleBundles;
+    for (; index < bundles.size() && count < MAX_CHECK_NUM; index++) {
+        count++;
+        if (DelayedSingleton<NotificationConfigParse>::GetInstance()->IsLiveViewEnabled(
+            bundles[index]->GetBundleName())) {
+            continue;
+        }
+
+        if (NotificationLiveViewUtils::GetInstance().CheckLiveViewConfigByBundle(
+            bundles[index]->GetBundleName(), NotificationLiveViewUtils::ALL_EVENT)) {
+            continue;
+        }
+
+        sptr<NotificationSlot> slot;
+        if (NotificationPreferences::GetInstance()->GetNotificationSlot(bundles[index],
+            NotificationConstant::SlotType::LIVE_VIEW, slot) != ERR_OK) {
+            continue;
+        }
+
+        NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundles[index],
+            NotificationConstant::SlotType::LIVE_VIEW);
+        handleBundles.push_back(bundles[index]->GetBundleName());
+    }
+
+    ANS_LOGI("Invock switch %{public}zu %{public}u %{public}zu.", bundles.size(), index, handleBundles.size());
+    if (!handleBundles.empty()) {
+        NotificationAnalyticsUtil::ReportTriggerLiveView(handleBundles);
+    }
+
+    if (index >= bundles.size()) {
+        NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
+            NotificationLiveViewUtils::ERASE_FLAG_FINISHED);
+        return;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
+            NotificationLiveViewUtils::ERASE_FLAG_INIT);
+        return;
+    }
+
+    notificationSvrQueue_->submit_h(std::bind([&, bundles, userId, index]() {
+        InvockLiveViewSwitchCheck(bundles, userId, index);
+    }),
+        ffrt::task_attr().delay(INTERVAL_CHECK_LIVEVIEW).name("doTriggerLiveView"));
+}
+
+void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
+{
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return;
+    }
+
+    if (!NotificationLiveViewUtils::GetInstance().CheckLiveViewRebuild(userId)) {
+        return;
+    }
+
+    ANS_LOGE("Trigger live view start.");
+    notificationSvrQueue_->submit_h(std::bind([&, userId]() {
+        std::map<std::string, sptr<NotificationBundleOption>> bundleOptions;
+        if (BundleManagerHelper::GetInstance()->GetAllBundleInfo(bundleOptions, userId) != ERR_OK) {
+            NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
+                NotificationLiveViewUtils::ERASE_FLAG_INIT);
+            NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
+                NotificationLiveViewUtils::ERASE_FLAG_INIT);
+            return;
+        }
+        std::vector<sptr<NotificationBundleOption>> checkBundles;
+        std::unordered_map<std::string, std::string> bundlesMap;
+        if (NotificationPreferences::GetInstance()->InitBundlesInfo(userId, bundlesMap) != ERR_OK) {
+            NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
+                NotificationLiveViewUtils::ERASE_FLAG_INIT);
+            return;
+        }
+
+        for (auto item : bundlesMap) {
+            if (bundleOptions.count(item.second)) {
+                checkBundles.push_back(bundleOptions[item.second]);
+            }
+        }
+        ANS_LOGI("Get data %{public}zu %{public}zu %{public}zu.", bundleOptions.size(), checkBundles.size(),
+            bundlesMap.size());
+        InvockLiveViewSwitchCheck(checkBundles, userId, 0);
+    }),
+        ffrt::task_attr().name("triggerLiveView").delay(DELAY_TIME_TRIGGER_LIVEVIEW));
+}
+
+ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std::string& requestId,
+    const std::string& key, const std::string& value)
+{
+    if (key != LIVEVIEW_CONFIG_KEY) {
+        ANS_LOGE("Invalid key %{public}s.", key.c_str());
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    notificationSvrQueue_->submit_h(std::bind([&]() {
+        if (response == ERR_OK) {
+            LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveViewConfig(value);
+            return;
+        }
+
+        ANS_LOGW("Push request failed %{public}s %{public}d.", requestId.c_str(), response);
+        if (response == PUSH_CHECK_ERR_DEVICE || response == PUSH_CHECK_ERR_EXPIRED ||
+            response == PUSH_CHECK_ERR_AUTH) {
+            NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
+            return;
+        }
+
+        std::shared_ptr<LiveViewCheckParam> checkParam = nullptr;
+        if (!NotificationLiveViewUtils::GetInstance().GetLiveViewCheckData(requestId, checkParam)) {
+            ANS_LOGE("Unknow request %{public}s.", requestId.c_str());
+            return;
+        }
+        if (checkParam == nullptr) {
+            ANS_LOGE("Invalid data request %{public}s.", requestId.c_str());
+            return;
+        }
+
+        checkParam->retryTime++;
+        if (checkParam->retryTime >= MAX_CHECK_RETRY_TIME) {
+            NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
+            ANS_LOGE("Check failed request %{public}s.", requestId.c_str());
+            return;
+        }
+
+        if (notificationSvrQueue_ == nullptr) {
+            ANS_LOGE("Check handler is null.");
+            return;
+        }
+        notificationSvrQueue_->submit_h([&, requestId]() { InvokeCheckConfig(requestId); },
+            ffrt::task_attr().name("checkLiveView").delay(DELAY_TIME_CHECK_LIVEVIEW));
+    }));
+
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::string>& bundleList)
+{
+    if (bundleList.empty() || bundleList.size() > MAX_LIVEVIEW_CONFIG_SIZE) {
+        ANS_LOGE("Invalid param %{public}zu.", bundleList.size());
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Permission denied.");
+        return ERR_ANS_PERMISSION_DENIED;
+    }
+
+    if (notificationSvrQueue_ == nullptr) {
+        ANS_LOGE("Serial queue is invalid.");
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    int32_t result = ERR_OK;
+    ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
+        sptr<IPushCallBack> pushCallBack = nullptr;
+        {
+            std::lock_guard<ffrt::mutex> lock(pushMutex_);
+            if (pushCallBacks_.find(NotificationConstant::SlotType::LIVE_VIEW) == pushCallBacks_.end()) {
+                ANS_LOGE("No push check.");
+                result = ERR_ANS_PUSH_CHECK_UNREGISTERED;
+                return;
+            }
+            pushCallBack = pushCallBacks_[NotificationConstant::SlotType::LIVE_VIEW];
+        }
+        if (pushCallBack == nullptr) {
+            ANS_LOGE("Invalid push check function.");
+            result = ERR_ANS_PUSH_CHECK_UNREGISTERED;
+            return;
+        }
+        auto param = std::make_shared<LiveViewCheckParam>(bundleList);
+        auto requestId = NotificationLiveViewUtils::GetInstance().AddLiveViewCheckData(param);
+        int32_t res = pushCallBack->OnCheckLiveView(requestId, bundleList);
+        if (res != ERR_OK) {
+            result = ERR_ANS_PUSH_CHECK_FAILED;
+            ANS_LOGE("Push check failed %{public}d %{public}zu.", res, bundleList.size());
+            NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
+        }
+    }));
+    notificationSvrQueue_->wait(handler);
     return result;
 }
 

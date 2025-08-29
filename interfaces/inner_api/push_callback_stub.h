@@ -36,6 +36,7 @@ public:
 
     int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnCheckLiveView(const std::string& requestId, const std::vector<std::string>& bundles) override { return 0; }
     ErrCode ConvertPushCheckCodeToErrCode(int32_t pushCheckCode);
 
 private:

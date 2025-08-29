@@ -771,5 +771,23 @@ ErrCode NotificationHelper::GetTargetDeviceBundleList(const std::string& deviceT
     return DelayedSingleton<AnsNotification>::GetInstance()->GetTargetDeviceBundleList(deviceType, deviceId,
         bundleList, labelList);
 }
+
+ErrCode NotificationHelper::SetDefaultSlotForBundle(const NotificationBundleOption& bundleOption,
+    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetDefaultSlotForBundle(bundleOption,
+        slotType, enabled, isForceControl);
+}
+
+ErrCode NotificationHelper::SetCheckConfig(int32_t response, const std::string& requestId,
+    const std::string& key, const std::string& value)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->SetCheckConfig(response, requestId, key, value);
+}
+
+ErrCode NotificationHelper::GetLiveViewConfig(const std::vector<std::string>& bundleList)
+{
+    return DelayedSingleton<AnsNotification>::GetInstance()->GetLiveViewConfig(bundleList);
+}
 }  // namespace Notification
 }  // namespace OHOS

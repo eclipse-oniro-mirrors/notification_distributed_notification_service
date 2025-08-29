@@ -39,6 +39,7 @@ enum PushCheckErrCode : int32_t {
     SYSTEM_ERROR = 4,
     OPTIONAL_PARAMETER_INVALID = 5
 };
+constexpr int32_t MAX_LIVEVIEW_CONFIG_SIZE = 60;
 
 ErrCode PushCallBackStub::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
 {
@@ -99,7 +100,23 @@ int PushCallBackStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             }
             return NO_ERROR;
         }
-
+        case static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_LIVEVIEW): {
+            std::string requestId = data.ReadString();
+            auto vsize = data.ReadUint64();
+            vsize = (vsize < MAX_LIVEVIEW_CONFIG_SIZE) ? vsize : MAX_LIVEVIEW_CONFIG_SIZE;
+            std::vector<std::string> bundlesName;
+            for (uint64_t it = 0; it < vsize; ++it) {
+                std::string bundle = data.ReadString();
+                bundlesName.emplace_back(bundle);
+            }
+            int32_t checkResult = this->OnCheckLiveView(requestId, bundlesName);
+            ANS_LOGI("Push check liveview: %{public}zu %{public}d.", bundlesName.size(), checkResult);
+            if (!reply.WriteInt32(checkResult)) {
+                ANS_LOGE("Failed to write reply ");
+                return ERR_INVALID_REPLY;
+            }
+            return NO_ERROR;
+        }
         default: {
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
@@ -141,6 +158,51 @@ int32_t PushCallBackProxy::OnCheckNotification(
     if (reply.ReadString(eventControl)) {
         HandleEventControl(eventControl, pushCallBackParam);
     }
+    return result;
+}
+
+int32_t PushCallBackProxy::OnCheckLiveView(const std::string& requestId, const std::vector<std::string>& bundles)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!data.WriteInterfaceToken(PushCallBackProxy::GetDescriptor())) {
+        ANS_LOGE("Write interface token failed.");
+        return ERROR_IPC_ERROR;
+    }
+
+    if (!data.WriteString(requestId)) {
+        ANS_LOGE("Connect done element error.");
+        return ERROR_IPC_ERROR;
+    }
+
+    if (!data.WriteUint64(bundles.size())) {
+        ANS_LOGE("Failed to write the size of bundles");
+        return ERROR_IPC_ERROR;
+    }
+
+    for (auto item : bundles) {
+        if (!data.WriteString(item)) {
+            ANS_LOGE("Failed to write bundle name");
+            return ERROR_IPC_ERROR;
+        }
+    }
+
+    auto remote = Remote();
+    if (remote == nullptr) {
+        ANS_LOGE("null remote");
+        return ERROR_IPC_ERROR;
+    }
+
+    int error = remote->SendRequest(static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_LIVEVIEW),
+        data, reply, option);
+    if (error != NO_ERROR) {
+        ANS_LOGE("error: %{public}d", error);
+        return ERROR_IPC_ERROR;
+    }
+
+    int result = reply.ReadInt32();
     return result;
 }
 

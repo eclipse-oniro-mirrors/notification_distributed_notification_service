@@ -568,6 +568,12 @@ public:
      */
     ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
 
+    ErrCode GetLiveViewConfigVersion(int32_t &version);
+    bool SetLiveViewConfigVersion(const int32_t& version);
+    ErrCode GetLiveViewRebuildFlag(std::string& flag, int32_t userId);
+    bool SetLiveViewRebuildFlag(int32_t userId);
+    ErrCode InitBundlesInfo(int32_t userId, std::unordered_map<std::string, std::string>& bundlesMap);
+    void GetAllLiveViewBundles(std::vector<sptr<NotificationBundleOption>>& bundleOption);
 private:
     bool GetBundleInfo(NotificationPreferencesInfo &preferencesInfo,
         const sptr<NotificationBundleOption> &bundleOption, NotificationPreferencesInfo::BundleInfo &info) const;

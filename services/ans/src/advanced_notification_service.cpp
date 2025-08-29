@@ -83,6 +83,7 @@
 #include "liveview_all_scenarios_extension_wrapper.h"
 #include "notification_operation_service.h"
 #include "string_wrapper.h"
+#include "notification_liveview_utils.h"
 
 namespace OHOS {
 namespace Notification {
@@ -102,6 +103,7 @@ constexpr int32_t TYPE_CODE_VOIP = 0;
 constexpr int32_t CONTROL_BY_DO_NOT_DISTURB_MODE = 1 << 14;
 constexpr int32_t CONTROL_BY_INTELLIGENT_EXPERIENCE = 1 << 31;
 constexpr int32_t FIRST_USERID = 0;
+constexpr int32_t PUSH_CHECK_WEAK_NETWORK = 7788;
 
 const std::string DO_NOT_DISTURB_MODE = "1";
 const std::string INTELLIGENT_EXPERIENCE = "1";
@@ -1791,6 +1793,26 @@ void AdvancedNotificationService::CreatePushCheckJson(
     }
 }
 
+ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<NotificationRequest> &request, int32_t result)
+{
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
+        .ErrorCode(result).Message("Push OnCheckNotification failed.");
+    if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
+        AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        if (!request->IsAtomicServiceNotification()) {
+            NotificationAnalyticsUtil::ReportTipsEvent(request, message);
+        }
+        return ERR_OK;
+    }
+    if (result == PUSH_CHECK_WEAK_NETWORK) {
+        if (NotificationLiveViewUtils::GetInstance().CheckLiveViewForBundle(request)) {
+            return ERR_OK;
+        }
+    }
+    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+    return result;
+}
+
 ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &request)
 {
     ANS_LOGD("start.");
@@ -1823,18 +1845,10 @@ ErrCode AdvancedNotificationService::PushCheck(const sptr<NotificationRequest> &
     }
     ErrCode result = pushCallBack->OnCheckNotification(jsonObject.dump(), pushCallBackParam);
     if (result != ERR_OK) {
-        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
-            .ErrorCode(result).Message("Push OnCheckNotification failed.");
-        if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
-            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
-            if (!request->IsAtomicServiceNotification()) {
-                NotificationAnalyticsUtil::ReportTipsEvent(request, message);
-            }
-            result = ERR_OK;
-        } else {
-            NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+        if (HandlePushCheckFailed(request, result) != ERR_OK) {
             return result;
         }
+        result = ERR_OK;
     }
     if (pushCallBackParam != nullptr && !pushCallBackParam->eventControl.empty() && extroInfo != nullptr) {
         extroInfo->SetParam("eventControl", AAFwk::String::Box(pushCallBackParam->eventControl));

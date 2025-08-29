@@ -1403,6 +1403,38 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     static ErrCode GetDistributedDevicelist(std::vector<std::string> &deviceTypes);
+
+    /**
+     * Set the application default slot is enabled.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotType Indicates type of slot.
+     * @param enabled the type of slot enabled.
+     * @param isForceControl Indicates whether the slot is affected by the notification switch.
+     * @return Returns get slot number by bundle result.
+     */
+    static ErrCode SetDefaultSlotForBundle(const NotificationBundleOption& bundleOption,
+        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+
+    /**
+     * @brief Set check config.
+     *
+     * @param response Indicates the result of check.
+     * @param requestId Indicates the request.
+     * @param key Indicates live view config if the value is "APP_LIVEVIEW_CONFIG".
+     * @param value Indicates key-value pair of live view.
+     * @return Returns set result.
+     */
+    static ErrCode SetCheckConfig(int32_t response, const std::string& requestId, const std::string& key,
+        const std::string& value);
+
+    /**
+     * @brief get live view config.
+     *
+     * @param bundleList Indicates bundle name.
+     * @return Returns set result.
+     */
+    static ErrCode GetLiveViewConfig(const std::vector<std::string>& bundleList);
 };
 }  // namespace Notification
 }  // namespace OHOS

@@ -31,9 +31,11 @@ public:
     class SlotInfo {
     public:
         std::string Dump() const;
+        int32_t GetAuthStaus() const;
         NotificationConstant::SlotType slotType_;
         bool enable_;
         bool isForceControl_;
+        bool authorizedStatus_ = true;
     };
     NotificationCloneBundleInfo() = default;
     ~NotificationCloneBundleInfo() = default;

@@ -33,8 +33,23 @@ public:
     typedef ErrCode (*UPDATE_LIVEVIEW_VOICE_CONTENT)(const sptr<NotificationRequest> &request);
     ErrCode UpdateLiveviewVoiceContent(const sptr<NotificationRequest> &request);
 
+    typedef ErrCode (*UPDATE_LIVEVIEW_CONFIG)(const std::string& config);
+    ErrCode UpdateLiveViewConfig(const std::string& config);
+    typedef ErrCode (*CHECK_LIVEVIEW_CONFIG)(const std::string& bundleName, const std::string& event,
+        int32_t userId, bool& enable);
+    ErrCode CheckLiveViewConfig(const std::string& bundleName, const std::string& event,
+        int32_t userId, bool& enable);
+    typedef ErrCode (*GET_LIVEVIEW_CONFIG_VERSION)(int32_t& version);
+    ErrCode GetLiveViewConfigVersion(int32_t& version);
+    typedef ErrCode (*NOTIFY_LIVEVIEW_EVENT)(const std::string& event,
+        const sptr<NotificationBundleOption>& bundleInfo);
+    ErrCode NotifyLiveViewEvent(const std::string& event, const sptr<NotificationBundleOption>& bundleInfo);
 private:
     void* ExtensionHandle_ = nullptr;
+    CHECK_LIVEVIEW_CONFIG checkLiveViewConfig_ = nullptr;
+    NOTIFY_LIVEVIEW_EVENT notifyLiveViewEvent_ = nullptr;
+    UPDATE_LIVEVIEW_CONFIG updateLiveViewConfig_ = nullptr;
+    GET_LIVEVIEW_CONFIG_VERSION getLiveViewConfigVersion_ = nullptr;
     UPDATE_LIVEVIEW_REMINDER_FLAGS updateLiveviewReminderFlags_ = nullptr;
     UPDATE_LIVEVIEW_VOICE_CONTENT updateLiveviewVoiceContent_ = nullptr;
 };

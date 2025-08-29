@@ -27,6 +27,8 @@
 
 namespace OHOS {
 namespace Notification {
+constexpr int32_t APP_TYPE_ONE = 1;
+constexpr int32_t APP_TYPE_TWO = 2;
 BundleManagerHelper::BundleManagerHelper()
 {
     deathRecipient_ = new (std::nothrow)
@@ -77,6 +79,51 @@ bool BundleManagerHelper::IsSystemApp(int32_t uid)
     }
 
     return isSystemApp;
+}
+
+ErrCode BundleManagerHelper::GetAllBundleInfo(std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions,
+    int32_t userId)
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    {
+        std::lock_guard<ffrt::mutex> lock(connectionMutex_);
+        Connect();
+        if (bundleMgr_ == nullptr) {
+            ANS_LOGE("GetBundleInfo bundle proxy failed.");
+            return -1;
+        }
+
+        int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
+        std::string identity = IPCSkeleton::ResetCallingIdentity();
+        ErrCode result = bundleMgr_->GetBundleInfosV9(flags, bundleInfos, userId);
+        IPCSkeleton::SetCallingIdentity(identity);
+        if (result != ERR_OK) {
+            ANS_LOGE("Get installed bundle failed %{public}d.", result);
+            return result;
+        }
+    }
+    for (auto& bundle : bundleInfos) {
+        if (bundle.applicationInfo.bundleType != AppExecFwk::BundleType::APP ||
+            bundle.applicationInfo.codePath == std::to_string(APP_TYPE_ONE) ||
+            bundle.applicationInfo.codePath == std::to_string(APP_TYPE_TWO)) {
+            ANS_LOGD("Get not app %{public}s", bundle.applicationInfo.bundleName.c_str());
+            continue;
+        }
+
+        ANS_LOGI("Get bundle %{public}d %{public}s.", bundle.applicationInfo.uid,
+            bundle.applicationInfo.bundleName.c_str());
+        sptr<NotificationBundleOption> option = new (std::nothrow) NotificationBundleOption(
+            bundle.applicationInfo.bundleName, bundle.applicationInfo.uid);
+        if (option == nullptr) {
+            ANS_LOGE("Get bundle failed.");
+            continue;
+        }
+        std::string key = bundle.applicationInfo.bundleName + std::to_string(bundle.applicationInfo.uid);
+        bundleOptions[key] = option;
+    }
+
+    ANS_LOGI("Get installed bundle size %{public}zu.", bundleOptions.size());
+    return ERR_OK;
 }
 
 bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
