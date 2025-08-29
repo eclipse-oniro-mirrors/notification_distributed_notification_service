@@ -86,6 +86,7 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
 
 void StsDistributedOperationCallback::SetVm(ani_vm *vm)
 {
+    std::lock_guard<std::mutex> l(lock_);
     etsVm_ = vm;
 }
 
@@ -455,6 +456,7 @@ bool StsSubscriberInstance::IsInit()
 bool StsSubscriberInstance::Compare(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> l(lock_);
     if (!IsInit()) {
         return false;
     }
@@ -482,19 +484,6 @@ bool StsSubscriberInstance::Compare(ani_env *env, ani_ref ref)
     ani_boolean result = ANI_FALSE;
     env->Reference_StrictEquals(ref, ref_, &result);
     return (result == ANI_TRUE) ? true : false;
-}
-bool StsSubscriberInstance::Compare(std::shared_ptr<StsSubscriberInstance> instance)
-{
-    ANS_LOGD("enter");
-    if (instance == nullptr) {
-        return false;
-    }
-    if (instance->obj_ == obj_) {
-        ANS_LOGD("Compare is ture");
-        return true;
-    }
-    ANS_LOGD("Compare is false");
-    return false;
 }
 bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::vector<ani_ref> &parm)
 {
@@ -528,6 +517,7 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
     ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto &iter : subscriberInstances_) {
         if (iter->Compare(env, value)) {
             subscriberInfo = iter;
