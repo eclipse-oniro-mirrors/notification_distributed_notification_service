@@ -815,7 +815,6 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
         return ANI_INVALID_ARGS;
     }
     multiLineContent->SetExpandedTitle(GetResizeStr(longTitle, SHORT_TEXT_SIZE));
-
     std::string briefText;
     isUndefined = ANI_TRUE;
     if ((status = GetPropertyString(env, obj, "briefText", isUndefined, briefText)) != ANI_OK
@@ -824,7 +823,6 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
         return ANI_INVALID_ARGS;
     }
     multiLineContent->SetBriefText(GetResizeStr(briefText, SHORT_TEXT_SIZE));
-
     std::vector<std::string> lines = {};
     isUndefined = ANI_TRUE;
     if ((status = GetPropertyStringArray(env, obj, "lines", isUndefined, lines)) != ANI_OK
@@ -834,6 +832,12 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
     }
     for (auto line : lines) {
         multiLineContent->AddSingleLine(GetResizeStr(line, SHORT_TEXT_SIZE));
+    }
+    std::vector<std::shared_ptr<WantAgent>> lineWantAgents = {};
+    isUndefined = ANI_TRUE;
+    if ((status = GetPropertyWantAgentArray(env, obj, "lineWantAgents", isUndefined, lineWantAgents)) != ANI_OK) {
+        ANS_LOGE("UnWarpNotificationMultiLineContent: get lineWantAgents failed");
+        return ANI_INVALID_ARGS;
     }
     ANS_LOGD("UnWarpNotificationMultiLineContent end");
     return status;
@@ -1315,6 +1319,14 @@ bool SetNotificationMultiLineContent(
     ani_object allLinesObject = GetAniStringArrayByVectorString(env, allLines);
     if (allLinesObject == nullptr || !SetPropertyByRef(env, contentObj, "lines", allLinesObject)) {
         ANS_LOGD("SetNotificationMultiLineContent: set lines failed");
+    }
+    std::vector<std::shared_ptr<WantAgent>> lineWantAgents = content->GetLineWantAgents();
+    if (lineWantAgents.size() > 0) {
+        ani_object lineWantAgentsObj = GetAniWantAgentArray(env, lineWantAgents);
+        if (lineWantAgentsObj == nullptr ||
+            !SetPropertyByRef(env, contentObj, "lineWantAgents", lineWantAgentsObj)) {
+            ANS_LOGD("SetNotificationMultiLineContent set lineWantAgents faild");
+        }
     }
     return SetPropertyByRef(env, ncObj, "multiLine", contentObj);
 }
