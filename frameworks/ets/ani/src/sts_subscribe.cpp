@@ -830,7 +830,7 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
 {
     std::string hashCodeStd;
     sptr<StsNotificationOperationInfo> info = new (std::nothrow) StsNotificationOperationInfo();
-    if (ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
+    if (info == nullptr || ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
         ANS_LOGD("hashCode is valid");
         return nullptr;
     }
