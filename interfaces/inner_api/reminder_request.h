@@ -952,7 +952,7 @@ public:
      * @param notificationRequest notification request object
      * @param isSnooze isSnooze
      */
-    void UpdateNotificationRequest(NotificationRequest& notificationRequest, bool isSnooze);
+    void UpdateNotificationRequest(NotificationRequest& notificationRequest, bool isSnooze, const int32_t index);
 
     /**
      * @brief Get repeated days of the week.
@@ -1107,9 +1107,12 @@ protected:
     uint64_t GetNowInstantMilli() const;
 
 private:
-
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateWantAgent(AppExecFwk::ElementName &element,
+        const int32_t index) const;
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateMaxWantAgent(AppExecFwk::ElementName &element) const;
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateButtonWantAgent(
+        std::vector<std::shared_ptr<AAFwk::Want>>& wants,
+        std::shared_ptr<AAFwk::WantParams>& extraInfo) const;
     std::string GetShowTime(const uint64_t showTime) const;
     std::string GetTimeInfoInner(const time_t &timeInSecond, const TimeFormat &format, bool keep24Hour) const;
     std::string GetState(const uint8_t state) const;
@@ -1126,7 +1129,7 @@ private:
     void UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze);
     void UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze);
     void UpdateNotificationAddRemovalWantAgent(NotificationRequest& notificationRequest);
-    void UpdateNotificationWantAgent(NotificationRequest& notificationRequest);
+    void UpdateNotificationWantAgent(NotificationRequest& notificationRequest, const int32_t index);
     void UpdateNotificationMaxScreenWantAgent(NotificationRequest& notificationRequest);
     void UpdateNotificationBundleInfo(NotificationRequest& notificationRequest);
 

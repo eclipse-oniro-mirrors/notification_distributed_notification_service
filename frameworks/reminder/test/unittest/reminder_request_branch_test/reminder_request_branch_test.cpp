@@ -176,7 +176,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00100, Function | 
     int32_t notificationId_ = 0;
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
-    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze);
+    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00200, Function | 
     int32_t notificationId_ = 0;
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = false;
-    reminderRequest->UpdateNotificationRequest(notificationRequest, false);
+    reminderRequest->UpdateNotificationRequest(notificationRequest, false, 0);
 }
 
 /**
@@ -211,7 +211,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00300, Function | 
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->wantAgentInfo_ = std::make_shared<ReminderRequest::WantAgentInfo>();
     bool isSnooze = true;
-    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze);
+    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
 }
 
 /**
@@ -229,7 +229,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00400, Function | 
     reminderRequest->maxScreenWantAgentInfo_ = std::make_shared<ReminderRequest::MaxScreenAgentInfo>();
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
-    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze);
+    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
 }
 
 /**
@@ -246,7 +246,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00500, Function | 
     int32_t notificationId_ = 0;
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
-    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze);
+    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
 }
 
 /**
@@ -262,7 +262,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00600, Function | 
     EXPECT_NE(reminderRequest, nullptr);
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
-    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze);
+    reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
 }
 
 /**

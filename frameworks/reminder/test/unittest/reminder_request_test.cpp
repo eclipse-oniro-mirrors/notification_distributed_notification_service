@@ -1248,7 +1248,7 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> WantAgent =
-        reminderRequestChild->CreateWantAgent(element);
+        reminderRequestChild->CreateWantAgent(element, 0);
     EXPECT_EQ(WantAgent, nullptr);
 }
 
@@ -2385,7 +2385,7 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_004, Function | SmallTest | Le
     ReminderRequestChild child;
     NotificationRequest request;
     child.wantAgentInfo_->parameters.SetParam("NotificationRequest_extraInfo", nullptr);
-    child.UpdateNotificationWantAgent(request);
+    child.UpdateNotificationWantAgent(request, 0);
 
     child.OnLanguageChange(nullptr);
     EXPECT_NE(request.GetAdditionalData(), nullptr);
@@ -2471,6 +2471,44 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_008, Function | SmallTest | Le
         wantAgent, update);
     child.MarshallingActionButton(p);
     EXPECT_EQ(child.actionButtonMap_.size(), 1);
+}
+
+/**
+ * @tc.name: ReminderRequestTest_009
+ * @tc.desc: Test AddActionButtons parameters.
+ * @tc.type: FUNC
+ * @tc.require: issueI8CDH3
+ */
+HWTEST_F(ReminderRequestTest, ReminderRequestTest_009, Function | SmallTest | Level1)
+{
+    NotificationRequest request(1);
+    ReminderRequestChild child;
+    child.SetActionButton("test1", ReminderRequest::ActionButtonType::CLOSE, "test1",
+        nullptr, nullptr);
+    child.AddActionButtons(request, false);
+    EXPECT_EQ(request.actionButtons_.size(), 1);
+
+    child.SetActionButton("test2", ReminderRequest::ActionButtonType::SNOOZE, "test2",
+        nullptr, nullptr);
+    request.actionButtons_.clear();
+    child.AddActionButtons(request, false);
+    EXPECT_EQ(request.actionButtons_.size(), 1);
+    request.actionButtons_.clear();
+    child.AddActionButtons(request, true);
+    EXPECT_EQ(request.actionButtons_.size(), 2);
+
+    child.SetActionButton("test3", ReminderRequest::ActionButtonType::CUSTOM, "test3",
+        nullptr, nullptr);
+    request.actionButtons_.clear();
+    child.AddActionButtons(request, true);
+    EXPECT_EQ(request.actionButtons_.size(), 2);
+    auto wantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
+    child.actionButtonMap_.erase(ReminderRequest::ActionButtonType::CUSTOM);
+    child.SetActionButton("test3", ReminderRequest::ActionButtonType::CUSTOM, "test3",
+        wantAgent, nullptr);
+    request.actionButtons_.clear();
+    child.AddActionButtons(request, true);
+    EXPECT_EQ(request.actionButtons_.size(), 3);
 }
 }
 }
