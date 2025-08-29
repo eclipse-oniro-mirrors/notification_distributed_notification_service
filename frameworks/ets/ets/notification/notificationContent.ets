@@ -16,6 +16,7 @@
 import image from '@ohos.multimedia.image';
 import { Resource } from 'global.resource';
 import type notificationManager from '@ohos.notificationManager';
+import { WantAgent } from '@ohos.app.ability.wantAgent';
 
 type IconType = Resource | image.PixelMap;
 
@@ -139,6 +140,8 @@ export interface NotificationMultiLineContent extends NotificationBasicContent {
     longTitle: string;
 
     lines: Array<string>;
+
+    lineWantAgents?: Array<WantAgent>;
 }
 
 class NotificationMultiLineContentInner implements NotificationMultiLineContent {
@@ -156,6 +159,8 @@ class NotificationMultiLineContentInner implements NotificationMultiLineContent 
     public longTitle: string = '';
 
     public lines: Array<string> = {};
+
+    public lineWantAgents?: Array<WantAgent> = {};
 }
 
 export interface NotificationPictureContent extends NotificationBasicContent {

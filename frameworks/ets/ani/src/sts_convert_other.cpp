@@ -38,6 +38,47 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
     return wantAgentSp;
 }
 
+ani_status GetPropertyWantAgentArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<std::shared_ptr<WantAgent>> &res)
+{
+    if (env == nullptr || param == nullptr || name == nullptr) {
+        ANS_LOGE("GetPropertyWantAgentArray fail, has nullptr");
+        return ANI_INVALID_ARGS;
+    }
+    ANS_LOGD("GetPropertyWantAgentArray: %{public}s", name);
+    ani_ref arrayObj = nullptr;
+    ani_status status;
+    ani_int length;
+    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK) {
+        ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
+        return ANI_INVALID_ARGS;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_OK;
+    }
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
+    if (status != ANI_OK) {
+        ANS_LOGE("status : %{public}d", status);
+        return status;
+    }
+    for (int32_t i = 0; i < length; i++) {
+        ani_ref entryRef;
+        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
+            "$_get", "i:C{std.core.Object}", &entryRef, i);
+        if (status != ANI_OK) {
+            ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
+            return status;
+        }
+        std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(entryRef));
+        if (wantAgent == nullptr) {
+            ANS_LOGE("UnwrapWantAgent failed, index: %{public}d", i);
+            return ANI_INVALID_ARGS;
+        }
+        res.push_back(wantAgent);
+    }
+    return status;
+}
+
 ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource &resource)
 {
     ANS_LOGD("UnwrapResource called");
