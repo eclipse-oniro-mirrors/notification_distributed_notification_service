@@ -67,13 +67,12 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
     ani_int length;
     status = env->Object_GetPropertyByName_Int(arrayObj, "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGD("UnwrapArrayDoNotDisturbProfile: status = %{public}d", status);
+        ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status = %{public}d", status);
         return false;
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref optionRef;
-        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get",
-            "i:C{std.core.Object}", &optionRef, i);
+        status = env->Object_CallMethodByName_Ref(arrayObj, "$_get", "i:C{std.core.Object}", &optionRef, i);
         if (status != ANI_OK) {
             ANS_LOGE("UnwrapArrayDoNotDisturbProfile: status : %{public}d, index: %{public}d", status, i);
             return false;
