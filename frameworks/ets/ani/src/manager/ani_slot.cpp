@@ -101,17 +101,18 @@ void AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj)
     ANS_LOGD("AniAddSlotBySlotType enter");
     Notification::NotificationConstant::SlotType slotType = Notification::NotificationConstant::SlotType::OTHER;
     if (!NotificationSts::SlotTypeEtsToC(env, enumObj, slotType)) {
+        ANS_LOGE("AniAddSlotBySlotType SlotTypeEtsToC failed");
         NotificationSts::ThrowStsErroWithMsg(env, "AddSlotByType ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = Notification::NotificationHelper::AddSlotByType(slotType);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniAddSlotBySlotType -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AddSlotByType failed, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+        return;
     }
     ANS_LOGD("AniAddSlotBySlotType leave");
-    return;
 }
 
 ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj)
