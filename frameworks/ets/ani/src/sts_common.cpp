@@ -334,10 +334,12 @@ ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *
     ani_ref arrayObj = nullptr;
     ani_status status;
     ani_int length;
-    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK ||
-        isUndefined == ANI_TRUE) {
+    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK) {
         ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_OK;
     }
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {

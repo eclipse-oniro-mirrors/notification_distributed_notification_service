@@ -24,9 +24,15 @@ bool GetSlotTypes(ani_env *env, ani_object value, NotificationSubscribeInfo &inf
 {
     ani_boolean isUndefined = ANI_TRUE;
     std::vector<ani_enum_item> slotTypesEnum = {};
-    if (ANI_OK != GetPropertyEnumItemArray(env, value, "slotTypes", isUndefined, slotTypesEnum)
-        || isUndefined == ANI_TRUE || slotTypesEnum.empty()) {
-        ANS_LOGE("GetPropertyEnumItemArray fail or undefined");
+    if (ANI_OK != GetPropertyEnumItemArray(env, value, "slotTypes", isUndefined, slotTypesEnum)) {
+        ANS_LOGE("GetPropertyEnumItemArray fail");
+        return false;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return true;
+    }
+    if (slotTypesEnum.empty()) {
+        ANS_LOGE("slotTypes is empty");
         return false;
     }
     std::vector<SlotType> slotTypes = {};
