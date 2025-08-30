@@ -28,7 +28,6 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
     }
     WantAgent* pWantAgent = nullptr;
     AppExecFwk::UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
-
     if (pWantAgent == nullptr) {
         ANS_LOGE("UnwrapWantAgent wantAgent nullptr");
         return nullptr;
@@ -50,6 +49,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
     ani_boolean isUndefined = ANI_TRUE;
     if ((status = GetPropertyString(env, obj, "bundleName", isUndefined, tempStr)) != ANI_OK
         || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyString bundleName fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
@@ -57,6 +57,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
 
     if ((status = GetPropertyString(env, obj, "moduleName", isUndefined, tempStr)) != ANI_OK
         || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyString moduleName fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     std::string moduleName = GetResizeStr(tempStr, STR_MAX_SIZE);
@@ -65,6 +66,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
     ani_double idAni = 0.0;
     if ((status = GetPropertyDouble(env, obj, "id", isUndefined, idAni)) != ANI_OK
         || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyDouble id fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     resource.id = static_cast<int32_t>(idAni);
