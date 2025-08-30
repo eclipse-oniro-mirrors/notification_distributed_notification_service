@@ -356,7 +356,6 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
             auto subscriberUid = record->subscriberUid;
             ANS_LOGI("subscriber removed . subscriberUid = %{public}d", record->subscriberUid);
             subscriberRecordList_.remove(record);
-            AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(record->subscriberUid);
         }
     }));
     notificationSubQueue_->wait(handler);
