@@ -261,7 +261,7 @@ void GetNotificationRequestByNumber(ani_env *env, ani_object obj,
 {
     ANS_LOGD("GetNotificationRequestByNumber start");
     if (env == nullptr || obj == nullptr || request == nullptr) {
-        ANS_LOGD("GetNotificationRequestByNumber failed, has nullptr");
+        ANS_LOGE("GetNotificationRequestByNumber failed, has nullptr");
         return;
     }
     ani_int mInt = 0;
@@ -532,7 +532,7 @@ void GetNotificationWantAgent(ani_env *env, ani_object obj, std::shared_ptr<Noti
     }
     std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
     if (wantAgent == nullptr) {
-        ANS_LOGD("wantAgent is null");
+        ANS_LOGE("wantAgent is null");
         return;
     }
     request->SetWantAgent(wantAgent);
@@ -580,7 +580,7 @@ void GetNotificationRemovalWantAgent(ani_env *env, ani_object obj,
     }
     std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(wantAgentRef));
     if (wantAgent == nullptr) {
-        ANS_LOGD("wantAgent is null");
+        ANS_LOGE("wantAgent is null");
         return;
     }
     request->SetRemovalWantAgent(wantAgent);
@@ -719,7 +719,7 @@ void GetNotificationBundleOption(ani_env *env, ani_object obj,
     ani_boolean isUndefind = ANI_TRUE;
     status = GetPropertyRef(env, obj, "representativeBundle", isUndefind, optionRef);
     if (status != ANI_OK || isUndefind == ANI_TRUE) {
-        ANS_LOGD("Cannot get the value of representativeBundle. status %{public}d isUndefind %{public}d",
+        ANS_LOGE("Cannot get the value of representativeBundle. status %{public}d isUndefind %{public}d",
             status, isUndefind);
         return;
     }
@@ -757,7 +757,7 @@ ani_status UnWarpNotificationRequest(ani_env *env, ani_object obj,
 {
     ANS_LOGD("UnWarpNotificationRequest start");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGD("UnWarpNotificationRequest has nullptr");
+        ANS_LOGE("UnWarpNotificationRequest has nullptr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
@@ -964,15 +964,15 @@ bool SetNotificationRequestByNotificationContent(ani_env* env, ani_class cls,
     std::shared_ptr<NotificationContent> content = request->GetContent();
     ani_object contentObj;
     if (!SetNotificationContent(env, content, contentObj)) {
-        ANS_LOGD("SetNotificationContent faild");
+        ANS_LOGE("SetNotificationContent faild");
         return false;
     }
     if (contentObj == nullptr) {
-        ANS_LOGD("contentObj is nullptr");
+        ANS_LOGE("contentObj is nullptr");
         return false;
     }
     if (!SetPropertyByRef(env, object, "content", contentObj)) {
-        ANS_LOGD("SetNotificationRequestByNotificationContent. set content faild");
+        ANS_LOGE("SetNotificationRequestByNotificationContent. set content faild");
         return false;
     }
     return true;
@@ -982,7 +982,7 @@ bool SetRequestExtraInfo(ani_env *env, const OHOS::Notification::NotificationReq
 {
     std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
     if (additionalData == nullptr) {
-        ANS_LOGD("extraInfo is Undefine");
+        ANS_LOGE("extraInfo is Undefine");
         return true;
     }
     ani_ref extraInfo = OHOS::AppExecFwk::WrapWantParams(env, *additionalData);
@@ -996,7 +996,7 @@ bool SetRequestExtendInfo(ani_env *env, const OHOS::Notification::NotificationRe
 {
     std::shared_ptr<AAFwk::WantParams> extendInfoData = request->GetExtendInfo();
     if (extendInfoData == nullptr) {
-        ANS_LOGD("extendInfo is Undefine");
+        ANS_LOGE("extendInfo is Undefine");
         return true;
     }
     ani_ref extendInfo = OHOS::AppExecFwk::WrapWantParams(env, *extendInfoData);
@@ -1010,7 +1010,7 @@ bool SetRequestActionButtons(ani_env *env, const OHOS::Notification::Notificatio
 {
     std::vector<std::shared_ptr<NotificationActionButton>> actionButtons = request->GetActionButtons();
     if (actionButtons.empty()) {
-        ANS_LOGD("actionButtons is Undefine");
+        ANS_LOGE("actionButtons is Undefine");
         return true;
     }
     ani_object actionButtonsArrayObj = GetAniArrayNotificationActionButton(env, actionButtons);
@@ -1025,7 +1025,7 @@ bool SetRequestTemplate(ani_env *env, const OHOS::Notification::NotificationRequ
 {
     std::shared_ptr<NotificationTemplate> templ = request->GetTemplate();
     if (templ == nullptr) {
-        ANS_LOGD("template is Undefine");
+        ANS_LOGE("template is Undefine");
         return true;
     }
     ani_object templateObject = WrapNotificationTemplate(env, templ);
@@ -1040,7 +1040,7 @@ bool SetRequestNotificationFlags(
 {
     std::shared_ptr<NotificationFlags> flags = request->GetFlags();
     if (flags == nullptr) {
-        ANS_LOGD("notificationFlags is Undefine");
+        ANS_LOGE("notificationFlags is Undefine");
         return true;
     }
     ani_object flagsObject = nullptr;
@@ -1059,7 +1059,7 @@ bool SetRequestAgentBundle(ani_env *env, const OHOS::Notification::NotificationR
 {
     std::shared_ptr<NotificationBundleOption> agentBundle = request->GetAgentBundle();
     if (agentBundle == nullptr) {
-        ANS_LOGD("agentBundle is Undefine");
+        ANS_LOGE("agentBundle is Undefine");
         return true;
     }
     ani_object agentBundleObject = nullptr;
@@ -1079,7 +1079,7 @@ bool SetRequestUnifiedGroupInfo(
 {
     std::shared_ptr<NotificationUnifiedGroupInfo> groupInfo = request->GetUnifiedGroupInfo();
     if (groupInfo == nullptr) {
-        ANS_LOGD("unifiedGroupInfo is Undefine");
+        ANS_LOGE("unifiedGroupInfo is Undefine");
         return true;
     }
     ani_object infoObject = nullptr;
@@ -1244,7 +1244,7 @@ bool WarpNotificationOther(ani_env *env, ani_class &cls,
     }
     // distributedOption?:DistributedOptions
     if (!SetNotificationRequestDistributedOptions(env, notification, outAniObj)) {
-        ANS_LOGD("set distributedOption faild");
+        ANS_LOGE("set distributedOption faild");
         return false;
     }
     // readonly isRemoveAllowed?: boolean
