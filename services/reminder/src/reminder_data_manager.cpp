@@ -87,7 +87,6 @@ std::mutex ReminderDataManager::SHOW_MUTEX;
 std::mutex ReminderDataManager::ALERT_MUTEX;
 std::mutex ReminderDataManager::TIMER_MUTEX;
 std::mutex ReminderDataManager::ACTIVE_MUTEX;
-constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 std::shared_ptr<ffrt::queue> ReminderDataManager::serviceQueue_ = nullptr;
 ReminderDataManager::ReminderDataManager() = default;
 ReminderDataManager::~ReminderDataManager() = default;
@@ -902,7 +901,8 @@ void ReminderDataManager::TerminateAlerting(const sptr<ReminderRequest> &reminde
     NotificationRequest notificationRequest(reminder->GetNotificationId());
     notificationRequest.SetNotificationControlFlags(static_cast<uint32_t>(
         NotificationNapi::NotificationControlFlagStatus::NOTIFICATION_STATUS_CLOSE_SOUND));
-    reminder->UpdateNotificationRequest(notificationRequest, false);
+    int32_t appIndex = ReminderBundleManagerHelper::GetInstance().GetAppIndexByUid(uid);
+    reminder->UpdateNotificationRequest(notificationRequest, false, appIndex);
     IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(
         ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     store_->UpdateOrInsert(reminder);
@@ -1046,28 +1046,6 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(sptr<ReminderRequest>& 
     }
 }
 
-bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder, const int8_t type)
-{
-    ANSR_LOGD("called");
-    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
-        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
-        std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
-        if (wantInfo != nullptr && wantInfo->pkgName.size() != 0 && wantInfo->abilityName.size() != 0) {
-            AAFwk::Want want;
-            want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
-            want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
-            want.SetParam("PULL_TYPE", type);
-            int32_t result = IN_PROCESS_CALL(
-                AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
-            if (result != ERR_OK) {
-                ANSR_LOGE("failed[%{public}d]", result);
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isNeedToPlaySound,
     const bool isNeedToStartNext, const bool isSysTimeChanged, const bool needScheduleTimeout,
     const bool isNeedCloseDefaultSound)
@@ -1087,7 +1065,8 @@ void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, co
     reminder->OnShow(toPlaySound, isSysTimeChanged, true);
     AddToShowedReminders(reminder);
     NotificationRequest notificationRequest(reminder->GetNotificationId());
-    reminder->UpdateNotificationRequest(notificationRequest, false);
+    int32_t appIndex = ReminderBundleManagerHelper::GetInstance().GetAppIndexByUid(reminder->GetUid());
+    reminder->UpdateNotificationRequest(notificationRequest, false, appIndex);
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
@@ -1161,7 +1140,8 @@ void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)
 
     ANSR_LOGD("publish(update) notification.(reminderId=%{public}d)", reminder->GetReminderId());
     NotificationRequest notificationRequest(reminder->GetNotificationId());
-    reminder->UpdateNotificationRequest(notificationRequest, true);
+    int32_t appIndex = ReminderBundleManagerHelper::GetInstance().GetAppIndexByUid(reminder->GetUid());
+    reminder->UpdateNotificationRequest(notificationRequest, true, appIndex);
     IN_PROCESS_CALL_WITHOUT_RET(NotificationHelper::PublishNotification(
         ReminderRequest::NOTIFICATION_LABEL, notificationRequest));
     StartRecentReminder();
@@ -1312,15 +1292,6 @@ void ReminderDataManager::HandleImmediatelyShow(
     if (playSoundReminder != nullptr) {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
         ShowReminder(playSoundReminder, true, false, isSysTimeChanged, true, true);
-    }
-}
-
-void ReminderDataManager::HandleExtensionReminder(std::vector<sptr<ReminderRequest>>& extensionReminders,
-    const int8_t type)
-{
-    int32_t count = 0;
-    for (auto& reminder : extensionReminders) {
-        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES, type, count);
     }
 }
 

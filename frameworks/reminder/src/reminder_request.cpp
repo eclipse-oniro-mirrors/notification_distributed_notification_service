@@ -28,6 +28,9 @@
 #include "want_agent_helper.h"
 #include "nlohmann/json.hpp"
 #include "want_params_wrapper.h"
+#include "bool_wrapper.h"
+#include "string_wrapper.h"
+#include "int_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -83,6 +86,8 @@ const uint8_t ReminderRequest::MONDAY = 1;
 const uint8_t ReminderRequest::SUNDAY = 7;
 const uint8_t ReminderRequest::HOURS_PER_DAY = 24;
 const uint16_t ReminderRequest::SECONDS_PER_HOUR = 3600;
+static constexpr const char* WANT_EXTRA_START_BUNDLE = "startBundleName";
+static constexpr const char* WANT_EXTRA_START_INDEX = "startBundleAppIndex";
 
 template <typename T>
 void GetJsonValue(const nlohmann::json& root, const std::string& name, T& value)
@@ -1102,7 +1107,8 @@ std::string ReminderRequest::GetMaxWantAgentStr()
     return maxWantAgentStr_;
 }
 
-void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificationRequest, const bool isSnooze)
+void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificationRequest, const bool isSnooze,
+    const int32_t index)
 {
     if (isSnooze) {
         UpdateNotificationStateForSnooze(notificationRequest);
@@ -1112,16 +1118,16 @@ void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificatio
     }
     UpdateNotificationCommon(notificationRequest, isSnooze);
     UpdateNotificationAddRemovalWantAgent(notificationRequest);
-    UpdateNotificationWantAgent(notificationRequest);
+    UpdateNotificationWantAgent(notificationRequest, index);
     UpdateNotificationMaxScreenWantAgent(notificationRequest);
     UpdateNotificationBundleInfo(notificationRequest);
 }
 
-void ReminderRequest::UpdateNotificationWantAgent(NotificationRequest& notificationRequest)
+void ReminderRequest::UpdateNotificationWantAgent(NotificationRequest& notificationRequest, const int32_t index)
 {
     ANSR_LOGI("UpdateNotification want_agent");
     AppExecFwk::ElementName element("", wantAgentInfo_->pkgName, wantAgentInfo_->abilityName);
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element);
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateWantAgent(element, index);
     notificationRequest.SetWantAgent(wantAgent);
     if (wantAgentInfo_->parameters.HasParam(PARAM_EXTRA_KEY)) {
         std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>(
@@ -1540,15 +1546,31 @@ std::string ReminderRequest::GetState(const uint8_t state) const
     return stateInfo;
 }
 
-void ReminderRequest::AddActionButtons(NotificationRequest& notificationRequest, const bool includeSnooze)
+std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateButtonWantAgent(
+    std::vector<std::shared_ptr<AAFwk::Want>>& wants,
+    std::shared_ptr<AAFwk::WantParams>& extraInfo) const
 {
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> flags;
     flags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
+    AbilityRuntime::WantAgent::WantAgentInfo buttonWantAgentInfo(
+        requestCode,
+        AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
+        flags, wants, extraInfo
+    );
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> buttonWantAgent =
+        AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(buttonWantAgentInfo, userId_);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return buttonWantAgent;
+}
+
+void ReminderRequest::AddActionButtons(NotificationRequest& notificationRequest, const bool includeSnooze)
+{
     for (auto button : actionButtonMap_) {
         auto want = std::make_shared<OHOS::AAFwk::Want>();
-        auto type = button.first;
-        switch (type) {
+        std::shared_ptr<AAFwk::WantParams> extraInfo;
+        switch (button.first) {
             case ActionButtonType::CLOSE:
                 want->SetAction(REMINDER_EVENT_CLOSE_ALERT);
                 break;
@@ -1565,30 +1587,29 @@ void ReminderRequest::AddActionButtons(NotificationRequest& notificationRequest,
                 if (button.second.wantAgent == nullptr) {
                     return;
                 }
-                want->SetParam("PkgName", button.second.wantAgent->pkgName);
-                want->SetParam("AbilityName", button.second.wantAgent->abilityName);
+                extraInfo = std::make_shared<AAFwk::WantParams>();
+                extraInfo->SetParam(WANT_EXTRA_START_BUNDLE, AAFwk::String::Box(button.second.wantAgent->pkgName));
+                extraInfo->SetParam(WANT_EXTRA_START_INDEX, AAFwk::Integer::Box(0));
+                extraInfo->SetParam("PkgName", AAFwk::String::Box(button.second.wantAgent->pkgName));
+                extraInfo->SetParam("AbilityName", AAFwk::String::Box(button.second.wantAgent->abilityName));
                 break;
             default:
                 break;
         }
-        want->SetParam(PARAM_REMINDER_ID, reminderId_);
-        want->SetParam(PARAM_REMINDER_SHARE, isShare_);
+        if (extraInfo == nullptr) {
+            want->SetParam(PARAM_REMINDER_ID, reminderId_);
+            want->SetParam(PARAM_REMINDER_SHARE, isShare_);
+        } else {
+            extraInfo->SetParam(PARAM_REMINDER_ID, AAFwk::Integer::Box(reminderId_));
+            extraInfo->SetParam(PARAM_REMINDER_SHARE, AAFwk::Boolean::Box(isShare_));
+        }
         std::vector<std::shared_ptr<AAFwk::Want>> wants;
         wants.push_back(want);
+
+        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = CreateButtonWantAgent(wants, extraInfo);
         auto title = static_cast<std::string>(button.second.title);
-        AbilityRuntime::WantAgent::WantAgentInfo buttonWantAgentInfo(
-            requestCode,
-            AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
-            flags, wants, nullptr
-        );
-
-        std::string identity = IPCSkeleton::ResetCallingIdentity();
-        std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> buttonWantAgent =
-            AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(buttonWantAgentInfo, userId_);
-        IPCSkeleton::SetCallingIdentity(identity);
-
         std::shared_ptr<NotificationActionButton> actionButton
-            = NotificationActionButton::Create(nullptr, title, buttonWantAgent);
+            = NotificationActionButton::Create(nullptr, title, wantAgent);
         notificationRequest.AddActionButton(actionButton);
     }
 }
@@ -1622,23 +1643,26 @@ void ReminderRequest::UpdateNotificationAddRemovalWantAgent(NotificationRequest&
 }
 
 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> ReminderRequest::CreateWantAgent(
-    AppExecFwk::ElementName &element) const
+    AppExecFwk::ElementName &element, const int32_t index) const
 {
     int32_t requestCode = 10;
     std::vector<AbilityRuntime::WantAgent::WantAgentConstant::Flags> wantFlags;
     wantFlags.push_back(AbilityRuntime::WantAgent::WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     auto want = std::make_shared<OHOS::AAFwk::Want>();
     want->SetAction(REMINDER_EVENT_CLICK_ALERT);
-    want->SetParam(PARAM_REMINDER_ID, reminderId_);
-    want->SetParam(PARAM_REMINDER_SHARE, isShare_);
     std::vector<std::shared_ptr<AAFwk::Want>> wantes;
     wantes.push_back(want);
+    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam(WANT_EXTRA_START_BUNDLE, AAFwk::String::Box(bundleName_));
+    extraInfo->SetParam(WANT_EXTRA_START_INDEX, AAFwk::Integer::Box(index));
+    extraInfo->SetParam(PARAM_REMINDER_ID, AAFwk::Integer::Box(reminderId_));
+    extraInfo->SetParam(PARAM_REMINDER_SHARE, AAFwk::Boolean::Box(isShare_));
     AbilityRuntime::WantAgent::WantAgentInfo wantInfo(
         requestCode,
         AbilityRuntime::WantAgent::WantAgentConstant::OperationType::SEND_COMMON_EVENT,
         wantFlags,
         wantes,
-        nullptr
+        extraInfo
     );
     std::string callingIdentity = IPCSkeleton::ResetCallingIdentity();
     auto wantAgent = AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(wantInfo, userId_);

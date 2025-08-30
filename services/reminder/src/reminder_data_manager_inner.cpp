@@ -65,6 +65,7 @@ static constexpr const char* USER_SETINGS_DATA_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE_";
 static constexpr const char* FOCUS_MODE_ENABLE_URI = "?Proxy=true&key=focus_mode_enable";
 static constexpr const char* FOCUS_MODE_ENABLE = "focus_mode_enable";
+static constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
 }
 
 static uint64_t GetRemainPartitionSize(const std::string& partitionName)
@@ -515,6 +516,37 @@ int32_t ReminderDataManager::ConvertRingChannel(ReminderRequest::RingChannel cha
         default:
             return static_cast<int32_t>(AudioStandard::StreamUsage::STREAM_USAGE_ALARM);
     }
+}
+
+void ReminderDataManager::HandleExtensionReminder(std::vector<sptr<ReminderRequest>>& extensionReminders,
+    const int8_t type)
+{
+    int32_t count = 0;
+    for (auto& reminder : extensionReminders) {
+        ReminderDataManager::AsyncStartExtensionAbility(reminder, CONNECT_EXTENSION_MAX_RETRY_TIMES, type, count);
+    }
+}
+
+bool ReminderDataManager::StartExtensionAbility(const sptr<ReminderRequest> &reminder, const int8_t type)
+{
+    ANSR_LOGD("called");
+    if (reminder->GetReminderType() == ReminderRequest::ReminderType::CALENDAR) {
+        ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
+        std::shared_ptr<ReminderRequest::WantAgentInfo> wantInfo = calendar->GetRRuleWantAgentInfo();
+        if (wantInfo != nullptr && wantInfo->pkgName.size() != 0 && wantInfo->abilityName.size() != 0) {
+            AAFwk::Want want;
+            want.SetElementName(wantInfo->pkgName, wantInfo->abilityName);
+            want.SetParam(ReminderRequest::PARAM_REMINDER_ID, reminder->GetReminderId());
+            want.SetParam("PULL_TYPE", type);
+            int32_t result = IN_PROCESS_CALL(
+                AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(want, nullptr));
+            if (result != ERR_OK) {
+                ANSR_LOGE("failed[%{public}d]", result);
+                return false;
+            }
+        }
+    }
+    return true;
 }
 }
 }
