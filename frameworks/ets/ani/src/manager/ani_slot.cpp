@@ -39,6 +39,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
     if (NotificationSts::UnwrapBundleOption(env, bundleOption, option)) {
         returncode = Notification::NotificationHelper::GetNotificationSlotsForBundle(option, slots);
     } else {
+        ANS_LOGE("UnwrapBundleOption failed");
         NotificationSts::ThrowStsErroWithMsg(env, "sts GetSlotsByBundle ERROR_INTERNAL_ERROR");
         return nullptr;
     }
@@ -51,6 +52,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption)
     }
     ani_object outAniObj;
     if (!NotificationSts::WrapNotificationSlotArray(env, slots, outAniObj)) {
+        ANS_LOGE("WrapNotificationSlotArray failed");
         NotificationSts::ThrowStsErroWithMsg(env, "GetSlotsByBundle:failed to WrapNotificationSlotArray");
         return nullptr;
     }
