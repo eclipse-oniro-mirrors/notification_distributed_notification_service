@@ -83,7 +83,7 @@ void AniSetBadgeNumber(ani_env *env, ani_int badgeNumber)
     int returncode = Notification::NotificationHelper::SetBadgeNumber(static_cast<int32_t>(badgeNumber));
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("sts AniSetBadgeNumber error, errorCode: %{public}d", externalCode);
+        ANS_LOGD("sts AniSetBadgeNumber error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("sts AniSetBadgeNumber end");
@@ -105,7 +105,7 @@ void AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badgeNumber
     }
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("sts AniSetBadgeNumberByBundle error, errorCode: %{public}d", externalCode);
+        ANS_LOGD("sts AniSetBadgeNumberByBundle error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
     ANS_LOGD("AniSetBadgeNumberByBundle end");
