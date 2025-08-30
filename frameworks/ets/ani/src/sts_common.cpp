@@ -188,10 +188,10 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
         "unboxed", ":D", &outvalue)) != ANI_OK) {
-        ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Double failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Double sucess");
+    ANS_LOGD("GetPropertyDouble sucess");
     return status;
 }
 
@@ -215,7 +215,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Int sucess");
+    ANS_LOGD("GetPropertyInt sucess");
     return status;
 }
 
