@@ -31,14 +31,14 @@ void AniTriggerSystemLiveView(
     if (!NotificationSts::UnwrapBundleOption(env, bundleOptionObj, bundleOption)) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniTriggerSystemLiveView bundleOption ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniTriggerSystemLiveView UnwrapBundleOption ERROR_INTERNAL_ERROR");
         return;
     }
     NotificationSts::ButtonOption buttonOption;
     if (NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption) != ANI_OK) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniTriggerSystemLiveView UnWarpNotificationButtonOption ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = OHOS::Notification::NotificationHelper::TriggerLocalLiveView(bundleOption,
