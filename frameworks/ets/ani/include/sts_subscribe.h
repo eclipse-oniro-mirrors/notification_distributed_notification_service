@@ -46,8 +46,8 @@ private:
 
 class StsSubscriberInstance : public OHOS::Notification::NotificationSubscriber {
 public:
-    StsSubscriberInstance();
-    virtual ~StsSubscriberInstance();
+    StsSubscriberInstance(){};
+    virtual ~StsSubscriberInstance(){};
 
     virtual void OnCanceled(const std::shared_ptr<OHOS::Notification::Notification> &request,
         const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason) override;
@@ -83,7 +83,6 @@ public:
     bool IsInit();
     bool Compare(ani_env *env, ani_object obj);
     bool Compare(ani_env *env, ani_ref ref);
-    bool Compare(std::shared_ptr<StsSubscriberInstance> instance);
 
 private:
     bool CallFunction(ani_env *env, const char* func, std::vector<ani_ref> &parm);

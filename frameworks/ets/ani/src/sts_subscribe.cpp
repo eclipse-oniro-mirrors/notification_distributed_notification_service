@@ -32,9 +32,12 @@ StsDistributedOperationCallback::StsDistributedOperationCallback(ani_object prom
 ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t operationResult)
 {
     std::lock_guard<std::mutex> l(lock_);
-    if (isCall_) return ANI_OK;
+    if (isCall_) {
+        ANS_LOGD("OnOperationCallback isCall_ is true");
+        return ANI_OK;
+    }
     if (etsVm_ == nullptr) {
-        ANS_LOGD("etsVm_ is null");
+        ANS_LOGE("etsVm_ is null");
         return ANI_OK;
     }
     ani_env* etsEnv;
@@ -42,13 +45,13 @@ ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t opera
     ani_options aniArgs { 0, nullptr };
     aniResult = etsVm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("StsDistributedOperationCallback AttachCurrentThread error. result: %{public}d.", aniResult);
         return aniResult;
     }
     OnStsOperationCallback(etsEnv, operationResult);
     aniResult = etsVm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("StsDistributedOperationCallback DetachCurrentThread error. result: %{public}d.", aniResult);
         return aniResult;
     }
     isCall_ = true;
@@ -57,7 +60,7 @@ ErrCode StsDistributedOperationCallback::OnOperationCallback(const int32_t opera
 
 void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const int32_t operationResult)
 {
-    ANS_LOGD("ENTER");
+    ANS_LOGD("OnStsOperationCallback enter");
     if (env == nullptr) {
         ANS_LOGD("env is nullptr");
         return;
@@ -67,10 +70,10 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
     ANS_LOGD("operationResult %{public}d, externalCode %{public}d", operationResult, externalErrCode);
 
     if (externalErrCode == ERR_OK) {
-        ANS_LOGD("OnStsOperationCallback Resolve");
+        ANS_LOGD("OnStsOperationCallback resolve");
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, externalErrCode);
         if (ANI_OK != (status = env->PromiseResolver_Resolve(resolver_, static_cast<ani_ref>(ret)))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
             return;
         }
     } else {
@@ -79,33 +82,30 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
         ani_error rejection =
             static_cast<ani_error>(OHOS::NotificationSts::CreateError(env, externalErrCode, errMsg));
         if (ANI_OK != (status = env->PromiseResolver_Reject(resolver_, rejection))) {
-            ANS_LOGD("PromiseResolver_Resolve faild. status %{public}d", status);
+            ANS_LOGE("PromiseResolver_Resolve faild. status %{public}d", status);
         }
     }
 }
 
 void StsDistributedOperationCallback::SetVm(ani_vm *vm)
 {
+    std::lock_guard<std::mutex> l(lock_);
     etsVm_ = vm;
 }
 
-StsSubscriberInstance::StsSubscriberInstance()
-{}
-StsSubscriberInstance::~StsSubscriberInstance()
-{}
 void StsSubscriberInstance::OnCanceled(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap,
     int32_t deleteReason)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("OnCanceled enter");
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -114,27 +114,27 @@ void StsSubscriberInstance::OnCanceled(
         vec.push_back(obj);
         CallFunction(etsEnv, "onCancel", vec);
     } else {
-        ANS_LOGD("WarpSubscribeCallbackData faild");
+        ANS_LOGE("WarpSubscribeCallbackData faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-    ANS_LOGD("done");
+    ANS_LOGD("OnCanceled done");
 }
 void StsSubscriberInstance::OnConsumed(
     const std::shared_ptr<OHOS::Notification::Notification> &request,
     const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("OnConsumed enter");
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -143,25 +143,25 @@ void StsSubscriberInstance::OnConsumed(
         vec.push_back(obj);
         CallFunction(etsEnv, "onConsume", vec);
     } else {
-        ANS_LOGD("WarpSubscribeCallbackData faild");
+        ANS_LOGE("WarpSubscribeCallbackData faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-    ANS_LOGD("done");
+    ANS_LOGD("OnConsumed done");
 }
 void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> &sortingMap)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("OnUpdate enter");
     std::lock_guard<std::mutex> l(lock_);
     ani_env* etsEnv;
     ani_status aniResult = ANI_ERROR;
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &etsEnv);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
     std::vector<ani_ref> vec;
@@ -170,14 +170,14 @@ void StsSubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMa
         vec.push_back(obj);
         CallFunction(etsEnv, "onUpdate", vec);
     } else {
-        ANS_LOGD("WarpNotificationSortingMap faild");
+        ANS_LOGE("WarpNotificationSortingMap faild");
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         return;
     }
-    ANS_LOGD("done");
+    ANS_LOGD("OnUpdate done");
 }
 void StsSubscriberInstance::OnConnected()
 {
@@ -455,6 +455,7 @@ bool StsSubscriberInstance::IsInit()
 bool StsSubscriberInstance::Compare(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> l(lock_);
     if (!IsInit()) {
         return false;
     }
@@ -482,19 +483,6 @@ bool StsSubscriberInstance::Compare(ani_env *env, ani_ref ref)
     ani_boolean result = ANI_FALSE;
     env->Reference_StrictEquals(ref, ref_, &result);
     return (result == ANI_TRUE) ? true : false;
-}
-bool StsSubscriberInstance::Compare(std::shared_ptr<StsSubscriberInstance> instance)
-{
-    ANS_LOGD("enter");
-    if (instance == nullptr) {
-        return false;
-    }
-    if (instance->obj_ == obj_) {
-        ANS_LOGD("Compare is ture");
-        return true;
-    }
-    ANS_LOGD("Compare is false");
-    return false;
 }
 bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::vector<ani_ref> &parm)
 {
@@ -528,6 +516,7 @@ bool SubscriberInstanceManager::HasNotificationSubscriber(
     ani_env *env, ani_object value, std::shared_ptr<StsSubscriberInstance> &subscriberInfo)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto &iter : subscriberInstances_) {
         if (iter->Compare(env, value)) {
             subscriberInfo = iter;
@@ -830,7 +819,7 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
 {
     std::string hashCodeStd;
     sptr<StsNotificationOperationInfo> info = new (std::nothrow) StsNotificationOperationInfo();
-    if (ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
+    if (info == nullptr || ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
         ANS_LOGD("hashCode is valid");
         return nullptr;
     }

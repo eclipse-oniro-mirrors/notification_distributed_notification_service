@@ -28,7 +28,7 @@ bool GetEnableNotificationInfo(ani_env *env, ani_object content, std::shared_ptr
 {
     ANS_LOGD("enter");
     if (content == nullptr) {
-        ANS_LOGD("content is null");
+        ANS_LOGE("content is null");
         return true;
     }
     ani_status status = ANI_OK;
@@ -54,12 +54,12 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
     ANS_LOGD("enter");
     sptr<AnsDialogHostClient> client = nullptr;
     if (!AnsDialogHostClient::CreateIfNullptr(client)) {
-        ANS_LOGD("create client fail");
+        ANS_LOGE("create client fail");
         info->errorCode = ERR_ANS_DIALOG_IS_POPPING;
         return;
     }
     if (client == nullptr) {
-        ANS_LOGD("client is nullptr");
+        ANS_LOGE("client is nullptr");
         info->errorCode = ERROR_INTERNAL_ERROR;
         return;
     }
@@ -95,7 +95,7 @@ void StsAsyncCompleteCallbackRequestEnableNotification(ani_env *env, std::shared
         ANS_LOGD("Resolve. errorCode %{public}d", errorCode);
         ani_object ret = OHOS::AppExecFwk::CreateInt(env, errorCode);
         if (ret == nullptr) {
-            ANS_LOGD("createInt faild");
+            ANS_LOGE("createInt faild");
             return;
         }
         if (ANI_OK != (status = env->PromiseResolver_Resolve(info->resolver, static_cast<ani_ref>(ret)))) {
@@ -199,13 +199,13 @@ ani_object AniRequestEnableNotification(ani_env *env, ani_object content)
     ANS_LOGD("enter");
     std::shared_ptr<EnableNotificationInfo> info = std::make_shared<EnableNotificationInfo>();
     if (!GetEnableNotificationInfo(env, content, info)) {
-        ANS_LOGD("GetEnableNotificationInfo");
+        ANS_LOGE("GetEnableNotificationInfo");
         return nullptr;
     }
     ani_object aniPromise {};
     ani_resolver aniResolver {};
     if (ANI_OK != env->Promise_New(&aniResolver, &aniPromise)) {
-        ANS_LOGD("Promise_New faild");
+        ANS_LOGE("Promise_New faild");
         return nullptr;
     }
     info->resolver = aniResolver;

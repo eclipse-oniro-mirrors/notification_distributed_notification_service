@@ -78,7 +78,7 @@ bool UnwrapArrayDoNotDisturbProfile(ani_env *env, ani_object arrayObj,
             return false;
         }
         sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow)NotificationDoNotDisturbProfile();
-        if (!UnwrapDoNotDisturbProfile(env, static_cast<ani_object>(optionRef), profile)) {
+        if (profile == nullptr || !UnwrapDoNotDisturbProfile(env, static_cast<ani_object>(optionRef), profile)) {
             ANS_LOGE("Get profile failed, index: %{public}d", i);
             return false;
         }

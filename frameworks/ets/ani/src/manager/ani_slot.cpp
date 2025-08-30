@@ -271,7 +271,7 @@ void AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, ani_enu
         return;
     }
     bool isForceControl = false;
-    int returncode returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
+    int returncode = Notification::NotificationHelper::SetEnabledForBundleSlot(option, slotType,
         NotificationSts::AniBooleanToBool(enable), isForceControl);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);

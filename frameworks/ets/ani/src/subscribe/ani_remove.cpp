@@ -59,7 +59,7 @@ void AniRemoveForBundle(ani_env *env, ani_object bundle, ani_object notification
     int ret = NotificationHelper::RemoveNotification(option, key.id, key.label, reasonType);
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }
@@ -93,7 +93,7 @@ void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEn
     int ret = NotificationHelper::RemoveNotification(hashCodeStd, reasonType);
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("StsRemoveForHashCode ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("StsRemoveForHashCode ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }
@@ -129,7 +129,7 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
     int ret = NotificationHelper::RemoveNotifications(hashCodesStd, reasonType);
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("StsRemoveForHashCodes ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("StsRemoveForHashCodes ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }
@@ -141,7 +141,7 @@ void AniRemoveAll(ani_env *env)
     int ret = NotificationHelper::RemoveNotifications();
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("AniRemoveAll ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("AniRemoveAll ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }
@@ -160,7 +160,7 @@ void AniRemoveAllForBundle(ani_env *env, ani_object bundle)
     int ret = NotificationHelper::RemoveAllNotifications(option);
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }
@@ -172,7 +172,7 @@ void AniRemoveAllForUserId(ani_env *env, ani_int userId)
     int ret = NotificationHelper::RemoveNotifications(userId);
     if (ret != ERR_OK) {
         int32_t externalErrorCode = NotificationSts::GetExternalCode(ret);
-        ANS_LOGD("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
+        ANS_LOGE("StsRemoveForBundle ret %{public}d. ErrorToExternal %{public}d", ret, externalErrorCode);
         std::string msg = OHOS::NotificationSts::FindAnsErrMsg(externalErrorCode);
         OHOS::NotificationSts::ThrowError(env, externalErrorCode, msg);
     }

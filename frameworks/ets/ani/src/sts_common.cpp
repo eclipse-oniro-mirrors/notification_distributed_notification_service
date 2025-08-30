@@ -158,7 +158,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
         return status;
     }
     if (isUndefined) {
-        ANS_LOGD("%{public}s is undefined", name);
+        ANS_LOGE("%{public}s is undefined", name);
         return ANI_INVALID_ARGS;
     }
     ani_boolean result = ANI_FALSE;
@@ -188,10 +188,10 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
         "unboxed", ":D", &outvalue)) != ANI_OK) {
-        ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Double failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Double sucess");
+    ANS_LOGD("GetPropertyDouble sucess");
     return status;
 }
 
@@ -215,7 +215,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Int sucess");
+    ANS_LOGD("GetPropertyInt sucess");
     return status;
 }
 
@@ -236,27 +236,33 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
     }
     if ((status = env->Object_CallMethodByName_Long(static_cast<ani_object>(refObj),
         "unboxed", ":J", &outvalue)) != ANI_OK) {
-        ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Long failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Long sucess");
+    ANS_LOGD("GetPropertyLong sucess");
     return status;
 }
 
 void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef)
 {
     if (env == nullptr || obj == nullptr || name == nullptr) {
+        ANS_LOGE("GetPropertyRefValue fail, has nullptr");
         return;
     }
     outRef = nullptr;
     isUndefined = ANI_TRUE;
-    if (env->Object_GetPropertyByName_Ref(obj, name, &outRef) != ANI_OK) {
+    ani_status status = ANI_ERROR;
+    status = env->Object_GetPropertyByName_Ref(obj, name, &outRef);
+    if (status != ANI_OK) {
+        ANS_LOGE("Object_GetPropertyByName_Ref failed, status : %{public}d", status);
         return;
     }
     if (outRef == nullptr) {
+        ANS_LOGE("GetPropertyRefValue fail, outRef nullptr");
         return;
     }
     env->Reference_IsUndefined(outRef, &isUndefined);
+    ANS_LOGD("GetPropertyRefValue end");
 }
 
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef)
