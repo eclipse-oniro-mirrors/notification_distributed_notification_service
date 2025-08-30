@@ -202,10 +202,9 @@ ani_status GetKeyString(ani_env *env, ani_object obj, int32_t index, ani_string 
     }
     ani_status status = ANI_ERROR;
     ani_ref stringEntryRef;
-    status = env->Object_CallMethodByName_Ref(obj,
-        "$_get", "i:C{std.core.Object}", &stringEntryRef, index);
+    status = env->Object_CallMethodByName_Ref(obj, "$_get", "i:C{std.core.Object}", &stringEntryRef, index);
     if (status != ANI_OK) {
-        ANS_LOGE("status : %{public}d, index: %{public}d", status, index);
+        ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d, index: %{public}d", status, index);
         return status;
     }
     str = static_cast<ani_string>(stringEntryRef);
