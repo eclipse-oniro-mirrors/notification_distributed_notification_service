@@ -322,7 +322,7 @@ ani_status GetIconButtonArray(ani_env *env,
     ani_status status = ANI_ERROR;
     ani_int length;
     if (((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK)) {
-        ANS_LOGI("get param failed, may be %{public}s : undefined", name);
+        ANS_LOGE("get param failed, may be %{public}s : undefined", name);
         return ANI_INVALID_ARGS;
     }
     if (isUndefined == ANI_TRUE) {
@@ -330,7 +330,7 @@ ani_status GetIconButtonArray(ani_env *env,
     }
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGI("status : %{public}d", status);
+        ANS_LOGE("status : %{public}d", status);
         return status;
     }
     for (int32_t i = 0; i < length; i++) {
@@ -338,7 +338,7 @@ ani_status GetIconButtonArray(ani_env *env,
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "i:C{std.core.Object}", &buttonRef, i);
         if (status != ANI_OK) {
-            ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         NotificationIconButton button;
@@ -897,14 +897,14 @@ void GetAniLiveViewContentVersion(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     if (!CheckAniLiveViewContentParam(env, obj, liveViewContent)) {
-        ANS_LOGD("CheckAniLiveViewContentParam faild");
+        ANS_LOGE("CheckAniLiveViewContentParam faild");
         return;
     }
     ani_int versionAni = 0;
     ani_boolean isUndefined = ANI_TRUE;
     if (GetPropertyInt(env, obj, "version", isUndefined, versionAni) != ANI_OK
         || isUndefined == ANI_TRUE) {
-            ANS_LOGD("UnWarpNotificationLiveViewContent: get version failed");
+            ANS_LOGE("UnWarpNotificationLiveViewContent: get version failed");
             return;
         }
     liveViewContent->SetVersion(static_cast<uint32_t>(versionAni));
@@ -914,7 +914,7 @@ void GetAniLiveViewContentExtraInfo(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     if (!CheckAniLiveViewContentParam(env, obj, liveViewContent)) {
-        ANS_LOGD("CheckAniLiveViewContentParam faild");
+        ANS_LOGE("CheckAniLiveViewContentParam faild");
         return;
     }
     ani_status status = ANI_OK;
@@ -922,12 +922,12 @@ void GetAniLiveViewContentExtraInfo(
     ani_boolean isUndefined = ANI_TRUE;
     if (ANI_OK != (status = GetPropertyRef(env, obj, "extraInfo", isUndefined, extraInfoRef))
         || isUndefined == ANI_TRUE || extraInfoRef == nullptr) {
-        ANS_LOGD("UnWarpNotificationLiveViewContent: get extraInfo failed. status %{public}d", status);
+        ANS_LOGE("UnWarpNotificationLiveViewContent: get extraInfo failed. status %{public}d", status);
         return;
     }
     AAFwk::WantParams wantParams = {};
     if (!UnwrapWantParams(env, extraInfoRef, wantParams)) {
-        ANS_LOGD("UnWarpNotificationLiveViewContent: get extraInfo by ref failed");
+        ANS_LOGE("UnWarpNotificationLiveViewContent: get extraInfo by ref failed");
         return;
     }
     std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<WantParams>(wantParams);
@@ -938,19 +938,19 @@ void GetAniLiveViewContentPictureInfo(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     if (!CheckAniLiveViewContentParam(env, obj, liveViewContent)) {
-        ANS_LOGD("CheckAniLiveViewContentParam faild");
+        ANS_LOGE("CheckAniLiveViewContentParam faild");
         return;
     }
     ani_ref pictureInfoRef;
     ani_boolean isUndefined = ANI_TRUE;
     if (ANI_OK != GetPropertyRef(env, obj, "pictureInfo", isUndefined, pictureInfoRef)
         || isUndefined == ANI_TRUE || pictureInfoRef == nullptr) {
-        ANS_LOGD("UnWarpNotificationLiveViewContent: get pictureInfo failed");
+        ANS_LOGE("UnWarpNotificationLiveViewContent: get pictureInfo failed");
         return;
     }
     std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap;
     if (GetMapOfPictureInfo(env, static_cast<ani_object>(pictureInfoRef), pictureMap) != ANI_OK) {
-        ANS_LOGD("UnWarpNotificationLiveViewContent: get pictureInfo by ref failed");
+        ANS_LOGE("UnWarpNotificationLiveViewContent: get pictureInfo by ref failed");
         return;
     }
     liveViewContent->SetPicture(pictureMap);
@@ -960,18 +960,18 @@ void GetAniLiveViewContentIsLocalUpdateOnly(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationLiveViewContent> &liveViewContent)
 {
     if (!CheckAniLiveViewContentParam(env, obj, liveViewContent)) {
-        ANS_LOGD("CheckAniLiveViewContentParam faild");
+        ANS_LOGE("CheckAniLiveViewContentParam faild");
         return;
     }
     ani_status status = ANI_OK;
     bool isLocalUpdateOnly = true;
     ani_boolean isUndefined = ANI_TRUE;
     if (ANI_OK != (status = GetPropertyBool(env, obj, "isLocalUpdateOnly", isUndefined, isLocalUpdateOnly))) {
-        ANS_LOGD("get 'isLocalUpdateOnly' faild. status %{public}d", status);
+        ANS_LOGE("get 'isLocalUpdateOnly' faild. status %{public}d", status);
         return;
     }
     if (isUndefined == ANI_TRUE) {
-        ANS_LOGD("'isLocalUpdateOnly' is Undefined");
+        ANS_LOGE("'isLocalUpdateOnly' is Undefined");
         return;
     }
     liveViewContent->SetIsOnlyLocalUpdate(isLocalUpdateOnly);
@@ -982,7 +982,7 @@ void UnWarpNotificationLiveViewContentByOther(ani_env *env, ani_object obj,
 {
     ANS_LOGD("UnWarpNotificationLiveViewContentByOther call");
     if (!CheckAniLiveViewContentParam(env, obj, liveViewContent)) {
-        ANS_LOGD("CheckAniLiveViewContentParam faild");
+        ANS_LOGE("CheckAniLiveViewContentParam faild");
         return;
     }
     GetAniLiveViewContentVersion(env, obj, liveViewContent);
