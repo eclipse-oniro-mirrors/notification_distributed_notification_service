@@ -37,7 +37,7 @@ ani_boolean AniIsSupportTemplate(ani_env* env, ani_string templateName)
     int returncode = Notification::NotificationHelper::IsSupportTemplate(templateNameStr, support);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniIsSupportTemplate -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniIsSupportTemplate error, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return NotificationSts::BoolToAniBoolean(false);
     }
