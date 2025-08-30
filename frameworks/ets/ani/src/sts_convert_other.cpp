@@ -218,27 +218,27 @@ ani_status GetPixelMapByKeys(ani_env *env, ani_object obj, std::vector<ani_strin
 {
     ANS_LOGD("GetPixelMapByKeys call");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("GetPixelMapByKeys failed, has nullPtr");
+        ANS_LOGE("GetPixelMapByKeys fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
     for (auto anikey : keys) {
         ani_ref picturesArrayRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(obj, "$_get", nullptr, &picturesArrayRef, anikey))) {
-            ANS_LOGE("GetPixelMapByKeys :  Object_CallMethodByName_Ref failed");
+            ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d", status);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
         }
         std::vector<std::shared_ptr<PixelMap>> pixelMaps = {};
         if ((status = GetPixelMapArrayByRef(env, picturesArrayRef, pixelMaps)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapByKeys :  GetPixelMapArrayByRef failed");
+            ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
             deleteVectorWithSpPoints(pixelMaps);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
         }
         std::string str = "";
         if ((status = GetStringByAniString(env, anikey, str)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapByKeys :  GetStringByAniString failed");
+            ANS_LOGE("GetStringByAniString fail. status : %{public}d", status);
             deleteVectorWithSpPoints(pixelMaps);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
