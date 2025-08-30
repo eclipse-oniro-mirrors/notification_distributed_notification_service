@@ -140,11 +140,13 @@ ani_status GetPixelMapArray(ani_env *env,
     ani_boolean isUndefined = ANI_TRUE;
     ani_status status = ANI_ERROR;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyRef fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
 
     if ((status = GetPixelMapArrayByRef(env, arrayObj, pixelMaps)) != ANI_OK) {
         pixelMaps.clear();
+        ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
         return status;
     }
     ANS_LOGD("GetPixelMapArray end");
