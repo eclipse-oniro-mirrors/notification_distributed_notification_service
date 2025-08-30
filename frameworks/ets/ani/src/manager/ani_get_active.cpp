@@ -32,7 +32,7 @@ ani_long AniGetActiveNotificationCount(ani_env *env)
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
-        ANS_LOGE("AniSetNotificationEnableSlotSync error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AniGetActiveNotificationCount error, errorCode: %{public}d", externalCode);
         return 0;
     }
     return retNum;
