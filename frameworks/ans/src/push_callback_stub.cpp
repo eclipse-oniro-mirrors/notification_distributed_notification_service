@@ -37,7 +37,8 @@ enum PushCheckErrCode : int32_t {
     NETWORK_UNREACHABLE = 2,
     SPECIFIED_NOTIFICATIONS_FAILED = 3,
     SYSTEM_ERROR = 4,
-    OPTIONAL_PARAMETER_INVALID = 5
+    OPTIONAL_PARAMETER_INVALID = 5,
+    PUSH_CHECK_WEAK_NETWORK = 6,
 };
 constexpr int32_t MAX_LIVEVIEW_CONFIG_SIZE = 60;
 
@@ -64,6 +65,9 @@ ErrCode PushCallBackStub::ConvertPushCheckCodeToErrCode(int32_t pushCheckCode)
             break;
         case PushCheckErrCode::OPTIONAL_PARAMETER_INVALID:
             errCode = ERR_ANS_PUSH_CHECK_EXTRAINFO_INVALID;
+            break;
+        case PushCheckErrCode::PUSH_CHECK_WEAK_NETWORK:
+            errCode = ERR_ANS_CHECK_WEAK_NETWORK;
             break;
         default:
             errCode = ERR_ANS_PUSH_CHECK_FAILED;

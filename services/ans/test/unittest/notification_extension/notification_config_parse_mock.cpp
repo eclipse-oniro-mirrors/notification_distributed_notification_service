@@ -175,6 +175,11 @@ uint32_t NotificationConfigParse::GetStartAbilityTimeout()
     return MOCK_DEFAULT_REPLY_TIMEOUT;
 }
 
+bool NotificationConfigParse::CheckAppLiveViewCcm()
+{
+    return true;
+}
+
 void NotificationConfigParse::GetReportTrustListConfig()
 {
     return;

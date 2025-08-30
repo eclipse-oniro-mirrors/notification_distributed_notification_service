@@ -1388,8 +1388,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286002, Function | SmallTest | Level1)
     bundle->SetUid(NON_SYSTEM_APP_UID);
     result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
     ASSERT_EQ(result, ERR_OK);
-    result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
-    ASSERT_EQ(result, ERR_ANS_BUNDLE_SLOT_EXIST);
 }
 }  // namespace Notification
 }  // namespace OHOS

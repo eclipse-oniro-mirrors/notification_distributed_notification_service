@@ -63,6 +63,7 @@ public:
     void GetCollaborationFilter();
     bool IsInCollaborationFilter(const std::string &bundleName, int32_t uid) const;
     uint32_t GetStartAbilityTimeout();
+    bool CheckAppLiveViewCcm();
 
 private:
     bool ParseCollaborativeDeleteTypesDevices(std::map<std::string, std::map<std::string,
@@ -80,6 +81,7 @@ private:
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
     constexpr static const char* CFG_KEY_SLOT_TYPE_REMINDER = "slotTypeReminder";
+    constexpr static const char* APP_LIVEVIEW_PERMISSIONS = "appLiveViewPermissions";
     constexpr static const char* CFG_KEY_NAME = "name";
     constexpr static const char* CFG_KEY_REMINDER_FLAGS = "reminderFlags";
     constexpr static const char* APP_PRIVILEGES = "appPrivileges";
