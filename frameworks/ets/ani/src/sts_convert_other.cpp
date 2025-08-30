@@ -156,7 +156,7 @@ ani_status GetResourceArray(ani_env *env,
 {
     ANS_LOGD("GetResourceArray call");
     if (env == nullptr || param == nullptr || name == nullptr) {
-        ANS_LOGE("GetResourceArray failed, has nullPtr");
+        ANS_LOGE("GetResourceArray fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_ref arrayObj = nullptr;
@@ -164,12 +164,12 @@ ani_status GetResourceArray(ani_env *env,
     ani_status status;
     ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetResourceArray failed, status : %{public}d", status);
+        ANS_LOGE("GetPropertyRef fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("GetResourceArray : status : %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
     }
     for (int32_t i = 0; i < length; i++) {
@@ -178,12 +178,12 @@ ani_status GetResourceArray(ani_env *env,
             "$_get", "i:C{std.core.Object}", &iconRef, i);
         if (status != ANI_OK) {
             res.clear();
-            ANS_LOGE("GetResourceArray: status = %{public}d, index = %{public}d", status, i);
+            ANS_LOGE("Object_CallMethodByName_Ref fail. status = %{public}d, index = %{public}d", status, i);
             return status;
         }
         ResourceManager::Resource resource;
         if (ANI_OK != UnwrapResource(env, static_cast<ani_object>(iconRef), resource)) {
-            ANS_LOGE("GetResourceArray : status = %{public}d, index= %{public}d", status, i);
+            ANS_LOGE("UnwrapResource fail. status = %{public}d, index= %{public}d", status, i);
             res.clear();
             return status;
         }
