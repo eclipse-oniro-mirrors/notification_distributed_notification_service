@@ -451,6 +451,18 @@ uint32_t NotificationConfigParse::GetStartAbilityTimeout()
     return 0;
 }
 
+bool NotificationConfigParse::CheckAppLiveViewCcm()
+{
+    nlohmann::json root;
+    std::string JsonPoint = "/";
+    JsonPoint.append(NotificationConfigParse::APP_LIVEVIEW_PERMISSIONS);
+    if (!NotificationConfigParse::GetInstance()->GetConfigJson(JsonPoint, root)) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file.");
+        return false;
+    }
+    return true;
+}
+
 void NotificationConfigParse::GetReportTrustListConfig()
 {
     nlohmann::json root;

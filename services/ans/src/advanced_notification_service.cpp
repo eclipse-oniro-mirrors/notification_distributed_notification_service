@@ -1797,6 +1797,7 @@ ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<Notificati
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
         .ErrorCode(result).Message("Push OnCheckNotification failed.");
+    ANS_LOGW("Push check failed %{public}d.", result);
     if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
         AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         if (!request->IsAtomicServiceNotification()) {
@@ -1804,7 +1805,7 @@ ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<Notificati
         }
         return ERR_OK;
     }
-    if (result == PUSH_CHECK_WEAK_NETWORK) {
+    if (result == ERR_ANS_CHECK_WEAK_NETWORK) {
         if (NotificationLiveViewUtils::GetInstance().CheckLiveViewForBundle(request)) {
             return ERR_OK;
         }

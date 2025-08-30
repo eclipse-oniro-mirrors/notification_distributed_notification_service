@@ -20,6 +20,7 @@
 #include "advanced_notification_inline.h"
 #include "notification_preferences.h"
 #include "liveview_all_scenarios_extension_wrapper.h"
+#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
@@ -93,6 +94,7 @@ bool NotificationLiveViewUtils::CheckLiveViewForBundle(const sptr<NotificationRe
         event = extroInfo->GetStringParam("event");
     }
 
+    ANS_LOGI("Ccm check %{public}s %{public}s.", bundleName.c_str(), event.c_str());
     bool enable = false;
     if (LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->CheckLiveViewConfig(bundleName, event,
         DEFAULT_USER_ID, enable) != ERR_OK) {
@@ -124,6 +126,10 @@ bool NotificationLiveViewUtils::CheckLiveViewVersion()
 
 void NotificationLiveViewUtils::NotifyLiveViewEvent(const std::string& event)
 {
+    if (!NotificationConfigParse::GetInstance()->CheckAppLiveViewCcm()) {
+        return;
+    }
+
     ANS_LOGI("notify event %{public}s", event.c_str());
     if (CheckLiveViewVersion()) {
         LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->NotifyLiveViewEvent(event, nullptr);
@@ -133,12 +139,19 @@ void NotificationLiveViewUtils::NotifyLiveViewEvent(const std::string& event)
 void NotificationLiveViewUtils::NotifyLiveViewEvent(const std::string& event,
     const sptr<NotificationBundleOption>& bundleInfo)
 {
+    if (!NotificationConfigParse::GetInstance()->CheckAppLiveViewCcm()) {
+        return;
+    }
     ANS_LOGI("notify event %{public}s", event.c_str());
     LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->NotifyLiveViewEvent(event, bundleInfo);
 }
 
 bool NotificationLiveViewUtils::CheckLiveViewRebuild(int32_t userId)
 {
+    if (!NotificationConfigParse::GetInstance()->CheckAppLiveViewCcm()) {
+        return false;
+    }
+
     std::lock_guard<ffrt::mutex> lock(eraseMutex);
     if (eraseFlag.find(userId) == eraseFlag.end()) {
         eraseFlag[userId] = ERASE_FLAG_INIT;

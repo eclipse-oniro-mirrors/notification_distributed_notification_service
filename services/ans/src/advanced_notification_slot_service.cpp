@@ -1226,7 +1226,7 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    notificationSvrQueue_->submit_h(std::bind([&]() {
+    notificationSvrQueue_->submit_h(std::bind([&, response, requestId, value]() {
         if (response == ERR_OK) {
             LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->UpdateLiveViewConfig(value);
             return;
