@@ -69,7 +69,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
 
     ani_vm *vm = nullptr;
     if (ANI_OK != env->GetVM(&vm)) {
-        ANS_LOGD("env GetVM faild");
+        ANS_LOGE("env GetVM faild");
         return nullptr;
     }
     callback->SetVm(vm);
@@ -106,7 +106,7 @@ void AniSubScribeRegistryInit(ani_env *env)
     static const char *npName = "@ohos.notificationSubscribe.notificationSubscribe";
     ani_namespace np;
     if (ANI_OK != env->FindNamespace(npName, &np)) {
-        ANS_LOGD("Not found '%{public}s'", npName);
+        ANS_LOGE("Not found '%{public}s'", npName);
         return;
     }
 
@@ -132,13 +132,13 @@ void AniSubScribeRegistryInit(ani_env *env)
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
     ani_status status = env->Namespace_BindNativeFunctions(np, methods.data(), methods.size());
     if (ANI_OK != status) {
-        ANS_LOGD("Cannot bind native methods to '%{public}s'. status %{public}d", npName, status);
+        ANS_LOGE("Cannot bind native methods to '%{public}s'. status %{public}d", npName, status);
         return;
     };
     ANS_LOGD("Finish bind native methods to '%{public}s'", npName);
 
     if (env->ResetError() != ANI_OK) {
-        ANS_LOGD("ResetError failed");
+        ANS_LOGE("ResetError failed");
     }
     ANS_LOGD("AniSubScribeRegistryInit end");
 }
@@ -151,7 +151,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ANS_LOGD("ANI_Constructor enter");
     ani_env *env;
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
-        ANS_LOGD("Unsupported ANI_VERSION_1");
+        ANS_LOGE("Unsupported ANI_VERSION_1");
         return ANI_ERROR;
     }
 
