@@ -69,7 +69,7 @@ void AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj)
     int returncode = Notification::NotificationHelper::AddNotificationSlots(slots);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("AniAddSlots -> error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AddNotificationSlots failed, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
@@ -84,12 +84,13 @@ void AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlotObj)
     if (NotificationSts::UnwrapNotificationSlot(env, notificationSlotObj, slot)) {
         returncode = Notification::NotificationHelper::AddNotificationSlot(slot);
     } else {
+        ANS_LOGE("UnwrapNotificationSlot failed");
         NotificationSts::ThrowStsErroWithMsg(env, "sts AddSlot ERROR_INTERNAL_ERROR");
         return;
     }
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
-        ANS_LOGE("sts AddSlot error, errorCode: %{public}d", externalCode);
+        ANS_LOGE("AddNotificationSlot failed, errorCode: %{public}d", externalCode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         return;
     }
