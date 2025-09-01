@@ -37,10 +37,6 @@ namespace OHOS {
 namespace Notification {
 class MockAnsSubscriberTest : public MockAnsSubscriber  {
 public:
-    sptr<IRemoteObject> AsObject() override
-    {
-        return new MockIRemoteObject();
-    }
 
     ErrCode OnConsumed(const sptr<Notification> &notification,
         const sptr<NotificationSortingMap> &notificationMap) override
@@ -903,6 +899,46 @@ HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_001, Function | SmallTe
     notificationSubscriberManager_->OnRemoteDied(obj);
     EXPECT_NE(notificationSubscriberManager_, nullptr);
 }
+
+HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_recordNotNull, TestSize.Level1)
+{
+    // Arrange
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.notificationSubQueue_ = std::make_shared<ffrt::queue>("test");
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberUid = 123;
+    notificationSubscriberManager.subscriberRecordList_.push_back(record);
+    LivePublishProcess::GetInstance()->AddLiveViewSubscriber(123);
+
+    notificationSubscriberManager.OnRemoteDied(subscriber->AsObject());
+
+    EXPECT_EQ(notificationSubscriberManager.subscriberRecordList_.size(), 0);
+    EXPECT_TRUE(LivePublishProcess::GetInstance()->GetLiveViewSubscribeState(123));
+}
+
+HWTEST_F(NotificationSubscriberManagerTest, OnRemoteDied_recordIsSubscribeSelf, TestSize.Level1)
+{
+    // Arrange
+    NotificationSubscriberManager notificationSubscriberManager;
+    notificationSubscriberManager.notificationSubQueue_ = std::make_shared<ffrt::queue>("test");
+    std::shared_ptr<TestAnsSubscriber> testAnsSubscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<IAnsSubscriber> subscriber(new (std::nothrow) SubscriberListener(testAnsSubscriber));
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->subscriberUid = 123;
+    record->isSubscribeSelf = true;
+    notificationSubscriberManager.subscriberRecordList_.push_back(record);
+    LivePublishProcess::GetInstance()->AddLiveViewSubscriber(123);
+
+    notificationSubscriberManager.OnRemoteDied(subscriber->AsObject());
+
+    EXPECT_EQ(notificationSubscriberManager.subscriberRecordList_.size(), 0);
+    EXPECT_FALSE(LivePublishProcess::GetInstance()->GetLiveViewSubscribeState(123));
+}
+
 /**
  * @tc.name: NotifyConsumedInner_001
  * @tc.desc: Test NotifyConsumedInner when notification is nullptr

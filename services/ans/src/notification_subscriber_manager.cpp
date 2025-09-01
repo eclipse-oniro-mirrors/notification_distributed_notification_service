@@ -42,20 +42,6 @@
 
 namespace OHOS {
 namespace Notification {
-struct NotificationSubscriberManager::SubscriberRecord {
-    sptr<IAnsSubscriber> subscriber {nullptr};
-    std::set<std::string> bundleList_ {};
-    bool subscribedAll {false};
-    int32_t userId {SUBSCRIBE_USER_INIT};
-    std::string deviceType {CURRENT_DEVICE_TYPE};
-    int32_t subscriberUid {DEFAULT_UID};
-    std::string subscriberBundleName_;
-    bool needNotifyApplicationChanged = false;
-    bool needNotifyResponse = false;
-    uint32_t filterType {0};
-    std::set<NotificationConstant::SlotType> slotTypes {};
-    bool isSubscribeSelf = false;
-};
 
 const uint32_t FILTETYPE_IM = 1 << 0;
 const uint32_t FILTETYPE_QUICK_REPLY_IM = 2 << 0;
@@ -356,6 +342,9 @@ void NotificationSubscriberManager::OnRemoteDied(const wptr<IRemoteObject> &obje
             auto subscriberUid = record->subscriberUid;
             ANS_LOGI("subscriber removed . subscriberUid = %{public}d", record->subscriberUid);
             subscriberRecordList_.remove(record);
+            if (record->isSubscribeSelf) {
+                AdvancedNotificationService::GetInstance()->RemoveSystemLiveViewNotificationsOfSa(subscriberUid);
+            }
         }
     }));
     notificationSubQueue_->wait(handler);
