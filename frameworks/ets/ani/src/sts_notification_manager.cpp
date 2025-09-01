@@ -490,8 +490,7 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
 {
     ANS_LOGD("ContentTypeCToEts call");
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
-    if (!StsContentTypeUtils::CToSts(contentType, stsContentType)
-        || !EnumConvertNativeToAni(env,
+    if (!StsContentTypeUtils::CToSts(contentType, stsContentType) || !EnumConvertNativeToAni(env,
         "@ohos.notificationManager.notificationManager.ContentType", stsContentType, enumItem)) {
         ANS_LOGE("ContentTypeCToEts failed");
         return false;
@@ -515,39 +514,45 @@ bool DoNotDisturbTypeEtsToC(ani_env *env, ani_enum_item enumItem,
 bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem)
 {
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
-    StsRemindTypeUtils::CToSts(remindType, stsRemindType);
-    EnumConvertNativeToAni(env,
-        "@ohos.notificationManager.notificationManager.DeviceRemindType", stsRemindType, enumItem);
+    if (!StsRemindTypeUtils::CToSts(remindType, stsRemindType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.DeviceRemindType", stsRemindType, enumItem)) {
+        ANS_LOGE("DeviceRemindTypeCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType)
 {
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
-    if (EnumConvertAniToNative(env, enumItem, stsRemindType)) {
-        StsRemindTypeUtils::StsToC(stsRemindType, remindType);
-        return true;
+    if (!EnumConvertAniToNative(env, enumItem, stsRemindType)
+        || !StsRemindTypeUtils::StsToC(stsRemindType, remindType)) {
+        ANS_LOGE("DeviceRemindTypeEtsToC failed");
+        return false;
     }
-    return false;
+    return true;
 }
 
 bool SourceTypeCToEts(ani_env *env, SourceType sourceType, ani_enum_item &enumItem)
 {
     STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
-    StsSourceTypeUtils::CToSts(sourceType, stsSourceType);
-    EnumConvertNativeToAni(env,
-        "@ohos.notificationManager.notificationManager.SourceType", stsSourceType, enumItem);
+    if (!StsSourceTypeUtils::CToSts(sourceType, stsSourceType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.SourceType", stsSourceType, enumItem)) {
+        ANS_LOGE("SourceTypeCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceType)
 {
     STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
-    if (EnumConvertAniToNative(env, enumItem, stsSourceType)) {
-        StsSourceTypeUtils::StsToC(stsSourceType, sourceType);
-        return true;
+    if (!EnumConvertAniToNative(env, enumItem, stsSourceType)
+        || !StsSourceTypeUtils::StsToC(stsSourceType, sourceType)) {
+        ANS_LOGE("SourceTypeEtsToC failed");
+        return false;
     }
-    return false;
+    return true;
 }
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
