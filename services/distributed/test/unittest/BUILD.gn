@@ -839,14 +839,14 @@ ohos_unittest("distributed_subscriber_test") {
 ohos_unittest("distributed_library_test") {
   module_out_path = module_output_path
   include_dirs = [ "/${services_path}/distributed/include/base" ]
- 
+
   sources = [
     "/${services_path}/distributed/src/base/distributed_liveview_all_scenarios_extension_wrapper.cpp",
     "distributed_library_test/distributed_liveview_all_scenarios_extension_wrapper_unit_test.cpp",
   ]
- 
+
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
- 
+
   external_deps = [
     "ability_base:zuri",
     "ability_runtime:ability_manager",
@@ -1030,7 +1030,8 @@ ohos_unittest("distributed_helper_test") {
     "/${services_path}/distributed/src/tlv_box/response_box.cpp",
     "/${services_path}/distributed/src/tlv_box/state_box.cpp",
     "/${services_path}/distributed/src/tlv_box/tlv_box.cpp",
-    "distributed_helper_test/distributed_notification_analytics_util_test.cpp"
+    "distributed_helper_test/distributed_notification_analytics_util_test.cpp",
+    "distributed_helper_test/bundle_resource_helper_test.cpp"
   ]
 
   configs = [

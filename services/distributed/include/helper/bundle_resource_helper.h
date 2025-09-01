@@ -93,6 +93,7 @@ public:
     ErrCode GetBundleInfoV9(const std::string& bundleName, int32_t userId,
         AppExecFwk::BundleInfo& bundleInfo);
 
+    int32_t GetAppIndexByUid(const int32_t uid);
 private:
     void Connect();
     void Disconnect();
