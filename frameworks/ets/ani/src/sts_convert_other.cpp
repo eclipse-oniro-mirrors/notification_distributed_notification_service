@@ -257,21 +257,21 @@ ani_status GetPixelMapByRef(
 {
     ANS_LOGD("GetPixelMapByRef call");
     if (env == nullptr || obj == nullptr || keysStrArrayRef == nullptr) {
-        ANS_LOGE("GetPixelMapByRef failed, has nullPtr");
+        ANS_LOGE("GetPixelMapByRef fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
     ani_int length;
     if (ANI_OK !=
         (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(keysStrArrayRef), "length", &length))) {
-        ANS_LOGE("GetPixelMapByRef : Object_GetPropertyByName_Double status = %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int fail. status = %{public}d", status);
         return status;
     }
     ani_string strAni = {};
     std::vector<ani_string> keys = {};
     for (int32_t i = 0; i < length; i++) {
         if ((status = GetKeyString(env, static_cast<ani_object>(keysStrArrayRef), i, strAni)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapByRef : GetKeyString status = %{public}d", status);
+            ANS_LOGE("GetKeyString fail. status = %{public}d", status);
             keys.clear();
             return status;
         }
