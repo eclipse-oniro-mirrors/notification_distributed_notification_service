@@ -257,12 +257,12 @@ bool WarpBadgeNumberCallbackData(
         ANS_LOGE("SetFieldString bundle faild");
         return false;
     }
-    if (!CallSetter(env, cls, outObj, "uid", static_cast<ani_int>(badgeData->GetUid()))) {
-        ANS_LOGE("uid set faild.");
+    if (!SetFieldInt(env, cls, outObj, "uid", badgeData->GetUid())) {
+        ANS_LOGE("SetFieldInt uid faild");
         return false;
     }
-    if (!CallSetter(env, cls, outObj, "badgeNumber", static_cast<ani_int>(badgeData->GetBadgeNumber()))) {
-        ANS_LOGE("badgeNumber set faild");
+    if (!SetFieldInt(env, cls, outObj, "badgeNumber", badgeData->GetBadgeNumber())) {
+        ANS_LOGE("SetFieldInt badgeNumber faild");
         return false;
     }
     instanceKeyObj = CreateInt(env, static_cast<ani_int>(badgeData->GetInstanceKey()));
