@@ -146,22 +146,21 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     ani_int length;
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(param), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("GetPixelMapArrayByRef: status : %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
     }
-
     for (int32_t i = 0; i < length; i++) {
         ani_ref pixelMapRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(param),
             "$_get", "i:C{std.core.Object}", &pixelMapRef, i);
         if (status != ANI_OK) {
-            ANS_LOGE("GetPixelMapArrayByRef:status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d, index: %{public}d", status, i);
             pixelMaps.clear();
             return status;
         }
         std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(pixelMapRef));
         if (pixelMap == nullptr) {
-            ANS_LOGE("GetPixelMapArrayByRef: GetPixelMapFromEnvSp failed.");
+            ANS_LOGE("GetPixelMapFromEnvSp fail. pixelMap nullptr");
             pixelMaps.clear();
             return ANI_INVALID_ARGS;
         }
