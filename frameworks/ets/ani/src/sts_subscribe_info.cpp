@@ -24,16 +24,22 @@ bool GetSlotTypes(ani_env *env, ani_object value, NotificationSubscribeInfo &inf
 {
     ani_boolean isUndefined = ANI_TRUE;
     std::vector<ani_enum_item> slotTypesEnum = {};
-    if (ANI_OK != GetPropertyEnumItemArray(env, value, "slotTypes", isUndefined, slotTypesEnum)
-        || isUndefined == ANI_TRUE || slotTypesEnum.empty()) {
-        ANS_LOGE("GetPropertyEnumItemArray fail or undefined");
+    if (ANI_OK != GetPropertyEnumItemArray(env, value, "slotTypes", isUndefined, slotTypesEnum)) {
+        ANS_LOGE("GetPropertyEnumItemArray fail");
+        return false;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return true;
+    }
+    if (slotTypesEnum.empty()) {
+        ANS_LOGE("slotTypes is empty");
         return false;
     }
     std::vector<SlotType> slotTypes = {};
     for (auto slotTypeEnum : slotTypesEnum) {
         SlotType slotType = SlotType::OTHER;
         if (!SlotTypeEtsToC(env, slotTypeEnum, slotType)) {
-            ANS_LOGE("Enum conversion failed");
+            ANS_LOGE("SlotTypeEtsToC failed");
             return false;
         }
         slotTypes.push_back(slotType);
@@ -46,9 +52,9 @@ bool GetSlotTypes(ani_env *env, ani_object value, NotificationSubscribeInfo &inf
 
 bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, NotificationSubscribeInfo &info)
 {
-    ANS_LOGD("enter");
+    ANS_LOGD("UnwarpNotificationSubscribeInfo enter");
     if (env == nullptr || value == nullptr) {
-        ANS_LOGE("invalid parameter value");
+        ANS_LOGE("env or value is null");
         return false;
     }
     std::vector<std::string> res = {};
@@ -59,20 +65,20 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     if (ANI_OK != GetPropertyStringArray(env, value, "bundleNames", isUndefined, res)
         || isUndefined == ANI_TRUE
         || res.empty()) {
-        ANS_LOGE("UnWarpStringArrayOrUndefinedByProperty faild");
+        ANS_LOGE("GetPropertyStringArray bundleNames faild");
     }
     std::vector<std::string> bundleNames = {};
     for (auto bundleName : res) {
         bundleNames.emplace_back(GetResizeStr(bundleName, STR_MAX_SIZE));
     }
     if (ANI_OK != GetPropertyInt(env, value, "userId", isUndefined, userId) || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetPropertyInt faild");
+        ANS_LOGE("GetPropertyInt userId faild");
     }
     if (ANI_OK != GetPropertyString(env, value, "deviceType", isUndefined, deviceType) || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetStringOrUndefined faild");
+        ANS_LOGE("GetPropertyString deviceType faild");
     }
     if (ANI_OK != GetPropertyLong(env, value, "filterLimit", isUndefined, filterLimit) || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetPropertyLong faild");
+        ANS_LOGE("GetPropertyLong filterLimit faild");
     }
     if (!GetSlotTypes(env, value, info)) {
         ANS_LOGE("GetSlotTypes faild");
@@ -86,6 +92,5 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
         info.GetAppUserId(), info.GetDeviceType().c_str(), info.GetFilterType());
     return true;
 }
-
 } // namespace NotificationSts
 } // OHOS

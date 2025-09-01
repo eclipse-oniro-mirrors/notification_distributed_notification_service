@@ -31,7 +31,7 @@ bool StsAnsDialogCallback::Init(
     }
     ani_status status = ANI_OK;
     if ((status = env->GetVM(&vm_)) != ANI_OK) {
-        ANS_LOGD("GetVM faild. status %{public}d", status);
+        ANS_LOGE("GetVM faild. status %{public}d", status);
         return false;
     }
     info_ = info;
@@ -55,7 +55,7 @@ void StsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData &da
     ani_options aniArgs { 0, nullptr };
     aniResult = vm_->AttachCurrentThread(&aniArgs, ANI_VERSION_1, &env);
     if (aniResult != ANI_OK) {
-        ANS_LOGD("AttachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("AttachCurrentThread error. result: %{public}d.", aniResult);
         AnsDialogHostClient::Destroy();
         return;
     }
@@ -64,7 +64,7 @@ void StsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData &da
     }
     aniResult = vm_->DetachCurrentThread();
     if (aniResult != ANI_OK) {
-        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+        ANS_LOGE("DetachCurrentThread error. result: %{public}d.", aniResult);
         AnsDialogHostClient::Destroy();
         return;
     }
