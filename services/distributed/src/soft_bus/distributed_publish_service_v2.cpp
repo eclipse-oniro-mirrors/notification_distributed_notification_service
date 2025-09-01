@@ -53,6 +53,7 @@ static const std::string EXTENDINFO_APP_NAME = "app_name";
 static const std::string EXTENDINFO_APP_LABEL = "app_label";
 static const std::string EXTENDINFO_APP_ICON = "app_icon";
 static const std::string EXTENDINFO_APP_INDEX = "app_index";
+static const std::string EXTENDINFO_APP_UID = "app_uid";
 static const std::string EXTENDINFO_DEVICE_USERID = "userId";
 static const std::string EXTENDINFO_DEVICE_ID = "deviceId";
 static const std::string EXTENDINFO_ENABLE_CHECK = "check";
@@ -652,17 +653,20 @@ bool DistributedPublishService::FillSyncRequestExtendInfo(const sptr<Notificatio
             ANS_LOGE("Dans get application, %{public}d, %{public}s", deviceTypeId, bundleName.c_str());
             return false;
         }
-
+        int32_t index = DelayedSingleton<BundleResourceHelper>::GetInstance()->GetAppIndexByUid(
+            notificationRequest->GetOwnerUid());
         AppExecFwk::ApplicationInfo appInfo = bundleInfo.applicationInfo;
         wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_NAME, AAFwk::String::Box(appInfo.name));
         wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_LABEL, AAFwk::String::Box(resourceInfo.label));
-        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, AAFwk::Integer::Box(appInfo.appIndex));
+        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_UID,
+            AAFwk::Integer::Box(notificationRequest->GetOwnerUid()));
+        wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_APP_INDEX, AAFwk::Integer::Box(index));
         wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID + "_" + deviceType,
             AAFwk::String::Box(deviceId));
         requestBox->SetSmallIcon(AnsImageUtil::CreatePixelMapByString(resourceInfo.icon));
         requestBox->SetReceiverUserId(userId);
-        ANS_LOGI("Dans fill %{public}s %{public}d %{public}s %{public}d", resourceInfo.label.c_str(), appInfo.appIndex,
-            StringAnonymous(deviceId).c_str(), userId);
+        ANS_LOGI("Dans fill %{public}s %{public}d %{public}s %{public}d %{public}d", resourceInfo.label.c_str(), index,
+            StringAnonymous(deviceId).c_str(), userId, notificationRequest->GetOwnerUid());
         return true;
     }
     wantParam.SetParam(EXTENDINFO_INFO_PRE + EXTENDINFO_DEVICE_ID + "_" + deviceType, AAFwk::String::Box(deviceId));
