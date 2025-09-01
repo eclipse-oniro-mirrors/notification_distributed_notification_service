@@ -609,14 +609,13 @@ bool WarpNotificationDoNotDisturbDate(
         ANS_LOGE("WarpNotificationDoNotDisturbDate: create class faild");
         return false;
     }
-    if (!EnumConvertNativeToAni(
-        env, "@ohos.notificationManager.notificationManager.DoNotDisturbType",
-            date->GetDoNotDisturbType(), stsEnumValue)) {
+    if (!EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.DoNotDisturbType", date->GetDoNotDisturbType(), stsEnumValue)) {
         ANS_LOGE("EnumConvert_NativeToSts faild");
         return false;
     }
     if (!SetPropertyByRef(env, outObj, "type", stsEnumValue)) {
-        ANS_LOGE("set type faild.");
+        ANS_LOGE("SetPropertyByRef 'type' faild.");
         return false;
     }
     if (!SetDate(env, outObj, "begin", date->GetBeginDate())) {
