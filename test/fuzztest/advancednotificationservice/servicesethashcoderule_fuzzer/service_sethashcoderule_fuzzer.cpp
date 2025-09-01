@@ -42,5 +42,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
     };
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
+    constexpr int sleepMs = 1000;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
     return 0;
 }
