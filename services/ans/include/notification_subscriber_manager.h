@@ -39,7 +39,20 @@ namespace OHOS {
 namespace Notification {
 class NotificationSubscriberManager : public DelayedSingleton<NotificationSubscriberManager> {
 public:
-    struct SubscriberRecord;
+    struct SubscriberRecord {
+        sptr<IAnsSubscriber> subscriber {nullptr};
+        std::set<std::string> bundleList_ {};
+        bool subscribedAll {false};
+        int32_t userId {SUBSCRIBE_USER_INIT};
+        std::string deviceType {CURRENT_DEVICE_TYPE};
+        int32_t subscriberUid {DEFAULT_UID};
+        std::string subscriberBundleName_;
+        bool needNotifyApplicationChanged = false;
+        bool needNotifyResponse = false;
+        uint32_t filterType {0};
+        std::set<NotificationConstant::SlotType> slotTypes {};
+        bool isSubscribeSelf = false;
+    };
 
     /**
      * @brief Add a subscriber.
