@@ -73,6 +73,7 @@ void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boo
 
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, const std::string value);
+bool SetFieldInt(ani_env *env, ani_class cls, ani_object &object, const std::string fieldName, const int32_t value);
 bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value);
 bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
