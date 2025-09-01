@@ -29,6 +29,8 @@ using namespace OHOS::AbilityRuntime::WantAgent;
 
 std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent);
 ani_object WarpWantAgent(ani_env *env, std::shared_ptr<WantAgent> wantAgent);
+ani_status GetPropertyWantAgentArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<std::shared_ptr<WantAgent>> &res);
 ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAgent>> wantAgents);
 
 ani_object CreateAniPixelMap(ani_env* env, std::shared_ptr<PixelMap> pixelMap);
