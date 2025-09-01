@@ -325,36 +325,36 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
 {
     ANS_LOGD("GetMapOfPictureInfo call");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("GetMapOfPictureInfo failed, has nullPtr");
+        ANS_LOGE("GetMapOfPictureInfo fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
     if (ANI_OK != (status = env->FindClass("notification.notificationContent.RecordTools", &cls))) {
-        ANS_LOGE("GetMapOfPictureInfo : FindClass status = %{public}d", status);
+        ANS_LOGE("FindClass fail. status = %{public}d", status);
         return status;
     }
     if (cls == nullptr) {
-        ANS_LOGE("GetMapOfPictureInfo : cls is nullptr");
+        ANS_LOGE("cls is nullptr");
         return ANI_INVALID_TYPE;
     }
     ani_static_method keysMethod = nullptr;
     if (ANI_OK != (status = env->Class_FindStaticMethod(cls, "GetKeys", nullptr, &keysMethod))) {
-        ANS_LOGE("GetMapOfPictureInfo : Class_FindStaticMethod status = %{public}d", status);
+        ANS_LOGE("Class_FindStaticMethod fail. status = %{public}d", status);
         return status;
     }
     ani_ref keysStrArrayRef = nullptr;
     if (ANI_OK != (status = env->Class_CallStaticMethod_Ref(cls, keysMethod, &keysStrArrayRef, obj))) {
-        ANS_LOGE("GetMapOfPictureInfo : Class_CallStaticMethod_Ref status = %{public}d", status);
+        ANS_LOGE("Class_CallStaticMethod_Ref fail. status = %{public}d", status);
         return status;
     }
     if (IsUndefine(env, static_cast<ani_object>(keysStrArrayRef))) {
-        ANS_LOGE("GetMapOfPictureInfo : keysStrArrayRef IsUndefined");
+        ANS_LOGE("keysStrArrayRef IsUndefined");
         return ANI_INVALID_ARGS;
     }
     if (ANI_OK != (status = GetPixelMapByRef(env, obj, keysStrArrayRef, pictureMap))) {
         deleteVectorWithArraySpPoints(pictureMap);
-        ANS_LOGE("GetMapOfPictureInfo : GetPixelMapByRef status = %{public}d", status);
+        ANS_LOGE("GetPixelMapByRef fail. status = %{public}d", status);
     }
     ANS_LOGD("GetMapOfPictureInfo end");
     return status;
