@@ -1819,13 +1819,13 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;
     std::shared_ptr<RecentInfo> recentInfo_ = nullptr;
-    std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     std::shared_ptr<SystemEventObserver> systemEventObserver_ = nullptr;
-    DistributedKv::DistributedKvDataManager dataManager_;
     sptr<IRemoteObject::DeathRecipient> pushRecipient_ = nullptr;
     std::shared_ptr<ffrt::queue> notificationSvrQueue_ = nullptr;
     std::map<NotificationConstant::SlotType, std::shared_ptr<BasePublishProcess>> publishProcess_;
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
+    DistributedKv::DistributedKvDataManager dataManager_;
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
     bool localScreenOn_ = true;
 #endif

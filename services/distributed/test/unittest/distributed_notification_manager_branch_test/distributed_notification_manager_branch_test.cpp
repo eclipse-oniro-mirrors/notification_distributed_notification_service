@@ -326,5 +326,17 @@ HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManage
     EXPECT_EQ(
         distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
 }
+
+/**
+ * @tc.name      : DistributedNotificationManager_01900
+ * @tc.number    : DistributedNotificationManager_01900
+ * @tc.desc      : test OnDistributedKvStoreDeathRecipient and database_ is nullptr.
+ */
+HWTEST_F(DistributedNotificationManagerBranchTest, DistributedNotificationManager_01900, Function | SmallTest | Level1)
+{
+    distributedManager_->database_ = nullptr;
+    EXPECT_EQ(
+        distributedManager_->OnDistributedKvStoreDeathRecipient(), ERR_ANS_DISTRIBUTED_OPERATION_FAILED);
+}
 }  // namespace Notification
 }  // namespace OHOS
