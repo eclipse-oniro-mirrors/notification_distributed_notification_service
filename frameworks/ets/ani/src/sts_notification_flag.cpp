@@ -26,20 +26,19 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
         return false;
     }
     ani_class flagsCls = nullptr;
-    if (!CreateClassObjByClassName(env,
-        "notification.notificationFlags.NotificationFlagsInner", flagsCls, flagsObject) ||
-        flagsObject == nullptr) {
-            ANS_LOGE("Create faild");
-            return false;
-        }
+    if (!CreateClassObjByClassName(env, "notification.notificationFlags.NotificationFlagsInner",
+        flagsCls, flagsObject) || flagsObject == nullptr) {
+        ANS_LOGE("CreateClassObjByClassName faild");
+        return false;
+    }
     // readonly soundEnabled?: NotificationFlagStatus;
     int32_t soundEnabled = static_cast<int32_t>(flags->IsSoundEnabled());
     ani_enum_item enumItem = nullptr;
     if (!EnumConvertNativeToAni(env, "notification.notificationFlags.NotificationFlagStatus",
         soundEnabled, enumItem)) {
-            ANS_LOGE("EnumConvertNativeToAni 'soundEnabled' faild");
-            return false;
-        }
+        ANS_LOGE("EnumConvertNativeToAni 'soundEnabled' faild");
+        return false;
+    }
     if (!SetPropertyByRef(env, flagsObject, "soundEnabled", enumItem)) {
         ANS_LOGE("WarpNotificationFlags set 'soundEnabled' faild");
         return false;
@@ -48,9 +47,9 @@ bool WarpNotificationFlags(ani_env* env, const std::shared_ptr<NotificationFlags
     int32_t vibrationEnabled = static_cast<int32_t>(flags->IsVibrationEnabled());
     if (!EnumConvertNativeToAni(env, "notification.notificationFlags.NotificationFlagStatus",
         vibrationEnabled, enumItem)) {
-            ANS_LOGE("EnumConvertNativeToAni 'vibrationEnabled' faild");
-            return false;
-        }
+        ANS_LOGE("EnumConvertNativeToAni 'vibrationEnabled' faild");
+        return false;
+    }
     if (!SetPropertyByRef(env, flagsObject, "vibrationEnabled", enumItem)) {
         ANS_LOGE("WarpNotificationFlags set 'vibrationEnabled' faild");
         return false;
