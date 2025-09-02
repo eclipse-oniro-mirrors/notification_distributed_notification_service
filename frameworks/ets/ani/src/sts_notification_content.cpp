@@ -447,20 +447,25 @@ bool WarpNotificationLocalLiveViewButton(
 
 bool getCapsuleByIcon(ani_env *env, ani_object obj, std::shared_ptr<PixelMap> &pixelMap)
 {
-    ani_boolean isUndefined = ANI_TRUE;
-    pixelMap = nullptr;
+    ani_boolean isUndefined = ANI_FALSE;
     ani_ref tempRef = nullptr;
     ani_status status = GetPropertyRef(env, obj, "icon", isUndefined, tempRef);
     if (status != ANI_OK) {
         ANS_LOGE("icon GetPropertyRef failed");
         return false;
     }
+    if (isUndefined == ANI_TRUE) {
+        return true;
+    }
     if (tempRef == nullptr) {
-        ANS_LOGE("PixelMap is null");
+        ANS_LOGE("tempRef is null");
         return false;
     }
     pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(tempRef));
-
+    if (pixelMap == nullptr) {
+        ANS_LOGE("PixelMap is null");
+        return false;
+    }
     return true;
 }
 
@@ -540,14 +545,16 @@ bool UnWarpNotificationCapsule(ani_env *env, ani_object obj, NotificationCapsule
     }
     capsule.SetTime(static_cast<int32_t>(time));
     std::shared_ptr<PixelMap> pixelMap = nullptr;
-    if (!getCapsuleByIcon(env, obj, pixelMap) || pixelMap == nullptr) {
+    if (!getCapsuleByIcon(env, obj, pixelMap)) {
         ANS_LOGE("get icon failed");
         return false;
     }
-    capsule.SetIcon(pixelMap);
+    if (pixelMap != nullptr) {
+        capsule.SetIcon(pixelMap);
+    }
     std::vector<NotificationIconButton> iconButtons = {};
     if (!getCapsuleByButtons(env, obj, iconButtons)) {
-        ANS_LOGE("get capsuleButtons   failed");
+        ANS_LOGE("get capsuleButtons failed");
         return false;
     }
     capsule.SetCapsuleButton(iconButtons);
