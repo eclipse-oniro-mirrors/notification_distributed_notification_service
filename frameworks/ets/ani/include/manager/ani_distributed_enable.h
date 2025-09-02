@@ -31,6 +31,9 @@ ani_boolean AniIsSmartReminderEnabled(ani_env *env, ani_string deviceType);
 void AniSetSmartReminderEnable(ani_env *env, ani_string deviceType, ani_boolean enable);
 void AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType, ani_boolean enable);
 ani_boolean AniIsDistributedEnabledBySlot(ani_env *env, ani_enum_item slot, ani_string deviceType);
+void AniSetDistributedEnabled(ani_env *env, ani_boolean enable, ani_string deviceType);
+void AniSetDistributedEnableByBundles(ani_env *env, ani_object obj, ani_string deviceType);
+ani_object AniGetDistributedDeviceList(ani_env *env);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 #endif

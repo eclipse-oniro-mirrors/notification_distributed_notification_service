@@ -49,6 +49,7 @@ ohos_shared_library("notification_manager_ani") {
     "./src/manager/ani_push_callback.cpp",
     "./src/manager/ani_remove_group.cpp",
     "./src/manager/ani_request_enable.cpp",
+    "./src/manager/ani_silent_reminder_enable.cpp",
     "./src/manager/ani_slot.cpp",
     "./src/manager/ani_support_template.cpp",
     "./src/manager/ani_sync_config.cpp",
