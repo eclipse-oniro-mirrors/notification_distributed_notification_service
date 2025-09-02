@@ -82,7 +82,6 @@ public:
     bool SetObject(ani_env *env, ani_object obj);
     bool IsInit();
     bool Compare(ani_env *env, ani_object obj);
-    bool Compare(std::shared_ptr<StsSubscriberInstance> instance);
 
 private:
     bool CallFunction(ani_env *env, const char* func, std::vector<ani_ref> &parm);
