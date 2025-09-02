@@ -330,10 +330,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     }
     soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
-#ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
-    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
-        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
-#endif
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
@@ -354,11 +350,11 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnBootSystemCompleted, this),
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
-#ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
-    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
-#endif
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
+        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
+    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     InitDistributeCallBack();
 #endif
 }
