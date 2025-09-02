@@ -34,7 +34,7 @@ test_path = "${component_path}/test"
 tools_path = "${component_path}/tools"
 service_fuzz_test_path =
     "distributed_notification_service/distributed_notification_service"
-distributed_notification_supported = false
+distributed_notification_supported = true
 subsystem_name = "notification"
 component_external_deps = [
   "ability_base:base",
@@ -88,9 +88,6 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_device_standby)) {
     standby_enable = false
-  }
-  if (target_cpu == "arm") {
-    distributed_notification_supported = true
   }
   if (defined(global_parts_info) &&
       !defined(global_parts_info.multimedia_player_framework)) {
