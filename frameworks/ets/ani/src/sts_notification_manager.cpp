@@ -580,12 +580,11 @@ ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonO
     ani_class optCls = nullptr;
     if (!CreateClassObjByClassName(env,
         "@ohos.notificationManager.notificationManager.ButtonOptionsInner", optCls, optObj) || optObj == nullptr) {
-        ANS_LOGE("WarpNotificationButtonOption: create class failed");
+        ANS_LOGE("CreateClassObjByClassName fail");
         return nullptr;
     }
-    // title: string;
     if (!SetPropertyOptionalByString(env, optObj, "buttonName", buttonOption->GetButtonName())) {
-        ANS_LOGE("WarpNotificationButtonOption: set buttonName failed");
+        ANS_LOGE("SetPropertyOptionalByString buttonName fail");
         return nullptr;
     }
     ANS_LOGD("WarpNotificationButtonOption end");
