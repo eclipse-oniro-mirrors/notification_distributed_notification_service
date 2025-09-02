@@ -442,9 +442,8 @@ bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
 {
     ANS_LOGD("SlotTypeCToEts call");
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
-    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType)
-        || !EnumConvertNativeToAni(
-            env, "@ohos.notificationManager.notificationManager.SlotType", stsSlotType, enumItem)) {
+    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType) ||
+        !EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.SlotType", stsSlotType, enumItem)) {
         ANS_LOGE("SlotTypeCToEts failed");
         return false;
     }
@@ -455,8 +454,7 @@ bool SlotLevelEtsToC(ani_env *env, ani_enum_item enumItem, SlotLevel &slotLevel)
 {
     ANS_LOGD("SlotLevelEtsToC call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
-    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel)
-        || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
+    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel) || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
         ANS_LOGE("SlotLevelEtsToC failed");
         return false;
     }
