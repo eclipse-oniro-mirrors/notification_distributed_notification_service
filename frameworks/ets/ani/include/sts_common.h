@@ -34,6 +34,7 @@ constexpr int32_t SHORT_TEXT_SIZE = 1026;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
 std::string GetResizeStr(std::string instr, int32_t length);
 
+ani_object GetNullObject(ani_env *env);
 bool IsUndefine(ani_env *env, const ani_object &obj);
 ani_object CreateBoolean(ani_env *env, bool value);
 ani_object CreateDouble(ani_env *env, ani_double value);

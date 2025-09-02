@@ -23,6 +23,12 @@ constexpr const char* CLASSNAME_BOOLEAN = "std.core.Boolean";
 constexpr const char* CLASSNAME_DOUBLE = "std.core.Double";
 constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
+ani_object GetNullObject(ani_env *env)
+{
+    ani_ref nullRef;
+    env->GetNull(&nullRef);
+    return static_cast<ani_object>(nullRef);
+}
 std::string GetResizeStr(std::string instr, int32_t length)
 {
     return instr.length() <= length ? instr : instr.substr(0, length);
