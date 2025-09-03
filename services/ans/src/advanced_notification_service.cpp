@@ -1669,7 +1669,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     ANS_LOGD("insert pushCallBack, slot type %{public}d", slotType);
     notificationCheckRequest->SetUid(uid);
     checkRequests_.insert_or_assign(slotType, notificationCheckRequest);
-    ANS_LOGD("insert notificationCheckRequest, slot type %{public}d, content type %{public}d",
+    ANS_LOGI("insert notificationCheckRequest, slot type %{public}d, content type %{public}d",
         slotType, notificationCheckRequest->GetContentType());
 
     ANS_LOGD("end");

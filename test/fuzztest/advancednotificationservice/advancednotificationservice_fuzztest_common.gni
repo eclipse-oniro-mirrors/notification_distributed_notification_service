@@ -3,7 +3,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0  
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,7 @@ import("//build/test.gni")
 template("advancednotificationservice_fuzztest_target") {
   assert(defined(invoker.sources_value), "sources_value must be defined")
   assert(defined(invoker.fuzz_config_file_value), "fuzz_config_file_value must be defined")
-  
+
   ohos_fuzztest(target_name) {
     module_out_path = service_fuzz_test_path
     sources = [ "${component_path}/test/fuzztest/fuzz_common_base/mock/mock_notification_func.cpp", ]
@@ -83,13 +83,13 @@ template("advancednotificationservice_fuzztest_target") {
       "time_service:time_client",
     ]
     external_deps += component_external_deps
-    
+
     # 条件编译标志
     if (is_double_framework) {
       cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
     }
 
-    if (distributed_notification_supported) {
+    if (distributed_notification_service_feature_distributed_db) {
       defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
       deps += [ "${services_path}/distributed:libans_distributed" ]
       include_dirs += [ "${services_path}/distributed/include" ]

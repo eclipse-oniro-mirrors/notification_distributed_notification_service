@@ -41,7 +41,7 @@ ohos_unittest("reminder_unit_test") {
     "${services_path}/reminder:libreminder_static",
   ]
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
@@ -257,7 +257,7 @@ ohos_unittest("reminder_service_test") {
     "${services_path}/reminder:libreminder_static",
   ]
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
@@ -342,7 +342,7 @@ ohos_unittest("reminder_agent_service_ability_test") {
     "${services_path}/reminder:libreminder_static",
   ]
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
