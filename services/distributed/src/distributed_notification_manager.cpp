@@ -484,7 +484,10 @@ ErrCode DistributedNotificationManager::GetLocalDeviceInfo(DistributedDatabase::
 ErrCode DistributedNotificationManager::OnDistributedKvStoreDeathRecipient()
 {
     ANS_LOGD("start");
-    database_ = std::make_shared<DistributedDatabase>(databaseCb_, deviceCb_);
+    if (database_ == nullptr) {
+        ANS_LOGE("database_ is invalid.");
+        return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
+    }
     if (!database_->RecreateDistributedDB()) {
         ANS_LOGE("RecreateDistributedDB failed.");
         return ERR_ANS_DISTRIBUTED_OPERATION_FAILED;
