@@ -51,9 +51,7 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
     }
     // supportDisplayDevices?: Array<string>;
     std::vector<std::string> tempStrings = {};
-    isUndefined = ANI_TRUE;
-    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", isUndefined, tempStrings) == ANI_OK
-        && isUndefined == ANI_FALSE) {
+    if (GetPropertyStringArray(env, obj, "supportDisplayDevices", tempStrings) == ANI_OK) {
         std::vector<std::string> supportDisplayDevices = {};
         for (auto device: tempStrings) {
             supportDisplayDevices.emplace_back(GetResizeStr(device, STR_MAX_SIZE));
@@ -64,9 +62,7 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
     }
     // supportOperateDevices?: Array<string>;
     tempStrings.clear();
-    isUndefined = ANI_TRUE;
-    if (GetPropertyStringArray(env, obj, "supportOperateDevices", isUndefined, tempStrings) == ANI_OK
-        && isUndefined == ANI_FALSE) {
+    if (GetPropertyStringArray(env, obj, "supportOperateDevices", tempStrings) == ANI_OK) {
         std::vector<std::string> supportOperateDevices = {};
         for (auto device: tempStrings) {
             supportOperateDevices.emplace_back(GetResizeStr(device, STR_MAX_SIZE));
@@ -1453,7 +1449,7 @@ bool UnWarpNotificationFilter(ani_env *env, ani_object obj, LiveViewFilter& filt
         ANS_LOGD("UnWarpNotificationFilter:UnWarpNotificationKey label is undefined");
     }
 
-    if (ANI_OK != (status = GetPropertyStringArray(env, obj, "extraInfoKeys", isUndefined, filter.extraInfoKeys))) {
+    if (ANI_OK != (status = GetPropertyStringArray(env, obj, "extraInfoKeys", filter.extraInfoKeys))) {
         ANS_LOGD("UnWarpNotificationFilter:get extraInfoKeysObj failed. status %{public}d", status);
     }
     return true;
