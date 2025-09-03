@@ -37,7 +37,7 @@ namespace OHOS {
 namespace Notification {
 class MockAnsSubscriberTest : public MockAnsSubscriber  {
 public:
-
+    explicit MockAnsSubscriberTest(const sptr<IRemoteObject>& remote) : MockAnsSubscriber(remote) {};
     ErrCode OnConsumed(const sptr<Notification> &notification,
         const sptr<NotificationSortingMap> &notificationMap) override
     {
@@ -319,7 +319,7 @@ HWTEST_F(NotificationSubscriberManagerTest, UnRegisterOnSubscriberAddCallbackTes
  */
 HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Function | SmallTest | Level1)
 {
-    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(1);
 
     sptr<NotificationRequest> request = new NotificationRequest();
@@ -347,7 +347,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_001, Functi
  */
 HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Function | SmallTest | Level1)
 {
-    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
     std::vector<sptr<OHOS::Notification::Notification>> notifications;
     notificationSubscriberManager_->BatchNotifyConsumedInner(notifications, nullptr, nullptr);
@@ -360,7 +360,7 @@ HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_002, Functi
  */
 HWTEST_F(NotificationSubscriberManagerTest, BatchNotifyConsumedInner_003, Function | SmallTest | Level1)
 {
-    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber();
+    sptr<MockAnsSubscriber> mockSubscriber = new MockAnsSubscriber(new MockIRemoteObject());
     EXPECT_CALL(*mockSubscriber, OnConsumedList(_, _)).Times(0);
 
     sptr<NotificationRequest> request = new NotificationRequest();
@@ -963,7 +963,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_001, Function | 
 HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
@@ -987,7 +987,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Function | 
 HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
@@ -1015,7 +1015,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_003, Function | 
 HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
@@ -1039,7 +1039,7 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Function | 
 HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_005, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     notificationSubscriberManager.AddSubscriberInner(subscriber, subscribeInfo);
@@ -1082,7 +1082,7 @@ HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_001, Funct
 HWTEST_F(NotificationSubscriberManagerTest, GetIsEnableEffectedRemind_002, Function | SmallTest | Level1)
 {
     NotificationSubscriberManager notificationSubscriberManager;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     subscribeInfo->AddDeviceType(NotificationConstant::PC_DEVICE_TYPE);
@@ -1116,7 +1116,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeSubscriberd_002, Functio
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     subscribeInfo->AddDeviceType(deviceType);
@@ -1136,7 +1136,7 @@ HWTEST_F(NotificationSubscriberManagerTest, IsDeviceTypeAffordConsume_001, Funct
 {
     NotificationSubscriberManager notificationSubscriberManager;
     std::string deviceType = NotificationConstant::PC_DEVICE_TYPE;
-    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest());
+    sptr<MockAnsSubscriberTest> subscriber(new (std::nothrow) MockAnsSubscriberTest(new MockIRemoteObject()));
     const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
     subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
     subscribeInfo->AddDeviceType(deviceType);

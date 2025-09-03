@@ -17,14 +17,13 @@
 #define BASE_NOTIFICATION_MOCK_ANS_SUBCRIBER_OBJECT_H
 
 #include "gmock/gmock.h"
-#include "ans_subscriber_stub.h"
+#include "ans_subscriber_proxy.h"
 
 namespace OHOS {
 namespace Notification {
-class MockAnsSubscriber : public AnsSubscriberStub  {
+class MockAnsSubscriber : public AnsSubscriberProxy  {
 public:
-    MockAnsSubscriber() {}
-    ~MockAnsSubscriber() {}
+    explicit MockAnsSubscriber(const sptr<IRemoteObject>& remote) : AnsSubscriberProxy(remote) {};
 
     ErrCode OnConnected() override { return ERR_OK; };
 
