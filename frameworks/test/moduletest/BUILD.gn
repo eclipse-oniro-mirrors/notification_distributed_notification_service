@@ -67,7 +67,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
   ]
 
   defines = []
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }
@@ -140,7 +140,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
   ]
 
   defines = []
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }
@@ -214,7 +214,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
   ]
 
   defines = []
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }

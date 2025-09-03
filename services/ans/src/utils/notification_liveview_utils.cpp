@@ -68,7 +68,8 @@ bool NotificationLiveViewUtils::CheckLiveViewConfigByBundle(const std::string& b
     bool configEnable = false;
     if (LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->CheckLiveViewConfig(bundleName, event,
         userId, configEnable) != ERR_OK) {
-        return false;
+        ANS_LOGE("Get config failed %{public}s", bundleName.c_str());
+        return true;
     }
     return configEnable;
 }

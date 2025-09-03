@@ -22,7 +22,7 @@ group("ans_unit_test") {
   testonly = true
   deps = []
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     deps += [
       ":ans_distributed_unit_test",
       ":distributed_database_branch_test",

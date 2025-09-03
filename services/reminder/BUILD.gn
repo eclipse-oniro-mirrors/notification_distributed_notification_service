@@ -75,7 +75,7 @@ ohos_source_set("reminder_service_sources") {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]
@@ -209,7 +209,7 @@ ohos_shared_library("libreminder") {
 
   deps = [ "${services_path}/reminder:reminder_service_sources" ]
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }
 
@@ -312,7 +312,7 @@ ohos_static_library("libreminder_static") {
 
   deps = [ "${services_path}/reminder:reminder_service_sources" ]
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     deps += [ "${services_path}/distributed:libans_distributed" ]
   }
 
