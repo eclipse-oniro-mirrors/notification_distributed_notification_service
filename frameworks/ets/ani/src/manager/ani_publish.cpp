@@ -79,6 +79,7 @@ void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representat
     }
     notificationRequest->SetOwnerUserId(userId);
     notificationRequest->SetOwnerBundleName(bundleStr);
+    notificationRequest->SetIsAgentNotification(true);
     int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
