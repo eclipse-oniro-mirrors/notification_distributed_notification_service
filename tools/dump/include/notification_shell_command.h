@@ -42,7 +42,9 @@ private:
     ErrCode RunAsHelpCommand();
     ErrCode RunAsDumpCommand();
     ErrCode RunAsSettingCommand();
+    void SetNativeToken();
 
+#ifndef ANM_BUILD_VARIANT_USER
     ErrCode RunHelp();
     void CheckDumpOpt();
     void SetDumpCmdInfo(std::string &cmd, std::string &bundle, int32_t &userId, ErrCode &ret, int32_t &recvUserId);
@@ -50,11 +52,11 @@ private:
         std::vector<std::string> &infos);
     ErrCode RunSetEnableCmd();
     ErrCode RunSetDeviceStatusCmd();
-    void SetNativeToken();
+    ErrCode RunGetDeviceStatusCmd();
     ErrCode RunSetSmartReminderEnabledCmd();
     ErrCode RunSetDistributedEnabledByBundleCmd();
     ErrCode RunSetDistributedEnabledBySlotCmd();
-    ErrCode RunGetDeviceStatusCmd();
+#endif
 
 private:
     std::shared_ptr<AnsNotification> ans_;
