@@ -455,6 +455,7 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
     int length = strs.size();
     ani_object arrayObj = newArrayClass(env, length);
     if (arrayObj == nullptr) {
+        ANS_LOGE("newArrayClass failed, arrayObj is nullptr");
         return nullptr;
     }
     ani_size i = 0;
@@ -550,6 +551,7 @@ bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     }
     ani_object boolObj = CreateBoolean(env, BoolToAniBoolean(value));
     if (boolObj == nullptr) {
+        ANS_LOGE("CreateBoolean failed, boolObj is nullptr");
         return false;
     }
     status = env->Object_SetField_Ref(object, field, boolObj);
