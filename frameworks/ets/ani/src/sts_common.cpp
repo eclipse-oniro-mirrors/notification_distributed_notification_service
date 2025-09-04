@@ -411,12 +411,13 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
     ani_status status;
     ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyRef fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
 
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGI("status : %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int status : %{public}d", status);
         return status;
     }
 
@@ -425,14 +426,14 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "i:C{std.core.Object}", &numEntryRef, i);
         if (status != ANI_OK) {
-            ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("Object_CallMethodByName_Ref status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         ani_long longValue = 0.0;
         status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "unboxed",
             ":J", &longValue);
         if (status != ANI_OK) {
-            ANS_LOGI("Object_CallMethodByName_Long uid fail, status: %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Long uid fail, status: %{public}d", status);
             return status;
         }
         res.push_back(static_cast<int64_t>(longValue));
