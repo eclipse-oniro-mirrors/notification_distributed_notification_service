@@ -62,9 +62,7 @@ bool UnwarpNotificationSubscribeInfo(ani_env *env, ani_object value, Notificatio
     ani_long filterLimit = 0;
     std::string deviceType;
     ani_boolean isUndefined = ANI_TRUE;
-    if (ANI_OK != GetPropertyStringArray(env, value, "bundleNames", isUndefined, res)
-        || isUndefined == ANI_TRUE
-        || res.empty()) {
+    if (ANI_OK != GetPropertyStringArray(env, value, "bundleNames", res)|| res.empty()) {
         ANS_LOGE("GetPropertyStringArray bundleNames faild");
     }
     std::vector<std::string> bundleNames = {};

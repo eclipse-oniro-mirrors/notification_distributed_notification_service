@@ -135,7 +135,8 @@ std::shared_ptr<PixelMap> GetPixelMapFromEnvSp(ani_env* env, ani_object obj)
     return PixelMapTaiheAni::GetNativePixelMap(env, obj);
 }
 
-ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::shared_ptr<PixelMap>> &pixelMaps)
+ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen)
 {
     ANS_LOGD("GetPixelMapArrayByRef call");
     if (env == nullptr || param == nullptr) {
@@ -148,6 +149,9 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     if (status != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
+    }
+    if (maxLen > 0 && length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref pixelMapRef;
@@ -170,8 +174,8 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     return status;
 }
 
-ani_status GetPixelMapArray(ani_env *env,
-    ani_object param, const char *name, std::vector<std::shared_ptr<PixelMap>> &pixelMaps)
+ani_status GetPixelMapArray(ani_env *env, ani_object param, const char *name,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen)
 {
     ANS_LOGD("GetPixelMapArray call");
     if (env == nullptr || param == nullptr || name == nullptr) {
@@ -186,7 +190,7 @@ ani_status GetPixelMapArray(ani_env *env,
         return ANI_INVALID_ARGS;
     }
 
-    if ((status = GetPixelMapArrayByRef(env, arrayObj, pixelMaps)) != ANI_OK) {
+    if ((status = GetPixelMapArrayByRef(env, arrayObj, pixelMaps, maxLen)) != ANI_OK) {
         pixelMaps.clear();
         ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
         return status;
@@ -195,8 +199,8 @@ ani_status GetPixelMapArray(ani_env *env,
     return status;
 }
 
-ani_status GetResourceArray(ani_env *env,
-    ani_object param, const char *name, std::vector<ResourceManager::Resource> &res)
+ani_status GetResourceArray(ani_env *env, ani_object param, const char *name,
+    std::vector<ResourceManager::Resource> &res, const uint32_t maxLen)
 {
     ANS_LOGD("GetResourceArray call");
     if (env == nullptr || param == nullptr || name == nullptr) {
@@ -215,6 +219,9 @@ ani_status GetResourceArray(ani_env *env,
     if (status != ANI_OK) {
         ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
+    }
+    if (length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref iconRef;
