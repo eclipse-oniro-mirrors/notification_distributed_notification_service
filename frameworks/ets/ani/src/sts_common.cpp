@@ -618,17 +618,17 @@ ani_object CreateLong(ani_env *env, int64_t value)
     ani_class longCls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_LONG, &longCls)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("FindClass fail, status : %{public}d", status);
         return nullptr;
     }
     ani_method longCtor;
     if ((status = env->Class_FindMethod(longCls, "<ctor>", "J:V", &longCtor)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
         return nullptr;
     }
     ani_object longObj;
     if ((status = env->Object_New(longCls, longCtor, &longObj, value)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_New fail, status : %{public}d", status);
         return nullptr;
     }
     return longObj;
@@ -643,17 +643,17 @@ ani_object CreateDouble(ani_env *env, double value)
     ani_class doubleCls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_DOUBLE, &doubleCls)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("FindClass fail, status : %{public}d", status);
         return nullptr;
     }
     ani_method doubleCtor;
     if ((status = env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
         return nullptr;
     }
     ani_object doubleObj;
     if ((status = env->Object_New(doubleCls, doubleCtor, &doubleObj, static_cast<ani_double>(value))) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_New fail, status : %{public}d", status);
         return nullptr;
     }
     return doubleObj;
