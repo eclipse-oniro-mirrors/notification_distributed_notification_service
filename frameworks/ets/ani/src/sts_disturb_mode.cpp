@@ -40,7 +40,8 @@ bool UnwrapDoNotDisturbProfile(ani_env *env, ani_object param,
         ANS_LOGE("UnwrapDoNotDisturbProfile: get name failed");
         return false;
     }
-    profile->SetProfileName(nameStr);
+    std::string profileName = GetResizeStr(nameStr, PROFILE_NAME_SIZE);
+    profile->SetProfileName(profileName);
     ani_ref trustlistRef;
     if (ANI_OK != GetPropertyRef(env, param, "trustlist", isUndefined, trustlistRef) || isUndefined == ANI_TRUE) {
         ANS_LOGE("UnwrapDoNotDisturbProfile: get trustlist failed");
