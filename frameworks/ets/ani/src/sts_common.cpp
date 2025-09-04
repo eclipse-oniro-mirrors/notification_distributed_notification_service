@@ -719,6 +719,7 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
     }
     ani_object arrayObj = newArrayClass(env, values.size());
     if (arrayObj == nullptr) {
+        ANS_LOGE("newArrayClass fail");
         return nullptr;
     }
     for (size_t i = 0; i < values.size(); i++) {
@@ -729,7 +730,7 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
         }
         ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, longObj);
         if (status != ANI_OK) {
-            ANS_LOGE("status : %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Void fail, status : %{public}d", status);
             return nullptr;
         }
     }
@@ -746,17 +747,17 @@ bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, 
     ani_field field = nullptr;
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
     if (status != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindField fail, status : %{public}d", status);
         return false;
     }
     ani_object arrayObj = ConvertArrayLongToAniObj(env, values);
     if (arrayObj == nullptr) {
-        ANS_LOGE("arrayObj is nullptr.");
+        ANS_LOGE("ConvertArrayLongToAniObj fail, arrayObj is nullptr.");
         return false;
     }
     status = env->Object_SetField_Ref(object, field, arrayObj);
     if (status != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_SetField_Ref fail, status : %{public}d", status);
         return false;
     }
     return true;
