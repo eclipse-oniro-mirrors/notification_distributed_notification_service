@@ -291,7 +291,7 @@ ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_bo
 }
 
 ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
-    ani_boolean &isUndefined, std::vector<std::string> &res)
+    std::vector<std::string> &res, const uint32_t maxLen)
 {
     if (env == nullptr || param == nullptr || name == nullptr) {
         ANS_LOGE("GetPropertyStringArray fail, has nullptr");
@@ -301,6 +301,7 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     ani_ref arrayObj = nullptr;
     ani_status status;
     ani_int length;
+    ani_boolean isUndefined = ANI_FALSE;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
@@ -309,6 +310,9 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     if (status != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return status;
+    }
+    if (maxLen > 0 && length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
     }
     std::string str = "";
     for (int32_t i = 0; i < length; i++) {

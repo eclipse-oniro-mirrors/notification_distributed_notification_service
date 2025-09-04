@@ -362,9 +362,8 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
         return;
     }
     std::vector<std::string> names = {};
-    ani_boolean isUndefined = ANI_TRUE;
     // names?: Array<string>
-    if (GetPropertyStringArray(env, obj, "names", isUndefined, names) == ANI_OK && isUndefined == ANI_FALSE) {
+    if (GetPropertyStringArray(env, obj, "names", names, BUTTON_RESOURCE_SIZE) == ANI_OK) {
         for (auto name: names) {
             button.addSingleButtonName(GetResizeStr(name, STR_MAX_SIZE));
         }
@@ -373,7 +372,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     }
     // icons?: Array<image.PixelMap>
     std::vector<std::shared_ptr<PixelMap>> icons = {};
-    if (ANI_OK == GetPixelMapArray(env, obj, "icons", icons)) {
+    if (ANI_OK == GetPixelMapArray(env, obj, "icons", icons, BUTTON_RESOURCE_SIZE)) {
         for (auto icon : icons) {
             button.addSingleButtonIcon(icon);
         }
@@ -382,7 +381,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     }
     // iconsResource?: Array<Resource>
     std::vector<ResourceManager::Resource> resources = {};
-    if (ANI_OK == GetResourceArray(env, obj, "iconsResource", resources)) {
+    if (ANI_OK == GetResourceArray(env, obj, "iconsResource", resources, BUTTON_RESOURCE_SIZE)) {
         for (auto res : resources) {
             std::shared_ptr<ResourceManager::Resource> pRes = std::make_shared<ResourceManager::Resource>(res);
             button.addSingleButtonIconResource(pRes);
@@ -822,9 +821,7 @@ ani_status UnWarpNotificationMultiLineContent(ani_env *env, ani_object obj,
     }
     multiLineContent->SetBriefText(GetResizeStr(briefText, SHORT_TEXT_SIZE));
     std::vector<std::string> lines = {};
-    isUndefined = ANI_TRUE;
-    if ((status = GetPropertyStringArray(env, obj, "lines", isUndefined, lines)) != ANI_OK
-        || isUndefined == ANI_TRUE) {
+    if ((status = GetPropertyStringArray(env, obj, "lines", lines)) != ANI_OK) {
         ANS_LOGE("UnWarpNotificationMultiLineContent: get lines failed");
         return ANI_INVALID_ARGS;
     }
