@@ -26,20 +26,20 @@ bool SetOptionalFieldSlotLevel(
 {
     ANS_LOGD("SetOptionalFieldSlotLevel call");
     if (env == nullptr || cls == nullptr || object == nullptr) {
-        ANS_LOGE("SetOptionalFieldSlotLevel failed, has nullptr");
+        ANS_LOGE("SetOptionalFieldSlotLevel failed, env, object or cls is null");
         return false;
     }
     ani_field field = nullptr;
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
     if (status != ANI_OK || field == nullptr) {
-        ANS_LOGE("Class_FindField failed or null field, status=%{public}d, fieldName=%{public}s",
+        ANS_LOGE("Class_FindField failed or field is null, status=%{public}d, fieldName=%{public}s",
             status, fieldName.c_str());
         return false;
     }
     ani_enum_item enumItem = nullptr;
     NotificationSts::SlotLevelCToEts(env, value, enumItem);
     if (enumItem == nullptr) {
-        ANS_LOGE("null enumItem");
+        ANS_LOGE("SlotLevelCToEts enumItem is null");
         return false;
     }
     status = env->Object_SetField_Ref(object, field, enumItem);
