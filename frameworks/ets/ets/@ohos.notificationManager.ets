@@ -1587,9 +1587,6 @@ export default namespace notificationManager {
     }
 
     export function cancel(id: int, label?: string): Promise<void> {
-        if (label == null || label?.length === 0) {
-            throw errorParamInvalid;
-        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { nativeCancelWithIdOptionalLabel(id, label); });
             p.then((data: NullishType): void => {

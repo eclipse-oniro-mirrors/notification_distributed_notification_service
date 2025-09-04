@@ -791,9 +791,12 @@ bool UnWarpNotificationKey(ani_env *env, const ani_object obj, NotificationKey &
     }
     OutObj.id = static_cast<int32_t>(idInt);
     std::string label;
-    if (GetPropertyString(env, obj, "label", isUndefined, label) != ANI_OK || isUndefined == ANI_TRUE) {
+    if (GetPropertyString(env, obj, "label", isUndefined, label) != ANI_OK) {
         ANS_LOGD("UnWarpNotificationKey GetPropertyString label fail");
         return false;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return true;
     }
     OutObj.label = GetResizeStr(label, STR_MAX_SIZE);
     ANS_LOGD("UnWarpNotificationKey id: %{public}d, label: %{public}s", OutObj.id, OutObj.label.c_str());
