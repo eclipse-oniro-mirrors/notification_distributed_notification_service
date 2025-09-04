@@ -19,27 +19,24 @@ namespace NotificationSts {
 constexpr const char *BUSINESS_ERROR_CLASS = "L@ohos/base/BusinessError;";
 constexpr const char *ERROR_CLASS_NAME = "Lescompat/Error;";
 
-std::string FindAnsErrMsg(const int32_t errCode)
-{
-    auto findMsg = ERROR_CODE_TO_MESSAGE.find(errCode);
-    if (findMsg == ERROR_CODE_TO_MESSAGE.end()) {
-        ANS_LOGE("FindAnsErrMsg Inner error.");
-        return "Inner error.";
-    }
-    return findMsg->second;
-}
-
 int32_t GetExternalCode(uint32_t errCode)
 {
-    for (const auto &errorConvert : ERRORS_CONVERT) {
-        if (static_cast<int32_t>(errCode) == errorConvert.second) {
-            return errCode;
-        }
-        if (errCode == errorConvert.first) {
-            return errorConvert.second;
-        }
+    int32_t externalCode = ERROR_INTERNAL_ERROR;
+    switch (errCode) {
+        case ERROR_PERMISSION_DENIED:
+        case ERROR_NOT_SYSTEM_APP:
+        case ERROR_PARAM_INVALID:
+        case ERROR_SYSTEM_CAP_ERROR:
+        case ERROR_INTERNAL_ERROR:
+        case ERROR_DIALOG_IS_POPPING:
+        case ERROR_NO_MEMORY:
+            externalCode = static_cast<int32_t>(errCode);
+            break;
+        default:
+            externalCode = ErrorToExternal(errCode);
+            break;
     }
-    return ERROR_INTERNAL_ERROR;
+    return externalCode;
 }
 
 void ThrowError(ani_env *env, ani_object err)
