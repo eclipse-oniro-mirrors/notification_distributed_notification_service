@@ -20,7 +20,7 @@ import("//build/test.gni")
 ohos_fuzztest("AnsManagerStubFuzzTest") {
   module_out_path = service_fuzz_test_path
   fuzz_config_file = "${component_path}/test/fuzztest/ansmanagerstub_fuzzer"
-  include_dirs = [ 
+  include_dirs = [
     "${component_path}/test/fuzztest/fuzz_common_base",
     "${services_path}/ans/include",
     "${core_path}/include"
@@ -57,7 +57,7 @@ ohos_fuzztest("AnsManagerStubFuzzTest") {
     cflags += [ "-DCONFIG_DUAL_FRAMEWORK" ]
   }
 
-  if (distributed_notification_supported) {
+  if (distributed_notification_service_feature_distributed_db) {
     defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
     include_dirs += [ "${services_path}/distributed/include" ]

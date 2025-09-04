@@ -120,6 +120,7 @@ private:
     const std::string EXTEND_INFO_APP_NAME = "app_name";
     const std::string EXTEND_INFO_APP_LABEL = "app_label";
     const std::string EXTEND_INFO_APP_INDEX = "app_index";
+    const std::string EXTEND_INFO_APP_UID = "app_uid";
     const std::string EXTEND_INFO_DEVICE_ID = "deviceId";
     const std::string EXTEND_INFO_USER_ID = "userId";
 };

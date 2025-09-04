@@ -38,6 +38,25 @@ bool CheckCallerIsSystemApp()
     return true;
 }
 
+int32_t getNotificationCheckRequestParam(ani_env *env, ani_object checkRequestObj,
+    sptr<NotificationCheckRequest> &checkRequest)
+{
+    checkRequest = new (std::nothrow) NotificationCheckRequest();
+    if (checkRequest == nullptr) {
+        ANS_LOGE("new NotificationCheckRequest fail");
+        int32_t errCode = OHOS::Notification::ERROR_INTERNAL_ERROR;
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
+        return errCode;
+    }
+    if (!OHOS::NotificationSts::UnWarpNotificationCheckRequest(env, checkRequestObj, checkRequest)) {
+        ANS_LOGE("InvalidParam 'checkRequest'");
+        int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
+        return errCode;
+    }
+    return ERR_OK;
+}
+
 ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkRequestObj)
 {
     ANS_LOGD("enter");
@@ -54,11 +73,10 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
         ANS_LOGI("Old function param, don't need register.");
         return ERR_OK;
     }
-    sptr<NotificationCheckRequest> checkRequest = new NotificationCheckRequest();
-    if (!OHOS::NotificationSts::UnWarpNotificationCheckRequest(env, checkRequestObj, checkRequest)) {
-        ANS_LOGE("InvalidParam 'checkRequest'");
-        int32_t errCode = OHOS::Notification::ERROR_PARAM_INVALID;
-        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
+    sptr<NotificationCheckRequest> checkRequest = nullptr;
+    int32_t errCode = getNotificationCheckRequestParam(env, checkRequestObj, checkRequest);
+    if (errCode != ERR_OK || checkRequest == nullptr) {
+        ANS_LOGE("getNotificationCheckRequestParam fail, errCode:%{public}d", errCode);
         return errCode;
     }
     if (!CheckCallerIsSystemApp()) {

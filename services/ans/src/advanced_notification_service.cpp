@@ -332,10 +332,6 @@ AdvancedNotificationService::AdvancedNotificationService()
     }
     soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
-#ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
-    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
-        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
-#endif
     permissonFilter_ = std::make_shared<PermissionFilter>();
     notificationSlotFilter_ = std::make_shared<NotificationSlotFilter>();
     StartFilters();
@@ -356,11 +352,11 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnBootSystemCompleted, this),
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
-#ifdef DISABLE_DISTRIBUTED_NOTIFICATION_SUPPORTED
-    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
-#endif
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
 #ifdef DISTRIBUTED_NOTIFICATION_SUPPORTED
+    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
+        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
+    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
     InitDistributeCallBack();
 #endif
 }
@@ -1673,7 +1669,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     ANS_LOGD("insert pushCallBack, slot type %{public}d", slotType);
     notificationCheckRequest->SetUid(uid);
     checkRequests_.insert_or_assign(slotType, notificationCheckRequest);
-    ANS_LOGD("insert notificationCheckRequest, slot type %{public}d, content type %{public}d",
+    ANS_LOGI("insert notificationCheckRequest, slot type %{public}d, content type %{public}d",
         slotType, notificationCheckRequest->GetContentType());
 
     ANS_LOGD("end");
@@ -1797,6 +1793,7 @@ ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<Notificati
 {
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_2, EventBranchId::BRANCH_5)
         .ErrorCode(result).Message("Push OnCheckNotification failed.");
+    ANS_LOGW("Push check failed %{public}d.", result);
     if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
         AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
         if (!request->IsAtomicServiceNotification()) {
@@ -1804,7 +1801,7 @@ ErrCode AdvancedNotificationService::HandlePushCheckFailed(const sptr<Notificati
         }
         return ERR_OK;
     }
-    if (result == PUSH_CHECK_WEAK_NETWORK) {
+    if (result == ERR_ANS_CHECK_WEAK_NETWORK) {
         if (NotificationLiveViewUtils::GetInstance().CheckLiveViewForBundle(request)) {
             return ERR_OK;
         }

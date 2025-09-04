@@ -88,6 +88,7 @@ void StsDistributedOperationCallback::OnStsOperationCallback(ani_env *env, const
 
 void StsDistributedOperationCallback::SetVm(ani_vm *vm)
 {
+    std::lock_guard<std::mutex> l(lock_);
     etsVm_ = vm;
 }
 
@@ -456,6 +457,7 @@ bool StsSubscriberInstance::IsInit()
 bool StsSubscriberInstance::Compare(ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> l(lock_);
     if (!IsInit()) return false;
     if (obj == nullptr || env == nullptr) return false;
     ani_ref ref;
@@ -464,17 +466,6 @@ bool StsSubscriberInstance::Compare(ani_env *env, ani_object obj)
     env->Reference_StrictEquals(ref, ref_, &result);
     env->GlobalReference_Delete(ref);
     return (result == ANI_TRUE) ? true : false;
-}
-bool StsSubscriberInstance::Compare(std::shared_ptr<StsSubscriberInstance> instance)
-{
-    ANS_LOGD("enter");
-    if (instance == nullptr) return false;
-    if (instance->obj_ == obj_) {
-        ANS_LOGD("Compare is ture");
-        return true;
-    }
-    ANS_LOGD("Compare is false");
-    return false;
 }
 bool StsSubscriberInstance::CallFunction(ani_env *env, const char *func, std::vector<ani_ref> &parm)
 {
@@ -530,11 +521,11 @@ bool SubscriberInstanceManager::DelSubscriberInstancesInfo(
     ani_env *env, ani_object obj)
 {
     ANS_LOGD("enter");
+    std::lock_guard<std::mutex> lock(mutex_);
     if (obj == nullptr) {
         ANS_LOGE("obj is null");
         return false;
     }
-    std::lock_guard<std::mutex> lock(mutex_);
     for (auto it = subscriberInstances_.begin(); it != subscriberInstances_.end(); ++it) {
         if ((*it)->Compare(env, obj)) {
             DelDeletingSubscriber((*it));
@@ -787,7 +778,7 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
 {
     std::string hashCodeStd;
     sptr<StsNotificationOperationInfo> info = new (std::nothrow) StsNotificationOperationInfo();
-    if (ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
+    if (info == nullptr || ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
         ANS_LOGD("hashCode is valid");
         return nullptr;
     }

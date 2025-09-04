@@ -89,7 +89,6 @@ declare_args() {
       !defined(global_parts_info.resourceschedule_device_standby)) {
     standby_enable = false
   }
-
   if (defined(global_parts_info) &&
       !defined(global_parts_info.multimedia_player_framework)) {
     player_framework = false

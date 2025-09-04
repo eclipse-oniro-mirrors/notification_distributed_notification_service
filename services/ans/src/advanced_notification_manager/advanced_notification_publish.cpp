@@ -407,9 +407,6 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
 
-    const auto wantAgent = request->GetWantAgent();
-    const auto removalWantAgent = request->GetRemovalWantAgent();
-
     auto content = request->GetContent();
     if (content != nullptr && content->GetContentType() == NotificationContent::Type::MULTILINE) {
         ErrCode checkCode = CheckNotificationRequestLineWantAgents(content, isAgentController,
@@ -419,17 +416,6 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
         }
     }
 
-    const auto isLocalWantAgent = (wantAgent != nullptr && wantAgent->IsLocal()) ||
-        (removalWantAgent != nullptr && removalWantAgent->IsLocal());
-    if (isLocalWantAgent && !(isSystemApp || isSubsystem)) {
-        ANS_LOGE("Local wantAgent does not support non system app");
-        return ERR_ANS_NON_SYSTEM_APP;
-    }
-
-    if (isLocalWantAgent && !isAgentController) {
-        ANS_LOGE("Local wantAgent does not support permission denied");
-        return ERR_ANS_PERMISSION_DENIED;
-    }
     if (!isSystemApp  && !isSubsystem && request->GetExtendInfo() != nullptr) {
         request->SetExtendInfo(nullptr);
     }

@@ -39,6 +39,7 @@ void JSPushCallBack::SetJsPushCallBackObject(NotificationConstant::SlotType slot
 {
     napi_ref pushCheckObject;
     napi_create_reference(env_, pushCallBackObject, 1, &pushCheckObject);
+    std::lock_guard<ffrt::mutex> lock(mutexlock);
     pushCallBackObjects_.insert_or_assign(slotType, pushCheckObject);
 }
 
@@ -135,15 +136,18 @@ int32_t JSPushCallBack::OnCheckNotification(
     std::string pkgName;
     auto checkInfo = std::make_shared<NotificationCheckInfo>();
     checkInfo->ConvertJsonStringToValue(notificationData);
-
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
-    if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
-        ANS_LOGE("null pushCallBackObjects");
-        return ERR_INVALID_STATE;
-    }
-
+    napi_ref callBackObj = nullptr;
     napi_value checkFunc = nullptr;
-    napi_get_reference_value(env_, pushCallBackObjects_[outSlotType], &checkFunc);
+    {
+        std::lock_guard<ffrt::mutex> lock(mutexlock);
+        if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
+            ANS_LOGE("null pushCallBackObjects");
+            return ERR_INVALID_STATE;
+        }
+        callBackObj = pushCallBackObjects_[outSlotType];
+        napi_get_reference_value(env_, callBackObj, &checkFunc);
+    }
     if (checkFunc == nullptr) {
         ANS_LOGE("null checkFunc");
         return ERR_INVALID_STATE;
