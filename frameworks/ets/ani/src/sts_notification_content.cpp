@@ -294,7 +294,7 @@ ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj, Notificati
     }
     if (GetPropertyString(env, obj, "text", isUndefined, tempStr) == ANI_OK && isUndefined == ANI_FALSE) {
         std::string text = GetResizeStr(tempStr, STR_MAX_SIZE);
-        iconButton.SetName(text);
+        iconButton.SetText(text);
     } else {
         ANS_LOGD("UnWarpNotificationIconButton: get text failed");
     }
