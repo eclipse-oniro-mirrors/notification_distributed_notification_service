@@ -608,8 +608,6 @@ bool ReminderCommon::GenReminderIntInner(
             return false;
         }
         reminder->SetSlotType(actureType);
-    } else if (!reminder->IsSystemApp()) {
-        reminder->SetSlotType(NotificationConstant::SlotType::OTHER);
     }
 
     //autoDeletedTime

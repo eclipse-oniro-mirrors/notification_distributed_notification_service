@@ -393,18 +393,6 @@ void ReminderDataManager::SetActiveReminder(const sptr<ReminderRequest> &reminde
     ANSR_LOGD("Set activeReminderId=%{public}d", activeReminderId_.load());
 }
 
-void ReminderDataManager::SetAlertingReminder(const sptr<ReminderRequest> &reminder)
-{
-    if (reminder == nullptr) {
-        // alertingReminder_ should not be set with null as it point to actual object.
-        alertingReminderId_ = -1;
-    } else {
-        alertingReminderId_ = reminder->GetReminderId();
-        alertingReminder_ = reminder;
-    }
-    ANSR_LOGD("Set alertingReminderId=%{public}d", alertingReminderId_.load());
-}
-
 ErrCode ReminderDataManager::CancelReminderToDb(const int32_t reminderId, const int32_t callingUid)
 {
     if (store_ == nullptr) {
@@ -446,9 +434,9 @@ void ReminderDataManager::ReportTimerEvent(const int64_t targetTime, const bool 
     if ((now - targetTime) <= deviation) {
         return;
     }
+    std::string event = "REMINDER_TIMER_ERROR";
     uint8_t errorCode = isSysTimeChanged ? 0 : 1;
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, "REMINDER_TIMER_ERROR",
-        HiviewDFX::HiSysEvent::EventType::STATISTIC,
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::NOTIFICATION, event, HiviewDFX::HiSysEvent::EventType::STATISTIC,
         "TARGET_TIME", targetTime, "TRIGGER_TIME", now, "ERROR_CODE", errorCode);
 #endif
 }

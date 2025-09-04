@@ -1042,7 +1042,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_021, Level1)
 {
     ReminderDataShareHelper::GetInstance().RegisterObserver();
     ReminderDataShareHelper::GetInstance().RegisterObserver();
-    ReminderDataShareHelper::GetInstance().Update(1, 1);
+    ReminderDataShareHelper::GetInstance().Update("1", 1);
     ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
     ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
     DataShare::DataShareObserver::ChangeInfo info;

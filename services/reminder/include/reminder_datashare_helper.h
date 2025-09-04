@@ -54,7 +54,7 @@ public:
      * @brief Update the reminder state.
      * state is ReminderCalendarShareTable::STATE_*
      */
-    bool Update(const int32_t reminderId, const int32_t state);
+    bool Update(const std::string& identifier, const int32_t state);
 
     /**
      * @brief Start calendar data extension.

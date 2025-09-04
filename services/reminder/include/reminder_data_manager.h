@@ -696,6 +696,7 @@ private:
 
     bool CheckShowLimit(std::unordered_map<std::string, int32_t>& limits, int32_t& totalCount,
         sptr<ReminderRequest>& reminder);
+    int64_t CreateReminderLoadTimer(const sptr<MiscServices::TimeServiceClient> timer);
 
     void UpdateReminderFromDb(const std::vector<sptr<ReminderRequest>>& remindersFromDb);
     ErrCode CancelReminderToDb(const int32_t reminderId, const int32_t callingUid);
@@ -712,6 +713,7 @@ private:
     static std::mutex ALERT_MUTEX;
     static std::mutex TIMER_MUTEX;
     static std::mutex ACTIVE_MUTEX;
+    std::mutex cancelMutex_; // for cancelReminder function
 
     /**
      * Max number of reminders limit for the whole system.
