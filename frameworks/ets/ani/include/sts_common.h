@@ -130,17 +130,6 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object &object, const ch
     return true;
 }
 
-[[maybe_unused]]static bool CallSetterNull(ani_env* env, ani_class cls, ani_object &object, const char* propertyName)
-{
-    ani_ref nullRef = nullptr;
-    ani_status status = env->GetNull(&nullRef);
-    if (status != ANI_OK) {
-        ANS_LOGE("GetNull %{public}s failed %{public}d", propertyName, status);
-        return false;
-    }
-    return CallSetter(env, cls, object, propertyName, nullRef);
-}
-
 template <class T>
 static bool EnumConvertAniToNative(ani_env *env, ani_enum_item enumItem, T &result)
 {
