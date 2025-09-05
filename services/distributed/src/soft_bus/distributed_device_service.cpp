@@ -383,6 +383,19 @@ void DistributedDeviceService::SetDeviceStatus(const std::shared_ptr<TlvBox>& bo
     }
 }
 #else
+bool DistributedDeviceService::GetDeviceInfoByNetworkId(const std::string& id, DistributedDeviceInfo& device)
+{
+    std::lock_guard<ffrt::mutex> lock(mapLock_);
+    for (auto deviceItem : peerDevice_) {
+        if (id == deviceItem.second.networkId_) {
+            device = deviceItem.second;
+            return true;
+        }
+    }
+    ANS_LOGI("Dans get deviceId unknonw %{public}s.", StringAnonymous(id).c_str());
+    return false;
+}
+
 void DistributedDeviceService::InitCurrentDeviceStatus()
 {
     bool notificationEnable = false;

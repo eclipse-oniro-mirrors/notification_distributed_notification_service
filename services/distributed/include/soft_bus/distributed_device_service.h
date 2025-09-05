@@ -64,6 +64,7 @@ public:
     void SetDeviceStatus(const std::shared_ptr<TlvBox>& boxMessage);
 #else
     void InitCurrentDeviceStatus();
+    bool GetDeviceInfoByNetworkId(const std::string& id, DistributedDeviceInfo& device);
     void SyncDeviceStatus(int32_t type, int32_t status, bool notificationEnable, bool liveViewEnable);
 #endif
 
