@@ -25,6 +25,7 @@
 #include "ani_publish.h"
 #include "ani_local_live_view.h"
 #include "ani_request_enable.h"
+#include "ani_silent_reminder_enable.h"
 #include "ani_on.h"
 #include "ani_support_template.h"
 #include "ani_distributed_enable.h"
@@ -167,6 +168,18 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniGetSyncNotificationEnabledWithoutApp)},
     ani_native_function {"nativeSetSyncNotificationEnabledWithoutApp", nullptr,
         reinterpret_cast<void *>(AniSetSyncNotificationEnabledWithoutApp)},
+    ani_native_function {"nativeDisableNotificationFeatureWithId", nullptr,
+        reinterpret_cast<void *>(AniDisableNotificationFeatureWithId)},
+    ani_native_function {"nativeSetDistributedEnabled", nullptr, reinterpret_cast<void *>(AniSetDistributedEnabled)},
+    ani_native_function {"nativeSetDistributedEnableByBundles", nullptr,
+        reinterpret_cast<void *>(AniSetDistributedEnableByBundles)},
+    ani_native_function {"nativeGetDistributedDeviceList", nullptr,
+        reinterpret_cast<void *>(AniGetDistributedDeviceList)},
+
+    ani_native_function {"nativeSetSilentReminderEnabled", nullptr,
+        reinterpret_cast<void *>(AniSetSilentReminderEnabled)},
+    ani_native_function {"nativeIsSilentReminderEnabled", nullptr,
+        reinterpret_cast<void *>(AniIsSilentReminderEnabled)},
 };
 
 void AniNotificationManagerRegistryInit(ani_env *env)

@@ -286,6 +286,50 @@ bool StsRemindTypeUtils::CToSts(const RemindType inType, STSRemindType &outType)
     return true;
 }
 
+bool StsSwitchStateUtils::StsToC(const STSSwitchState inType, SwitchState &outType)
+{
+    switch (inType) {
+        case STSSwitchState::USER_MODIFIED_OFF:
+            outType = SwitchState::USER_MODIFIED_OFF;
+            break;
+        case STSSwitchState::USER_MODIFIED_ON:
+            outType = SwitchState::USER_MODIFIED_ON;
+            break;
+        case STSSwitchState::SYSTEM_DEFAULT_OFF:
+            outType = SwitchState::SYSTEM_DEFAULT_OFF;
+            break;
+        case STSSwitchState::SYSTEM_DEFAULT_ON:
+            outType = SwitchState::SYSTEM_DEFAULT_ON;
+            break;
+        default:
+            ANS_LOGE("STSSwitchState %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
+bool StsSwitchStateUtils::CToSts(const SwitchState inType, STSSwitchState &outType)
+{
+    switch (inType) {
+        case SwitchState::USER_MODIFIED_OFF:
+            outType = STSSwitchState::USER_MODIFIED_OFF;
+            break;
+        case SwitchState::USER_MODIFIED_ON:
+            outType = STSSwitchState::USER_MODIFIED_ON;
+            break;
+        case SwitchState::SYSTEM_DEFAULT_OFF:
+            outType = STSSwitchState::SYSTEM_DEFAULT_OFF;
+            break;
+        case SwitchState::SYSTEM_DEFAULT_ON:
+            outType = STSSwitchState::SYSTEM_DEFAULT_ON;
+            break;
+        default:
+            ANS_LOGE("SwitchState %{public}d is an invalid value", inType);
+            return false;
+    }
+    return true;
+}
+
 StsNotificationLocalLiveViewSubscriber::StsNotificationLocalLiveViewSubscriber()
 {}
 
@@ -481,6 +525,29 @@ bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &re
         return true;
     }
     return false;
+}
+
+bool SwitchStateCToEts(ani_env *env, SwitchState switchState, ani_enum_item &enumItem)
+{
+    STSSwitchState stsSwitchState = STSSwitchState::USER_MODIFIED_OFF;
+    if (!EnumConvertNativeToAni(env,
+        "L@ohos/notificationManager/notificationManager/SwitchState;", stsSwitchState, enumItem)
+        || !StsSwitchStateUtils::CToSts(switchState, stsSwitchState)) {
+        ANS_LOGE("SwitchStateCToEts failed");
+        return false;
+    }
+    return true;
+}
+
+bool SwitchStateEtsToC(ani_env *env, ani_enum_item enumItem, SwitchState &switchState)
+{
+    STSSwitchState stsSwitchState = STSSwitchState::USER_MODIFIED_OFF;
+    if (!EnumConvertAniToNative(env, enumItem, stsSwitchState)
+        || !StsSwitchStateUtils::StsToC(stsSwitchState, switchState)) {
+        ANS_LOGE("SwitchStateEtsToC failed");
+        return false;
+    }
+    return true;
 }
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,

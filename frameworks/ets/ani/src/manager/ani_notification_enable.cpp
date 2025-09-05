@@ -178,5 +178,27 @@ void AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani_objec
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
 }
+
+void AniDisableNotificationFeatureWithId(ani_env *env, ani_boolean disabled, ani_object bundleList, ani_double userId)
+{
+    ANS_LOGD("AniDisableNotificationFeatureWithId enter");
+    std::vector<std::string> bundleListStd;
+    if (!NotificationSts::GetStringArrayByAniObj(env, bundleList, bundleListStd)) {
+        ANS_LOGE("GetStringArrayByAniObj fail");
+        OHOS::NotificationSts::ThrowErrorWithInvalidParam(env);
+        return;
+    }
+    Notification::NotificationDisable param;
+    param.SetDisabled(NotificationSts::AniBooleanToBool(disabled));
+    param.SetBundleList(bundleListStd);
+    param.SetUserId(static_cast<int32_t>(userId));
+    int returncode = ERR_OK;
+    returncode = Notification::NotificationHelper::DisableNotificationFeature(param);
+    if (returncode != ERR_OK) {
+        int externalCode = NotificationSts::GetExternalCode(returncode);
+        ANS_LOGE("AniDisableNotificationFeatureWithId error, errorCode: %{public}d", externalCode);
+        OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
+    }
+}
 } // namespace NotificationManagerSts
 } // namespace OHOS
