@@ -94,6 +94,7 @@ static uint64_t reportAggregateTimeId = 0;
 static std::list<ReportCache> successReportCacheList;
 static bool g_successReportFlag = false;
 static std::shared_ptr<ReportTimerInfo> reportAggregateTimeInfo = std::make_shared<ReportTimerInfo>();
+static ffrt::mutex reportAggListMutex_;
 static std::list<ReportCache> reportAggList;
 
 static int32_t SLOT_REPORT_INTERVAL = 7 * 24 * NotificationConstant::HOUR_TO_MS;
@@ -619,23 +620,26 @@ void NotificationAnalyticsUtil::CreateLiveViewTimerExecute()
 
 void NotificationAnalyticsUtil::ExecuteLiveViewReport()
 {
-    std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
-    if (liveViewMessages.empty()) {
-        ANS_LOGI("report end");
-        g_reportLiveViewFlag = false;
-        return;
-    }
-    if (reportAggregateTimeId == 0) {
-        sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
-        if (aggregateTimer == nullptr) {
-            ANS_LOGE("null aggregateTimer");
+    {
+        std::lock_guard<ffrt::mutex> lockReportLiveView(ReportLiveViewMessageMutex_);
+        if (liveViewMessages.empty()) {
+            ANS_LOGI("report end");
             g_reportLiveViewFlag = false;
             return;
         }
-        reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
+        if (reportAggregateTimeId == 0) {
+            sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
+            if (aggregateTimer == nullptr) {
+                ANS_LOGE("null aggregateTimer");
+                g_reportLiveViewFlag = false;
+                return;
+            }
+            reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
+        }
+        ReportCache reportCache = AggregateLiveView();
+        std::lock_guard<ffrt::mutex> lockReportAggList(reportAggListMutex_);
+        reportAggList.emplace_back(reportCache);
     }
-    ReportCache reportCache = AggregateLiveView();
-    reportAggList.emplace_back(reportCache);
     if (!g_successReportFlag) {
         ExecuteSuccessCacheList();
     }
@@ -1278,16 +1282,18 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
             reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
         }
 
-        ReportCache reportInfo;
-        reportInfo.want = want;
-        reportInfo.eventCode = ANS_CUSTOMIZE_CODE ;
-        reportAggList.emplace_back(reportInfo);
-
         for (auto bundle : removeBundles) {
             badgeInfos.erase(bundle);
         }
     }
-
+    {
+        std::lock_guard<ffrt::mutex> lock(reportAggListMutex_);
+        ReportCache reportInfo;
+        reportInfo.want = want;
+        reportInfo.eventCode = ANS_CUSTOMIZE_CODE ;
+        reportAggList.emplace_back(reportInfo);
+    }
+    
     if (!g_successReportFlag) {
         ExecuteSuccessCacheList();
     }
@@ -1295,26 +1301,28 @@ void NotificationAnalyticsUtil::AggregateBadgeChange()
 
 void NotificationAnalyticsUtil::AddSuccessListCache(EventFwk::Want& want, int32_t eventCode)
 {
-    std::lock_guard<ffrt::mutex> lock(reportSuccessCacheMutex_);
-    int32_t size = static_cast<int32_t>(successReportCacheList.size());
-    if (size >= SUCCESS_REPORT_CACHE_MAX_SIZE) {
-        ANS_LOGW("Success list size is max.");
-        return;
-    }
-
-    if (reportAggregateTimeId == 0) {
-        sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
-        if (aggregateTimer == nullptr) {
-            ANS_LOGE("null aggregateTimer");
+    {
+        std::lock_guard<ffrt::mutex> lock(reportSuccessCacheMutex_);
+        int32_t size = static_cast<int32_t>(successReportCacheList.size());
+        if (size >= SUCCESS_REPORT_CACHE_MAX_SIZE) {
+            ANS_LOGW("Success list size is max.");
             return;
         }
-        reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
-    }
 
-    ReportCache reportCache;
-    reportCache.want = want;
-    reportCache.eventCode = eventCode;
-    successReportCacheList.push_back(reportCache);
+        if (reportAggregateTimeId == 0) {
+            sptr<MiscServices::TimeServiceClient> aggregateTimer = MiscServices::TimeServiceClient::GetInstance();
+            if (aggregateTimer == nullptr) {
+                ANS_LOGE("null aggregateTimer");
+                return;
+            }
+            reportAggregateTimeId = aggregateTimer->CreateTimer(reportAggregateTimeInfo);
+        }
+
+        ReportCache reportCache;
+        reportCache.want = want;
+        reportCache.eventCode = eventCode;
+        successReportCacheList.push_back(reportCache);
+    }
     if (!g_successReportFlag) {
         ExecuteSuccessCacheList();
     }
@@ -1359,30 +1367,39 @@ ReportCache NotificationAnalyticsUtil::Aggregate()
 
 void NotificationAnalyticsUtil::ExecuteSuccessCacheList()
 {
-    if (successReportCacheList.empty()) {
-        ANS_LOGI("successReportCacheList is empty");
-        if (reportAggList.empty()) {
-            g_successReportFlag = false;
-            ANS_LOGI("No aggregate data need report");
-            return;
-        }
-    } else {
-        while (!successReportCacheList.empty()) {
+    {
+        std::lock_guard<ffrt::mutex> lockReportSuccessCache(reportSuccessCacheMutex_);
+        if (successReportCacheList.empty()) {
+            ANS_LOGI("successReportCacheList is empty");
+            std::lock_guard<ffrt::mutex> lockReportAggList(reportAggListMutex_);
+            if (reportAggList.empty()) {
+                g_successReportFlag = false;
+                ANS_LOGI("No aggregate data need report");
+                return;
+            }
+            auto reportCount = MAX_REPORT_COUNT;
+            while (reportCount > 0 && !reportAggList.empty()) {
+                auto reportCache = reportAggList.front();
+                ReportCommonEvent(reportCache);
+                reportAggList.pop_front();
+                reportCount--;
+            }
+        } else {
             auto reportCache = Aggregate();
+            std::lock_guard<ffrt::mutex> lockReportAggList(reportAggListMutex_);
             reportAggList.emplace_back(reportCache);
+            auto reportCount = MAX_REPORT_COUNT;
+            while (reportCount > 0 && !reportAggList.empty()) {
+                auto reportCache = reportAggList.front();
+                ReportCommonEvent(reportCache);
+                reportAggList.pop_front();
+                reportCount--;
+            }
         }
     }
 
-    auto reportCount = MAX_REPORT_COUNT;
-    while (reportCount > 0 && !reportAggList.empty()) {
-        auto reportCache = reportAggList.front();
-        ReportCommonEvent(reportCache);
-        reportAggList.pop_front();
-        reportCount--;
-    }
     CheckBadgeReport();
     auto triggerFunc = [] {
-        std::lock_guard<ffrt::mutex> lock(reportSuccessCacheMutex_);
         NotificationAnalyticsUtil::ExecuteSuccessCacheList();
     };
     reportAggregateTimeInfo->SetCallbackInfo(triggerFunc);

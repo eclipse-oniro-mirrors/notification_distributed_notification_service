@@ -970,6 +970,11 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_002, Function | 
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetCreatorUid(DEFAULT_UID);
     request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
     sptr<Notification> notification = new Notification(request);
     sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
 
@@ -1022,6 +1027,11 @@ HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_004, Function | 
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetCreatorUid(DEFAULT_UID);
     request->SetOwnerBundleName("test1");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
     sptr<Notification> notification = new Notification(request);
     sptr<NotificationSortingMap> notificationMap = nullptr;
 
