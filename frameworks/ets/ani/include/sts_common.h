@@ -131,6 +131,10 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object &object, const ch
 template <class T>
 static bool EnumConvertAniToNative(ani_env *env, ani_enum_item enumItem, T &result)
 {
+    if (env == nullptr) {
+        ANS_LOGE("env nullptr");
+        return false;
+    }
     ani_status status = ANI_ERROR;
     if constexpr (std::is_enum<T>::value || std::is_integral<T>::value) {
         ani_int intValue{};
