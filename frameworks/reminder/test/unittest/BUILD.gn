@@ -43,10 +43,6 @@ ohos_unittest("reminder_test") {
   ]
 
   defines = []
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
-    deps += [ "${services_path}/distributed:libans_distributed" ]
-  }
 
   external_deps = [
     "ability_base:base",

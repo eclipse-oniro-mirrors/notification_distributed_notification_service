@@ -41,12 +41,6 @@ ohos_unittest("reminder_unit_test") {
     "${services_path}/reminder:libreminder_static",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
-    deps += [ "${services_path}/distributed:libans_distributed" ]
-    include_dirs += [ "${services_path}/distributed/include" ]
-  }
-
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
@@ -61,7 +55,6 @@ ohos_unittest("reminder_unit_test") {
     "common_event_service:cesfwk_innerkits",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -257,12 +250,6 @@ ohos_unittest("reminder_service_test") {
     "${services_path}/reminder:libreminder_static",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
-    deps += [ "${services_path}/distributed:libans_distributed" ]
-    include_dirs += [ "${services_path}/distributed/include" ]
-  }
-
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -275,7 +262,6 @@ ohos_unittest("reminder_service_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
@@ -342,12 +328,6 @@ ohos_unittest("reminder_agent_service_ability_test") {
     "${services_path}/reminder:libreminder_static",
   ]
 
-  if (distributed_notification_service_feature_distributed_db) {
-    defines += [ "DISTRIBUTED_NOTIFICATION_SUPPORTED" ]
-    deps += [ "${services_path}/distributed:libans_distributed" ]
-    include_dirs += [ "${services_path}/distributed/include" ]
-  }
-
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -362,7 +342,6 @@ ohos_unittest("reminder_agent_service_ability_test") {
     "common_event_service:cesfwk_innerkits",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",
