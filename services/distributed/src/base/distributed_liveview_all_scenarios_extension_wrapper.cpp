@@ -103,7 +103,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitDistributedCollaborate
         ANS_LOGE("update liveview Bin File 2 PiexlMap failed, error: %{public}s", dlerror());
         return;
     }
- 
+
     updateLiveviewPiexlMap2BinFile_ =
         (UPDATE_LIVE_VIEW_PIEXL_MAP_2_BIN_FILE)dlsym(ExtensionHandle_, "UpdateLiveviewPiexlMap2BinFile");
     if (updateLiveviewPiexlMap2BinFile_ == nullptr) {
@@ -161,13 +161,13 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
     return triggerHandler_(request, actionType, extraInfo);
 }
 
-ErrCode DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect()
+ErrCode DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect(bool isPadOrPc)
 {
     if (subscribeHandler_ == nullptr) {
         ANS_LOGE("Subscribe all connect wrapper symbol failed");
         return 0;
     }
-    return subscribeHandler_();
+    return subscribeHandler_(isPadOrPc);
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
@@ -217,7 +217,7 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewBinFile2P
     }
     return updateLiveviewBinFile2PiexlMap_(pixelMap, buffer);
 }
- 
+
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewPiexlMap2BinFile(
     const std::shared_ptr<Media::PixelMap> pixelMap, std::vector<uint8_t> &buffer)
 {

@@ -112,11 +112,18 @@ ErrCode DistributedDeviceStatus::SetDeviceStatus(const std::string &deviceType, 
     bool allConnect = ((1 << NETWORKID_FLAG) & controlFlag);
 #ifdef ALL_SCENARIO_COLLABORATION
     if (allConnect) {
+        if (deviceType == NotificationConstant::SLAVE_DEVICE_TYPE) {
+            DeviceStatueChangeInfo changeInfo;
+            changeInfo.deviceId = deviceId;
+            changeInfo.changeType = DeviceStatueChangeType::DEVICE_USING_CLOSE;
+            DistributedExtensionService::GetInstance().DeviceStatusChange(changeInfo);
+            ANS_LOGI("notify %{public}s network change.", StringAnonymous(deviceId).c_str());
+            return ERR_OK;
+        }
         std::string udid;
-        int32_t result = DistributedExtensionService::GetInstance().TransDeviceIdToUdid(deviceId, udid);
-        if (result != ERR_OK) {
-            ANS_LOGI("Get udid failed %{public}s %{public}s %{public}d ", deviceType.c_str(),
-                StringAnonymous(deviceStatusId).c_str(), result);
+        if (DistributedExtensionService::GetInstance().TransDeviceIdToUdid(deviceId, udid) != ERR_OK) {
+            ANS_LOGI("Get udid failed %{public}s %{public}s", deviceType.c_str(),
+                StringAnonymous(deviceStatusId).c_str());
             return ERR_ANS_TASK_ERR;
         }
         deviceStatusId = udid;
