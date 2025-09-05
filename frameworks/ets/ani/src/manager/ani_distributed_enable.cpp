@@ -348,7 +348,7 @@ ani_object AniGetDistributedDeviceList(ani_env *env)
         ANS_LOGE("AniGetDistributedDeviceList error, errorCode: %{public}d", externalCode);
         NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
     }
-    ANS_LOGD("GetDistributedDevicelist deviceList size: %{public}d", deviceList.size());
+    ANS_LOGD("GetDistributedDevicelist deviceList size: %{public}d", static_cast<int32_t>(deviceList.size()));
     ani_object deviceListArray = NotificationSts::GetAniStringArrayByVectorString(env, deviceList);
     if (deviceListArray == nullptr) {
         ANS_LOGE("deviceListArray nullptr");
