@@ -309,8 +309,8 @@ ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj, Notificati
     return status;
 }
 
-ani_status GetIconButtonArray(ani_env *env,
-    ani_object param, const char *name, std::vector<NotificationIconButton> &res)
+ani_status GetIconButtonArray(ani_env *env, ani_object param, const char *name,
+    std::vector<NotificationIconButton> &res, const uint32_t maxLen)
 {
     ANS_LOGD("GetIconButtonArray call");
     if (env == nullptr || param == nullptr || name == nullptr) {
@@ -329,6 +329,9 @@ ani_status GetIconButtonArray(ani_env *env,
     if (status != ANI_OK) {
         ANS_LOGI("status : %{public}d", status);
         return status;
+    }
+    if (length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
     }
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref buttonRef;
@@ -469,7 +472,7 @@ bool getCapsuleByButtons(ani_env *env, ani_object obj, std::vector<NotificationI
             ANS_LOGE("capsuleButtons of Capsule is undefined");
             return false;
         }
-        if (GetIconButtonArray(env, obj, "capsuleButtons", iconButtons) != ANI_OK || iconButtons.empty()) {
+        if (GetIconButtonArray(env, obj, "capsuleButtons", iconButtons, CAPSULE_BTN_MAX_SIZE) != ANI_OK) {
             ANS_LOGE("get capsuleButtons failed");
             return false;
         }
@@ -1061,7 +1064,7 @@ bool GetLocalLiveViewContentByOne(ani_env *env, ani_object obj,
         ANS_LOGD("GetLocalLiveViewContentByOne: get button failed");
     }
     std::vector<NotificationIconButton> buttons = {};
-    if (GetIconButtonArray(env, obj, "cardButtons", buttons) == ANI_OK) {
+    if (GetIconButtonArray(env, obj, "cardButtons", buttons, BUTTON_MAX_SIZE) == ANI_OK) {
         localLiveViewContent->SetCardButton(buttons);
         localLiveViewContent->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::CARD_BUTTON);
     } else {
