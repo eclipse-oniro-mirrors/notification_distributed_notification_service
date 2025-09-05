@@ -35,7 +35,8 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
 ani_object CreateAniPixelMap(ani_env* env, std::shared_ptr<PixelMap> pixelMap);
 std::shared_ptr<PixelMap> GetPixelMapFromAni(ani_env* env, ani_object obj);
 // ani_object to vector
-ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::shared_ptr<PixelMap>> &pixelMaps);
+ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen = 0);
 // ani_object to vector
 ani_status GetPixelMapArray(ani_env *env, ani_object param, const char *name,
     std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen);
