@@ -67,6 +67,7 @@ ohos_shared_library("ans_innerkits") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  version_script = "libans_innerkits.map"
 
   include_dirs = [ "${inner_api_path}" ]
 
