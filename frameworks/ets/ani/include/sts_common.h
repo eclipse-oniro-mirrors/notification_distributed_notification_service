@@ -53,7 +53,7 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_ref &outRef);
 ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
-    ani_boolean &isUndefined, std::vector<std::string> &res);
+    std::vector<std::string> &res, const uint32_t maxLen = 0);
 ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<int64_t> &res);
 
