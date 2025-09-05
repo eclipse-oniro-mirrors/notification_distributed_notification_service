@@ -178,6 +178,74 @@ void DistributedService::ReleaseDevice(const std::string &deviceId, uint16_t dev
     serviceQueue_->submit(subscribeTask);
 }
 
+#ifdef DISTRIBUTED_FEATURE_MASTER
+void DistributedService::HandleStatusChange(const DeviceStatueChangeInfo& changeInfo)
+{
+    if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_ONLINE) {
+        HandleDeviceUsingChange(changeInfo);
+    }
+
+    if (changeInfo.changeType == DeviceStatueChangeType::ALL_CONNECT_STATUS_CHANGE) {
+        if (DistributedDeviceService::GetInstance().CheckNeedSubscribeAllConnect()) {
+            DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect(false);
+            DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
+        }
+    }
+
+    if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CLOSE) {
+        DistributedDeviceInfo device;
+        if (!DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(changeInfo.deviceId, device)) {
+            ANS_LOGW("get deviceId err");
+            return;
+        }
+        DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
+            device.deviceType_, false);
+        std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
+        if (!deviceType.empty()) {
+            auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_,
+                BundleListOperationType::RELEASE_BUNDLES, std::vector<std::string>(), std::vector<std::string>());
+            ANS_LOGI("Remove bundle %{public}s %{public}s %{public}d.", deviceType.c_str(),
+                StringAnonymous(device.deviceId_).c_str(), ret);
+        }
+
+        DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
+        DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
+    }
+}
+
+#else
+void DistributedService::HandleStatusChange(const DeviceStatueChangeInfo& changeInfo)
+{
+    if (DistributedDeviceService::GetInstance().IsLocalPadOrPC() &&
+        changeInfo.changeType == DeviceStatueChangeType::ALL_CONNECT_STATUS_CHANGE) {
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect(true);
+        DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
+    }
+
+    if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
+        DistributedDeviceService::GetInstance().SyncDeviceStatus(DistributedDeviceService::STATE_TYPE_SWITCH,
+            false, changeInfo.enableChange, changeInfo.liveViewChange);
+    }
+
+    if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CLOSE) {
+        DistributedDeviceInfo device;
+        if (!DistributedDeviceService::GetInstance().GetDeviceInfoByNetworkId(changeInfo.deviceId, device)) {
+            ANS_LOGW("get deviceId err");
+            return;
+        }
+        std::vector<std::string> hashcodes;
+        DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
+            device.deviceType_, false);
+        NotificationHelper::RemoveDistributedNotifications(hashcodes,
+            NotificationConstant::SlotType::SOCIAL_COMMUNICATION,
+            NotificationConstant::DistributedDeleteType::DEVICE_ID,
+            NotificationConstant::DISTRIBUTED_RELEASE_DELETE, device.udid_);
+        DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
+        DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
+    }
+}
+#endif
+
 void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& changeInfo)
 {
     if (serviceQueue_ == nullptr) {
@@ -187,45 +255,7 @@ void DistributedService::DeviceStatusChange(const DeviceStatueChangeInfo& change
     std::function<void()> task = std::bind([&, changeInfo]() {
         ANS_LOGI("Device change %{public}d %{public}d %{public}d", changeInfo.changeType,
             changeInfo.enableChange, changeInfo.liveViewChange);
-#ifdef DISTRIBUTED_FEATURE_MASTER
-        if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_ONLINE) {
-            HandleDeviceUsingChange(changeInfo);
-        }
-
-        if (changeInfo.changeType == DeviceStatueChangeType::ALL_CONNECT_STATUS_CHANGE) {
-            if (DistributedDeviceService::GetInstance().CheckNeedSubscribeAllConnect()) {
-                DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
-                DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
-            }
-        }
-
-        if (changeInfo.changeType == DeviceStatueChangeType::DEVICE_USING_CLOSE) {
-            DistributedDeviceInfo device;
-            if (!DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(changeInfo.deviceId, device)) {
-                ANS_LOGW("get deviceId err");
-                return;
-            }
-            DistributedPublishService::GetInstance().RemoveAllDistributedNotifications(device);
-            DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
-                device.deviceType_, false);
-            std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(device.deviceType_);
-            if (!deviceType.empty()) {
-                auto ret = NotificationHelper::SetTargetDeviceBundleList(deviceType, device.udid_,
-                    BundleListOperationType::RELEASE_BUNDLES, std::vector<std::string>(), std::vector<std::string>());
-                ANS_LOGI("Remove bundle %{public}s %{public}s %{public}d.", deviceType.c_str(),
-                    StringAnonymous(device.deviceId_).c_str(), ret);
-            }
-
-            DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_OFFLINE);
-            DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
-            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
-        }
-#else
-        if (changeInfo.changeType == DeviceStatueChangeType::NOTIFICATION_ENABLE_CHANGE) {
-            DistributedDeviceService::GetInstance().SyncDeviceStatus(DistributedDeviceService::STATE_TYPE_SWITCH,
-                false, changeInfo.enableChange, changeInfo.liveViewChange);
-        }
-#endif
+        HandleStatusChange(changeInfo);
     });
     serviceQueue_->submit(task);
 }
@@ -341,7 +371,7 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
     DistributedDeviceService::GetInstance().SetDeviceSyncData(device.deviceId_,
         DistributedDeviceService::DEVICE_USAGE, true);
     if (!DistributedDeviceService::GetInstance().IsSubscribeAllConnect()) {
-        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect();
+        DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect(false);
         DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
     }
     // sync to peer device
@@ -476,13 +506,11 @@ void DistributedService::HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessa
             DistributedDeviceService::GetInstance().InitCurrentDeviceStatus();
             DistributedBundleService::GetInstance().SyncInstalledBundles(device, true);
             DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_ACK);
+            if (!DistributedDeviceService::GetInstance().IsSubscribeAllConnect()) {
+                DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->SubscribeAllConnect(true);
+                DistributedDeviceService::GetInstance().SetSubscribeAllConnect(true);
+            }
             return;
-        }
-        if (matchType == MatchType::MATCH_OFFLINE) {
-            DistributedSubscribeService::GetInstance().UnSubscribeNotification(device.deviceId_,
-                device.deviceType_, false);
-            DistributedClient::GetInstance().ReleaseDevice(device.deviceId_, device.deviceType_, false);
-            DistributedDeviceService::GetInstance().ResetDeviceInfo(device.deviceId_, DeviceState::STATE_OFFLINE);
         }
     }
 

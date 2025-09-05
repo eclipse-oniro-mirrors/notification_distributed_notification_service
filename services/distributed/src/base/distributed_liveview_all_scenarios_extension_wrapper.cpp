@@ -161,13 +161,13 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
     return triggerHandler_(request, actionType, extraInfo);
 }
 
-void DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect()
+void DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect(bool isPadOrPc)
 {
     if (subscribeHandler_ == nullptr) {
         ANS_LOGE("Subscribe all connect wrapper symbol failed");
         return;
     }
-    subscribeHandler_();
+    subscribeHandler_(isPadOrPc);
     return;
 }
 
