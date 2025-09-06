@@ -64,7 +64,6 @@ group("benchmarktest") {
   deps = []
 
   deps += [
-    # deps file
     ":Benchmark_Notification_Servece_Test",
   ]
 }
