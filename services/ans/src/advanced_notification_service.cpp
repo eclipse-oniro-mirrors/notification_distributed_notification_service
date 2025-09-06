@@ -663,7 +663,13 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
-    EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController);
+    NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
+    if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF ||
+        enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
+        ANS_LOGI("xds-test");
+        EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController);
+    }
 #endif
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_5, EventBranchId::BRANCH_1);
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
