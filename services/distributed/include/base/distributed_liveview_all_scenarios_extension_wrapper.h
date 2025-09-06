@@ -51,8 +51,8 @@ public:
         const std::string& deviceType);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
         const AAFwk::WantParams extraInfo);
-    ErrCode SubscribeAllConnect();
-    ErrCode UnSubscribeAllConnect();
+    void SubscribeAllConnect();
+    void UnSubscribeAllConnect();
     ErrCode DistributedLiveViewOperation(
         sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
     ErrCode DistributedAncoNotificationClick(const sptr<NotificationRequest> &request, bool &triggerWantInner);
@@ -66,7 +66,7 @@ private:
 
     void* ExtensionHandle_ = nullptr;
     SUBSCRIBE_ALL_CONNECT subscribeHandler_ = nullptr;
-    UNSUBSCRIBE_ALL_CONNECT unSubscribeHandler_ = nullptr;
+    UNSUBSCRIBE_ALL_CONNECT unsubscribeHandler_ = nullptr;
     TRIGGER_PUSH_WANT_AGENT triggerHandler_ = nullptr;
     UPDATE_LIVEVIEW_ENCODE_CONTENT updateLiveviewEncodeContent_ = nullptr;
     UPDATE_LIVEVIEW_DECODE_CONTENT updateLiveviewDecodeContent_ = nullptr;

@@ -208,7 +208,6 @@ bool NotificationRequestBox::SetBigIcon(const std::shared_ptr<Media::PixelMap>& 
     if (box_ == nullptr) {
         return false;
     }
-
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
         std::string icon;
         std::string copyIcon = AnsImageUtil::PackImage(bigIcon);
@@ -233,7 +232,6 @@ bool NotificationRequestBox::SetOverlayIcon(const std::shared_ptr<Media::PixelMa
     if (box_ == nullptr) {
         return false;
     }
-
     if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
         std::string icon;
         std::string copyIcon = AnsImageUtil::PackImage(overlayIcon);
@@ -310,7 +308,6 @@ bool NotificationRequestBox::SetDeviceId(const std::string& deviceId)
     }
     return box_->PutValue(std::make_shared<TlvItem>(LOCAL_DEVICE_ID, deviceId));
 }
-
 bool NotificationRequestBox::SetActionButtonsLength(const int32_t length)
 {
     if (box_ == nullptr) {
@@ -339,8 +336,7 @@ bool NotificationRequestBox::SetNotificationBasicInfo(const std::string& basicIn
     if (box_ == nullptr) {
         return false;
     }
-    box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BASIC_INFO, basicInfo));
-    return true;
+    return box_->PutValue(std::make_shared<TlvItem>(NOTIFICATION_BASIC_INFO, basicInfo));
 }
 #else
 bool NotificationRequestBox::GetNotificationHashCode(std::string& hasdCode) const
@@ -648,10 +644,9 @@ bool NotificationRequestBox::GetNotificationBasicInfo(std::string& basicInfo) co
     if (box_ == nullptr) {
         return false;
     }
-    box_->GetStringValue(NOTIFICATION_BASIC_INFO, basicInfo);
-    return true;
+
+    return box_->GetStringValue(NOTIFICATION_BASIC_INFO, basicInfo);
 }
 #endif
 }
 }
-

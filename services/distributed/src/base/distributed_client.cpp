@@ -32,7 +32,7 @@ DistributedClient& DistributedClient::GetInstance()
 void DistributedClient::ReleaseClient()
 {
     std::lock_guard<ffrt::mutex> lock(clientLock_);
-    ANS_LOGI("Release client socket %{public}d.", (int32_t)(socketsId_.size()));
+    ANS_LOGI("Release client socket %{public}zu.", socketsId_.size());
     for (auto& socketItem : socketsId_) {
         CloseSocket(socketItem.second);
     }
@@ -207,4 +207,3 @@ std::string DistributedClient::ShutdownReasonToString(ShutdownReason reason)
 
 }
 }
-

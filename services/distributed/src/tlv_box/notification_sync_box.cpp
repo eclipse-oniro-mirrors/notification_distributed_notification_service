@@ -107,3 +107,4 @@ bool NotificationSyncBox::GetNotificationEmpty(bool& empty) const
 #endif
 }
 }
+

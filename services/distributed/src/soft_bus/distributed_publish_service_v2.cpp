@@ -37,8 +37,8 @@
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 #include "distributed_subscribe_service.h"
-#include "remove_all_distributed_box.h"
 #include "bundle_resource_helper.h"
+#include "remove_all_distributed_box.h"
 #include "distributed_service.h"
 #include "distributed_send_adapter.h"
 
@@ -275,7 +275,8 @@ bool DistributedPublishService::ForWardRemove(const std::shared_ptr<BoxBase>& bo
 
     for (auto peerDevice : peerDevices) {
         auto peerDeviceInfo = peerDevice.second;
-        if (peerDeviceInfo.deviceId_ == deviceId) {
+        if (peerDeviceInfo.deviceId_ == deviceId ||
+            (peerDeviceInfo.IsPadOrPc() && peerDeviceInfo.peerState_ != DeviceState::STATE_ONLINE)) {
             ANS_LOGD("no need ForWardRemove");
             continue;
         }
@@ -477,7 +478,7 @@ void DistributedPublishService::SendNotifictionRequest(const std::shared_ptr<Not
     }
 
     auto requestPoint = request->GetNotificationRequestPoint();
-    ANS_LOGI("Dans OnConsumed Notification key = %{public}s, notificationFlag = %{public}s", request->GetKey().c_str(),
+    ANS_LOGI("Dans OnConsumed Notification key = %{public}s, flag = %{public}s", request->GetKey().c_str(),
         requestPoint->GetFlags() == nullptr ? "null" : requestPoint->GetFlags()->Dump().c_str());
     auto local = DistributedDeviceService::GetInstance().GetLocalDevice();
     requestBox->SetDeviceId(local.deviceId_);
@@ -583,8 +584,9 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
         ANS_LOGE("Check actionButtons is null.");
         return;
     }
-    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
-        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
+    if ((deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) &&
+        !notificationRequest->IsCommonLiveView()) {
         std::vector<std::string> buttonsTitle;
         size_t length = actionButtons.size();
         if (length > NotificationConstant::MAX_BTN_NUM) {
@@ -874,6 +876,10 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
         }
         std::shared_ptr<NotificationActionButton> actionButton =
             NotificationActionButton::Create(nullptr, actionName, nullptr);
+        if (!actionButton) {
+            ANS_LOGE("Failed to create NotificationActionButton by actionName=%{public}s", actionName.c_str());
+            return;
+        }
         actionButton->AddNotificationUserInput(userInput);
         request->AddActionButton(actionButton);
     }
@@ -882,7 +888,7 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
 void DistributedPublishService::MakePadNotificationButtons(
     const NotificationRequestBox& box, sptr<NotificationRequest>& request)
 {
-    if (request == nullptr) {
+    if (request == nullptr || request->IsCommonLiveView()) {
         return;
     }
     std::vector<std::string> buttonsTitle;
@@ -1007,7 +1013,7 @@ void DistributedPublishService::MakeNotificationContent(const NotificationReques
         }
         return;
     }
-    MakeNotificationBasicContent(box, request, contentType);
+    MakeNotifictaionBasicContent(box, request, contentType);
 }
 
 struct TransferNotification {
@@ -1068,7 +1074,7 @@ static void ConvertBoxToPictureContent(const TransferNotification& notificationI
     request->SetContent(content);
 }
 
-void DistributedPublishService::MakeNotificationBasicContent(const NotificationRequestBox& box,
+void DistributedPublishService::MakeNotifictaionBasicContent(const NotificationRequestBox& box,
     sptr<NotificationRequest>& request, int32_t contentType)
 {
     TransferNotification notificationItem;
