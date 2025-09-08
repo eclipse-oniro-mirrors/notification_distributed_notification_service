@@ -501,10 +501,10 @@ export default namespace notificationManager {
         if (template === null) {
             return false;
         }
-        if (template?.name != undefined && template?.name?.trim() === '') {
+        if (template?.name == undefined) {
             return false;
         }
-        if (template?.data != undefined && template?.data === null) {
+        if (template?.data !== undefined && typeof template?.data !== 'object') {
             return false;
         }
         return true;
