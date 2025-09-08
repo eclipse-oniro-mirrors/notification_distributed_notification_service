@@ -839,8 +839,8 @@ bool UnWarpNotificationDoNotDisturbDate(
         ANS_LOGE("Invalid time range");
         return false;
     }
-    doNotDisturbDate.SetBeginDate(static_cast<int32_t>(beginTime));
-    doNotDisturbDate.SetEndDate(static_cast<int32_t>(endTime));
+    doNotDisturbDate.SetBeginDate(beginTime);
+    doNotDisturbDate.SetEndDate(endTime);
     ANS_LOGD("Successfully parsed DoNotDisturbDate");
     return true;
 }
