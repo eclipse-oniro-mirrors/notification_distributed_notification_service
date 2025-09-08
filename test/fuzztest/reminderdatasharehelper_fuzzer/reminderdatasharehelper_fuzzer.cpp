@@ -32,7 +32,7 @@ namespace OHOS {
         helper.UnRegisterObserver();
         std::map<std::string, sptr<Notification::ReminderRequest>> reminders;
         helper.Query(reminders);
-        helper.Update(id, id);
+        helper.Update(bundleName, id);
         helper.StartDataExtension(id);
         helper.SetUserId(id);
         helper.UpdateCalendarUid();

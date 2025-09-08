@@ -73,6 +73,7 @@ ohos_shared_library("reminder_innerkits") {
   ]
   sources += filter_include(output_values, [ "*.cpp" ])
   defines = []
+  cflags_cc = [ "-fstack-protector-strong" ]
   deps = [
     ":reminder_service_interface",
     "${frameworks_path}/ans:ans_client",

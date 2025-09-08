@@ -154,10 +154,6 @@ ohos_source_set("reminder_service_sources") {
     defines += [ "SCREENLOCK_MGR_ENABLE" ]
   }
 
-  if (distributed_notification_service_feature_summary) {
-    defines += [ "ENABLE_ANS_EXT_WRAPPER" ]
-  }
-
   if (telephony_cust) {
     defines += [ "ENABLE_ANS_TELEPHONY_CUST_WRAPPER" ]
   }
@@ -194,6 +190,7 @@ ohos_shared_library("libreminder") {
     "-Oz",
     "-flto",
     "-ffunction-sections",
+    "-fstack-protector-strong",
     "-fdata-sections",
   ]
   sources = []

@@ -1208,6 +1208,7 @@ private:
     std::string maxWantAgentStr_{};
     std::string identifier_;
 
+    sptr<NotificationBundleOption> notificationOption_ {nullptr};
     int32_t titleResourceId_ {0};
     int32_t contentResourceId_ {0};
     int32_t expiredContentResourceId_ {0};
