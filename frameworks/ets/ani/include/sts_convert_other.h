@@ -26,6 +26,7 @@ namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::Media;
 using namespace OHOS::AbilityRuntime::WantAgent;
+const uint32_t BUTTON_RESOURCE_SIZE = 3;
 
 std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent);
 ani_object WarpWantAgent(ani_env *env, std::shared_ptr<WantAgent> wantAgent);
@@ -34,10 +35,11 @@ ani_object GetAniWantAgentArray(ani_env *env, std::vector<std::shared_ptr<WantAg
 ani_object CreateAniPixelMap(ani_env* env, std::shared_ptr<PixelMap> pixelMap);
 std::shared_ptr<PixelMap> GetPixelMapFromAni(ani_env* env, ani_object obj);
 // ani_object to vector
-ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::shared_ptr<PixelMap>> &pixelMaps);
+ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen = 0);
 // ani_object to vector
-ani_status GetPixelMapArray(ani_env *env,
-    ani_object param, const char *name, std::vector<std::shared_ptr<PixelMap>> &pixelMaps);
+ani_status GetPixelMapArray(ani_env *env, ani_object param, const char *name,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen);
 // map ro AniRecord
 bool GetAniPictrueInfo(ani_env *env, std::map<std::string, std::vector<std::shared_ptr<Media::PixelMap>>> pictureMap,
     ani_object &pictureInfoObj);
@@ -48,8 +50,8 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
 ani_object GetAniArrayPixelMap(ani_env *env, const std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps);
 
 ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource &resource);
-ani_status GetResourceArray(ani_env *env,
-    ani_object param, const char *name, std::vector<ResourceManager::Resource> &res);
+ani_status GetResourceArray(ani_env *env, ani_object param, const char *name,
+    std::vector<ResourceManager::Resource> &res, const uint32_t maxLen);
 ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::Resource> resource);
 ani_object GetAniArrayResource(ani_env *env,
     const std::vector<std::shared_ptr<ResourceManager::Resource>> resources);
