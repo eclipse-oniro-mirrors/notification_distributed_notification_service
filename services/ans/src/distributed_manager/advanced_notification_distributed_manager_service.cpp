@@ -710,10 +710,11 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
     }
 
     std::vector<sptr<DistributedBundleOption>> affectBundleOption;
+    ANS_LOGI("deviceType: %{public}s",  deviceType.c_str());
     for (auto distributedBundle : bundles) {
         std::string bundleName = distributedBundle->GetBundle()->GetBundleName();
         if (bundleName.empty()) {
-            ANS_LOGW("unaffet bundle. empty bundle");
+            ANS_LOGE("unaffet bundle. empty bundle");
             continue;
         }
         int32_t uid = distributedBundle->GetBundle()->GetUid();
@@ -724,6 +725,8 @@ ErrCode AdvancedNotificationService::SetDistributedBundleOption(
             continue;
         }
         distributedBundle->GetBundle()->SetUid(returnOption->GetUid());
+        ANS_LOGI("bundleName = %{public}s uidParam= %{public}d finalUid= %{public}d enable = %{public}s",
+            bundleName.c_str(), uid, returnOption->GetUid(), std::to_string(distributedBundle->isEnable()).c_str());
         affectBundleOption.emplace_back(distributedBundle);
     }
 
@@ -786,6 +789,8 @@ ErrCode AdvancedNotificationService::SetDistributedEnabled(const std::string &de
         enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
         : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 
+    ANS_LOGI("deviceType: %{public}s, enabled: %{public}s, result: %{public}d",
+        deviceType.c_str(), std::to_string(enabled).c_str(), result);
     if (deviceType == NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
         return result;
     }

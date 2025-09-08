@@ -154,18 +154,13 @@ ErrCode NotificationShellCommand::RunAsHelpCommand()
     return ERR_OK;
 }
 
-ErrCode NotificationShellCommand::RunHelp()
-{
-    resultReceiver_.append(DUMP_HELP_MSG);
-    return ERR_OK;
-}
-
 ErrCode NotificationShellCommand::RunAsDumpCommand()
 {
 #ifdef ANM_BUILD_VARIANT_USER
      resultReceiver_.append("error: user version cannot use dump.\n");
      return ERR_INVALID_VALUE;
 #endif
+#ifndef ANM_BUILD_VARIANT_USER
     ErrCode ret = ERR_OK;
     std::vector<std::string> infos;
     std::string cmd;
@@ -190,8 +185,74 @@ ErrCode NotificationShellCommand::RunAsDumpCommand()
         resultReceiver_.append(info);
     }
     return ret;
+#endif
 }
 
+ErrCode NotificationShellCommand::RunAsSettingCommand()
+{
+#ifdef ANM_BUILD_VARIANT_USER
+     resultReceiver_.append("error: user version cannot use setting.\n");
+     return ERR_INVALID_VALUE;
+#endif
+#ifndef ANM_BUILD_VARIANT_USER
+    int option = getopt_long(argc_, argv_, SETTING_SHORT_OPTIONS, SETTING_LONG_OPTIONS, nullptr);
+    if (option == '?') {
+        if (optopt == 'c') {
+            resultReceiver_.append("error: option 'c' requires a value.\n");
+        } else if (optopt == 'e') {
+            resultReceiver_.append("error: option 'e' requires a value.\n");
+        } else if (optopt == 'd') {
+            resultReceiver_.append("error: option 'd' requires a value.\n");
+        } else if (optopt == 'k') {
+            resultReceiver_.append("error: option 'k' requires a value.\n");
+        } else if (optopt == 'b') {
+            resultReceiver_.append("error: option 'b' requires a value.\n");
+        } else if (optopt == 'o') {
+            resultReceiver_.append("error: option 'o' requires a value.\n");
+        } else if (optopt == 'g') {
+            resultReceiver_.append("error: option 'g' requires a value.\n");
+        } else {
+            resultReceiver_.append("error: unknown option.\n");
+        }
+        resultReceiver_.append(SETTING_HELP_MSG);
+        return ERR_INVALID_VALUE;
+    }
+    if (option == 'c') {
+        int32_t count = atoi(optarg);
+        if ((count < NOTIFICATION_MIN_COUNT) || (count > NOTIFICATION_MAX_COUNT)) {
+            resultReceiver_.append("error: recent count should between 1 and 1024\n");
+            resultReceiver_.append(SETTING_HELP_MSG);
+            return ERR_INVALID_VALUE;
+        }
+        std::vector<std::string> infos;
+        std::string cmd = COMMAND_SET_RECENT_COUNT;
+        cmd.append(" ").append(std::string(optarg));
+        return RunDumpCmd(cmd, "", SUBSCRIBE_USER_INIT, SUBSCRIBE_USER_INIT, infos);
+    }
+    if (option == 'e') {
+        return RunSetEnableCmd();
+    }
+    if (option == 'd') {
+        return RunSetDeviceStatusCmd();
+    }
+    if (option == 'k') {
+        return RunSetSmartReminderEnabledCmd();
+    }
+    if (option == 'b') {
+        return RunSetDistributedEnabledByBundleCmd();
+    }
+    if (option == 'o') {
+        return RunSetDistributedEnabledBySlotCmd();
+    }
+    if (option == 'g') {
+        return RunGetDeviceStatusCmd();
+    }
+    resultReceiver_.append(SETTING_HELP_MSG);
+    return ERR_INVALID_VALUE;
+#endif
+}
+
+#ifndef ANM_BUILD_VARIANT_USER
 ErrCode NotificationShellCommand::RunDumpCmd(const std::string& cmd, const std::string& bundle,
     int32_t userId, int32_t recvUserId, std::vector<std::string> &infos)
 {
@@ -277,66 +338,10 @@ void NotificationShellCommand::CheckDumpOpt()
     }
 }
 
-ErrCode NotificationShellCommand::RunAsSettingCommand()
+ErrCode NotificationShellCommand::RunHelp()
 {
-#ifdef ANM_BUILD_VARIANT_USER
-     resultReceiver_.append("error: user version cannot use setting.\n");
-     return ERR_INVALID_VALUE;
-#endif
-    int option = getopt_long(argc_, argv_, SETTING_SHORT_OPTIONS, SETTING_LONG_OPTIONS, nullptr);
-    if (option == '?') {
-        if (optopt == 'c') {
-            resultReceiver_.append("error: option 'c' requires a value.\n");
-        } else if (optopt == 'e') {
-            resultReceiver_.append("error: option 'e' requires a value.\n");
-        } else if (optopt == 'd') {
-            resultReceiver_.append("error: option 'd' requires a value.\n");
-        } else if (optopt == 'k') {
-            resultReceiver_.append("error: option 'k' requires a value.\n");
-        } else if (optopt == 'b') {
-            resultReceiver_.append("error: option 'b' requires a value.\n");
-        } else if (optopt == 'o') {
-            resultReceiver_.append("error: option 'o' requires a value.\n");
-        } else if (optopt == 'g') {
-            resultReceiver_.append("error: option 'g' requires a value.\n");
-        } else {
-            resultReceiver_.append("error: unknown option.\n");
-        }
-        resultReceiver_.append(SETTING_HELP_MSG);
-        return ERR_INVALID_VALUE;
-    }
-    if (option == 'c') {
-        int32_t count = atoi(optarg);
-        if ((count < NOTIFICATION_MIN_COUNT) || (count > NOTIFICATION_MAX_COUNT)) {
-            resultReceiver_.append("error: recent count should between 1 and 1024\n");
-            resultReceiver_.append(SETTING_HELP_MSG);
-            return ERR_INVALID_VALUE;
-        }
-        std::vector<std::string> infos;
-        std::string cmd = COMMAND_SET_RECENT_COUNT;
-        cmd.append(" ").append(std::string(optarg));
-        return RunDumpCmd(cmd, "", SUBSCRIBE_USER_INIT, SUBSCRIBE_USER_INIT, infos);
-    }
-    if (option == 'e') {
-        return RunSetEnableCmd();
-    }
-    if (option == 'd') {
-        return RunSetDeviceStatusCmd();
-    }
-    if (option == 'k') {
-        return RunSetSmartReminderEnabledCmd();
-    }
-    if (option == 'b') {
-        return RunSetDistributedEnabledByBundleCmd();
-    }
-    if (option == 'o') {
-        return RunSetDistributedEnabledBySlotCmd();
-    }
-    if (option == 'g') {
-        return RunGetDeviceStatusCmd();
-    }
-    resultReceiver_.append(SETTING_HELP_MSG);
-    return ERR_INVALID_VALUE;
+    resultReceiver_.append(DUMP_HELP_MSG);
+    return ERR_OK;
 }
 
 ErrCode NotificationShellCommand::RunSetEnableCmd()
@@ -540,5 +545,7 @@ ErrCode NotificationShellCommand::RunSetDistributedEnabledBySlotCmd()
     }
     return ret;
 }
+#endif
+
 }  // namespace Notification
 }  // namespace OHOS
