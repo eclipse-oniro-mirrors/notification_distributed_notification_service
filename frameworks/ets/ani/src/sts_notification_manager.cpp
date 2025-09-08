@@ -340,7 +340,9 @@ void StsNotificationLocalLiveViewSubscriber::OnConnected()
 {}
 
 void StsNotificationLocalLiveViewSubscriber::OnDisconnected()
-{}
+{
+    delete this;
+}
 
 void StsNotificationLocalLiveViewSubscriber::OnDied()
 {}
