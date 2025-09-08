@@ -201,6 +201,7 @@ bool CreateSettingsUIExtension(std::shared_ptr<OHOS::AbilityRuntime::Context> co
 
     Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
+    config.isWindowModeFollowHost = true;
 
     int32_t sessionId = uiContent->CreateModalUIExtension(want, uiExtensionCallbacks, config);
     ANS_LOGI("Create end, sessionId: %{public}d", sessionId);
