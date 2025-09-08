@@ -909,15 +909,18 @@ ErrCode AdvancedNotificationService::SetDistributedAuthStatus(
     auto result =
         NotificationPreferences::GetInstance()->SetDistributedAuthStatus(deviceType, deviceId, userId, isAuth);
     if (result == ERR_OK) {
-        if (isAuth) {
-            UpdateDistributedDeviceList(deviceType, userId);
+        int32_t currentUserId = userId;
+        auto ret = OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
+        if (isAuth && ret == ERR_OK) {
+            UpdateDistributedDeviceList(deviceType, currentUserId);
         }
         EventFwk::Want want;
         want.SetAction(NOTIFICATION_EVENT_DISTRIBUTED_DEVICE_TYPES_CHANGE);
         EventFwk::CommonEventData commonData{ want };
         EventFwk::CommonEventPublishInfo publishInfo;
         publishInfo.SetSubscriberType(EventFwk::SubscriberType::SYSTEM_SUBSCRIBER_TYPE);
-        if (!EventFwk::CommonEventManager::PublishCommonEventAsUser(commonData, publishInfo, userId)) {
+        if (ret != ERR_OK || !EventFwk::CommonEventManager::PublishCommonEventAsUser(
+            commonData, publishInfo, currentUserId)) {
             ANS_LOGE("Publish common event failed");
         }
     }
