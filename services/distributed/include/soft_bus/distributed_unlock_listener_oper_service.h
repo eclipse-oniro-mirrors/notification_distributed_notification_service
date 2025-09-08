@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,8 @@
 
 #include "ffrt.h"
 #include "itimer_info.h"
+#include "notification_constant.h"
+#include "notification_request.h"
 
 namespace OHOS {
 namespace Notification {
@@ -33,29 +35,11 @@ class UnlockListenerTimerInfo : public MiscServices::ITimerInfo {
 public:
     UnlockListenerTimerInfo(std::string timerHashCode) : timerHashCode_(timerHashCode) {};
     virtual ~UnlockListenerTimerInfo() {};
-    /**
-     * When timing is up, this function will execute as call back.
-     */
+
     void OnTrigger() override;
-
-    /**
-     * Indicates the timing type.
-     */
     void SetType(const int32_t &type) override {};
-
-    /**
-     * Indicates the repeat policy.
-     */
     void SetRepeat(bool repeat) override {};
-
-    /**
-     * Indicates the interval time for repeat timing.
-     */
     void SetInterval(const uint64_t &interval) override {};
-
-    /**
-     * Indicates the want agent information.
-     */
     void SetWantAgent(std::shared_ptr<OHOS::AbilityRuntime::WantAgent::WantAgent> wantAgent) override {};
 
 private:
@@ -93,6 +77,14 @@ private:
     ErrCode LaunchWantAgent(const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr);
     ErrCode GetNtfBtnWantAgentPtr(const std::string& hashCode,
         const int32_t btnIndex, std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>& wantAgentPtr);
+    void TriggerLiveViewNotification(
+        sptr<NotificationRequest>& notificationRequest,
+        const NotificationConstant::SlotType& slotType,
+        const int32_t jumpType, const int32_t deviceType, const int32_t btnIndex);
+    bool TriggerAncoNotification(const sptr<NotificationRequest>& notificationRequest,
+        const std::string& hashCode, const int32_t deviceType, const NotificationConstant::SlotType& slotType);
+    void TriggerNotification(const std::string& hashCode, const int32_t jumpType,
+        const int32_t deviceType, const int32_t btnIndex, const NotificationConstant::SlotType& slotType);
 
 private:
     ffrt::mutex mapLock_;

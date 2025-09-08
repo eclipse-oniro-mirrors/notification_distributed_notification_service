@@ -182,7 +182,7 @@ ErrCode BundleResourceHelper::GetBundleInfoV9(const std::string& bundleName, int
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
     if (bundleMgr_ == nullptr) {
-        return false;
+        return -1;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     int32_t result = bundleMgr_->GetBundleInfoV9(bundleName, flags, bundleInfo, userId);

@@ -64,8 +64,8 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitExtentionWrapper()
         ANS_LOGE("distributed subscribe all conncet failed, error: %{public}s", dlerror());
         return;
     }
-    unSubscribeHandler_ = (UNSUBSCRIBE_ALL_CONNECT)dlsym(ExtensionHandle_, "UnSubscribeAllConnect");
-    if (unSubscribeHandler_ == nullptr) {
+    unsubscribeHandler_ = (UNSUBSCRIBE_ALL_CONNECT)dlsym(ExtensionHandle_, "UnSubscribeAllConnect");
+    if (unsubscribeHandler_ == nullptr) {
         ANS_LOGE("distributed unsubscribe all conncet failed, error: %{public}s", dlerror());
         return;
     }
@@ -103,7 +103,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::InitDistributedCollaborate
         ANS_LOGE("update liveview Bin File 2 PiexlMap failed, error: %{public}s", dlerror());
         return;
     }
- 
+
     updateLiveviewPiexlMap2BinFile_ =
         (UPDATE_LIVE_VIEW_PIEXL_MAP_2_BIN_FILE)dlsym(ExtensionHandle_, "UpdateLiveviewPiexlMap2BinFile");
     if (updateLiveviewPiexlMap2BinFile_ == nullptr) {
@@ -117,7 +117,7 @@ void DistributedLiveviewAllScenariosExtensionWrapper::CloseExtentionWrapper()
     if (ExtensionHandle_ != nullptr) {
         dlclose(ExtensionHandle_);
         subscribeHandler_ = nullptr;
-        unSubscribeHandler_ = nullptr;
+        unsubscribeHandler_ = nullptr;
         ExtensionHandle_ = nullptr;
         triggerHandler_ = nullptr;
         updateLiveviewEncodeContent_ = nullptr;
@@ -161,22 +161,24 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
     return triggerHandler_(request, actionType, extraInfo);
 }
 
-ErrCode DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect()
+void DistributedLiveviewAllScenariosExtensionWrapper::SubscribeAllConnect()
 {
     if (subscribeHandler_ == nullptr) {
         ANS_LOGE("Subscribe all connect wrapper symbol failed");
-        return 0;
+        return;
     }
-    return subscribeHandler_();
+    subscribeHandler_();
+    return;
 }
 
-ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
+void DistributedLiveviewAllScenariosExtensionWrapper::UnSubscribeAllConnect()
 {
-    if (unSubscribeHandler_ == nullptr) {
+    if (unsubscribeHandler_ == nullptr) {
         ANS_LOGE("UnSubscribe all connect wrapper symbol failed");
-        return 0;
+        return;
     }
-    return unSubscribeHandler_();
+    unsubscribeHandler_();
+    return;
 }
 
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveViewOperation(
@@ -217,7 +219,7 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewBinFile2P
     }
     return updateLiveviewBinFile2PiexlMap_(pixelMap, buffer);
 }
- 
+
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewPiexlMap2BinFile(
     const std::shared_ptr<Media::PixelMap> pixelMap, std::vector<uint8_t> &buffer)
 {

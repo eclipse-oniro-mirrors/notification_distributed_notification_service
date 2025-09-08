@@ -77,6 +77,7 @@ void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &reque
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         ANS_LOGI("No need consumed notification %{public}d %{public}s.",
             localDevice_.deviceType_, StringAnonymous(localDevice_.deviceId_).c_str());
+        ANS_LOGI("Dans OnConsumed %{public}s", request->Dump().c_str());
         return;
     }
     if (peerDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
@@ -163,7 +164,7 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
 
 void DistribuedSubscriber::OnApplicationInfoNeedChanged(const std::string& bundleName)
 {
-    ANS_LOGI("Notify changed %{public}s %{public}d.", bundleName.c_str(), localDevice_.deviceType_);
+    ANS_LOGI("Notify changed %{public}s %{public}u.", bundleName.c_str(), localDevice_.deviceType_);
     if (localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_PHONE) {
         return;
     }

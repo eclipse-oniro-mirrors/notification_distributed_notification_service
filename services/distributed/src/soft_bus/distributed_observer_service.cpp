@@ -91,6 +91,7 @@ void OberverService::Init(uint16_t deviceType)
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
 #endif
+
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     subscriber_ = std::make_shared<DistributedEventSubscriber>(subscribeInfo);
     if (subscriber_ == nullptr) {

@@ -29,6 +29,7 @@ public:
     static DistributedBundleService& GetInstance();
 
     void HandleBundleIconSync(const std::shared_ptr<TlvBox>& boxMessage);
+
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void RequestBundlesIcon(const DistributedDeviceInfo peerDevice, bool isForce);
     void GenerateBundleIconSync(const DistributedDeviceInfo& device);
@@ -54,3 +55,4 @@ private:
 }
 }
 #endif // DISTRIBUTED_INCLUDE_SOFTBUS_DISTRIBUTED_BUNDLE_SERVICE_H
+

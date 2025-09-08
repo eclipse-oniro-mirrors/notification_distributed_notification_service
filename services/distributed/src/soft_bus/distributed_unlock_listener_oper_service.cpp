@@ -19,7 +19,6 @@
 #include "ans_inner_errors.h"
 #include "ans_log_wrapper.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
-#include "notification_constant.h"
 #include "notification_helper.h"
 #include "time_service_client.h"
 #include "analytics_util.h"
@@ -106,7 +105,7 @@ void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashC
         if (iterTimer->second == NotificationConstant::INVALID_TIMER_ID) {
             return;
         }
-        ANS_LOGI("Operation timer erase %{public}s %{public}" PRIu64, hashCode.c_str(), iterTimer->second);
+        ANS_LOGI("Operation timer erase %{public}s %{public}llu", hashCode.c_str(), iterTimer->second);
         MiscServices::TimeServiceClient::GetInstance()->StopTimer(iterTimer->second);
         MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(iterTimer->second);
         timerMap_.erase(iterTimer);
@@ -167,31 +166,59 @@ void UnlockListenerOperService::TriggerByJumpType(const std::string& hashCode, c
         return;
     }
     NotificationConstant::SlotType slotType = notificationRequest->GetSlotType();
-    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = nullptr;
     if (jumpType >= NotificationConstant::DISTRIBUTE_JUMP_BY_LIVE_VIEW) {
-        if (!notificationRequest->IsCommonLiveView()) {
-            ANS_LOGE("jumpType for liveView but notification not liveView.");
-            return;
-        }
-        ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedLiveViewOperation(
-            notificationRequest, jumpType, btnIndex);
-        AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP, slotType);
-        ANS_LOGI("DistributedLiveViewOperation res: %{public}d.", static_cast<int32_t>(res));
+        TriggerLiveViewNotification(notificationRequest, slotType, jumpType, deviceType, btnIndex);
         return;
     }
-    bool triggerWantInner;
+    if (notificationRequest->IsCommonLiveView()) {
+        ANS_LOGE("jumpType not for liveView but notification is liveView.");
+        return;
+    }
+    bool triggerWantInner = TriggerAncoNotification(notificationRequest, hashCode, deviceType, slotType);
+    if (triggerWantInner) {
+        return;
+    }
+    TriggerNotification(hashCode, jumpType, deviceType, btnIndex, slotType);
+}
+
+void UnlockListenerOperService::TriggerLiveViewNotification(
+    sptr<NotificationRequest>& notificationRequest,
+    const NotificationConstant::SlotType& slotType,
+    const int32_t jumpType, const int32_t deviceType, const int32_t btnIndex)
+{
+    if (!notificationRequest->IsCommonLiveView()) {
+        ANS_LOGE("jumpType for liveView but notification not liveView.");
+        return;
+    }
+    ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedLiveViewOperation(
+        notificationRequest, jumpType, btnIndex);
+    AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP, slotType);
+    ANS_LOGI("DistributedLiveViewOperation res: %{public}d.", static_cast<int32_t>(res));
+}
+
+bool UnlockListenerOperService::TriggerAncoNotification(const sptr<NotificationRequest>& notificationRequest,
+    const std::string& hashCode, const int32_t deviceType, const NotificationConstant::SlotType& slotType)
+{
+    bool triggerWantInner = false;
     if (DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedAncoNotificationClick(
         notificationRequest, triggerWantInner) != ERR_OK) {
-        return;
+        return triggerWantInner;
     }
     if (triggerWantInner) {
+        ANS_LOGI("TriggerAncoNotification success.");
         std::vector<std::string> hashcodes;
         hashcodes.push_back(hashCode);
         NotificationHelper::RemoveNotifications(
             hashcodes, NotificationConstant::DISTRIBUTED_COLLABORATIVE_CLICK_DELETE);
         AnalyticsUtil::GetInstance().OperationalReporting(deviceType, HaOperationType::COLLABORATE_JUMP, slotType);
-        return;
     }
+    return triggerWantInner;
+}
+
+void UnlockListenerOperService::TriggerNotification(const std::string& hashCode, const int32_t jumpType,
+    const int32_t deviceType, const int32_t btnIndex, const NotificationConstant::SlotType& slotType)
+{
+    std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgentPtr = nullptr;
     if (jumpType == NotificationConstant::DISTRIBUTE_JUMP_BY_NTF) {
         wantAgentPtr = GetNtfWantAgentPtr(hashCode);
     } else if (jumpType == NotificationConstant::DISTRIBUTE_JUMP_BY_BTN) {

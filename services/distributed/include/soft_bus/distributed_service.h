@@ -53,6 +53,8 @@ public:
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void HandleBundlesEvent(const std::string& bundleName, const std::string& action);
     void HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo);
+    bool OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
+        const DistributedDeviceInfo& peerDevice);
 #else
     void SyncDeviceStatus(int32_t status);
     void SyncInstalledBundle(const std::string& bundleName, bool isAdd);
@@ -67,8 +69,6 @@ private:
     void OnHandleMsg(std::shared_ptr<TlvBox>& box);
     void ConnectPeerDevice(DistributedDeviceInfo device);
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
-    bool OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
-        const DistributedDeviceInfo& peerDevice);
 
 private:
     std::shared_ptr<ffrt::queue> serviceQueue_ = nullptr;

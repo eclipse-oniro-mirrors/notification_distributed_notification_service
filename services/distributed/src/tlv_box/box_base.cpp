@@ -55,3 +55,4 @@ bool BoxBase::Serialize()
 }
 }
 }
+

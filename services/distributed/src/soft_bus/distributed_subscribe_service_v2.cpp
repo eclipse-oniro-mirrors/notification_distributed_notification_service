@@ -28,6 +28,20 @@ namespace Notification {
 const int32_t FILTER_IM_TYPE = 1;
 const int32_t FILTER_IM_REPLY_TYPE = 2;
 
+static std::string SubscribeTransDeviceType(uint16_t deviceType)
+{
+    switch (deviceType) {
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH: {
+            return "wearable";
+        }
+        case DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD: {
+            return "Pad";
+        }
+        default:
+            return "";
+    }
+}
+
 int32_t DistributedSubscribeService::GetCurrentActiveUserId()
 {
     int32_t userId = DEFAULT_USER_ID;

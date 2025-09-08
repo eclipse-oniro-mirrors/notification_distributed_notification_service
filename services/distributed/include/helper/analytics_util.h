@@ -49,6 +49,7 @@ public:
         const std::string &errorReason);
     void OperationalReporting(int32_t deviceType, int32_t sceneType, int32_t slotType,
         const std::string& reason = std::string());
+
 private:
     AnalyticsUtil() = default;
     ~AnalyticsUtil() = default;

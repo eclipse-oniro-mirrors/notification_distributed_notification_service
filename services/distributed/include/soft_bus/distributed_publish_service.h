@@ -80,7 +80,7 @@ private:
     void MakeNotificationIcon(const NotificationRequestBox& box, sptr<NotificationRequest>& request);
     void MakeNotificationReminderFlag(const NotificationRequestBox& box,
         sptr<NotificationRequest>& request);
-    void MakeNotificationBasicContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
+    void MakeNotifictaionBasicContent(const NotificationRequestBox& box, sptr<NotificationRequest>& request,
         int32_t contentType);
 #endif
 };

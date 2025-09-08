@@ -37,3 +37,4 @@ public:
 }  // namespace Notification
 }  // namespace OHOS
 #endif // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_REMOVE_BOX_H
+
