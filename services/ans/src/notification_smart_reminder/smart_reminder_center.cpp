@@ -356,11 +356,6 @@ void SmartReminderCenter::InitValidDevices(
                 ANS_LOGI("unaffect slot");
                 continue;
             }
-            bool distributedSwitch = GetDistributedSwitch(deviceType);
-            if (!distributedSwitch) {
-                ANS_LOGI("distributed switch is closed, deveiceType = %{public}s", deviceType.c_str());
-                continue;
-            }
             bool appSwitch = GetAppSwitch(deviceType, request->GetOwnerBundleName(), request->GetOwnerUid());
             // app-close
             if (!appSwitch) {
