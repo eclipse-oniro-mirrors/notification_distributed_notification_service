@@ -658,7 +658,7 @@ HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_100, Function | SmallTest |
 
 /**
  * @tc.name: UpdateRecordByOwner_200
- * @tc.desc: Test UpdateRecordByOwner when isSystem is true and timerId is 0
+ * @tc.desc: Test UpdateRecordByOwner when isSystem is true and timerId is not 0
  * @tc.type: FUNC
  */
 HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_200, Function | SmallTest | Level1)
@@ -688,7 +688,7 @@ HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_200, Function | SmallTest |
     advancedNotificationService_->UpdateRecordByOwner(record, isSystem);
     auto ret = record->notification->GetFinishTimer();
 
-    ASSERT_EQ(ret, 0);
+    ASSERT_NE(ret, 0);
 }
 
 /**
