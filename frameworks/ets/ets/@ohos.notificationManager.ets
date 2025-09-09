@@ -23,6 +23,7 @@ import { NotificationLongTextContent } from 'notification.notificationContent';
 import { NotificationMultiLineContent } from 'notification.notificationContent';
 import { NotificationPictureContent } from 'notification.notificationContent';
 import { NotificationSystemLiveViewContent } from 'notification.notificationContent';
+import { NotificationContent } from 'notification.notificationContent';
 import { NotificationTemplate } from 'notification.notificationTemplate';
 import { DistributedOptions } from 'notification.notificationRequest';
 import { NotificationLiveViewContent } from 'notification.notificationContent';
@@ -500,10 +501,10 @@ export default namespace notificationManager {
         if (template === null) {
             return false;
         }
-        if (template?.name != undefined && template?.name?.trim() === '') {
+        if (template?.name == undefined) {
             return false;
         }
-        if (template?.data != undefined && template?.data === null) {
+        if (template?.data !== undefined && typeof template?.data !== 'object') {
             return false;
         }
         return true;
@@ -553,6 +554,33 @@ export default namespace notificationManager {
         }
         return true;
     }
+    function checkContentType(content: NotificationContent): boolean
+    {
+        let contentType = content.notificationContentType;
+        if (contentType !== undefined) {
+            let type:ContentType = contentType as ContentType;
+            if (type == ContentType.NOTIFICATION_CONTENT_BASIC_TEXT
+                && content.normal == undefined) {
+                return false;
+            } else if (type == ContentType.NOTIFICATION_CONTENT_LONG_TEXT
+                && content.longText == undefined) {
+                return false;
+            } else if (type == ContentType.NOTIFICATION_CONTENT_PICTURE
+                && content.picture == undefined) {
+                return false;
+            } else if (type == ContentType.NOTIFICATION_CONTENT_MULTILINE
+                && content.multiLine == undefined) {
+                return false;
+            } else if (type == ContentType.NOTIFICATION_CONTENT_SYSTEM_LIVE_VIEW
+                && content.systemLiveView == undefined) {
+                return false;
+            } else if (type == ContentType.NOTIFICATION_CONTENT_LIVE_VIEW
+                && content.liveView == undefined) {
+                return false;
+            }
+        }
+        return true;
+    }
     function isInvalidParameter(request: NotificationRequest): BusinessError
     {
         let error: BusinessError = successCallbackError
@@ -563,6 +591,12 @@ export default namespace notificationManager {
         if (request.content == null || request.content == undefined) {
             error = errorParamInvalid
             return error;
+        }
+        if (request.content?.notificationContentType == undefined) {
+            return errorParamInvalid;
+        }
+        if (!checkContentType(request.content)) {
+            return errorParamInvalid;
         }
         if (request.content?.normal !== undefined && !isInvalidContent(request.content.normal)) {
             return errorParamInvalid;
@@ -1553,9 +1587,6 @@ export default namespace notificationManager {
     }
 
     export function cancel(id: int, label?: string): Promise<void> {
-        if (label == null || label?.length === 0) {
-            throw errorParamInvalid;
-        }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => { return nativeCancelWithIdOptionalLabel(id, label); });
             p.then((data: NullishType): void => {

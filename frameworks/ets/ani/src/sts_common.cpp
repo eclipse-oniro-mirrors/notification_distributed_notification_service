@@ -87,20 +87,19 @@ bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<
     ani_int length;
     ani_status status = env->Object_GetPropertyByName_Int(ani_obj, "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("Object_GetPropertyByName_Double faild. status %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int faild. status %{public}d", status);
         return false;
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
-        status = env->Object_CallMethodByName_Ref(ani_obj,
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
+        status = env->Object_CallMethodByName_Ref(ani_obj, "$_get", "i:C{std.core.Object}", &stringEntryRef, i);
         if (status != ANI_OK) {
-            ANS_LOGE("status : %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Ref faild. status : %{public}d", status);
             return false;
         }
         std::string std_string;
         if ((status = GetStringByAniString(env, static_cast<ani_string>(stringEntryRef), std_string)) != ANI_OK) {
-            ANS_LOGE("GetStdString faild. status %{public}d", status);
+            ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
             return false;
         }
         stdVString.emplace_back(std_string);
@@ -159,7 +158,7 @@ ani_status GetPropertyBool(ani_env *env, ani_object obj, const char *name,
         return status;
     }
     if (isUndefined) {
-        ANS_LOGD("%{public}s is undefined", name);
+        ANS_LOGE("%{public}s is undefined", name);
         return ANI_INVALID_ARGS;
     }
     ani_boolean result = ANI_FALSE;
@@ -189,10 +188,10 @@ ani_status GetPropertyDouble(ani_env *env, ani_object obj, const char *name,
     }
     if ((status = env->Object_CallMethodByName_Double(static_cast<ani_object>(refObj),
         "unboxed", ":D", &outvalue)) != ANI_OK) {
-        ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Double failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Double sucess");
+    ANS_LOGD("GetPropertyDouble sucess");
     return status;
 }
 
@@ -216,7 +215,7 @@ ani_status GetPropertyInt(ani_env *env, ani_object obj, const char *name,
         ANS_LOGE("Object_CallMethodByName_Int failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Int sucess");
+    ANS_LOGD("GetPropertyInt sucess");
     return status;
 }
 
@@ -237,27 +236,33 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
     }
     if ((status = env->Object_CallMethodByName_Long(static_cast<ani_object>(refObj),
         "unboxed", ":J", &outvalue)) != ANI_OK) {
-        ANS_LOGE("Object_CallMethodByName_Boolean failed, status : %{public}d", status);
+        ANS_LOGE("Object_CallMethodByName_Long failed, status : %{public}d", status);
         return status;
     }
-    ANS_LOGD("Object_CallMethodByName_Long sucess");
+    ANS_LOGD("GetPropertyLong sucess");
     return status;
 }
 
 void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef)
 {
     if (env == nullptr || obj == nullptr || name == nullptr) {
+        ANS_LOGE("GetPropertyRefValue fail, has nullptr");
         return;
     }
     outRef = nullptr;
     isUndefined = ANI_TRUE;
-    if (env->Object_GetPropertyByName_Ref(obj, name, &outRef) != ANI_OK) {
+    ani_status status = ANI_ERROR;
+    status = env->Object_GetPropertyByName_Ref(obj, name, &outRef);
+    if (status != ANI_OK) {
+        ANS_LOGE("Object_GetPropertyByName_Ref failed, status : %{public}d", status);
         return;
     }
     if (outRef == nullptr) {
+        ANS_LOGE("GetPropertyRefValue fail, outRef nullptr");
         return;
     }
     env->Reference_IsUndefined(outRef, &isUndefined);
+    ANS_LOGD("GetPropertyRefValue end");
 }
 
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_boolean &isUndefined, ani_ref &outRef)
@@ -286,7 +291,7 @@ ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name, ani_bo
 }
 
 ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
-    ani_boolean &isUndefined, std::vector<std::string> &res)
+    std::vector<std::string> &res, const uint32_t maxLen)
 {
     if (env == nullptr || param == nullptr || name == nullptr) {
         ANS_LOGE("GetPropertyStringArray fail, has nullptr");
@@ -296,6 +301,7 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     ani_ref arrayObj = nullptr;
     ani_status status;
     ani_int length;
+    ani_boolean isUndefined = ANI_FALSE;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
         ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
@@ -304,6 +310,9 @@ ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *na
     if (status != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return status;
+    }
+    if (maxLen > 0 && length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
     }
     std::string str = "";
     for (int32_t i = 0; i < length; i++) {
@@ -335,10 +344,12 @@ ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *
     ani_ref arrayObj = nullptr;
     ani_status status;
     ani_int length;
-    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK ||
-        isUndefined == ANI_TRUE) {
+    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK) {
         ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
         return ANI_INVALID_ARGS;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_OK;
     }
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
@@ -404,12 +415,13 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
     ani_status status;
     ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyRef fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
 
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGI("status : %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int status : %{public}d", status);
         return status;
     }
 
@@ -418,14 +430,14 @@ ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
             "$_get", "i:C{std.core.Object}", &numEntryRef, i);
         if (status != ANI_OK) {
-            ANS_LOGI("status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("Object_CallMethodByName_Ref status : %{public}d, index: %{public}d", status, i);
             return status;
         }
         ani_long longValue = 0.0;
         status = env->Object_CallMethodByName_Long(static_cast<ani_object>(numEntryRef), "unboxed",
             ":J", &longValue);
         if (status != ANI_OK) {
-            ANS_LOGI("Object_CallMethodByName_Long uid fail, status: %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Long uid fail, status: %{public}d", status);
             return status;
         }
         res.push_back(static_cast<int64_t>(longValue));
@@ -443,6 +455,7 @@ ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string
     int length = strs.size();
     ani_object arrayObj = newArrayClass(env, length);
     if (arrayObj == nullptr) {
+        ANS_LOGE("newArrayClass failed, arrayObj is nullptr");
         return nullptr;
     }
     ani_size i = 0;
@@ -501,6 +514,27 @@ bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
     return true;
 }
 
+bool SetFieldInt(ani_env *env, ani_class cls, ani_object &object,
+    const std::string fieldName, const int32_t value)
+{
+    if (env == nullptr || cls == nullptr || object == nullptr || fieldName.empty()) {
+        ANS_LOGE("SetFieldInt fail. has nullptr or fieldName is empty");
+        return false;
+    }
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
+    ANS_LOGD("SetFieldInt fieldName : %{public}s", fieldName.c_str());
+    if (status != ANI_OK || field == nullptr) {
+        ANS_LOGE("Class_FindField fail. status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetField_Int(object, field, static_cast<ani_int>(value))) != ANI_OK) {
+        ANS_LOGE("Object_SetField_Int fail. status : %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value)
 {
@@ -517,6 +551,7 @@ bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     }
     ani_object boolObj = CreateBoolean(env, BoolToAniBoolean(value));
     if (boolObj == nullptr) {
+        ANS_LOGE("CreateBoolean failed, boolObj is nullptr");
         return false;
     }
     status = env->Object_SetField_Ref(object, field, boolObj);
@@ -544,6 +579,7 @@ bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
     }
     ani_object doubleObj = CreateDouble(env, value);
     if (doubleObj == nullptr) {
+        ANS_LOGE("CreateDouble failed, doubleObj is nullptr");
         return false;
     }
     status = env->Object_SetField_Ref(object, field, doubleObj);
@@ -560,18 +596,18 @@ ani_object CreateBoolean(ani_env *env, bool value)
     ani_class persion_cls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_BOOLEAN, &persion_cls)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("FindClass fail, status : %{public}d", status);
         return nullptr;
     }
     ani_method personInfoCtor;
     if ((status = env->Class_FindMethod(persion_cls, "<ctor>", "z:", &personInfoCtor)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
         return nullptr;
     }
     ani_object personInfoObj;
     if ((status = env->Object_New(persion_cls, personInfoCtor, &personInfoObj, value ? ANI_TRUE : ANI_FALSE))
         != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_New fail, status : %{public}d", status);
         return nullptr;
     }
     return personInfoObj;
@@ -586,17 +622,17 @@ ani_object CreateLong(ani_env *env, int64_t value)
     ani_class longCls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_LONG, &longCls)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("FindClass fail, status : %{public}d", status);
         return nullptr;
     }
     ani_method longCtor;
     if ((status = env->Class_FindMethod(longCls, "<ctor>", "J:V", &longCtor)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
         return nullptr;
     }
     ani_object longObj;
     if ((status = env->Object_New(longCls, longCtor, &longObj, value)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_New fail, status : %{public}d", status);
         return nullptr;
     }
     return longObj;
@@ -611,17 +647,17 @@ ani_object CreateDouble(ani_env *env, double value)
     ani_class doubleCls;
     ani_status status = ANI_ERROR;
     if ((status = env->FindClass(CLASSNAME_DOUBLE, &doubleCls)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("FindClass fail, status : %{public}d", status);
         return nullptr;
     }
     ani_method doubleCtor;
     if ((status = env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindMethod fail, status : %{public}d", status);
         return nullptr;
     }
     ani_object doubleObj;
     if ((status = env->Object_New(doubleCls, doubleCtor, &doubleObj, static_cast<ani_double>(value))) != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_New fail, status : %{public}d", status);
         return nullptr;
     }
     return doubleObj;
@@ -688,6 +724,7 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
     }
     ani_object arrayObj = newArrayClass(env, values.size());
     if (arrayObj == nullptr) {
+        ANS_LOGE("newArrayClass fail");
         return nullptr;
     }
     for (size_t i = 0; i < values.size(); i++) {
@@ -698,7 +735,7 @@ ani_object ConvertArrayLongToAniObj(ani_env *env, const std::vector<std::int64_t
         }
         ani_status status = env->Object_CallMethodByName_Void(arrayObj, "$_set", "iC{std.core.Object}:", i, longObj);
         if (status != ANI_OK) {
-            ANS_LOGE("status : %{public}d", status);
+            ANS_LOGE("Object_CallMethodByName_Void fail, status : %{public}d", status);
             return nullptr;
         }
     }
@@ -715,17 +752,17 @@ bool SetOptionalFieldArrayLong(ani_env *env, ani_class cls, ani_object &object, 
     ani_field field = nullptr;
     ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
     if (status != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Class_FindField fail, status : %{public}d", status);
         return false;
     }
     ani_object arrayObj = ConvertArrayLongToAniObj(env, values);
     if (arrayObj == nullptr) {
-        ANS_LOGE("arrayObj is nullptr.");
+        ANS_LOGE("ConvertArrayLongToAniObj fail, arrayObj is nullptr.");
         return false;
     }
     status = env->Object_SetField_Ref(object, field, arrayObj);
     if (status != ANI_OK) {
-        ANS_LOGE("status : %{public}d", status);
+        ANS_LOGE("Object_SetField_Ref fail, status : %{public}d", status);
         return false;
     }
     return true;

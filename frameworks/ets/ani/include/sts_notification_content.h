@@ -37,6 +37,8 @@ using LiveViewTypes = OHOS::Notification::NotificationLocalLiveViewContent::Live
 namespace OHOS {
 namespace NotificationSts {
 using namespace OHOS::Notification;
+const uint32_t BUTTON_MAX_SIZE = 3;
+const uint32_t CAPSULE_BTN_MAX_SIZE = 2;
 
 enum STSLiveViewStatus {
     LIVE_VIEW_CREATE = 0,
@@ -66,8 +68,8 @@ bool WarpNotificationTime(ani_env *env, const NotificationTime &time, bool isIni
 ani_status UnWarpNotificationIconButton(ani_env *env, ani_object obj,
     NotificationIconButton &iconButton);
 ani_object WarpNotificationIconButton(ani_env *env, const NotificationIconButton &button);
-ani_status GetIconButtonArray(ani_env *env,
-    ani_object param, const char *name, std::vector<NotificationIconButton> &res);
+ani_status GetIconButtonArray(ani_env *env, ani_object param, const char *name,
+    std::vector<NotificationIconButton> &res, const uint32_t maxLen);
 ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIconButton> buttons);
 
 void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,

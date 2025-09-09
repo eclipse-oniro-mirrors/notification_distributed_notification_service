@@ -31,14 +31,14 @@ void AniTriggerSystemLiveView(
     if (!NotificationSts::UnwrapBundleOption(env, bundleOptionObj, bundleOption)) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniTriggerSystemLiveView bundleOption ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniTriggerSystemLiveView UnwrapBundleOption ERROR_INTERNAL_ERROR");
         return;
     }
     NotificationSts::ButtonOption buttonOption;
     if (NotificationSts::UnWarpNotificationButtonOption(env, buttonOptionsObj, buttonOption) != ANI_OK) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
-        ANS_LOGE("AniTriggerSystemLiveView buttonOption ERROR_INTERNAL_ERROR");
+        ANS_LOGE("AniTriggerSystemLiveView UnWarpNotificationButtonOption ERROR_INTERNAL_ERROR");
         return;
     }
     int returncode = OHOS::Notification::NotificationHelper::TriggerLocalLiveView(bundleOption,
@@ -54,11 +54,17 @@ void AniTriggerSystemLiveView(
 void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
 {
     ANS_LOGD("AniSubscribeSystemLiveView call");
-    NotificationSts::StsNotificationLocalLiveViewSubscriber *localLiveViewSubscriber
-        = new (std::nothrow)NotificationSts::StsNotificationLocalLiveViewSubscriber();
+    NotificationSts::StsNotificationLocalLiveViewSubscriber *localLiveViewSubscriber =
+        NotificationSts::StsNotificationLocalLiveViewSubscriber::GetSelfSubscriber();
+    if (localLiveViewSubscriber == nullptr) {
+        OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
+            NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
+        ANS_LOGE("AniSubscribeSystemLiveView localLiveViewSubscriber ERROR_INTERNAL_ERROR");
+        return;
+    }
     localLiveViewSubscriber->SetStsNotificationLocalLiveViewSubscriber(env, subscriberObj);
-    int returncode
-        = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(*localLiveViewSubscriber, false);
+    int returncode = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(
+        *localLiveViewSubscriber, false);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

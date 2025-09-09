@@ -31,7 +31,7 @@ void AniPublish(ani_env *env, ani_object obj)
     ANS_LOGD("AniPublish call");
     std::shared_ptr<NotificationRequest> notificationRequest = std::make_shared<NotificationRequest>();
     if (NotificationSts::UnWarpNotificationRequest(env, obj, notificationRequest) != ANI_OK) {
-        ANS_LOGE("UnWarpNotificationRequest failed");
+        ANS_LOGE("AniPublish UnWarpNotificationRequest failed");
         NotificationSts::ThrowStsErroWithMsg(env, "AniPublish ERROR_INTERNAL_ERROR");
         return;
     }
@@ -79,6 +79,7 @@ void AniPublishAsBundle(ani_env *env, ani_object request, ani_string representat
     }
     notificationRequest->SetOwnerUserId(userId);
     notificationRequest->SetOwnerBundleName(bundleStr);
+    notificationRequest->SetIsAgentNotification(true);
     int returncode =  NotificationHelper::PublishNotification(*notificationRequest);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);

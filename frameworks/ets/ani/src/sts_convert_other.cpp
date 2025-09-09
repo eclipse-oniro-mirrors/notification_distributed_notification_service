@@ -28,14 +28,54 @@ std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent)
     }
     WantAgent* pWantAgent = nullptr;
     AppExecFwk::UnwrapWantAgent(env, agent, reinterpret_cast<void **>(&pWantAgent));
-
     if (pWantAgent == nullptr) {
-        ANS_LOGI("UnwrapWantAgent wantAgent nullptr");
+        ANS_LOGE("UnwrapWantAgent wantAgent nullptr");
         return nullptr;
     }
     std::shared_ptr<WantAgent> wantAgentSp = std::make_shared<WantAgent>(*pWantAgent);
     ANS_LOGD("UnwrapWantAgent end");
     return wantAgentSp;
+}
+
+ani_status GetPropertyWantAgentArray(ani_env *env, ani_object param, const char *name,
+    ani_boolean &isUndefined, std::vector<std::shared_ptr<WantAgent>> &res)
+{
+    if (env == nullptr || param == nullptr || name == nullptr) {
+        ANS_LOGE("GetPropertyWantAgentArray fail, has nullptr");
+        return ANI_INVALID_ARGS;
+    }
+    ANS_LOGD("GetPropertyWantAgentArray: %{public}s", name);
+    ani_ref arrayObj = nullptr;
+    ani_status status;
+    ani_int length;
+    if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK) {
+        ANS_LOGE("GetPropertyRef fail, status = %{public}d, isUndefind = %{public}d", status, isUndefined);
+        return ANI_INVALID_ARGS;
+    }
+    if (isUndefined == ANI_TRUE) {
+        return ANI_OK;
+    }
+    status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
+    if (status != ANI_OK) {
+        ANS_LOGE("status : %{public}d", status);
+        return status;
+    }
+    for (int32_t i = 0; i < length; i++) {
+        ani_ref entryRef;
+        status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
+            "$_get", "i:C{std.core.Object}", &entryRef, i);
+        if (status != ANI_OK) {
+            ANS_LOGE("status : %{public}d, index: %{public}d", status, i);
+            return status;
+        }
+        std::shared_ptr<WantAgent> wantAgent = UnwrapWantAgent(env, static_cast<ani_object>(entryRef));
+        if (wantAgent == nullptr) {
+            ANS_LOGE("UnwrapWantAgent failed, index: %{public}d", i);
+            return ANI_INVALID_ARGS;
+        }
+        res.push_back(wantAgent);
+    }
+    return status;
 }
 
 ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resource &resource)
@@ -50,6 +90,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
     ani_boolean isUndefined = ANI_TRUE;
     if ((status = GetPropertyString(env, obj, "bundleName", isUndefined, tempStr)) != ANI_OK
         || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyString bundleName fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     std::string bundleName = GetResizeStr(tempStr, STR_MAX_SIZE);
@@ -57,6 +98,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
 
     if ((status = GetPropertyString(env, obj, "moduleName", isUndefined, tempStr)) != ANI_OK
         || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyString moduleName fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     std::string moduleName = GetResizeStr(tempStr, STR_MAX_SIZE);
@@ -65,6 +107,7 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
     ani_double idAni = 0.0;
     if ((status = GetPropertyDouble(env, obj, "id", isUndefined, idAni)) != ANI_OK
         || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyDouble id fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     resource.id = static_cast<int32_t>(idAni);
@@ -92,7 +135,8 @@ std::shared_ptr<PixelMap> GetPixelMapFromEnvSp(ani_env* env, ani_object obj)
     return PixelMapTaiheAni::GetNativePixelMap(env, obj);
 }
 
-ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::shared_ptr<PixelMap>> &pixelMaps)
+ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen)
 {
     ANS_LOGD("GetPixelMapArrayByRef call");
     if (env == nullptr || param == nullptr) {
@@ -103,22 +147,24 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     ani_int length;
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(param), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("GetPixelMapArrayByRef: status : %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
     }
-
+    if (maxLen > 0 && length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
+    }
     for (int32_t i = 0; i < length; i++) {
         ani_ref pixelMapRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(param),
             "$_get", "i:C{std.core.Object}", &pixelMapRef, i);
         if (status != ANI_OK) {
-            ANS_LOGE("GetPixelMapArrayByRef:status : %{public}d, index: %{public}d", status, i);
+            ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d, index: %{public}d", status, i);
             pixelMaps.clear();
             return status;
         }
         std::shared_ptr<PixelMap> pixelMap = GetPixelMapFromEnvSp(env, static_cast<ani_object>(pixelMapRef));
         if (pixelMap == nullptr) {
-            ANS_LOGE("GetPixelMapArrayByRef: GetPixelMapFromEnvSp failed.");
+            ANS_LOGE("GetPixelMapFromEnvSp fail. pixelMap nullptr");
             pixelMaps.clear();
             return ANI_INVALID_ARGS;
         }
@@ -128,8 +174,8 @@ ani_status GetPixelMapArrayByRef(ani_env *env, ani_ref param, std::vector<std::s
     return status;
 }
 
-ani_status GetPixelMapArray(ani_env *env,
-    ani_object param, const char *name, std::vector<std::shared_ptr<PixelMap>> &pixelMaps)
+ani_status GetPixelMapArray(ani_env *env, ani_object param, const char *name,
+    std::vector<std::shared_ptr<PixelMap>> &pixelMaps, const uint32_t maxLen)
 {
     ANS_LOGD("GetPixelMapArray call");
     if (env == nullptr || param == nullptr || name == nullptr) {
@@ -140,23 +186,25 @@ ani_status GetPixelMapArray(ani_env *env,
     ani_boolean isUndefined = ANI_TRUE;
     ani_status status = ANI_ERROR;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
+        ANS_LOGE("GetPropertyRef fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
 
-    if ((status = GetPixelMapArrayByRef(env, arrayObj, pixelMaps)) != ANI_OK) {
+    if ((status = GetPixelMapArrayByRef(env, arrayObj, pixelMaps, maxLen)) != ANI_OK) {
         pixelMaps.clear();
+        ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
         return status;
     }
     ANS_LOGD("GetPixelMapArray end");
     return status;
 }
 
-ani_status GetResourceArray(ani_env *env,
-    ani_object param, const char *name, std::vector<ResourceManager::Resource> &res)
+ani_status GetResourceArray(ani_env *env, ani_object param, const char *name,
+    std::vector<ResourceManager::Resource> &res, const uint32_t maxLen)
 {
     ANS_LOGD("GetResourceArray call");
     if (env == nullptr || param == nullptr || name == nullptr) {
-        ANS_LOGE("GetResourceArray failed, has nullPtr");
+        ANS_LOGE("GetResourceArray fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_ref arrayObj = nullptr;
@@ -164,13 +212,16 @@ ani_status GetResourceArray(ani_env *env,
     ani_status status;
     ani_int length;
     if ((status = GetPropertyRef(env, param, name, isUndefined, arrayObj)) != ANI_OK || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetResourceArray failed, status : %{public}d", status);
+        ANS_LOGE("GetPropertyRef fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(arrayObj), "length", &length);
     if (status != ANI_OK) {
-        ANS_LOGE("GetResourceArray : status : %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int fail. status : %{public}d", status);
         return status;
+    }
+    if (length > maxLen) {
+        length = static_cast<ani_int>(maxLen);
     }
     for (int32_t i = 0; i < length; i++) {
         ani_ref iconRef;
@@ -178,12 +229,12 @@ ani_status GetResourceArray(ani_env *env,
             "$_get", "i:C{std.core.Object}", &iconRef, i);
         if (status != ANI_OK) {
             res.clear();
-            ANS_LOGE("GetResourceArray: status = %{public}d, index = %{public}d", status, i);
+            ANS_LOGE("Object_CallMethodByName_Ref fail. status = %{public}d, index = %{public}d", status, i);
             return status;
         }
         ResourceManager::Resource resource;
         if (ANI_OK != UnwrapResource(env, static_cast<ani_object>(iconRef), resource)) {
-            ANS_LOGE("GetResourceArray : status = %{public}d, index= %{public}d", status, i);
+            ANS_LOGE("UnwrapResource fail. status = %{public}d, index= %{public}d", status, i);
             res.clear();
             return status;
         }
@@ -202,10 +253,9 @@ ani_status GetKeyString(ani_env *env, ani_object obj, int32_t index, ani_string 
     }
     ani_status status = ANI_ERROR;
     ani_ref stringEntryRef;
-    status = env->Object_CallMethodByName_Ref(obj,
-        "$_get", "i:C{std.core.Object}", &stringEntryRef, index);
+    status = env->Object_CallMethodByName_Ref(obj, "$_get", "i:C{std.core.Object}", &stringEntryRef, index);
     if (status != ANI_OK) {
-        ANS_LOGE("status : %{public}d, index: %{public}d", status, index);
+        ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d, index: %{public}d", status, index);
         return status;
     }
     str = static_cast<ani_string>(stringEntryRef);
@@ -218,27 +268,27 @@ ani_status GetPixelMapByKeys(ani_env *env, ani_object obj, std::vector<ani_strin
 {
     ANS_LOGD("GetPixelMapByKeys call");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("GetPixelMapByKeys failed, has nullPtr");
+        ANS_LOGE("GetPixelMapByKeys fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
     for (auto anikey : keys) {
         ani_ref picturesArrayRef;
         if (ANI_OK != (status = env->Object_CallMethodByName_Ref(obj, "$_get", nullptr, &picturesArrayRef, anikey))) {
-            ANS_LOGE("GetPixelMapByKeys :  Object_CallMethodByName_Ref failed");
+            ANS_LOGE("Object_CallMethodByName_Ref fail. status : %{public}d", status);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
         }
         std::vector<std::shared_ptr<PixelMap>> pixelMaps = {};
         if ((status = GetPixelMapArrayByRef(env, picturesArrayRef, pixelMaps)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapByKeys :  GetPixelMapArrayByRef failed");
+            ANS_LOGE("GetPixelMapArrayByRef fail. status : %{public}d", status);
             deleteVectorWithSpPoints(pixelMaps);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
         }
         std::string str = "";
         if ((status = GetStringByAniString(env, anikey, str)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapByKeys :  GetStringByAniString failed");
+            ANS_LOGE("GetStringByAniString fail. status : %{public}d", status);
             deleteVectorWithSpPoints(pixelMaps);
             deleteVectorWithArraySpPoints(pictureMap);
             return status;
@@ -255,21 +305,21 @@ ani_status GetPixelMapByRef(
 {
     ANS_LOGD("GetPixelMapByRef call");
     if (env == nullptr || obj == nullptr || keysStrArrayRef == nullptr) {
-        ANS_LOGE("GetPixelMapByRef failed, has nullPtr");
+        ANS_LOGE("GetPixelMapByRef fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
     ani_int length;
     if (ANI_OK !=
         (status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(keysStrArrayRef), "length", &length))) {
-        ANS_LOGE("GetPixelMapByRef : Object_GetPropertyByName_Double status = %{public}d", status);
+        ANS_LOGE("Object_GetPropertyByName_Int fail. status = %{public}d", status);
         return status;
     }
     ani_string strAni = {};
     std::vector<ani_string> keys = {};
     for (int32_t i = 0; i < length; i++) {
         if ((status = GetKeyString(env, static_cast<ani_object>(keysStrArrayRef), i, strAni)) != ANI_OK) {
-            ANS_LOGE("GetPixelMapByRef : GetKeyString status = %{public}d", status);
+            ANS_LOGE("GetKeyString fail. status = %{public}d", status);
             keys.clear();
             return status;
         }
@@ -285,36 +335,36 @@ ani_status GetMapOfPictureInfo(ani_env *env, ani_object obj,
 {
     ANS_LOGD("GetMapOfPictureInfo call");
     if (env == nullptr || obj == nullptr) {
-        ANS_LOGE("GetMapOfPictureInfo failed, has nullPtr");
+        ANS_LOGE("GetMapOfPictureInfo fail. has nullPtr");
         return ANI_ERROR;
     }
     ani_status status = ANI_ERROR;
     ani_class cls = nullptr;
     if (ANI_OK != (status = env->FindClass("notification.notificationContent.RecordTools", &cls))) {
-        ANS_LOGE("GetMapOfPictureInfo : FindClass status = %{public}d", status);
+        ANS_LOGE("FindClass fail. status = %{public}d", status);
         return status;
     }
     if (cls == nullptr) {
-        ANS_LOGE("GetMapOfPictureInfo : cls is nullptr");
+        ANS_LOGE("cls is nullptr");
         return ANI_INVALID_TYPE;
     }
     ani_static_method keysMethod = nullptr;
     if (ANI_OK != (status = env->Class_FindStaticMethod(cls, "GetKeys", nullptr, &keysMethod))) {
-        ANS_LOGE("GetMapOfPictureInfo : Class_FindStaticMethod status = %{public}d", status);
+        ANS_LOGE("Class_FindStaticMethod fail. status = %{public}d", status);
         return status;
     }
     ani_ref keysStrArrayRef = nullptr;
     if (ANI_OK != (status = env->Class_CallStaticMethod_Ref(cls, keysMethod, &keysStrArrayRef, obj))) {
-        ANS_LOGE("GetMapOfPictureInfo : Class_CallStaticMethod_Ref status = %{public}d", status);
+        ANS_LOGE("Class_CallStaticMethod_Ref fail. status = %{public}d", status);
         return status;
     }
     if (IsUndefine(env, static_cast<ani_object>(keysStrArrayRef))) {
-        ANS_LOGE("GetMapOfPictureInfo : keysStrArrayRef IsUndefined");
+        ANS_LOGE("keysStrArrayRef IsUndefined");
         return ANI_INVALID_ARGS;
     }
     if (ANI_OK != (status = GetPixelMapByRef(env, obj, keysStrArrayRef, pictureMap))) {
         deleteVectorWithArraySpPoints(pictureMap);
-        ANS_LOGE("GetMapOfPictureInfo : GetPixelMapByRef status = %{public}d", status);
+        ANS_LOGE("GetPixelMapByRef fail. status = %{public}d", status);
     }
     ANS_LOGD("GetMapOfPictureInfo end");
     return status;

@@ -25,6 +25,7 @@
 namespace OHOS {
 namespace NotificationSts {
 constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t PROFILE_NAME_SIZE = 202;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
 constexpr int32_t SHORT_TEXT_SIZE = 1026;
@@ -59,9 +60,9 @@ ani_status GetPropertyLong(ani_env *env, ani_object obj, const char *name,
 ani_status GetPropertyRef(ani_env *env, ani_object obj, const char *name,
     ani_boolean &isUndefined, ani_ref &outRef);
 ani_status GetPropertyStringArray(ani_env *env, ani_object param, const char *name,
-    ani_boolean &isUndefined, std::vector<std::string> &res);
+    std::vector<std::string> &res, const uint32_t maxLen = 0);
 ani_status GetPropertyNumberArray(ani_env *env, ani_object param, const char *name,
-    ani_boolean &isUndefined, std::vector<int64_t> &res);
+    ani_boolean &isUndefined, std::vector<int64_t> &res, const uint32_t maxLen = 0);
 ani_status GetPropertyLongArray(ani_env *env, ani_object param, const char *name,
     ani_boolean &isUndefined, std::vector<int64_t> &res);
 ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *name,
@@ -70,6 +71,7 @@ void GetPropertyRefValue(ani_env *env, ani_object obj, const char *name, ani_boo
 
 bool SetFieldString(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, const std::string value);
+bool SetFieldInt(ani_env *env, ani_class cls, ani_object &object, const std::string fieldName, const int32_t value);
 bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value);
 bool SetOptionalFieldDouble(ani_env *env, ani_class cls, ani_object &object,
@@ -126,20 +128,13 @@ static bool CallSetter(ani_env* env, ani_class cls, ani_object &object, const ch
     return true;
 }
 
-[[maybe_unused]]static bool CallSetterNull(ani_env* env, ani_class cls, ani_object &object, const char* propertyName)
-{
-    ani_ref nullRef = nullptr;
-    ani_status status = env->GetNull(&nullRef);
-    if (status != ANI_OK) {
-        ANS_LOGE("GetNull %{public}s failed %{public}d", propertyName, status);
-        return false;
-    }
-    return CallSetter(env, cls, object, propertyName, nullRef);
-}
-
 template <class T>
 static bool EnumConvertAniToNative(ani_env *env, ani_enum_item enumItem, T &result)
 {
+    if (env == nullptr) {
+        ANS_LOGE("env nullptr");
+        return false;
+    }
     ani_status status = ANI_ERROR;
     if constexpr (std::is_enum<T>::value || std::is_integral<T>::value) {
         ani_int intValue{};

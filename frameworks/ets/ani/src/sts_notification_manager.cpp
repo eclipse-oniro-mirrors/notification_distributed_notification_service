@@ -65,7 +65,7 @@ bool StsSlotTypeUtils::StsToC(const STSSlotType inType, SlotType &outType)
             outType = SlotType::OTHER;
             break;
         default:
-            ANS_LOGE("SlotType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSSlotType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -130,7 +130,7 @@ bool StsContentTypeUtils::StsToC(const STSContentType inType, ContentType &outTy
             outType = ContentType::LIVE_VIEW;
             break;
         default:
-            ANS_LOGE("ContentType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSContentType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -212,7 +212,7 @@ bool StsSlotLevelUtils::StsToC(const STSSlotLevel inLevel, SlotLevel &outLevel)
             outLevel = SlotLevel::LEVEL_HIGH;
             break;
         default:
-            ANS_LOGE("SlotLevel %{public}d is an invalid value", inLevel);
+            ANS_LOGE("STSSlotLevel %{public}d is an invalid value", inLevel);
             return false;
     }
     return true;
@@ -299,7 +299,7 @@ bool StsSourceTypeUtils::StsToC(const STSSourceType inType, SourceType &outType)
             outType = SourceType::TYPE_TIMER;
             break;
         default:
-            ANS_LOGE("SourceType %{public}d is an invalid value", inType);
+            ANS_LOGE("STSSourceType %{public}d is an invalid value", inType);
             return false;
     }
     return true;
@@ -334,7 +334,9 @@ void StsNotificationLocalLiveViewSubscriber::OnConnected()
 {}
 
 void StsNotificationLocalLiveViewSubscriber::OnDisconnected()
-{}
+{
+    delete this;
+}
 
 void StsNotificationLocalLiveViewSubscriber::OnDied()
 {}
@@ -442,9 +444,8 @@ bool SlotTypeCToEts(ani_env *env, SlotType slotType, ani_enum_item &enumItem)
 {
     ANS_LOGD("SlotTypeCToEts call");
     STSSlotType stsSlotType = STSSlotType::UNKNOWN_TYPE;
-    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType)
-        || !EnumConvertNativeToAni(
-            env, "@ohos.notificationManager.notificationManager.SlotType", stsSlotType, enumItem)) {
+    if (!StsSlotTypeUtils::CToSts(slotType, stsSlotType) ||
+        !EnumConvertNativeToAni(env, "@ohos.notificationManager.notificationManager.SlotType", stsSlotType, enumItem)) {
         ANS_LOGE("SlotTypeCToEts failed");
         return false;
     }
@@ -455,8 +456,7 @@ bool SlotLevelEtsToC(ani_env *env, ani_enum_item enumItem, SlotLevel &slotLevel)
 {
     ANS_LOGD("SlotLevelEtsToC call");
     STSSlotLevel stsSlotLevel = STSSlotLevel::LEVEL_NONE;
-    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel)
-        || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
+    if (!EnumConvertAniToNative(env, enumItem, stsSlotLevel) || !StsSlotLevelUtils::StsToC(stsSlotLevel, slotLevel)) {
         ANS_LOGE("SlotLevelEtsToC failed");
         return false;
     }
@@ -490,8 +490,7 @@ bool ContentTypeCToEts(ani_env *env, ContentType contentType, ani_enum_item &enu
 {
     ANS_LOGD("ContentTypeCToEts call");
     STSContentType stsContentType = STSContentType::NOTIFICATION_CONTENT_BASIC_TEXT;
-    if (!StsContentTypeUtils::CToSts(contentType, stsContentType)
-        || !EnumConvertNativeToAni(env,
+    if (!StsContentTypeUtils::CToSts(contentType, stsContentType) || !EnumConvertNativeToAni(env,
         "@ohos.notificationManager.notificationManager.ContentType", stsContentType, enumItem)) {
         ANS_LOGE("ContentTypeCToEts failed");
         return false;
@@ -515,39 +514,45 @@ bool DoNotDisturbTypeEtsToC(ani_env *env, ani_enum_item enumItem,
 bool DeviceRemindTypeCToEts(ani_env *env, RemindType remindType, ani_enum_item &enumItem)
 {
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
-    StsRemindTypeUtils::CToSts(remindType, stsRemindType);
-    EnumConvertNativeToAni(env,
-        "@ohos.notificationManager.notificationManager.DeviceRemindType", stsRemindType, enumItem);
+    if (!StsRemindTypeUtils::CToSts(remindType, stsRemindType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.DeviceRemindType", stsRemindType, enumItem)) {
+        ANS_LOGE("DeviceRemindTypeCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool DeviceRemindTypeEtsToC(ani_env *env, ani_enum_item enumItem, RemindType &remindType)
 {
     STSRemindType stsRemindType = STSRemindType::IDLE_DONOT_REMIND;
-    if (EnumConvertAniToNative(env, enumItem, stsRemindType)) {
-        StsRemindTypeUtils::StsToC(stsRemindType, remindType);
-        return true;
+    if (!EnumConvertAniToNative(env, enumItem, stsRemindType)
+        || !StsRemindTypeUtils::StsToC(stsRemindType, remindType)) {
+        ANS_LOGE("DeviceRemindTypeEtsToC failed");
+        return false;
     }
-    return false;
+    return true;
 }
 
 bool SourceTypeCToEts(ani_env *env, SourceType sourceType, ani_enum_item &enumItem)
 {
     STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
-    StsSourceTypeUtils::CToSts(sourceType, stsSourceType);
-    EnumConvertNativeToAni(env,
-        "@ohos.notificationManager.notificationManager.SourceType", stsSourceType, enumItem);
+    if (!StsSourceTypeUtils::CToSts(sourceType, stsSourceType) || !EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.SourceType", stsSourceType, enumItem)) {
+        ANS_LOGE("SourceTypeCToEts failed");
+        return false;
+    }
     return true;
 }
 
 bool SourceTypeEtsToC(ani_env *env, ani_enum_item enumItem, SourceType &sourceType)
 {
     STSSourceType stsSourceType = STSSourceType::TYPE_NORMAL;
-    if (EnumConvertAniToNative(env, enumItem, stsSourceType)) {
-        StsSourceTypeUtils::StsToC(stsSourceType, sourceType);
-        return true;
+    if (!EnumConvertAniToNative(env, enumItem, stsSourceType)
+        || !StsSourceTypeUtils::StsToC(stsSourceType, sourceType)) {
+        ANS_LOGE("SourceTypeEtsToC failed");
+        return false;
     }
-    return false;
+    return true;
 }
 
 ani_status UnWarpNotificationButtonOption(ani_env *env, const ani_object buttonOptionObj,
@@ -582,12 +587,11 @@ ani_object WarpNotificationButtonOption(ani_env *env, sptr<ButtonOption> buttonO
     ani_class optCls = nullptr;
     if (!CreateClassObjByClassName(env,
         "@ohos.notificationManager.notificationManager.ButtonOptionsInner", optCls, optObj) || optObj == nullptr) {
-        ANS_LOGE("WarpNotificationButtonOption: create class failed");
+        ANS_LOGE("CreateClassObjByClassName fail");
         return nullptr;
     }
-    // title: string;
     if (!SetPropertyOptionalByString(env, optObj, "buttonName", buttonOption->GetButtonName())) {
-        ANS_LOGE("WarpNotificationButtonOption: set buttonName failed");
+        ANS_LOGE("SetPropertyOptionalByString buttonName fail");
         return nullptr;
     }
     ANS_LOGD("WarpNotificationButtonOption end");
@@ -609,14 +613,13 @@ bool WarpNotificationDoNotDisturbDate(
         ANS_LOGE("WarpNotificationDoNotDisturbDate: create class faild");
         return false;
     }
-    if (!EnumConvertNativeToAni(
-        env, "@ohos.notificationManager.notificationManager.DoNotDisturbType",
-            date->GetDoNotDisturbType(), stsEnumValue)) {
+    if (!EnumConvertNativeToAni(env,
+        "@ohos.notificationManager.notificationManager.DoNotDisturbType", date->GetDoNotDisturbType(), stsEnumValue)) {
         ANS_LOGE("EnumConvert_NativeToSts faild");
         return false;
     }
     if (!SetPropertyByRef(env, outObj, "type", stsEnumValue)) {
-        ANS_LOGE("set type faild.");
+        ANS_LOGE("SetPropertyByRef 'type' faild.");
         return false;
     }
     if (!SetDate(env, outObj, "begin", date->GetBeginDate())) {
@@ -838,8 +841,8 @@ bool UnWarpNotificationDoNotDisturbDate(
         ANS_LOGE("Invalid time range");
         return false;
     }
-    doNotDisturbDate.SetBeginDate(static_cast<int32_t>(beginTime));
-    doNotDisturbDate.SetEndDate(static_cast<int32_t>(endTime));
+    doNotDisturbDate.SetBeginDate(beginTime);
+    doNotDisturbDate.SetEndDate(endTime);
     ANS_LOGD("Successfully parsed DoNotDisturbDate");
     return true;
 }

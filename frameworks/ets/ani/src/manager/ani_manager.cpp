@@ -240,7 +240,7 @@ void AniNotificationManagerRegistryInit(ani_env *env)
     }
     status = env->Namespace_BindNativeFunctions(ns, kitManagerFunctions.data(), kitManagerFunctions.size());
     if (status != ANI_OK) {
-        ANS_LOGD("Namespace_BindNativeFunctions failed status : %{public}d", status);
+        ANS_LOGE("FindNamespace notificationManager failed status: %{public}d", status);
     }
     if (env->ResetError() != ANI_OK) {
         ANS_LOGD("ResetError failed");
@@ -258,7 +258,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     ani_status status = ANI_ERROR;
     status = vm->GetEnv(ANI_VERSION_1, &env);
     if (status != ANI_OK) {
-        ANS_LOGE("GetEnv failed status : %{public}d", status);
+        ANS_LOGE("ANI_Constructor GetEnv failed status : %{public}d", status);
         return ANI_NOT_FOUND;
     }
 

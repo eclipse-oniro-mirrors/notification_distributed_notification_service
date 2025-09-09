@@ -25,7 +25,7 @@ using namespace OHOS::NotificationSts;
 StsPushCallBack::StsPushCallBack(ani_env *env)
 {
     if (env == nullptr || env->GetVM(&vm_) != ANI_OK) {
-        ANS_LOGE("InvalidParam 'env'");
+        ANS_LOGE("StsPushCallBack InvalidParam 'env'");
     }
 }
 
@@ -39,13 +39,13 @@ int32_t StsPushCallBack::OnCheckNotification(
     ANS_LOGD("enter");
     std::lock_guard<std::mutex> l(mutexlock);
     if (vm_ == nullptr || pushCallBackParam == nullptr) {
-        ANS_LOGE("InvalidParam");
+        ANS_LOGE("OnCheckNotification InvalidParam");
         return ERR_INVALID_STATE;
     }
     ani_env* env;
     ani_status aniResult = ANI_ERROR;
     if (ANI_OK != (aniResult = vm_->GetEnv(ANI_VERSION_1, &env))) {
-        ANS_LOGD("GetEnv error. result: %{public}d.", aniResult);
+        ANS_LOGD("OnCheckNotification GetEnv error. result: %{public}d.", aniResult);
         return ERR_INVALID_STATE;
     }
     return CheckNotification(env, notificationData, pushCallBackParam);
@@ -56,13 +56,13 @@ void StsPushCallBack::SetJsPushCallBackObject(
 {
     ANS_LOGD("enter");
     if (env == nullptr || pushCallBackObject == nullptr) {
-        ANS_LOGE("InvalidParam");
+        ANS_LOGE("SetJsPushCallBackObject InvalidParam");
         return;
     }
     ani_ref pushCheckObject;
     ani_status status = ANI_OK;
     if (ANI_OK != (status = env->GlobalReference_Create(pushCallBackObject, &pushCheckObject))) {
-        ANS_LOGE("GlobalReference_Create pushCallBackObject faild. status %{public}d", status);
+        ANS_LOGE("SetJsPushCallBackObject GlobalReference_Create pushCallBackObject faild. status %{public}d", status);
         return;
     }
     pushCallBackObjects_.insert_or_assign(slotType, pushCheckObject);
@@ -73,7 +73,7 @@ void StsPushCallBack::HandleCheckCallback(
 {
     ANS_LOGD("enter");
     if (env == nullptr || fn == nullptr || value == nullptr || pushCallBackParam == nullptr) {
-        ANS_LOGE("pushCallBackObjects is nullptr");
+        ANS_LOGE("HandleCheckCallback pushCallBackObjects is nullptr");
         return;
     }
     std::vector<ani_ref> vec;
@@ -81,12 +81,12 @@ void StsPushCallBack::HandleCheckCallback(
     ani_ref funcResult;
     ani_status status = ANI_OK;
     if (ANI_OK != (status = env->FunctionalObject_Call(fn, vec.size(), vec.data(), &funcResult))) {
-        ANS_LOGE("FunctionalObject_Call faild. status %{public}d", status);
+        ANS_LOGE("HandleCheckCallback FunctionalObject_Call faild. status %{public}d", status);
         return;
     }
     ResultParam result;
     if (!WarpFunctionResult(env, static_cast<ani_object>(funcResult), result)) {
-        ANS_LOGE("WarpFunctionResult faild");
+        ANS_LOGE("HandleCheckCallback WarpFunctionResult faild");
         return;
     }
     std::unique_lock<std::mutex> uniqueLock(pushCallBackParam->callBackMutex);
@@ -106,12 +106,12 @@ int32_t StsPushCallBack::CheckNotification(
     checkInfo->ConvertJsonStringToValue(notificationData);
     NotificationConstant::SlotType outSlotType = static_cast<NotificationConstant::SlotType>(checkInfo->GetSlotType());
     if (pushCallBackObjects_.find(outSlotType) == pushCallBackObjects_.end()) {
-        ANS_LOGE("pushCallBackObjects is nullptr");
+        ANS_LOGE("CheckNotification pushCallBackObjects is nullptr");
         return ERR_INVALID_STATE;
     }
     ani_object checkInfoObj;
     if (!WarpNotificationCheckInfo(env, checkInfo, checkInfoObj) || checkInfoObj == nullptr) {
-        ANS_LOGE("WarpNotificationCheckInfo faild");
+        ANS_LOGE("CheckNotification WarpNotificationCheckInfo faild");
         return ERR_INVALID_STATE;
     }
     HandleCheckCallback(
