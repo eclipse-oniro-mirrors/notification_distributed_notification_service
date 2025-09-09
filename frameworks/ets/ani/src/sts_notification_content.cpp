@@ -398,7 +398,6 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
 bool WarpNotificationLocalLiveViewButton(
     ani_env *env, const NotificationLocalLiveViewButton &button, ani_object &buttonObject)
 {
-    ANS_LOGD("WarpNotificationLocalLiveViewButton call");
     if (env == nullptr) {
         ANS_LOGE("WarpNotificationLocalLiveViewButton failed, env is nullptr");
         return false;
@@ -410,40 +409,42 @@ bool WarpNotificationLocalLiveViewButton(
         ANS_LOGE("WarpNotificationLocalLiveViewButton: create class failed");
         return false;
     }
-    // names?: Array<string>;
     std::vector<std::string> names = button.GetAllButtonNames();
-    ani_object namesObjectArray = GetAniStringArrayByVectorString(env, names);
-    if (namesObjectArray == nullptr) {
-        ANS_LOGE("namesObjectArray is nullptr");
-        return false;
+    if (!names.empty()) {
+        ani_object namesObjectArray = GetAniStringArrayByVectorString(env, names);
+        if (namesObjectArray == nullptr) {
+            ANS_LOGE("namesObjectArray is nullptr");
+            return false;
+        }
+        if (!SetPropertyByRef(env, buttonObject, "names", namesObjectArray)) {
+            ANS_LOGE("Set names failed");
+            return false;
+        }
     }
-    if (!SetPropertyByRef(env, buttonObject, "names", namesObjectArray)) {
-        ANS_LOGE("Set names failed");
-        return false;
-    }
-    // icons?: Array<image.PixelMap>;
     std::vector<std::shared_ptr<Media::PixelMap>> icons = button.GetAllButtonIcons();
-    ani_object iconsObjectArray = GetAniArrayPixelMap(env, icons);
-    if (iconsObjectArray == nullptr) {
-        ANS_LOGE("iconsObjectArray is nullptr");
-        return false;
+    if (!icons.empty()) {
+        ani_object iconsObjectArray = GetAniArrayPixelMap(env, icons);
+        if (iconsObjectArray == nullptr) {
+            ANS_LOGE("iconsObjectArray is nullptr");
+            return false;
+        }
+        if (!SetPropertyByRef(env, buttonObject, "icons", iconsObjectArray)) {
+            ANS_LOGE("Set icons failed");
+            return false;
+        }
     }
-    if (!SetPropertyByRef(env, buttonObject, "icons", iconsObjectArray)) {
-        ANS_LOGE("Set icons failed");
-        return false;
-    }
-    // iconsResource?: Array<Resource>;
     std::vector<std::shared_ptr<ResourceManager::Resource>> iconsResource = button.GetAllButtonIconResource();
-    ani_object resourceObjectArray = GetAniArrayResource(env, iconsResource);
-    if (resourceObjectArray == nullptr) {
-        ANS_LOGE("resourceObjectArray is nullptr");
-        return false;
+    if (!iconsResource.empty()) {
+        ani_object resourceObjectArray = GetAniArrayResource(env, iconsResource);
+        if (resourceObjectArray == nullptr) {
+            ANS_LOGE("resourceObjectArray is nullptr");
+            return false;
+        }
+        if (!SetPropertyByRef(env, buttonObject, "iconsResource", resourceObjectArray)) {
+            ANS_LOGE("Set iconsResource failed");
+            return false;
+        }
     }
-    if (!SetPropertyByRef(env, buttonObject, "iconsResource", resourceObjectArray)) {
-        ANS_LOGE("Set iconsResource failed");
-        return false;
-    }
-    ANS_LOGD("WarpNotificationLocalLiveViewButton end");
     return true;
 }
 
