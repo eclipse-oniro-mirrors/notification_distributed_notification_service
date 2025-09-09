@@ -25,7 +25,31 @@ constexpr const char* CLASSNAME_INT = "std.core.Int";
 constexpr const char* CLASSNAME_LONG = "std.core.Long";
 std::string GetResizeStr(std::string instr, int32_t length)
 {
-    return instr.length() <= length ? instr : instr.substr(0, length);
+    if (instr.length() <= length) {
+        return instr;
+    } else {
+        int32_t end_pos = 0;
+        for (int32_t i = 0; i < instr.size();) {
+            if ((instr[i] & 0x80) == 0) {          // ASCII字符
+                i += 1;
+            } else if ((instr[i] & 0xE0) == 0xC0) { // 2字节字符
+                i += 2;
+            } else if ((instr[i] & 0xF0) == 0xE0) { // 3字节字符
+                i += 3;
+            } else if ((instr[i] & 0xF8) == 0xF0) { // 4字节字符
+                i += 4;
+            } else {
+                // 无效的UTF-8序列
+                i += 1;
+            }
+            if (i > length) {
+                break;
+            }
+            end_pos = i;
+        }
+        
+        return instr.substr(0, end_pos);
+    }
 }
 
 bool IsUndefine(ani_env *env, const ani_object &obj)
