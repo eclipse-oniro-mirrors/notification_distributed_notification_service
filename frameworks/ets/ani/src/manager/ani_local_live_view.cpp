@@ -54,8 +54,8 @@ void AniTriggerSystemLiveView(
 void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
 {
     ANS_LOGD("AniSubscribeSystemLiveView call");
-    std::shared_ptr<NotificationSts::StsNotificationLocalLiveViewSubscriber> localLiveViewSubscriber
-        = std::make_shared<NotificationSts::StsNotificationLocalLiveViewSubscriber>();
+    NotificationSts::StsNotificationLocalLiveViewSubscriber *localLiveViewSubscriber =
+        NotificationSts::StsNotificationLocalLiveViewSubscriber::GetSelfSubscriber();
     if (localLiveViewSubscriber == nullptr) {
         OHOS::NotificationSts::ThrowError(env, OHOS::Notification::ERROR_INTERNAL_ERROR,
             NotificationSts::FindAnsErrMsg(OHOS::Notification::ERROR_INTERNAL_ERROR));
@@ -64,7 +64,7 @@ void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
     }
     localLiveViewSubscriber->SetStsNotificationLocalLiveViewSubscriber(env, subscriberObj);
     int returncode = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(
-        (*localLiveViewSubscriber.get()), false);
+        *localLiveViewSubscriber, false);
     if (returncode != ERR_OK) {
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));

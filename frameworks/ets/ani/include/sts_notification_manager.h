@@ -160,6 +160,11 @@ public:
     {
         return stsSubscriber_;
     }
+
+    static StsNotificationLocalLiveViewSubscriber *GetSelfSubscriber()
+    {
+        return new (std::nothrow) StsNotificationLocalLiveViewSubscriber();
+    }
 private:
     ani_env* GetAniEnv();
 private:
