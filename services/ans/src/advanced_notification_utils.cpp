@@ -1848,9 +1848,7 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
     }
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     int32_t ctrlResult = EXTENTION_WRAPPER->ReminderControl(bundleName);
-    if (ctrlResult != ERR_OK) {
-        return ctrlResult;
-    }
+    return ctrlResult == ERR_OK;
 #else
     return true;
 #endif

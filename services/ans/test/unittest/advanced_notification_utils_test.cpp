@@ -40,6 +40,7 @@
 #include "refbase.h"
 #include "bundle_manager_helper.h"
 #include "mock_bundle_mgr.h"
+#include "notification_extension_wrapper.h"
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -901,6 +902,25 @@ HWTEST_F(AnsUtilsTest, AllowUseReminder_00001, Function | SmallTest | Level1)
     advancedNotificationService_->AllowUseReminder(str, b);
     ASSERT_EQ(advancedNotificationService_->AllowUseReminder(str, b), (int)ERR_OK);
 }
+
+
+#ifdef ENABLE_ANS_ADDITIONAL_CONTROL
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00002, Function | SmallTest | Level1)
+{
+    EXTENTION_WRAPPER->reminderControl_ = [](const std::string &bundleName) { return ERR_OK; };
+    std::string str = "test1";
+    
+    ASSERT_TRUE(advancedNotificationService_->AllowUseReminder(str););
+}
+
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00003, Function | SmallTest | Level1)
+{
+    EXTENTION_WRAPPER->reminderControl_ = [](const std::string &bundleName) { return ERR_ANS_INVALID_BUNDLE; };
+    std::string str = "test1";
+    
+    ASSERT_FALSE(advancedNotificationService_->AllowUseReminder(str););
+}
+#endif // ENABLE_ANS_ADDITIONAL_CONTROL
 
 /**
  * @tc.name: CloseAlert_00001
