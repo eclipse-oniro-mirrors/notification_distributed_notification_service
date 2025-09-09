@@ -687,6 +687,8 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         record->request->SetWantAgent(wantAgent);
     }
     uint64_t timerId = 0;
+    uint64_t process = NotificationConstant::DEFAULT_FINISH_STATUS;
+    CancelTimer(oldRecord->notification->GetFinishTimer());
     if (isSystemApp) {
         record->request->SetContent(content);
     } else {
@@ -694,16 +696,14 @@ void AdvancedNotificationService::UpdateRecordByOwner(
         auto data = downloadTemplate->GetTemplateData();
         AAFwk::WantParamWrapper wrapper(*data);
         ANS_LOGD("Update the template data: %{public}s.", wrapper.ToString().c_str());
-        CancelTimer(oldRecord->notification->GetFinishTimer());
-        uint64_t process = 0;
         if (data->HasParam(PROGRESS_VALUE)) {
             process = data->GetIntParam(PROGRESS_VALUE, 0);
         }
-        StartFinishTimerForUpdate(record, process);
-        timerId = record->notification->GetFinishTimer();
-        ANS_LOGI("TimerForUpdate,oldTimeId:%{public}d,newTimeId:%{public}d",
-            (int)(oldRecord->notification->GetFinishTimer()), (int)timerId);
     }
+    StartFinishTimerForUpdate(record, process);
+    timerId = record->notification->GetFinishTimer();
+    ANS_LOGI("TimerForUpdate,oldTimeId: %{public}llu, newTimeId: %{public}llu",
+        oldRecord->notification->GetFinishTimer(), timerId);
     record->notification = new (std::nothrow) Notification(record->request);
     if (record->notification == nullptr) {
         ANS_LOGE("Failed to create notification.");
