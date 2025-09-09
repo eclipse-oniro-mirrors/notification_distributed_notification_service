@@ -167,11 +167,11 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     auto resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId, isSupportIntelligentScene);
+    IPCSkeleton::SetCallingIdentity(identity);
     if (resultSet == nullptr) {
         ANS_LOGE("QueryContact error, resultSet is null.");
         return ERROR_QUERY_INFO_FAILED;
     }
-    IPCSkeleton::SetCallingIdentity(identity);
     int isFound = 0;
     int rowCount = 0;
     resultSet->GetRowCount(rowCount);
@@ -298,6 +298,7 @@ bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
     std::shared_ptr<DataShare::DataShareHelper> helper = CreateContactDataShareHelper(CALLLOG_URI);
     if (helper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
+        IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
     bool isRepeat = false;
