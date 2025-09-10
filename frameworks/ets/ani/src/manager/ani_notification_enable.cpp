@@ -161,9 +161,8 @@ void AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani_objec
     ANS_LOGD("AniDisableNotificationFeature enter");
     std::vector<std::string> bundleListStd;
     if (!NotificationSts::GetStringArrayByAniObj(env, bundleList, bundleListStd)) {
-        std::string msg = "Invalid bundleList: must be an array of strings.";
-        ANS_LOGE("GetStringArrayByAniObj failed. msg: %{public}s", msg.c_str());
-        OHOS::NotificationSts::ThrowError(env, Notification::ERROR_PARAM_INVALID, msg);
+        ANS_LOGE("GetStringArrayByAniObj failed. Invalid bundleList");
+        OHOS::NotificationSts::ThrowStsErrorWithInvalidParam(env);
         return;
     }
     Notification::NotificationDisable param;
