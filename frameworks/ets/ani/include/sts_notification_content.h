@@ -72,7 +72,7 @@ ani_status GetIconButtonArray(ani_env *env, ani_object param, const char *name,
     std::vector<NotificationIconButton> &res, const uint32_t maxLen);
 ani_object GetAniIconButtonArray(ani_env *env, const std::vector<NotificationIconButton> buttons);
 
-void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
+bool UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     NotificationLocalLiveViewButton &button);
 bool WarpNotificationLocalLiveViewButton(ani_env *env, const NotificationLocalLiveViewButton &button,
     ani_object &buttonObject);
