@@ -2426,6 +2426,14 @@ export default namespace notificationManager {
     }
 
     export function disableNotificationFeature(disabled:boolean, bundleList: Array<string>): Promise<void> {
+        if (bundleList.length == 0) {
+            throw errorParamInvalid;
+        }
+        bundleList.forEach((value, index, bundleList) => {
+            if (value.trim().isEmpty()) {
+                throw errorParamInvalid;
+            }
+        });
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void => {
             let p = taskpool.execute((): void => {
                 nativedisableNotificationFeature(disabled,bundleList);
