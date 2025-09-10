@@ -368,11 +368,7 @@ bool UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     // names?: Array<string>
     if (GetPropertyStringArray(env, obj, "names", names, BUTTON_RESOURCE_SIZE) == ANI_OK) {
         for (auto name: names) {
-            if (icon != nullptr && static_cast<uint32_t>(icon->GetByteCount()) <= MAX_ICON_SIZE) {
-                button.addSingleButtonIcon(icon);
-            } else {
-                return false;
-            }
+            button.addSingleButtonName(GetResizeStr(name, STR_MAX_SIZE));    
         }
     } else {
         ANS_LOGD("UnWarpNotificationLocalLiveViewButton get names failed.");
@@ -381,7 +377,11 @@ bool UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     std::vector<std::shared_ptr<PixelMap>> icons = {};
     if (ANI_OK == GetPixelMapArray(env, obj, "icons", icons, BUTTON_RESOURCE_SIZE)) {
         for (auto icon : icons) {
-            button.addSingleButtonIcon(icon);
+            if (icon != nullptr && static_cast<uint32_t>(icon->GetByteCount()) <= MAX_ICON_SIZE) {
+                button.addSingleButtonIcon(icon);
+            } else {
+                return false;
+            }
         }
     } else {
         ANS_LOGD("UnWarpNotificationLocalLiveViewButton get icons failed.");
