@@ -368,7 +368,7 @@ bool UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     // names?: Array<string>
     if (GetPropertyStringArray(env, obj, "names", names, BUTTON_RESOURCE_SIZE) == ANI_OK) {
         for (auto name: names) {
-            button.addSingleButtonName(GetResizeStr(name, STR_MAX_SIZE));    
+            button.addSingleButtonName(GetResizeStr(name, STR_MAX_SIZE));
         }
     } else {
         ANS_LOGD("UnWarpNotificationLocalLiveViewButton get names failed.");
