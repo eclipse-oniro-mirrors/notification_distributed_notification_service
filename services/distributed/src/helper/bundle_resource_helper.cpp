@@ -205,11 +205,11 @@ int32_t BundleResourceHelper::GetAppIndexByUid(const int32_t uid)
     std::string bundleName;
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     int32_t result = bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    IPCSkeleton::SetCallingIdentity(identity);
     if (result != ERR_OK) {
         ANS_LOGW("Get bundle index %{public}d.", uid);
         return 0;
     }
-    IPCSkeleton::SetCallingIdentity(identity);
     return appIndex;
 }
 }
