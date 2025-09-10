@@ -66,6 +66,9 @@ void AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj)
     int returncode = OHOS::Notification::NotificationHelper::SubscribeLocalLiveViewNotification(
         *localLiveViewSubscriber, false);
     if (returncode != ERR_OK) {
+        if (localLiveViewSubscriber != nullptr) {
+            delete localLiveViewSubscriber;
+        }
         int externalCode = NotificationSts::GetExternalCode(returncode);
         OHOS::NotificationSts::ThrowError(env, externalCode, NotificationSts::FindAnsErrMsg(externalCode));
         ANS_LOGE("AniSubscribeSystemLiveView error, errorCode: %{public}d", externalCode);
