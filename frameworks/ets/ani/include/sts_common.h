@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace NotificationSts {
-constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t STR_MAX_SIZE = 202;
 constexpr int32_t PROFILE_NAME_SIZE = 202;
 constexpr int32_t LONG_STR_MAX_SIZE = 1028;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
