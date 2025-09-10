@@ -431,6 +431,9 @@ void SmartReminderCenter::InitPcPadDevices(const string &deviceType,
 
     std::string bundleName = request->GetOwnerBundleName();
     int32_t userId = request->GetOwnerUserId();
+    if (userId == SUBSCRIBE_USER_INIT) {
+        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    }
     AppExecFwk::BundleInfo bundleInfo;
     AppExecFwk::ApplicationInfo appInfo;
     AppExecFwk::BundleResourceInfo bundleResourceInfo;
