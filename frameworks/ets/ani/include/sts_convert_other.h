@@ -27,6 +27,7 @@ namespace NotificationSts {
 using namespace OHOS::Media;
 using namespace OHOS::AbilityRuntime::WantAgent;
 const uint32_t BUTTON_RESOURCE_SIZE = 3;
+const uint32_t STRUCTURED_TEXT_SIZE = 512;
 
 std::shared_ptr<WantAgent> UnwrapWantAgent(ani_env *env, ani_object agent);
 ani_object WarpWantAgent(ani_env *env, std::shared_ptr<WantAgent> wantAgent);
@@ -55,6 +56,10 @@ ani_status GetResourceArray(ani_env *env, ani_object param, const char *name,
 ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::Resource> resource);
 ani_object GetAniArrayResource(ani_env *env,
     const std::vector<std::shared_ptr<ResourceManager::Resource>> resources);
+ani_object CreateAniUndefined(ani_env *env);
+ani_object CreateMapObject(ani_env *env, const std::string name, const char *signature);
+ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
+    std::vector<std::pair<std::string, std::string>> &out);
 } // namespace NotificationSts
 } // OHOS
 #endif

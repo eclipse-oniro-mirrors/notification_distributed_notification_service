@@ -352,6 +352,9 @@ export default namespace notificationManager {
         if (normal?.lockscreenPicture != undefined && !(normal?.lockscreenPicture instanceof image.PixelMap)) {
             return false;
         }
+        if (normal?.structuredText != undefined && !(normal?.structuredText instanceof Map)) {
+            return false;
+        }
         return true;
     }
     function isInvalidLongText(longText?: NotificationLongTextContent): boolean
@@ -369,6 +372,9 @@ export default namespace notificationManager {
             return false;
         }
         if (longText?.lockscreenPicture != undefined && !(longText?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (longText?.structuredText != undefined && !(longText?.structuredText instanceof Map)) {
             return false;
         }
         if (!longText?.longText || longText?.longText?.trim() === '') {
@@ -399,6 +405,9 @@ export default namespace notificationManager {
         if (multiLine?.lockscreenPicture != undefined && !(multiLine?.lockscreenPicture instanceof image.PixelMap)) {
             return false;
         }
+        if (multiLine?.structuredText != undefined && !(multiLine?.structuredText instanceof Map)) {
+            return false;
+        }
         if (!multiLine?.briefText || multiLine?.briefText.trim() === '') {
             return false;
         }
@@ -427,6 +436,9 @@ export default namespace notificationManager {
         if (picture?.lockscreenPicture != undefined && !(picture?.lockscreenPicture instanceof image.PixelMap)) {
             return false;
         }
+        if (picture?.structuredText != undefined && !(picture?.structuredText instanceof Map)) {
+            return false;
+        }
         if (!picture?.briefText || picture?.briefText?.trim() === '') {
             return false;
         }
@@ -453,6 +465,9 @@ export default namespace notificationManager {
             return false;
         }
         if (systemLiveView?.lockscreenPicture != undefined && !(systemLiveView?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (systemLiveView?.structuredText != undefined && !(systemLiveView?.structuredText instanceof Map)) {
             return false;
         }
         if (systemLiveView?.capsule !== undefined) {
@@ -496,6 +511,9 @@ export default namespace notificationManager {
             return false;
         }
         if (liveView?.lockscreenPicture != undefined && !(liveView?.lockscreenPicture instanceof image.PixelMap)) {
+            return false;
+        }
+        if (liveView?.structuredText != undefined && !(liveView?.structuredText instanceof Map)) {
             return false;
         }
         if (liveView?.extraInfo !== undefined && liveView?.extraInfo === null) {

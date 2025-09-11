@@ -70,7 +70,7 @@ HWTEST_F(NotificationMediaContentTest, Dump_00001, Function | SmallTest | Level1
 {
     auto rrc = std::make_shared<NotificationMediaContent>();
     std::string ret = "NotificationMediaContent{ title = , text = , "
-    "additionalText = , lockScreenPicture = null, avToken = null, sequenceNumbers =  }";
+    "additionalText = , lockScreenPicture = null, structuredText = null, avToken = null, sequenceNumbers =  }";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }
