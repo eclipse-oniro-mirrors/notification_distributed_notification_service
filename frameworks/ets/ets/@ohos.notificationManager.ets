@@ -458,28 +458,6 @@ export default namespace notificationManager {
         }
         return true;
     }
-    function isInvalidUnifiedGroupInfo(unifiedGroupInfo?: UnifiedGroupInfo): boolean
-    {
-        if (unifiedGroupInfo === null) {
-            return false;
-        }
-        if (unifiedGroupInfo?.key != undefined && unifiedGroupInfo?.key?.trim() === '') {
-            return false;
-        }
-        if (unifiedGroupInfo?.title != undefined && unifiedGroupInfo?.title?.trim() === '') {
-            return false;
-        }
-        if (unifiedGroupInfo?.content != undefined && unifiedGroupInfo?.content?.trim() === '') {
-            return false;
-        }
-        if (unifiedGroupInfo?.sceneName != undefined && unifiedGroupInfo?.sceneName?.trim() === '') {
-            return false;
-        }
-        if (unifiedGroupInfo?.extraInfo != undefined && unifiedGroupInfo?.extraInfo == null) {
-            return false;
-        }
-        return true;
-    }
     function isInvalidBundleOption(bundleOption?: BundleOption): boolean
     {
         if (bundleOption === null) {
@@ -552,16 +530,10 @@ export default namespace notificationManager {
         if (request.content?.liveView !== undefined && !isInvalidLiveView(request.content.liveView)) {
             return errorParamInvalid;
         }
-        if (request?.appMessageId !== undefined && request?.appMessageId?.trim() === '') {
-            return errorParamInvalid;
-        }
         if (request?.wantAgent !== undefined && request.wantAgent == null) {
             return errorParamInvalid;
         }
         if(request?.extendInfo !== undefined && request?.extendInfo == null) {
-            return errorParamInvalid;
-        }
-        if (request?.actionButtons !== undefined && request?.actionButtons?.length === 0) {
             return errorParamInvalid;
         }
         if (request.smallIcon !== undefined && request.smallIcon == null) {
@@ -573,28 +545,10 @@ export default namespace notificationManager {
         if (request?.overlayIcon !== undefined && request.overlayIcon == null) {
             return errorParamInvalid;
         }
-        if (request?.groupName !== undefined && request?.groupName?.trim() === '') {
-            return errorParamInvalid;
-        }
-        if (request?.creatorBundleName !== undefined && request?.creatorBundleName?.trim() === '') {
-            return errorParamInvalid;
-        }
-        if (request?.sound !== undefined && request?.sound?.trim() === '') {
-            return errorParamInvalid;
-        }
-        if (request?.classification !== undefined && request?.classification?.trim() === '') {
-            return errorParamInvalid;
-        }
-        if (request?.hashCode !== undefined && request?.hashCode?.trim() === '') {
-            return errorParamInvalid;
-        }
         if (request?.template !== undefined && !isInvalidTemplate(request.template)) {
             return errorParamInvalid;
         }
         if (request?.distributedOption !== undefined && !isInvalidDistributedOption(request.distributedOption)) {
-            return errorParamInvalid;
-        }
-        if (request?.deviceId !== undefined && request?.deviceId?.trim() === '') {
             return errorParamInvalid;
         }
         if (request?.removalWantAgent !== undefined && request.removalWantAgent == null) {
@@ -604,12 +558,6 @@ export default namespace notificationManager {
             return errorParamInvalid;
         }
         if (request?.agentBundle !== undefined && !isInvalidBundleOption(request.agentBundle)) {
-            return errorParamInvalid;
-        }
-        if (request?.unifiedGroupInfo !== undefined && !isInvalidUnifiedGroupInfo(request.unifiedGroupInfo)) {
-            return errorParamInvalid;
-        }
-        if (request?.appInstanceKey !== undefined && request?.appInstanceKey?.trim() === '') {
             return errorParamInvalid;
         }
         if (request?.color !== undefined && typeof request.color === 'number') {
