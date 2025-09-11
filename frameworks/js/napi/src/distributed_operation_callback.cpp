@@ -68,6 +68,11 @@ void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t sta
 
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(callBackPtr->env, &scope);
+    if (scope == nullptr) {
+        ANS_LOGE("null scope");
+        return;
+    }
+
     if (callBackPtr->deferred) {
         Common::SetPromise(callBackPtr->env, callBackPtr->deferred, callBackPtr->operationResult,
             Common::NapiGetNull(callBackPtr->env), false);
