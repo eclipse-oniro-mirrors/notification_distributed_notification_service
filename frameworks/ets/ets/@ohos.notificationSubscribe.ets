@@ -29,7 +29,7 @@ const rejectInternalError: BusinessError<string> = {code: ERROR_INTERNAL_ERROR, 
 const callbackInternalError: BusinessError = {code: ERROR_INTERNAL_ERROR, data: undefined};
 const successCallbackError: BusinessError = {code: ERROR_OK, data: undefined};
 
-const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, data: "Invalid parameter"};
+const errorParamInvalid: BusinessError<string> = {code: ERROR_PARAM_INVALID, message: "Invalid parameter"};
 
 function isInvalidParameter(bundle: BundleOption): BusinessError
 {
@@ -50,6 +50,17 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
         return errorCode;
     }
     return error;
+}
+
+function isInvalidParameter(info?: NotificationSubscribeInfo): boolean
+{
+    if (info == null) {
+        return false;
+    }
+    if (info?.deviceType != undefined && info.deviceType?.length === 0) {
+        return false;
+    }
+    return true;
 }
 
 export default namespace notificationSubscribe {
@@ -106,6 +117,9 @@ export default namespace notificationSubscribe {
         if (subscriber == undefined || info == undefined || callback == undefined) {
             throw errorParamInvalid;
         }
+        if (!isInvalidParameter(info)) {
+            throw errorParamInvalid;
+        }
         let p = taskpool.execute((): void => { notificationSubscribe.nativeSubscribe(subscriber, info) });
         p.then(
             (e: NullishType): void => {
@@ -118,6 +132,9 @@ export default namespace notificationSubscribe {
     }
     export function subscribe(subscriber: NotificationSubscriber, info?: NotificationSubscribeInfo): Promise<void> {
         if (subscriber == undefined) {
+            throw errorParamInvalid;
+        }
+        if (!isInvalidParameter(info)) {
             throw errorParamInvalid;
         }
         let pPromise = new Promise<void>((resolve: ResolveCallback<void>, reject: RejectCallback): void =>{
