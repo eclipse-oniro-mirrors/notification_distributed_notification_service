@@ -99,7 +99,7 @@ bool LiveViewStatusCToEts(ani_env *env, LiveViewStatus liveViewStatus, ani_enum_
     STSLiveViewStatus stsLiveViewStatus = STSLiveViewStatus::LIVE_VIEW_CREATE;
     if (!StsLiveViewStatusUtils::CToSts(liveViewStatus, stsLiveViewStatus)
         || !EnumConvertNativeToAni(env,
-        "notification.notificationContent.#LiveViewStatus", stsLiveViewStatus, enumItem)) {
+        "notification.notificationContent.LiveViewStatus", stsLiveViewStatus, enumItem)) {
         ANS_LOGE("LiveViewStatusCToEts failed");
         return false;
     }
@@ -117,7 +117,7 @@ bool LiveViewTypesCToEts(ani_env *env, LiveViewTypes liveViewTypes, ani_enum_ite
 {
     ANS_LOGD("LiveViewTypesCToEts call");
     return EnumConvertNativeToAni(env,
-        "notification.notificationContent.#LiveViewTypes", liveViewTypes, enumItem);
+        "notification.notificationContent.LiveViewTypes", liveViewTypes, enumItem);
 }
 
 void UnWarpNotificationProgress(ani_env *env, ani_object obj, NotificationProgress &notificationProgress)
@@ -1415,8 +1415,10 @@ bool WarpNotificationLocalLiveViewContent(
         ANS_LOGE("SetNotificationMultiLineContent: set BasicContent failed");
         return false;
     }
-    if (!SetPropertyOptionalByInt(env, contentObj, "typeCode", content->GetType())) {
-        ANS_LOGD("SetNotificationMultiLineContent: set typeCode failed");
+    ani_status status = ANI_OK;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Int(
+        contentObj, "typeCode", content->GetType()))) {
+        ANS_LOGE("SetNotificationMultiLineContent: set typeCode failed. status %{public}d", status);
     }
     ani_enum_item enumItem = nullptr;
     if (!LiveViewTypesCToEts(env, content->GetLiveViewType(), enumItem)
