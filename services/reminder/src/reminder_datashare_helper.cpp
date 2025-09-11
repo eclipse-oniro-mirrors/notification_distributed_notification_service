@@ -153,7 +153,7 @@ bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>
 
 bool ReminderDataShareHelper::Query(Uri& uri, const std::string& key, std::string& value)
 {
-    static constexpr const char* SETTINGS_DATA_EXT_URI = "datashare::///com.ohos.settingsdata.DataAbility";
+    static constexpr const char* SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
     static constexpr const char* DATA_COLUMN_KEYWORD = "KEYWORD";
     static constexpr const char* DATA_COLUMN_VALUE = "VALUE";
     auto helper = CreateDataShareHelper(SETTINGS_DATA_EXT_URI);
@@ -173,7 +173,7 @@ bool ReminderDataShareHelper::Query(Uri& uri, const std::string& key, std::strin
         ANSR_LOGE("GoToFirstRow failed.");
         result->Close();
         helper->Release();
-        return false;
+        return true;
     }
     int32_t columnIndex;
     result->GetColumnIndex(DATA_COLUMN_VALUE, columnIndex);
@@ -183,7 +183,7 @@ bool ReminderDataShareHelper::Query(Uri& uri, const std::string& key, std::strin
     return true;
 }
 
-bool ReminderDataShareHelper::Update(const int32_t reminderId, const int32_t state)
+bool ReminderDataShareHelper::Update(const std::string& identifier, const int32_t state)
 {
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     if (helper == nullptr) {
@@ -195,7 +195,7 @@ bool ReminderDataShareHelper::Update(const int32_t reminderId, const int32_t sta
     Uri uri(proxy);
 
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(ReminderCalendarShareTable::ID, reminderId);
+    predicates.EqualTo(ReminderCalendarShareTable::IDENTIFIER, identifier);
     DataShare::DataShareValuesBucket valuesBucket;
     valuesBucket.Put(ReminderCalendarShareTable::STATE, state);
     helper->UpdateEx(uri, predicates, valuesBucket);

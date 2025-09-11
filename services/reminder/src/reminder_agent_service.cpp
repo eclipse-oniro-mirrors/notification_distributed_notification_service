@@ -129,7 +129,6 @@ ErrCode ReminderAgentService::UpdateReminder(const int32_t reminderId, const Rem
     }
     tarReminder->SetReminderId(reminderId);
     ret = rdm->UpdateReminder(tarReminder, callingUid);
-    TryPostDelayUnloadTask(UNLOAD_TASK_DELAY_TIME);
     return ret;
 }
 
