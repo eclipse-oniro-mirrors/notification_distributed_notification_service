@@ -104,10 +104,9 @@ ani_status UnwrapResource(ani_env *env, ani_object obj, ResourceManager::Resourc
     std::string moduleName = GetResizeStr(tempStr, STR_MAX_SIZE);
     resource.moduleName = moduleName;
 
-    ani_double idAni = 0.0;
-    if ((status = GetPropertyDouble(env, obj, "id", isUndefined, idAni)) != ANI_OK
-        || isUndefined == ANI_TRUE) {
-        ANS_LOGE("GetPropertyDouble id fail. status : %{public}d", status);
+    ani_long idAni = 0;
+    if ((status = env->Object_GetPropertyByName_Long(obj, "id", &idAni)) != ANI_OK) {
+        ANS_LOGE("Object_GetPropertyByName_Long id fail. status : %{public}d", status);
         return ANI_INVALID_ARGS;
     }
     resource.id = static_cast<int32_t>(idAni);
