@@ -356,13 +356,13 @@ ani_status GetIconButtonArray(ani_env *env, ani_object param, const char *name,
     return status;
 }
 
-void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
+bool UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     NotificationLocalLiveViewButton &button)
 {
     ANS_LOGD("UnWarpNotificationLocalLiveViewButton call");
     if (env == nullptr || obj == nullptr) {
         ANS_LOGE("UnWarpNotificationLocalLiveViewButton failed, has nullptr");
-        return;
+        return false;
     }
     std::vector<std::string> names = {};
     // names?: Array<string>
@@ -377,7 +377,11 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
     std::vector<std::shared_ptr<PixelMap>> icons = {};
     if (ANI_OK == GetPixelMapArray(env, obj, "icons", icons, BUTTON_RESOURCE_SIZE)) {
         for (auto icon : icons) {
-            button.addSingleButtonIcon(icon);
+            if (icon != nullptr && static_cast<uint32_t>(icon->GetByteCount()) <= MAX_ICON_SIZE) {
+                button.addSingleButtonIcon(icon);
+            } else {
+                return false;
+            }
         }
     } else {
         ANS_LOGD("UnWarpNotificationLocalLiveViewButton get icons failed.");
@@ -393,6 +397,7 @@ void UnWarpNotificationLocalLiveViewButton(ani_env *env, ani_object obj,
         ANS_LOGD("UnWarpNotificationLocalLiveViewButton get iconsResource failed.");
     }
     ANS_LOGD("UnWarpNotificationLocalLiveViewButton end");
+    return true;
 }
 
 bool WarpNotificationLocalLiveViewButton(
@@ -1058,7 +1063,9 @@ bool GetLocalLiveViewContentByOne(ani_env *env, ani_object obj,
     if (GetPropertyRef(env, obj, "button", isUndefined, buttonRef) == ANI_OK
         && isUndefined == ANI_FALSE && buttonRef != nullptr) {
         NotificationLocalLiveViewButton button;
-        UnWarpNotificationLocalLiveViewButton(env, static_cast<ani_object>(buttonRef), button);
+        if (!UnWarpNotificationLocalLiveViewButton(env, static_cast<ani_object>(buttonRef), button)) {
+            return false;
+        }
         localLiveViewContent->SetButton(button);
         localLiveViewContent->addFlag(NotificationLocalLiveViewContent::LiveViewContentInner::BUTTON);
     } else {

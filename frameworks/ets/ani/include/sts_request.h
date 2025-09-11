@@ -35,7 +35,7 @@ void UnWarpDistributedOptions(ani_env *env, ani_object obj, StsDistributedOption
 bool WarpNotificationUnifiedGroupInfo(ani_env* env,
     const std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo, ani_object &groupInfoObject);
 
-ani_status UnWarpNotificationRequest(
+int32_t UnWarpNotificationRequest(
     ani_env *env, ani_object obj, std::shared_ptr<NotificationRequest> &notificationRequest);
 bool WarpNotificationRequest(
     ani_env *env, const NotificationRequest *notificationRequest, ani_class &cls, ani_object &outAniObj);
