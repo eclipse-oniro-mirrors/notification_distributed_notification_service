@@ -58,7 +58,7 @@ public:
     bool GetActionButtonsTitle(std::vector<std::string>& buttonsTitle) const;
     bool GetNotificationBasicInfo(std::string& basicInfo) const;
 
-    static int32_t MAX_LINES_NUM = 7;
+    static const int32_t MAX_LINES_NUM = 7;
 };
 }  // namespace Notification
 }  // namespace OHOS

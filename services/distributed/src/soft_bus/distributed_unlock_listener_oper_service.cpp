@@ -199,7 +199,7 @@ void UnlockListenerOperService::TriggerLiveViewNotification(
 bool UnlockListenerOperService::TriggerAncoNotification(const sptr<NotificationRequest>& notificationRequest,
     const std::string& hashCode, const int32_t deviceType, const NotificationConstant::SlotType& slotType)
 {
-    bool triggerWantInner;
+    bool triggerWantInner = false;
     if (DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->DistributedAncoNotificationClick(
         notificationRequest, triggerWantInner) != ERR_OK) {
         return triggerWantInner;

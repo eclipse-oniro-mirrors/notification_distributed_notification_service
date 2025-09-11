@@ -1819,6 +1819,8 @@ private:
 
     ErrCode UpdateNotificationSwitchState(
         const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
+    ErrCode DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo);
+
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;

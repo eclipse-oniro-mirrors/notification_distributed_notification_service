@@ -342,6 +342,29 @@ HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_600, Functi
 }
 
 /**
+ * @tc.name: DistributeOperation_700
+ * @tc.desc: Test DistributeOperation ERR_OK with OperationType JUMP_BY_TYPE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationDistMgrServiceTest, DistributeOperation_700, Function | SmallTest | Level1)
+{
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetDistributedCollaborate(true);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->DeleteAll();
+    advancedNotificationService_->AddToNotificationList(record);
+    sptr<NotificationOperationInfo> operationInfo = new (std::nothrow) NotificationOperationInfo();
+    operationInfo->SetHashCode(record->notification->GetKey());
+    operationInfo->SetOperationType(OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE);
+    sptr<IAnsOperationCallback> callback = nullptr;
+    auto ret = advancedNotificationService_->DistributeOperation(operationInfo, callback);
+    ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
  * @tc.name: SetTargetDeviceStatus_100
  * @tc.desc: Test SetTargetDeviceStatus when caller is not subsystem or system app.
  * @tc.type: FUNC

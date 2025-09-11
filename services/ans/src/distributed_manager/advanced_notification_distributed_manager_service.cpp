@@ -375,41 +375,51 @@ ErrCode AdvancedNotificationService::DistributeOperation(const sptr<Notification
     }
 
     OperationType operationType = operationInfo->GetOperationType();
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_21);
+    message.Message("key:" + operationInfo->GetHashCode(), false);
     if (operationType == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         operationInfo->SetEventId(std::to_string(GetCurrentTime()));
         std::string key = operationInfo->GetHashCode() + operationInfo->GetEventId();
         DistributedOperationService::GetInstance().AddOperation(key, callback);
+    } else if (operationType == OperationType::DISTRIBUTE_OPERATION_JUMP_BY_TYPE) {
+        message.Append(", type:" + std::to_string(operationInfo->GetJumpType()) +
+            ", index: " + std::to_string(operationInfo->GetBtnIndex()));
     }
     ANS_LOGI("DistributeOperation trigger hashcode %{public}s.", operationInfo->GetHashCode().c_str());
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        std::string hashCode = operationInfo->GetHashCode();
-        for (auto record : notificationList_) {
-            if (record->notification->GetKey() != hashCode) {
-                continue;
-            }
-            if (record->notification->GetNotificationRequestPoint() == nullptr) {
-                continue;
-            }
-            auto request = record->notification->GetNotificationRequestPoint();
-            if (!request->GetDistributedCollaborate()) {
-                ANS_LOGI("Not collaborate hashcode %{public}s.", hashCode.c_str());
-                continue;
-            }
-            result = NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo, request);
-            return;
-        }
-        ANS_LOGI("DistributeOperation not exist hashcode.");
-        result = ERR_ANS_INVALID_PARAM;
+        result = DistributeOperationInner(operationInfo);
     }));
     notificationSvrQueue_->wait(handler);
     if (result != ERR_OK && operationType == OperationType::DISTRIBUTE_OPERATION_REPLY) {
         std::string key = operationInfo->GetHashCode() + operationInfo->GetEventId();
         DistributedOperationService::GetInstance().RemoveOperationResponse(key);
     }
+    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result));
     return result;
 #else
     return ERR_ANS_INVALID_PARAM;
 #endif
+}
+
+ErrCode AdvancedNotificationService::DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo)
+{
+    std::string hashCode = operationInfo->GetHashCode();
+    for (auto record : notificationList_) {
+        if (record->notification->GetKey() != hashCode) {
+            continue;
+        }
+        if (record->notification->GetNotificationRequestPoint() == nullptr) {
+            continue;
+        }
+        auto request = record->notification->GetNotificationRequestPoint();
+        if (!request->GetDistributedCollaborate()) {
+            ANS_LOGI("Not collaborate hashcode %{public}s.", hashCode.c_str());
+            continue;
+        }
+        return NotificationSubscriberManager::GetInstance()->DistributeOperation(operationInfo, request);
+    }
+    ANS_LOGI("DistributeOperation not exist hashcode.");
+    return ERR_ANS_INVALID_PARAM;
 }
 
 ErrCode AdvancedNotificationService::ReplyDistributeOperation(const std::string& hashCode, const int32_t result)
