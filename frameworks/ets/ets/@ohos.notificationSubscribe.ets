@@ -53,7 +53,7 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
 }
 
 export default namespace notificationSubscribe {
-    loadLibrary("notification_subscribe_ani.z")
+    loadLibraryWithPermissionCheck("notification_subscribe_ani.z", "@ohos.notificationSubscribe")
     export interface NotificationKey {
         id: number;
         label?: string;
