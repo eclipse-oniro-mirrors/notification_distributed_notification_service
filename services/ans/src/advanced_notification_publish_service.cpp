@@ -736,7 +736,7 @@ ErrCode AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifica
     }
     bool directAgency = false;
 
-    if (request->IsAgentNotification() || request->GetOwnerUid() != DEFAULT_UID) {
+    if (request->IsAgentNotification()) {
         uid = request->GetOwnerUid();
         request->SetIsAgentNotification(false);
         directAgency = true;
