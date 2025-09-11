@@ -728,7 +728,7 @@ HWTEST_F(ReminderStoreTest, ReminderStoreTest_001, Function | SmallTest | Level1
         callback.OnUpgrade(store, 10, 1);
         callback.OnUpgrade(store, 1, 2);
         callback.OnDowngrade(store, 8, 1);
-        callback.OnUpgrade(store, 1, 9);
+        callback.OnUpgrade(store, 1, 8);
         callback.OnDowngrade(store, 1, 8);
         callback.OnDowngrade(store, 8, 7);
     }

@@ -1042,7 +1042,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_021, Level1)
 {
     ReminderDataShareHelper::GetInstance().RegisterObserver();
     ReminderDataShareHelper::GetInstance().RegisterObserver();
-    ReminderDataShareHelper::GetInstance().Update(1, 1);
+    ReminderDataShareHelper::GetInstance().Update("1", 1);
     ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
     ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
     DataShare::DataShareObserver::ChangeInfo info;
@@ -1639,6 +1639,48 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_038, Level1)
     std::string enable;
     auto ret = ReminderDataShareHelper::GetInstance().Query(enableUri, "focus_mode_enable", enable);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_039
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_039, Level1)
+{
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->InitBundleName("com.test.test");
+    calendar->InitUid(999);
+    uint64_t triggerTimeInMilli = static_cast<uint64_t>(GetCurrentTime()) + 5 * 60 * 1000;
+    calendar->SetTriggerTimeInMilli(triggerTimeInMilli);
+    auto result = manager->HandleRefreshReminder(ReminderDataManager::TIME_ZONE_CHANGE, calendar);
+    EXPECT_TRUE(result == nullptr);
+    result = manager->HandleRefreshReminder(ReminderDataManager::DATE_TIME_CHANGE, calendar);
+    EXPECT_TRUE(result == nullptr);
+    calendar->OnStart();
+    calendar->OnShow(false, false, true);
+    triggerTimeInMilli = static_cast<uint64_t>(GetCurrentTime()) + 10 * 60 * 1000;
+    calendar->SetReminderTimeInMilli(triggerTimeInMilli);
+    result = manager->HandleRefreshReminder(ReminderDataManager::DATE_TIME_CHANGE, calendar);
+    EXPECT_TRUE(result == nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataManagerTest_040
+ * @tc.desc: Reminder data manager test
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_040, Level1)
+{
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(300);
+    calendar->InitBundleName("com.test.test");
+    calendar->InitUid(999);
+    uint64_t triggerTimeInMilli = static_cast<uint64_t>(GetCurrentTime()) - 60 * 1000;
+    calendar->SetTriggerTimeInMilli(triggerTimeInMilli);
+    auto result = manager->HandleRefreshReminder(ReminderDataManager::DATE_TIME_CHANGE, calendar);
+    EXPECT_TRUE(result != nullptr);
 }
 }  // namespace Notification
 }  // namespace OHOS

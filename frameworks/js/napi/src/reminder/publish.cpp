@@ -772,11 +772,7 @@ napi_value SetValidReminder(const napi_env &env, ReminderRequest &reminder, napi
 
     // slotType
     NotificationNapi::SlotType jsSlotType;
-    if (reminder.GetSlotType() == NotificationConstant::SlotType::OTHER) {
-        NotificationNapi::AnsEnumUtil::SlotTypeCToJS(NotificationConstant::SlotType::SOCIAL_COMMUNICATION, jsSlotType);
-    } else {
-        NotificationNapi::AnsEnumUtil::SlotTypeCToJS(reminder.GetSlotType(), jsSlotType);
-    }
+    NotificationNapi::AnsEnumUtil::SlotTypeCToJS(reminder.GetSlotType(), jsSlotType);
     napi_create_int32(env, static_cast<int32_t>(jsSlotType), &value);
     napi_set_named_property(env, result, SLOT_TYPE, value);
 

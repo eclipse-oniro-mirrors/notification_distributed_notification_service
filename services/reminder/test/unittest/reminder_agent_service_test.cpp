@@ -425,12 +425,12 @@ HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_015, Function | Smal
 }
 
 /**
- * @tc.name: ReminderAgentServiceTest_017
+ * @tc.name: ReminderAgentServiceTest_016
  * @tc.desc: Test UpdateReminder function
  * @tc.type: FUNC
  * @tc.require: issueI5S4VP
  */
-HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_017, Function | SmallTest | Level1)
+HWTEST_F(ReminderAgentServiceTest, ReminderAgentServiceTest_016, Function | SmallTest | Level1)
 {
     // test CreateReminderRequest
     int32_t reminderId = 0;
