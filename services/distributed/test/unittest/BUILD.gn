@@ -1089,13 +1089,16 @@ ohos_unittest("distributed_helper_test") {
   part_name = "${component_name}"
 }
 
-ohos_unittest("distributed_soft_bus_master_test") {
+ohos_unittest("distributed_soft_bus_test") {
   module_out_path = module_output_path
   include_dirs = [
+    "/${services_path}/ans/include",
+    "/${services_path}/distributed/include",
     "/${services_path}/distributed/include/soft_bus",
-    "/${services_path}/distributed/include/base",
     "/${services_path}/distributed/include/helper",
     "/${services_path}/distributed/include/tlv_box",
+    "/${services_path}/distributed/include/base",
+    "mock",
   ]
 
   sources = [
@@ -1103,7 +1106,34 @@ ohos_unittest("distributed_soft_bus_master_test") {
     "/${services_path}/distributed/src/base/distributed_liveview_all_scenarios_extension_wrapper.cpp",
     "/${services_path}/distributed/src/soft_bus/distributed_unlock_listener_oper_service.cpp",
     "/${services_path}/distributed/src/soft_bus/distributed_device_service.cpp",
-    "distributed_soft_bus_test/distributed_unlock_listener_oper_service_unit_test.cpp",  ]
+    "/${services_path}/distributed/src/tlv_box/box_base.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_operation_service.cpp",
+    "/${services_path}/distributed/src/tlv_box/response_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/tlv_box.cpp",
+    "/${services_path}/distributed/src/base/distributed_client.cpp",
+    "/${services_path}/distributed/src/base/distributed_server.cpp",
+    "/${services_path}/distributed/src/base/distributed_socket.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_service.cpp",
+    "/${services_path}/distributed/src/tlv_box/match_box.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_observer_service.cpp",
+    "/${services_path}/distributed/src/tlv_box/state_box.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_publish_service_v2.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_subscribe_service_v2.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_bundle_service.cpp",
+    "/${services_path}/distributed/src/helper/bundle_resource_helper.cpp",
+    "/${services_path}/distributed/src/tlv_box/remove_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/batch_remove_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/remove_all_distributed_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/request_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/notification_sync_box.cpp",
+    "/${services_path}/distributed/src/soft_bus/distributed_subscriber.cpp",
+    "/${services_path}/distributed/src/tlv_box/bundle_icon_box.cpp",
+    "/${services_path}/distributed/src/base/distributed_local_config.cpp",
+    "mock/mock_request_box.cpp",
+    "distributed_soft_bus_test/distributed_operation_service_unit_test.cpp",
+    "distributed_soft_bus_test/distributed_publish_service_v2_unit_test.cpp",
+    "distributed_soft_bus_test/distributed_unlock_listener_oper_service_unit_test.cpp",
+  ]
 
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
@@ -1137,82 +1167,6 @@ ohos_unittest("distributed_soft_bus_master_test") {
 
   if (distributed_notification_service_feature_phone_collaboration) {
     defines += [ "DISTRIBUTED_FEATURE_MASTER" ]
-  }
-
-  subsystem_name = "${subsystem_name}"
-  part_name = "${component_name}"
-}
-
-ohos_unittest("distributed_soft_bus_test") {
-  module_out_path = module_output_path
-  include_dirs = [
-    "/${services_path}/ans/include",
-    "/${services_path}/distributed/include",
-    "/${services_path}/distributed/include/soft_bus",
-    "/${services_path}/distributed/include/helper",
-    "/${services_path}/distributed/include/tlv_box",
-    "/${services_path}/distributed/include/base",
-  ]
-
-  sources = [
-    "/${services_path}/distributed/src/tlv_box/box_base.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_operation_service.cpp",
-    "/${services_path}/distributed/src/tlv_box/response_box.cpp",
-    "/${services_path}/distributed/src/tlv_box/tlv_box.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_device_service.cpp",
-    "/${services_path}/distributed/src/base/distributed_liveview_all_scenarios_extension_wrapper.cpp",
-    "/${services_path}/distributed/src/base/distributed_client.cpp",
-    "/${services_path}/distributed/src/base/distributed_server.cpp",
-    "/${services_path}/distributed/src/helper/analytics_util.cpp",
-    "/${services_path}/distributed/src/base/distributed_socket.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_service.cpp",
-    "/${services_path}/distributed/src/tlv_box/match_box.cpp",
-    "/${services_path}/distributed/src/base/distributed_send_adapter.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_observer_service.cpp",
-    "/${services_path}/distributed/src/tlv_box/state_box.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_publish_service_v2.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_subscribe_service_v2.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_bundle_service.cpp",
-    "/${services_path}/distributed/src/helper/bundle_resource_helper.cpp",
-    "/${services_path}/distributed/src/tlv_box/remove_box.cpp",
-    "/${services_path}/distributed/src/tlv_box/batch_remove_box.cpp",
-    "/${services_path}/distributed/src/tlv_box/remove_all_distributed_box.cpp",
-    "/${services_path}/distributed/src/tlv_box/request_box.cpp",
-    "/${services_path}/distributed/src/tlv_box/notification_sync_box.cpp",
-    "/${services_path}/distributed/src/soft_bus/distributed_subscriber.cpp",
-    "/${services_path}/distributed/src/tlv_box/bundle_icon_box.cpp",
-    "/${services_path}/distributed/src/base/distributed_local_config.cpp",
-    "distributed_soft_bus_test/distributed_operation_service_unit_test.cpp",
-  ]
-
-  deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
-
-  external_deps = [
-    "ability_base:zuri",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
-    "ability_runtime:uri_permission_mgr",
-    "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
-    "ffrt:libffrt",
-    "hilog:libhilog",
-    "kv_store:distributeddata_inner",
-    "os_account:os_account_innerkits",
-    "power_manager:powermgr_client",
-    "relational_store:native_rdb",
-    "samgr:samgr_proxy",
-    "time_service:time_client",
-    "zlib:libz",
-  ]
-
-  defines = []
-  if (screenlock_mgr_enable) {
-    external_deps += [ "screenlock_mgr:screenlock_client" ]
-    defines += [ "SCREENLOCK_MGR_ENABLE" ]
   }
 
   subsystem_name = "${subsystem_name}"

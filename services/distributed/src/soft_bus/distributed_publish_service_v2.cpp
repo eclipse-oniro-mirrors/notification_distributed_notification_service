@@ -585,7 +585,8 @@ void DistributedPublishService::SetNotificationButtons(const sptr<NotificationRe
         ANS_LOGE("Check actionButtons is null.");
         return;
     }
-    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+    if (deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
+        deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
         deviceType == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC) {
         std::vector<std::string> buttonsTitle;
         size_t length = actionButtons.size();
@@ -857,7 +858,8 @@ void DistributedPublishService::MakeNotificationButtons(const NotificationReques
     NotificationConstant::SlotType slotType, sptr<NotificationRequest>& request)
 {
     auto localDevice = DistributedDeviceService::GetInstance().GetLocalDevice();
-    if ((localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
+    if ((localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_2IN1 ||
+        localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD ||
         localDevice.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_PC)) {
         MakePadNotificationButtons(box, request);
         return;
