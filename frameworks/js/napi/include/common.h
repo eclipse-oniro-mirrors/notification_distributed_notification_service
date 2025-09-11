@@ -36,6 +36,7 @@ constexpr uint8_t OPERATION_MAX_TYPE = 3;
 constexpr int32_t LONG_LONG_STR_MAX_SIZE = 25600;
 constexpr int32_t COMMON_TEXT_SIZE = 3074;
 constexpr int32_t SHORT_TEXT_SIZE = 1026;
+constexpr int32_t MAP_TEXT_SIZE = 514;
 constexpr int8_t NO_ERROR = 0;
 constexpr int8_t ERROR = -1;
 constexpr uint8_t PARAM0 = 0;
@@ -1882,6 +1883,10 @@ public:
         const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent);
     static napi_value SetLockScreenPicture(
         const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
+    static napi_value GetStructuredText(
+        const napi_env &env, const napi_value &contentResult, std::shared_ptr<NotificationBasicContent> basicContent);
+    static napi_value SetStructuredText(
+        const napi_env &env, const NotificationBasicContent *basicContent, napi_value &result);
     static napi_value SetAgentBundle(const napi_env &env,
         const std::shared_ptr<NotificationBundleOption> &agentBundle, napi_value &result);
     static napi_value GetResourceObject(napi_env env, std::shared_ptr<ResourceManager::Resource> &resource,
@@ -1894,6 +1899,8 @@ public:
         uint32_t value);
     static std::string GetAppInstanceKey();
     static void PictureScale(std::shared_ptr<Media::PixelMap> pixelMap);
+    static napi_value GetMapObject(const napi_env &env, const napi_value &object,
+        std::vector<std::pair<std::string, std::string>> &out);
 private:
     static const int32_t ARGS_ONE = 1;
     static const int32_t ARGS_TWO = 2;

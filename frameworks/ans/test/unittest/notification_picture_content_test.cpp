@@ -84,7 +84,8 @@ HWTEST_F(NotificationPictureContentTest, Dump_00001, Function | SmallTest | Leve
 {
     auto rrc = std::make_shared<NotificationPictureContent>();
     std::string ret = "NotificationPictureContent{ title = , text = , "
-    "additionalText = , lockScreenPicture = null, briefText = , expandedTitle = , bigPicture = null }";
+    "additionalText = , lockScreenPicture = null, structuredText = null, "
+    "briefText = , expandedTitle = , bigPicture = null }";
 
     EXPECT_EQ(rrc->Dump(), ret);
 }

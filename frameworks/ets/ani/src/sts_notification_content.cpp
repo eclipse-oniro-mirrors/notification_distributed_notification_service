@@ -735,8 +735,63 @@ ani_status UnWarpNotificationBasicContent(ani_env *env, ani_object obj,
             ANS_LOGD("UnWarpNotificationBasicContent: get lockscreenPicture by pixelMap failed");
         }
     }
+
+    if (GetStructuredTextFromAni(env, obj, basicContent) != ANI_OK) {
+        return ANI_ERROR;
+    }
+
     ANS_LOGD("UnWarpNotificationBasicContent end");
     return status;
+}
+
+ani_status GetStructuredTextFromAni(ani_env *env, ani_object obj,
+    std::shared_ptr<NotificationBasicContent> basicContent)
+{
+    ANS_LOGD("GetStructuredText enter");
+    ani_boolean isUndefined;
+    ani_status status = ANI_ERROR;
+    ani_ref structuredTextRef;
+    std::vector<std::pair<std::string, std::string>> structuredTexts;
+ 
+    if (env->Object_GetPropertyByName_Ref(obj, "structuredText", &structuredTextRef) != ANI_OK ||
+        structuredTextRef == nullptr) {
+        ANS_LOGD("UnWarpNotificationBasicContent: structuredText is nullptr.");
+        return ANI_OK;
+    }
+ 
+    status = env->Reference_IsUndefined(structuredTextRef, &isUndefined);
+    if (status != ANI_OK) {
+        ANS_LOGE("Failed to check undefined, status: %{public}d", status);
+        return ANI_OK;
+    }
+    if (isUndefined == ANI_TRUE) {
+        ANS_LOGE("StructuredTextRef is undefined");
+        return ANI_ERROR;
+    }
+ 
+    ani_class mapClass;
+    ani_object mapObj = static_cast<ani_object>(structuredTextRef);
+ 
+    if (env->FindClass("Lescompat/Map;", &mapClass) != ANI_OK) {
+        ANS_LOGE("Find Map class failed.");
+        return ANI_OK;
+    }
+ 
+    ani_type typeMap = mapClass;
+    ani_boolean isMap;
+    status = env->Object_InstanceOf(mapObj, typeMap, &isMap);
+    if (isMap != ANI_TRUE) {
+        ANS_LOGE("Current obj is not map type.");
+        return ANI_ERROR;
+    }
+ 
+    if (GetMapByAniMap(env, mapObj, structuredTexts) != ANI_OK) {
+        return ANI_ERROR;
+    }
+    basicContent->SetStructuredText(structuredTexts);
+ 
+    ANS_LOGD("GetStructuredText end");
+    return ANI_OK;
 }
 
 ani_status UnWarpNotificationNormalContent(ani_env *env, ani_object obj,
@@ -1144,6 +1199,40 @@ ani_status UnWarpNotificationLocalLiveViewContent(ani_env *env, ani_object obj,
     return status;
 }
 
+bool WrapStructuredText(ani_env *env, ani_object &object, const NotificationBasicContent *basicContent)
+{
+    ANS_LOGD("WrapStructuredText enter");
+    const auto& texts = basicContent->GetStructuredText();
+    ani_object structuredTextObj = nullptr;
+    structuredTextObj = CreateMapObject(env, "Lescompat/Map;", ":V");
+    if (structuredTextObj == nullptr) {
+        return false;
+    }
+    ani_ref mapRef = nullptr;
+    ani_status status = ANI_ERROR;
+    for (const auto& [k, v] : texts) {
+        ani_string key;
+        ani_string val;
+        if (GetAniStringByString(env, k, key) != ANI_OK ||
+            GetAniStringByString(env, v, val) != ANI_OK) {
+            ANS_LOGE("Faild to get ani string.");
+            continue;
+        }
+        status = env->Object_CallMethodByName_Ref(structuredTextObj, "set",
+            "Lstd/core/Object;Lstd/core/Object;:Lescompat/Map;", &mapRef,
+            static_cast<ani_object>(key), static_cast<ani_object>(val));
+        if (status != ANI_OK) {
+            ANS_LOGE("Faild to set structuredText map, status : %{public}d", status);
+            continue;
+        }
+    }
+    if (structuredTextObj == nullptr || !SetPropertyByRef(env, object, "structuredText", structuredTextObj)) {
+        return false;
+    }
+    ANS_LOGD("WrapStructuredText end");
+    return true;
+}
+
 bool SetNotificationBasicContent(
     ani_env* env, const NotificationBasicContent *basicContent, ani_object &object)
 {
@@ -1166,6 +1255,9 @@ bool SetNotificationBasicContent(
     ani_ref lockScreenPicObj = CreateAniPixelMap(env, basicContent->GetLockScreenPicture());
     if (lockScreenPicObj == nullptr || !SetPropertyByRef(env, object, "lockScreenPicture", lockScreenPicObj)) {
         ANS_LOGD("SetNotificationBasicContent: set lockScreenPicture failed");
+    }
+    if (!WrapStructuredText(env, object, basicContent)) {
+        ANS_LOGD("SetNotificationBasicContent: set structuredText failed");
     }
     ANS_LOGD("SetNotificationBasicContent end");
     return true;
