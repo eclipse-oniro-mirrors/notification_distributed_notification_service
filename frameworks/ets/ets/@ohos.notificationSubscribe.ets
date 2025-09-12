@@ -54,10 +54,7 @@ function isInvalidParameter(bundle: BundleOption): BusinessError
 
 function isInvalidParameter(info?: NotificationSubscribeInfo): boolean
 {
-    if (info == null) {
-        return false;
-    }
-    if (info?.deviceType != undefined && info.deviceType?.length === 0) {
+    if (info != undefined && info?.deviceType != undefined && info?.deviceType?.length === 0) {
         return false;
     }
     return true;
