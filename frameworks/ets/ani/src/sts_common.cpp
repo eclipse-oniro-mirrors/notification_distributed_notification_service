@@ -565,6 +565,27 @@ bool SetFieldInt(ani_env *env, ani_class cls, ani_object &object,
     return true;
 }
 
+bool SetFieldLong(ani_env *env, ani_class cls, ani_object &object,
+    const std::string fieldName, const int64_t value)
+{
+    if (env == nullptr || cls == nullptr || object == nullptr || fieldName.empty()) {
+        ANS_LOGE("SetFieldLong fail. has nullptr or fieldName is empty");
+        return false;
+    }
+    ani_field field = nullptr;
+    ani_status status = env->Class_FindField(cls, fieldName.c_str(), &field);
+    ANS_LOGD("SetFieldLong fieldName : %{public}s", fieldName.c_str());
+    if (status != ANI_OK || field == nullptr) {
+        ANS_LOGE("Class_FindField fail. status : %{public}d", status);
+        return false;
+    }
+    if ((status = env->Object_SetField_Long(object, field, static_cast<ani_long>(value))) != ANI_OK) {
+        ANS_LOGE("Object_SetField_Long fail. status : %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool SetOptionalFieldBoolean(ani_env *env, ani_class cls, ani_object &object,
     const std::string fieldName, bool value)
 {
