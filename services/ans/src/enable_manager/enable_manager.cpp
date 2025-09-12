@@ -572,6 +572,8 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
             SetDefaultNotificationEnabled(bundleOption, allowed);
         }
     }
+    ANS_LOGI("get ntf auth status %{public}s %{public}d %{public}d %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), allowed, result);
     return result;
 }
 
