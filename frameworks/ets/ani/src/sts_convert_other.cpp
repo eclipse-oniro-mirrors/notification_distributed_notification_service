@@ -395,8 +395,8 @@ ani_object GetAniResource(ani_env *env, const std::shared_ptr<ResourceManager::R
         ANS_LOGE("GetAniResource : set moduleName failed, status = %{public}d", status);
         return nullptr;
     }
-    if (!CallSetter(env, resourceCls, resourceObject, "id", resource->id)) {
-        ANS_LOGE("GetAniResource : set moduleName failed, status = %{public}d", status);
+    if (!SetFieldLong(env, resourceCls, resourceObject, "id", static_cast<int64_t>(resource->id))) {
+        ANS_LOGE("GetAniResource : set id failed");
     }
     ANS_LOGD("GetAniResource end");
     return resourceObject;
