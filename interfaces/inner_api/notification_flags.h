@@ -175,6 +175,7 @@ private:
     static constexpr char CHAR_REMIND_DISABLE = '0';
     static constexpr char CHAR_REMIND_ENABLE = '1';
     static constexpr char CHAR_FLAG_STATUS_CLOSE = '2';
+    static constexpr int32_t REMINDER_FLAG_SIZE = 6;
     static constexpr int32_t SOUND_ENABLED_SEQ = 5;
     static constexpr int32_t LOCK_SCREEN_VISIBLENESS_ENABLED_SEQ = 4;
     static constexpr int32_t BANNER_ENABLED_SEQ = 3;

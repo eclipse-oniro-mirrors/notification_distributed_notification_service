@@ -256,7 +256,7 @@ bool NotificationFlags::ReadFromParcel(Parcel &parcel)
 bool NotificationFlags::GetReminderFlagsByString(
     const std::string &strReminderFlags, std::shared_ptr<NotificationFlags> &reminderFlags)
 {
-    if (strReminderFlags.size() <= SOUND_ENABLED_SEQ) {
+    if (strReminderFlags.size() != REMINDER_FLAG_SIZE) {
         ANS_LOGE("GetReminderFlagsByString failed as Invalid reminderFlags size");
         return false;
     }

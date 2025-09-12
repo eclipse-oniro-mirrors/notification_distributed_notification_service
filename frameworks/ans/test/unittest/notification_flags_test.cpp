@@ -201,6 +201,9 @@ HWTEST_F(NotificationFlagsTest, GetReminderFlagsByString_00001, Function | Small
 
     res = flag.GetReminderFlagsByString("444444", flagSptr);
     ASSERT_FALSE(res);
+
+    res = flag.GetReminderFlagsByString("1111111", flagSptr);
+    ASSERT_FALSE(res);
 }
 
 /**
