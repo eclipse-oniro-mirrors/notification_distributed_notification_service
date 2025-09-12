@@ -389,7 +389,7 @@ ani_status GetPropertyEnumItemArray(ani_env *env, ani_object param, const char *
     for (int i = 0; i < static_cast<int>(length); i++) {
         ani_ref enumItemRef;
         status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(arrayObj),
-            "$_get", "I:Lstd/core/Object;", &enumItemRef, (ani_int)i);
+            "$_get", "i:C{std.core.Object}", &enumItemRef, (ani_int)i);
         if (status != ANI_OK) {
             ANS_LOGE("status: %{public}d, index: %{public}d", status, i);
             return status;

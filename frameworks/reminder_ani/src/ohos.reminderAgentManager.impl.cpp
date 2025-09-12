@@ -45,7 +45,7 @@ static bool UnWarpDate(uintptr_t date, ani_double& outValue)
         ANSR_LOGE("Env is nullptr.");
         return false;
     }
-    static const char* className = "Lescompat/Date;";
+    static const char* className = "escompat.Date";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         ANSR_LOGE("Failed to find class %{public}s.", className);
@@ -71,7 +71,7 @@ static bool UnWarpNotificationSlot(uintptr_t slot, OHOS::Notification::Notificat
         ANSR_LOGE("Env is nullptr or slot is nullptr.");
         return false;
     }
-    static const char* className = "Lnotification/notificationSlot/NotificationSlotInner;";
+    static const char* className = "notification.notificationSlot.NotificationSlotInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         ANSR_LOGE("Failed to find class %{public}s.", className);
@@ -118,8 +118,8 @@ static bool WarpDate(int64_t time, ani_object &outObj)
         return false;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", ":V", &ctor)) != ANI_OK) {
-        ANSR_LOGE("Failed to find method <ctor>. :V.");
+    if ((status = env->Class_FindMethod(cls, "<ctor>", ":", &ctor)) != ANI_OK) {
+        ANSR_LOGE("Failed to find method <ctor>. :.");
         return false;
     }
     if ((status = env->Object_New(cls, ctor, &outObj)) != ANI_OK) {
@@ -127,7 +127,7 @@ static bool WarpDate(int64_t time, ani_object &outObj)
         return false;
     }
     ani_double msObj = 0;
-    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "D:D", &msObj, static_cast<double>(time)))
+    if ((status = env->Object_CallMethodByName_Double(outObj, "setTime", "d:d", &msObj, static_cast<double>(time)))
         != ANI_OK) {
         ANSR_LOGE("Object_CallMethodByName_Double setDate faild.");
         return false;
