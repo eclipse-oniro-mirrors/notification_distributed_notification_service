@@ -923,7 +923,7 @@ ErrCode AdvancedNotificationService::AddSlotThenPublishEvent(
 ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
     const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationBundleOption> &bundle,
-    const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl)
+    const NotificationConstant::SlotType &slotType, NotificationSlot slotInfo)
 {
     sptr<NotificationSlot> slot;
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundle, slotType, slot);
@@ -935,16 +935,18 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlotInner(
             return ERR_ANS_NO_MEMORY;
         }
         GenerateSlotReminderMode(slot, bundleOption);
-        return AddSlotThenPublishEvent(slot, bundle, enabled, isForceControl);
+        return AddSlotThenPublishEvent(slot, bundle, slotInfo.GetEnable(),
+            slotInfo.GetForceControl(), slotInfo.GetAuthorizedStatus());
     } else if ((result == ERR_OK) && (slot != nullptr)) {
-        if (slot->GetEnable() == enabled && slot->GetForceControl() == isForceControl) {
-            slot->SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        if (slot->GetEnable() == slotInfo.GetEnable() && slot->GetForceControl() == slotInfo.GetForceControl()) {
+            slot->SetAuthorizedStatus(slotInfo.GetAuthorizedStatus());
             std::vector<sptr<NotificationSlot>> slots;
             slots.push_back(slot);
             return NotificationPreferences::GetInstance()->AddNotificationSlots(bundle, slots);
         }
         NotificationPreferences::GetInstance()->RemoveNotificationSlot(bundle, slotType);
-        return AddSlotThenPublishEvent(slot, bundle, enabled, isForceControl);
+        return AddSlotThenPublishEvent(slot, bundle, slotInfo.GetEnable(),
+            slotInfo.GetForceControl(), slotInfo.GetAuthorizedStatus());
     }
     ANS_LOGE("Set enable slot: GetNotificationSlot failed");
     return result;
@@ -972,7 +974,11 @@ ErrCode AdvancedNotificationService::SetEnabledForBundleSlot(const sptr<Notifica
         " slotType: " + std::to_string(static_cast<uint32_t>(slotType)) +
         " enabled: " +std::to_string(enabled) + "isForceControl" + std::to_string(isForceControl));
     ffrt::task_handle handler = notificationSvrQueue_->submit_h(std::bind([&]() {
-        result = SetEnabledForBundleSlotInner(bundleOption, bundle, slotType, enabled, isForceControl);
+        NotificationSlot slotInfo = NotificationSlot(slotType);
+        slotInfo.SetEnable(enabled);
+        slotInfo.SetForceControl(isForceControl);
+        slotInfo.SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+        result = SetEnabledForBundleSlotInner(bundleOption, bundle, slotType, slotInfo);
     }));
     notificationSvrQueue_->wait(handler);
 
@@ -1260,6 +1266,7 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
             ANS_LOGE("Check handler is null.");
             return;
         }
+        ANS_LOGI("Push request retry %{public}s %{public}d.", requestId.c_str(), checkParam->retryTime);
         notificationSvrQueue_->submit_h([&, requestId]() { InvokeCheckConfig(requestId); },
             ffrt::task_attr().name("checkLiveView").delay(DELAY_TIME_CHECK_LIVEVIEW));
     }));
@@ -1309,6 +1316,7 @@ ErrCode AdvancedNotificationService::GetLiveViewConfig(const std::vector<std::st
             ANS_LOGE("Push check failed %{public}d %{public}zu.", res, bundleList.size());
             NotificationLiveViewUtils::GetInstance().EraseLiveViewCheckData(requestId);
         }
+        ANS_LOGI("Get config %{public}s %{public}zu.", requestId.c_str(), bundleList.size());
     }));
     notificationSvrQueue_->wait(handler);
     return result;

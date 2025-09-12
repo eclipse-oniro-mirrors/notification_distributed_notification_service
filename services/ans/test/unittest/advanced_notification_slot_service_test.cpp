@@ -912,12 +912,38 @@ HWTEST_F(AnsSlotServiceTest, SetEnabledForBundleSlotInner_00001, Function | Smal
     sptr<NotificationBundleOption> bundle(new NotificationBundleOption("test7777", 7777));
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::SERVICE_REMINDER;
 
+    NotificationSlot slotInfo = NotificationSlot(slotType);
+    slotInfo.SetEnable(true);
+    slotInfo.SetForceControl(true);
     auto ret = advancedNotificationService_->SetEnabledForBundleSlotInner(
-        bundleOption, bundle, slotType, true, true);
+        bundleOption, bundle, slotType, slotInfo);
     ASSERT_EQ(ret, ERR_OK);
 
     ret = advancedNotificationService_->SetEnabledForBundleSlotInner(
-        bundleOption, bundle, slotType, true, true);
+        bundleOption, bundle, slotType, slotInfo);
+    ASSERT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SetEnabledForBundleSlotInner_00002
+ * @tc.desc: Test SetEnabledForBundleSlotInner_00002
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, SetEnabledForBundleSlotInner_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot(new NotificationSlot());
+    slot->SetEnable(true);
+    slot->SetForceControl(true);
+    sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("test6666", 6666));
+    sptr<NotificationBundleOption> bundle(new NotificationBundleOption("test7777", 7777));
+    NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
+
+    NotificationSlot slotInfo = NotificationSlot(slotType);
+    slotInfo.SetEnable(true);
+    slotInfo.SetForceControl(true);
+    slotInfo.SetAuthorizedStatus(NotificationSlot::AuthorizedStatus::AUTHORIZED);
+    auto ret = advancedNotificationService_->SetEnabledForBundleSlotInner(
+        bundleOption, bundle, slotType, slotInfo);
     ASSERT_EQ(ret, ERR_OK);
 }
 

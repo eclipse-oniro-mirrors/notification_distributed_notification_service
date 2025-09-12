@@ -2025,8 +2025,11 @@ void AdvancedNotificationService::UpdateCloneBundleInfoFoSlot(
     }
 
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
-        if (SetEnabledForBundleSlotInner(bundle, bundle, cloneSlot.slotType_, cloneSlot.enable_,
-            cloneSlot.isForceControl_) != ERR_OK) {
+        NotificationSlot slotInfo = NotificationSlot(cloneSlot.slotType_);
+        slotInfo.SetEnable(cloneSlot.enable_);
+        slotInfo.SetForceControl(cloneSlot.isForceControl_);
+        slotInfo.SetAuthorizedStatus(cloneSlot.GetAuthStaus());
+        if (SetEnabledForBundleSlotInner(bundle, bundle, cloneSlot.slotType_, slotInfo) != ERR_OK) {
             ANS_LOGW("Set notification slots failed %{public}s.", cloneSlot.Dump().c_str());
         }
     }

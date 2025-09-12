@@ -1745,7 +1745,7 @@ private:
     void SetCollaborateReminderFlag(const sptr<NotificationRequest> &request);
     ErrCode SetEnabledForBundleSlotInner(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle,
-        const NotificationConstant::SlotType &slotType, bool enabled, bool isForceControl);
+        const NotificationConstant::SlotType &slotType, NotificationSlot slotInfo);
     ErrCode AddSlotThenPublishEvent(
         const sptr<NotificationSlot> &slot,
         const sptr<NotificationBundleOption> &bundle,
