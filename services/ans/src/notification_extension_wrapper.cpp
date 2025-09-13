@@ -286,31 +286,19 @@ void ExtensionWrapper::HandlePrivilegeMessage(const sptr<NotificationBundleOptio
 bool ExtensionWrapper::GetPrivilegeDialogPopped(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t &userId)
 {
-    if (getPrivilegeDialogPopped_ == nullptr) {
-        ANS_LOGE("GetPrivilegeDialogPopped wrapper symbol failed.");
-        return -1;
-    }
-    return getPrivilegeDialogPopped_(bundleOption, userId);
+    return false;
 }
 
 bool ExtensionWrapper::SetDialogOpenSuccessTimeStamp(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t &userId)
 {
-    if (setDialogOpenSuccessTimeStamp_ == nullptr) {
-        ANS_LOGE("SetDialogOpenSuccessTimeStamp wrapper symbol failed.");
-        return -1;
-    }
-    return setDialogOpenSuccessTimeStamp_(bundleOption, userId);
+    return true;
 }
 
 bool ExtensionWrapper::SetDialogOpenSuccessTimeInterval(const sptr<NotificationBundleOption>& bundleOption,
     const int32_t &userId)
 {
-    if (setDialogOpenSuccessTimeInterval_ == nullptr) {
-        ANS_LOGE("SetDialogOpenSuccessTimeInterval wrapper symbol failed.");
-        return -1;
-    }
-    return setDialogOpenSuccessTimeInterval_(bundleOption, userId);
+    return true;
 }
 #endif
 
