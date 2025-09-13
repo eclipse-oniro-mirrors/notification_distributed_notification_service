@@ -34,7 +34,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
-        ANS_LOGE("Wrong number of arguments");
+        ANS_LOGE("Wrong number of args");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -43,7 +43,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: id: number / representativeBundle: BundleOption
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_number && valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Number object expected.");
+        ANS_LOGE("Number object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number or object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -69,8 +69,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         }
         if (valuetype != napi_number && valuetype != napi_boolean &&
             valuetype != napi_string && valuetype != napi_function) {
-            ANS_LOGE("Wrong argument type. String or function expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be string or function.";
+            ANS_LOGE("Str or func expected.");
+            std::string msg = "Incorrect parameter types.The type of param must be str or func.";
             Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
         }
@@ -123,7 +123,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < CANCEL_GROUP_MIN_PARA) {
-        ANS_LOGE("Wrong number of arguments");
+        ANS_LOGE("Wrong number of args");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -132,7 +132,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     // argv[0]: groupName: string
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_string && valuetype != napi_number && valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. String number boolean expected.");
+        ANS_LOGE("String number boolean expected.");
         std::string msg = "Incorrect parameter types.The type of param must be number or string or boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -183,7 +183,7 @@ napi_value Cancel(napi_env env, napi_callback_info info)
     napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, paras.callback, asynccallbackinfo->info, promise);
 
-    ANS_LOGD("Create cancel string.");
+    ANS_LOGD("Create cancel str.");
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "cancel", NAPI_AUTO_LENGTH, &resourceName);
     // Async function call

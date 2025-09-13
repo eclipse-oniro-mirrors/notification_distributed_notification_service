@@ -271,7 +271,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
     if (argc < 1) {
-        ANS_LOGE("Wrong number of arguments");
+        ANS_LOGE("Wrong number of args");
         Common::NapiThrow(env, ERROR_PARAM_INVALID, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
         return nullptr;
     }
@@ -281,7 +281,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
     // argv[0]:LocalLiveViewButton
     NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type for arg0. LocalLiveViewButton object expected.");
+        ANS_LOGE("LocalLiveViewButton object expected.");
         std::string msg = "Incorrect parameter types.The type of param must be LocalLiveViewButton.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -299,7 +299,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info,
             return nullptr;
         }
         if (!AddSubscriberInstancesInfo(env, subscriberInstancesInfo)) {
-            ANS_LOGE("AddSubscriberInstancesInfo add failed");
+            ANS_LOGE("AddSubscriberInstancesInfo failed");
             Common::NapiThrow(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
             if (subscriberInstancesInfo.subscriber) {
                 delete subscriberInstancesInfo.subscriber;
