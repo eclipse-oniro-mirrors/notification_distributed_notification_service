@@ -208,8 +208,7 @@ void SystemEventObserver::OnBundleUpdateEventInner(const EventFwk::CommonEventDa
         callbacks_.onBundleUpdate(bundleOption);
     }
 
-    AAFwk::Want want = data.GetWant();
-    if (bundleOption != nullptr && want.GetBoolParam("isAppUpdate", false)) {
+    if (bundleOption != nullptr) {
         NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(
             EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED, bundleOption);
     }

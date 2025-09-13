@@ -219,7 +219,7 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
 std::string NotificationCloneBundleInfo::SlotInfo::Dump() const
 {
     return "type: " + std::to_string(slotType_) + " " + std::to_string(enable_) + " "
-        + std::to_string(isForceControl_);
+        + std::to_string(isForceControl_)  + " " + std::to_string(authorizedStatus_);
 }
 
 int32_t NotificationCloneBundleInfo::SlotInfo::GetAuthStaus() const
