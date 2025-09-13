@@ -346,6 +346,9 @@ void SmartReminderCenter::InitValidDevices(
                 ANS_LOGI("liveView smart switch is closed, deviceType = %{public}s", deviceType.c_str());
                 continue;
             }
+            if (!CheckHealthWhiteList(request, deviceType)) {
+                continue;
+            }
             syncDevices.insert(deviceType);
             smartDevices.insert(deviceType);
             request->SetNotificationControlFlags(notificationControlFlags | CONTROL_BY_SMART_REMINDER);
@@ -771,6 +774,37 @@ void SmartReminderCenter::GetDeviceStatusByType(
         bitStatus.set(DistributedDeviceStatus::LOCK_FLAG, !screenLocked);
     }
     ANS_LOGI("deviceType: %{public}s, bitStatus: %{public}s", deviceType.c_str(), bitStatus.to_string().c_str());
+}
+
+bool SmartReminderCenter::CheckHealthWhiteList(const sptr<NotificationRequest> &request,
+    const string &deviceType) const
+{
+    if (NotificationConstant::SlotType::LIVE_VIEW != request->GetSlotType()) {
+        return true;
+    }
+
+    if (deviceType.compare(NotificationConstant::WEARABLE_DEVICE_TYPE) != 0 &&
+        deviceType.compare(NotificationConstant::LITEWEARABLE_DEVICE_TYPE) != 0) {
+            return true;
+    }
+
+    std::string value;
+    NotificationPreferences::GetInstance()->GetKvFromDb(NotificationConstant::HEALTH_BUNDLE_WHITE_LIST,
+        value, SUBSCRIBE_USER_INIT);
+    if (value.empty()) {
+        return true;
+    }
+
+    std::string bundleName = request->GetOwnerBundleName();
+    if (bundleName.empty()) {
+        return true;
+    }
+    bool notInWhiteList  = value.find(bundleName) == std::string::npos;
+    if (notInWhiteList) {
+        ANS_LOGI("not in white list. bundleName = %{public}s", bundleName.c_str());
+        return false;
+    }
+    return true;
 }
 }  // namespace Notification
 }  // namespace OHOS

@@ -101,6 +101,7 @@ private:
         const AppExecFwk::ApplicationInfo &appInfo,
         const AppExecFwk::BundleResourceInfo &bundleResourceInfo) const;
     bool IsCollaborationAllowed(const sptr<NotificationRequest> &request) const;
+    bool CheckHealthWhiteList(const sptr<NotificationRequest> &request, const string &deviceType) const;
     map<NotificationConstant::SlotType, shared_ptr<NotificationFlags>> currentReminderMethods_;
     map<string, map<string, vector<shared_ptr<ReminderAffected>>>> reminderMethods_;
 
