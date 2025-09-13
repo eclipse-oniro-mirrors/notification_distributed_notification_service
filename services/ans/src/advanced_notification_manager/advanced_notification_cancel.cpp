@@ -62,7 +62,7 @@ ErrCode AdvancedNotificationService::CancelAll(const std::string &instanceKey)
     bundleOption->SetAppInstanceKey(instanceKey);
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("null notificationSvrQueue");
+        ANS_LOGE("null notifSvrQueue");
         return ERR_ANS_INVALID_PARAM;
     }
     ErrCode result = ExcuteCancelAll(bundleOption, reason);
@@ -333,7 +333,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        std::string message = "NotificationSvrQueue_ is null.";
+        std::string message = "NotifSvrQueue_ is null.";
         ANS_LOGE("%{public}s", message.c_str());
         return ERR_ANS_INVALID_PARAM;
     }
@@ -514,11 +514,11 @@ void AdvancedNotificationService::GetRemoveListForRemoveAll(const sptr<Notificat
             ANSR_LOGW("The application does not request enable notification.");
         }
         if (!record->notification->IsRemoveAllowed() && isAllowedNotification) {
-            ANS_LOGI("BatchRemove-FILTER-RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
+            ANS_LOGI("RemoveNotAllowed-%{public}s", record->notification->GetKey().c_str());
             continue;
         }
         if (record->slot != nullptr && record->slot->GetForceControl() && record->slot->GetEnable()) {
-            ANS_LOGI("BatchRemove-FILTER-ForceControl-%{public}s", record->notification->GetKey().c_str());
+            ANS_LOGI("ForceControl-%{public}s", record->notification->GetKey().c_str());
             continue;
         }
         if (record->bundleOption->GetBundleName() != bundle->GetBundleName() ||
@@ -907,7 +907,7 @@ void AdvancedNotificationService::ExcuteDeleteAll(ErrCode &result, const int32_t
 #endif
         }
         if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
-            ANS_LOGD("Notifications size greater than or equal to MAX_CANCELED_PARCELABLE_VECTOR_NUM.");
+            ANS_LOGD("Notifs size oversize.");
             SendNotificationsOnCanceled(notifications, nullptr, reason);
         }
     }
@@ -925,7 +925,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
 {
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("IsSystemApp is false.");
+        ANS_LOGE("IsSysApp is false.");
         return ERR_ANS_NON_SYSTEM_APP;
     }
 
@@ -935,7 +935,7 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
     }
 
     if (notificationSvrQueue_ == nullptr) {
-        ANS_LOGE("notificationSvrQueue is null");
+        ANS_LOGE("notifSvrQueue is null");
         return ERR_ANS_INVALID_PARAM;
     }
 

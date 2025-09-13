@@ -565,7 +565,7 @@ ani_status GetMapIteratorStringValue(ani_env *env, ani_ref &next, std::string &s
     ani_ref val;
     ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(next), "value", &val);
     if (status != ANI_OK) {
-        ANS_LOGD("Falied to get value, status: %{public}d", status);
+        ANS_LOGD("Failed to get value, status: %{public}d", status);
     }
     status = GetStringByAniString(env, reinterpret_cast<ani_string>(val), str);
     if (status == ANI_OK && str.size() > STRUCTURED_TEXT_SIZE) {
@@ -613,7 +613,6 @@ ani_status GetMapByAniMap(ani_env *env, ani_object &mapObj,
             GetMapIteratorStringValue(env, nextVal, valStr) != ANI_OK) {
             return ANI_ERROR;
         }
-        ANS_LOGD("__logwd sts %{public}s %{public}s", keyStr.c_str(), valStr.c_str());
         out.emplace_back(keyStr, valStr);
     }
  

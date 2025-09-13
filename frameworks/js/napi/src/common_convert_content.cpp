@@ -539,7 +539,7 @@ napi_value Common::GetNotificationBasicContent(
     napi_get_named_property(env, result, "normal", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         std::string msg = "Incorrect parameter types. The type of normal must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -645,7 +645,7 @@ napi_value Common::GetNotificationLongTextContent(
     napi_get_named_property(env, result, "longText", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         std::string msg = "Incorrect parameter types. The type of longText must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -693,7 +693,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     napi_get_named_property(env, contentResult, "longText", &longContentResult);
     NAPI_CALL(env, napi_typeof(env, longContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of longText must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -714,7 +714,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     napi_get_named_property(env, contentResult, "briefText", &longContentResult);
     NAPI_CALL(env, napi_typeof(env, longContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of briefText must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -735,7 +735,7 @@ napi_value Common::GetNotificationLongTextContentDetailed(
     napi_get_named_property(env, contentResult, "expandedTitle", &longContentResult);
     NAPI_CALL(env, napi_typeof(env, longContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of expandedTitle must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -767,7 +767,7 @@ napi_value Common::GetNotificationPictureContent(
     napi_get_named_property(env, result, "picture", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         std::string msg = "Incorrect parameter types. The type of picture must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -812,7 +812,7 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     napi_get_named_property(env, contentResult, "briefText", &pictureContentResult);
     NAPI_CALL(env, napi_typeof(env, pictureContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of briefText must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -833,7 +833,7 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     napi_get_named_property(env, contentResult, "expandedTitle", &pictureContentResult);
     NAPI_CALL(env, napi_typeof(env, pictureContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of expandedTitle must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -848,13 +848,13 @@ napi_value Common::GetNotificationPictureContentDetailed(const napi_env &env,
     // picture: image.PixelMap
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "picture", &hasProperty));
     if (!hasProperty) {
-        ANS_LOGE("Property picture expected.");
+        ANS_LOGE("Property pic expected.");
         return nullptr;
     }
     napi_get_named_property(env, contentResult, "picture", &pictureContentResult);
     NAPI_CALL(env, napi_typeof(env, pictureContentResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         std::string msg = "Incorrect parameter types. The type of picture must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -888,7 +888,7 @@ napi_value Common::GetNotificationConversationalContent(
     napi_get_named_property(env, result, "conversation", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         std::string msg = "Incorrect parameter types. The type of conversation must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -941,7 +941,7 @@ napi_value Common::GetNotificationConversationalContentByUser(
     napi_get_named_property(env, contentResult, "user", &userResult);
     NAPI_CALL(env, napi_typeof(env, userResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         std::string msg = "Incorrect parameter types. The type of user must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -991,7 +991,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
     napi_get_named_property(env, result, "name", &nameResult);
     NAPI_CALL(env, napi_typeof(env, nameResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of name must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1010,7 +1010,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
     napi_get_named_property(env, result, "key", &keyResult);
     NAPI_CALL(env, napi_typeof(env, keyResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of key must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1029,7 +1029,7 @@ napi_value Common::GetMessageUserByString(const napi_env &env, const napi_value 
     napi_get_named_property(env, result, "uri", &uriResult);
     NAPI_CALL(env, napi_typeof(env, uriResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         std::string msg = "Incorrect parameter types. The type of uri must be string.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1058,7 +1058,7 @@ napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &r
     napi_get_named_property(env, result, "isMachine", &machineResult);
     NAPI_CALL(env, napi_typeof(env, machineResult, &valuetype));
     if (valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. Bool expected.");
+        ANS_LOGE("Bool expected.");
         std::string msg = "Incorrect parameter types. The type of isMachine must be boolean.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1077,7 +1077,7 @@ napi_value Common::GetMessageUserByBool(const napi_env &env, const napi_value &r
     napi_get_named_property(env, result, "isUserImportant", &importantResult);
     NAPI_CALL(env, napi_typeof(env, importantResult, &valuetype));
     if (valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. Bool expected.");
+        ANS_LOGE("Bool expected.");
         std::string msg = "Incorrect parameter types. The type of isUserImportant must be bool.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1104,7 +1104,7 @@ napi_value Common::GetMessageUserByCustom(const napi_env &env, const napi_value 
         napi_get_named_property(env, result, "icon", &iconResult);
         NAPI_CALL(env, napi_typeof(env, iconResult, &valuetype));
         if (valuetype != napi_object) {
-            ANS_LOGE("Wrong argument type. Object expected.");
+            ANS_LOGE("Object expected.");
             std::string msg = "Incorrect parameter types. The type of icon must be object.";
             Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
             return nullptr;
@@ -1141,7 +1141,7 @@ napi_value Common::GetNotificationConversationalContentTitle(
     napi_get_named_property(env, contentResult, "conversationTitle", &conversationalContentResult);
     NAPI_CALL(env, napi_typeof(env, conversationalContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(
@@ -1170,7 +1170,7 @@ napi_value Common::GetNotificationConversationalContentGroup(
     napi_get_named_property(env, contentResult, "conversationGroup", &conversationalContentResult);
     NAPI_CALL(env, napi_typeof(env, conversationalContentResult, &valuetype));
     if (valuetype != napi_boolean) {
-        ANS_LOGE("Wrong argument type. Bool expected.");
+        ANS_LOGE("Bool expected.");
         return nullptr;
     }
     bool conversationGroup = false;
@@ -1193,14 +1193,14 @@ napi_value Common::GetNotificationConversationalContentMessages(
     // messages: Array<ConversationalMessage>
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "messages", &hasProperty));
     if (!hasProperty) {
-        ANS_LOGE("Property messages expected.");
+        ANS_LOGE("Property msgs expected.");
         return nullptr;
     }
     napi_get_named_property(env, contentResult, "messages", &conversationalContentResult);
     bool isArray = false;
     napi_is_array(env, conversationalContentResult, &isArray);
     if (!isArray) {
-        ANS_LOGE("Property messages is expected to be an array.");
+        ANS_LOGE("Property msgs is expected to be an array.");
         return nullptr;
     }
     uint32_t length = 0;
@@ -1214,7 +1214,7 @@ napi_value Common::GetNotificationConversationalContentMessages(
         napi_get_element(env, conversationalContentResult, i, &conversationalMessage);
         NAPI_CALL(env, napi_typeof(env, conversationalMessage, &valuetype));
         if (valuetype != napi_object) {
-            ANS_LOGE("Wrong argument type. Object expected.");
+            ANS_LOGE("Object expected.");
             return nullptr;
         }
         std::shared_ptr<NotificationConversationalMessage> message = nullptr;
@@ -1264,7 +1264,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
     napi_get_named_property(env, conversationalMessage, "text", &textResult);
     NAPI_CALL(env, napi_typeof(env, textResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, textResult, commonStr, COMMON_TEXT_SIZE - 1, &strLen));
@@ -1281,7 +1281,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
     napi_get_named_property(env, conversationalMessage, "timestamp", &timestampResult);
     NAPI_CALL(env, napi_typeof(env, timestampResult, &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
+        ANS_LOGE("Number expected.");
         return nullptr;
     }
     napi_get_value_int64(env, timestampResult, &timestamp);
@@ -1297,7 +1297,7 @@ napi_value Common::GetConversationalMessageBasicInfo(const napi_env &env, const 
     napi_get_named_property(env, conversationalMessage, "sender", &senderResult);
     NAPI_CALL(env, napi_typeof(env, senderResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         return nullptr;
     }
     if (!GetMessageUser(env, senderResult, sender)) {
@@ -1335,7 +1335,7 @@ napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const 
     napi_get_named_property(env, conversationalMessage, "mimeType", &mimeTypeResult);
     NAPI_CALL(env, napi_typeof(env, mimeTypeResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, mimeTypeResult, str, STR_MAX_SIZE - 1, &strLen));
@@ -1349,7 +1349,7 @@ napi_value Common::GetConversationalMessageOtherInfo(const napi_env &env, const 
         napi_get_named_property(env, conversationalMessage, "uri", &uriResult);
         NAPI_CALL(env, napi_typeof(env, uriResult, &valuetype));
         if (valuetype != napi_string) {
-            ANS_LOGE("Wrong argument type. String expected.");
+            ANS_LOGE("String expected.");
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, uriResult, str, STR_MAX_SIZE - 1, &strLen));
@@ -1382,7 +1382,7 @@ napi_value Common::GetNotificationMultiLineContent(
     napi_get_named_property(env, result, "multiLine", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Object expected.");
         return nullptr;
     }
 
@@ -1406,7 +1406,7 @@ napi_value Common::GetNotificationMultiLineContent(
     napi_get_named_property(env, contentResult, "briefText", &multiLineContentResult);
     NAPI_CALL(env, napi_typeof(env, multiLineContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
@@ -1425,7 +1425,7 @@ napi_value Common::GetNotificationMultiLineContent(
     napi_get_named_property(env, contentResult, "longTitle", &multiLineContentResult);
     NAPI_CALL(env, napi_typeof(env, multiLineContentResult, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("String expected.");
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
@@ -1488,7 +1488,7 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
         napi_get_element(env, multilines, i, &line);
         NAPI_CALL(env, napi_typeof(env, line, &valuetype));
         if (valuetype != napi_string) {
-            ANS_LOGE("Wrong argument type. String expected.");
+            ANS_LOGE("String expected.");
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, line, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
@@ -1528,7 +1528,7 @@ napi_value Common::GetNotificationContentLineWantAgents(const napi_env &env, con
             napi_get_element(env, value, i, &wantAgentValue);
             NAPI_CALL(env, napi_typeof(env, wantAgentValue, &valuetype));
             if (valuetype != napi_object) {
-                ANS_LOGE("Wrong agrument type. Object expected.");
+                ANS_LOGE("Object expected.");
                 std::string msg = "Incorrect parameter types. The type of lineWantAgents item must be object.";
                 Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
                 return nullptr;
@@ -1660,7 +1660,7 @@ napi_value Common::GetStructuredText(
     NAPI_CALL(env, napi_get_named_property(env, contentResult, "structuredText", &jsStMap));
     NAPI_CALL(env, napi_typeof(env, jsStMap, &jsType));
     if (jsType != napi_object) {
-        ANS_LOGE("Wrong argument type. Obejct expected.");
+        ANS_LOGE("Obejct expected.");
         std::string msg = "Incorrect parameter types. The type of normal must be object.";
         Common::NapiThrow(env, ERROR_PARAM_INVALID, msg);
         return nullptr;

@@ -54,7 +54,7 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
 
     auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
     if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
-        ANS_LOGE("AtomicService is not allowed to publish notification");
+        ANS_LOGE("AtomicService is not allowed to publish");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
@@ -170,7 +170,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     auto fullTokenID = IPCSkeleton::GetCallingFullTokenID();
     if (Security::AccessToken::AccessTokenKit::IsAtomicServiceByFullTokenID(fullTokenID)) {
-        ANS_LOGE("AtomicService is not allowed to publish notification");
+        ANS_LOGE("AtomicService is not allowed to publish");
         return ERR_ANS_PERMISSION_DENIED;
     }
 
