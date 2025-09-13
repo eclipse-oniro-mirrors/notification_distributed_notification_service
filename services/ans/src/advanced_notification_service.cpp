@@ -667,7 +667,6 @@ ErrCode AdvancedNotificationService::PublishPreparedNotification(const sptr<Noti
     NotificationPreferences::GetInstance()->IsSilentReminderEnabled(bundleOption, enableStatus);
     if (enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF ||
         enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) {
-        ANS_LOGI("xds-test");
         EXTENTION_WRAPPER->HandlePrivilegeMessage(bundleOption, request, isAgentController);
     }
 #endif
