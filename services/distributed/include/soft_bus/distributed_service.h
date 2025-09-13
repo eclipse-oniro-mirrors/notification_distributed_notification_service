@@ -68,6 +68,7 @@ public:
 private:
     void OnHandleMsg(std::shared_ptr<TlvBox>& box);
     void ConnectPeerDevice(DistributedDeviceInfo device);
+    void HandleStatusChange(const DeviceStatueChangeInfo& changeInfo);
     void HandleMatchSync(const std::shared_ptr<TlvBox>& boxMessage);
 
 private:

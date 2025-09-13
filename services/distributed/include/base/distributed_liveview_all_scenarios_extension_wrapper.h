@@ -36,7 +36,7 @@ public:
         std::vector<uint8_t> &buffer, const std::string& deviceType);
     typedef ErrCode (*TRIGGER_PUSH_WANT_AGENT)(const sptr<NotificationRequest> &request,
         int32_t actionType, const AAFwk::WantParams extraInfo);
-    typedef ErrCode (*SUBSCRIBE_ALL_CONNECT)();
+    typedef ErrCode (*SUBSCRIBE_ALL_CONNECT)(bool isPadOrPc);
     typedef ErrCode (*UNSUBSCRIBE_ALL_CONNECT)();
     typedef ErrCode (*DISTRIBUTED_LIVE_VIEW_OPERATION)(
         sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);
@@ -51,7 +51,7 @@ public:
         const std::string& deviceType);
     ErrCode TriggerPushWantAgent(const sptr<NotificationRequest> &request, int32_t actionType,
         const AAFwk::WantParams extraInfo);
-    void SubscribeAllConnect();
+    void SubscribeAllConnect(bool isPadOrPc);
     void UnSubscribeAllConnect();
     ErrCode DistributedLiveViewOperation(
         sptr<NotificationRequest> &request, const int32_t operationType, const int32_t btnIndex);

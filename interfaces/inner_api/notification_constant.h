@@ -233,7 +233,7 @@ public:
      * Indicates that a notification is deleted because the application cancels all notifications.
      */
     static const int32_t APP_CANCEL_ALL_REASON_DELETE = 9;
-    
+
     /**
      * Indicates that a notification is deleted because this user is removed.
      */
@@ -273,7 +273,7 @@ public:
      * Indicates that a notification is deleted because the application cancel it by group.
      */
     static const int32_t APP_CANCEL_GROPU_REASON_DELETE = 17;
-    
+
     /**
      * Indicates that a notification is deleted by group because the system cancel it.
      */
@@ -303,7 +303,7 @@ public:
      * Indicates that notification is deleted because ten-minutes timer cancel it.
      */
     static const int32_t TRIGGER_TEN_MINUTES_REASON_DELETE = 23;
-    
+
     /**
      * Indicates that notification is deleted because fifteen-minutes timer cancel it.
      */
@@ -358,7 +358,7 @@ public:
      * Indicates that a notification is deleted because collaboration click.
      */
     static const int32_t DISTRIBUTED_COLLABORATIVE_CLICK_DELETE = 34;
-    
+
     /**
      * Indicates that a notification is deleted because distributed enable close removed.
      */
@@ -382,15 +382,15 @@ public:
     static const int64_t HOUR_TO_MS = 3600000;
 
     static const int64_t SECOND_TO_MS = 1000;
-    
+
     static const int64_t TEN_MINUTES = 600000;
-    
+
     static const int64_t FIFTEEN_MINUTES = 900000;
-    
+
     static const int64_t THIRTY_MINUTES = 1800000;
-    
+
     static const int64_t FINISH_PER = 100;
-    
+
     static const int64_t DEFAULT_FINISH_STATUS = -1;
 
     static const int64_t MAX_FINISH_TIME = 8 * HOUR_TO_MS;
@@ -409,13 +409,13 @@ public:
     static constexpr int32_t ANS_UID = 5523;
 
     static const int32_t MAX_BTN_NUM = 3;
- 
+
     static const int32_t DISTRIBUTE_JUMP_INVALID = -1;
- 
+
     static const int32_t DISTRIBUTE_JUMP_BY_NTF = 0;
- 
+
     static const int32_t DISTRIBUTE_JUMP_BY_BTN = 1;
- 
+
     static const int32_t DISTRIBUTE_JUMP_BY_LIVE_VIEW = 32;
 
     // live view max size is 512KB(extra size) + 8KB(base size) = 520KB
@@ -436,6 +436,7 @@ public:
     constexpr static const char* WEARABLE_DEVICE_TYPE = "wearable";
     constexpr static const char* PAD_DEVICE_TYPE = "tablet";
     constexpr static const char* PC_DEVICE_TYPE = "2in1";
+    constexpr static const char* SLAVE_DEVICE_TYPE = "slave";
     constexpr static const char* DEVICESTYPES[] = {"headset", "liteWearable", "wearable", "2in1", "tablet"};
     constexpr static const char* ANS_VOIP = "ANS_VOIP";
     constexpr static const char* PC_PAD_VOIP_FLAG = "110101";
