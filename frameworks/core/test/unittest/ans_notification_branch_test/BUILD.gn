@@ -29,6 +29,7 @@ ohos_unittest("ans_notification_branch_test") {
     "../mock/mock_ans_manager_proxy.cpp",
     "ans_notification_branch_test.cpp",
   ]
+  version_script = "../test.map"
 
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
