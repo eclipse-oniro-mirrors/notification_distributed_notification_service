@@ -213,6 +213,7 @@ void ReminderDataShareHelper::StartDataExtension(const int32_t reason)
 
 void ReminderDataShareHelper::UpdateCalendarUid()
 {
+    ANSR_LOGI("Update calendar uid and query calendar info");
     uid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(ReminderCalendarShareTable::NAME,
         curUserId_);
     dataUid_ = ReminderBundleManagerHelper::GetInstance().GetDefaultUidByBundleName(
