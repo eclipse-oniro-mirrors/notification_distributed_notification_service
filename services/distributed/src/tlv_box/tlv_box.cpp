@@ -292,7 +292,7 @@ bool TlvBox::Serialize(bool addCheck)
         uint32_t calCrc = crc32(crc32(0L, Z_NULL, 0), (const Bytef*)byteBuffer_, offset);
         uint32_t calValue = htonl(calCrc);
         (void)memcpy_s(byteBuffer_ + offset, sizeof(uint32_t), &calValue, sizeof(uint32_t));
-        ANS_LOGI("Box Serialize crc32 %{public}zu %{public}zu.", offset + sizeof(uint32_t), calCrc);
+        ANS_LOGI("Box Serialize crc32 %{public}d %{public}d.", (int32_t)(offset + sizeof(uint32_t)), (int32_t)(calCrc));
     } else {
         ANS_LOGI("Box Serialize crc32 %{public}d.", offset);
     }
