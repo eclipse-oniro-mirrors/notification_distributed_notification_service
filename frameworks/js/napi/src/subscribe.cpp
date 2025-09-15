@@ -229,9 +229,9 @@ void ThreadSafeOnCancel(napi_env env, napi_value jsCallback, void* context, void
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -307,9 +307,9 @@ void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context,
     }
     napi_value resultArray = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_array(env, &resultArray);
@@ -413,9 +413,9 @@ void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, vo
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -498,9 +498,9 @@ void ThreadSafeOnUpdate(napi_env env, napi_value jsCallback, void* context, void
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -710,9 +710,9 @@ void ThreadSafeOnDoNotDisturbDateChange(napi_env env, napi_value jsCallback, voi
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -778,9 +778,9 @@ void ThreadSafeOnDoNotDisturbChanged(napi_env env, napi_value jsCallback, void* 
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -843,9 +843,9 @@ void ThreadSafeOnEnabledNotificationChanged(napi_env env, napi_value jsCallback,
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -909,9 +909,9 @@ void ThreadSafeOnBadgeChanged(napi_env env, napi_value jsCallback, void* context
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
@@ -974,9 +974,9 @@ void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* 
     }
     napi_value result = nullptr;
     napi_handle_scope scope;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        ANS_LOGE("null scope");
+    auto status = napi_open_handle_scope(env, &scope);
+    if (status != napi_ok || scope == nullptr) {
+        ANS_LOGE("status: %{public}d", status);
         return;
     }
     napi_create_object(env, &result);
