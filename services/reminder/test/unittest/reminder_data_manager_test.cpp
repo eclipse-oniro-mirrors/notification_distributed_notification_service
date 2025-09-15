@@ -1029,7 +1029,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_020, Level1)
     std::map<std::string, sptr<ReminderRequest>> reminders;
     reminders["500"] = reminder;
     manager->UpdateShareReminders(reminders);
-    EXPECT_TRUE(manager != nullptr);
+    EXPECT_NE(manager, nullptr);
 }
 
 /**

@@ -372,6 +372,7 @@ void ReminderDataManager::OnUnlockScreen()
     }
     bool expected = false;
     if (isScreenUnLocked_.compare_exchange_strong(expected, true)) {
+        ANSR_LOGI("First unlock screen.");
         ffrt::task_attr taskAttr;
         taskAttr.delay(FIRST_QUERY_DELAY);
         auto callback = []() {
@@ -642,6 +643,7 @@ void ReminderDataManager::StartLoadTimer()
 
 void ReminderDataManager::InitShareReminders(const bool registerObserver)
 {
+    ANSR_LOGI("Init.");
     ReminderDataShareHelper::GetInstance().SetUserId(currentUserId_);
     ReminderDataShareHelper::GetInstance().UpdateCalendarUid();
     if (registerObserver) {
@@ -1343,7 +1345,6 @@ void ReminderDataManager::HandleSameNotificationIdShowing(const sptr<ReminderReq
 
 void ReminderDataManager::Init()
 {
-    ANSR_LOGD("called");
     if (IsReminderAgentReady()) {
         return;
     }
@@ -1354,10 +1355,6 @@ void ReminderDataManager::Init()
     }
     if (queue_ == nullptr) {
         queue_ = std::make_shared<ffrt::queue>("ReminderDataManager");
-        if (queue_ == nullptr) {
-            ANSR_LOGE("null queue");
-            return;
-        }
     }
     if (store_ == nullptr) {
         store_ = std::make_shared<ReminderStore>();
