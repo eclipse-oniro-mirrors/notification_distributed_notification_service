@@ -30,7 +30,7 @@ ohos_unittest("ans_notification_test") {
     "../mock/mock_message_parcel.cpp",
     "ans_notification_unit_test.cpp",
   ]
-
+  version_script = "../test.map"
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
