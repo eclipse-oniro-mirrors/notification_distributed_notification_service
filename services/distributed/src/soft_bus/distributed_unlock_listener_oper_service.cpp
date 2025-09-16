@@ -105,7 +105,7 @@ void UnlockListenerOperService::RemoveOperationResponse(const std::string& hashC
         if (iterTimer->second == NotificationConstant::INVALID_TIMER_ID) {
             return;
         }
-        ANS_LOGI("Operation timer erase %{public}s %{public}llu", hashCode.c_str(), iterTimer->second);
+        ANS_LOGI("Operation timer erase %{public}s %{public}" PRIu64, hashCode.c_str(), iterTimer->second);
         MiscServices::TimeServiceClient::GetInstance()->StopTimer(iterTimer->second);
         MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(iterTimer->second);
         timerMap_.erase(iterTimer);
